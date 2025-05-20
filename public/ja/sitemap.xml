@@ -2,70 +2,65 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/ja/categories/</loc>
+    <loc>https://theblackcat98.github.io/TheBlackCat/ja/categories/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/categories/"
+                href="https://theblackcat98.github.io/TheBlackCat/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="fa"
-                href="http://localhost:1313/fa/categories/"
+                href="https://theblackcat98.github.io/TheBlackCat/fa/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-CN"
-                href="http://localhost:1313/zh-cn/categories/"
+                href="https://theblackcat98.github.io/TheBlackCat/zh-cn/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="http://localhost:1313/ja/categories/"
+                href="https://theblackcat98.github.io/TheBlackCat/ja/categories/"
                 />
   </url><url>
-    <loc>http://localhost:1313/ja/</loc>
-    <xhtml:link
-                rel="alternate"
-                hreflang="en"
-                href="http://localhost:1313/"
-                />
+    <loc>https://theblackcat98.github.io/TheBlackCat/ja/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="fa"
-                href="http://localhost:1313/fa/"
+                href="https://theblackcat98.github.io/TheBlackCat/fa/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-CN"
-                href="http://localhost:1313/zh-cn/"
+                href="https://theblackcat98.github.io/TheBlackCat/zh-cn/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="http://localhost:1313/ja/"
+                href="https://theblackcat98.github.io/TheBlackCat/ja/"
                 />
   </url><url>
-    <loc>http://localhost:1313/ja/tags/</loc>
+    <loc>https://theblackcat98.github.io/TheBlackCat/ja/tags/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/tags/"
+                href="https://theblackcat98.github.io/TheBlackCat/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="fa"
-                href="http://localhost:1313/fa/tags/"
+                href="https://theblackcat98.github.io/TheBlackCat/fa/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-CN"
-                href="http://localhost:1313/zh-cn/tags/"
+                href="https://theblackcat98.github.io/TheBlackCat/zh-cn/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="http://localhost:1313/ja/tags/"
+                href="https://theblackcat98.github.io/TheBlackCat/ja/tags/"
                 />
   </url>
 </urlset>

@@ -3,12 +3,9 @@ title: Markdown Syntax Guide
 date: '2025-05-20T19:43:29Z'
 draft: false
 authors:
-  - name: imfing
-    link: https://github.com/imfing
-    image: https://github.com/imfing.png
-  - name: Octocat
-    link: https://github.com/octocat
-    image: https://github.com/octocat.png
+  - name: theblackcat98
+    link: https://github.com/theblackcat98
+    image: https://github.com/theblackcat98.png
 tags:
   - Markdown
   - Example

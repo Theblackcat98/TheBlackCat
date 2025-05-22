@@ -1,12 +1,19 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Docs on Hextra</title>
-    <link>https://theblackcat98.github.io/TheBlackCat/docs/</link>
+    <title>Hextra – Docs</title>
+    <link>http://localhost:1313/TheBlackCat/docs/</link>
     <description>Recent content in Docs on Hextra</description>
-    <generator>Hugo</generator>
+    <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate></lastBuildDate>
-    <atom:link href="https://theblackcat98.github.io/TheBlackCat/docs/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 20 May 2025 18:40:20 +0000</lastBuildDate>
+    
+	  <atom:link href="http://localhost:1313/TheBlackCat/docs/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
   </channel>
 </rss>

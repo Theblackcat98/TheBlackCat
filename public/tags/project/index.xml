@@ -1,0 +1,33 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hextra – Project</title>
+    <link>http://localhost:1313/TheBlackCat/tags/project/</link>
+    <description>Recent content in Project on Hextra</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Wed, 21 May 2025 17:06:27 +0000</lastBuildDate>
+    
+	  <atom:link href="http://localhost:1313/TheBlackCat/tags/project/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title>IG Post Maker</title>
+      <link>http://localhost:1313/TheBlackCat/blog/ig-post-maker/</link>
+      <pubDate>Wed, 21 May 2025 17:06:27 +0000</pubDate>
+      
+      <guid>http://localhost:1313/TheBlackCat/blog/ig-post-maker/</guid>
+      <description>
+        
+        
+        &lt;p&gt;IG Post Maker is a tool that allows you to create IG posts easily.&lt;/p&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>

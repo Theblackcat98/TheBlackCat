@@ -1,33 +1,19 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Tags on Hextra</title>
-    <link>https://theblackcat98.github.io/TheBlackCat/tags/</link>
+    <title>Hextra – Tags</title>
+    <link>http://localhost:1313/TheBlackCat/tags/</link>
     <description>Recent content in Tags on Hextra</description>
-    <generator>Hugo</generator>
+    <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 20 May 2025 13:05:01 -0700</lastBuildDate>
-    <atom:link href="https://theblackcat98.github.io/TheBlackCat/tags/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Example</title>
-      <link>https://theblackcat98.github.io/TheBlackCat/tags/example/</link>
-      <pubDate>Tue, 20 May 2025 19:43:29 +0000</pubDate>
-      <guid>https://theblackcat98.github.io/TheBlackCat/tags/example/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Guide</title>
-      <link>https://theblackcat98.github.io/TheBlackCat/tags/guide/</link>
-      <pubDate>Tue, 20 May 2025 19:43:29 +0000</pubDate>
-      <guid>https://theblackcat98.github.io/TheBlackCat/tags/guide/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Markdown</title>
-      <link>https://theblackcat98.github.io/TheBlackCat/tags/markdown/</link>
-      <pubDate>Tue, 20 May 2025 19:43:29 +0000</pubDate>
-      <guid>https://theblackcat98.github.io/TheBlackCat/tags/markdown/</guid>
-      <description></description>
-    </item>
+    <lastBuildDate>Tue, 20 May 2025 19:43:29 +0000</lastBuildDate>
+    
+	  <atom:link href="http://localhost:1313/TheBlackCat/tags/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
   </channel>
 </rss>

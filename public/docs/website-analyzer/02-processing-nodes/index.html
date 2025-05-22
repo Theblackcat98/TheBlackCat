@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en"><head><script src="/TheBlackCat/livereload.js?mindelay=10&amp;v=2&amp;port=36743&amp;path=TheBlackCat/livereload" data-no-instant defer></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="robots" content="noindex, nofollow" />
+  <link rel="icon shortcut" href="/TheBlackCat/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/TheBlackCat/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/TheBlackCat/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="/TheBlackCat/favicon-16x16.png" type="image/png" sizes="16x16" />
+<link rel="icon" href="/TheBlackCat/favicon-32x32.png" type="image/png" sizes="32x32" />
+<link rel="apple-touch-icon" href="/TheBlackCat/apple-touch-icon.png" sizes="180x180" />
+<link fetchpriority="low" href="/TheBlackCat/site.webmanifest" rel="manifest" />
+<title>Processing Nodes – Hextra</title>
+  <meta name="description" content="Chapter 2: Processing NodesWelcome back! In the previous chapter, Flow Orchestration, we learned that the Flow is like the conductor of an orchestra, directing the overall process of analyzing a website. But who are the musicians? Who actually does the work?
+That’s where Processing Nodes come in.
+Think of the website analysis process as an assembly line. There are many distinct steps: someone fetches the raw website page, someone else extracts the text content, another person pulls out the design details like colors and fonts, and so on, until the final report is assembled." /><link rel="canonical" href="http://localhost:36743/TheBlackCat/docs/website-analyzer/02-processing-nodes/" itemprop="url" />
+
+<meta property="og:title" content="Processing Nodes" />
+<meta property="og:description" content="Chapter 2: Processing NodesWelcome back! In the previous chapter, Flow Orchestration, we learned that the Flow is like the conductor of an orchestra, directing the overall process of analyzing a website. But who are the musicians? Who actually does the work?
+That&rsquo;s where Processing Nodes come in.
+Think of the website analysis process as an assembly line. There are many distinct steps: someone fetches the raw website page, someone else extracts the text content, another person pulls out the design details like colors and fonts, and so on, until the final report is assembled." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://localhost:36743/TheBlackCat/docs/website-analyzer/02-processing-nodes/" /><meta property="article:section" content="docs" />
+<meta property="article:published_time" content="2025-05-21T17:06:27+00:00" />
+<meta property="article:modified_time" content="2025-05-21T17:06:27+00:00" />
+
+  <meta itemprop="name" content="Processing Nodes">
+  <meta itemprop="description" content="Chapter 2: Processing NodesWelcome back! In the previous chapter, Flow Orchestration, we learned that the Flow is like the conductor of an orchestra, directing the overall process of analyzing a website. But who are the musicians? Who actually does the work?
+That’s where Processing Nodes come in.
+Think of the website analysis process as an assembly line. There are many distinct steps: someone fetches the raw website page, someone else extracts the text content, another person pulls out the design details like colors and fonts, and so on, until the final report is assembled.">
+  <meta itemprop="datePublished" content="2025-05-21T17:06:27+00:00">
+  <meta itemprop="dateModified" content="2025-05-21T17:06:27+00:00">
+  <meta itemprop="wordCount" content="1785">
+  <meta itemprop="keywords" content="Project,Guide,AI">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Processing Nodes">
+  <meta name="twitter:description" content="Chapter 2: Processing NodesWelcome back! In the previous chapter, Flow Orchestration, we learned that the Flow is like the conductor of an orchestra, directing the overall process of analyzing a website. But who are the musicians? Who actually does the work?
+That’s where Processing Nodes come in.
+Think of the website analysis process as an assembly line. There are many distinct steps: someone fetches the raw website page, someone else extracts the text content, another person pulls out the design details like colors and fonts, and so on, until the final report is assembled.">
+
+    <link href="/TheBlackCat/css/compiled/main.css" rel="stylesheet" />
+
+
+
+  <link href="/TheBlackCat/css/custom.css" rel="stylesheet" />
+
+
+  <script>
+     
+    const defaultTheme = 'system';
+
+    const setDarkTheme = () => {
+      document.documentElement.classList.add("dark");
+      document.documentElement.style.colorScheme = "dark";
+    }
+    const setLightTheme = () => {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.style.colorScheme = "light";
+    }
+
+    if ("color-theme" in localStorage) {
+      localStorage.getItem("color-theme") === "dark" ? setDarkTheme() : setLightTheme();
+    } else {
+      defaultTheme === "dark" ? setDarkTheme() : setLightTheme();
+      if (defaultTheme === "system") {
+        window.matchMedia("(prefers-color-scheme: dark)").matches ? setDarkTheme() : setLightTheme();
+      }
+    }
+  </script>
+
+  
+  </head>
+<body dir="ltr"><div class="nav-container hx:sticky hx:top-0 hx:z-20 hx:w-full hx:bg-transparent hx:print:hidden">
+  <div class="nav-container-blur hx:pointer-events-none hx:absolute hx:z-[-1] hx:h-full hx:w-full hx:bg-white hx:dark:bg-dark hx:shadow-[0_2px_4px_rgba(0,0,0,.02),0_1px_0_rgba(0,0,0,.06)] hx:contrast-more:shadow-[0_0_0_1px_#000] hx:dark:shadow-[0_-1px_0_rgba(255,255,255,.1)_inset] hx:contrast-more:dark:shadow-[0_0_0_1px_#fff]"></div>
+
+  <nav class="hx:mx-auto hx:flex hx:items-center hx:justify-end hx:gap-2 hx:h-16 hx:px-6 hx:max-w-[90rem]">
+    <a class="hx:flex hx:items-center hx:hover:opacity-75 hx:ltr:mr-auto hx:rtl:ml-auto" href="/TheBlackCat/">
+        <img class="hx:mr-2 hx:block hx:dark:hidden" src="/TheBlackCat/images/logo.svg" alt="Hextra" height="20" width="20" />
+        <img class="hx:mr-2 hx:hidden hx:dark:block" src="/TheBlackCat/images/logo-dark.svg" alt="Hextra" height="20" width="20" />
+        <span class="hx:mr-2 hx:font-extrabold hx:inline hx:select-none" title="Hextra">Hextra</span>
+    </a><a
+            title="Documentation"
+            href="/TheBlackCat/docs"
+            
+            class="hx:text-sm hx:contrast-more:text-gray-700 hx:contrast-more:dark:text-gray-100 hx:relative hx:-ml-2 hx:hidden hx:whitespace-nowrap hx:p-2 hx:md:inline-block hx:font-medium"
+          >
+            <span class="hx:text-center">Documentation</span>
+          </a><a
+            title="Showcase"
+            href="/TheBlackCat/showcase"
+            
+            class="hx:text-sm hx:contrast-more:text-gray-700 hx:contrast-more:dark:text-gray-100 hx:relative hx:-ml-2 hx:hidden hx:whitespace-nowrap hx:p-2 hx:md:inline-block hx:text-gray-600 hx:hover:text-gray-800 hx:dark:text-gray-400 hx:dark:hover:text-gray-200"
+          >
+            <span class="hx:text-center">Showcase</span>
+          </a><a
+            title="Blog"
+            href="/TheBlackCat/blog"
+            
+            class="hx:text-sm hx:contrast-more:text-gray-700 hx:contrast-more:dark:text-gray-100 hx:relative hx:-ml-2 hx:hidden hx:whitespace-nowrap hx:p-2 hx:md:inline-block hx:text-gray-600 hx:hover:text-gray-800 hx:dark:text-gray-400 hx:dark:hover:text-gray-200"
+          >
+            <span class="hx:text-center">Blog</span>
+          </a><a
+            title="About"
+            href="/TheBlackCat/about"
+            
+            class="hx:text-sm hx:contrast-more:text-gray-700 hx:contrast-more:dark:text-gray-100 hx:relative hx:-ml-2 hx:hidden hx:whitespace-nowrap hx:p-2 hx:md:inline-block hx:text-gray-600 hx:hover:text-gray-800 hx:dark:text-gray-400 hx:dark:hover:text-gray-200"
+          >
+            <span class="hx:text-center">About</span>
+          </a><div class="search-wrapper hx:relative hx:md:w-64">
+  <div class="hx:relative hx:flex hx:items-center hx:text-gray-900 hx:contrast-more:text-gray-800 hx:dark:text-gray-300 hx:contrast-more:dark:text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx:block hx:w-full hx:appearance-none hx:rounded-lg hx:px-3 hx:py-2 hx:transition-colors hx:text-base hx:leading-tight hx:md:text-sm hx:bg-black/[.05] hx:dark:bg-gray-50/10 hx:focus:bg-white hx:dark:focus:bg-dark hx:placeholder:text-gray-500 hx:dark:placeholder:text-gray-400 hx:contrast-more:border hx:contrast-more:border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx:absolute hx:my-1.5 hx:select-none hx:ltr:right-1.5 hx:rtl:left-1.5 hx:h-5 hx:rounded-sm hx:bg-white hx:px-1.5 hx:font-mono hx:text-[10px] hx:font-medium hx:text-gray-500 hx:border hx:border-gray-200 hx:dark:border-gray-100/20 hx:dark:bg-dark/50 hx:contrast-more:border-current hx:contrast-more:text-current hx:contrast-more:dark:border-current hx:items-center hx:gap-1 hx:transition-opacity hx:pointer-events-none hx:hidden hx:sm:flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx:hidden hx:border hx:border-gray-200 hx:bg-white hx:text-gray-100 hx:dark:border-neutral-800 hx:dark:bg-neutral-900 hx:absolute hx:top-full hx:z-20 hx:mt-2 hx:overflow-auto hx:overscroll-contain hx:rounded-xl hx:py-2.5 hx:shadow-xl hx:max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] hx:md:max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx:inset-x-0 hx:ltr:md:left-auto hx:rtl:md:right-auto hx:contrast-more:border hx:contrast-more:border-gray-900 hx:contrast-more:dark:border-gray-50 hx:w-screen hx:min-h-[100px] hx:max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+
+          <a class="hx:p-2 hx:text-current" target="_blank" rel="noreferrer" href="https://github.com/theblackcat98/theblackcat" title="GitHub"><svg height=24 fill="currentColor" viewBox="3 3 18 18">
+  <path d="M12 3C7.0275 3 3 7.12937 3 12.2276C3 16.3109 5.57625 19.7597 9.15374 20.9824C9.60374 21.0631 9.77249 20.7863 9.77249 20.5441C9.77249 20.3249 9.76125 19.5982 9.76125 18.8254C7.5 19.2522 6.915 18.2602 6.735 17.7412C6.63375 17.4759 6.19499 16.6569 5.8125 16.4378C5.4975 16.2647 5.0475 15.838 5.80124 15.8264C6.51 15.8149 7.01625 16.4954 7.18499 16.7723C7.99499 18.1679 9.28875 17.7758 9.80625 17.5335C9.885 16.9337 10.1212 16.53 10.38 16.2993C8.3775 16.0687 6.285 15.2728 6.285 11.7432C6.285 10.7397 6.63375 9.9092 7.20749 9.26326C7.1175 9.03257 6.8025 8.08674 7.2975 6.81794C7.2975 6.81794 8.05125 6.57571 9.77249 7.76377C10.4925 7.55615 11.2575 7.45234 12.0225 7.45234C12.7875 7.45234 13.5525 7.55615 14.2725 7.76377C15.9937 6.56418 16.7475 6.81794 16.7475 6.81794C17.2424 8.08674 16.9275 9.03257 16.8375 9.26326C17.4113 9.9092 17.76 10.7281 17.76 11.7432C17.76 15.2843 15.6563 16.0687 13.6537 16.2993C13.98 16.5877 14.2613 17.1414 14.2613 18.0065C14.2613 19.2407 14.25 20.2326 14.25 20.5441C14.25 20.7863 14.4188 21.0746 14.8688 20.9824C16.6554 20.364 18.2079 19.1866 19.3078 17.6162C20.4077 16.0457 20.9995 14.1611 21 12.2276C21 7.12937 16.9725 3 12 3Z"></path>
+</svg>
+<span class="hx:sr-only">GitHub</span>
+          </a><button type="button" aria-label="Menu" class="hamburger-menu hx:cursor-pointer hx:-mr-2 hx:rounded-sm hx:p-2 hx:active:bg-gray-400/20 hx:md:hidden"><svg height=24 fill="none" viewBox="0 0 24 24" stroke="currentColor"><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8H20"></path></g><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16H20"></path></g></svg></button>
+  </nav>
+</div>
+
+  <div class='hx:mx-auto hx:flex hx:max-w-screen-xl'>
+    <aside class="sidebar-container hx:flex hx:flex-col hx:print:hidden hx:md:top-16 hx:md:shrink-0 hx:md:w-64 hx:md:self-start hx:max-md:[transform:translate3d(0,-100%,0)] hx:md:sticky">
+  
+  <div class="hx:px-4 hx:pt-4 hx:md:hidden">
+    <div class="search-wrapper hx:relative hx:md:w-64">
+  <div class="hx:relative hx:flex hx:items-center hx:text-gray-900 hx:contrast-more:text-gray-800 hx:dark:text-gray-300 hx:contrast-more:dark:text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx:block hx:w-full hx:appearance-none hx:rounded-lg hx:px-3 hx:py-2 hx:transition-colors hx:text-base hx:leading-tight hx:md:text-sm hx:bg-black/[.05] hx:dark:bg-gray-50/10 hx:focus:bg-white hx:dark:focus:bg-dark hx:placeholder:text-gray-500 hx:dark:placeholder:text-gray-400 hx:contrast-more:border hx:contrast-more:border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx:absolute hx:my-1.5 hx:select-none hx:ltr:right-1.5 hx:rtl:left-1.5 hx:h-5 hx:rounded-sm hx:bg-white hx:px-1.5 hx:font-mono hx:text-[10px] hx:font-medium hx:text-gray-500 hx:border hx:border-gray-200 hx:dark:border-gray-100/20 hx:dark:bg-dark/50 hx:contrast-more:border-current hx:contrast-more:text-current hx:contrast-more:dark:border-current hx:items-center hx:gap-1 hx:transition-opacity hx:pointer-events-none hx:hidden hx:sm:flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx:hidden hx:border hx:border-gray-200 hx:bg-white hx:text-gray-100 hx:dark:border-neutral-800 hx:dark:bg-neutral-900 hx:absolute hx:top-full hx:z-20 hx:mt-2 hx:overflow-auto hx:overscroll-contain hx:rounded-xl hx:py-2.5 hx:shadow-xl hx:max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] hx:md:max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx:inset-x-0 hx:ltr:md:left-auto hx:rtl:md:right-auto hx:contrast-more:border hx:contrast-more:border-gray-900 hx:contrast-more:dark:border-gray-50 hx:w-screen hx:min-h-[100px] hx:max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+
+  </div>
+  <div class="hextra-scrollbar hx:overflow-y-auto hx:overflow-x-hidden hx:p-4 hx:grow hx:md:h-[calc(100vh-var(--navbar-height)-var(--menu-height))]">
+    <ul class="hx:flex hx:flex-col hx:gap-1 hx:md:hidden">
+      
+      
+          <li class=""><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+    href="/TheBlackCat/blog/"
+    
+  >Blog
+        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx:h-[18px] hx:min-w-[18px] hx:rounded-xs hx:p-0.5 hx:hover:bg-gray-800/5 hx:dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx:origin-center hx:transition-transform hx:rtl:-rotate-180"></path></svg></span>
+    </a><div class="hx:ltr:pr-0 hx:overflow-hidden">
+        <ul class='hx:relative hx:flex hx:flex-col hx:gap-1 hx:before:absolute hx:before:inset-y-1 hx:before:w-px hx:before:bg-gray-200 hx:before:content-[""] hx:ltr:ml-3 hx:ltr:pl-3 hx:ltr:before:left-0 hx:rtl:mr-3 hx:rtl:pr-3 hx:rtl:before:right-0 hx:dark:before:bg-neutral-800'><li class="hx:flex hx:flex-col "><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+    href="/TheBlackCat/blog/ig-post-maker/"
+    
+  >IG Post Maker
+    </a>
+              
+            </li><li class="hx:flex hx:flex-col "><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+    href="/TheBlackCat/blog/my-first-post/"
+    
+  >Markdown Syntax Guide
+    </a>
+              
+            </li><li class="hx:flex hx:flex-col "><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+    href="/TheBlackCat/blog/website-analyzer/"
+    
+  >Website Analyzer
+    </a>
+              
+            </li></ul>
+      </div></li>
+          <li class="open"><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+    href="/TheBlackCat/docs/"
+    
+  >Docs
+        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx:h-[18px] hx:min-w-[18px] hx:rounded-xs hx:p-0.5 hx:hover:bg-gray-800/5 hx:dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx:origin-center hx:transition-transform hx:rtl:-rotate-180"></path></svg></span>
+    </a><div class="hx:ltr:pr-0 hx:overflow-hidden">
+        <ul class='hx:relative hx:flex hx:flex-col hx:gap-1 hx:before:absolute hx:before:inset-y-1 hx:before:w-px hx:before:bg-gray-200 hx:before:content-[""] hx:ltr:ml-3 hx:ltr:pl-3 hx:ltr:before:left-0 hx:rtl:mr-3 hx:rtl:pr-3 hx:rtl:before:right-0 hx:dark:before:bg-neutral-800'><li class="hx:flex hx:flex-col open"><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+    href="/TheBlackCat/docs/website-analyzer/"
+    
+  >Docs
+        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx:h-[18px] hx:min-w-[18px] hx:rounded-xs hx:p-0.5 hx:hover:bg-gray-800/5 hx:dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx:origin-center hx:transition-transform hx:rtl:-rotate-180"></path></svg></span>
+    </a>
+              <div class="hx:ltr:pr-0 hx:overflow-hidden">
+        <ul class='hx:relative hx:flex hx:flex-col hx:gap-1 hx:before:absolute hx:before:inset-y-1 hx:before:w-px hx:before:bg-gray-200 hx:before:content-[""] hx:ltr:ml-3 hx:ltr:pl-3 hx:ltr:before:left-0 hx:rtl:mr-3 hx:rtl:pr-3 hx:rtl:before:right-0 hx:dark:before:bg-neutral-800'><li class="hx:flex hx:flex-col "><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+    href="/TheBlackCat/docs/website-analyzer/01-flow-orchestration/"
+    
+  >IG Post Maker
+    </a>
+              
+            </li><li class="hx:flex hx:flex-col open"><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      sidebar-active-item hx:bg-primary-100 hx:font-semibold hx:text-primary-800 hx:contrast-more:border hx:contrast-more:border-primary-500 hx:dark:bg-primary-400/10 hx:dark:text-primary-600 hx:contrast-more:dark:border-primary-500"
+    href="/TheBlackCat/docs/website-analyzer/02-processing-nodes/"
+    
+  >Processing Nodes
+    </a>
+  
+    <ul class='hx:flex hx:flex-col hx:gap-1 hx:relative hx:before:absolute hx:before:inset-y-1 hx:before:w-px hx:before:bg-gray-200 hx:before:content-[""] hx:dark:before:bg-neutral-800 hx:ltr:pl-3 hx:ltr:before:left-0 hx:rtl:pr-3 hx:rtl:before:right-0 hx:ltr:ml-3 hx:rtl:mr-3'><li>
+              <a
+                href="#"
+                class="hx:flex hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [word-break:break-word] hx:cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] hx:contrast-more:border hx:gap-2 hx:before:opacity-25 hx:before:content-['#'] hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:text-gray-900 hx:contrast-more:dark:text-gray-50 hx:contrast-more:border-transparent hx:contrast-more:hover:border-gray-900 hx:contrast-more:dark:hover:border-gray-50"
+              ></a>
+            </li>
+          </ul>
+  
+              
+            </li></ul>
+      </div>
+            </li></ul>
+      </div></li>
+      <li class="[word-break:break-word] hx:mt-5 hx:mb-2 hx:px-2 hx:py-1.5 hx:text-sm hx:font-semibold hx:text-gray-900 hx:first:mt-0 hx:dark:text-gray-100">
+        <span class="hx:cursor-default">More</span>
+      </li>
+    <li><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+    href="/TheBlackCat/about"
+    
+  >About</a></li>
+    <li><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+    href="https://gohugo.io/documentation/"
+    target="_blank" rel="noreferrer"
+  >Hugo Docs ↗</a></li>
+    
+    </ul>
+
+    <ul class="hx:flex hx:flex-col hx:gap-1 hx:max-md:hidden">
+        
+          <li class="open"><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+    href="/TheBlackCat/docs/website-analyzer/"
+    
+  >Docs
+        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="hx:h-[18px] hx:min-w-[18px] hx:rounded-xs hx:p-0.5 hx:hover:bg-gray-800/5 hx:dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="hx:origin-center hx:transition-transform hx:rtl:-rotate-180"></path></svg></span>
+    </a><div class="hx:ltr:pr-0 hx:overflow-hidden">
+        <ul class='hx:relative hx:flex hx:flex-col hx:gap-1 hx:before:absolute hx:before:inset-y-1 hx:before:w-px hx:before:bg-gray-200 hx:before:content-[""] hx:ltr:ml-3 hx:ltr:pl-3 hx:ltr:before:left-0 hx:rtl:mr-3 hx:rtl:pr-3 hx:rtl:before:right-0 hx:dark:before:bg-neutral-800'><li class="hx:flex hx:flex-col "><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+    href="/TheBlackCat/docs/website-analyzer/01-flow-orchestration/"
+    
+  >IG Post Maker
+    </a>
+              
+            </li><li class="hx:flex hx:flex-col open"><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      sidebar-active-item hx:bg-primary-100 hx:font-semibold hx:text-primary-800 hx:contrast-more:border hx:contrast-more:border-primary-500 hx:dark:bg-primary-400/10 hx:dark:text-primary-600 hx:contrast-more:dark:border-primary-500"
+    href="/TheBlackCat/docs/website-analyzer/02-processing-nodes/"
+    
+  >Processing Nodes
+    </a>
+              
+            </li></ul>
+      </div></li>
+        
+      <li class="[word-break:break-word] hx:mt-5 hx:mb-2 hx:px-2 hx:py-1.5 hx:text-sm hx:font-semibold hx:text-gray-900 hx:first:mt-0 hx:dark:text-gray-100">
+        <span class="hx:cursor-default">More</span>
+      </li>
+    <li><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+    href="/TheBlackCat/about"
+    
+  >About</a></li>
+    <li><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+    href="https://gohugo.io/documentation/"
+    target="_blank" rel="noreferrer"
+  >Hugo Docs ↗</a></li>
+    
+      </ul>
+    </div>
+  
+  
+    <div class="  hx:sticky hx:bottom-0 hx:max-h-(--menu-height) hx:bg-white hx:dark:bg-dark hx:mx-4 hx:py-4 hx:shadow-[0_-12px_16px_#fff] hx:flex hx:items-center hx:gap-2 hx:border-gray-200 hx:dark:border-neutral-800 hx:dark:shadow-[0_-12px_16px_#111] hx:contrast-more:border-neutral-400 hx:contrast-more:shadow-none hx:contrast-more:dark:shadow-none hx:border-t" data-toggle-animation="show"><div class="hx:flex hx:grow hx:flex-col"><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle hx:cursor-pointer hx:group hx:h-7 hx:rounded-md hx:px-2 hx:text-left hx:text-xs hx:font-medium hx:text-gray-600 hx:transition-colors hx:dark:text-gray-400 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <div class="hx:flex hx:items-center hx:gap-2 hx:capitalize"><svg height=12 class="hx:group-data-[theme=light]:hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="hx:group-data-[theme=light]:hidden">Light</span><svg height=12 class="hx:group-data-[theme=dark]:hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg><span class="hx:group-data-[theme=dark]:hidden">Dark</span></div>
+</button>
+</div></div></aside>
+    
+<nav class="hextra-toc hx:order-last hx:hidden hx:w-64 hx:shrink-0 hx:xl:block hx:print:hidden hx:px-4" aria-label="table of contents">
+    <div class="hextra-scrollbar hx:sticky hx:top-16 hx:overflow-y-auto hx:pr-4 hx:pt-6 hx:text-sm [hyphens:auto] hx:max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] hx:ltr:-mr-4 hx:rtl:-ml-4"><p class="hx:mb-4 hx:font-semibold hx:tracking-tight">On this page</p><ul>
+      <li class="hx:my-2 hx:scroll-my-6 hx:scroll-py-6">
+        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#the-basic-structure-of-a-node">The Basic Structure of a Node
+        </a>
+      </li>
+      <li class="hx:my-2 hx:scroll-my-6 hx:scroll-py-6">
+        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#how-nodes-use-shared-data">How Nodes Use Shared Data
+        </a>
+      </li>
+      <li class="hx:my-2 hx:scroll-my-6 hx:scroll-py-6">
+        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#creating-a-simple-custom-node">Creating a Simple Custom Node
+        </a>
+      </li>
+      <li class="hx:my-2 hx:scroll-my-6 hx:scroll-py-6">
+        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#how-nodes-fit-into-the-flow-under-the-hood-peek">How Nodes Fit into the Flow (Under the Hood Peek)
+        </a>
+      </li>
+      <li class="hx:my-2 hx:scroll-my-6 hx:scroll-py-6">
+        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#real-world-nodes-in-website-analyzer">Real-World Nodes in Website Analyzer
+        </a>
+      </li>
+      <li class="hx:my-2 hx:scroll-my-6 hx:scroll-py-6">
+        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#conclusion">Conclusion
+        </a>
+      </li></ul>
+      <div class="hx:mt-8 hx:border-t hx:bg-white hx:pt-8 hx:shadow-[0_-12px_16px_white] hx:dark:bg-dark hx:dark:shadow-[0_-12px_16px_#111] hx:sticky hx:bottom-0 hx:flex hx:flex-col hx:items-start hx:gap-2 hx:pb-8 hx:border-gray-200 hx:dark:border-neutral-800 hx:contrast-more:border-t hx:contrast-more:border-neutral-400 hx:contrast-more:shadow-none hx:contrast-more:dark:border-neutral-400">
+        <button aria-hidden="true" id="backToTop" onClick="scrollUp();" class="hx:cursor-pointer hx:transition-all hx:duration-75 hx:opacity-0 hx:text-xs hx:font-medium hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-100 hx:contrast-more:text-gray-800 hx:contrast-more:dark:text-gray-50">
+          <span>Scroll to top</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hx:inline hx:ltr:ml-1 hx:rtl:mr-1 hx:h-3.5 hx:w-3.5 hx:rounded-full hx:border hx:border-gray-500 hx:hover:border-gray-900 hx:dark:border-gray-400 hx:dark:hover:border-gray-100 hx:contrast-more:border-gray-800 hx:contrast-more:dark:border-gray-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+
+    <article class="hx:w-full hx:break-words hx:flex hx:min-h-[calc(100vh-var(--navbar-height))] hx:min-w-0 hx:justify-center hx:pb-8 hx:pr-[calc(env(safe-area-inset-right)-1.5rem)]">
+      <main class="hx:w-full hx:min-w-0 hx:max-w-6xl hx:px-6 hx:pt-4 hx:md:px-12">
+        
+  <div class="hx:mt-1.5 hx:flex hx:items-center hx:gap-1 hx:overflow-hidden hx:text-sm hx:text-gray-500 hx:dark:text-gray-400 hx:contrast-more:text-current">
+        <div class="hx:whitespace-nowrap hx:transition-colors hx:min-w-[24px] hx:overflow-hidden hx:text-ellipsis hx:hover:text-gray-900 hx:dark:hover:text-gray-100">
+          <a href="/TheBlackCat/docs/">Docs</a>
+        </div><svg class="hx:w-3.5 hx:shrink-0 hx:rtl:-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <div class="hx:whitespace-nowrap hx:transition-colors hx:min-w-[24px] hx:overflow-hidden hx:text-ellipsis hx:hover:text-gray-900 hx:dark:hover:text-gray-100">
+          <a href="/TheBlackCat/docs/website-analyzer/">Docs</a>
+        </div><svg class="hx:w-3.5 hx:shrink-0 hx:rtl:-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx:whitespace-nowrap hx:transition-colors hx:font-medium hx:text-gray-700 hx:contrast-more:font-bold hx:contrast-more:text-current hx:dark:text-gray-100 hx:contrast-more:dark:text-current">Processing Nodes</div>
+  </div>
+
+        <div class="content">
+          <h1>Processing Nodes</h1>
+          <h1>Chapter 2: Processing Nodes</h1><p>Welcome back! In the previous chapter, <a href="01_flow_orchestration_.md" >Flow Orchestration</a>, we learned that the <code>Flow</code> is like the conductor of an orchestra, directing the overall process of analyzing a website. But who are the musicians? Who actually <em>does</em> the work?</p>
+<p>That&rsquo;s where <strong>Processing Nodes</strong> come in.</p>
+<p>Think of the website analysis process as an assembly line. There are many distinct steps: someone fetches the raw website page, someone else extracts the text content, another person pulls out the design details like colors and fonts, and so on, until the final report is assembled.</p>
+<p>Each worker on this assembly line is responsible for one specific job before passing the work along. These individual workers are our <strong>Processing Nodes</strong>.</p>
+<p>In the context of our <code>Website-Analyzer</code> project:</p>
+<ul>
+<li>A <strong>Node</strong> is a single, self-contained unit of work.</li>
+<li>Each Node performs one specific task, like &ldquo;Fetch a web page&rdquo;, &ldquo;Find links on a page&rdquo;, or &ldquo;Extract business information&rdquo;.</li>
+<li>Nodes work together in a sequence defined by the <a href="01_flow_orchestration_.md" >Flow</a>, passing information between them using the <code>shared</code> data storage.</li>
+</ul>
+<p>Let&rsquo;s revisit our simple example from Chapter 1:</p>
+<ol>
+<li>Fetch the main page content.</li>
+<li>Do something else (process content).</li>
+</ol>
+<p>Here, &ldquo;Fetch the main page content&rdquo; is one Node, and &ldquo;Do something else&rdquo; (process content) is another Node.</p>
+<p>The <code>Flow</code> doesn&rsquo;t know <em>how</em> to fetch a page or process content itself. It just knows <em>that</em> it needs these steps and <em>in what order</em> they should happen. The <em>how</em> is handled by the specific Node instances.</p>
+<h3>The Basic Structure of a Node<span class="hx:absolute hx:-mt-20" id="the-basic-structure-of-a-node"></span>
+    <a href="#the-basic-structure-of-a-node" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>All Nodes in our project are built upon a base <code>Node</code> class. This base class provides the fundamental structure and the <code>run</code> method that the <a href="01_flow_orchestration_.md" >Flow</a> calls.</p>
+<p>While the actual <code>Node</code> class in <code>nodes.py</code> has a few methods like <code>prep</code>, <code>exec</code>, and <code>post</code> for more complex operations (which we&rsquo;ll touch on later), the most important method for understanding what a Node <em>does</em> when the Flow runs it is the <code>run</code> method:</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Simplified Base Node structure from nodes.py</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shared</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        Runs the logic for this node.
+</span></span></span><span class="line"><span class="cl"><span class="s2">        
+</span></span></span><span class="line"><span class="cl"><span class="s2">        Args:
+</span></span></span><span class="line"><span class="cl"><span class="s2">            shared (dict): The shared data dictionary.
+</span></span></span><span class="line"><span class="cl"><span class="s2">            
+</span></span></span><span class="line"><span class="cl"><span class="s2">        Returns:
+</span></span></span><span class="line"><span class="cl"><span class="s2">            str: An action string (&#34;next&#34;, &#34;error&#34;, etc.) to tell the Flow
+</span></span></span><span class="line"><span class="cl"><span class="s2">                 what node to execute next.
+</span></span></span><span class="line"><span class="cl"><span class="s2">        &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># ... Node&#39;s specific work happens here ...</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;A generic Node ran!&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="c1"># Node modifies the &#39;shared&#39; dictionary if needed</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># shared[&#39;result_from_this_node&#39;] = some_value </span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="c1"># Node returns an action string</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="s2">&#34;next&#34;</span> </span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+    <div class="success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Every specific Node you create will inherit from <code>Node</code> and implement its unique task, usually by overriding the <code>run</code> method or its internal <code>prep</code>/<code>exec</code>/<code>post</code> steps. When the <a href="01_flow_orchestration_.md" >Flow</a> calls <code>node_instance.run(shared_data)</code>, the Node executes its job, potentially updates the <code>shared_data</code> dictionary, and returns an action string.</p>
+<h3>How Nodes Use Shared Data<span class="hx:absolute hx:-mt-20" id="how-nodes-use-shared-data"></span>
+    <a href="#how-nodes-use-shared-data" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Nodes don&rsquo;t talk directly to each other. They communicate by reading from and writing to the central <code>shared</code> data dictionary (or object). This is like workers on an assembly line putting their finished piece into a shared bin for the next worker to pick up.</p>
+<p>Let&rsquo;s look at our simple Fetch and Process example again:</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Simple Nodes (revisited from Chapter 1)</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">FetchPageNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shared</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Fetching page...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># *** Node writes data to shared ***</span>
+</span></span><span class="line"><span class="cl">        <span class="n">shared</span><span class="p">[</span><span class="s1">&#39;page_content&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&#34;&lt;html&gt;...&lt;/html&gt;&#34;</span> 
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Page content added to shared.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="s2">&#34;success&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">ProcessContentNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shared</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># *** Node reads data from shared ***</span>
+</span></span><span class="line"><span class="cl">        <span class="n">content</span> <span class="o">=</span> <span class="n">shared</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;page_content&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Processing content: </span><span class="si">{</span><span class="n">content</span><span class="p">[:</span><span class="mi">20</span><span class="p">]</span><span class="si">}</span><span class="s2">...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="c1"># This node might also write results back to shared</span>
+</span></span><span class="line"><span class="cl">        <span class="n">shared</span><span class="p">[</span><span class="s1">&#39;processed_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&#34;Summary of content...&#34;</span> 
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Processed data added to shared.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="s2">&#34;done&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Example of running them (orchestrated by Flow, but showing the shared part)</span>
+</span></span><span class="line"><span class="cl"><span class="n">data_store</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># The shared data dictionary</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">fetch_node_instance</span> <span class="o">=</span> <span class="n">FetchPageNode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="n">process_node_instance</span> <span class="o">=</span> <span class="n">ProcessContentNode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># In a real Flow, the Flow manages these calls:</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># action_from_fetch = fetch_node_instance.run(data_store) # &#39;success&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># if action_from_fetch == &#34;success&#34;:</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#     action_from_process = process_node_instance.run(data_store) # &#39;done&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Initial shared data:&#34;</span><span class="p">,</span> <span class="n">data_store</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">fetch_node_instance</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">data_store</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Shared data after fetch:&#34;</span><span class="p">,</span> <span class="n">data_store</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">process_node_instance</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">data_store</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Shared data after process:&#34;</span><span class="p">,</span> <span class="n">data_store</span><span class="p">)</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+    <div class="success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>Running this code would show:</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><pre><code>Initial shared data: {}
+Fetching page...
+Page content added to shared.
+Shared data after fetch: {&#39;page_content&#39;: &#39;&lt;html&gt;...&lt;/html&gt;&#39;}
+Processing content: &lt;html&gt;...&lt;...
+Processed data added to shared.
+Shared data after process: {&#39;page_content&#39;: &#39;&lt;html&gt;...&lt;/html&gt;&#39;, &#39;processed_data&#39;: &#39;Summary of content...&#39;}</code></pre></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+    <div class="success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>As you can see, <code>FetchPageNode</code> adds <code>'page_content'</code> to the <code>data_store</code> (our <code>shared</code> dictionary), and then <code>ProcessContentNode</code> reads <code>'page_content'</code> from the same <code>data_store</code> to do its work. It then adds its own result, <code>'processed_data'</code>.</p>
+<h3>Creating a Simple Custom Node<span class="hx:absolute hx:-mt-20" id="creating-a-simple-custom-node"></span>
+    <a href="#creating-a-simple-custom-node" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Let&rsquo;s walk through creating a very basic custom Node that just adds a simple message to the shared data.</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Create a new Python file (e.g., my_nodes.py) or add to an existing one</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">nodes</span> <span class="kn">import</span> <span class="n">Node</span> <span class="c1"># Import the base Node class</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">GreetingNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shared</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">        Adds a greeting message to the shared data.
+</span></span></span><span class="line"><span class="cl"><span class="s2">        &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Running GreetingNode...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="c1"># Add a simple greeting to the shared dictionary</span>
+</span></span><span class="line"><span class="cl">        <span class="n">shared</span><span class="p">[</span><span class="s1">&#39;greeting_message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&#34;Hello from GreetingNode!&#34;</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Greeting message added to shared.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="c1"># Return &#39;next&#39; to signal the Flow to move to the next node</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="s2">&#34;next&#34;</span> </span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+    <div class="success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>This <code>GreetingNode</code> is simple: it inherits from <code>Node</code>, overrides the <code>run</code> method, prints a message, adds an item to the <code>shared</code> dictionary, and returns <code>&quot;next&quot;</code>.</p>
+<p>To use this Node, you&rsquo;d add it to a <a href="01_flow_orchestration_.md" >Flow</a> just like we saw in Chapter 1:</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Using the custom GreetingNode</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">nodes</span> <span class="kn">import</span> <span class="n">Flow</span> <span class="c1"># Assuming Flow is in nodes.py</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># from my_nodes import GreetingNode # If you saved it separately</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Create the Flow</span>
+</span></span><span class="line"><span class="cl"><span class="n">my_flow</span> <span class="o">=</span> <span class="n">Flow</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Create an instance of our custom node</span>
+</span></span><span class="line"><span class="cl"><span class="n">greeting_node</span> <span class="o">=</span> <span class="n">GreetingNode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Add the node to the flow, giving it a unique name</span>
+</span></span><span class="line"><span class="cl"><span class="n">my_flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;greet&#34;</span><span class="p">,</span> <span class="n">greeting_node</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Add a dummy node to go AFTER the greeting node (for illustration)</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">AnotherNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shared</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Running AnotherNode...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">message</span> <span class="o">=</span> <span class="n">shared</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;greeting_message&#39;</span><span class="p">,</span> <span class="s1">&#39;No greeting found!&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Received message: </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="s2">&#34;done&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">another_node</span> <span class="o">=</span> <span class="n">AnotherNode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="n">my_flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;another&#34;</span><span class="p">,</span> <span class="n">another_node</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Define the transition: After &#34;greet&#34; returns &#34;next&#34;, go to &#34;another&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="n">my_flow</span><span class="o">.</span><span class="n">add_transition</span><span class="p">(</span><span class="s2">&#34;greet&#34;</span><span class="p">,</span> <span class="s2">&#34;next&#34;</span><span class="p">,</span> <span class="s2">&#34;another&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Create the shared data dictionary</span>
+</span></span><span class="line"><span class="cl"><span class="n">data_store</span> <span class="o">=</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Run the flow starting at our greeting node</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Starting flow...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">my_flow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">data_store</span><span class="p">,</span> <span class="s2">&#34;greet&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Flow finished.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Final shared data:&#34;</span><span class="p">,</span> <span class="n">data_store</span><span class="p">)</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+    <div class="success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>When you run this, the <code>Flow</code> will execute the <code>greet</code> node, which puts the message into <code>data_store</code> and returns <code>&quot;next&quot;</code>. The <code>Flow</code> then looks at its transitions, sees that after <code>greet</code> with action <code>&quot;next&quot;</code> it should go to <code>another</code>, and runs <code>another</code>. The <code>another</code> node reads the message from <code>data_store</code> and prints it.</p>
+<p>Output:</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><pre><code>Starting flow...
+Running node: greet
+Running GreetingNode...
+Greeting message added to shared.
+Node greet completed with action: next
+Running node: another
+Running AnotherNode...
+Received message: Hello from GreetingNode!
+Node another completed with action: done
+Flow finished.
+Final shared data: {&#39;greeting_message&#39;: &#39;Hello from GreetingNode!&#39;}</code></pre></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+    <div class="success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>This confirms that the Nodes executed in sequence, updated the <code>shared</code> data, and the second node could access the data from the first.</p>
+<h3>How Nodes Fit into the Flow (Under the Hood Peek)<span class="hx:absolute hx:-mt-20" id="how-nodes-fit-into-the-flow-under-the-hood-peek"></span>
+    <a href="#how-nodes-fit-into-the-flow-under-the-hood-peek" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Let&rsquo;s quickly revisit the sequence diagram from Chapter 1, now focusing on the Node&rsquo;s perspective.</p>
+<pre class="mermaid hx:mt-6">
+  sequenceDiagram
+    participant User
+    participant Flow
+    participant Node A instance
+    participant Node B instance
+
+    User-&gt;&gt;Flow: run(shared, &#34;node_a&#34;)
+    Flow-&gt;&gt;Flow: Looks up &#34;node_a&#34; instance
+    Flow-&gt;&gt;Node A instance: run(shared)
+    Note over Node A instance: Does its specific job&lt;br/&gt;Reads from shared&lt;br/&gt;Writes to shared
+    Node A instance--&gt;&gt;Flow: Returns &#34;action_string&#34;
+    Flow-&gt;&gt;Flow: Looks up transition: &#34;From node_a on action_string, where next?&#34;
+    Flow-&gt;&gt;Flow: Finds &#34;node_b&#34; name
+    Flow-&gt;&gt;Flow: Looks up &#34;node_b&#34; instance
+    Flow-&gt;&gt;Node B instance: run(shared)
+    Note over Node B instance: Does its specific job&lt;br/&gt;Reads from shared&lt;br/&gt;Writes to shared
+    Node B instance--&gt;&gt;Flow: Returns &#34;another_action&#34;
+    Flow-&gt;&gt;Flow: Looks up transition: &#34;From node_b on another_action, where next?&#34;
+    Note over Flow: If no transition found, Flow stops.
+    Flow--&gt;&gt;User: Signals completion/stops
+</pre><p>This sequence shows clearly that the <code>Flow</code> is merely the manager. It fetches the correct Node instance and calls its <code>run</code> method, passing the <code>shared</code> data. The Node does <em>all</em> the specific work and tells the <code>Flow</code> what happened by returning an action string. The <code>Flow</code> then uses this action string and its transition map to decide which Node instance to call next.</p>
+<h3>Real-World Nodes in Website Analyzer<span class="hx:absolute hx:-mt-20" id="real-world-nodes-in-website-analyzer"></span>
+    <a href="#real-world-nodes-in-website-analyzer" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Our <code>Website-Analyzer</code> project uses various specific Node types, each responsible for a part of the website analysis:</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Node Type</th>
+          <th style="text-align: left">Main Responsibility</th>
+          <th style="text-align: left">Key Data Used/Added to <code>shared</code></th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><code>InitialFetchNode</code></td>
+          <td style="text-align: left">Fetches the content of the starting URL</td>
+          <td style="text-align: left">Reads: <code>url</code> <br/> Writes: <code>soup</code>, <code>initial_status</code></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>SitemapBatchNode</code></td>
+          <td style="text-align: left">Crawls the site to build a sitemap</td>
+          <td style="text-align: left">Reads: <code>url</code>, <code>max_pages</code>, <code>pages_to_process</code>, <code>pages_visited</code> <br/> Writes: <code>sitemap</code>, <code>pages_to_process</code>, <code>pages_visited</code>, <code>soups</code></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>DesignElementsBatchNode</code></td>
+          <td style="text-align: left">Extracts design details (colors, fonts, etc.)</td>
+          <td style="text-align: left">Reads: <code>sitemap</code>, <code>soups</code> <br/> Writes: <code>design</code></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>ContentBatchNode</code></td>
+          <td style="text-align: left">Extracts text content and business information</td>
+          <td style="text-align: left">Reads: <code>sitemap</code>, <code>soups</code> <br/> Writes: <code>content</code></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>CombineResultsNode</code></td>
+          <td style="text-align: left">Merges data from different extraction steps</td>
+          <td style="text-align: left">Reads: <code>design</code>, <code>content</code> <br/> (Mostly an passthrough placeholder in current code)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>GenerateSpecsNode</code></td>
+          <td style="text-align: left">Creates structured specifications from collected data</td>
+          <td style="text-align: left">Reads: <code>content_data</code>, <code>design</code>, <code>sitemap</code>, <code>url</code>, <code>output_dir</code> <br/> Writes: <code>business_spec</code>, <code>brand_spec</code>, <code>specs_file</code></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>CreateHtmlSummaryNode</code></td>
+          <td style="text-align: left">Generates the final HTML report</td>
+          <td style="text-align: left">Reads: <code>url</code>, <code>business_spec</code>, <code>brand_spec</code>, <code>sitemap</code>, <code>design</code>, <code>content_data</code>, <code>output_dir</code> <br/> Writes: <code>html_summary</code>, <code>html_output_path</code></td>
+      </tr>
+  </tbody>
+</table>
+<p>You can see these Node types listed in the <code>flow.py</code> file when the <code>create_website_cloner_flow</code> function is setting up the flow:</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># From flow.py (simplified)</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">nodes</span> <span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Flow</span><span class="p">,</span> <span class="n">InitialFetchNode</span><span class="p">,</span> <span class="n">SitemapBatchNode</span><span class="p">,</span> <span class="n">DesignElementsBatchNode</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">ContentBatchNode</span><span class="p">,</span> <span class="n">CombineResultsNode</span><span class="p">,</span> <span class="n">GenerateSpecsNode</span><span class="p">,</span> <span class="n">CreateHtmlSummaryNode</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Node</span> <span class="c1"># ... other imports</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">create_website_cloner_flow</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">flow</span> <span class="o">=</span> <span class="n">Flow</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1"># Create instances of specific nodes</span>
+</span></span><span class="line"><span class="cl">    <span class="n">initial_fetch</span> <span class="o">=</span> <span class="n">InitialFetchNode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sitemap_batch</span> <span class="o">=</span> <span class="n">SitemapBatchNode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">design_batch</span> <span class="o">=</span> <span class="n">DesignElementsBatchNode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">content_batch</span> <span class="o">=</span> <span class="n">ContentBatchNode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">combine_results</span> <span class="o">=</span> <span class="n">CombineResultsNode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">generate_specs</span> <span class="o">=</span> <span class="n">GenerateSpecsNode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">create_html</span> <span class="o">=</span> <span class="n">CreateHtmlSummaryNode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># ... other nodes ...</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1"># Add node instances to the flow with names</span>
+</span></span><span class="line"><span class="cl">    <span class="n">flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;initial_fetch&#34;</span><span class="p">,</span> <span class="n">initial_fetch</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;sitemap_batch&#34;</span><span class="p">,</span> <span class="n">sitemap_batch</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;design_batch&#34;</span><span class="p">,</span> <span class="n">design_batch</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;content_batch&#34;</span><span class="p">,</span> <span class="n">content_batch</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;combine_results&#34;</span><span class="p">,</span> <span class="n">combine_results</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;generate_specs&#34;</span><span class="p">,</span> <span class="n">generate_specs</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;create_html&#34;</span><span class="p">,</span> <span class="n">create_html</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># ... add other nodes ...</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># ... transitions are defined next ...</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">flow</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+    <div class="success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>This snippet shows exactly how instances of our specialized Node classes are created and registered with the <code>Flow</code> object under specific names (<code>&quot;initial_fetch&quot;</code>, <code>&quot;sitemap_batch&quot;</code>, etc.). These names are what the <a href="01_flow_orchestration_.md" >Flow</a> uses in its transition map.</p>
+<p>Some of these nodes, like <code>SitemapBatchNode</code>, <code>DesignElementsBatchNode</code>, and <code>ContentBatchNode</code>, inherit from a special type called <code>BatchNode</code>. These are designed to process a <em>list</em> of items (like many different pages) efficiently. We&rsquo;ll explore <code>BatchNode</code>s in the next chapter.</p>
+<h3>Conclusion<span class="hx:absolute hx:-mt-20" id="conclusion"></span>
+    <a href="#conclusion" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>In this chapter, we focused on Processing Nodes, the individual workers or steps in our website analysis assembly line. We learned that each Node performs a specific task, communicates by reading from and writing to a <code>shared</code> data dictionary, and signals its outcome to the <a href="01_orchestration_.md" >Flow</a> by returning an action string from its <code>run</code> method. We saw how basic Nodes are structured and how they are added to a Flow.</p>
+<p>Understanding Nodes is crucial because they contain the actual logic for <em>what</em> the Website Analyzer does. The Flow defines the <em>order</em> and <em>paths</em>, but the Nodes define the <em>actions</em>.</p>
+<p>In the next chapter, we&rsquo;ll look at a special type of Node, the <a href="03_batch_processing_.md" >Batch Processing</a> Node, which is essential for handling tasks that need to be performed on multiple items, like analyzing many web pages.</p>
+<hr>
+<p><sub><sup>Generated by <a href="https://github.com/The-Pocket/Tutorial-Codebase-Knowledge" target="_blank" rel="noopener">AI Codebase Knowledge Builder</a>.</sup></sub> <sub><sup><strong>References</strong>: <a href="https://github.com/Theblackcat98/Website-Analyzer/blob/3c2ef570c745520cd623f7b5a5f498ba45f1f35c/flow.py" target="_blank" rel="noopener">[1]</a>, <a href="https://github.com/Theblackcat98/Website-Analyzer/blob/3c2ef570c745520cd623f7b5a5f498ba45f1f35c/main.py" target="_blank" rel="noopener">[2]</a>, <a href="https://github.com/Theblackcat98/Website-Analyzer/blob/3c2ef570c745520cd623f7b5a5f498ba45f1f35c/nodes.py" target="_blank" rel="noopener">[3]</a>, <a href="https://github.com/Theblackcat98/Website-Analyzer/blob/3c2ef570c745520cd623f7b5a5f498ba45f1f35c/tests/test_flow.py" target="_blank" rel="noopener">[4]</a></sup></sub></p>
+
+        </div>
+        
+    <div class="hx:mt-12 hx:mb-8 hx:block hx:text-xs hx:text-gray-500 hx:ltr:text-right hx:rtl:text-left hx:dark:text-gray-400">Last updated on <time datetime="2025-05-21T17:06:27.000Z">May 21, 5969</time></div>
+        <div class="hx:mb-8 hx:flex hx:items-center hx:border-t hx:pt-8 hx:border-gray-200 hx:dark:border-neutral-800 hx:contrast-more:border-neutral-400 hx:dark:contrast-more:border-neutral-400 hx:print:hidden"><a
+        href="/TheBlackCat/docs/website-analyzer/01-flow-orchestration/"
+        title="IG Post Maker"
+        class="hx:flex hx:max-w-[50%] hx:items-center hx:gap-1 hx:py-4 hx:text-base hx:font-medium hx:text-gray-600 hx:transition-colors [word-break:break-word] hx:hover:text-primary-600 hx:dark:text-gray-300 hx:md:text-lg hx:ltr:pr-4 hx:rtl:pl-4"
+      ><svg class="hx:inline hx:h-5 hx:shrink-0 hx:ltr:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>IG Post Maker</a></div>
+        
+      </main>
+    </article>
+  </div>
+
+      <footer class="hextra-footer hx:bg-gray-100 hx:pb-[env(safe-area-inset-bottom)] hx:dark:bg-neutral-900 hx:print:bg-transparent"><div
+      class="hextra-custom-footer hx:max-w-screen-xl hx:mx-auto hx:pl-[max(env(safe-area-inset-left),1.5rem)] hx:pr-[max(env(safe-area-inset-right),1.5rem)] hx:text-gray-600 hx:dark:text-gray-400"
+    ></div><div
+        class="hx:max-w-screen-xl hx:mx-auto hx:flex hx:justify-center hx:py-12 hx:pl-[max(env(safe-area-inset-left),1.5rem)] hx:pr-[max(env(safe-area-inset-right),1.5rem)] hx:text-gray-600 hx:dark:text-gray-400 hx:md:justify-start"
+      >
+        <div class="hx:flex hx:w-full hx:flex-col hx:items-center hx:sm:items-start"><div class="hx:font-semibold"><a class="hx:flex hx:text-sm hx:items-center hx:gap-1 hx:text-current" target="_blank" rel="noopener noreferrer" title="Hextra GitHub Homepage" href="https://github.com/imfing/hextra">
+    <span>Powered by Hextra<svg height=1em class="hx:inline-block hx:ltr:ml-1 hx:rtl:mr-1 hx:align-[-2.5px]" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="m 105.50024,22.224647 c -9.59169,-5.537563 -21.40871,-5.537563 -31.000093,0 L 39.054693,42.689119 C 29.463353,48.226675 23.55484,58.460531 23.55484,69.535642 v 40.928918 c 0,11.07542 5.908513,21.3092 15.499853,26.84652 l 35.445453,20.46446 c 9.591313,5.53732 21.408404,5.53732 31.000094,0 l 35.44507,-20.46446 c 9.59131,-5.53732 15.49985,-15.7711 15.49985,-26.84652 V 69.535642 c 0,-11.075111 -5.90854,-21.308967 -15.49985,-26.846523 z M 34.112797,85.737639 c -1.384445,2.397827 -1.384445,5.352099 0,7.749927 l 24.781554,42.922974 c 1.38437,2.39783 3.942853,3.87496 6.711592,3.87496 h 49.563107 c 2.76905,0 5.3273,-1.47713 6.71144,-3.87496 l 24.78194,-42.922974 c 1.38414,-2.397828 1.38414,-5.3521 0,-7.749927 L 121.88049,42.814746 c -1.38414,-2.397828 -3.94239,-3.874964 -6.71144,-3.874964 H 65.605944 c -2.768739,0 -5.327223,1.477059 -6.711592,3.874964 z" style="stroke-width:0.774993" /></svg></span>
+  </a></div><div class="hx:mt-6 hx:text-xs">© 2025 Hextra Project.</div></div>
+      </div></footer>
+    
+    <script defer src="/TheBlackCat/js/main.js" integrity=""></script>
+<script defer src="/TheBlackCat/js/flexsearch.9f5b5908f93ae86f1ecd4b043b799f580c2d1654e703dd9357d568ac41b2547a.js" integrity="sha256-n1tZCPk66G8ezUsEO3mfWAwtFlTnA92TV9VorEGyVHo=" crossorigin="anonymous"></script>
+        <script defer src="/TheBlackCat/en.search.js" integrity=""></script>
+
+<script defer src="/TheBlackCat/js/mermaid.min.dd0a5f51877dd31f21c9af008ebd501653d54fc302a5b82df3f86a189ab1c910.js" integrity="sha256-3QpfUYd90x8hya8Ajr1QFlPVT8MCpbgt8/hqGJqxyRA=" crossorigin="anonymous"></script>
+    <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    
+    document.querySelectorAll(".mermaid").forEach((el) => {
+      el.dataset.original = el.innerHTML;
+    });
+
+    const theme = document.documentElement.classList.contains("dark") ? "dark" : "default";
+    mermaid.initialize({ startOnLoad: true, theme: theme });
+
+    let timeout;
+    new MutationObserver(() => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        const theme = document.documentElement.classList.contains("dark") ? "dark" : "default";
+        document.querySelectorAll(".mermaid").forEach((el) => {
+          
+          el.innerHTML = el.dataset.original;
+          el.removeAttribute("data-processed");
+        });
+        mermaid.initialize({ startOnLoad: true, theme: theme });
+        mermaid.init();
+      }, 150);
+    }).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  });
+</script>
+
+  </body>
+</html>

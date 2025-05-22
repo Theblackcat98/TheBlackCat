@@ -9,33 +9,29 @@
 <link rel="icon" href="/TheBlackCat/favicon-32x32.png" type="image/png" sizes="32x32" />
 <link rel="apple-touch-icon" href="/TheBlackCat/apple-touch-icon.png" sizes="180x180" />
 <link fetchpriority="low" href="/TheBlackCat/site.webmanifest" rel="manifest" />
-<title>Processing Nodes – Hextra</title>
-  <meta name="description" content="Chapter 2: Processing NodesWelcome back! In the previous chapter, Flow Orchestration, we learned that the Flow is like the conductor of an orchestra, directing the overall process of analyzing a website. But who are the musicians? Who actually does the work?
-That’s where Processing Nodes come in.
-Think of the website analysis process as an assembly line. There are many distinct steps: someone fetches the raw website page, someone else extracts the text content, another person pulls out the design details like colors and fonts, and so on, until the final report is assembled." /><link rel="canonical" href="http://localhost:36743/TheBlackCat/docs/website-analyzer/02-processing-nodes/" itemprop="url" />
+<title>Ollama LLM Integration – Hextra</title>
+  <meta name="description" content="Chapter 9: HTML TemplatingWelcome back! In our journey through the Website Analyzer project, we’ve reached the point where we have gathered raw website content (Chapter 4), extracted specific data from it (Chapter 5), synthesized that data into structured Business and Brand Specifications (Chapter 6), and even explored using an LLM (Chapter 8) to help write those specifications and potentially the final report (Chapter 7).
+Chapter 7 introduced the CreateHtmlSummaryNode as the step responsible for generating the final, user-friendly HTML report. While the LLM approach can be powerful for generating flexible and creative reports, sometimes you need a guarantee of a certain structure and appearance. What if the LLM is offline, returns invalid HTML, or just doesn’t format things the way you need?" /><link rel="canonical" href="http://localhost:36743/TheBlackCat/docs/website-analyzer/09-html-templating/" itemprop="url" />
 
-<meta property="og:title" content="Processing Nodes" />
-<meta property="og:description" content="Chapter 2: Processing NodesWelcome back! In the previous chapter, Flow Orchestration, we learned that the Flow is like the conductor of an orchestra, directing the overall process of analyzing a website. But who are the musicians? Who actually does the work?
-That&rsquo;s where Processing Nodes come in.
-Think of the website analysis process as an assembly line. There are many distinct steps: someone fetches the raw website page, someone else extracts the text content, another person pulls out the design details like colors and fonts, and so on, until the final report is assembled." />
+<meta property="og:title" content="Ollama LLM Integration" />
+<meta property="og:description" content="Chapter 9: HTML TemplatingWelcome back! In our journey through the Website Analyzer project, we&rsquo;ve reached the point where we have gathered raw website content (Chapter 4), extracted specific data from it (Chapter 5), synthesized that data into structured Business and Brand Specifications (Chapter 6), and even explored using an LLM (Chapter 8) to help write those specifications and potentially the final report (Chapter 7).
+Chapter 7 introduced the CreateHtmlSummaryNode as the step responsible for generating the final, user-friendly HTML report. While the LLM approach can be powerful for generating flexible and creative reports, sometimes you need a guarantee of a certain structure and appearance. What if the LLM is offline, returns invalid HTML, or just doesn&rsquo;t format things the way you need?" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="http://localhost:36743/TheBlackCat/docs/website-analyzer/02-processing-nodes/" /><meta property="article:section" content="docs" />
+<meta property="og:url" content="http://localhost:36743/TheBlackCat/docs/website-analyzer/09-html-templating/" /><meta property="article:section" content="docs" />
 <meta property="article:published_time" content="2025-05-21T17:06:27+00:00" />
 <meta property="article:modified_time" content="2025-05-21T17:06:27+00:00" />
 
-  <meta itemprop="name" content="Processing Nodes">
-  <meta itemprop="description" content="Chapter 2: Processing NodesWelcome back! In the previous chapter, Flow Orchestration, we learned that the Flow is like the conductor of an orchestra, directing the overall process of analyzing a website. But who are the musicians? Who actually does the work?
-That’s where Processing Nodes come in.
-Think of the website analysis process as an assembly line. There are many distinct steps: someone fetches the raw website page, someone else extracts the text content, another person pulls out the design details like colors and fonts, and so on, until the final report is assembled.">
+  <meta itemprop="name" content="Ollama LLM Integration">
+  <meta itemprop="description" content="Chapter 9: HTML TemplatingWelcome back! In our journey through the Website Analyzer project, we’ve reached the point where we have gathered raw website content (Chapter 4), extracted specific data from it (Chapter 5), synthesized that data into structured Business and Brand Specifications (Chapter 6), and even explored using an LLM (Chapter 8) to help write those specifications and potentially the final report (Chapter 7).
+Chapter 7 introduced the CreateHtmlSummaryNode as the step responsible for generating the final, user-friendly HTML report. While the LLM approach can be powerful for generating flexible and creative reports, sometimes you need a guarantee of a certain structure and appearance. What if the LLM is offline, returns invalid HTML, or just doesn’t format things the way you need?">
   <meta itemprop="datePublished" content="2025-05-21T17:06:27+00:00">
   <meta itemprop="dateModified" content="2025-05-21T17:06:27+00:00">
-  <meta itemprop="wordCount" content="1785">
+  <meta itemprop="wordCount" content="2012">
   <meta itemprop="keywords" content="Project,Guide,AI">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Processing Nodes">
-  <meta name="twitter:description" content="Chapter 2: Processing NodesWelcome back! In the previous chapter, Flow Orchestration, we learned that the Flow is like the conductor of an orchestra, directing the overall process of analyzing a website. But who are the musicians? Who actually does the work?
-That’s where Processing Nodes come in.
-Think of the website analysis process as an assembly line. There are many distinct steps: someone fetches the raw website page, someone else extracts the text content, another person pulls out the design details like colors and fonts, and so on, until the final report is assembled.">
+  <meta name="twitter:title" content="Ollama LLM Integration">
+  <meta name="twitter:description" content="Chapter 9: HTML TemplatingWelcome back! In our journey through the Website Analyzer project, we’ve reached the point where we have gathered raw website content (Chapter 4), extracted specific data from it (Chapter 5), synthesized that data into structured Business and Brand Specifications (Chapter 6), and even explored using an LLM (Chapter 8) to help write those specifications and potentially the final report (Chapter 7).
+Chapter 7 introduced the CreateHtmlSummaryNode as the step responsible for generating the final, user-friendly HTML report. While the LLM approach can be powerful for generating flexible and creative reports, sometimes you need a guarantee of a certain structure and appearance. What if the LLM is offline, returns invalid HTML, or just doesn’t format things the way you need?">
 
     <link href="/TheBlackCat/css/compiled/main.css" rel="stylesheet" />
 
@@ -237,20 +233,12 @@ Think of the website analysis process as an assembly line. There are many distin
   >Flow Orchestration
     </a>
               
-            </li><li class="hx:flex hx:flex-col "><a
-    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
-    href="/TheBlackCat/docs/website-analyzer/09-html-templating/"
-    
-  >Ollama LLM Integration
-    </a>
-              
             </li><li class="hx:flex hx:flex-col open"><a
     class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       sidebar-active-item hx:bg-primary-100 hx:font-semibold hx:text-primary-800 hx:contrast-more:border hx:contrast-more:border-primary-500 hx:dark:bg-primary-400/10 hx:dark:text-primary-600 hx:contrast-more:dark:border-primary-500"
-    href="/TheBlackCat/docs/website-analyzer/02-processing-nodes/"
+    href="/TheBlackCat/docs/website-analyzer/09-html-templating/"
     
-  >Processing Nodes
+  >Ollama LLM Integration
     </a>
   
     <ul class='hx:flex hx:flex-col hx:gap-1 hx:relative hx:before:absolute hx:before:inset-y-1 hx:before:w-px hx:before:bg-gray-200 hx:before:content-[""] hx:dark:before:bg-neutral-800 hx:ltr:pl-3 hx:ltr:before:left-0 hx:rtl:pr-3 hx:rtl:before:right-0 hx:ltr:ml-3 hx:rtl:mr-3'><li>
@@ -261,6 +249,14 @@ Think of the website analysis process as an assembly line. There are many distin
             </li>
           </ul>
   
+              
+            </li><li class="hx:flex hx:flex-col "><a
+    class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+    href="/TheBlackCat/docs/website-analyzer/02-processing-nodes/"
+    
+  >Processing Nodes
+    </a>
               
             </li><li class="hx:flex hx:flex-col "><a
     class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
@@ -357,17 +353,17 @@ Think of the website analysis process as an assembly line. There are many distin
   >Flow Orchestration
     </a>
               
-            </li><li class="hx:flex hx:flex-col "><a
+            </li><li class="hx:flex hx:flex-col open"><a
     class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
+      sidebar-active-item hx:bg-primary-100 hx:font-semibold hx:text-primary-800 hx:contrast-more:border hx:contrast-more:border-primary-500 hx:dark:bg-primary-400/10 hx:dark:text-primary-600 hx:contrast-more:dark:border-primary-500"
     href="/TheBlackCat/docs/website-analyzer/09-html-templating/"
     
   >Ollama LLM Integration
     </a>
               
-            </li><li class="hx:flex hx:flex-col open"><a
+            </li><li class="hx:flex hx:flex-col "><a
     class="hx:flex hx:items-center hx:justify-between hx:gap-2 hx:cursor-pointer hx:rounded-sm hx:px-2 hx:py-1.5 hx:text-sm hx:transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      sidebar-active-item hx:bg-primary-100 hx:font-semibold hx:text-primary-800 hx:contrast-more:border hx:contrast-more:border-primary-500 hx:dark:bg-primary-400/10 hx:dark:text-primary-600 hx:contrast-more:dark:border-primary-500"
+      hx:text-gray-500 hx:hover:bg-gray-100 hx:hover:text-gray-900 hx:contrast-more:border hx:contrast-more:border-transparent hx:contrast-more:text-gray-900 hx:contrast-more:hover:border-gray-900 hx:dark:text-neutral-400 hx:dark:hover:bg-primary-100/5 hx:dark:hover:text-gray-50 hx:contrast-more:dark:text-gray-50 hx:contrast-more:dark:hover:border-gray-50"
     href="/TheBlackCat/docs/website-analyzer/02-processing-nodes/"
     
   >Processing Nodes
@@ -458,23 +454,27 @@ Think of the website analysis process as an assembly line. There are many distin
 <nav class="hextra-toc hx:order-last hx:hidden hx:w-64 hx:shrink-0 hx:xl:block hx:print:hidden hx:px-4" aria-label="table of contents">
     <div class="hextra-scrollbar hx:sticky hx:top-16 hx:overflow-y-auto hx:pr-4 hx:pt-6 hx:text-sm [hyphens:auto] hx:max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] hx:ltr:-mr-4 hx:rtl:-ml-4"><p class="hx:mb-4 hx:font-semibold hx:tracking-tight">On this page</p><ul>
       <li class="hx:my-2 hx:scroll-my-6 hx:scroll-py-6">
-        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#the-basic-structure-of-a-node">The Basic Structure of a Node
+        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#the-central-use-case-generating-a-predictable-html-report">The Central Use Case: Generating a Predictable HTML Report
         </a>
       </li>
       <li class="hx:my-2 hx:scroll-my-6 hx:scroll-py-6">
-        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#how-nodes-use-shared-data">How Nodes Use Shared Data
+        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#what-is-html-templating">What is HTML Templating?
         </a>
       </li>
       <li class="hx:my-2 hx:scroll-my-6 hx:scroll-py-6">
-        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#creating-a-simple-custom-node">Creating a Simple Custom Node
+        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#key-concepts-in-html-templating">Key Concepts in HTML Templating
         </a>
       </li>
       <li class="hx:my-2 hx:scroll-my-6 hx:scroll-py-6">
-        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#how-nodes-fit-into-the-flow-under-the-hood-peek">How Nodes Fit into the Flow (Under the Hood Peek)
+        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#how-is-templating-used-in-the-project">How is Templating Used in the Project?
         </a>
       </li>
       <li class="hx:my-2 hx:scroll-my-6 hx:scroll-py-6">
-        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#real-world-nodes-in-website-analyzer">Real-World Nodes in Website Analyzer
+        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#how-templating-works-under-the-hood">How Templating Works Under the Hood
+        </a>
+      </li>
+      <li class="hx:my-2 hx:scroll-my-6 hx:scroll-py-6">
+        <a class="hx:ltr:pl-4 hx:rtl:pr-4 hx:inline-block hx:text-gray-500 hx:hover:text-gray-900 hx:dark:text-gray-400 hx:dark:hover:text-gray-300 hx:contrast-more:text-gray-900 hx:contrast-more:underline hx:contrast-more:dark:text-gray-50 hx:w-full hx:break-words" href="#why-use-templating-vs-llm-html-generation">Why Use Templating (vs LLM HTML Generation)?
         </a>
       </li>
       <li class="hx:my-2 hx:scroll-my-6 hx:scroll-py-6">
@@ -502,54 +502,77 @@ Think of the website analysis process as an assembly line. There are many distin
         </div><svg class="hx:w-3.5 hx:shrink-0 hx:rtl:-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         <div class="hx:whitespace-nowrap hx:transition-colors hx:min-w-[24px] hx:overflow-hidden hx:text-ellipsis hx:hover:text-gray-900 hx:dark:hover:text-gray-100">
           <a href="/TheBlackCat/docs/website-analyzer/">Website Analyzer</a>
-        </div><svg class="hx:w-3.5 hx:shrink-0 hx:rtl:-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx:whitespace-nowrap hx:transition-colors hx:font-medium hx:text-gray-700 hx:contrast-more:font-bold hx:contrast-more:text-current hx:dark:text-gray-100 hx:contrast-more:dark:text-current">Processing Nodes</div>
+        </div><svg class="hx:w-3.5 hx:shrink-0 hx:rtl:-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx:whitespace-nowrap hx:transition-colors hx:font-medium hx:text-gray-700 hx:contrast-more:font-bold hx:contrast-more:text-current hx:dark:text-gray-100 hx:contrast-more:dark:text-current">Ollama LLM Integration</div>
   </div>
 
         <div class="content">
-          <h1>Processing Nodes</h1>
-          <h1>Chapter 2: Processing Nodes</h1><p>Welcome back! In the previous chapter, <a href="01_flow_orchestration_.md" >Flow Orchestration</a>, we learned that the <code>Flow</code> is like the conductor of an orchestra, directing the overall process of analyzing a website. But who are the musicians? Who actually <em>does</em> the work?</p>
-<p>That&rsquo;s where <strong>Processing Nodes</strong> come in.</p>
-<p>Think of the website analysis process as an assembly line. There are many distinct steps: someone fetches the raw website page, someone else extracts the text content, another person pulls out the design details like colors and fonts, and so on, until the final report is assembled.</p>
-<p>Each worker on this assembly line is responsible for one specific job before passing the work along. These individual workers are our <strong>Processing Nodes</strong>.</p>
-<p>In the context of our <code>Website-Analyzer</code> project:</p>
+          <h1>Ollama LLM Integration</h1>
+          <h1>Chapter 9: HTML Templating</h1><p>Welcome back! In our journey through the Website Analyzer project, we&rsquo;ve reached the point where we have gathered raw website content (<a href="04_website_content_fetching_.md" >Chapter 4</a>), extracted specific data from it (<a href="05_data_extraction_utilities_.md" >Chapter 5</a>), synthesized that data into structured Business and Brand Specifications (<a href="06_specification_generation_.md" >Chapter 6</a>), and even explored using an LLM (<a href="08_ollama_llm_integration_.md" >Chapter 8</a>) to help write those specifications and potentially the final report (<a href="07_html_summary_generation_.md" >Chapter 7</a>).</p>
+<p>Chapter 7 introduced the <code>CreateHtmlSummaryNode</code> as the step responsible for generating the final, user-friendly HTML report. While the LLM approach can be powerful for generating flexible and creative reports, sometimes you need a guarantee of a certain structure and appearance. What if the LLM is offline, returns invalid HTML, or just doesn&rsquo;t format things the way you need?</p>
+<p>This is where <strong>HTML Templating</strong> comes in. It provides a reliable, predictable way to generate the HTML summary, ensuring consistency every time, even if the LLM is not used or fails.</p>
+<h3>The Central Use Case: Generating a Predictable HTML Report<span class="hx:absolute hx:-mt-20" id="the-central-use-case-generating-a-predictable-html-report"></span>
+    <a href="#the-central-use-case-generating-a-predictable-html-report" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Imagine you need to produce a report that always has a specific layout: a header at the top, a section for business details, a section for brand elements, maybe a table of contents, and a footer. The information within these sections will change depending on the website analyzed, but the sections themselves and their general look should be the same for every report.</p>
+<p>HTML Templating solves this by letting you define a pre-formatted HTML file with placeholders for where the dynamic data goes. Our <strong>central use case</strong> for HTML Templating is to use this pre-defined structure to build the final HTML summary page based on the generated specifications.</p>
+<h3>What is HTML Templating?<span class="hx:absolute hx:-mt-20" id="what-is-html-templating"></span>
+    <a href="#what-is-html-templating" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Think of HTML Templating like using a fancy pre-printed form or report paper.</p>
 <ul>
-<li>A <strong>Node</strong> is a single, self-contained unit of work.</li>
-<li>Each Node performs one specific task, like &ldquo;Fetch a web page&rdquo;, &ldquo;Find links on a page&rdquo;, or &ldquo;Extract business information&rdquo;.</li>
-<li>Nodes work together in a sequence defined by the <a href="01_flow_orchestration_.md" >Flow</a>, passing information between them using the <code>shared</code> data storage.</li>
+<li><strong>The Template:</strong> This is the pre-printed paper itself. It has a fixed structure – headings, sections, tables, and maybe some basic styling. Crucially, it also has blank spaces or labels that say &ldquo;Fill in the Business Name here,&rdquo; &ldquo;Add the list of colors here,&rdquo; etc. In our case, the template is an HTML file (<code>html_template.html</code>) with special placeholders.</li>
+<li><strong>The Data:</strong> This is the information you&rsquo;ve collected – our Business and Brand Specifications (<a href="06_specification_generation_.md" >Chapter 6</a>) and perhaps other extracted details. This is the content you need to fill into the blanks.</li>
+<li><strong>The Renderer:</strong> This is the process or script that takes the data and the template, finds all the placeholders in the template, and replaces them with the actual data. The output is a complete, filled-out document (the final HTML report).</li>
 </ul>
-<p>Let&rsquo;s revisit our simple example from Chapter 1:</p>
-<ol>
-<li>Fetch the main page content.</li>
-<li>Do something else (process content).</li>
+<p>The key advantage of templating is that the <em>structure</em> and basic <em>appearance</em> are controlled by the template file, not by potentially unpredictable LLM output.</p>
+<h3>Key Concepts in HTML Templating<span class="hx:absolute hx:-mt-20" id="key-concepts-in-html-templating"></span>
+    <a href="#key-concepts-in-html-templating" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ol>
+<li><strong>Template File:</strong> An HTML file containing the fixed structure and presentation. It includes special markers indicating where dynamic content should be inserted. In our project, a primary template is located at <code>utils/templates/html_template.html</code>.</li>
+<li><strong>Placeholders:</strong> These are special strings within the template that the renderer script looks for. They act as markers for where data should be placed. For example, a template might have <code>{business_name}</code> or a more complex loop like sections for displaying lists of items (products, colors).</li>
+<li><strong>Data Source:</strong> The structured information used to fill the placeholders. In our project, this is primarily the <code>business_spec</code> and <code>brand_spec</code> dictionaries and potentially other details from the <code>shared</code> data (<a href="01_flow_orchestration_.md" >Chapter 1</a>).</li>
+<li><strong>Rendering Logic:</strong> The Python code that reads the template, takes the data, finds the placeholders, and generates the final HTML string by inserting the data into the template. This logic is implemented in our project, mainly within <code>utils/generate_html_summary.py</code>.</li>
 </ol>
-<p>Here, &ldquo;Fetch the main page content&rdquo; is one Node, and &ldquo;Do something else&rdquo; (process content) is another Node.</p>
-<p>The <code>Flow</code> doesn&rsquo;t know <em>how</em> to fetch a page or process content itself. It just knows <em>that</em> it needs these steps and <em>in what order</em> they should happen. The <em>how</em> is handled by the specific Node instances.</p>
-<h3>The Basic Structure of a Node<span class="hx:absolute hx:-mt-20" id="the-basic-structure-of-a-node"></span>
-    <a href="#the-basic-structure-of-a-node" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>All Nodes in our project are built upon a base <code>Node</code> class. This base class provides the fundamental structure and the <code>run</code> method that the <a href="01_flow_orchestration_.md" >Flow</a> calls.</p>
-<p>While the actual <code>Node</code> class in <code>nodes.py</code> has a few methods like <code>prep</code>, <code>exec</code>, and <code>post</code> for more complex operations (which we&rsquo;ll touch on later), the most important method for understanding what a Node <em>does</em> when the Flow runs it is the <code>run</code> method:</p>
+<h3>How is Templating Used in the Project?<span class="hx:absolute hx:-mt-20" id="how-is-templating-used-in-the-project"></span>
+    <a href="#how-is-templating-used-in-the-project" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>As discussed in <a href="07_html_summary_generation_.md" >Chapter 7: HTML Summary Generation</a>, the <code>CreateHtmlSummaryNode</code> is responsible for generating the final HTML. This node delegates the actual HTML creation to a utility function, <code>generate_html_summary</code>, found in <code>utils/generate_html_summary.py</code>.</p>
+<p>This <code>generate_html_summary</code> utility is designed to potentially use different methods for HTML creation. In our project&rsquo;s current structure, it includes logic to check if a templated approach is available and preferred (<code>USE_TEMPLATE</code> flag). If it is, it calls a dedicated templating function (like <code>templated_html_summary</code>). If not, or if the template method fails, it falls back to a simpler, hardcoded HTML generation logic.</p>
+<p>Let&rsquo;s look at a simplified view of how <code>utils/generate_html_summary.py</code> might decide to use the template:</p>
 <div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
 
-<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Simplified Base Node structure from nodes.py</span>
-</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shared</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="s2">&#34;&#34;&#34;
-</span></span></span><span class="line"><span class="cl"><span class="s2">        Runs the logic for this node.
-</span></span></span><span class="line"><span class="cl"><span class="s2">        
-</span></span></span><span class="line"><span class="cl"><span class="s2">        Args:
-</span></span></span><span class="line"><span class="cl"><span class="s2">            shared (dict): The shared data dictionary.
-</span></span></span><span class="line"><span class="cl"><span class="s2">            
-</span></span></span><span class="line"><span class="cl"><span class="s2">        Returns:
-</span></span></span><span class="line"><span class="cl"><span class="s2">            str: An action string (&#34;next&#34;, &#34;error&#34;, etc.) to tell the Flow
-</span></span></span><span class="line"><span class="cl"><span class="s2">                 what node to execute next.
-</span></span></span><span class="line"><span class="cl"><span class="s2">        &#34;&#34;&#34;</span>
-</span></span><span class="line"><span class="cl">        <span class="c1"># ... Node&#39;s specific work happens here ...</span>
-</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;A generic Node ran!&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        
-</span></span><span class="line"><span class="cl">        <span class="c1"># Node modifies the &#39;shared&#39; dictionary if needed</span>
-</span></span><span class="line"><span class="cl">        <span class="c1"># shared[&#39;result_from_this_node&#39;] = some_value </span>
-</span></span><span class="line"><span class="cl">        
-</span></span><span class="line"><span class="cl">        <span class="c1"># Node returns an action string</span>
-</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="s2">&#34;next&#34;</span> </span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Inside utils/generate_html_summary.py (Simplified)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Assume templated_html_summary function is imported/available</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># This flag indicates if the template-based generator is available/preferred</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># It&#39;s often set based on imports (as shown in the actual code snippet)</span>
+</span></span><span class="line"><span class="cl"><span class="n">USE_TEMPLATE</span> <span class="o">=</span> <span class="kc">True</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">generate_html_summary</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">business_spec</span><span class="p">,</span> <span class="n">brand_spec</span><span class="p">,</span> <span class="n">sitemap_data</span><span class="p">,</span> <span class="n">design_data</span><span class="p">,</span> <span class="n">content_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    Generate an HTML summary page using a template or fallback.
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># --- Decision Point: Use Template? ---</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">USE_TEMPLATE</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Attempting to generate HTML using template...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="c1"># Call the function that implements the template rendering logic</span>
+</span></span><span class="line"><span class="cl">            <span class="n">html_content</span> <span class="o">=</span> <span class="n">templated_html_summary</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">business_spec</span><span class="p">,</span> <span class="n">brand_spec</span><span class="p">,</span> <span class="n">sitemap_data</span><span class="p">,</span> <span class="n">design_data</span><span class="p">,</span> <span class="n">content_data</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Template HTML generation successful.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">html_content</span> <span class="c1"># Return the HTML from the template</span>
+</span></span><span class="line"><span class="cl">        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Template HTML generation failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">. Falling back...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="c1"># If template rendering fails, continue to the fallback</span>
+</span></span><span class="line"><span class="cl">            <span class="k">pass</span> <span class="c1"># Fall through to the fallback logic below</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># --- Fallback HTML Generation (if template not used or failed) ---</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Generating HTML using built-in fallback logic...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># This is the hardcoded HTML generation logic shown in Chapter 7 snippet</span>
+</span></span><span class="line"><span class="cl">    <span class="n">html</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &lt;!DOCTYPE html&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    ... # Your hardcoded HTML structure here
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &lt;h1&gt;Website Analysis: </span><span class="si">{</span><span class="n">business_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;business_overview&#39;</span><span class="p">,{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;Unknown Business&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/h1&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    ... # Insert other data using string formatting
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Fallback HTML generation complete.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">html</span> <span class="c1"># Return the fallback HTML</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Assume templated_html_summary function exists elsewhere (e.g. utils/templates/html_summary_template.py)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># This function would load the template file, populate it, and return the string.</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># def templated_html_summary(...): ...</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
   <button
     class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
     title="Copy code"
@@ -559,317 +582,189 @@ Think of the website analysis process as an assembly line. There are many distin
   </button>
 </div>
 </div>
-<p>Every specific Node you create will inherit from <code>Node</code> and implement its unique task, usually by overriding the <code>run</code> method or its internal <code>prep</code>/<code>exec</code>/<code>post</code> steps. When the <a href="01_flow_orchestration_.md" >Flow</a> calls <code>node_instance.run(shared_data)</code>, the Node executes its job, potentially updates the <code>shared_data</code> dictionary, and returns an action string.</p>
-<h3>How Nodes Use Shared Data<span class="hx:absolute hx:-mt-20" id="how-nodes-use-shared-data"></span>
-    <a href="#how-nodes-use-shared-data" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Nodes don&rsquo;t talk directly to each other. They communicate by reading from and writing to the central <code>shared</code> data dictionary (or object). This is like workers on an assembly line putting their finished piece into a shared bin for the next worker to pick up.</p>
-<p>Let&rsquo;s look at our simple Fetch and Process example again:</p>
-<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
-
-<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Simple Nodes (revisited from Chapter 1)</span>
-</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">FetchPageNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shared</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Fetching page...&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="c1"># *** Node writes data to shared ***</span>
-</span></span><span class="line"><span class="cl">        <span class="n">shared</span><span class="p">[</span><span class="s1">&#39;page_content&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&#34;&lt;html&gt;...&lt;/html&gt;&#34;</span> 
-</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Page content added to shared.&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="s2">&#34;success&#34;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">ProcessContentNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shared</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="c1"># *** Node reads data from shared ***</span>
-</span></span><span class="line"><span class="cl">        <span class="n">content</span> <span class="o">=</span> <span class="n">shared</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;page_content&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> 
-</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Processing content: </span><span class="si">{</span><span class="n">content</span><span class="p">[:</span><span class="mi">20</span><span class="p">]</span><span class="si">}</span><span class="s2">...&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        
-</span></span><span class="line"><span class="cl">        <span class="c1"># This node might also write results back to shared</span>
-</span></span><span class="line"><span class="cl">        <span class="n">shared</span><span class="p">[</span><span class="s1">&#39;processed_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&#34;Summary of content...&#34;</span> 
-</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Processed data added to shared.&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="s2">&#34;done&#34;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># Example of running them (orchestrated by Flow, but showing the shared part)</span>
-</span></span><span class="line"><span class="cl"><span class="n">data_store</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># The shared data dictionary</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="n">fetch_node_instance</span> <span class="o">=</span> <span class="n">FetchPageNode</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl"><span class="n">process_node_instance</span> <span class="o">=</span> <span class="n">ProcessContentNode</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># In a real Flow, the Flow manages these calls:</span>
-</span></span><span class="line"><span class="cl"><span class="c1"># action_from_fetch = fetch_node_instance.run(data_store) # &#39;success&#39;</span>
-</span></span><span class="line"><span class="cl"><span class="c1"># if action_from_fetch == &#34;success&#34;:</span>
-</span></span><span class="line"><span class="cl"><span class="c1">#     action_from_process = process_node_instance.run(data_store) # &#39;done&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Initial shared data:&#34;</span><span class="p">,</span> <span class="n">data_store</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">fetch_node_instance</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">data_store</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Shared data after fetch:&#34;</span><span class="p">,</span> <span class="n">data_store</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">process_node_instance</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">data_store</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Shared data after process:&#34;</span><span class="p">,</span> <span class="n">data_store</span><span class="p">)</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
-  <button
-    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
-    title="Copy code"
-  >
-    <div class="copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
-    <div class="success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
-  </button>
-</div>
-</div>
-<p>Running this code would show:</p>
-<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
-
-<div><pre><code>Initial shared data: {}
-Fetching page...
-Page content added to shared.
-Shared data after fetch: {&#39;page_content&#39;: &#39;&lt;html&gt;...&lt;/html&gt;&#39;}
-Processing content: &lt;html&gt;...&lt;...
-Processed data added to shared.
-Shared data after process: {&#39;page_content&#39;: &#39;&lt;html&gt;...&lt;/html&gt;&#39;, &#39;processed_data&#39;: &#39;Summary of content...&#39;}</code></pre></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
-  <button
-    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
-    title="Copy code"
-  >
-    <div class="copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
-    <div class="success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
-  </button>
-</div>
-</div>
-<p>As you can see, <code>FetchPageNode</code> adds <code>'page_content'</code> to the <code>data_store</code> (our <code>shared</code> dictionary), and then <code>ProcessContentNode</code> reads <code>'page_content'</code> from the same <code>data_store</code> to do its work. It then adds its own result, <code>'processed_data'</code>.</p>
-<h3>Creating a Simple Custom Node<span class="hx:absolute hx:-mt-20" id="creating-a-simple-custom-node"></span>
-    <a href="#creating-a-simple-custom-node" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Let&rsquo;s walk through creating a very basic custom Node that just adds a simple message to the shared data.</p>
-<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
-
-<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Create a new Python file (e.g., my_nodes.py) or add to an existing one</span>
-</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">nodes</span> <span class="kn">import</span> <span class="n">Node</span> <span class="c1"># Import the base Node class</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">GreetingNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shared</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="s2">&#34;&#34;&#34;
-</span></span></span><span class="line"><span class="cl"><span class="s2">        Adds a greeting message to the shared data.
-</span></span></span><span class="line"><span class="cl"><span class="s2">        &#34;&#34;&#34;</span>
-</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Running GreetingNode...&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        
-</span></span><span class="line"><span class="cl">        <span class="c1"># Add a simple greeting to the shared dictionary</span>
-</span></span><span class="line"><span class="cl">        <span class="n">shared</span><span class="p">[</span><span class="s1">&#39;greeting_message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&#34;Hello from GreetingNode!&#34;</span>
-</span></span><span class="line"><span class="cl">        
-</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Greeting message added to shared.&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        
-</span></span><span class="line"><span class="cl">        <span class="c1"># Return &#39;next&#39; to signal the Flow to move to the next node</span>
-</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="s2">&#34;next&#34;</span> </span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
-  <button
-    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
-    title="Copy code"
-  >
-    <div class="copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
-    <div class="success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
-  </button>
-</div>
-</div>
-<p>This <code>GreetingNode</code> is simple: it inherits from <code>Node</code>, overrides the <code>run</code> method, prints a message, adds an item to the <code>shared</code> dictionary, and returns <code>&quot;next&quot;</code>.</p>
-<p>To use this Node, you&rsquo;d add it to a <a href="01_flow_orchestration_.md" >Flow</a> just like we saw in Chapter 1:</p>
-<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
-
-<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Using the custom GreetingNode</span>
-</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">nodes</span> <span class="kn">import</span> <span class="n">Flow</span> <span class="c1"># Assuming Flow is in nodes.py</span>
-</span></span><span class="line"><span class="cl"><span class="c1"># from my_nodes import GreetingNode # If you saved it separately</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># Create the Flow</span>
-</span></span><span class="line"><span class="cl"><span class="n">my_flow</span> <span class="o">=</span> <span class="n">Flow</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># Create an instance of our custom node</span>
-</span></span><span class="line"><span class="cl"><span class="n">greeting_node</span> <span class="o">=</span> <span class="n">GreetingNode</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># Add the node to the flow, giving it a unique name</span>
-</span></span><span class="line"><span class="cl"><span class="n">my_flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;greet&#34;</span><span class="p">,</span> <span class="n">greeting_node</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># Add a dummy node to go AFTER the greeting node (for illustration)</span>
-</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">AnotherNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shared</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Running AnotherNode...&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="n">message</span> <span class="o">=</span> <span class="n">shared</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;greeting_message&#39;</span><span class="p">,</span> <span class="s1">&#39;No greeting found!&#39;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Received message: </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="s2">&#34;done&#34;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="n">another_node</span> <span class="o">=</span> <span class="n">AnotherNode</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl"><span class="n">my_flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;another&#34;</span><span class="p">,</span> <span class="n">another_node</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># Define the transition: After &#34;greet&#34; returns &#34;next&#34;, go to &#34;another&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="n">my_flow</span><span class="o">.</span><span class="n">add_transition</span><span class="p">(</span><span class="s2">&#34;greet&#34;</span><span class="p">,</span> <span class="s2">&#34;next&#34;</span><span class="p">,</span> <span class="s2">&#34;another&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># Create the shared data dictionary</span>
-</span></span><span class="line"><span class="cl"><span class="n">data_store</span> <span class="o">=</span> <span class="p">{}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># Run the flow starting at our greeting node</span>
-</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Starting flow...&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">my_flow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">data_store</span><span class="p">,</span> <span class="s2">&#34;greet&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Flow finished.&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Final shared data:&#34;</span><span class="p">,</span> <span class="n">data_store</span><span class="p">)</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
-  <button
-    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
-    title="Copy code"
-  >
-    <div class="copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
-    <div class="success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
-  </button>
-</div>
-</div>
-<p>When you run this, the <code>Flow</code> will execute the <code>greet</code> node, which puts the message into <code>data_store</code> and returns <code>&quot;next&quot;</code>. The <code>Flow</code> then looks at its transitions, sees that after <code>greet</code> with action <code>&quot;next&quot;</code> it should go to <code>another</code>, and runs <code>another</code>. The <code>another</code> node reads the message from <code>data_store</code> and prints it.</p>
-<p>Output:</p>
-<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
-
-<div><pre><code>Starting flow...
-Running node: greet
-Running GreetingNode...
-Greeting message added to shared.
-Node greet completed with action: next
-Running node: another
-Running AnotherNode...
-Received message: Hello from GreetingNode!
-Node another completed with action: done
-Flow finished.
-Final shared data: {&#39;greeting_message&#39;: &#39;Hello from GreetingNode!&#39;}</code></pre></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
-  <button
-    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
-    title="Copy code"
-  >
-    <div class="copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
-    <div class="success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
-  </button>
-</div>
-</div>
-<p>This confirms that the Nodes executed in sequence, updated the <code>shared</code> data, and the second node could access the data from the first.</p>
-<h3>How Nodes Fit into the Flow (Under the Hood Peek)<span class="hx:absolute hx:-mt-20" id="how-nodes-fit-into-the-flow-under-the-hood-peek"></span>
-    <a href="#how-nodes-fit-into-the-flow-under-the-hood-peek" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Let&rsquo;s quickly revisit the sequence diagram from Chapter 1, now focusing on the Node&rsquo;s perspective.</p>
+<p>This snippet shows that the <code>generate_html_summary</code> function checks <code>USE_TEMPLATE</code>. If <code>True</code>, it calls the <code>templated_html_summary</code> function. This separates the <em>decision</em> of how to generate from the <em>logic</em> of templating.</p>
+<p>The <code>templated_html_summary</code> function (which might live in <code>utils/templates/html_summary_template.py</code>) is the one that performs the actual templating: it loads the HTML template file (<code>html_template.html</code>) and fills it with data.</p>
+<h3>How Templating Works Under the Hood<span class="hx:absolute hx:-mt-20" id="how-templating-works-under-the-hood"></span>
+    <a href="#how-templating-works-under-the-hood" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Let&rsquo;s trace the process when the template method is used:</p>
 <pre class="mermaid hx:mt-6">
   sequenceDiagram
-    participant User
-    participant Flow
-    participant Node A instance
-    participant Node B instance
+    participant CreateHtmlSummaryNode
+    participant GenerateHtmlUtility (&#34;utils/generate_html_summary.py&#34;)
+    participant TemplatingRenderer (&#34;utils/templates/html_summary_template.py&#34;)
+    participant Template File (&#34;html_template.html&#34;)
+    participant Specifications Data (shared)
+    participant Final HTML String
 
-    User-&gt;&gt;Flow: run(shared, &#34;node_a&#34;)
-    Flow-&gt;&gt;Flow: Looks up &#34;node_a&#34; instance
-    Flow-&gt;&gt;Node A instance: run(shared)
-    Note over Node A instance: Does its specific job&lt;br/&gt;Reads from shared&lt;br/&gt;Writes to shared
-    Node A instance--&gt;&gt;Flow: Returns &#34;action_string&#34;
-    Flow-&gt;&gt;Flow: Looks up transition: &#34;From node_a on action_string, where next?&#34;
-    Flow-&gt;&gt;Flow: Finds &#34;node_b&#34; name
-    Flow-&gt;&gt;Flow: Looks up &#34;node_b&#34; instance
-    Flow-&gt;&gt;Node B instance: run(shared)
-    Note over Node B instance: Does its specific job&lt;br/&gt;Reads from shared&lt;br/&gt;Writes to shared
-    Node B instance--&gt;&gt;Flow: Returns &#34;another_action&#34;
-    Flow-&gt;&gt;Flow: Looks up transition: &#34;From node_b on another_action, where next?&#34;
-    Note over Flow: If no transition found, Flow stops.
-    Flow--&gt;&gt;User: Signals completion/stops
-</pre><p>This sequence shows clearly that the <code>Flow</code> is merely the manager. It fetches the correct Node instance and calls its <code>run</code> method, passing the <code>shared</code> data. The Node does <em>all</em> the specific work and tells the <code>Flow</code> what happened by returning an action string. The <code>Flow</code> then uses this action string and its transition map to decide which Node instance to call next.</p>
-<h3>Real-World Nodes in Website Analyzer<span class="hx:absolute hx:-mt-20" id="real-world-nodes-in-website-analyzer"></span>
-    <a href="#real-world-nodes-in-website-analyzer" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Our <code>Website-Analyzer</code> project uses various specific Node types, each responsible for a part of the website analysis:</p>
+    CreateHtmlSummaryNode-&gt;&gt;GenerateHtmlUtility: generate_html_summary(specs_data, ...)
+    GenerateHtmlUtility-&gt;&gt;GenerateHtmlUtility: Check USE_TEMPLATE flag
+    GenerateHtmlUtility-&gt;&gt;TemplatingRenderer: Call templated_html_summary(specs_data, ...)
+    TemplatingRenderer-&gt;&gt;Template File: Read html_template.html
+    Template File--&gt;&gt;TemplatingRenderer: Return template HTML string
+    TemplatingRenderer-&gt;&gt;Specifications Data (shared): Read necessary data (specs)
+    TemplatingRenderer-&gt;&gt;TemplatingRenderer: Find placeholders in template
+    TemplatingRenderer-&gt;&gt;TemplatingRenderer: Replace placeholders with data
+    TemplatingRenderer--&gt;&gt;Final HTML String: Return completed HTML string
+    Final HTML String--&gt;&gt;GenerateHtmlUtility: Return HTML string
+    GenerateHtmlUtility-&gt;&gt;GenerateHtmlUtility: Save HTML (save_html_summary)
+    GenerateHtmlUtility--&gt;&gt;CreateHtmlSummaryNode: Return {html_summary, output_path}
+    CreateHtmlSummaryNode-&gt;&gt;Specifications Data (shared): Store html_output_path
+    CreateHtmlSummaryNode--&gt;&gt;Flow: Return &#34;next&#34;
+</pre><p>Here&rsquo;s a breakdown of the steps performed by the <code>TemplatingRenderer</code> (the logic within <code>utils/templates/html_summary_template.py</code>):</p>
+<ol>
+<li><strong>Load Template:</strong> The script reads the raw text content of the template HTML file (<code>utils/templates/html_template.html</code>). This template contains the fixed HTML structure and placeholder like <code>{business_name}</code>.</li>
+<li><strong>Get Data:</strong> It receives the structured data, primarily the <code>business_spec</code> and <code>brand_spec</code> dictionaries, which were previously generated (<a href="06_specification_generation_.md" >Chapter 6</a>) and passed down from the <code>CreateHtmlSummaryNode</code>.</li>
+<li><strong>Populate Placeholders:</strong> It iterates through the template string, finds the placeholders (e.g., <code>{business_name}</code>), looks up the corresponding data in the specification dictionaries (e.g., <code>business_spec['business_overview']['name']</code>), and replaces the placeholder in the template string with the actual data value. This often involves handling nested data structures and lists.</li>
+<li><strong>Generate Final HTML:</strong> After replacing all placeholders, the result is a complete HTML string that is ready to be saved to a file.</li>
+</ol>
+<p>Let&rsquo;s look at simplified code snippets illustrating the population step within the <code>templated_html_summary</code> function (or similar logic in <code>utils/generate_html_summary.py</code>):</p>
+<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Inside utils/templates/html_summary_template.py or utils/generate_html_summary.py (Simplified)</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">os</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">logging</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlparse</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Assume template content is loaded into a string variable:</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># template_html = &#34;... content of html_template.html ...&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">templated_html_summary</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">business_spec</span><span class="p">,</span> <span class="n">brand_spec</span><span class="p">,</span> <span class="n">sitemap_data</span><span class="p">,</span> <span class="n">design_data</span><span class="p">,</span> <span class="n">content_data</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    Generate HTML summary using the template.
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># Load the template content (simplified - real code might use get_template utility)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">template_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;html_template.html&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">template_path</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># Fallback logic if template file is missing (or use a default string)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Template file not found at </span><span class="si">{</span><span class="n">template_path</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="s2">&#34;&lt;h1&gt;Error: Template not found&lt;/h1&gt;&#34;</span> <span class="c1"># Return simple error HTML</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">template_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">template_html</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># --- Extract specific data points from specs ---</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># Need to handle potential missing keys safely</span>
+</span></span><span class="line"><span class="cl">    <span class="n">business_overview</span> <span class="o">=</span> <span class="n">business_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;business_overview&#39;</span><span class="p">,</span> <span class="p">{})</span>
+</span></span><span class="line"><span class="cl">    <span class="n">brand_identity</span> <span class="o">=</span> <span class="n">brand_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;brand_identity&#39;</span><span class="p">,</span> <span class="p">{})</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="n">business_name</span> <span class="o">=</span> <span class="n">business_overview</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;Unknown Business&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">brand_personality</span> <span class="o">=</span> <span class="s2">&#34;, &#34;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">brand_identity</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;personality_traits&#39;</span><span class="p">,</span> <span class="p">[]))</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1"># Get colors from design data for CSS variables (as seen in default template)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">colors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">design_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;colors&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">    <span class="n">primary_color</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">colors</span> <span class="k">else</span> <span class="s2">&#34;#4a90e2&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">accent_color</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&#34;#34495e&#34;</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1"># ... extract other data points needed for the template ...</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># --- Populate the template using simple string replacement ---</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># This is a very basic method; real templating engines are more powerful</span>
+</span></span><span class="line"><span class="cl">    <span class="n">html_content</span> <span class="o">=</span> <span class="n">template_html</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{business_name}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">business_name</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">html_content</span> <span class="o">=</span> <span class="n">html_content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{url}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1"># Example for CSS variables based on extracted colors</span>
+</span></span><span class="line"><span class="cl">    <span class="n">html_content</span> <span class="o">=</span> <span class="n">html_content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{primary_color}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">primary_color</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">html_content</span> <span class="o">=</span> <span class="n">html_content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{accent_color}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">accent_color</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1"># Populate sections - might require more complex loops/conditions in real code</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># Example: filling a &#34;Business Information&#34; section placeholder</span>
+</span></span><span class="line"><span class="cl">    <span class="n">business_info_html</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &lt;h3&gt;Business Overview&lt;/h3&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &lt;p&gt;&lt;strong&gt;Name:&lt;/strong&gt; </span><span class="si">{</span><span class="n">business_name</span><span class="si">}</span><span class="s2">&lt;/p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &lt;p&gt;&lt;strong&gt;Type:&lt;/strong&gt; </span><span class="si">{</span><span class="n">business_overview</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;Not specified&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    ... # add more business details
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># If the template has a specific comment or marker for this section:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">html_content</span> <span class="o">=</span> <span class="n">html_content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;!-- Business Information Section --&gt;&#39;</span><span class="p">,</span> <span class="n">business_info_html</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1"># Populate brand section</span>
+</span></span><span class="line"><span class="cl">    <span class="n">brand_info_html</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &lt;h3&gt;Brand Identity&lt;/h3&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &lt;p&gt;&lt;strong&gt;Personality:&lt;/strong&gt; </span><span class="si">{</span><span class="n">brand_personality</span><span class="si">}</span><span class="s2">&lt;/p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    ... # add more brand details including colors, fonts
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">html_content</span> <span class="o">=</span> <span class="n">html_content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;!-- Brand Information Section --&gt;&#39;</span><span class="p">,</span> <span class="n">brand_info_html</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1"># ... replace other placeholders ...</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">html_content</span> <span class="c1"># Return the final HTML string</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
+  <button
+    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
+    <div class="success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
+  </button>
+</div>
+</div>
+<p>This simplified snippet shows how the Python code:</p>
+<ol>
+<li>Loads the template file content.</li>
+<li>Accesses specific pieces of data from the input dictionaries (<code>business_spec</code>, <code>brand_spec</code>, etc.).</li>
+<li>Uses string manipulation (like <code>.replace()</code> in this basic example) to substitute the placeholders in the template with the actual data values.</li>
+</ol>
+<p>The actual code in <code>utils/generate_html_summary.py</code> and potentially <code>utils/templates/html_summary_template.py</code> includes more detailed logic to handle the complex structure of the specification dictionaries and insert the data into various parts of the pre-defined HTML template, including generating lists of items (like colors or products) as HTML list items or cards. It effectively takes the structured data and maps it onto the visual structure defined by the template.</p>
+<p>After <code>templated_html_summary</code> returns the complete HTML string, the <code>generate_html_summary</code> utility (or the <code>CreateHtmlSummaryNode</code> itself) calls the <code>save_html_summary</code> function (introduced in <a href="07_html_summary_generation_.md" >Chapter 7</a>) to write this string to a <code>.html</code> file in the output directory. The path to this file is then stored in <code>shared</code> for the user to find.</p>
+<h3>Why Use Templating (vs LLM HTML Generation)?<span class="hx:absolute hx:-mt-20" id="why-use-templating-vs-llm-html-generation"></span>
+    <a href="#why-use-templating-vs-llm-html-generation" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Templating offers distinct advantages, especially as a reliable fallback:</p>
 <table>
   <thead>
       <tr>
-          <th style="text-align: left">Node Type</th>
-          <th style="text-align: left">Main Responsibility</th>
-          <th style="text-align: left">Key Data Used/Added to <code>shared</code></th>
+          <th style="text-align: left">Feature</th>
+          <th style="text-align: left">HTML Templating</th>
+          <th style="text-align: left">LLM HTML Generation (<a href="08_ollama_llm_integration_.md" >Chapter 8</a>)</th>
       </tr>
   </thead>
   <tbody>
       <tr>
-          <td style="text-align: left"><code>InitialFetchNode</code></td>
-          <td style="text-align: left">Fetches the content of the starting URL</td>
-          <td style="text-align: left">Reads: <code>url</code> <br/> Writes: <code>soup</code>, <code>initial_status</code></td>
+          <td style="text-align: left"><strong>Predictability</strong></td>
+          <td style="text-align: left">Very High: Output structure is fixed by the template.</td>
+          <td style="text-align: left">Lower: Output structure and wording can vary.</td>
       </tr>
       <tr>
-          <td style="text-align: left"><code>SitemapBatchNode</code></td>
-          <td style="text-align: left">Crawls the site to build a sitemap</td>
-          <td style="text-align: left">Reads: <code>url</code>, <code>max_pages</code>, <code>pages_to_process</code>, <code>pages_visited</code> <br/> Writes: <code>sitemap</code>, <code>pages_to_process</code>, <code>pages_visited</code>, <code>soups</code></td>
+          <td style="text-align: left"><strong>Reliability</strong></td>
+          <td style="text-align: left">High: Code logic is deterministic.</td>
+          <td style="text-align: left">Lower: Depends on LLM availability and ability to follow instructions perfectly.</td>
       </tr>
       <tr>
-          <td style="text-align: left"><code>DesignElementsBatchNode</code></td>
-          <td style="text-align: left">Extracts design details (colors, fonts, etc.)</td>
-          <td style="text-align: left">Reads: <code>sitemap</code>, <code>soups</code> <br/> Writes: <code>design</code></td>
+          <td style="text-align: left"><strong>Cost</strong></td>
+          <td style="text-align: left">Very Low: Just computation.</td>
+          <td style="text-align: left">Can be High: LLM API calls cost money or require significant local resources.</td>
       </tr>
       <tr>
-          <td style="text-align: left"><code>ContentBatchNode</code></td>
-          <td style="text-align: left">Extracts text content and business information</td>
-          <td style="text-align: left">Reads: <code>sitemap</code>, <code>soups</code> <br/> Writes: <code>content</code></td>
+          <td style="text-align: left"><strong>Speed</strong></td>
+          <td style="text-align: left">Faster: Simple string manipulation.</td>
+          <td style="text-align: left">Slower: Requires communication with LLM and its processing time.</td>
       </tr>
       <tr>
-          <td style="text-align: left"><code>CombineResultsNode</code></td>
-          <td style="text-align: left">Merges data from different extraction steps</td>
-          <td style="text-align: left">Reads: <code>design</code>, <code>content</code> <br/> (Mostly an passthrough placeholder in current code)</td>
+          <td style="text-align: left"><strong>Flexibility</strong></td>
+          <td style="text-align: left">Lower: Limited by template structure and rendering logic.</td>
+          <td style="text-align: left">Higher: LLM can potentially create unique layouts or content interpretations.</td>
       </tr>
       <tr>
-          <td style="text-align: left"><code>GenerateSpecsNode</code></td>
-          <td style="text-align: left">Creates structured specifications from collected data</td>
-          <td style="text-align: left">Reads: <code>content_data</code>, <code>design</code>, <code>sitemap</code>, <code>url</code>, <code>output_dir</code> <br/> Writes: <code>business_spec</code>, <code>brand_spec</code>, <code>specs_file</code></td>
-      </tr>
-      <tr>
-          <td style="text-align: left"><code>CreateHtmlSummaryNode</code></td>
-          <td style="text-align: left">Generates the final HTML report</td>
-          <td style="text-align: left">Reads: <code>url</code>, <code>business_spec</code>, <code>brand_spec</code>, <code>sitemap</code>, <code>design</code>, <code>content_data</code>, <code>output_dir</code> <br/> Writes: <code>html_summary</code>, <code>html_output_path</code></td>
+          <td style="text-align: left"><strong>Structure Control</strong></td>
+          <td style="text-align: left">Full control via template file.</td>
+          <td style="text-align: left">Less control, relies on prompt instructions.</td>
       </tr>
   </tbody>
 </table>
-<p>You can see these Node types listed in the <code>flow.py</code> file when the <code>create_website_cloner_flow</code> function is setting up the flow:</p>
-<div class="hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code">
-
-<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># From flow.py (simplified)</span>
-</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">nodes</span> <span class="kn">import</span> <span class="p">(</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Flow</span><span class="p">,</span> <span class="n">InitialFetchNode</span><span class="p">,</span> <span class="n">SitemapBatchNode</span><span class="p">,</span> <span class="n">DesignElementsBatchNode</span><span class="p">,</span> 
-</span></span><span class="line"><span class="cl">    <span class="n">ContentBatchNode</span><span class="p">,</span> <span class="n">CombineResultsNode</span><span class="p">,</span> <span class="n">GenerateSpecsNode</span><span class="p">,</span> <span class="n">CreateHtmlSummaryNode</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Node</span> <span class="c1"># ... other imports</span>
-</span></span><span class="line"><span class="cl"><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">create_website_cloner_flow</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">    <span class="n">flow</span> <span class="o">=</span> <span class="n">Flow</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    
-</span></span><span class="line"><span class="cl">    <span class="c1"># Create instances of specific nodes</span>
-</span></span><span class="line"><span class="cl">    <span class="n">initial_fetch</span> <span class="o">=</span> <span class="n">InitialFetchNode</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="n">sitemap_batch</span> <span class="o">=</span> <span class="n">SitemapBatchNode</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="n">design_batch</span> <span class="o">=</span> <span class="n">DesignElementsBatchNode</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="n">content_batch</span> <span class="o">=</span> <span class="n">ContentBatchNode</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="n">combine_results</span> <span class="o">=</span> <span class="n">CombineResultsNode</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="n">generate_specs</span> <span class="o">=</span> <span class="n">GenerateSpecsNode</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="n">create_html</span> <span class="o">=</span> <span class="n">CreateHtmlSummaryNode</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="c1"># ... other nodes ...</span>
-</span></span><span class="line"><span class="cl">    
-</span></span><span class="line"><span class="cl">    <span class="c1"># Add node instances to the flow with names</span>
-</span></span><span class="line"><span class="cl">    <span class="n">flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;initial_fetch&#34;</span><span class="p">,</span> <span class="n">initial_fetch</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="n">flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;sitemap_batch&#34;</span><span class="p">,</span> <span class="n">sitemap_batch</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="n">flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;design_batch&#34;</span><span class="p">,</span> <span class="n">design_batch</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="n">flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;content_batch&#34;</span><span class="p">,</span> <span class="n">content_batch</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="n">flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;combine_results&#34;</span><span class="p">,</span> <span class="n">combine_results</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="n">flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;generate_specs&#34;</span><span class="p">,</span> <span class="n">generate_specs</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="n">flow</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">&#34;create_html&#34;</span><span class="p">,</span> <span class="n">create_html</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="c1"># ... add other nodes ...</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="c1"># ... transitions are defined next ...</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">flow</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0">
-  <button
-    class="hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50"
-    title="Copy code"
-  >
-    <div class="copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4"></div>
-    <div class="success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4"></div>
-  </button>
-</div>
-</div>
-<p>This snippet shows exactly how instances of our specialized Node classes are created and registered with the <code>Flow</code> object under specific names (<code>&quot;initial_fetch&quot;</code>, <code>&quot;sitemap_batch&quot;</code>, etc.). These names are what the <a href="01_flow_orchestration_.md" >Flow</a> uses in its transition map.</p>
-<p>Some of these nodes, like <code>SitemapBatchNode</code>, <code>DesignElementsBatchNode</code>, and <code>ContentBatchNode</code>, inherit from a special type called <code>BatchNode</code>. These are designed to process a <em>list</em> of items (like many different pages) efficiently. We&rsquo;ll explore <code>BatchNode</code>s in the next chapter.</p>
+<p>Templating guarantees that you will always get a valid HTML file with the expected sections, providing a solid foundation for the report, even if the more flexible LLM generation method encounters issues.</p>
 <h3>Conclusion<span class="hx:absolute hx:-mt-20" id="conclusion"></span>
-    <a href="#conclusion" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>In this chapter, we focused on Processing Nodes, the individual workers or steps in our website analysis assembly line. We learned that each Node performs a specific task, communicates by reading from and writing to a <code>shared</code> data dictionary, and signals its outcome to the <a href="01_orchestration_.md" >Flow</a> by returning an action string from its <code>run</code> method. We saw how basic Nodes are structured and how they are added to a Flow.</p>
-<p>Understanding Nodes is crucial because they contain the actual logic for <em>what</em> the Website Analyzer does. The Flow defines the <em>order</em> and <em>paths</em>, but the Nodes define the <em>actions</em>.</p>
-<p>In the next chapter, we&rsquo;ll look at a special type of Node, the <a href="03_batch_processing_.md" >Batch Processing</a> Node, which is essential for handling tasks that need to be performed on multiple items, like analyzing many web pages.</p>
+    <a href="#conclusion" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>HTML Templating is a powerful and reliable method used in our Website Analyzer project to generate the final HTML summary report. By using a pre-defined HTML template with placeholders, the project&rsquo;s rendering logic can consistently take the structured specification data and populate the template to produce a user-friendly web page. This approach, often used as a fallback or alternative to LLM-based HTML generation, ensures a predictable structure and appearance for the analysis reports, making the results easy for users to consume. This concludes our tutorial on the core concepts of the Website Analyzer project, from Flow Orchestration to generating the final HTML summary.</p>
 <hr>
-<p><sub><sup>Generated by <a href="https://github.com/The-Pocket/Tutorial-Codebase-Knowledge" target="_blank" rel="noopener">AI Codebase Knowledge Builder</a>.</sup></sub> <sub><sup><strong>References</strong>: <a href="https://github.com/Theblackcat98/Website-Analyzer/blob/3c2ef570c745520cd623f7b5a5f498ba45f1f35c/flow.py" target="_blank" rel="noopener">[1]</a>, <a href="https://github.com/Theblackcat98/Website-Analyzer/blob/3c2ef570c745520cd623f7b5a5f498ba45f1f35c/main.py" target="_blank" rel="noopener">[2]</a>, <a href="https://github.com/Theblackcat98/Website-Analyzer/blob/3c2ef570c745520cd623f7b5a5f498ba45f1f35c/nodes.py" target="_blank" rel="noopener">[3]</a>, <a href="https://github.com/Theblackcat98/Website-Analyzer/blob/3c2ef570c745520cd623f7b5a5f498ba45f1f35c/tests/test_flow.py" target="_blank" rel="noopener">[4]</a></sup></sub></p>
+<p><sub><sup>Generated by <a href="https://github.com/The-Pocket/Tutorial-Codebase-Knowledge" target="_blank" rel="noopener">AI Codebase Knowledge Builder</a>.</sup></sub> <sub><sup><strong>References</strong>: <a href="https://github.com/Theblackcat98/Website-Analyzer/blob/3c2ef570c745520cd623f7b5a5f498ba45f1f35c/generate_llm_summary.py" target="_blank" rel="noopener">[1]</a>, <a href="https://github.com/Theblackcat98/Website-Analyzer/blob/3c2ef570c745520cd623f7b5a5f498ba45f1f35c/utils/generate_html_summary.py" target="_blank" rel="noopener">[2]</a>, <a href="https://github.com/Theblackcat98/Website-Analyzer/blob/3c2ef570c745520cd623f7b5a5f498ba45f1f35c/utils/templates/html_template.html" target="_blank" rel="noopener">[3]</a>, <a href="https://github.com/Theblackcat98/Website-Analyzer/blob/3c2ef570c745520cd623f7b5a5f498ba45f1f35c/utils/templates/template_generator.py" target="_blank" rel="noopener">[4]</a></sup></sub></p>
 
         </div>
         
     <div class="hx:mt-12 hx:mb-8 hx:block hx:text-xs hx:text-gray-500 hx:ltr:text-right hx:rtl:text-left hx:dark:text-gray-400">Last updated on <time datetime="2025-05-21T17:06:27.000Z">May 21, 5969</time></div>
         <div class="hx:mb-8 hx:flex hx:items-center hx:border-t hx:pt-8 hx:border-gray-200 hx:dark:border-neutral-800 hx:contrast-more:border-neutral-400 hx:dark:contrast-more:border-neutral-400 hx:print:hidden"><a
-        href="/TheBlackCat/docs/website-analyzer/09-html-templating/"
-        title="Ollama LLM Integration"
+        href="/TheBlackCat/docs/website-analyzer/01-flow-orchestration/"
+        title="Flow Orchestration"
         class="hx:flex hx:max-w-[50%] hx:items-center hx:gap-1 hx:py-4 hx:text-base hx:font-medium hx:text-gray-600 hx:transition-colors [word-break:break-word] hx:hover:text-primary-600 hx:dark:text-gray-300 hx:md:text-lg hx:ltr:pr-4 hx:rtl:pl-4"
-      ><svg class="hx:inline hx:h-5 hx:shrink-0 hx:ltr:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>Ollama LLM Integration</a><a
-        href="/TheBlackCat/docs/website-analyzer/06-specification-generation/"
-        title="Specification Generation"
+      ><svg class="hx:inline hx:h-5 hx:shrink-0 hx:ltr:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>Flow Orchestration</a><a
+        href="/TheBlackCat/docs/website-analyzer/02-processing-nodes/"
+        title="Processing Nodes"
         class="hx:flex hx:max-w-[50%] hx:items-center hx:gap-1 hx:py-4 hx:text-base hx:font-medium hx:text-gray-600 hx:transition-colors [word-break:break-word] hx:hover:text-primary-600 hx:dark:text-gray-300 hx:md:text-lg hx:ltr:ml-auto hx:ltr:pl-4 hx:ltr:text-right hx:rtl:mr-auto hx:rtl:pr-4 hx:rtl:text-left"
-      >Specification Generation<svg class="hx:inline hx:h-5 hx:shrink-0 hx:rtl:-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></a></div>
+      >Processing Nodes<svg class="hx:inline hx:h-5 hx:shrink-0 hx:rtl:-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></a></div>
         
       </main>
     </article>

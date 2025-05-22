@@ -1,13 +1,13 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Hextra – Guide</title>
-    <link>http://localhost:1313/TheBlackCat/tags/guide/</link>
+    <link>http://localhost:36743/TheBlackCat/tags/guide/</link>
     <description>Recent content in Guide on Hextra</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 20 May 2025 19:43:29 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 21 May 2025 17:06:27 +0000</lastBuildDate>
     
-	  <atom:link href="http://localhost:1313/TheBlackCat/tags/guide/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="http://localhost:36743/TheBlackCat/tags/guide/index.xml" rel="self" type="application/rss+xml" />
     
     
       
@@ -16,11 +16,25 @@
     
     
     <item>
+      <title>IG Post Maker</title>
+      <link>http://localhost:36743/TheBlackCat/blog/ig-post-maker/</link>
+      <pubDate>Wed, 21 May 2025 17:06:27 +0000</pubDate>
+      
+      <guid>http://localhost:36743/TheBlackCat/blog/ig-post-maker/</guid>
+      <description>
+        
+        
+        &lt;p&gt;IG Post Maker is a tool that allows you to create IG posts easily.&lt;/p&gt;
+
+      </description>
+    </item>
+    
+    <item>
       <title>Markdown Syntax Guide</title>
-      <link>http://localhost:1313/TheBlackCat/blog/my-first-post/</link>
+      <link>http://localhost:36743/TheBlackCat/blog/my-first-post/</link>
       <pubDate>Tue, 20 May 2025 19:43:29 +0000</pubDate>
       
-      <guid>http://localhost:1313/TheBlackCat/blog/my-first-post/</guid>
+      <guid>http://localhost:36743/TheBlackCat/blog/my-first-post/</guid>
       <description>
         
         

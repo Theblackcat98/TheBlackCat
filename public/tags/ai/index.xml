@@ -1,13 +1,13 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Hextra – AI</title>
-    <link>http://localhost:1313/TheBlackCat/tags/ai/</link>
+    <link>http://localhost:36743/TheBlackCat/tags/ai/</link>
     <description>Recent content in AI on Hextra</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Wed, 21 May 2025 17:06:27 +0000</lastBuildDate>
     
-	  <atom:link href="http://localhost:1313/TheBlackCat/tags/ai/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="http://localhost:36743/TheBlackCat/tags/ai/index.xml" rel="self" type="application/rss+xml" />
     
     
       
@@ -17,10 +17,10 @@
     
     <item>
       <title>IG Post Maker</title>
-      <link>http://localhost:1313/TheBlackCat/blog/ig-post-maker/</link>
+      <link>http://localhost:36743/TheBlackCat/blog/ig-post-maker/</link>
       <pubDate>Wed, 21 May 2025 17:06:27 +0000</pubDate>
       
-      <guid>http://localhost:1313/TheBlackCat/blog/ig-post-maker/</guid>
+      <guid>http://localhost:36743/TheBlackCat/blog/ig-post-maker/</guid>
       <description>
         
         

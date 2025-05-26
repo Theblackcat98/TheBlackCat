@@ -1,0 +1,86 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hextra – Index</title>
+    <link>http://localhost:1313/TheBlackCat/tags/index/</link>
+    <description>Recent content in Index on Hextra</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    
+	  <atom:link href="http://localhost:1313/TheBlackCat/tags/index/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/TheBlackCat/docs/deep-research-at-home/deep-research-at-home/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/TheBlackCat/docs/deep-research-at-home/deep-research-at-home/</guid>
+      <description>
+        
+        
+        &lt;h1&gt;Tutorial: deep-research-at-home&lt;/h1&gt;&lt;p&gt;This project, &amp;ldquo;Deep Research At Home&amp;rdquo;, is an advanced AI system designed
+to perform comprehensive &lt;strong&gt;research&lt;/strong&gt; on a given query. It acts like an
+automated academic, starting with initial searches, refining its focus
+through &lt;em&gt;iterative cycles&lt;/em&gt; based on discovered information and user feedback,
+and finally generating a detailed &lt;strong&gt;report&lt;/strong&gt; complete with verified &lt;em&gt;citations&lt;/em&gt;.
+It uses sophisticated techniques like &lt;strong&gt;semantic embeddings&lt;/strong&gt; and dimensional
+analysis to understand the research landscape and navigate effectively.&lt;/p&gt;
+&lt;h2&gt;Visual Overview&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;visual-overview&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#visual-overview&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  flowchart TD
+    A0[&amp;#34;The Research Pipe
+&amp;#34;]
+    A1[&amp;#34;Configuration (Valves)
+&amp;#34;]
+    A2[&amp;#34;Research State Management
+&amp;#34;]
+    A3[&amp;#34;Web Search &amp;amp; Content Fetching
+&amp;#34;]
+    A4[&amp;#34;Content Preprocessing
+&amp;#34;]
+    A5[&amp;#34;Semantic Embeddings
+&amp;#34;]
+    A6[&amp;#34;Semantic Guidance (Dimensions, PDV, Trajectory)
+&amp;#34;]
+    A7[&amp;#34;Iterative Research Cycles
+&amp;#34;]
+    A8[&amp;#34;Synthesis &amp;amp; Report Generation
+&amp;#34;]
+    A9[&amp;#34;Citation Management &amp;amp; Verification
+&amp;#34;]
+    A0 -- &amp;#34;Reads Configuration&amp;#34; --&amp;gt; A1
+    A0 -- &amp;#34;Manages State&amp;#34; --&amp;gt; A2
+    A0 -- &amp;#34;Orchestrates Cycles&amp;#34; --&amp;gt; A7
+    A0 -- &amp;#34;Orchestrates Synthesis&amp;#34; --&amp;gt; A8
+    A7 -- &amp;#34;Executes Searches&amp;#34; --&amp;gt; A3
+    A3 -- &amp;#34;Provides Raw Content&amp;#34; --&amp;gt; A4
+    A4 -- &amp;#34;Prepares For Embedding&amp;#34; --&amp;gt; A5
+    A5 -- &amp;#34;Generates Vectors For&amp;#34; --&amp;gt; A6
+    A6 -- &amp;#34;Directs Research In&amp;#34; --&amp;gt; A7
+    A7 -- &amp;#34;Updates State With&amp;#34; --&amp;gt; A2
+    A8 -- &amp;#34;Uses For Citation&amp;#34; --&amp;gt; A9
+    A9 -- &amp;#34;Informs Report Content&amp;#34; --&amp;gt; A8
+&lt;/pre&gt;&lt;h2&gt;Chapters&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;chapters&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#chapters&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;01_the_research_pipe.md&#34; &gt;The Research Pipe&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;02_configuration__valves.md&#34; &gt;Configuration (Valves)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;03_research_state_management.md&#34; &gt;Research State Management&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;04_iterative_research_cycles.md&#34; &gt;Iterative Research Cycles&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;05_web_search___content_fetching.md&#34; &gt;Web Search &amp;amp; Content Fetching&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;06_content_preprocessing.md&#34; &gt;Content Preprocessing&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;07_semantic_embeddings.md&#34; &gt;Semantic Embeddings&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;08_semantic_guidance__dimensions__pdv__trajectory.md&#34; &gt;Semantic Guidance (Dimensions, PDV, Trajectory)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;09_synthesis___report_generation.md&#34; &gt;Synthesis &amp;amp; Report Generation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;10_citation_management___verification.md&#34; &gt;Citation Management &amp;amp; Verification&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>

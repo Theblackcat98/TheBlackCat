@@ -1,3 +1,18 @@
+---
+title: 'Chapter 1'
+date: 
+draft: false
+authors:
+  - name: theblackcat98
+    link: https://github.com/theblackcat98
+    image: https://github.com/theblackcat98.png
+tags:
+  - Project
+  - Guide
+  - AI
+excludeSearch: true
+---
+
 # Chapter 1: The Architecture of Motivation (Enhanced with Conflicts and Turning Points)
 
 ## Historical Perspectives on Human Motivation

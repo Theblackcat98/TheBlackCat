@@ -1,0 +1,155 @@
+name: Fetch External Documentation
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight UTC
+  push:
+    branches:
+      - main # Or your default branch
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: 'Force run (currently no special behavior)'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: write # To checkout private repos (if PAT has repo scope) and push changes back to this repo
+
+jobs:
+  fetch_and_update_docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Website Repository
+        uses: actions/checkout@v4
+        with:
+          path: website # Checkout main repo into a 'website' subdirectory
+          # Using a PAT is recommended for broad access and reliable push.
+          # Ensure this PAT has 'repo' scope if fetching private repos or for robust pushing.
+          token: ${{ secrets.GH_PAT_FOR_DOCS_FETCH }}
+
+      - name: Setup Git User
+        run: |
+          git config --global user.name "GitHub Actions Doc Fetcher"
+          git config --global user.email "actions-doc-fetcher@users.noreply.github.com"
+        working-directory: ./website
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Clear existing external docs and create base docs directory
+        working-directory: ./website/content
+        run: |
+          echo "Clearing and preparing docs directory..."
+          # Remove existing subdirectories that might be from the config to avoid stale content
+          # This is a basic approach; more sophisticated would be to read config and selectively delete
+          # For now, let's assume 'docs' might contain other manually added content, so we are careful
+          # A safer approach is to have a dedicated subdir like 'content/external-docs'
+          # and wipe that, then Hugo config combines them.
+          # For this draft, we'll target specific subfolders based on config later.
+          mkdir -p docs
+
+      - name: Loop through external documentation sources
+        env:
+          GH_PAT: ${{ secrets.GH_PAT_FOR_DOCS_FETCH }}
+        run: |
+          CONFIG_FILE="${{ github.workspace }}/website/.github/external-docs-config.json"
+          if [ ! -f "$CONFIG_FILE" ]; then
+            echo "Configuration file not found: $CONFIG_FILE"
+            exit 1
+          fi
+
+          echo "Processing external documentation sources from $CONFIG_FILE"
+          jq -c '.[]' $CONFIG_FILE | while read -r item; do
+            REPO_NAME=$(echo "$item" | jq -r '.name')
+            REPO_URL=$(echo "$item" | jq -r '.repo')
+            SOURCE_PATH=$(echo "$item" | jq -r '.source_path')
+            TARGET_SUBFOLDER=$(echo "$item" | jq -r '.target_subfolder') # e.g., "project-a"
+
+            echo "Fetching docs for $REPO_NAME from $REPO_URL (path: $SOURCE_PATH)"
+
+            TEMP_CHECKOUT_PATH="${{ github.workspace }}/external_tmp/$TARGET_SUBFOLDER"
+            FINAL_DOCS_PATH="${{ github.workspace }}/website/content/docs/$TARGET_SUBFOLDER"
+
+            echo "Cleaning up previous target directory: $FINAL_DOCS_PATH"
+            rm -rf "$FINAL_DOCS_PATH"
+            mkdir -p "$FINAL_DOCS_PATH"
+
+            echo "Cleaning up temporary checkout path: $TEMP_CHECKOUT_PATH"
+            rm -rf "$TEMP_CHECKOUT_PATH" # Clean before checkout
+            mkdir -p "$(dirname "$TEMP_CHECKOUT_PATH")"
+
+
+            # Checkout the specific documentation folder using sparse checkout
+            git clone --depth 1 --filter=blob:none --sparse https://x-access-token:$GH_PAT@github.com/$REPO_URL.git "$TEMP_CHECKOUT_PATH"
+            if [ $? -ne 0 ]; then
+                echo "Failed to clone $REPO_URL"
+                # Decide if to continue with other repos or fail the job
+                # For now, let's try to continue
+                continue
+            fi
+            (
+              cd "$TEMP_CHECKOUT_PATH"
+              git sparse-checkout init --cone
+              git sparse-checkout set "$SOURCE_PATH"
+              # git checkout # Ensure we are on the default branch, or specify one if needed
+            )
+            if [ $? -ne 0 ]; then
+                echo "Failed to sparse-checkout $SOURCE_PATH from $REPO_URL"
+                continue
+            fi
+
+            # Verify that the source path exists after sparse checkout
+            if [ ! -d "$TEMP_CHECKOUT_PATH/$SOURCE_PATH" ]; then
+              echo "Source path '$SOURCE_PATH' does not exist in the checkout for $REPO_NAME."
+              ls -la "$TEMP_CHECKOUT_PATH" # List contents for debugging
+              continue # Skip to the next item
+            fi
+
+            echo "Copying from $TEMP_CHECKOUT_PATH/$SOURCE_PATH to $FINAL_DOCS_PATH"
+            # Using rsync for better copying (preserves attributes, can delete extraneous files if needed)
+            # Ensure rsync is available or install it
+            sudo apt-get install -y rsync
+            rsync -av --delete "$TEMP_CHECKOUT_PATH/$SOURCE_PATH/" "$FINAL_DOCS_PATH/"
+
+            # Create a default _index.md if one doesn't exist in the copied docs
+            # This makes the folder a Hugo section.
+            if [ ! -f "$FINAL_DOCS_PATH/_index.md" ] && [ ! -f "$FINAL_DOCS_PATH/index.md" ]; then
+              echo "Creating default _index.md for $TARGET_SUBFOLDER as it's missing in the source."
+              cat <<EOL > "$FINAL_DOCS_PATH/_index.md"
+          ---
+          title: "$REPO_NAME"
+          type: "docs" # Important for Hextra to recognize this as a documentation section
+          weight: 10 # Optional: for ordering in the sidebar
+          ---
+          This section contains documentation for $REPO_NAME, automatically fetched from the $REPO_URL repository.
+          EOL
+            fi
+
+            echo "Successfully processed $REPO_NAME"
+          done
+          echo "Finished processing all sources."
+
+      - name: Commit and Push Documentation Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Chore: Update external documentation from configured sources"
+          repository: website # Path to the checked out website repo relative to GITHUB_WORKSPACE
+          # commit_options: '--no-verify' # Optional
+          file_pattern: 'content/docs/**/*.*' # Pattern of files to look for changes
+          # push_options: '--force' # Use with caution
+          # skip_dirty_check: false # Default
+          # skip_fetch: true # Default
+          # skip_checkout: true # Default
+          # disable_globbing: false # Default
+          # create_branch: false # Default
+          commit_user_name: "GitHub Actions Doc Fetcher" # Ensure this matches git config
+          commit_user_email: "actions-doc-fetcher@users.noreply.github.com" # Ensure this matches git config
+          commit_author: "GitHub Actions Doc Fetcher <actions-doc-fetcher@users.noreply.github.com>" # Ensure this matches git config
+
+      - name: Clean up temporary external checkouts
+        if: always() # Run even if previous steps fail
+        run: |
+          echo "Cleaning up temporary directory ${{ github.workspace }}/external_tmp"
+          rm -rf "${{ github.workspace }}/external_tmp"
+          echo "Cleanup complete."

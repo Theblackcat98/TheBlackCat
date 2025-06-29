@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Sample Project Alpha",
+    "repo": "your-username-or-org/sample-project-alpha-docs",
+    "source_path": "docs",
+    "target_subfolder": "sample-alpha"
+  },
+  {
+    "name": "Sample Module Beta",
+    "repo": "your-username-or-org/sample-module-beta-docs",
+    "source_path": "documentation",
+    "target_subfolder": "sample-beta"
+  }
+]

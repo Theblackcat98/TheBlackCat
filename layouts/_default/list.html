@@ -4,11 +4,14 @@
   <h1>{{ .Title }}</h1>
   {{ with .Content }}<div class="prose">{{ . }}</div>{{ end }}
   <div class="cards">
-    {{ range .Pages.ByDate.Reverse }}
+    {{ range .Pages.ByTitle }}
     <a class="card" href="{{ .RelPermalink }}">
       <span class="card-type">{{ .Params.type | default "page" }}</span>
       <h2>{{ .Title }}</h2>
-      {{ with .Summary }}<p>{{ . | plainify | truncate 180 }}</p>{{ end }}
+      {{ with .Params.description }}<p>{{ . }}</p>{{ else }}{{ with .Summary }}<p>{{ . | plainify | truncate 180 }}</p>{{ end }}{{ end }}
+      {{ with .Params.language }}<span class="card-meta">{{ . }}</span>{{ end }}
+      {{ with .Params.stars }}<span class="card-meta">★ {{ . }}</span>{{ end }}
+      {{ with .Params.github }}<span class="card-meta">GitHub ↗</span>{{ end }}
     </a>
     {{ end }}
   </div>

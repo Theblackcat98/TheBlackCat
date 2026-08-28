@@ -1,0 +1,16 @@
+{{ define "main" }}
+<section>
+  <p class="eyebrow">{{ .Section }}</p>
+  <h1>{{ .Title }}</h1>
+  {{ with .Content }}<div class="prose">{{ . }}</div>{{ end }}
+  <div class="cards">
+    {{ range .Pages.ByDate.Reverse }}
+    <a class="card" href="{{ .RelPermalink }}">
+      <span class="card-type">{{ .Params.type | default "page" }}</span>
+      <h2>{{ .Title }}</h2>
+      {{ with .Summary }}<p>{{ . | plainify | truncate 180 }}</p>{{ end }}
+    </a>
+    {{ end }}
+  </div>
+</section>
+{{ end }}

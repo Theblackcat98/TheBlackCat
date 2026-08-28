@@ -9,7 +9,7 @@ tags:
   - ai
   - tools
   - web
-status: inbox
+status: filed
 created: 2026-08-28
 updated: 2026-08-28
 ---

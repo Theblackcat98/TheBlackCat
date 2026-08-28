@@ -8,7 +8,7 @@ tags:
   - knowledge-management
   - automation
   - tools
-status: inbox
+status: filed
 created: 2026-08-28
 updated: 2026-08-28
 ---
@@ -28,6 +28,6 @@ A Hermes Agent skill (`blackcat-bookmark`) that saves URLs into this repository.
 5. Create `content/inbox/<slug>.md` following the bookmark archetype front matter
 6. Commit only that file, push, verify on origin via `gh api`
 
-Design constraints: the repo is public so only public info is written; new items always start in `content/inbox/` with `status: inbox` per AGENTS.md; never modifies unrelated files. Weekly triage then moves inbox items into `content/library/<domain>/` (Sundays 23:00, automated).
+Design constraints: the repo is public so only public info is written; new items always start in `content/inbox/` with `status: filed` per AGENTS.md; never modifies unrelated files. Weekly triage then moves inbox items into `content/library/<domain>/` (Sundays 23:00, automated).
 
 The skill lives in the agent's skill store; this entry documents its behavior as part of the library's own operating manual.

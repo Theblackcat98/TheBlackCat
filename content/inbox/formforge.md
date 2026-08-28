@@ -20,5 +20,5 @@ Cheap/free alternative to **Typeform**. No subscription needed.
 
 ## Notes
 
-- Captured from a "don't pay for X, use Y" list — no URL saved yet; add and verify the canonical site before relying on this.
-- Status stays `inbox` until enriched with a source and real description.
+- Captured from a viral "don't pay for X, use Y" list (circulating on FB/X/IG; matches a Medium "Code Coup" article, Jul 2026). Searched for the product on 2026-08-28 — findings below.
+- UNVERIFIED: only matches are FormForge (formforge.com, bespoke metal sculptures, India) and an MIT Media Lab sketch project. No forms/surveys SaaS under this name.

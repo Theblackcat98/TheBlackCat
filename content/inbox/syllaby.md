@@ -2,7 +2,7 @@
 title: "Syllaby"
 type: bookmark
 description: "Viral scripting and video research tool."
-source: ""
+source: "https://syllaby.io"
 topics:
   - ai
 tags:
@@ -20,5 +20,6 @@ Viral scripting & video research platform. No subscription needed.
 
 ## Notes
 
-- Captured from a "don't pay for X, use Y" list — no URL saved yet; add and verify the canonical site before relying on this.
-- Status stays `inbox` until enriched with a source and real description.
+- Captured from a viral "don't pay for X, use Y" list (circulating on FB/X/IG; matches a Medium "Code Coup" article, Jul 2026). Searched for the product on 2026-08-28 — findings below.
+- VERIFIED: syllaby.io is real and matches — AI faceless-video & scripting platform (script generation, AI avatars, video research).
+- Established product with G2 reviews/competitor listings.

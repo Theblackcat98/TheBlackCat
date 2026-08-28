@@ -20,5 +20,6 @@ Cheap/free alternative to **Zapier**. No subscription needed.
 
 ## Notes
 
-- Captured from a "don't pay for X, use Y" list — no URL saved yet; add and verify the canonical site before relying on this.
-- Status stays `inbox` until enriched with a source and real description.
+- Captured from a viral "don't pay for X, use Y" list (circulating on FB/X/IG; matches a Medium "Code Coup" article, Jul 2026). Searched for the product on 2026-08-28 — findings below.
+- PARTIAL: hookflow.in = free webhook testing tool; github.com/rumizenzz/hookflow = lightweight webhook/API pipeline builder that explicitly pitches itself as a Zapier alternative ("Zapier is powerful but overkill").
+- Neither is a confirmed full Zapier-style automation platform; possible-but-unconfirmed match is the GitHub project.

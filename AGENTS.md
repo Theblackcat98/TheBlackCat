@@ -30,7 +30,7 @@ The BlackCat is a Git-native personal library. Markdown is the source of truth; 
 ## Placement rules
 
 - Put a resource in the broadest appropriate `library/<domain>/...` location.
-- Put an individual AI skill in `library/ai/skills/` when the skill itself is the subject.
+- Put an individual AI skill in `library/ai/skills/<kebab-slug>/index.md` (one skill per folder, Hugo page bundle) when the skill itself is the subject. Give each skill a one-line `description:` in front matter — the site's cards and search use it.
 - Use `collections/` for curated subsets such as `Favorite AI Skills` rather than creating a new taxonomy branch for the adjective "favorite".
 - A collection should point to canonical library items; do not duplicate their content inside the collection.
 

@@ -1,7 +1,7 @@
 ---
 title: "Analyze Repo"
 description: "Deeply analyze a public GitHub repository by cloning it and applying a structured reverse-engineering framework. Trigger on phrases such as deeply analyze this GitHub repo, analyze this GitHub repo, deep analysis of repo, or when a GitHub URL is provided with an analysis request."
-type: bookmark
+type: skill
 source: "https://github.com/mattpocock/skills/tree/main/skills/engineering/analyze-repo"
 topics:
   - ai

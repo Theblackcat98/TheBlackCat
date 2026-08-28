@@ -1,0 +1,15 @@
+{{ define "main" }}
+<article>
+  <p class="eyebrow">{{ with .Params.type }}{{ . }}{{ end }}</p>
+  <h1>{{ .Title }}</h1>
+  {{ with .Params.url }}<p><a class="source" href="{{ . }}">Open source ↗</a></p>{{ end }}
+  {{ with .Params.topics }}<div class="tags">{{ range . }}<span>{{ . }}</span>{{ end }}</div>{{ end }}
+  <div class="prose">{{ .Content }}</div>
+  {{ with .Params.related }}
+  <aside class="related">
+    <h2>Related</h2>
+    <ul>{{ range . }}<li><a href="{{ . | relURL }}">{{ . }}</a></li>{{ end }}</ul>
+  </aside>
+  {{ end }}
+</article>
+{{ end }}

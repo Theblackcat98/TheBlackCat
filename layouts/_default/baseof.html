@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="{{ site.Language.Lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ if not .IsHome }}{{ .Title }} · {{ end }}{{ site.Title }}</title>
+  <meta name="description" content="{{ .Description | default site.Params.description }}">
+  <link rel="stylesheet" href="{{ "css/blackcat.css" | relURL }}">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{{ "/" | relURL }}">The BlackCat</a>
+    <nav>
+      {{ range site.Menus.main }}<a href="{{ .URL | relURL }}">{{ .Name }}</a>{{ end }}
+    </nav>
+  </header>
+  <main class="container">
+    {{ block "main" . }}{{ end }}
+  </main>
+  <footer class="site-footer">The BlackCat · {{ now.Year }}</footer>
+</body>
+</html>

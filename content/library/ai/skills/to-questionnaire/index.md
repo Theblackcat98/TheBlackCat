@@ -1,7 +1,7 @@
 ---
 title: "To Questionnaire"
 description: "Turn a decision you can't fully answer into a questionnaire for someone else to fill in."
-type: bookmark
+type: skill
 source: "https://github.com/mattpocock/skills/tree/main/skills/engineering/to-questionnaire"
 topics:
   - ai

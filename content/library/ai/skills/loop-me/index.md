@@ -1,7 +1,7 @@
 ---
 title: "Loop Me"
 description: "Grill me about specs for the workflows I want to build, within this workspace."
-type: bookmark
+type: skill
 source: "https://github.com/mattpocock/skills/tree/main/skills/in-progress/loop-me"
 topics:
   - ai

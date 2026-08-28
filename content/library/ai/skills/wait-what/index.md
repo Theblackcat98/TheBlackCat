@@ -1,7 +1,7 @@
 ---
 title: "Wait What"
 description: "Stop. That last message did not land — re-pitch it."
-type: bookmark
+type: skill
 source: "https://github.com/mattpocock/skills/tree/main/skills/productivity/wait-what"
 topics:
   - ai

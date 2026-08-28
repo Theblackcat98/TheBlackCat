@@ -1,7 +1,7 @@
 ---
 title: "Ask Matt"
 description: "Ask which skill or flow fits your situation. A router over the skills in this repo."
-type: bookmark
+type: skill
 source: "https://github.com/mattpocock/skills/tree/main/skills/engineering/ask-matt"
 topics:
   - ai

@@ -1,7 +1,7 @@
 ---
 title: "Triage"
 description: "Move issues and external PRs through a state machine of triage roles — categorise, verify, grill if needed, and write agent-ready briefs."
-type: bookmark
+type: skill
 source: "https://github.com/mattpocock/skills/tree/main/skills/engineering/triage"
 topics:
   - ai

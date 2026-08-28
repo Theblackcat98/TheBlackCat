@@ -1,6 +1,7 @@
 ---
 title: "{{ replace .Name "-" " " | title }}"
 type: collection
+description: ""
 topics: []
 tags: []
 status: active
@@ -8,8 +9,6 @@ created: {{ .Date }}
 updated: {{ .Date }}
 ---
 
-A curated view across the library.
+## Collection
 
-## Items
-
-_No items added yet._
+Add links to canonical BlackCat items here. Do not duplicate their content.

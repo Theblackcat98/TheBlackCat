@@ -1,0 +1,30 @@
+{{ define "main" }}
+<section class="hero">
+  <p class="eyebrow">Personal Library</p>
+  <h1>The BlackCat</h1>
+  <p class="lede">A Git-native archive of bookmarks, research, notes, projects, and things worth remembering.</p>
+</section>
+
+<section>
+  <h2>Explore</h2>
+  <div class="cards">
+    {{ range slice "library" "collections" "projects" "notes" "inbox" }}
+      {{ with site.GetPage (printf "/%s" .) }}
+      <a class="card" href="{{ .RelPermalink }}">
+        <h2>{{ .Title }}</h2>
+        <p>{{ .Content | plainify | truncate 160 }}</p>
+      </a>
+      {{ end }}
+    {{ end }}
+  </div>
+</section>
+
+<section>
+  <h2>Recently added</h2>
+  <div class="cards">
+    {{ range first 8 (where site.RegularPages "Section" "library") }}
+      <a class="card" href="{{ .RelPermalink }}"><span class="card-type">{{ .Params.type | default "page" }}</span><h2>{{ .Title }}</h2></a>
+    {{ end }}
+  </div>
+</section>
+{{ end }}

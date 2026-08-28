@@ -1,7 +1,7 @@
 ---
 title: "BlackCat Bookmark Skill"
 type: bookmark
-url: "https://github.com/Theblackcat98/TheBlackCat"
+source: "https://github.com/Theblackcat98/TheBlackCat"
 topics:
   - ai
 tags:

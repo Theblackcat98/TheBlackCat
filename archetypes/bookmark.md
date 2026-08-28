@@ -1,7 +1,7 @@
 ---
 title: "{{ replace .Name "-" " " | title }}"
 type: bookmark
-url: ""
+source: ""
 topics: []
 tags: []
 status: inbox

@@ -21,7 +21,7 @@ Required:
 
 Recommended:
 
-- `url`
+- `source` (the external URL for bookmarks — Hugo reserves `url` for permalinks, so never use `url` here)
 - `topics`
 - `tags`
 - `status`

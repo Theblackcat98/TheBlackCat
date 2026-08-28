@@ -39,7 +39,7 @@ The BlackCat is a Git-native personal library. Markdown is the source of truth; 
 ```yaml
 title: "..."
 type: bookmark
-url: "https://..."
+source: "https://..."   # NOT `url` — reserved Hugo key, breaks the build
 topics:
   - ai
 tags:

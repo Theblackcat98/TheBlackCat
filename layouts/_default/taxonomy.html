@@ -1,0 +1,21 @@
+{{ define "main" }}
+<section>
+  <div class="article-header">
+    <div class="breadcrumbs"><a href="{{ site.Home.RelPermalink }}">Home</a><span>/</span><span>{{ .Title }}</span></div>
+    <p class="eyebrow">{{ .Data.Singular }}</p>
+    <h1>{{ .Title }}</h1>
+    <p class="prose">A filtered view of the BlackCat archive by {{ .Data.Singular }}.</p>
+  </div>
+
+  <div class="cards">
+    {{ range .Pages.ByDate.Reverse }}
+    <a class="card type-{{ .Params.type | default "page" }}" href="{{ .RelPermalink }}">
+      <div class="card-meta"><span class="card-type">{{ .Params.type | default "page" }}</span>{{ with .Params.updated }}<time>{{ . }}</time>{{ end }}</div>
+      <h2>{{ .Title }}</h2>
+      {{ with .Params.description }}<p>{{ . }}</p>{{ else }}{{ with .Summary }}<p>{{ . | plainify | truncate 180 }}</p>{{ end }}{{ end }}
+      {{ with .Params.tags }}<div class="tags">{{ range first 4 . }}<span>{{ . }}</span>{{ end }}</div>{{ end }}
+    </a>
+    {{ end }}
+  </div>
+</section>
+{{ end }}

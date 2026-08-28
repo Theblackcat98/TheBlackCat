@@ -1,6 +1,7 @@
 ---
 title: "{{ replace .Name "-" " " | title }}"
 type: bookmark
+description: ""
 source: ""
 topics: []
 tags: []

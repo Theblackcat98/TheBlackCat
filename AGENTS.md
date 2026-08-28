@@ -27,6 +27,13 @@ The BlackCat is a Git-native personal library. Markdown is the source of truth; 
 - `collection`: curated cross-library view.
 - `project`: project documentation or project reference.
 
+## Placement rules
+
+- Put a resource in the broadest appropriate `library/<domain>/...` location.
+- Put an individual AI skill in `library/ai/skills/` when the skill itself is the subject.
+- Use `collections/` for curated subsets such as `Favorite AI Skills` rather than creating a new taxonomy branch for the adjective "favorite".
+- A collection should point to canonical library items; do not duplicate their content inside the collection.
+
 ## Preferred front matter
 
 ```yaml

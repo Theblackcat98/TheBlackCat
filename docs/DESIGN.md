@@ -111,7 +111,9 @@ Remaining gaps (in recommended order):
 6. Mobile refinement pass (nav collapse, priority order above)
 7. Component decomposition (layouts/components/*) + CSS split into
    tokens/typography/layout/components/responsive files
-8. Accessibility & keyboard navigation polish
+8. Library sidebar shelves list only direct children of library/ — recurse
+   one level so nested sections (e.g. ai/skills) get their own shelf button
+9. Accessibility & keyboard navigation polish
 
 ## Implementation order (original roadmap)
 

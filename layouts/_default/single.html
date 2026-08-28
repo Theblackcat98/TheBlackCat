@@ -1,15 +1,95 @@
 {{ define "main" }}
-<article>
-  <p class="eyebrow">{{ with .Params.type }}{{ . }}{{ end }}</p>
-  <h1>{{ .Title }}</h1>
-  {{ with .Params.url }}<p><a class="source" href="{{ . }}">Open source ↗</a></p>{{ end }}
-  {{ with .Params.topics }}<div class="tags">{{ range . }}<span>{{ . }}</span>{{ end }}</div>{{ end }}
-  <div class="prose">{{ .Content }}</div>
-  {{ with .Params.related }}
-  <aside class="related">
-    <h2>Related</h2>
-    <ul>{{ range . }}<li><a href="{{ . | relURL }}">{{ . }}</a></li>{{ end }}</ul>
-  </aside>
-  {{ end }}
-</article>
+<div class="article-detail-wrap">
+  <div class="breadcrumbs">
+    <a href="{{ "/" | relURL }}">Home</a>
+    {{ range .Ancestors.Reverse }}
+      {{ if not .IsHome }}
+        <span>/</span>
+        <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+      {{ end }}
+    {{ end }}
+    <span>/</span>
+    <span>{{ .Title | truncate 45 }}</span>
+  </div>
+
+  <article class="article-container">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span class="bookmark-type">{{ .Params.type | default .Section }}</span>
+        {{ with .Params.status }}
+          <span class="badge-status">status: {{ . }}</span>
+        {{ end }}
+      </div>
+
+      {{ with .Params.language }}
+        <span class="badge-lang">{{ . }}</span>
+      {{ end }}
+    </div>
+
+    <h1 style="font-family: var(--font-serif-display); font-size: clamp(2rem, 4vw, 2.5rem); font-weight: 700; color: var(--text-primary); line-height: 1.2; margin-bottom: 1rem;">
+      {{ .Title }}
+    </h1>
+
+    <div class="article-meta">
+      {{ with .Params.url }}
+        <a class="source-btn" href="{{ . }}" target="_blank" rel="noopener noreferrer">
+          <span>Open Canonical Source</span>
+          <span>↗</span>
+        </a>
+      {{ end }}
+
+      {{ with .Params.github }}
+        <a class="source-btn" href="{{ . }}" target="_blank" rel="noopener noreferrer">
+          <span>GitHub Repository</span>
+          <span>↗</span>
+        </a>
+      {{ end }}
+
+      {{ with .Params.stars }}
+        <span class="badge-stars">★ {{ . }}</span>
+      {{ end }}
+
+      <span>~{{ .ReadingTime }} min read</span>
+
+      {{ if not .Date.IsZero }}
+        <span>Updated {{ .Date.Format "Jan 02, 2006" }}</span>
+      {{ end }}
+    </div>
+
+    <div class="prose">
+      {{ .Content }}
+    </div>
+
+    {{ with .Params.topics }}
+    <div style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle);">
+      <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.5rem;">Topics & Domains</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+        {{ range . }}<span class="tag-pill">{{ . }}</span>{{ end }}
+      </div>
+    </div>
+    {{ end }}
+
+    {{ with .Params.tags }}
+    <div style="margin-top: 1rem;">
+      <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.5rem;">Associated Tags</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+        {{ range . }}<span class="tag-pill">#{{ . }}</span>{{ end }}
+      </div>
+    </div>
+    {{ end }}
+
+    {{ with .Params.related }}
+    <aside style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle);">
+      <h3 style="font-family: var(--font-serif-display); font-size: 1.15rem; margin-bottom: 0.75rem;">Related Knowledge Nodes</h3>
+      <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; padding: 0;">
+        {{ range . }}
+        <li><a href="{{ . | relURL }}" class="section-link" style="font-size: 0.85rem;">→ {{ . }}</a></li>
+        {{ end }}
+      </ul>
+    </aside>
+    {{ end }}
+  </article>
+</div>
 {{ end }}
+
+

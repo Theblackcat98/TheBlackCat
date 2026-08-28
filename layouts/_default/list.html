@@ -1,19 +1,491 @@
 {{ define "main" }}
+
+{{ if eq .Section "library" }}
+<!-- ======================================================== -->
+<!-- 1. SPLIT-PANE DYNAMIC LIBRARY & BOOKMARK DOSSIER -->
+<!-- ======================================================== -->
 <section>
-  <p class="eyebrow">{{ .Section }}</p>
-  <h1>{{ .Title }}</h1>
-  {{ with .Content }}<div class="prose">{{ . }}</div>{{ end }}
-  <div class="cards">
+  <div class="split-pane-header">
+    <div>
+      <div class="breadcrumbs" style="margin-bottom: 0.35rem;">
+        <a href="{{ "/" | relURL }}">Home</a>
+        <span>/</span>
+        <span>Knowledge Library</span>
+      </div>
+      <h1 style="font-family: var(--font-serif-display); font-size: 2.25rem; margin: 0;">
+        The Reading Library & Bookmarks
+      </h1>
+      {{ with .Content }}<div class="prose" style="margin-top: 0.5rem; font-size: 0.95rem;">{{ . }}</div>{{ end }}
+    </div>
+
+    <!-- Real-time Search Input -->
+    <div style="max-width: 320px; width: 100%;">
+      <input 
+        type="text" 
+        id="dossier-search-input" 
+        class="dossier-search" 
+        placeholder="Search bookmarks, topics & tags..." 
+        oninput="searchDossier(this.value)"
+      >
+    </div>
+  </div>
+
+  {{ $libraryPages := where site.RegularPages "Section" "library" }}
+
+  <!-- Dynamically collect all unique topics from library items -->
+  {{ $topics := slice }}
+  {{ range $libraryPages }}
+    {{ with .Params.topics }}
+      {{ range . }}
+        {{ $topics = $topics | append (lower .) }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+  {{ $uniqueTopics := $topics | uniq | sort }}
+
+  <!-- Dynamically get all sub-sections in library -->
+  {{ $librarySection := site.GetPage "/library" }}
+
+  <div class="split-pane-grid">
+    <!-- Left Pane: Dynamic Shelves Directory -->
+    <aside class="shelf-sidebar">
+      <div class="shelf-sidebar-title">Domain Shelves</div>
+      
+      <button class="shelf-btn active" onclick="filterShelf('all', this)">
+        <span style="display: flex; align-items: center; gap: 0.5rem;">
+          <span>📂</span>
+          <span>All Library Items</span>
+        </span>
+        <span class="shelf-count font-mono">{{ len $libraryPages }}</span>
+      </button>
+
+      {{ if and $librarySection (gt (len $librarySection.Sections) 0) }}
+        {{ range $librarySection.Sections }}
+          {{ $subSlug := .File.ContentBaseName | lower }}
+          {{ $subPagesCount := len .RegularPagesRecursive }}
+          <button class="shelf-btn" onclick="filterShelf('shelf-{{ $subSlug }}', this)">
+            <span style="display: flex; align-items: center; gap: 0.5rem;">
+              <span>📁</span>
+              <span>{{ .Title }}</span>
+            </span>
+            <span class="shelf-count font-mono">{{ $subPagesCount }}</span>
+          </button>
+        {{ end }}
+      {{ end }}
+
+      {{ if gt (len $uniqueTopics) 0 }}
+        <div class="shelf-sidebar-title" style="margin-top: 1rem;">Topics & Tags</div>
+        {{ range $uniqueTopics }}
+          {{ $topicName := . }}
+          {{ $topicCount := 0 }}
+          {{ range $libraryPages }}
+            {{ $itemTopics := slice }}
+            {{ with .Params.topics }}{{ range . }}{{ $itemTopics = $itemTopics | append (lower .) }}{{ end }}{{ end }}
+            {{ if in $itemTopics $topicName }}{{ $topicCount = add $topicCount 1 }}{{ end }}
+          {{ end }}
+          <button class="shelf-btn" onclick="filterShelf('topic-{{ $topicName }}', this)">
+            <span style="display: flex; align-items: center; gap: 0.5rem;">
+              <span>🏷️</span>
+              <span>#{{ $topicName }}</span>
+            </span>
+            <span class="shelf-count font-mono">{{ $topicCount }}</span>
+          </button>
+        {{ end }}
+      {{ end }}
+
+      <div class="shelf-info-box">
+        Select a shelf or topic to filter, or type in the search bar above to filter across all bookmarks in real time.
+      </div>
+    </aside>
+
+    <!-- Right Pane: Bookmarks Dossier -->
+    <main class="dossier-container" id="dossier-container">
+      {{ range $libraryPages.ByTitle }}
+      {{ $itemShelf := "" }}
+      {{ with .Parent }}
+        {{ if and (ne .Section .File.ContentBaseName) (ne .File.ContentBaseName "library") }}
+          {{ $itemShelf = .File.ContentBaseName | lower }}
+        {{ end }}
+      {{ end }}
+      <div 
+        class="bookmark-card dossier-item" 
+        data-title="{{ .Title | lower }}" 
+        data-shelf="{{ $itemShelf }}"
+        data-topics="{{ with .Params.topics }}{{ delimit . " " | lower }}{{ end }}" 
+        data-tags="{{ with .Params.tags }}{{ delimit . " " | lower }}{{ end }}" 
+        data-type="{{ .Params.type | default "bookmark" | lower }}"
+        data-summary="{{ with .Summary }}{{ . | plainify | lower }}{{ end }}"
+      >
+        <div class="bookmark-top">
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <span class="bookmark-type">{{ .Params.type | default "bookmark" }}</span>
+            <span class="bookmark-shelf-label">
+              {{ with .Params.topics }}
+                {{ delimit . ", " }}
+              {{ else }}
+                {{ with .Parent }}{{ if ne .Title "Library" }}{{ .Title }}{{ else }}General{{ end }}{{ else }}General{{ end }}
+              {{ end }}
+            </span>
+          </div>
+          {{ with .Params.url }}
+            <a href="{{ . }}" target="_blank" rel="noopener noreferrer" class="source-btn">
+              <span>Open Source</span>
+              <span>↗</span>
+            </a>
+          {{ end }}
+        </div>
+
+        <a href="{{ .RelPermalink }}" class="bookmark-title">
+          {{ .Title }}
+        </a>
+
+        {{ with .Params.description }}
+          <p class="bookmark-summary">{{ . }}</p>
+        {{ else }}
+          {{ with .Summary }}<p class="bookmark-summary">{{ . | plainify | truncate 180 }}</p>{{ end }}
+        {{ end }}
+
+        <div class="bookmark-actions">
+          <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+            {{ with .Params.tags }}
+              {{ range . }}<span class="tag-pill">#{{ . }}</span>{{ end }}
+            {{ end }}
+          </div>
+          <a href="{{ .RelPermalink }}" class="section-link" style="font-size: 0.75rem;">
+            Read Complete Note →
+          </a>
+        </div>
+      </div>
+      {{ else }}
+      <div class="bookmark-card" style="text-align: center; padding: 3rem 1.5rem; color: var(--text-muted);">
+        <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">The Library is ready for cataloging.</p>
+        <p style="font-size: 0.85rem;">Add markdown files or domain folders under <code>content/library/</code> and they will appear here automatically.</p>
+      </div>
+      {{ end }}
+
+      <div id="no-results" style="display: none; padding: 3rem 1rem; text-align: center; color: var(--text-muted); background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md);">
+        <p style="font-size: 1rem; margin-bottom: 0.25rem;">No items match your filter criteria.</p>
+        <p style="font-size: 0.8rem;">Try clearing the search query or selecting a different shelf.</p>
+      </div>
+    </main>
+  </div>
+</section>
+
+<script>
+  let currentFilter = 'all';
+  let searchQuery = '';
+
+  function filterShelf(filterKey, btnEl) {
+    currentFilter = filterKey;
+    document.querySelectorAll('.shelf-btn').forEach(b => b.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+    applyFilters();
+  }
+
+  function searchDossier(val) {
+    searchQuery = val.toLowerCase().trim();
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const items = document.querySelectorAll('.dossier-item');
+    let visibleCount = 0;
+
+    items.forEach(item => {
+      const title = item.getAttribute('data-title') || '';
+      const tags = item.getAttribute('data-tags') || '';
+      const topics = item.getAttribute('data-topics') || '';
+      const type = item.getAttribute('data-type') || '';
+      const shelf = item.getAttribute('data-shelf') || '';
+      const summary = item.getAttribute('data-summary') || '';
+
+      const matchesSearch = !searchQuery || 
+        title.includes(searchQuery) || 
+        tags.includes(searchQuery) || 
+        topics.includes(searchQuery) || 
+        summary.includes(searchQuery) ||
+        type.includes(searchQuery);
+
+      let matchesShelf = true;
+      if (currentFilter !== 'all') {
+        if (currentFilter.startsWith('shelf-')) {
+          const targetShelf = currentFilter.replace('shelf-', '');
+          matchesShelf = (shelf === targetShelf) || topics.includes(targetShelf);
+        } else if (currentFilter.startsWith('topic-')) {
+          const targetTopic = currentFilter.replace('topic-', '');
+          const topicList = topics.split(' ');
+          const tagList = tags.split(' ');
+          matchesShelf = topicList.includes(targetTopic) || tagList.includes(targetTopic);
+        }
+      }
+
+      if (matchesSearch && matchesShelf) {
+        item.style.display = 'block';
+        visibleCount++;
+      } else {
+        item.style.display = 'none';
+      }
+    });
+
+    const noResults = document.getElementById('no-results');
+    if (noResults) {
+      noResults.style.display = (visibleCount === 0 && items.length > 0) ? 'block' : 'none';
+    }
+  }
+</script>
+
+{{ else if eq .Section "collections" }}
+<!-- ======================================================== -->
+<!-- 2. DEDICATED COLLECTIONS ARCHIVE -->
+<!-- ======================================================== -->
+<section>
+  <div class="article-header">
+    <div class="breadcrumbs">
+      <a href="{{ "/" | relURL }}">Home</a>
+      <span>/</span>
+      <span>Collections Archive</span>
+    </div>
+    <h1 style="font-family: var(--font-serif-display); font-size: 2.25rem; margin-bottom: 0.5rem;">
+      Curated Collections ({{ len .Pages }})
+    </h1>
+    <p style="color: var(--text-secondary); font-family: var(--font-serif-reading); font-size: 1.05rem; max-width: 700px; line-height: 1.6;">
+      Curated views and thematic binders across the library, intentionally connecting ideas across domain boundaries.
+    </p>
+    {{ with .Content }}<div class="prose" style="margin-top: 1rem;">{{ . }}</div>{{ end }}
+  </div>
+
+  <div class="collections-grid" style="margin-top: 2rem;">
     {{ range .Pages.ByTitle }}
-    <a class="card" href="{{ .RelPermalink }}">
-      <span class="card-type">{{ .Params.type | default "page" }}</span>
-      <h2>{{ .Title }}</h2>
-      {{ with .Params.description }}<p>{{ . }}</p>{{ else }}{{ with .Summary }}<p>{{ . | plainify | truncate 180 }}</p>{{ end }}{{ end }}
-      {{ with .Params.language }}<span class="card-meta">{{ . }}</span>{{ end }}
-      {{ with .Params.stars }}<span class="card-meta">★ {{ . }}</span>{{ end }}
-      {{ with .Params.github }}<span class="card-meta">GitHub ↗</span>{{ end }}
-    </a>
+    <div class="collection-card">
+      <div>
+        <div class="collection-top">
+          <span class="bookmark-type">Collection</span>
+          {{ with .Params.related }}
+            <span class="badge-count">{{ len . }} Linked Nodes</span>
+          {{ end }}
+        </div>
+        <h3 class="collection-title">
+          <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+        </h3>
+        {{ with .Params.description }}
+          <p class="collection-desc">{{ . }}</p>
+        {{ else }}
+          {{ with .Summary }}<p class="collection-desc">{{ . | plainify | truncate 160 }}</p>{{ end }}
+        {{ end }}
+      </div>
+
+      <div>
+        {{ with .Params.topics }}
+        <div class="pinned-tags" style="margin-top: 1rem;">
+          {{ range . }}<span class="tag-pill">{{ . }}</span>{{ end }}
+        </div>
+        {{ end }}
+        
+        <div class="collection-actions">
+          <a href="{{ .RelPermalink }}" class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 0.75rem;">
+            Explore Collection Binder →
+          </a>
+        </div>
+      </div>
+    </div>
+    {{ else }}
+    <div class="bookmark-card" style="text-align: center; padding: 3rem 1.5rem; color: var(--text-muted); grid-column: 1 / -1;">
+      <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">No collections created yet.</p>
+      <p style="font-size: 0.85rem;">Create markdown files under <code>content/collections/</code> to curate cross-library views.</p>
+    </div>
+    {{ end }}
+  </div>
+</section>
+
+{{ else if eq .Section "projects" }}
+<!-- ======================================================== -->
+<!-- 3. DEDICATED PROJECTS ARCHIVE (REPOSITORIES & TOOLS) -->
+<!-- ======================================================== -->
+<section>
+  <div class="article-header">
+    <div class="breadcrumbs">
+      <a href="{{ "/" | relURL }}">Home</a>
+      <span>/</span>
+      <span>Projects Archive</span>
+    </div>
+    <h1 style="font-family: var(--font-serif-display); font-size: 2.25rem; margin-bottom: 0.5rem;">
+      Software Projects & Experiments ({{ len .Pages }})
+    </h1>
+    <p style="color: var(--text-secondary); font-family: var(--font-serif-reading); font-size: 1.05rem; max-width: 700px; line-height: 1.6;">
+      Every tool, agent pipeline, terminal UI, and open source repository maintained in the BlackCat ecosystem.
+    </p>
+    {{ with .Content }}<div class="prose" style="margin-top: 1rem;">{{ . }}</div>{{ end }}
+  </div>
+
+  <div class="projects-grid" style="margin-top: 2rem;">
+    {{ range .Pages.ByTitle }}
+    <div class="project-card">
+      <div>
+        <div class="pinned-top">
+          <h3 style="font-family: var(--font-serif-display); font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">
+            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+          </h3>
+          <div style="display: flex; align-items: center; gap: 0.35rem;">
+            {{ if or .Params.pinned .Params.featured }}
+              <span class="pinned-badge">📌 Featured</span>
+            {{ end }}
+            {{ with .Params.stars }}
+              <span class="badge-stars">★ {{ . }}</span>
+            {{ end }}
+          </div>
+        </div>
+        {{ with .Params.description }}
+          <p style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 1.25rem;">{{ . }}</p>
+        {{ else }}
+          {{ with .Summary }}<p style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 1.25rem;">{{ . | plainify | truncate 140 }}</p>{{ end }}
+        {{ end }}
+      </div>
+
+      <div>
+        {{ with .Params.tags }}
+        <div class="pinned-tags">
+          {{ range . }}<span class="tag-pill">#{{ . }}</span>{{ end }}
+        </div>
+        {{ end }}
+
+        <div class="pinned-meta-row">
+          <span class="badge-lang">{{ .Params.language | default "Software" }}</span>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            {{ with .Params.github }}
+              <a href="{{ . }}" target="_blank" rel="noopener noreferrer" class="source-btn">
+                <span>GitHub</span>
+                <span>↗</span>
+              </a>
+            {{ end }}
+            <a href="{{ .RelPermalink }}" class="section-link" style="font-size: 0.75rem;">Doc →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{ else }}
+    <div class="bookmark-card" style="text-align: center; padding: 3rem 1.5rem; color: var(--text-muted); grid-column: 1 / -1;">
+      <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">No projects cataloged yet.</p>
+      <p style="font-size: 0.85rem;">Add project folders under <code>content/projects/</code> to register them in the vault.</p>
+    </div>
+    {{ end }}
+  </div>
+</section>
+
+{{ else if eq .Section "notes" }}
+<!-- ======================================================== -->
+<!-- 4. DEDICATED WORKING NOTES & THOUGHTS ARCHIVE -->
+<!-- ======================================================== -->
+<section>
+  <div class="article-header">
+    <div class="breadcrumbs">
+      <a href="{{ "/" | relURL }}">Home</a>
+      <span>/</span>
+      <span>Notes Archive</span>
+    </div>
+    <h1 style="font-family: var(--font-serif-display); font-size: 2.25rem; margin-bottom: 0.5rem;">
+      Notes & Working Thoughts ({{ len .Pages }})
+    </h1>
+    <p style="color: var(--text-secondary); font-family: var(--font-serif-reading); font-size: 1.05rem; max-width: 700px; line-height: 1.6;">
+      First-person thinking, observations, working knowledge, and hypotheses that do not need to become formal articles.
+    </p>
+    {{ with .Content }}<div class="prose" style="margin-top: 1rem;">{{ . }}</div>{{ end }}
+  </div>
+
+  <div class="notes-grid" style="margin-top: 2rem;">
+    {{ range .Pages.ByDate.Reverse }}
+    <div class="note-card">
+      <div class="note-card-top">
+        {{ if not .Date.IsZero }}
+          <span class="note-date">🗓️ {{ .Date.Format "Jan 02, 2006" }}</span>
+        {{ else }}
+          <span class="note-date">Note</span>
+        {{ end }}
+        <span class="note-read-time">~{{ .ReadingTime }} min read</span>
+      </div>
+
+      <h3 class="note-title">
+        <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+      </h3>
+
+      {{ with .Params.description }}
+        <p class="note-summary">{{ . }}</p>
+      {{ else }}
+        {{ with .Summary }}<p class="note-summary">{{ . | plainify | truncate 180 }}</p>{{ end }}
+      {{ end }}
+
+      <div class="note-footer">
+        <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+          {{ with .Params.tags }}
+            {{ range . }}<span class="tag-pill">#{{ . }}</span>{{ end }}
+          {{ end }}
+        </div>
+        <a href="{{ .RelPermalink }}" class="section-link" style="font-size: 0.75rem;">
+          Read Note →
+        </a>
+      </div>
+    </div>
+    {{ else }}
+    <div class="bookmark-card" style="text-align: center; padding: 3rem 1.5rem; color: var(--text-muted);">
+      <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">No notes recorded yet.</p>
+      <p style="font-size: 0.85rem;">Add markdown notes under <code>content/notes/</code> to start your thought log.</p>
+    </div>
+    {{ end }}
+  </div>
+</section>
+
+{{ else }}
+<!-- ======================================================== -->
+<!-- 5. GENERIC SECTION & TAXONOMY FALLBACK LISTING -->
+<!-- ======================================================== -->
+<section>
+  <div class="article-header">
+    <div class="breadcrumbs">
+      <a href="{{ "/" | relURL }}">Home</a>
+      <span>/</span>
+      <span>{{ .Title }}</span>
+    </div>
+    <h1 style="font-family: var(--font-serif-display); font-size: 2.25rem;">{{ .Title }}</h1>
+    {{ with .Content }}<div class="prose" style="margin-top: 1rem;">{{ . }}</div>{{ end }}
+  </div>
+
+  <div class="dossier-container" style="margin-top: 2rem;">
+    {{ range .Pages.ByTitle }}
+    <div class="bookmark-card">
+      <div class="bookmark-top">
+        <span class="bookmark-type">{{ .Params.type | default "page" }}</span>
+        {{ if not .Date.IsZero }}
+          <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono);">
+            {{ .Date.Format "Jan 02, 2006" }}
+          </span>
+        {{ end }}
+      </div>
+      <a href="{{ .RelPermalink }}" class="bookmark-title">{{ .Title }}</a>
+      {{ with .Params.description }}
+        <p class="bookmark-summary">{{ . }}</p>
+      {{ else }}
+        {{ with .Summary }}<p class="bookmark-summary">{{ . | plainify | truncate 160 }}</p>{{ end }}
+      {{ end }}
+      <div class="bookmark-actions">
+        <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+          {{ with .Params.tags }}
+            {{ range . }}<span class="tag-pill">#{{ . }}</span>{{ end }}
+          {{ end }}
+        </div>
+        <a href="{{ .RelPermalink }}" class="section-link" style="font-size: 0.75rem;">
+          View →
+        </a>
+      </div>
+    </div>
+    {{ else }}
+    <div class="bookmark-card" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+      No items found in this section.
+    </div>
     {{ end }}
   </div>
 </section>
 {{ end }}
+
+{{ end }}
+
+
+

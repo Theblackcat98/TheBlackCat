@@ -4,42 +4,60 @@ The BlackCat is a Git-native personal library. Markdown is the source of truth; 
 
 ## Content lifecycle
 
-`inbox/` -> classify -> enrich -> canonical library item -> collections/relationships
+`inbox/` -> classify -> enrich -> canonical item -> collections/relationships
 
 ## Rules
 
-1. Prefer existing domains and tags.
+1. Prefer existing domains, content types, and tags.
 2. Do not create new top-level domains casually.
 3. If classification is uncertain, leave the item in `inbox/`.
 4. Never create a duplicate resource when an existing canonical item can be updated.
-5. Preserve the original source URL for bookmarks and external references.
+5. Preserve the original source URL in `source` for external material. Never use front-matter `url` for source URLs; Hugo reserves it for page URLs.
 6. Keep front matter machine-readable and conservative.
 7. Use lowercase kebab-case for tags, topics, slugs, and filenames.
 8. Do not delete content unless explicitly instructed or the item is clearly a duplicate.
 9. Do not modify unrelated files.
 10. Keep the Markdown body useful to a human; front matter is metadata, not prose.
+11. Choose `type` based on what the thing **is**, not where it came from.
+12. Use `description` when a concise summary will improve cards, listings, search, or agent retrieval.
 
 ## Content types
 
-- `bookmark`: saved external resource with URL and notes.
-- `article`: substantial researched or authored material.
-- `note`: first-person or working knowledge.
-- `collection`: curated cross-library view.
-- `project`: project documentation or project reference.
+- `bookmark`: saved external resource whose primary value is the link and accompanying notes.
+- `skill`: reusable AI/agent skill, workflow, prompt system, or operational procedure. Preserve supporting files when useful.
+- `article`: substantial researched or authored prose intended to stand on its own.
+- `note`: personal thought, working knowledge, observation, hypothesis, or short-form synthesis.
+- `project`: a coherent project and its associated documentation, decisions, references, and implementation knowledge.
+- `collection`: curated view of canonical items. Collections organize relationships; they do not duplicate content.
+- `reference`: durable factual or technical reference material such as specifications, manuals, standards, glossaries, or cheat sheets.
 
 ## Placement rules
 
-- Put a resource in the broadest appropriate `library/<domain>/...` location.
-- Put an individual AI skill in `library/ai/skills/<kebab-slug>/index.md` (one skill per folder, Hugo page bundle) when the skill itself is the subject. Give each skill a one-line `description:` in front matter — the site's cards and search use it.
-- Use `collections/` for curated subsets such as `Favorite AI Skills` rather than creating a new taxonomy branch for the adjective "favorite".
-- A collection should point to canonical library items; do not duplicate their content inside the collection.
+- Put canonical knowledge in the broadest appropriate `library/<domain>/...` location.
+- Put individual AI skills in `library/ai/skills/<kebab-slug>/index.md` (one skill per folder, Hugo page bundle) when the skill itself is the subject.
+- Put projects in `projects/<kebab-slug>/index.md` when the project needs its own page bundle.
+- Put personal/working notes in `notes/` unless they clearly belong to a library domain.
+- Put curated collections in `collections/`. A collection should point to canonical items rather than copying their content.
+- Use `reference` for durable reference material; do not force it into `bookmark` merely because it originated externally.
+- Use `bookmark` when the external resource itself is what is being saved and the local content is primarily annotation.
+
+## Classification examples
+
+- "Save this GitHub repo" -> `bookmark` unless the repository is one of Nick's own projects.
+- "Add this reusable Claude skill" -> `skill`.
+- "Write up my research on agent memory" -> `article`.
+- "Remember this insight about agent memory" -> `note`.
+- "Add my opencode-workflow project" -> `project`.
+- "Make a list of my favorite AI skills" -> `collection` referencing `skill` items.
+- "Save the HTTP specification for future lookup" -> `reference`.
 
 ## Preferred front matter
 
 ```yaml
 title: "..."
 type: bookmark
-source: "https://..."   # NOT `url` — reserved Hugo key, breaks the build
+description: "..."
+source: "https://..."   # external canonical URL; NOT `url`
 topics:
   - ai
 tags:

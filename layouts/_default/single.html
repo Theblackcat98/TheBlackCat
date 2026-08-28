@@ -1,7 +1,7 @@
 {{ define "main" }}
 <div class="article-detail-wrap">
   <div class="breadcrumbs">
-    <a href="{{ "/" | relURL }}">Home</a>
+    <a href="{{ site.Home.RelPermalink }}">Home</a>
     {{ range .Ancestors.Reverse }}
       {{ if not .IsHome }}
         <span>/</span>

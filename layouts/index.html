@@ -10,11 +10,11 @@
   </p>
   
   <div class="hero-btn-group">
-    <a href="{{ "/library" | relURL }}" class="btn btn-primary">
+    <a href="{{ with site.GetPage "/library" }}{{ .RelPermalink }}{{ else }}{{ "library" | relURL }}{{ end }}" class="btn btn-primary">
       <span>Explore Knowledge Library</span>
       <span>→</span>
     </a>
-    <a href="{{ "/projects" | relURL }}" class="btn btn-secondary">
+    <a href="{{ with site.GetPage "/projects" }}{{ .RelPermalink }}{{ else }}{{ "projects" | relURL }}{{ end }}" class="btn btn-secondary">
       View All Repositories ({{ len (where site.RegularPages "Section" "projects") }})
     </a>
   </div>
@@ -38,7 +38,7 @@
       {{ $secName := . }}
       {{ $secPage := site.GetPage (printf "/%s" $secName) }}
       {{ $secCount := len (where site.RegularPages "Section" $secName) }}
-      <a href="{{ printf "/%s" $secName | relURL }}" class="vault-card">
+      <a href="{{ with $secPage }}{{ .RelPermalink }}{{ else }}{{ $secName | relURL }}{{ end }}" class="vault-card">
         <div class="vault-card-header">
           <div class="vault-card-icon">
             {{ if eq $secName "library" }}📚
@@ -76,7 +76,7 @@
       <span>📌</span>
       <span>Featured Repositories & Tools</span>
     </h3>
-    <a class="section-link" href="{{ "/projects" | relURL }}">
+    <a class="section-link" href="{{ with site.GetPage "/projects" }}{{ .RelPermalink }}{{ else }}{{ "projects" | relURL }}{{ end }}">
       View all {{ len (where site.RegularPages "Section" "projects") }} projects →
     </a>
   </div>
@@ -146,7 +146,7 @@
       <span>🕒</span>
       <span>Recently Cataloged Knowledge</span>
     </h3>
-    <a class="section-link" href="{{ "/library" | relURL }}">
+    <a class="section-link" href="{{ with site.GetPage "/library" }}{{ .RelPermalink }}{{ else }}{{ "library" | relURL }}{{ end }}">
       Browse library dossier →
     </a>
   </div>

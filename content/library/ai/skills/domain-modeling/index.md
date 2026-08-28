@@ -1,7 +1,7 @@
 ---
 title: "Domain Modeling"
 description: "Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a CONTEXT.md, or recording or editing an ADR."
-type: bookmark
+type: skill
 source: "https://github.com/mattpocock/skills/tree/main/skills/engineering/domain-modeling"
 topics:
   - ai

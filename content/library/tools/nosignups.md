@@ -9,9 +9,9 @@ tags:
   - directory
   - open-source
   - web
-status: inbox
+status: filed
 created: 2026-08-28
-updated: 2026-08-28
+updated: 2026-08-30
 ---
 
 ## Why I saved this

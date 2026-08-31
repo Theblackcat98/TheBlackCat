@@ -1,6 +1,18 @@
 ---
-name: greek-hebrew-word-study
-description: Rigorous linguistic and lexical analysis framework for biblical Greek (Koine) and biblical Hebrew/Aramaic words, integrating Strong's concordance, morphological parsing, semantic ranges, Septuagint (LXX) mapping, and fallacy prevention.
+title: "Greek & Hebrew Word Study"
+description: "Rigorous linguistic and lexical analysis framework for biblical Greek (Koine) and biblical Hebrew/Aramaic words, integrating Strong's concordance, morphological parsing, semantic ranges, Septuagint (LXX) mapping, and fallacy prevention."
+type: skill
+source: "local://inbox/bible-study/greek-hebrew-word-study/SKILL.md"
+topics:
+  - ai
+tags:
+  - skills
+  - agents
+  - workflows
+  - bible-study
+status: filed
+created: 2026-08-28
+updated: 2026-08-30
 ---
 
 # Greek & Hebrew Word Study Skill

@@ -1,6 +1,6 @@
 ---
 title: "50 Web Sites Google Doesn't Want You to Know About"
-type: reference
+type: collection
 description: "Curated cheat-sheet of 50 utility web sites: paywall/academic access, image & PDF tools, dev utilities, privacy checks, music/focus, and research assistants."
 source: ""
 topics:
@@ -11,7 +11,7 @@ tags:
   - web
 status: active
 created: 2026-08-28
-updated: 2026-08-28
+updated: 2026-08-30
 ---
 
 ## Reference

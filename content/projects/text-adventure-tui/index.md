@@ -1,6 +1,6 @@
 ---
 title: "Text-Adventure-TUI"
-type: project
+contenttype: project
 language: Python
 stars: 2
 github: "https://github.com/Theblackcat98/Text-Adventure-TUI"

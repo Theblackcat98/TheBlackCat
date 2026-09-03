@@ -1,7 +1,7 @@
 ---
 title: "Cross-Testament Typology"
 description: "Theological framework for analyzing biblical typology, intertestamental Old-to-New Testament connections, Christological fulfillment trajectories, and covenantal continuity while preventing allegorical over-interpretation."
-type: skill
+contenttype: skill
 source: "local://inbox/bible-study/cross-testament-typology/SKILL.md"
 topics:
   - ai

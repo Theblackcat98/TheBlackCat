@@ -1,6 +1,6 @@
 ---
 title: "The Nature of Code — Daniel Shiffman"
-type: bookmark
+contenttype: bookmark
 description: "Classic free textbook on simulating natural systems with code — vectors, forces, fractals, cellular automata, genetic algorithms and neural networks. Full book readable free online."
 source: "https://natureofcode.com/"
 topics:

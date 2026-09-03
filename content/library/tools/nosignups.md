@@ -1,6 +1,6 @@
 ---
 title: "NoSignups (formerly FckSignups)"
-type: bookmark
+contenttype: bookmark
 description: "Curated directory of open-source, in-browser tools that need no accounts, emails, or tracking."
 source: "https://www.fucksignups.com"
 topics:

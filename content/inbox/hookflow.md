@@ -1,6 +1,6 @@
 ---
 title: "HookFlow"
-type: bookmark
+contenttype: bookmark
 description: "Workflow automation alternative to Zapier."
 source: ""
 topics:

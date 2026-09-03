@@ -1,7 +1,7 @@
 ---
 title: "Research"
 description: "Investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a background agent."
-type: skill
+contenttype: skill
 source: "https://github.com/mattpocock/skills/tree/main/skills/engineering/research"
 topics:
   - ai

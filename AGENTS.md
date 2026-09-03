@@ -18,7 +18,7 @@ The BlackCat is a Git-native personal library. Markdown is the source of truth; 
 8. Do not delete content unless explicitly instructed or the item is clearly a duplicate.
 9. Do not modify unrelated files.
 10. Keep the Markdown body useful to a human; front matter is metadata, not prose.
-11. Choose `type` based on what the thing **is**, not where it came from.
+11. Choose `contenttype` based on what the thing **is**, not where it came from. Never set `type` in front matter except `type: section` in `_index.md` files — `type` is a reserved Hugo field and silently breaks the `types` taxonomy and library nav.
 12. Use `description` when a concise summary will improve cards, listings, search, or agent retrieval.
 
 ## Content types
@@ -43,19 +43,19 @@ The BlackCat is a Git-native personal library. Markdown is the source of truth; 
 
 ## Classification examples
 
-- "Save this GitHub repo" -> `bookmark` unless the repository is one of Nick's own projects.
-- "Add this reusable Claude skill" -> `skill`.
-- "Write up my research on agent memory" -> `article`.
-- "Remember this insight about agent memory" -> `note`.
-- "Add my opencode-workflow project" -> `project`.
-- "Make a list of my favorite AI skills" -> `collection` referencing `skill` items.
-- "Save the HTTP specification for future lookup" -> `reference`.
+- "Save this GitHub repo" -> `contenttype: bookmark` unless the repository is one of Nick's own projects.
+- "Add this reusable Claude skill" -> `contenttype: skill`.
+- "Write up my research on agent memory" -> `contenttype: article`.
+- "Remember this insight about agent memory" -> `contenttype: note`.
+- "Add my opencode-workflow project" -> `contenttype: project`.
+- "Make a list of my favorite AI skills" -> `contenttype: collection` referencing `skill` items.
+- "Save the HTTP specification for future lookup" -> `contenttype: reference`.
 
 ## Preferred front matter
 
 ```yaml
 title: "..."
-type: bookmark
+contenttype: bookmark
 description: "..."
 source: "https://..."   # external canonical URL; NOT `url`
 topics:

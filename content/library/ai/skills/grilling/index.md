@@ -1,7 +1,7 @@
 ---
 title: "Grilling"
 description: "Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases."
-type: skill
+contenttype: skill
 source: "https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling"
 topics:
   - ai

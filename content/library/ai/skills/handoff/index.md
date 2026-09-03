@@ -1,7 +1,7 @@
 ---
 title: "Handoff"
 description: "Compact the current conversation into a handoff document for another agent to pick up."
-type: skill
+contenttype: skill
 source: "https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff"
 topics:
   - ai

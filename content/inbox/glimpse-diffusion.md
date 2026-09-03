@@ -1,6 +1,6 @@
 ---
 title: "Glimpse Diffusion"
-type: bookmark
+contenttype: bookmark
 description: "Image generation alternative to Midjourney."
 source: ""
 topics:

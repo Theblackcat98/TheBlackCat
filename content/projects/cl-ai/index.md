@@ -1,6 +1,6 @@
 ---
 title: "CL-AI"
-type: project
+contenttype: project
 language: Python
 stars: 1
 github: "https://github.com/Theblackcat98/CL-AI"

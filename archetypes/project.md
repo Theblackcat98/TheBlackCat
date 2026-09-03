@@ -1,6 +1,6 @@
 ---
 title: "{{ replace .Name "-" " " | title }}"
-type: project
+contenttype: project
 description: ""
 source: ""
 topics: []

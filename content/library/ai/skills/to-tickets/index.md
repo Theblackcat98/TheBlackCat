@@ -1,7 +1,7 @@
 ---
 title: "To Tickets"
 description: "Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker — edges as text in one file per ticket locally, or native blocking links on a real tracker."
-type: skill
+contenttype: skill
 source: "https://github.com/mattpocock/skills/tree/main/skills/engineering/to-tickets"
 topics:
   - ai

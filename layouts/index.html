@@ -156,7 +156,7 @@
     {{ range first 4 $recentItems.ByDate.Reverse }}
     <a href="{{ .RelPermalink }}" class="recent-card">
       <div class="recent-card-top">
-        <span class="bookmark-type">{{ .Params.type | default .Section }}</span>
+        <span class="bookmark-type">{{ .Params.contenttype | default .Section }}</span>
         {{ if not .Date.IsZero }}
           <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono);">
             {{ .Date.Format "Jan 02, 2006" }}

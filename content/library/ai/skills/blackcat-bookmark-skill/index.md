@@ -1,6 +1,6 @@
 ---
 title: "BlackCat Bookmark Skill"
-type: skill
+contenttype: skill
 source: "https://github.com/Theblackcat98/TheBlackCat"
 topics:
   - ai

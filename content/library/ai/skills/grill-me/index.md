@@ -1,7 +1,7 @@
 ---
 title: "Grill Me"
 description: "A relentless interview to sharpen a plan or design."
-type: skill
+contenttype: skill
 source: "https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me"
 topics:
   - ai

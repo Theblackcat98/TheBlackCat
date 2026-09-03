@@ -1,6 +1,6 @@
 ---
 title: "{{ replace .Name "-" " " | title }}"
-type: skill
+contenttype: skill
 description: ""
 source: ""
 topics: []

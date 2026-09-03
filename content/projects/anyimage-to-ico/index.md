@@ -1,6 +1,6 @@
 ---
 title: "AnyImage-to-ICO"
-type: project
+contenttype: project
 language: Batchfile
 stars: 1
 github: "https://github.com/Theblackcat98/AnyImage-to-ICO"

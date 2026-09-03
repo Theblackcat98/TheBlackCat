@@ -1,6 +1,6 @@
 ---
 title: "Syllaby"
-type: bookmark
+contenttype: bookmark
 description: "Viral scripting and video research tool."
 source: "https://syllaby.io"
 topics:

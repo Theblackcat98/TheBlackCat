@@ -1,6 +1,6 @@
 ---
 title: "Favorite AI Skills"
-type: collection
+contenttype: collection
 topics:
   - ai
   - agents

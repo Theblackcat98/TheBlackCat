@@ -1,6 +1,6 @@
 ---
 title: "opencode-workflow"
-type: project
+contenttype: project
 language: TypeScript
 stars: 1
 github: "https://github.com/Theblackcat98/opencode-workflow"

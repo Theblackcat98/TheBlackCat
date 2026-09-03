@@ -1,7 +1,7 @@
 ---
 title: "Implement"
 description: "Implement a piece of work based on a spec or set of tickets."
-type: skill
+contenttype: skill
 source: "https://github.com/mattpocock/skills/tree/main/skills/engineering/implement"
 topics:
   - ai

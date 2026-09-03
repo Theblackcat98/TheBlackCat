@@ -1,6 +1,6 @@
 ---
 title: "ChatSprout"
-type: bookmark
+contenttype: bookmark
 description: "Customer chat/support alternative to Intercom."
 source: ""
 topics:

@@ -1,6 +1,6 @@
 ---
 title: "termux-ui"
-type: project
+contenttype: project
 language: Go
 stars: 1
 github: "https://github.com/Theblackcat98/termux-ui"

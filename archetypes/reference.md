@@ -1,6 +1,6 @@
 ---
 title: "{{ replace .Name "-" " " | title }}"
-type: reference
+contenttype: reference
 description: ""
 source: ""
 topics: []

@@ -1,6 +1,6 @@
 ---
 title: "WordPress-Scrape"
-type: project
+contenttype: project
 stars: 1
 github: "https://github.com/Theblackcat98/WordPress-Scrape"
 tags:

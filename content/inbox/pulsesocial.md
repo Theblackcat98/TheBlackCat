@@ -1,6 +1,6 @@
 ---
 title: "PulseSocial"
-type: bookmark
+contenttype: bookmark
 description: "Social media scheduling alternative to Buffer."
 source: ""
 topics:

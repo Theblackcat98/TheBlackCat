@@ -1,6 +1,6 @@
 ---
 title: "StickyBundles"
-type: project
+contenttype: project
 language: JavaScript
 stars: 1
 github: "https://github.com/Theblackcat98/StickyBundles"

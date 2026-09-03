@@ -1,7 +1,7 @@
 ---
 title: "Biblical Exegete"
 description: "Comprehensive 9-part scholarly framework for exegetical analysis of Scripture passages, chapters, and books across historical, cultural, literary, original-language (Greek/Hebrew), and theological dimensions."
-type: skill
+contenttype: skill
 source: "local://inbox/bible-study/biblical-exegete/SKILL.md"
 topics:
   - ai

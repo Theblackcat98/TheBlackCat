@@ -16,7 +16,7 @@ The BlackCat stores knowledge as Markdown documents with YAML front matter.
 
 ## Type vs. source
 
-`type` describes **what the content is**. It should not describe where it came from.
+`contenttype` describes **what the content is**. It should not describe where it came from.
 
 Use `source` to record an external canonical URL when one exists. A personal article can have no source; a skill can have an external source; a reference can be imported from a specification. These are independent properties.
 
@@ -25,7 +25,7 @@ Use `source` to record an external canonical URL when one exists. A personal art
 Required:
 
 - `title`
-- `type`
+- `contenttype`
 
 Recommended:
 

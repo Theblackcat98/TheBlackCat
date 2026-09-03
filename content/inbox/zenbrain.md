@@ -1,6 +1,6 @@
 ---
 title: "ZenBrain"
-type: bookmark
+contenttype: bookmark
 description: "AI notes/workspace alternative to Notion AI."
 source: ""
 topics:

@@ -1,6 +1,6 @@
 ---
 title: "ScreenDraft"
-type: bookmark
+contenttype: bookmark
 description: "Screen recording alternative to Loom Pro."
 source: ""
 topics:

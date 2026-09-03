@@ -1,7 +1,7 @@
 ---
 title: "Resolving Merge Conflicts"
 description: "Use when you need to resolve an in-progress git merge/rebase conflict."
-type: skill
+contenttype: skill
 source: "https://github.com/mattpocock/skills/tree/main/skills/engineering/resolving-merge-conflicts"
 topics:
   - ai

@@ -1,6 +1,6 @@
 ---
 title: "visual-ml"
-type: project
+contenttype: project
 stars: 1
 github: "https://github.com/Theblackcat98/visual-ml"
 tags:

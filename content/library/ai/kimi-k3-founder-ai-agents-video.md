@@ -1,6 +1,6 @@
 ---
 title: "Kimi K3 Founder Reveals the Future of AI Agents, Open Source AI & AI Coworkers"
-type: bookmark
+contenttype: bookmark
 description: "YouTube interview with the Kimi K3 founder on AI agents, open-source AI, and AI coworkers."
 source: "https://www.youtube.com/watch?v=3tii8rEscCI"
 topics:

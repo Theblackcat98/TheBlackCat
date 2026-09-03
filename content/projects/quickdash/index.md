@@ -1,6 +1,6 @@
 ---
 title: "quickdash"
-type: project
+contenttype: project
 language: JavaScript
 stars: 3
 github: "https://github.com/Theblackcat98/quickdash"

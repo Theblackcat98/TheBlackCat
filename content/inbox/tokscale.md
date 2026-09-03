@@ -1,6 +1,6 @@
 ---
 title: "tokscale — token usage tracker for AI coding agents"
-type: bookmark
+contenttype: bookmark
 description: "Rust CLI/TUI that parses local session files from 50+ AI coding agents (Claude Code, Codex, OpenCode, Cursor…) and reports token usage & cost — dense ratatui terminal dashboard, 2D/3D web contribution graph, optional global leaderboard."
 source: "https://github.com/junhoyeo/tokscale"
 topics:

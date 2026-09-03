@@ -1,6 +1,6 @@
 ---
 title: "Voxilica"
-type: bookmark
+contenttype: bookmark
 description: "TTS / voice AI alternative to ElevenLabs."
 source: ""
 topics:

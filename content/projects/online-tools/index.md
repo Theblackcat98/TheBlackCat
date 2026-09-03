@@ -1,6 +1,6 @@
 ---
 title: "Online-Tools"
-type: project
+contenttype: project
 language: HTML
 stars: 1
 github: "https://github.com/Theblackcat98/Online-Tools"

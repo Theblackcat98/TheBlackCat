@@ -1,6 +1,6 @@
 ---
 title: "FormForge"
-type: bookmark
+contenttype: bookmark
 description: "Forms/surveys alternative to Typeform."
 source: ""
 topics:

@@ -10,17 +10,18 @@
 
   {{ if eq .Section "library" }}
   <div class="library-type-nav">
+    {{ $libPages := site.RegularPages }}
     {{ range slice "bookmark" "skill" "article" "note" "reference" }}
-      {{ $count := len (where $pages "Params.type" .) }}
-      <a href="{{ printf "/types/%s/" . | relURL }}"><span>{{ . | title }}</span><small>{{ $count }}</small></a>
+      {{ $count := len (where $libPages "Params.contenttype" .) }}
+      <a href="{{ printf "types/%s/" . | relURL }}"><span>{{ . | title }}</span><small>{{ $count }}</small></a>
     {{ end }}
   </div>
   {{ end }}
 
   <div class="cards">
     {{ range $pages.ByDate.Reverse }}
-    <a class="card type-{{ .Params.type | default "page" }}" href="{{ .RelPermalink }}">
-      <div class="card-meta"><span class="card-type">{{ .Params.type | default "page" }}</span>{{ with .Params.updated }}<time>{{ . }}</time>{{ end }}</div>
+    <a class="card type-{{ .Params.contenttype | default "page" }}" href="{{ .RelPermalink }}">
+      <div class="card-meta"><span class="card-type">{{ .Params.contenttype | default "page" }}</span>{{ with .Params.updated }}<time>{{ . }}</time>{{ end }}</div>
       <h2>{{ .Title }}</h2>
       {{ with .Params.description }}<p>{{ . }}</p>{{ else }}{{ with .Summary }}<p>{{ . | plainify | truncate 180 }}</p>{{ end }}{{ end }}
       {{ with .Params.tags }}<div class="tags">{{ range first 4 . }}<span>{{ . }}</span>{{ end }}</div>{{ end }}

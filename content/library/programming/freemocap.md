@@ -1,6 +1,6 @@
 ---
 title: "FreeMoCap — Free Motion Capture for Everyone"
-type: bookmark
+contenttype: bookmark
 description: "Open-source markerless motion capture system (Python) — multi-camera skeleton tracking for everyone."
 source: "https://github.com/freemocap/freemocap"
 topics:

@@ -1,6 +1,6 @@
 ---
 title: "VentureMap"
-type: bookmark
+contenttype: bookmark
 description: "Startup/company data alternative to Crunchbase."
 source: ""
 topics:

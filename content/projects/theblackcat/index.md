@@ -1,6 +1,6 @@
 ---
 title: "The BlackCat"
-type: project
+contenttype: project
 language: Hugo / HTML / CSS / Markdown
 github: "https://github.com/Theblackcat98/TheBlackCat"
 tags:

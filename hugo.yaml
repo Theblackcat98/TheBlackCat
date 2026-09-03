@@ -14,7 +14,7 @@ outputs:
 taxonomies:
   tag: tags
   topic: topics
-  contenttype: types
+  contenttype: contenttype
 
 markup:
   goldmark:

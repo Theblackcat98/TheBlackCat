@@ -13,7 +13,9 @@
     {{ $libPages := site.RegularPages }}
     {{ range slice "bookmark" "skill" "article" "note" "reference" }}
       {{ $count := len (where $libPages "Params.contenttype" .) }}
-      <a href="{{ printf "types/%s/" . | relURL }}"><span>{{ . | title }}</span><small>{{ $count }}</small></a>
+      {{ if gt $count 0 }}
+      <a href="{{ printf "contenttype/%s/" . | relURL }}"><span>{{ . | title }}</span><small>{{ $count }}</small></a>
+      {{ end }}
     {{ end }}
   </div>
   {{ end }}

@@ -75,3 +75,5 @@ Every substantive item should have one canonical document or page bundle. If the
 ## Taxonomy philosophy
 
 Directories represent broad domains. Tags and topics represent cross-cutting concepts. Content type describes the nature of the item. Collections describe useful relationships between items. Do not encode all four concepts into the directory tree.
+
+Hugo indexes taxonomy front matter by the taxonomy's plural name (the map value in `hugo.yaml`), not the singular key. Tags work because content sets `tags:`; topics work because content sets `topics:`. The contenttype taxonomy is therefore mapped singular-to-itself (`contenttype: contenttype`) so the `contenttype:` front-matter field is indexed; term pages live at `/contenttype/<value>/`.

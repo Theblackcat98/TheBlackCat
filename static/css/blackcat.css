@@ -1061,3 +1061,185 @@ img {
   }
 }
 
+
+/* ==========================================================================
+   Card system — v2 template vocabulary (layouts/_default/*)
+   Styles for .cards / .card / .card-meta / .card-type / .library-type-nav /
+   .tags / .eyebrow / .empty-state emitted by the current templates.
+   Uses the C2.1 tokens above to match pinned/project/vault cards.
+   ========================================================================== */
+
+/* --- Cards grid --- */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all var(--transition-normal);
+  text-decoration: none;
+  color: inherit;
+}
+
+.card:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.card-type {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-badge);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-card);
+  text-transform: lowercase;
+}
+
+/* subtle per-contenttype accent on the badge */
+.type-bookmark .card-type { color: var(--accent-gold); }
+.type-skill .card-type    { color: var(--text-primary); }
+.type-project .card-type  { color: var(--accent-gold); }
+.type-collection .card-type { color: var(--accent-gold); background: var(--accent-gold-bg); }
+
+.card-meta time {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.card h2 {
+  font-family: var(--font-serif-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+.card p {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+/* --- Tag chips inside cards --- */
+.card .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+.card .tags span {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-badge);
+  color: var(--text-secondary);
+}
+
+/* --- Library type-nav pills --- */
+.library-type-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 2.5rem;
+}
+
+.library-type-nav a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.library-type-nav a:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.library-type-nav small {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  background: var(--bg-badge);
+  border: 1px solid var(--border-card);
+  padding: 0.05rem 0.4rem;
+  border-radius: var(--radius-full);
+}
+
+/* --- Page header accents --- */
+.article-header {
+  margin-bottom: 2.5rem;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent-gold);
+  margin: 1.25rem 0 0.4rem;
+}
+
+.article-header h1 {
+  margin: 0 0 0.75rem;
+}
+
+/* --- Empty state --- */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  background: var(--bg-surface);
+  border: 1px dashed var(--border-card);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+}
+
+.empty-state h2 {
+  font-family: var(--font-serif-display);
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+}
+
+@media (max-width: 640px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}

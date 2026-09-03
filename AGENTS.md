@@ -18,7 +18,7 @@ The BlackCat is a Git-native personal library. Markdown is the source of truth; 
 8. Do not delete content unless explicitly instructed or the item is clearly a duplicate.
 9. Do not modify unrelated files.
 10. Keep the Markdown body useful to a human; front matter is metadata, not prose.
-11. Choose `contenttype` based on what the thing **is**, not where it came from. Never set `type` in front matter except `type: section` in `_index.md` files — `type` is a reserved Hugo field and silently breaks the `types` taxonomy and library nav.
+11. Choose `contenttype` based on what the thing **is**, not where it came from. Never set `type` in front matter except `type: section` in `_index.md` files — `type` is a reserved Hugo field and silently breaks the contenttype taxonomy and library nav. Hugo indexes taxonomy front matter by the taxonomy's *plural* name, so `contenttype: <value>` in front matter only works because hugo.yaml maps `contenttype: contenttype` (singular = plural, term pages at `/contenttype/<value>/`). Do not remap it to `types` — nothing in content sets a `types:` field, so terms would silently vanish.
 12. Use `description` when a concise summary will improve cards, listings, search, or agent retrieval.
 
 ## Content types

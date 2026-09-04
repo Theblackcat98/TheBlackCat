@@ -1031,6 +1031,58 @@ img {
   color: inherit;
 }
 
+/* Prose data elements: tables, figures, rules */
+.prose table {
+  width: 100%;
+  margin: 1.5rem 0;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.prose th, .prose td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-card);
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose thead th {
+  background: var(--bg-badge);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.prose tbody tr:nth-child(even) { background: var(--bg-badge); }
+.prose tbody tr:hover { background: var(--accent-gold-bg); }
+
+.prose hr {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-card);
+}
+
+.prose figure { margin: 1.5rem 0; }
+
+.prose figcaption {
+  margin-top: 0.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
 /* Footer */
 .site-footer {
   margin-top: auto;

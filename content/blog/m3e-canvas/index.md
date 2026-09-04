@@ -4,6 +4,7 @@ description: "m3e-canvas fixes vibe coding's actual weak spot — not the code g
 authors:
   - theblackcat98
 date: 2026-09-04T13:30:00-07:00
+draft: true
 topics:
   - ai
 tags:

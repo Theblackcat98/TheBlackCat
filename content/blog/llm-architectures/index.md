@@ -30,8 +30,19 @@ Nearly every architecture difference you'll see diagrammed is an attack on one o
 - **MHA (multi-head attention)** — the GPT-2 original. Every query head keeps its own keys and values. Maximum quality per head, worst memory. OLMo 2 still ships it (with QK-norm), deliberately trading the 512 KiB/token cost for training stability and full transparency.
 - **MQA → GQA (grouped-query attention)** — share one set of KV heads across many query heads. GQA is the quiet workhorse of the 2024+ generation: Llama 3's 8B uses it at 128 KiB/token, a 2.3× cut from GPT-2's recipe at a similar width. Quality loss turned out to be negligible.
 - **MLA (multi-head latent attention)** — DeepSeek's move: project keys and values into a small latent space and cache *that*. DeepSeek V3 runs 671B total parameters with 128k context at **68.6 KiB per token** — less per-token cache than Llama 3 8B, in a model two orders of magnitude larger.
-- **Sliding-window + global mixes** — Gemma 3's answer: 55 layers of cheap local sliding-window attention plus 11 global layers. Most token interactions only need neighbors; pay full attention only where it counts.
+- **Sliding-window + global mixes** — the Gemma family's recipe: a 5:1 ratio of cheap local sliding-window layers to full-attention global ones (15+3 in the small variant). Most token interactions only need neighbors; pay full attention only where it counts. Not a magic bullet, though: the gallery's card for Thinking Machines Lab's 975B MoE runs the same 5:1 mix at a million tokens of context and still carries 484 KiB per token.
 - **Sparse attention** — skip most of the n² comparisons entirely. A family of approaches rather than one trick, all chasing the same quadratic term.
+
+The memory scoreboard, all numbers from the gallery's fact sheets (bf16, per token):
+
+| Approach | KV cache / token | Where you'll find it |
+|---|---|---|
+| MHA | 300–512 KiB | GPT-2, OLMo 2 |
+| GQA | 128 KiB | Llama 3 8B |
+| MLA | 68.6 KiB | DeepSeek V3 (671B total) |
+| 5:1 sliding-window/global | 484 KiB @ 1M ctx | Thinking Machines 975B MoE |
+| 3:1 DeltaNet/attention hybrid | 64 KiB | Qwen3.6-27B agent stack |
+| Constant recurrent state | none — fixed-size state | xLSTM-7B |
 
 ## Leaving attention behind: recurrent state
 

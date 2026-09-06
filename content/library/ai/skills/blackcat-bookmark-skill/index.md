@@ -10,7 +10,7 @@ tags:
   - tools
 status: filed
 created: 2026-08-28
-updated: 2026-08-28
+updated: 2026-09-05
 ---
 
 ## Why I saved this
@@ -31,3 +31,10 @@ A Hermes Agent skill (`blackcat-bookmark`) that saves URLs into this repository.
 Design constraints: the repo is public so only public info is written; new items always start in `content/inbox/` with `status: filed` per AGENTS.md; never modifies unrelated files. Weekly triage then moves inbox items into `content/library/<domain>/` (Sundays 23:00, automated).
 
 The skill lives in the agent's skill store; this entry documents its behavior as part of the library's own operating manual.
+
+**Update 2026-09-05:** the skill has since grown well beyond bookmarks — it
+now also owns the blog draft-flag workflow, the weekly triage procedure, and
+the site model, backed by six reference files. The complete skill is mirrored
+verbatim in this library at
+[theblackcat-site](/TheBlackCat/library/ai/skills/theblackcat-site/); this
+entry remains as the historical description of the original bookmark pipeline.

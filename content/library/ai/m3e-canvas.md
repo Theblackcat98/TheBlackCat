@@ -9,9 +9,9 @@ tags:
   - design
   - ui
   - tools
-status: inbox
+status: filed
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 ---
 
 Sketch Material 3 Expressive UI in the browser and turn the sketch into a vibe-coding prompt. By lnkiai, MIT, static Next.js export — [live demo](https://lnkiai.github.io/m3e-canvas/), no backend, everything in localStorage.

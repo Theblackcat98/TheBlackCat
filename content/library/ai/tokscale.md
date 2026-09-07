@@ -12,9 +12,9 @@ tags:
   - tui
   - token-usage
   - ai
-status: inbox
+status: filed
 created: 2026-09-03
-updated: 2026-09-03
+updated: 2026-09-06
 ---
 
 ## Why I saved this

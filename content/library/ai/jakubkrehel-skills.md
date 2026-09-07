@@ -11,9 +11,9 @@ tags:
   - skills
   - web
   - design
-status: inbox
+status: filed
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 ---
 
 ## Why I saved this

@@ -12,9 +12,9 @@ tags:
   - self-hosted
   - open-source
   - typescript
-status: inbox
+status: filed
 created: 2026-09-03
-updated: 2026-09-03
+updated: 2026-09-06
 ---
 
 ## Why I saved this

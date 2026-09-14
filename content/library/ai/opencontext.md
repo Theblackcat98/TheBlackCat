@@ -9,9 +9,9 @@ tags:
   - agents
   - knowledge-management
   - tools
-status: inbox
+status: filed
 created: 2026-09-09
-updated: 2026-09-09
+updated: 2026-09-14
 ---
 
 A personal context store for AI coding agents — capture project knowledge once, then any agent (Codex, Claude Code, OpenCode) can remember decisions and reuse context **across repositories**. Desktop GUI + built-in skills/tools that plug into the agent CLIs you already run.

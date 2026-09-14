@@ -9,9 +9,9 @@ tags:
   - alternatives
   - chatbots
   - support
-status: active
+status: filed
 created: 2026-08-28
-updated: 2026-08-30
+updated: 2026-09-14
 ---
 
 ## Why I saved this

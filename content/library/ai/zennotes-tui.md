@@ -9,9 +9,9 @@ tags:
   - tui
   - knowledge-management
   - open-source
-status: inbox
+status: filed
 created: 2026-09-09
-updated: 2026-09-09
+updated: 2026-09-14
 ---
 
 `zn` — ZenNotes in the terminal: a full CLI plus a Bubble Tea TUI app in one static Go binary (no runtime deps). Notes stay **plain Markdown files in a folder you own**.

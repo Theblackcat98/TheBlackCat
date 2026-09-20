@@ -11,9 +11,9 @@ tags:
   - tts
   - voice
   - linux
-status: inbox
+status: filed
 created: 2026-09-16
-updated: 2026-09-16
+updated: 2026-09-20
 ---
 
 ## Why I saved this

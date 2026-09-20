@@ -5,9 +5,9 @@ description: "x.ai's official guide series for Grok Bot: nine field reports on r
 source: "https://x.ai/bot/guides"
 topics: [ai, programming]
 tags: [ai, agents, workflows, chatbots, automation, prompts]
-status: inbox
+status: filed
 created: 2026-09-15
-updated: 2026-09-15
+updated: 2026-09-20
 ---
 
 ## Why I saved this

@@ -12,9 +12,9 @@ tags:
   - open-source
   - alternatives
   - python
-status: inbox
+status: filed
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-27
 ---
 
 ## Why I saved this

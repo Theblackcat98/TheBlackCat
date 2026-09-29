@@ -1,0 +1,1151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <title>Mermaid.js Gallery</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f7f8;
+      --surface: #ffffff;
+      --surface-2: #edf2f3;
+      --ink: #172225;
+      --muted: #54666b;
+      --line: #d7e0e2;
+      --accent: #067c72;
+      --accent-ink: #ffffff;
+      --accent-soft: #d8f1ed;
+      --code-bg: #152124;
+      --code-ink: #d9e7e8;
+      --warning-bg: #fff3d6;
+      --warning-ink: #664800;
+      --shadow: 0 18px 48px rgba(28, 49, 52, 0.08);
+      --diagram-bg: #fbfdfd;
+      --focus: #e37726;
+      --radius-lg: 20px;
+      --radius-md: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1719;
+        --surface: #162124;
+        --surface-2: #1e2c2f;
+        --ink: #e7eeee;
+        --muted: #adbdc0;
+        --line: #314145;
+        --accent: #58c8bb;
+        --accent-ink: #082c28;
+        --accent-soft: #173d3a;
+        --code-bg: #091113;
+        --code-ink: #d5e4e5;
+        --warning-bg: #3c321b;
+        --warning-ink: #f3d781;
+        --shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
+        --diagram-bg: #f8fbfb;
+        --focus: #ffad66;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 92px; }
+    body {
+      margin: 0;
+      min-width: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Avenir Next", "Segoe UI", Helvetica, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    button, input, select { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+    .page {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: 28px clamp(16px, 3vw, 42px) 64px;
+    }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 28px;
+      align-items: end;
+      padding: 20px 0 28px;
+      border-bottom: 1px solid var(--line);
+    }
+    .intro h1 {
+      max-width: 760px;
+      margin: 0 0 12px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 400;
+      font-size: clamp(2.35rem, 6vw, 5.4rem);
+      line-height: 0.98;
+      letter-spacing: -0.045em;
+    }
+    .intro p {
+      max-width: 720px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.7vw, 1.22rem);
+    }
+    .counter {
+      min-width: 154px;
+      padding: 16px 18px;
+      border-left: 3px solid var(--accent);
+      background: var(--surface);
+    }
+    .counter strong {
+      display: block;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 2.7rem;
+      line-height: 1;
+      color: var(--accent);
+      font-weight: 400;
+    }
+    .counter span { color: var(--muted); font-size: 0.9rem; }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: minmax(230px, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      margin: 18px 0 24px;
+      padding: 11px;
+      background: color-mix(in srgb, var(--bg) 90%, transparent);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--line);
+      box-shadow: 0 8px 26px rgba(17, 36, 39, 0.08);
+    }
+    .search-wrap { position: relative; }
+    .search-wrap svg {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+    #search {
+      width: 100%;
+      height: 44px;
+      border: 0;
+      background: var(--surface);
+      color: var(--ink);
+      padding: 0 42px 0 40px;
+      border-radius: 8px;
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+    #search::placeholder { color: var(--muted); }
+    .search-clear {
+      position: absolute;
+      right: 5px;
+      top: 5px;
+      width: 34px;
+      height: 34px;
+      display: none;
+      place-items: center;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .search-clear:hover { background: var(--surface-2); color: var(--ink); }
+    .toolbar select {
+      display: none;
+      width: 100%;
+      height: 44px;
+      padding: 0 36px 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+    .filter-list { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .filter {
+      min-height: 36px;
+      padding: 7px 11px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .filter:hover { background: var(--surface-2); color: var(--ink); }
+    .filter.active { background: var(--accent); color: var(--accent-ink); }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: clamp(24px, 4vw, 58px);
+      align-items: start;
+    }
+    .sidebar {
+      position: sticky;
+      top: 90px;
+      max-height: calc(100vh - 112px);
+      overflow-y: auto;
+      padding: 8px 14px 18px 0;
+      scrollbar-width: thin;
+    }
+    .side-heading {
+      margin: 0 0 9px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+    }
+    .side-group { margin-bottom: 19px; }
+    .side-group-title {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .side-link {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 31px;
+      padding: 4px 7px;
+      border-radius: 7px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+    }
+    .side-link:hover, .side-link.active { background: var(--surface-2); color: var(--ink); }
+    .side-link.active { font-weight: 650; }
+    .side-index {
+      width: 21px;
+      flex: 0 0 21px;
+      color: var(--accent);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.71rem;
+    }
+
+    .gallery { min-width: 0; }
+    .category-block { margin-bottom: 52px; }
+    .category-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 2px 0 15px;
+    }
+    .category-head h2 {
+      margin: 0;
+      font-size: clamp(1.28rem, 2.5vw, 1.75rem);
+      letter-spacing: -0.02em;
+    }
+    .category-head span { color: var(--muted); font-size: 0.88rem; }
+
+    .diagram-card {
+      scroll-margin-top: 96px;
+      margin-bottom: 19px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: clip;
+    }
+    .card-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: start;
+      padding: clamp(18px, 3vw, 28px) clamp(18px, 3.5vw, 34px) 18px;
+    }
+    .title-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    .card-number {
+      color: var(--accent);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .card-head h3 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.45rem, 3vw, 2.12rem);
+      line-height: 1.1;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+    }
+    .card-head p {
+      max-width: 730px;
+      margin: 8px 0 0;
+      color: var(--muted);
+    }
+    .source-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 38px;
+      padding: 7px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+    .source-toggle:hover { background: var(--surface-2); }
+    .source-toggle svg { width: 16px; height: 16px; }
+
+    .good-for {
+      display: flex;
+      align-items: baseline;
+      gap: 9px;
+      flex-wrap: wrap;
+      margin: 0;
+      padding: 0 clamp(18px, 3.5vw, 34px) 22px;
+      list-style: none;
+    }
+    .good-for::before {
+      content: "Good for";
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .good-for li {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--ink);
+      font-size: 0.9rem;
+    }
+    .good-for li:not(:last-child)::after { content: "·"; color: var(--accent); }
+
+    .diagram-stage {
+      position: relative;
+      min-height: 300px;
+      display: grid;
+      place-items: center;
+      padding: clamp(18px, 4vw, 44px);
+      background:
+        linear-gradient(var(--diagram-bg), var(--diagram-bg)),
+        repeating-linear-gradient(0deg, transparent 0 27px, rgba(6,124,114,.04) 27px 28px);
+      border-top: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .diagram-stage .render-target { width: 100%; min-width: 0; text-align: center; }
+    .diagram-stage svg { display: block; max-width: 100% !important; height: auto !important; margin: 0 auto; }
+    .rendering {
+      color: #51676b;
+      font-size: 0.9rem;
+    }
+    .render-error {
+      width: min(560px, 100%);
+      padding: 16px;
+      border: 1px solid #c34a42;
+      border-radius: 8px;
+      background: #fff0ef;
+      color: #74241f;
+      text-align: left;
+    }
+
+    .source-panel {
+      display: none;
+      background: var(--code-bg);
+      color: var(--code-ink);
+      border-top: 1px solid color-mix(in srgb, var(--line) 45%, transparent);
+    }
+    .source-panel.open { display: block; }
+    .source-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 14px 0 18px;
+      color: #91a9ac;
+      font: 0.76rem/1.4 "SFMono-Regular", Consolas, monospace;
+    }
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 34px;
+      padding: 6px 10px;
+      border: 1px solid #34494d;
+      border-radius: 7px;
+      background: #203034;
+      color: #d9e7e8;
+      cursor: pointer;
+    }
+    .copy-btn:hover { background: #293d41; }
+    .copy-btn svg { width: 14px; height: 14px; }
+    pre {
+      margin: 0;
+      padding: 14px 18px 22px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      font: 0.82rem/1.62 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      tab-size: 2;
+    }
+
+    .curiosity {
+      margin: 20px clamp(18px, 3.5vw, 34px) 0;
+      padding: 11px 13px;
+      border-radius: 8px;
+      background: var(--warning-bg);
+      color: var(--warning-ink);
+      font-size: 0.88rem;
+    }
+    .empty-state {
+      display: none;
+      margin: 48px auto;
+      max-width: 520px;
+      padding: 30px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      background: var(--surface);
+    }
+    .empty-state strong { display: block; color: var(--ink); font-size: 1.15rem; margin-bottom: 4px; }
+    .footnote {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+    .footnote strong { color: var(--ink); }
+
+    @media (max-width: 930px) {
+      .intro { grid-template-columns: 1fr; align-items: start; }
+      .counter { width: max-content; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .toolbar { grid-template-columns: minmax(0, 1fr) 180px; }
+      .filter-list { display: none; }
+      .toolbar select { display: block; }
+    }
+
+    @media (max-width: 620px) {
+      html { scroll-padding-top: 142px; }
+      .page { padding: 16px 12px 46px; }
+      .intro { padding: 14px 4px 22px; gap: 20px; }
+      .counter { min-width: 0; padding: 12px 14px; }
+      .counter strong { font-size: 2rem; }
+      .toolbar {
+        top: 0;
+        grid-template-columns: 1fr;
+        margin: 12px 0 22px;
+        padding: 8px;
+      }
+      .category-block { margin-bottom: 38px; }
+      .category-head { padding: 0 4px; }
+      .category-head span { display: none; }
+      .diagram-card { border-radius: 15px; margin-bottom: 14px; }
+      .card-head { grid-template-columns: 1fr; gap: 13px; }
+      .source-toggle { width: 100%; justify-content: center; }
+      .good-for { gap: 7px; }
+      .good-for::before { width: 100%; }
+      .good-for li { width: 100%; }
+      .good-for li:not(:last-child)::after { display: none; }
+      .good-for li::before { content: "—"; color: var(--accent); }
+      .diagram-stage { min-height: 235px; padding: 14px; }
+      .diagram-stage svg { max-height: 540px; }
+      pre { font-size: 0.75rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <h1 id="page-title">Every Mermaid diagram, one page.</h1>
+        <p>Twenty-three Mermaid v11 diagram types—from flowcharts and sequence diagrams to architecture, Sankey, radar, and treemap—each with a working example and copyable source.</p>
+      </div>
+      <div class="counter" aria-label="23 diagram types">
+        <strong>23</strong>
+        <span>diagram types · Mermaid v11</span>
+      </div>
+    </section>
+
+    <div class="toolbar" aria-label="Gallery controls">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg>
+        <label class="sr-only" for="search" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Search diagram types</label>
+        <input id="search" type="search" placeholder="Search diagrams or use cases…" autocomplete="off" />
+        <button class="search-clear" type="button" aria-label="Clear search">×</button>
+      </div>
+      <div class="filter-list" aria-label="Filter by category"></div>
+      <select id="mobile-filter" aria-label="Filter by category"></select>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar" aria-label="Diagram index">
+        <p class="side-heading">Diagram index</p>
+        <nav id="sidebar-nav"></nav>
+      </aside>
+      <div class="gallery" id="gallery" aria-live="polite"></div>
+    </div>
+
+    <div class="empty-state" id="empty-state">
+      <strong>No matching diagrams</strong>
+      Try a different term or choose another category.
+    </div>
+
+    <p class="footnote"><strong>Scope note.</strong> These 23 examples were syntax-checked with Mermaid 11.17.2. ZenUML is not included because it requires an experimental configuration; the final “Info” example is a diagnostic that displays the Mermaid version currently running.</p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.min.js"></script>
+  <script>
+    const categories = [
+      { id: "essentials", label: "Essentials" },
+      { id: "planning", label: "Planning & product" },
+      { id: "charts", label: "Charts & data" },
+      { id: "technical", label: "Technical systems" },
+      { id: "utility", label: "Utility" }
+    ];
+
+    const diagrams = [
+      {
+        id: "flowchart", name: "Flowchart", category: "essentials",
+        blurb: "Nodes and edges for processes, decisions, and flows—the workhorse of the Mermaid family.",
+        uses: ["CI/CD pipelines", "Decision trees", "Algorithms and business processes"],
+        code: `flowchart TD
+    A[Push to main] --> B{CI checks pass?}
+    B -->|Yes| C[Build container image]
+    B -->|No| D[Notify author]
+    D --> E[Fix and re-push]
+    E --> B
+    C --> F[Push to registry]
+    F --> G{Deploy approved?}
+    G -->|Yes| H[Rolling deploy to prod]
+    G -->|No| I[Hold for review]
+    H --> J[Smoke tests]
+    J --> K{Healthy?}
+    K -->|Yes| L[Done]
+    K -->|No| M[Rollback]`
+      },
+      {
+        id: "sequence-diagram", name: "Sequence Diagram", category: "essentials",
+        blurb: "How actors and systems exchange messages over time—the classic for API and protocol docs.",
+        uses: ["API request flows", "Auth handshakes (OAuth, SAML)", "Debugging distributed interactions"],
+        code: `sequenceDiagram
+    autonumber
+    participant U as User
+    participant C as Client App
+    participant A as Auth Server
+    participant R as Resource API
+
+    U->>C: Click "Sign in"
+    C->>A: GET /authorize (client_id, scope)
+    A->>U: Login page
+    U->>A: Enter credentials
+    A->>C: Redirect with auth code
+    C->>A: POST /token (code, client_secret)
+    A-->>C: access_token + refresh_token
+    C->>R: GET /profile (Bearer token)
+    R-->>C: User profile JSON
+    C-->>U: Signed-in dashboard
+    Note over C,R: Tokens expire in 1h - the refresh_token renews them`
+      },
+      {
+        id: "class-diagram", name: "Class Diagram", category: "essentials",
+        blurb: "UML classes, members, and relationships for object-oriented designs.",
+        uses: ["Domain modeling", "Codebase documentation", "Planning refactors"],
+        code: `classDiagram
+    class Vehicle {
+        +String make
+        +String model
+        +int year
+        +start() void
+        +stop() void
+    }
+    class Car {
+        +int doors
+        +openTrunk() void
+    }
+    class Engine {
+        +int horsepower
+        +ignite() void
+    }
+    class Driver {
+        +String name
+        +drive(Vehicle v) void
+    }
+    Vehicle <|-- Car
+    Car *-- Engine : contains
+    Driver --> Vehicle : drives`
+      },
+      {
+        id: "state-diagram", name: "State Diagram", category: "essentials",
+        blurb: "States and the transitions between them—perfect for anything with a lifecycle.",
+        uses: ["Order or ticket lifecycles", "UI component states", "Protocol state machines"],
+        code: `stateDiagram-v2
+    [*] --> Created
+    Created --> Paid : payment received
+    Created --> Cancelled : timeout
+    Paid --> Shipped : packed
+    Paid --> Refunded : chargeback
+    Shipped --> Delivered : signed
+    Shipped --> Returned : customer return
+    Delivered --> [*]
+    Cancelled --> [*]
+    Refunded --> [*]
+    Returned --> Refunded : refund issued`
+      },
+      {
+        id: "entity-relationship", name: "Entity Relationship Diagram", category: "essentials",
+        blurb: "Database tables, attributes, and cardinalities without opening a schema tool.",
+        uses: ["Database schema design", "Onboarding to an existing database", "Data-model reviews"],
+        code: `erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ LINE_ITEM : contains
+    PRODUCT ||--o{ LINE_ITEM : "listed in"
+    CUSTOMER {
+        string id PK
+        string name
+        string email
+    }
+    ORDER {
+        string id PK
+        string customer_id FK
+        date placed_at
+        string status
+    }
+    LINE_ITEM {
+        string order_id FK
+        string product_id FK
+        int quantity
+    }
+    PRODUCT {
+        string id PK
+        string name
+        float price
+    }`
+      },
+      {
+        id: "user-journey", name: "User Journey", category: "planning",
+        blurb: "A user's experience across steps, scored for satisfaction—UX's favorite one-pager.",
+        uses: ["UX research synthesis", "Customer experience mapping", "Pain-point spotting"],
+        code: `journey
+    title Morning coffee run
+    section Leave home
+      Grab keys: 5: Me
+      Walk to car: 4: Me
+    section Buy coffee
+      Queue up: 3: Me, Barista
+      Order oat latte: 5: Me
+      Wait for drink: 2: Me
+      Pay: 4: Me
+    section Head to work
+      Drive to office: 5: Me`
+      },
+      {
+        id: "gantt-chart", name: "Gantt Chart", category: "planning",
+        blurb: "Tasks on a timeline with dependencies—a project plan that fits in a Markdown file.",
+        uses: ["Release planning", "Sprint or milestone tracking", "Dependency visualization"],
+        code: `gantt
+    title Website relaunch plan
+    dateFormat YYYY-MM-DD
+    section Design
+    Wireframes      :done,   des1, 2026-10-01, 2026-10-07
+    Visual design   :active, des2, 2026-10-08, 2026-10-14
+    section Build
+    Frontend        :        dev1, after des2, 10d
+    Backend API     :        dev2, after des2, 12d
+    section Launch
+    QA pass         :        qa1, after dev1, 5d
+    Deploy to prod  :crit,   dep1, after qa1, 2d`
+      },
+      {
+        id: "requirement-diagram", name: "Requirement Diagram", category: "planning",
+        blurb: "Requirements, system elements, and how they satisfy, trace, and verify each other.",
+        uses: ["Systems engineering docs", "Compliance traceability", "Acceptance criteria mapping"],
+        code: `requirementDiagram
+    requirement login_req {
+        id: 1
+        text: "Users can sign in with email and password."
+        risk: high
+        verifymethod: test
+    }
+    requirement sso_req {
+        id: 2
+        text: "Users can sign in with Google SSO."
+        risk: medium
+        verifymethod: inspection
+    }
+    element web_app {
+        type: "web application"
+    }
+    web_app - satisfies -> login_req
+    web_app - satisfies -> sso_req
+    sso_req - traces -> login_req`
+      },
+      {
+        id: "mindmap", name: "Mindmap", category: "planning",
+        blurb: "Ideas radiating from a central topic—brainstorming that can live directly in the doc.",
+        uses: ["Brainstorming sessions", "Topic outlines", "Knowledge mapping"],
+        code: `mindmap
+  root((Mermaid))
+    Diagrams
+      Flowchart
+      Sequence
+      Class
+      State
+      ER
+    Charts
+      Gantt
+      Pie
+      Quadrant
+      XY
+      Radar
+    Extras
+      Idea maps
+      Roadmaps
+      Gitgraph
+      Kanban`
+      },
+      {
+        id: "timeline", name: "Timeline", category: "planning",
+        blurb: "Events laid out chronologically—history lessons and roadmaps in plain text.",
+        uses: ["Project roadmaps", "Company history", "Incident timelines"],
+        code: `timeline
+    title History of the web
+    1990 : Tim Berners-Lee proposes the World Wide Web
+    1993 : Mosaic browser launches
+    1998 : Google founded
+    2004 : Web 2.0 and social media take off
+    2007 : iPhone launches the mobile era
+    2022 : ChatGPT sparks the AI wave`
+      },
+      {
+        id: "kanban-board", name: "Kanban Board", category: "planning",
+        blurb: "Columns of cards for work in progress—a board that can live in your repo.",
+        uses: ["Lightweight task tracking", "Sprint boards in docs", "Personal to-do walls"],
+        code: `kanban
+  Backlog
+    setup[Set up repo]
+    design[Draft UI mockups]
+  In Progress
+    auth[Implement auth flow]
+  Review
+    api[REST API endpoints]
+  Done
+    ci[CI pipeline]`
+      },
+      {
+        id: "pie-chart", name: "Pie Chart", category: "charts",
+        blurb: "Part-of-a-whole proportions in a few lines, with no separate charting library required.",
+        uses: ["Survey results", "Market or traffic share", "Budget breakdowns"],
+        code: `pie title Browser share, Sept 2026
+    "Chrome" : 62
+    "Safari" : 19
+    "Edge" : 6
+    "Firefox" : 5
+    "Other" : 8`
+      },
+      {
+        id: "quadrant-chart", name: "Quadrant Chart", category: "charts",
+        blurb: "Two axes, four boxes—the classic 2×2 matrix for prioritization.",
+        uses: ["Feature prioritization", "Risk matrices", "Market positioning"],
+        code: `quadrantChart
+    title Prioritize features
+    x-axis "Low effort" --> "High effort"
+    y-axis "Low value" --> "High value"
+    quadrant-1 "Do later"
+    quadrant-2 "Quick wins"
+    quadrant-3 "Skip"
+    quadrant-4 "Big bets"
+    Dark mode: [0.3, 0.8]
+    SSO login: [0.2, 0.9]
+    Rewrite in Rust: [0.9, 0.5]
+    New logo: [0.2, 0.2]`
+      },
+      {
+        id: "xy-chart", name: "XY Chart", category: "charts",
+        blurb: "Bar and line charts on x/y axes—the spreadsheet chart you can version-control.",
+        uses: ["Metrics dashboards in docs", "Trend reporting", "A/B test results"],
+        code: `xychart-beta
+    title "Signups per month"
+    x-axis [Jan, Feb, Mar, Apr, May, Jun]
+    y-axis "Signups" 0 --> 500
+    bar [120, 200, 180, 320, 410, 480]
+    line [100, 150, 220, 260, 380, 450]`
+      },
+      {
+        id: "sankey-diagram", name: "Sankey Diagram", category: "charts",
+        blurb: "Flows with widths proportional to quantity—see where energy, money, or users go.",
+        uses: ["Energy or budget flows", "User funnels", "Resource allocation"],
+        code: `sankey-beta
+Solar, Grid, 120
+Wind, Grid, 80
+Grid, Homes, 110
+Grid, Industry, 60
+Grid, Loss, 30`
+      },
+      {
+        id: "radar-chart", name: "Radar Chart", category: "charts",
+        blurb: "A multi-axis comparison on a spider web, ideal for compact spec-sheet showdowns.",
+        uses: ["Product comparisons", "Skill assessments", "Benchmark summaries"],
+        code: `radar-beta
+  title "Phone comparison"
+  axis b["Battery"], c["Camera"], s["Screen"], p["Price"], w["Weight"]
+  curve i["Phone A"]{80, 90, 85, 40, 70}
+  curve j["Phone B"]{70, 75, 90, 80, 60}
+  max 100
+  min 0`
+      },
+      {
+        id: "treemap", name: "Treemap", category: "charts",
+        blurb: "Nested rectangles sized by value—a hierarchy whose weight is visible at a glance.",
+        uses: ["Budget breakdowns", "Disk or resource usage", "Portfolio composition"],
+        code: `treemap-beta
+"Q3 Revenue"
+    "Hardware": 420
+    "Software": 310
+    "Services"
+        "Consulting": 120
+        "Support": 90`
+      },
+      {
+        id: "git-graph", name: "Git Graph", category: "technical",
+        blurb: "Branches, commits, merges, and tags as a picture—worth a thousand git log commands.",
+        uses: ["Explaining branching strategy", "Release-note visuals", "Git tutorials"],
+        code: `gitGraph
+    commit id: "init"
+    branch feature
+    checkout feature
+    commit id: "add parser"
+    commit id: "add tests"
+    checkout main
+    commit id: "hotfix"
+    checkout feature
+    merge main
+    checkout main
+    merge feature
+    commit id: "release v1.0" tag: "v1.0"`
+      },
+      {
+        id: "c4-diagram", name: "C4 Diagram", category: "technical",
+        blurb: "Experimental C4-model syntax for context, container, and component views of software architecture.",
+        uses: ["System context docs", "Architecture reviews", "Onboarding engineers"],
+        code: `C4Context
+    title Online bookstore - system context
+    Person(customer, "Customer", "Buys books online")
+    System(shop, "Bookstore", "Lets customers browse and order books")
+    System_Ext(payments, "Payment gateway", "Processes card payments")
+    SystemDb(warehouse, "Warehouse DB", "Tracks stock and shipments")
+
+    Rel(customer, shop, "Browses and orders")
+    Rel(shop, payments, "Charges cards via")
+    Rel(shop, warehouse, "Reads and writes")`
+      },
+      {
+        id: "packet-diagram", name: "Packet Diagram", category: "technical",
+        blurb: "Bit-level layouts of network packets and binary formats.",
+        uses: ["Protocol documentation", "Binary format specifications", "Networking tutorials"],
+        code: `packet-beta
+0-15: "Source Port"
+16-31: "Destination Port"
+32-63: "Sequence Number"
+64-95: "Acknowledgment Number"
+96-99: "Data Offset"
+100-105: "Reserved"
+106-111: "Flags"
+112-127: "Window Size"
+128-143: "Checksum"
+144-159: "Urgent Pointer"`
+      },
+      {
+        id: "block-diagram", name: "Block Diagram", category: "technical",
+        blurb: "Composable blocks with columns and nesting for quick infrastructure sketches.",
+        uses: ["Infrastructure sketches", "System block layouts", "Hardware diagrams"],
+        code: `block-beta
+    columns 3
+    db["Database"] app["App Server"] cache["Cache"]
+    block:net:3
+        columns 1
+        lb["Load Balancer"]
+    end
+    web1["Web 1"] web2["Web 2"] web3["Web 3"]
+    lb --> web1
+    lb --> web2
+    lb --> web3
+    web1 --> app
+    app --> db
+    app --> cache`
+      },
+      {
+        id: "architecture-diagram", name: "Architecture Diagram", category: "technical",
+        blurb: "Cloud-style architecture with icons, groups, and directional edges.",
+        uses: ["Cloud topology docs", "Deployment overviews", "Network diagrams"],
+        code: `architecture-beta
+    group cloud(cloud)[Cloud VPC]
+
+    service lb(server)[Load Balancer] in cloud
+    service api(server)[API Servers] in cloud
+    service db(database)[Postgres] in cloud
+    service cache(disk)[Redis] in cloud
+
+    lb:R -- L:api
+    api:B -- T:db
+    api:B -- T:cache`
+      },
+      {
+        id: "info", name: "Info", category: "utility",
+        blurb: "A diagnostic box showing the running Mermaid version—meta, but it counts as a type.",
+        uses: ["Debugging render issues", "Confirming the Mermaid version in a document pipeline"],
+        note: "The Info diagram is intentionally minimal: its entire source is the word “info.”",
+        code: `info`
+      }
+    ];
+
+    const categoryMap = Object.fromEntries(categories.map(c => [c.id, c]));
+    const gallery = document.getElementById("gallery");
+    const nav = document.getElementById("sidebar-nav");
+    const filterList = document.querySelector(".filter-list");
+    const mobileFilter = document.getElementById("mobile-filter");
+    const searchInput = document.getElementById("search");
+    const searchClear = document.querySelector(".search-clear");
+    const emptyState = document.getElementById("empty-state");
+    let activeCategory = "all";
+    let renderCycle = 0;
+
+    const icons = {
+      code: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg>',
+      copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>'
+    };
+
+    function escapeHtml(value) {
+      return value.replace(/[&<>]/g, char => ({"&":"&amp;","<":"&lt;",">":["&gt;"][0]})[char]);
+    }
+
+    function renderStructure() {
+      filterList.innerHTML = [
+        '<button class="filter active" type="button" data-filter="all">All 23</button>',
+        ...categories.map(c => `<button class="filter" type="button" data-filter="${c.id}">${c.label}</button>`)
+      ].join("");
+      mobileFilter.innerHTML = '<option value="all">All 23 types</option>' + categories.map(c => `<option value="${c.id}">${c.label}</option>`).join("");
+
+      nav.innerHTML = categories.map(category => {
+        const items = diagrams.filter(d => d.category === category.id);
+        return `<div class="side-group" data-nav-category="${category.id}">
+          <span class="side-group-title">${category.label}</span>
+          ${items.map(item => {
+            const index = diagrams.indexOf(item) + 1;
+            return `<a class="side-link" href="#${item.id}" data-target="${item.id}"><span class="side-index">${String(index).padStart(2, "0")}</span><span>${item.name}</span></a>`;
+          }).join("")}
+        </div>`;
+      }).join("");
+
+      gallery.innerHTML = categories.map(category => {
+        const items = diagrams.filter(d => d.category === category.id);
+        return `<section class="category-block" data-category="${category.id}" aria-labelledby="category-${category.id}">
+          <div class="category-head"><h2 id="category-${category.id}">${category.label}</h2><span>${items.length} ${items.length === 1 ? "type" : "types"}</span></div>
+          ${items.map(item => {
+            const index = diagrams.indexOf(item) + 1;
+            return `<article class="diagram-card" id="${item.id}" data-name="${item.name.toLowerCase()}" data-search="${(item.name + " " + item.blurb + " " + item.uses.join(" ")).toLowerCase()}">
+              <header class="card-head">
+                <div>
+                  <div class="title-row"><span class="card-number">${String(index).padStart(2, "0")}</span><h3>${item.name}</h3></div>
+                  <p>${item.blurb}</p>
+                  ${item.note ? `<div class="curiosity">${item.note}</div>` : ""}
+                </div>
+                <button class="source-toggle" type="button" data-source="${item.id}" aria-expanded="false" aria-controls="source-${item.id}">${icons.code}<span>View source</span></button>
+              </header>
+              <ul class="good-for">${item.uses.map(use => `<li>${use}</li>`).join("")}</ul>
+              <div class="diagram-stage" aria-label="Rendered ${item.name} example">
+                <div class="render-target" id="render-${item.id}"><span class="rendering">Rendering diagram…</span></div>
+              </div>
+              <div class="source-panel" id="source-${item.id}">
+                <div class="source-bar"><span>mermaid</span><button class="copy-btn" type="button" data-copy="${item.id}">${icons.copy}<span>Copy</span></button></div>
+                <pre><code>${escapeHtml(item.code)}</code></pre>
+              </div>
+            </article>`;
+          }).join("")}
+        </section>`;
+      }).join("");
+    }
+
+    function mermaidConfig() {
+      const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      return {
+        startOnLoad: false,
+        securityLevel: "strict",
+        theme: "base",
+        fontFamily: '"Avenir Next", "Segoe UI", Helvetica, sans-serif',
+        themeVariables: {
+          background: "#fbfdfd",
+          primaryColor: dark ? "#d8f1ed" : "#d8f1ed",
+          primaryTextColor: "#172225",
+          primaryBorderColor: "#067c72",
+          lineColor: "#506a6e",
+          secondaryColor: "#e7eff0",
+          tertiaryColor: "#fff3d6",
+          clusterBkg: "#edf4f4",
+          clusterBorder: "#8da5a8",
+          titleColor: "#172225",
+          edgeLabelBackground: "#fbfdfd",
+          fontSize: "15px",
+          pie1: "#087c72",
+          pie2: "#e37726",
+          pie3: "#5b748d",
+          pie4: "#d2ab37",
+          pie5: "#9b6b80"
+        },
+        flowchart: { htmlLabels: true, curve: "basis" },
+        sequence: { useMaxWidth: true, diagramMarginX: 20, diagramMarginY: 20 },
+        gantt: { useMaxWidth: true },
+        c4: { useMaxWidth: true }
+      };
+    }
+
+    async function renderAllDiagrams() {
+      const cycle = ++renderCycle;
+      if (!window.mermaid) {
+        document.querySelectorAll(".render-target").forEach(el => {
+          el.innerHTML = '<div class="render-error"><strong>Mermaid could not load.</strong><br>Check the network connection and reload this page.</div>';
+        });
+        return;
+      }
+      mermaid.initialize(mermaidConfig());
+      for (let i = 0; i < diagrams.length; i++) {
+        if (cycle !== renderCycle) return;
+        const item = diagrams[i];
+        const target = document.getElementById(`render-${item.id}`);
+        if (!target) continue;
+        try {
+          const result = await mermaid.render(`mermaid-svg-${cycle}-${i}`, item.code);
+          if (cycle !== renderCycle) return;
+          target.innerHTML = result.svg;
+          if (result.bindFunctions) result.bindFunctions(target);
+          const svg = target.querySelector("svg");
+          if (svg) {
+            svg.removeAttribute("height");
+            svg.setAttribute("role", "img");
+            svg.setAttribute("aria-label", `${item.name} example`);
+          }
+        } catch (error) {
+          target.innerHTML = `<div class="render-error"><strong>This diagram did not render.</strong><br>${escapeHtml(String(error.message || error))}</div>`;
+        }
+      }
+    }
+
+    function applyFilters() {
+      const query = searchInput.value.trim().toLowerCase();
+      let shown = 0;
+      document.querySelectorAll(".category-block").forEach(section => {
+        let categoryShown = 0;
+        section.querySelectorAll(".diagram-card").forEach(card => {
+          const matchesCategory = activeCategory === "all" || section.dataset.category === activeCategory;
+          const matchesSearch = !query || card.dataset.search.includes(query);
+          const visible = matchesCategory && matchesSearch;
+          card.hidden = !visible;
+          if (visible) { shown++; categoryShown++; }
+        });
+        section.hidden = categoryShown === 0;
+      });
+      document.querySelectorAll(".side-group").forEach(group => {
+        const section = document.querySelector(`.category-block[data-category="${group.dataset.navCategory}"]`);
+        group.hidden = !section || section.hidden;
+        group.querySelectorAll(".side-link").forEach(link => {
+          const card = document.getElementById(link.dataset.target);
+          link.hidden = !card || card.hidden;
+        });
+      });
+      emptyState.style.display = shown === 0 ? "block" : "none";
+      searchClear.style.display = query ? "grid" : "none";
+    }
+
+    async function copyText(text, button) {
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(text);
+        copied = true;
+      } catch (_) {
+        const area = document.createElement("textarea");
+        area.value = text;
+        area.setAttribute("readonly", "");
+        area.style.position = "fixed";
+        area.style.opacity = "0";
+        document.body.appendChild(area);
+        area.select();
+        copied = document.execCommand("copy");
+        area.remove();
+      }
+      const label = button.querySelector("span");
+      const previous = label.textContent;
+      label.textContent = copied ? "Copied" : "Select code";
+      setTimeout(() => { label.textContent = previous; }, 1600);
+    }
+
+    renderStructure();
+
+    document.addEventListener("click", event => {
+      const filter = event.target.closest(".filter");
+      if (filter) {
+        activeCategory = filter.dataset.filter;
+        document.querySelectorAll(".filter").forEach(btn => btn.classList.toggle("active", btn === filter));
+        mobileFilter.value = activeCategory;
+        applyFilters();
+      }
+
+      const toggle = event.target.closest(".source-toggle");
+      if (toggle) {
+        const panel = document.getElementById(`source-${toggle.dataset.source}`);
+        const open = panel.classList.toggle("open");
+        toggle.setAttribute("aria-expanded", String(open));
+        toggle.querySelector("span").textContent = open ? "Hide source" : "View source";
+      }
+
+      const copy = event.target.closest(".copy-btn");
+      if (copy) {
+        const item = diagrams.find(d => d.id === copy.dataset.copy);
+        if (item) copyText(item.code, copy);
+      }
+    });
+
+    mobileFilter.addEventListener("change", () => {
+      activeCategory = mobileFilter.value;
+      document.querySelectorAll(".filter").forEach(btn => btn.classList.toggle("active", btn.dataset.filter === activeCategory));
+      applyFilters();
+    });
+    searchInput.addEventListener("input", applyFilters);
+    searchClear.addEventListener("click", () => {
+      searchInput.value = "";
+      applyFilters();
+      searchInput.focus();
+    });
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        document.querySelectorAll(".side-link").forEach(link => link.classList.toggle("active", link.dataset.target === entry.target.id));
+      });
+    }, { rootMargin: "-20% 0px -65% 0px", threshold: 0 });
+    document.querySelectorAll(".diagram-card").forEach(card => observer.observe(card));
+
+    window.addEventListener("load", renderAllDiagrams);
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAllDiagrams);
+  </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{{- /* Human label for a kind. Vocabulary lives in hugo.yaml (params.contenttypes). */ -}}
+{{- $k := . -}}
+{{- $over := dict "blog" "Post" "docs" "Doc" "section" "Section" "page" "Page" "notes" "Note" "inbox" "Inbox" -}}
+{{- $label := $k | title -}}
+{{- with index site.Params.contenttypes $k -}}
+  {{- $label = .label -}}
+{{- else -}}
+  {{- with index $over $k }}{{ $label = . }}{{ end -}}
+{{- end -}}
+{{- return $label -}}

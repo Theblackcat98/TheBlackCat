@@ -1,0 +1,40 @@
+{{- $items := .RegularPages.ByParam "stars" -}}
+{{- $items = $items.Reverse -}}
+{{- $tagCounts := dict -}}
+{{- range $items -}}{{- range .Params.tags -}}{{- $t := lower (string .) -}}{{- $tagCounts = merge $tagCounts (dict $t (add 1 (index $tagCounts $t | default 0))) -}}{{- end -}}{{- end -}}
+{{- $top := slice -}}
+{{- range $t, $n := $tagCounts -}}{{- if ge $n 2 -}}{{- $top = $top | append (dict "t" $t "n" $n "k" (printf "%04d|%s" (sub 9999 $n) $t)) -}}{{- end -}}{{- end -}}
+{{- $top = sort $top "k" -}}
+
+{{ partial "breadcrumbs.html" . }}
+<header class="page-head">
+  <span class="kicker">Workshop</span>
+  <h1 class="h-page">{{ partial "title.html" . }}</h1>
+  {{ with .Content }}<div class="lede prose" style="max-width: 38rem">{{ . }}</div>{{ end }}
+</header>
+
+<div data-filter-root>
+  <div class="toolbar">
+    <div class="toolbar__row">
+      <div class="chips" role="group" aria-label="Filter by tag">
+        <button class="chip" type="button" data-filter="tag" data-value="" aria-pressed="true">All <small>{{ len $items }}</small></button>
+        {{- range first 8 $top }}
+        <button class="chip" type="button" data-filter="tag" data-value="{{ .t }}" aria-pressed="false">{{ .t }} <small>{{ .n }}</small></button>
+        {{- end }}
+      </div>
+      <label class="field" style="padding: 0 var(--s-3)">
+        <span class="visually-hidden">Sort projects</span>
+        <select data-filter-sort>
+          <option value="stars">Most stars</option>
+          <option value="az">A → Z</option>
+        </select>
+      </label>
+    </div>
+    <p class="count" aria-live="polite" data-filter-count>{{ len $items }} projects</p>
+  </div>
+
+  <ul class="grid" role="list" data-filter-list>
+    {{- range $items }}{{ partial "project-card.html" . }}{{ end }}
+  </ul>
+  <div class="empty" data-filter-empty hidden><h2>No matches</h2><p><button class="chip" type="button" data-filter-reset>Clear filters</button></p></div>
+</div>

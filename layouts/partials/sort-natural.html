@@ -1,0 +1,12 @@
+{{- /* Chapter order: weight, then the first number in the filename (so chapter_2 < chapter_10), then filename. */ -}}
+{{- $keyed := slice -}}
+{{- range . -}}
+  {{- $n := 0 -}}
+  {{- $name := "" -}}
+  {{- with .File -}}{{- $name = .LogicalName -}}{{- end -}}
+  {{- with findRE `\d+` $name 1 -}}{{- $n = int (default "0" (strings.TrimLeft "0" (index . 0))) -}}{{- end -}}
+  {{- $keyed = $keyed | append (dict "k" (printf "%06d|%09d|%s" .Weight $n $name) "p" .) -}}
+{{- end -}}
+{{- $out := slice -}}
+{{- range sort $keyed "k" -}}{{- $out = $out | append .p -}}{{- end -}}
+{{- return $out -}}

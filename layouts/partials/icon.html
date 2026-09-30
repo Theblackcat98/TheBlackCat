@@ -1,0 +1,20 @@
+{{- /* Inline icons. Usage: {{ partial "icon.html" "search" }}  (decorative; aria-hidden) */ -}}
+{{- $n := . -}}
+{{- if eq $n "cat" -}}
+<svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect class="logo-bg" x="1" y="1" width="30" height="30" rx="8"/><path class="logo-cat" d="M6.5 5.5 12 9.6q4-1.2 8 0l5.500-4.100.9 8.300q1.600 2.400 1.600 5.200C28 25 22.500 28 16 28S4 25 4 19.500q0-2.800 1.600-5.200z"/><ellipse class="logo-eye" cx="11.600" cy="18" rx="2.300" ry="2.900"/><ellipse class="logo-eye" cx="20.400" cy="18" rx="2.300" ry="2.900"/><rect class="logo-slit" x="10.900" y="15.700" width="1.400" height="4.600" rx=".7"/><rect class="logo-slit" x="19.700" y="15.700" width="1.400" height="4.600" rx=".7"/></svg>
+{{- else if eq $n "github" -}}
+<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+{{- else -}}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+{{- if eq $n "search" -}}<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.200-4.200"/>
+{{- else if eq $n "sun" -}}<circle cx="12" cy="12" r="4"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.600 5.600 7 7m10 10 1.400 1.400M5.600 18.400 7 17M17 7l1.400-1.400"/>
+{{- else if eq $n "moon" -}}<path d="M20 14.500A8 8 0 1 1 9.500 4a6.500 6.500 0 0 0 10.500 10.500z"/>
+{{- else if eq $n "arrow-ur" -}}<path d="M7 17 17 7M8 7h9v9"/>
+{{- else if eq $n "arrow-r" -}}<path d="M4 12h16m-6-6 6 6-6 6"/>
+{{- else if eq $n "copy" -}}<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>
+{{- else if eq $n "check" -}}<path d="m5 12.500 4.500 4.500L19 7.500"/>
+{{- else if eq $n "rss" -}}<path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.200"/>
+{{- else if eq $n "inbox" -}}<path d="M4 13.500 6.500 5h11L20 13.500M4 13.500V19h16v-5.500M4 13.500h4.500a3.500 3.500 0 0 0 7 0H20"/>
+{{- end -}}
+</svg>
+{{- end -}}

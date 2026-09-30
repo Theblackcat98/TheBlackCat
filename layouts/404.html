@@ -1,0 +1,12 @@
+{{ define "main" }}
+<div class="lost">
+  {{ partial "icon.html" "cat" }}
+  <span class="kicker">404</span>
+  <h1 class="h-page">This shelf is empty.</h1>
+  <p>The page you wanted moved, was renamed, or never existed. Try searching, or start from the front desk.</p>
+  <div class="actions">
+    <button class="btn" type="button" data-search-open>{{ partial "icon.html" "search" }} Search the library</button>
+    <a class="btn btn--ghost" href="{{ site.Home.RelPermalink }}">Home</a>
+  </div>
+</div>
+{{ end }}

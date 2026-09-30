@@ -1,0 +1,32 @@
+{{ partial "breadcrumbs.html" . }}
+<header class="page-head">
+  <span class="kicker">{{ partial "type-label.html" (partial "type-of.html" .) }}</span>
+  <h1 class="h-page">{{ partial "title.html" . }}</h1>
+  {{ with .Content }}<div class="prose">{{ . }}</div>{{ end }}
+</header>
+
+{{- $subs := .Sections.ByTitle }}
+{{- $pages := .RegularPages.ByDate.Reverse }}
+{{- if $subs }}
+<ul class="grid" role="list" style="margin-bottom: var(--s-6)">
+  {{- range $subs }}
+  <li class="card">
+    <div class="meta"><span class="type">Section</span><span>{{ len .RegularPagesRecursive }} items</span></div>
+    <h3 class="card__title"><a href="{{ .RelPermalink }}">{{ partial "title.html" . }}</a></h3>
+    {{- with .Content | plainify | strings.TrimSpace }}<p class="card__desc">{{ . }}</p>{{ end }}
+  </li>
+  {{- end }}
+</ul>
+{{- end }}
+
+{{- if $pages }}
+<ul class="rows" role="list">
+  {{- range $pages }}{{ partial "item-row.html" (dict "page" .) }}{{ end }}
+</ul>
+{{- else if not $subs }}
+<div class="empty">
+  {{ partial "icon.html" "inbox" }}
+  <h2>Nothing here yet</h2>
+  <p>This shelf is ready for its first item.</p>
+</div>
+{{- end }}

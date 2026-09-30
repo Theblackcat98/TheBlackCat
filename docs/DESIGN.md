@@ -1,124 +1,126 @@
-# The BlackCat Design System & Redesign Roadmap
+# The BlackCat Design System
 
-Design direction agreed with Nick, Aug 2026. This document is the source of
-truth for all presentation-layer work. The repo is the archive; this file
-governs how the archive *looks*.
+This document governs how the archive *looks*. The repo is the archive; the
+site is a view of it. Rewritten Sep 2026 to match the implementation (the
+Aug 2026 roadmap it replaces was almost entirely delivered, and its
+"remaining gaps" list had gone stale).
 
 ## Visual thesis
 
 A quiet, dense, beautifully typeset **personal digital library** with
-technical details underneath — knowledge base + technical library + developer
-portfolio hybrid. Deliberate, quiet, dense, intellectually oriented.
+technical details underneath. Knowledge base + technical library + developer
+portfolio. The site should say: *"There is a lot here, but I can always
+figure out where I am."* Navigation beats decoration.
 
-The site must communicate: *"There is a lot of information here, but I can
-always figure out where I am."* Navigation beats decoration.
+**Never look like:** corporate docs site, résumé, Notion clone, generic
+landing page, neon "AI dashboard."
 
-**Never look like:** corporate docs site, résumé, blog, Notion clone, generic
-Tailwind landing page, neon "AI dashboard."
-
-Aesthetic keywords: dark room · paper · terminal · library.
+Aesthetic keywords: paper · ink · terminal · library.
 
 ## Core rules
 
-1. **One accent color.** Everything else exists to support hierarchy.
-   Current palette ("Oatmeal & Slate", see `:root` in `static/css/blackcat.css`).
-   Light = warm paper (`#f7f7f5`-ish), Dark = soft charcoal (`#101216`-ish,
-   never pure black). Both themes designed explicitly, dark is not an inversion.
-2. **Typography does the heavy lifting.** UI = clean sans (Plus Jakarta Sans),
-   body = serif (Newsreader), display = Playfair Display (sparingly),
-   code = Fira Code. Two faces + mono is the maximum.
-3. **Spacing scale:** 4/8/12/16/24/32/48/64/96px — nothing off-scale.
-4. **Borders sparingly.** Prefer whitespace, typography, background contrast,
-   subtle separators, occasional cards. Editorial, not dashboard.
-5. **Tags are metadata, not decorations.** `ai · agents · harnesses` beats
-   twenty colorful pills.
-6. **Motion: almost none.** Card hover 2px elevation, link underline,
-   150ms fades for search/theme. No parallax, scroll animations, glass.
-7. **Mobile is designed, not deferred.** Priority order: brand → search →
-   current section → content → metadata → related → navigation.
+1. **One accent.** Cat-eye amber (`--accent`: `#9a4707` on paper, `#eba74f`
+   in the dark room). Everything else is paper and ink. Light and dark are
+   both designed, not inverted, and every text/background pair is checked by
+   `scripts/contrast.py` (WCAG AA, both themes).
+2. **Two faces, no more.** *Newsreader* (serif) for reading and headings;
+   *JetBrains Mono* for the "label voice": metadata, kickers, controls, code.
+   Self-hosted variable WOFF2 in `static/fonts` (3 files, ~236 KB total, no
+   third-party requests, `font-display: swap`).
+3. **Spacing scale:** 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96 px
+   (`--s-1 … --s-9`). Nothing off-scale.
+4. **Borders sparingly.** Hairline rules and paper-tone contrast instead of
+   boxes; cards only where a thing is a *thing* (projects, collections).
+5. **Tags are metadata, not decorations.** Plain `#agents  #harnesses`, not
+   coloured pills. Filter *chips* are controls and look like controls.
+6. **Motion: almost none.** 2 px card lift, underline fades, 150 ms colour
+   transitions. All of it off under `prefers-reduced-motion`.
+7. **Mobile is designed.** Header collapses to brand + search + theme with a
+   scrollable nav rail; the library toolbar collapses to search + chips;
+   article TOC becomes a `<details>`; metadata "facts" move inline.
+8. **Works without JavaScript.** Every list is fully rendered HTML. JS adds
+   search, filters, theme toggle, copy buttons, TOC spy, diagrams.
 
-## Content-type vocabularies (the big opportunity)
+## Content-type vocabularies
 
-The front matter already distinguishes types; the UI must reflect it:
+The front matter says what a thing *is* (`contenttype`); the UI follows.
+Labels and blurbs come from `params.contenttypes` in `hugo.yaml`.
 
-- **Bookmark** — compact, metadata-heavy. Type label, title, source domain,
-  tags, one-line why-it-matters.
-- **Article** — editorial. Large title, readable measure (~68ch), prominent
-  headings, three-column desktop layout (nav | article | on-this-page),
-  collapses to single column on mobile.
-- **Project** — technical. Name, language · GitHub, description, ★ stars,
-  updated date, `[View on GitHub ↗]`, related links. Filterable by tag
-  (All / AI / Developer Tools / CLI / Web / Experiments).
+| Type | Presentation |
+| --- | --- |
+| Bookmark, reference | Dense **row**: type, source domain, date, title, one-line why, tags. Whole row clickable. Detail page leads with a "Visit source" button. |
+| Skill | Row in listings; detail page with source + facts sidebar (domain, added/updated, tags). |
+| Article, note | Reading page: 40 rem measure, left-aligned, TOC rail (≥ 64 rem) with scroll-spy, "Related" from shared tags. |
+| Project | **Card** with language, ★ stars, updated date, GitHub link; filterable by tag on `/projects/`. |
+| Collection | Curated page whose members are listed automatically from `collect:` front matter (see `CONTENT_MODEL.md`). |
+| Docs / blog series | Chapter navigation (sidebar `details` on mobile, prev/next pager), natural-sort ordering (`02-…` before `10-…`). |
 
-## Agent-compatible presentation (stable primitives)
-
-Templates should expose predictable components so the agent can add content
-without inventing presentation:
+## Architecture
 
 ```
+assets/css/   00-tokens  10-base  20-layout  30-components  40-code  50-pages
+              (concatenated + minified + fingerprinted by Hugo Pipes, ~35 KB)
+assets/js/    site.js   (one file, ~8 KB minified, no dependencies; Mermaid is lazy-loaded)
 layouts/
-├── _default/        baseof, single, list
-├── components/      card, project-card, bookmark-card, metadata,
-│                    tags, breadcrumbs, related, search-result
-└── shortcodes/      callout, figure, ...
-
-static/css/
-├── reset.css  variables.css  typography.css
-├── layout.css components.css  responsive.css
+  _default/   baseof, list (dispatcher), single, taxonomy (term page), terms
+              _markup/  code blocks (copy + language), headings (anchors),
+                        links (external ↗), images (lazy), tables (scroll)
+  partials/   shell (head, header, footer, search-dialog), components
+              (item-row, project-card, tag-list, breadcrumbs, chapters,
+              collected), helpers (type-of, domain, title, description …),
+              lists/<section>.html
+  shortcodes/ callout
+  index.json  the client-side search index
 ```
 
-Flow: agent writes Markdown + front matter → stable Hugo templates →
-consistent UI. This is why we keep a small custom theme, not a framework.
+Two Hugo details that will bite you again:
 
-## Feature specs
+- `_index.md` files set `type: section`, so Hugo skips `layouts/<section>/`.
+  `_default/list.html` therefore dispatches to `partials/lists/<section>.html`
+  with `templates.Exists`. Add a section view by adding a partial.
+- Term/terms templates use Hugo's *legacy* names: `taxonomy.html` is the
+  single-term page, `terms.html` the list of terms.
 
-- **Search (top priority after foundation):** input on homepage + `⌘K`/`Ctrl-K`
-  command palette. Searches titles, descriptions, tags, topics, content, URLs.
-  Results grouped by type with metadata rows. More important than any animation.
-- **Breadcrumbs everywhere:** `Library / AI / Agents / Agent Memory` — mirrors
-  the filesystem domains; scales to thousands of docs.
-- **Metadata as UI, not leaking YAML:** small rows like
-  `ARTICLE · Agent Architecture · AI·Agents·SE · Updated Aug 28, 2026 · 12 min`.
-- **Code treatment:** syntax highlighting, copy button, filename label,
-  language indicator, horizontal scroll, line numbers where useful,
-  terminal blocks, good inline code.
-- **Homepage = front desk of the library:** hero + search, domain explorer
-  with counts, recently added (dated, typed), featured collections,
-  project highlights.
+Flow: agent writes Markdown + front matter → stable templates → consistent
+UI. That is why this stays a small custom theme and not a framework.
 
-## Status snapshot — as of e9919ac (Aug 28, 2026)
+## Search
 
-Done in the current implementation:
+`⌘K` / `Ctrl-K` / `/` opens a native `<dialog>` palette. It fetches
+`/index.json` once (title, description, tags, topics, type, domain, source
+host; inbox items excluded), scores matches (title > tags > description),
+groups by type, and is fully keyboard-driven. The library page has its own
+filters (type, domain, tag, text, sort) with state in the URL, so a filtered
+view is a shareable link.
 
-- ✅ Custom typography loaded (Plus Jakarta Sans / Newsreader / Playfair / Fira Code)
-- ✅ Header with brand block, nav, GitHub link; footer
-- ✅ Homepage: hero + vault pillars (dynamic counts) + featured projects
-  (pinned/stars fallback) + recently cataloged (cross-section)
-- ✅ Split-pane library view with shelf sidebar, client-side filter search,
-  bookmark cards with type/status badges
-- ✅ 17 project entries with language/stars/github front matter; project cards
-- ✅ Prose typography, article detail view, notes/collections grids
-- ✅ Permalink fix for GitHub Pages subpath baseURL
+## Checks
 
-Remaining gaps (in recommended order):
+| Command | What it guards |
+| --- | --- |
+| `make build` | Hugo with `--panicOnWarning` |
+| `make lint` | front-matter contract from `AGENTS.md` |
+| `make css` | every class emitted by a template/JS exists in the CSS |
+| `make contrast` | WCAG contrast for all token pairs, light + dark |
+| `make test` | Playwright behaviour tests + axe-core (0 violations expected) |
+| `make shots` | screenshots (light/dark × desktop/mobile) for eyeballing |
 
-1. ⌘K / Ctrl-K global search palette (search is the #1 missing interaction)
-2. Breadcrumbs on all pages
-3. Article template: three-column layout with on-this-page TOC + related
-4. Designed light/dark theme pair (currently one designed theme; verify dark
-   is designed, not inverted) + theme toggle
-5. Code block treatment (copy button, filename, language label, line numbers)
-6. Mobile refinement pass (nav collapse, priority order above)
-7. Component decomposition (layouts/components/*) + CSS split into
-   tokens/typography/layout/components/responsive files
-8. Library sidebar shelves list only direct children of library/ — recurse
-   one level so nested sections (e.g. ai/skills) get their own shelf button
-9. Accessibility & keyboard navigation polish
+## Status
 
-## Implementation order (original roadmap)
+Delivered: shell, tokens, both themes, search palette, breadcrumbs,
+type-aware pages, TOC + scroll-spy, code treatment, Mermaid, docs/blog chapter
+navigation, 404, canonical/Open Graph/Twitter metadata, RSS, print styles,
+keyboard and screen-reader pass.
 
-Visual identity → design tokens → global shell → homepage → project template
-→ bookmark template → article template → search → collections/discovery →
-polish/accessibility.
+Open, in order:
+
+1. Per-page social cards (only the site-wide `static/og.png` exists).
+2. Pagefind (or similar) if `index.json` grows past ~250 KB; today it is ~60 KB.
+3. Self-host Mermaid (currently jsDelivr at runtime, loaded only on pages that
+   contain a diagram).
+4. The library renders all ~90 rows as plain HTML (good for no-JS and search
+   engines, but ~20,000 px on a phone). Filters make it navigable; if it keeps
+   growing, add `content-visibility: auto` on rows or paginate by domain.
+5. Content clean-up listed in `docs/REVIEW.md` (untitled chapters, tag sprawl,
+   local-only sources).
 
 **Design the system once, then let the content multiply it.**

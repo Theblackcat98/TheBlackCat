@@ -1,36 +1,9 @@
+{{- /*
+  Section lists are dispatched by section name to partials/lists/<section>.html.
+  (Layout dirs like layouts/library/ would be ignored: AGENTS.md requires `type: section`
+  in every _index.md, and Hugo looks up layouts by `type` before `section`.)
+*/ -}}
 {{ define "main" }}
-{{ $pages := .Pages }}
-<section>
-  <div class="article-header">
-    <div class="breadcrumbs"><a href="{{ site.Home.RelPermalink }}">Home</a><span>/</span><span>{{ .Title }}</span></div>
-    <p class="eyebrow">{{ .Section }}</p>
-    <h1>{{ .Title }}</h1>
-    {{ with .Content }}<div class="prose">{{ . }}</div>{{ end }}
-  </div>
-
-  {{ if eq .Section "library" }}
-  <div class="library-type-nav">
-    {{ $libPages := site.RegularPages }}
-    {{ range slice "bookmark" "skill" "article" "note" "reference" }}
-      {{ $count := len (where $libPages "Params.contenttype" .) }}
-      {{ if gt $count 0 }}
-      <a href="{{ printf "contenttype/%s/" . | relURL }}"><span>{{ . | title }}</span><small>{{ $count }}</small></a>
-      {{ end }}
-    {{ end }}
-  </div>
-  {{ end }}
-
-  <div class="cards">
-    {{ range $pages.ByDate.Reverse }}
-    <a class="card type-{{ .Params.contenttype | default .Params.type | default "page" }}" href="{{ .RelPermalink }}">
-      <div class="card-meta"><span class="card-type">{{ .Params.contenttype | default .Params.type | default "page" }}</span>{{ with .Params.updated }}<time>{{ . }}</time>{{ end }}</div>
-      <h2>{{ .Title }}</h2>
-      {{ with .Params.description }}<p>{{ . }}</p>{{ else }}{{ with .Summary }}<p>{{ . | plainify | truncate 180 }}</p>{{ end }}{{ end }}
-      {{ with .Params.tags }}<div class="tags">{{ range first 4 . }}<span>{{ . }}</span>{{ end }}</div>{{ end }}
-    </a>
-    {{ else }}
-    <div class="empty-state"><h2>Nothing here yet.</h2><p>This section is ready for content.</p></div>
-    {{ end }}
-  </div>
-</section>
+{{- $p := printf "lists/%s.html" .Section }}
+{{- if templates.Exists (printf "partials/%s" $p) }}{{ partial $p . }}{{ else }}{{ partial "lists/default.html" . }}{{ end }}
 {{ end }}

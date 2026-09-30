@@ -1,0 +1,23 @@
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div>
+      <p><strong>{{ site.Title }}</strong> is a git-native personal library.<br>Markdown is the archive; this site is only a view of it.</p>
+      <p class="fine">Last updated {{ site.Lastmod.Format "Jan 2, 2006" }}</p>
+    </div>
+    <div>
+      <h2>Browse</h2>
+      <ul>
+        {{- range site.Menus.main }}{{ if not (hasPrefix .URL "http") }}<li><a href="{{ .URL }}">{{ .Name }}</a></li>{{ end }}{{ end }}
+      </ul>
+    </div>
+    <div>
+      <h2>Elsewhere</h2>
+      <ul>
+        <li><a href="{{ site.Params.repo }}" rel="noopener">Source on GitHub ↗</a></li>
+        {{- with site.Home.OutputFormats.Get "RSS" }}<li><a href="{{ .RelPermalink }}">RSS feed</a></li>{{ end }}
+        <li><a href="{{ "sitemap.xml" | relURL }}">Sitemap</a></li>
+        <li><a href="{{ "contenttype/" | relURL }}">All content types</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>

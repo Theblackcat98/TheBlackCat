@@ -1,0 +1,16 @@
+{{- /* Numbered table of contents for a branch bundle (docs guide, blog series). */ -}}
+{{- $chs := partial "sort-natural.html" .RegularPages -}}
+{{- with $chs }}
+<ol class="chapters" role="list">
+  {{- range . }}
+  <li>
+    <div>
+      <h3><a href="{{ .RelPermalink }}">{{ partial "title.html" . }}</a></h3>
+      {{- with partial "description.html" . }}<p>{{ . | truncate 150 }}</p>{{ end }}
+    </div>
+  </li>
+  {{- end }}
+</ol>
+{{- else }}
+<div class="empty"><h2>Nothing here yet</h2></div>
+{{- end }}

@@ -1,0 +1,3 @@
+{{- /* Every file in assets/css is concatenated in filename order (00-, 10-, ...), minified and fingerprinted. */ -}}
+{{- $css := resources.Match "css/*.css" | resources.Concat "css/site.css" | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">

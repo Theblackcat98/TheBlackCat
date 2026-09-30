@@ -1,67 +1,97 @@
-# Build and deploy The BlackCat to GitHub Pages
+# Build, check and deploy The BlackCat to GitHub Pages.
+#   pull_request -> build + checks only (never deploys)
+#   push to main -> build + checks + deploy
 name: Deploy The BlackCat
 
 on:
   push:
     branches: ["main"]
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: pages-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 defaults:
   run:
     shell: bash
 
+env:
+  HUGO_VERSION: 0.147.4
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      HUGO_VERSION: 0.147.4
+    permissions:
+      contents: read
+      pages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0        # only so the lint step can diff against the base branch
 
       - name: Setup Pages
         id: pages
+        if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
 
       - name: Setup Hugo
         run: |
-          wget -O "${{ runner.temp }}/hugo.deb" \
+          wget -q -O "${{ runner.temp }}/hugo.deb" \
             "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb"
           sudo dpkg -i "${{ runner.temp }}/hugo.deb"
           hugo version
+
+      - name: Install lint dependencies
+        run: pip install --quiet pyyaml
+
+      # Old content has known debt (see docs/REVIEW.md), so PRs are only held to the
+      # contract for the files they touch; a push to main lints the whole tree but
+      # does not block on it.
+      - name: Lint content (changed files)
+        if: github.event_name == 'pull_request'
+        run: |
+          files=$(git diff --name-only --diff-filter=AM "origin/${{ github.base_ref }}...HEAD" -- 'content/*.md' | tr '\n' ' ')
+          if [ -n "$files" ]; then python3 scripts/lint_content.py $files; else echo "no content changes"; fi
+
+      - name: Lint content (whole tree, report only)
+        if: github.event_name != 'pull_request'
+        run: python3 scripts/lint_content.py || true
+
+      - name: Design checks (CSS coverage + colour contrast)
+        run: |
+          python3 scripts/check_css.py
+          python3 scripts/contrast.py
 
       - name: Build with Hugo
         env:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
         run: |
-          hugo \
-            --gc \
-            --minify \
-            --baseURL "${{ steps.pages.outputs.base_url }}/"
+          BASE="${{ steps.pages.outputs.base_url }}"
+          hugo --gc --minify --panicOnWarning --baseURL "${BASE:-https://theblackcat98.github.io/TheBlackCat}/"
 
       - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
 
   deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
     steps:
       - name: Deploy to GitHub Pages
         id: deployment

@@ -14,6 +14,10 @@ The BlackCat stores knowledge as Markdown documents with YAML front matter.
 | `collection` | Curated view of canonical items; contains relationships, not duplicated content | `collections/...` |
 | `reference` | Durable reference material such as specifications, manuals, glossaries, or reference sheets | `library/<domain>/...` |
 
+## Dates
+
+`created` is the canonical *added* date and `updated` the canonical *last touched* date, both `YYYY-MM-DD`. `hugo.yaml` maps them onto Hugo's own `date` and `lastmod` (`frontmatter.date: [date, created, publishDate]`, `lastmod: [lastmod, updated, date]`), so sorting, "recently added", RSS and the "Updated" line all work without a `date:` field. Git history is deliberately **not** used for dates (`enableGitInfo: false`): a bulk reformat should not make the whole library look freshly updated.
+
 ## Type vs. source
 
 `contenttype` describes **what the content is**. It should not describe where it came from.
@@ -63,6 +67,19 @@ Use for a coherent project and its associated documentation, decisions, referenc
 ### Collection
 
 Use for a deliberate curated view such as `Favorite AI Skills`, `Local AI`, or `Tools I Actually Use`. Collections should reference canonical content rather than copy it.
+
+The collection page lists its members automatically from a `collect:` block, so nothing is retyped:
+
+```yaml
+collect:
+  items:                       # explicit picks, in this order (content paths)
+    - /library/ai/skills/grill-me
+  contenttype: skill           # ...and/or a live query; all given filters must match
+  tag: agents
+  topic: ai
+```
+
+Explicit `items` come first, then query matches (newest first). Inbox items are never included.
 
 ### Reference
 

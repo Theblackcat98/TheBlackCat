@@ -1,0 +1,83 @@
+/* ==========================================================================
+   00 · Tokens
+   One accent (cat-eye amber). Everything else is paper and ink.
+   Light and dark are both designed, not inverted. `light-dark()` keeps each
+   token to a single line; [data-theme] on <html> overrides the OS setting.
+   ========================================================================== */
+
+@font-face {
+  font-family: "Newsreader";
+  src: url("../fonts/newsreader-latin-opsz-normal.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Newsreader";
+  src: url("../fonts/newsreader-latin-wght-italic.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light dark;
+
+  /* Surfaces */
+  --paper:      light-dark(#f6f2e9, #15120f);
+  --paper-2:    light-dark(#fbf9f3, #1b1814);
+  --paper-3:    light-dark(#ece6d8, #241f19);
+  --code-bg:    light-dark(#efe9db, #1b1814);
+
+  /* Ink */
+  --ink:        light-dark(#1c1915, #ede7db);
+  --ink-2:      light-dark(#453f36, #c3baa9);
+  --ink-3:      light-dark(#655d51, #9d9484);
+
+  /* Lines */
+  --rule:       light-dark(#ddd5c2, #2c2620);
+  --rule-2:     light-dark(#c6bca4, #443c30);
+
+  /* The one accent */
+  --accent:     light-dark(#9a4707, #eba74f);
+  --accent-2:   light-dark(#7a3704, #f4c184);
+  --accent-wash:light-dark(#f2e2c8, #2a2013);
+
+  /* Focus */
+  --focus:      light-dark(#9a4707, #eba74f);
+
+  /* Type */
+  --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --mono:  "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Spacing scale: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96 */
+  --s-1: .25rem;
+  --s-2: .5rem;
+  --s-3: .75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+  --s-9: 6rem;
+
+  /* Layout */
+  --gutter: clamp(1rem, 4vw, 1.75rem);
+  --wrap: 72rem;
+  --measure: 40rem;
+
+  --radius: 6px;
+  --radius-lg: 10px;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --header-h: 3.5rem;
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"]  { color-scheme: dark; }

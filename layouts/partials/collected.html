@@ -1,0 +1,26 @@
+{{- /*
+  Items a collection points at. Front matter:
+
+    collect:
+      items: [/library/ai/skills/grill-me, ...]   # explicit picks (content paths)
+      contenttype: skill                          # ...and/or a live query
+      tag: agents
+      topic: ai
+
+  Explicit items come first, then query matches. Collections never copy content.
+*/ -}}
+{{- $c := .Params.collect -}}
+{{- $out := slice -}}
+{{- if $c -}}
+  {{- range $c.items -}}{{- with site.GetPage . -}}{{- $out = $out | append . -}}{{- end -}}{{- end -}}
+  {{- if or $c.contenttype $c.tag $c.topic -}}
+    {{- $pool := where site.RegularPages "Section" "in" (slice "library" "projects" "notes") -}}
+    {{- $pool = where $pool "Params.status" "ne" "inbox" -}}
+    {{- with $c.contenttype }}{{ $pool = where $pool "Params.contenttype" . }}{{ end -}}
+    {{- with $c.tag }}{{ $pool = where $pool "Params.tags" "intersect" (slice .) }}{{ end -}}
+    {{- with $c.topic }}{{ $pool = where $pool "Params.topics" "intersect" (slice .) }}{{ end -}}
+    {{- $out = $out | append $pool.ByDate.Reverse -}}
+  {{- end -}}
+  {{- $out = $out | uniq -}}
+{{- end -}}
+{{- return $out -}}

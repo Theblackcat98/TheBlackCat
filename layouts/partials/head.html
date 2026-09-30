@@ -1,0 +1,30 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f2e9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#15120f" media="(prefers-color-scheme: dark)">
+{{ $desc := .Description -}}
+{{- if not $desc }}{{ $desc = printf "%s" .Summary | plainify | htmlUnescape | strings.TrimSpace }}{{ end -}}
+{{- if or (not $desc) .IsHome }}{{ $desc = site.Params.description }}{{ end -}}
+{{- $desc = $desc | truncate 180 -}}
+{{- $title := cond .IsHome (printf "%s · %s" site.Title "a personal library") (printf "%s · %s" (partial "title.html" .) site.Title) -}}
+<title>{{ $title }}</title>
+<meta name="description" content="{{ $desc }}">
+<link rel="canonical" href="{{ .Permalink }}">
+{{- if or (eq .Params.status "inbox") (eq .Section "inbox") }}
+<meta name="robots" content="noindex, nofollow">
+{{- end }}
+{{- $img := absURL "og.png" }}
+<meta property="og:site_name" content="{{ site.Title }}">
+<meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}">
+<meta property="og:title" content="{{ partial "title.html" . }}">
+<meta property="og:description" content="{{ $desc }}">
+<meta property="og:url" content="{{ .Permalink }}">
+<meta property="og:image" content="{{ $img }}">
+<meta name="twitter:card" content="summary_large_image">
+{{ range .AlternativeOutputFormats }}{{ if eq .Name "RSS" }}<link rel="alternate" type="application/rss+xml" href="{{ .Permalink }}" title="{{ site.Title }}">{{ end }}{{ end }}
+<link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
+{{ partial "theme-init.html" . }}
+<link rel="preload" href="{{ "fonts/newsreader-latin-opsz-normal.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{ "fonts/jetbrains-mono-latin-wght-normal.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
+{{ partial "css.html" . }}

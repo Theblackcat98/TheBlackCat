@@ -1,186 +1,85 @@
 {{ define "main" }}
-<!-- Simple Clean Intro / Hero -->
-<section class="home-hero">
-  <div class="home-pill">
-    <span>●</span> Personal Knowledge Vault & Software Workspace
-  </div>
-  <h1>Hi, I'm Nick.</h1>
-  <p>
-    I build tools focused on autonomous AI agents, terminal user interfaces, automation pipelines, and cognitive models. The BlackCat is my Git-native library—Markdown is the source of truth, git holds the history, and Hugo provides the quiet reading view.
-  </p>
-  
-  <div class="hero-btn-group">
-    <a href="{{ with site.GetPage "/library" }}{{ .RelPermalink }}{{ else }}{{ "library" | relURL }}{{ end }}" class="btn btn-primary">
-      <span>Explore Knowledge Library</span>
-      <span>→</span>
-    </a>
-    <a href="{{ with site.GetPage "/projects" }}{{ .RelPermalink }}{{ else }}{{ "projects" | relURL }}{{ end }}" class="btn btn-secondary">
-      View All Repositories ({{ len (where site.RegularPages "Section" "projects") }})
-    </a>
-  </div>
+{{- $hero := site.Params.hero -}}
+{{- $lib := where site.RegularPages "Section" "library" -}}
+{{- $all := where site.RegularPages "Section" "in" (slice "library" "collections" "notes" "projects" "blog") -}}
+{{- $all = where $all "Params.status" "ne" "inbox" -}}
+
+<section class="hero" aria-labelledby="hero-title">
+  <span class="kicker">{{ $hero.eyebrow }}</span>
+  <h1 id="hero-title" class="h-display">{{ $hero.title }}</h1>
+  <p class="hero__lede">{{ $hero.lede }}</p>
+  {{ with $hero.about }}<p class="hero__about">{{ . }}</p>{{ end }}
+
+  <button class="hero-search" type="button" data-search-open aria-label="Search the library">
+    {{ partial "icon.html" "search" }}
+    <span>Search {{ len $all }} items<span class="hide-sm">: skills, bookmarks, projects…</span></span>
+    <kbd>⌘K</kbd>
+  </button>
+
+  <ul class="stats" role="list" aria-label="Library at a glance">
+    {{- range $k := slice "skill" "bookmark" "article" "note" "reference" }}
+      {{- $n := len (where $lib "Params.contenttype" $k) }}
+      {{- if gt $n 0 }}
+      <li class="stat"><a href="{{ printf "contenttype/%s/" $k | relURL }}"><b>{{ $n }}</b><span>{{ (index $.Site.Params.contenttypes $k).plural }}</span></a></li>
+      {{- end }}
+    {{- end }}
+    {{- with site.GetPage "/projects" }}<li class="stat"><a href="{{ .RelPermalink }}"><b>{{ len .RegularPages }}</b><span>Projects</span></a></li>{{ end }}
+    {{- with site.GetPage "/blog" }}<li class="stat"><a href="{{ .RelPermalink }}"><b>{{ len .RegularPages }}</b><span>Posts</span></a></li>{{ end }}
+  </ul>
 </section>
 
-<!-- Core Archive Sections / Vault Pillars -->
-<section style="margin-bottom: 3.5rem;">
-  <div class="section-title-row">
-    <h3>
-      <span>🗂️</span>
-      <span>Core Vault Pillars</span>
-    </h3>
-    <span style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);">
-      {{ len site.RegularPages }} total knowledge nodes
-    </span>
+<section class="section" aria-labelledby="shelves-h">
+  <div class="section__head">
+    <h2 id="shelves-h" class="h-section">Shelves</h2>
+    <a href="{{ with site.GetPage "/library" }}{{ .RelPermalink }}{{ end }}">Browse the whole library →</a>
   </div>
-
-  <div class="vault-grid">
-    {{ $coreSections := slice "library" "collections" "projects" "notes" }}
-    {{ range $coreSections }}
-      {{ $secName := . }}
-      {{ $secPage := site.GetPage (printf "/%s" $secName) }}
-      {{ $secCount := len (where site.RegularPages "Section" $secName) }}
-      <a href="{{ with $secPage }}{{ .RelPermalink }}{{ else }}{{ $secName | relURL }}{{ end }}" class="vault-card">
-        <div class="vault-card-header">
-          <div class="vault-card-icon">
-            {{ if eq $secName "library" }}📚
-            {{ else if eq $secName "collections" }}🗂️
-            {{ else if eq $secName "projects" }}⚡
-            {{ else if eq $secName "notes" }}📝
-            {{ else }}📂{{ end }}
-          </div>
-          <span class="vault-card-count">{{ $secCount }} {{ if eq $secCount 1 }}item{{ else }}items{{ end }}</span>
-        </div>
-        <h4 class="vault-card-title">{{ with $secPage }}{{ .Title }}{{ else }}{{ $secName | title }}{{ end }}</h4>
-        <p class="vault-card-desc">
-          {{ with $secPage }}
-            {{ if .Content }}
-              {{ .Content | plainify | truncate 110 }}
-            {{ else if .Params.description }}
-              {{ .Params.description | truncate 110 }}
-            {{ else }}
-              Archive for {{ $secName }}.
-            {{ end }}
-          {{ else }}
-            Archive for {{ $secName }}.
-          {{ end }}
-        </p>
-        <span class="vault-card-link">Browse {{ with $secPage }}{{ .Title }}{{ else }}{{ $secName | title }}{{ end }} →</span>
-      </a>
-    {{ end }}
-  </div>
+  <ul class="shelves" role="list">
+    {{- with site.GetPage "/library" }}
+      {{- range .Sections.ByTitle }}
+      <li class="shelf">
+        <h3><a href="{{ .RelPermalink }}">{{ partial "title.html" . }}</a></h3>
+        <span class="count">{{ with len .RegularPagesRecursive }}{{ . }} items{{ else }}empty{{ end }}</span>
+        {{- with partial "description.html" . }}<p>{{ . | truncate 110 }}</p>{{ end }}
+      </li>
+      {{- end }}
+    {{- end }}
+    {{- range slice "collections" "notes" "docs" }}
+      {{- with site.GetPage (printf "/%s" .) }}
+      <li class="shelf">
+        <h3><a href="{{ .RelPermalink }}">{{ partial "title.html" . }}</a></h3>
+        <span class="count">{{ with len .RegularPagesRecursive }}{{ . }} items{{ else }}empty{{ end }}</span>
+        {{- with partial "description.html" . }}<p>{{ . | truncate 110 }}</p>{{ end }}
+      </li>
+      {{- end }}
+    {{- end }}
+  </ul>
 </section>
 
-<!-- Featured Projects Section (Dynamically Discovered) -->
-<section style="margin-bottom: 3.5rem;">
-  <div class="section-title-row">
-    <h3>
-      <span>📌</span>
-      <span>Featured Repositories & Tools</span>
-    </h3>
-    <a class="section-link" href="{{ with site.GetPage "/projects" }}{{ .RelPermalink }}{{ else }}{{ "projects" | relURL }}{{ end }}">
-      View all {{ len (where site.RegularPages "Section" "projects") }} projects →
-    </a>
+<section class="section" aria-labelledby="recent-h">
+  <div class="section__head">
+    <h2 id="recent-h" class="h-section">Recently added</h2>
+    <a href="{{ with site.GetPage "/library" }}{{ .RelPermalink }}{{ end }}">See everything →</a>
   </div>
-
-  <div class="pinned-grid">
-    {{ $allProjects := where site.RegularPages "Section" "projects" }}
-    {{ $pinned := where $allProjects "Params.pinned" true }}
-    {{ if eq (len $pinned) 0 }}
-      {{ $pinned = where $allProjects "Params.featured" true }}
-    {{ end }}
-    {{ if eq (len $pinned) 0 }}
-      {{ $pinned = first 4 ($allProjects.ByParam "stars").Reverse }}
-    {{ end }}
-    {{ if eq (len $pinned) 0 }}
-      {{ $pinned = first 4 $allProjects.ByDate.Reverse }}
-    {{ end }}
-
-    {{ range first 4 $pinned }}
-    <div class="pinned-card">
-      <div>
-        <div class="pinned-top">
-          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-            {{ if or .Params.pinned .Params.featured }}
-              <span class="pinned-badge">📌 Featured</span>
-            {{ end }}
-            <h4 class="pinned-title">{{ .Title }}</h4>
-          </div>
-          {{ with .Params.stars }}
-            <span class="badge-stars">★ {{ . }}</span>
-          {{ end }}
-        </div>
-        {{ with .Params.description }}
-          <p>{{ . }}</p>
-        {{ else }}
-          {{ with .Summary }}<p>{{ . | plainify | truncate 140 }}</p>{{ end }}
-        {{ end }}
-      </div>
-
-      <div>
-        {{ with .Params.tags }}
-        <div class="pinned-tags">
-          {{ range first 3 . }}<span class="tag-pill">#{{ . }}</span>{{ end }}
-        </div>
-        {{ end }}
-
-        <div class="pinned-meta-row">
-          <span class="badge-lang">{{ .Params.language | default "Software" }}</span>
-          {{ with .Params.github }}
-            <a href="{{ . }}" target="_blank" rel="noopener noreferrer" class="source-btn">
-              <span>GitHub</span>
-              <span>↗</span>
-            </a>
-          {{ else }}
-            <a href="{{ .RelPermalink }}" class="section-link">Details →</a>
-          {{ end }}
-        </div>
-      </div>
-    </div>
-    {{ end }}
-  </div>
+  <ul class="rows" role="list">
+    {{- range first 8 (where $all "Date" "gt" (time.AsTime "2000-01-01")).ByDate.Reverse }}
+      {{ partial "item-row.html" (dict "page" . "compact" true) }}
+    {{- end }}
+  </ul>
 </section>
 
-<!-- Dynamic Recent Additions across Archive -->
-<section>
-  <div class="section-title-row">
-    <h3>
-      <span>🕒</span>
-      <span>Recently Cataloged Knowledge</span>
-    </h3>
-    <a class="section-link" href="{{ with site.GetPage "/library" }}{{ .RelPermalink }}{{ else }}{{ "library" | relURL }}{{ end }}">
-      Browse library dossier →
-    </a>
+{{- $projects := where site.RegularPages "Section" "projects" }}
+{{- if $projects }}
+<section class="section" aria-labelledby="proj-h">
+  <div class="section__head">
+    <h2 id="proj-h" class="h-section">Projects</h2>
+    <a href="{{ with site.GetPage "/projects" }}{{ .RelPermalink }}{{ end }}">All {{ len $projects }} projects →</a>
   </div>
-  
-  {{ $recentItems := where site.RegularPages "Section" "in" (slice "library" "notes" "collections" "docs") }}
-  <div class="recent-grid">
-    {{ range first 4 $recentItems.ByDate.Reverse }}
-    <a href="{{ .RelPermalink }}" class="recent-card">
-      <div class="recent-card-top">
-        <span class="bookmark-type">{{ .Params.contenttype | default .Section }}</span>
-        {{ if not .Date.IsZero }}
-          <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono);">
-            {{ .Date.Format "Jan 02, 2006" }}
-          </span>
-        {{ end }}
-      </div>
-      <h4 class="recent-card-title">{{ .Title }}</h4>
-      <p class="recent-card-desc">
-        {{ with .Params.description }}
-          {{ . | truncate 120 }}
-        {{ else }}
-          {{ with .Summary }}{{ . | plainify | truncate 120 }}{{ end }}
-        {{ end }}
-      </p>
-      <div class="recent-card-footer">
-        <span style="font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono);">
-          {{ with .Params.topics }}{{ delimit . ", " }}{{ else }}{{ .Section | title }}{{ end }}
-        </span>
-        <span class="section-link" style="font-size: 0.75rem;">Read →</span>
-      </div>
-    </a>
-    {{ end }}
-  </div>
+  {{- $pick := where $projects "Params.pinned" true }}
+  {{- if not $pick }}{{ $pick = where $projects "Params.featured" true }}{{ end }}
+  {{- if not $pick }}{{ $pick = first 6 ($projects.ByParam "stars").Reverse }}{{ end }}
+  <ul class="grid" role="list">
+    {{- range first 6 $pick }}{{ partial "project-card.html" . }}{{ end }}
+  </ul>
 </section>
+{{- end }}
 {{ end }}
-
-

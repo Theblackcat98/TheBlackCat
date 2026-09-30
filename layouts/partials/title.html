@@ -1,0 +1,6 @@
+{{- /* Page title with a fallback: pages without `title:` get their humanised file/folder name instead of an empty heading. */ -}}
+{{- $t := .Title -}}
+{{- if not $t -}}
+  {{- with .File -}}{{- $t = .ContentBaseName | replaceRE `[-_]+` " " | strings.TrimSpace | title -}}{{- end -}}
+{{- end -}}
+{{- return $t -}}

@@ -1,0 +1,83 @@
+{{- $isRoot := .Parent.IsHome -}}
+{{- $items := .RegularPagesRecursive.ByDate.Reverse -}}
+{{- $items = where $items "Params.status" "ne" "inbox" -}}
+
+{{ partial "breadcrumbs.html" . }}
+<header class="page-head">
+  <span class="kicker">{{ if $isRoot }}The archive{{ else }}Shelf{{ end }}</span>
+  <h1 class="h-page">{{ partial "title.html" . }}</h1>
+  {{ with .Content }}<div class="lede prose" style="max-width: 38rem">{{ . }}</div>{{ end }}
+</header>
+
+{{- /* facet data */ -}}
+{{- $types := slice -}}
+{{- range $k, $_ := site.Params.contenttypes -}}{{- if gt (len (where $items "Params.contenttype" $k)) 0 -}}{{- $types = $types | append $k -}}{{- end -}}{{- end -}}
+{{- $tagCounts := dict -}}
+{{- range $items -}}{{- range .Params.tags -}}{{- $t := lower (string .) -}}{{- $tagCounts = merge $tagCounts (dict $t (add 1 (index $tagCounts $t | default 0))) -}}{{- end -}}{{- end -}}
+{{- $topTags := slice -}}
+{{- range $t, $n := $tagCounts -}}{{- if ge $n 3 -}}{{- $topTags = $topTags | append (dict "t" $t "n" $n "k" (printf "%04d|%s" (sub 9999 $n) $t)) -}}{{- end -}}{{- end -}}
+{{- $topTags = sort $topTags "k" -}}
+
+<div class="library" data-filter-root>
+  <aside class="facets toolbar" aria-label="Filter the library">
+    <label class="field">
+      {{ partial "icon.html" "search" }}
+      <span class="visually-hidden">Filter this list</span>
+      <input type="search" placeholder="Filter…" autocomplete="off" spellcheck="false" data-filter-q>
+    </label>
+
+    <span class="label">Type</span>
+    <div class="chips" role="group" aria-label="Filter by type">
+      <button class="chip" type="button" data-filter="type" data-value="" aria-pressed="true">All <small>{{ len $items }}</small></button>
+      {{- range $types }}
+      <button class="chip" type="button" data-filter="type" data-value="{{ . }}" aria-pressed="false">{{ (index site.Params.contenttypes .).plural }} <small>{{ len (where $items "Params.contenttype" .) }}</small></button>
+      {{- end }}
+    </div>
+
+    <details class="more" open data-close-narrow>
+      <summary>More filters</summary>
+      {{- if and $isRoot .Sections }}
+      <span class="label">Shelf</span>
+      <div class="chips" role="group" aria-label="Filter by shelf">
+        <button class="chip" type="button" data-filter="domain" data-value="" aria-pressed="true">All</button>
+        {{- range .Sections.ByTitle }}
+        <button class="chip" type="button" data-filter="domain" data-value="{{ .File.ContentBaseName }}" aria-pressed="false">{{ .Title }} <small>{{ len .RegularPagesRecursive }}</small></button>
+        {{- end }}
+      </div>
+      {{- end }}
+      {{- if $topTags }}
+      <span class="label">Common tags</span>
+      <div class="chips" role="group" aria-label="Filter by tag">
+        {{- range first 14 $topTags }}
+        <button class="chip" type="button" data-filter="tag" data-value="{{ .t }}" aria-pressed="false">{{ .t }} <small>{{ .n }}</small></button>
+        {{- end }}
+      </div>
+      {{- end }}
+    </details>
+  </aside>
+
+  <section class="results" aria-label="Results">
+    <div class="results-head">
+      <p class="count" aria-live="polite" data-filter-count>{{ len $items }} items</p>
+      <label class="field toolbar" style="padding: 0 var(--s-3)">
+        <span class="visually-hidden">Sort</span>
+        <select data-filter-sort>
+          <option value="recent">Newest first</option>
+          <option value="az">A → Z</option>
+        </select>
+      </label>
+    </div>
+    {{- if $items }}
+    <ul class="rows" role="list" data-filter-list>
+      {{- range $items }}{{ partial "item-row.html" (dict "page" . "filter" true) }}{{ end }}
+    </ul>
+    <div class="empty" data-filter-empty hidden>
+      {{ partial "icon.html" "search" }}
+      <h2>No matches</h2>
+      <p>Nothing on this shelf fits those filters. <button class="chip" type="button" data-filter-reset>Clear filters</button></p>
+    </div>
+    {{- else }}
+    <div class="empty">{{ partial "icon.html" "inbox" }}<h2>Nothing here yet</h2><p>This shelf is ready for its first item.</p></div>
+    {{- end }}
+  </section>
+</div>

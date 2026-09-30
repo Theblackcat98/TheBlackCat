@@ -1,0 +1,9 @@
+{{- /* One-line description: front matter first, else the first paragraph with headings and code stripped. */ -}}
+{{- $d := .Description -}}
+{{- if not $d -}}
+  {{- $s := printf "%s" .Summary -}}
+  {{- $s = replaceRE `(?s)<(h[1-6]|pre|table)[^>]*>.*?</(h[1-6]|pre|table)>` "" $s -}}
+  {{- with findRE `(?s)<p[ >].*?</p>` $s 1 }}{{ $s = index . 0 }}{{ end -}}
+  {{- $d = $s | plainify | htmlUnescape | strings.TrimSpace | truncate 220 -}}
+{{- end -}}
+{{- return $d -}}

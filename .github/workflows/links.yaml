@@ -1,0 +1,40 @@
+# Weekly dead-link report for the library. Bookmarks rot; this opens (or updates) one issue
+# instead of failing builds. NOTE: written without being able to run it in the review sandbox.
+# First run manually (Actions -> Link check -> Run workflow) and tune lychee.toml if noisy.
+name: Link check
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  lychee:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check external links in content
+        id: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress --max-concurrency 8 --max-retries 2 --timeout 20
+            --accept 200,204,206,301,302,403,429
+            --exclude '^local://' --exclude 'localhost' --exclude '127\.0\.0\.1'
+            --scheme https --scheme http
+            'content/**/*.md'
+          output: lychee-report.md
+          fail: false
+
+      - name: Open or update the issue
+        if: steps.lychee.outputs.exit_code != 0
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "Link check: dead links in the library"
+          content-filepath: lychee-report.md
+          labels: maintenance

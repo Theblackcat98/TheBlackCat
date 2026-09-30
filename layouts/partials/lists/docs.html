@@ -1,0 +1,29 @@
+{{- $nested := not .Parent.IsHome -}}
+{{ partial "breadcrumbs.html" . }}
+<header class="page-head">
+  <span class="kicker">{{ if $nested }}Guide{{ else }}Documentation{{ end }}</span>
+  <h1 class="h-page">{{ partial "title.html" . }}</h1>
+  {{ with .Content }}<div class="lede prose" style="max-width: 38rem">{{ . }}</div>{{ end }}
+</header>
+
+{{- if $nested }}
+  {{ partial "chapters.html" . }}
+{{- else }}
+  {{- with .Sections.ByTitle }}
+  <ul class="grid" role="list" style="margin-bottom: var(--s-7)">
+    {{- range . }}
+    <li class="card">
+      <div class="meta"><span class="type">Guide</span><span>{{ len .RegularPages }} parts</span></div>
+      <h3 class="card__title"><a href="{{ .RelPermalink }}">{{ partial "title.html" . }}</a></h3>
+      {{- with partial "description.html" . }}<p class="card__desc">{{ . }}</p>{{ end }}
+    </li>
+    {{- end }}
+  </ul>
+  {{- end }}
+  {{- with .RegularPages.ByTitle }}
+  <div class="section__head"><h2 class="h-section">Loose pages</h2></div>
+  <ul class="rows" role="list">
+    {{- range . }}{{ partial "item-row.html" (dict "page" . "compact" true) }}{{ end }}
+  </ul>
+  {{- end }}
+{{- end }}

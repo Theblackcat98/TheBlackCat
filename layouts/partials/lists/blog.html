@@ -1,0 +1,33 @@
+{{- $nested := not .Parent.IsHome -}}
+{{ partial "breadcrumbs.html" . }}
+<header class="page-head">
+  <span class="kicker">{{ if $nested }}Series{{ else }}Writing{{ end }}</span>
+  <h1 class="h-page">{{ partial "title.html" . }}</h1>
+  {{ with .Content }}<div class="lede prose" style="max-width: 38rem">{{ . }}</div>{{ end }}
+  {{- with .OutputFormats.Get "RSS" }}<p class="meta" style="margin-top: var(--s-4)"><a href="{{ .RelPermalink }}">RSS feed</a></p>{{ end }}
+</header>
+
+{{- if $nested }}
+  {{ partial "chapters.html" . }}
+{{- else }}
+  {{- $pages := .Pages.ByDate.Reverse }}
+  {{- if $pages }}
+    {{- range $pages.GroupByDate "2006" }}
+    <section class="year">
+      <h2>{{ .Key }}</h2>
+      {{- range .Pages }}
+      <article class="post">
+        <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "Jan 2" }}</time>
+        <div>
+          <h3><a href="{{ .RelPermalink }}">{{ partial "title.html" . }}</a></h3>
+          {{- with partial "description.html" . }}<p>{{ . }}</p>{{ end }}
+          {{- if .IsSection }}<p class="meta"><span class="type">Series</span><span>{{ len .RegularPages }} parts</span></p>{{ else }}<p class="meta"><span>{{ .ReadingTime }} min read</span></p>{{ end }}
+        </div>
+      </article>
+      {{- end }}
+    </section>
+    {{- end }}
+  {{- else }}
+  <div class="empty">{{ partial "icon.html" "inbox" }}<h2>No posts yet</h2><p>Drafts stay hidden until they are published.</p></div>
+  {{- end }}
+{{- end }}

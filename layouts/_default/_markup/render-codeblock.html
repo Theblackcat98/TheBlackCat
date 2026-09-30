@@ -1,0 +1,12 @@
+{{- $lang := .Type -}}
+{{- if eq $lang "mermaid" -}}
+<pre class="mermaid" tabindex="0">{{ .Inner | htmlEscape | safeHTML }}</pre>
+{{- else -}}
+<div class="codeblock"{{ with $lang }} data-lang="{{ . }}"{{ end }}>
+  <div class="codeblock__bar">
+    <span>{{ with .Attributes.title }}{{ . }}{{ else }}{{ $lang | default "text" }}{{ end }}</span>
+    <button class="codeblock__copy" type="button" data-copy aria-label="Copy code to clipboard">{{ partial "icon.html" "copy" }}<span>Copy</span></button>
+  </div>
+  {{ (transform.HighlightCodeBlock .).Wrapped }}
+</div>
+{{- end -}}

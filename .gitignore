@@ -1,3 +1,5 @@
 # Hugo build output — CI builds fresh on every deploy (pages.yaml)
 /public/
 /resources/
+
+.hugo_build.lock

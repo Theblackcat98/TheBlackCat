@@ -2,12 +2,19 @@ languageCode: en-us
 baseURL: "https://theblackcat98.github.io/TheBlackCat/"
 title: "The BlackCat"
 enableRobotsTXT: true
-enableGitInfo: true
+enableGitInfo: false   # dates come from front matter (created/updated), not from commits
 
 defaultContentLanguage: en
 
+# Dates: `created:` is the canonical "added" date and `updated:` the canonical
+# "last touched" date (see docs/CONTENT_MODEL.md). Without this mapping Hugo
+# only understands `date:`, so every bookmark/skill sorted as "undated".
+frontmatter:
+  date: [date, created, publishDate]
+  lastmod: [lastmod, updated, date]
+
 outputs:
-  home: [HTML, RSS]
+  home: [HTML, RSS, JSON]   # JSON = /index.json, the client-side search index
   page: [HTML]
   section: [HTML, RSS]
 
@@ -16,16 +23,77 @@ taxonomies:
   topic: topics
   contenttype: contenttype
 
+# "Related" links at the bottom of a page (explicit `related:` still wins).
+related:
+  includeNewer: true
+  threshold: 55
+  toLower: true
+  indices:
+    - name: tags
+      weight: 100
+    - name: topics
+      weight: 40
+    - name: contenttype
+      weight: 15
+
 markup:
   goldmark:
     renderer:
       unsafe: true
+    parser:
+      attribute:
+        block: true
   highlight:
-    noClasses: false
+    noClasses: false      # token colours live in assets/css/40-code.css
+  tableOfContents:
+    startLevel: 2
+    endLevel: 3
 
 params:
   description: "Nick's personal library of bookmarks, research, notes, projects, and useful things."
   author: "Nick"
+  repo: "https://github.com/Theblackcat98/TheBlackCat"
+  branch: main
+
+  # Copy for the home page lives here, not in the template, so it can be
+  # edited (by hand or by an agent) without touching layouts.
+  hero:
+    eyebrow: "A git-native personal library"
+    title: "A quiet library of things worth keeping."
+    lede: "Bookmarks, AI skills, research and projects. Markdown is the source of truth, git holds the history, and Hugo provides the reading room."
+    about: "I'm Nick. I build tools for autonomous AI agents, terminal interfaces, automation pipelines and cognitive models."
+
+  # One place that defines the content-type vocabulary. Templates read labels
+  # and blurbs from here; AGENTS.md / CONTENT_MODEL.md describe the semantics.
+  contenttypes:
+    bookmark:
+      label: Bookmark
+      plural: Bookmarks
+      blurb: "Saved external resources, with my notes on why they matter."
+    skill:
+      label: Skill
+      plural: Skills
+      blurb: "Reusable AI and agent skills, workflows and prompt systems."
+    article:
+      label: Article
+      plural: Articles
+      blurb: "Researched or authored prose that stands on its own."
+    note:
+      label: Note
+      plural: Notes
+      blurb: "Working knowledge, observations and hypotheses."
+    reference:
+      label: Reference
+      plural: References
+      blurb: "Durable lookup material: specs, manuals, cheat sheets."
+    project:
+      label: Project
+      plural: Projects
+      blurb: "Things I build, with their documentation and decisions."
+    collection:
+      label: Collection
+      plural: Collections
+      blurb: "Curated views across the library."
 
 menu:
   main:
@@ -44,6 +112,9 @@ menu:
     - name: Blog
       pageRef: /blog
       weight: 45
+    - name: Docs
+      pageRef: /docs
+      weight: 48
     - name: GitHub
       url: "https://github.com/Theblackcat98/TheBlackCat"
       weight: 50

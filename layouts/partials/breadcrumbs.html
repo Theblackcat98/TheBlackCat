@@ -1,0 +1,9 @@
+<nav class="crumbs" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="{{ site.Home.RelPermalink }}">Home</a></li>
+    {{- range .Ancestors.Reverse }}{{ if not .IsHome }}
+    <li><a href="{{ .RelPermalink }}">{{ partial "title.html" . }}</a></li>
+    {{- end }}{{ end }}
+    <li aria-current="page">{{ if eq .Kind "term" }}{{ lower .Title }}{{ else }}{{ partial "title.html" . | truncate 56 }}{{ end }}</li>
+  </ol>
+</nav>

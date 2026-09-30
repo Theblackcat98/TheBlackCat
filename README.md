@@ -118,8 +118,10 @@ TheBlackCat/
 ├── docs/               # Repository design and maintenance documentation
 ├── archetypes/         # Templates for each content type
 ├── layouts/            # Hugo presentation layer
-├── static/             # Static site assets
-├── .github/workflows/  # GitHub Pages deployment
+├── assets/             # CSS (tokens → base → layout → components → code → pages) and site.js
+├── static/             # Fonts, favicon, social card
+├── scripts/            # Content lint, design checks, browser tests
+├── .github/workflows/  # CI checks, GitHub Pages deployment, weekly link check
 ├── AGENTS.md           # Rules for automated content maintenance
 └── hugo.yaml           # Hugo configuration
 ```
@@ -133,7 +135,7 @@ A typical bookmark might look like:
 ```yaml
 ---
 title: "Example Resource"
-type: bookmark
+contenttype: bookmark
 description: "A concise explanation of why this is worth keeping."
 source: "https://example.com"
 topics:
@@ -185,9 +187,22 @@ The goal is not to maximize the number of entries. The goal is to build an archi
 
 The public website is generated from the repository with Hugo and deployed through GitHub Pages.
 
-The presentation layer is intentionally custom and lightweight. The site recognizes content types and can present bookmarks, skills, articles, notes, projects, collections, and references according to their role instead of treating every page as the same kind of document.
+The presentation layer is intentionally custom and lightweight: no theme, no framework, no build step beyond Hugo Pipes. Types are presented according to their role (a bookmark is a dense row, a project a card, an article a reading page) rather than treating every page as the same kind of document. The design system is described in [`docs/DESIGN.md`](docs/DESIGN.md).
 
-The visual interface can therefore evolve independently of the archive itself.
+### Working on it
+
+```bash
+make serve      # live-reloading dev server (drafts on)
+make check      # build (warnings are errors) + lint of changed content + CSS coverage + contrast
+make test       # + browser tests (search, filters, theme, copy, no-JS) and axe accessibility
+make lint       # lint the whole content tree (reports existing debt; see docs/REVIEW.md)
+make help       # everything else
+```
+
+- Hugo **0.147.4 extended** is pinned in CI; use the same locally.
+- `python3 scripts/lint_content.py` enforces the [`AGENTS.md`](AGENTS.md) front-matter contract. In pull requests it checks the files that changed, so agents get the same feedback a human reviewer would.
+- Home-page copy and the content-type vocabulary live in `hugo.yaml` (`params.hero`, `params.contenttypes`), not in templates.
+- Social preview card: edit `scripts/og.py`, run it, commit `static/og.png`.
 
 ## Philosophy
 

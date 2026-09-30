@@ -1,0 +1,9 @@
+{{- /* Anchor links on h2-h4. A body H1 that repeats (or contains) the page title is dropped; other H1s are demoted (the page already has one). */ -}}
+{{- $lvl := .Level -}}
+{{- $h := lower (plainify .Text | strings.TrimSpace) -}}
+{{- $t := lower (.Page.Title | strings.TrimSpace) -}}
+{{- $dupe := and (eq $lvl 1) (or (eq $h $t) (strings.Contains $h $t) (strings.Contains $t $h)) -}}
+{{- if not $dupe -}}
+  {{- if eq $lvl 1 }}{{ $lvl = 2 }}{{ end -}}
+<h{{ $lvl }} id="{{ .Anchor | safeURL }}">{{ .Text | safeHTML }}{{ if ge $lvl 2 }}<a class="anchor" href="#{{ .Anchor | safeURL }}" aria-label="Link to this section">#</a>{{ end }}</h{{ $lvl }}>
+{{- end -}}

@@ -1,0 +1,8 @@
+{{- /* "https://www.github.com/x/y" -> "github.com". "" when there is no source or it is not a web link (e.g. local://inbox/...). */ -}}
+{{- $host := "" -}}
+{{- with . -}}
+  {{- if hasPrefix . "http" -}}
+    {{- with urls.Parse . }}{{ $host = strings.TrimPrefix "www." .Host }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $host -}}

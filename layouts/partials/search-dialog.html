@@ -1,0 +1,9 @@
+<dialog id="search" class="search" aria-label="Search the library" data-index="{{ "index.json" | relURL }}">
+  <div class="search__bar">
+    {{ partial "icon.html" "search" }}
+    <input id="search-input" class="search__input" type="search" placeholder="Search titles, tags, notes…" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" role="combobox" aria-expanded="true" aria-controls="search-results" aria-autocomplete="list" aria-label="Search">
+    <button type="button" class="search__esc" data-search-close aria-label="Close search">esc</button>
+  </div>
+  <div id="search-results" class="search__results" role="listbox" aria-label="Results"></div>
+  <div class="search__foot"><span>↑↓ navigate</span><span>↵ open</span><span>esc close</span></div>
+</dialog>

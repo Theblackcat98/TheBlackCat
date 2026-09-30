@@ -1,0 +1,17 @@
+{{- /* A listing row. Usage: {{ partial "item-row.html" (dict "page" . "filter" true "compact" false) }} */ -}}
+{{- $p := .page -}}
+{{- $kind := partial "type-of.html" $p -}}
+{{- $tags := $p.Params.tags | default slice -}}
+{{- $tl := slice -}}{{- range $tags -}}{{- $tl = $tl | append (lower (string .)) -}}{{- end -}}
+{{- $desc := partial "description.html" $p -}}
+<li class="row{{ if .compact }} row--compact{{ end }}"
+  {{- if .filter }} data-type="{{ $kind }}" data-domain="{{ partial "domain.html" $p }}" data-tags="{{ delimit $tl " " }}" data-title="{{ lower (partial "title.html" $p) }}" data-date="{{ $p.Date.Format "2006-01-02" }}" data-q="{{ lower (printf "%s %s %s %s" (partial "title.html" $p) $desc (delimit $tl " ") (delimit ($p.Params.topics | default slice) " ")) }}"{{ end }}>
+  <div class="meta">
+    <span class="type">{{ partial "type-label.html" $kind }}</span>
+    {{- with $p.Params.source }}{{ with partial "source-host.html" . }}<span>{{ . }}</span>{{ end }}{{ end }}
+    {{- if not $p.Date.IsZero }}<time datetime="{{ $p.Date.Format "2006-01-02" }}">{{ $p.Date.Format "Jan 2, 2006" }}</time>{{ end }}
+  </div>
+  <h3 class="row__title"><a href="{{ $p.RelPermalink }}">{{ partial "title.html" $p }}</a></h3>
+  {{- with $desc }}<p class="row__desc">{{ . }}</p>{{ end }}
+  {{- with first 4 $tags }}{{ partial "tag-list.html" (dict "items" . "tax" "tags") }}{{ end }}
+</li>

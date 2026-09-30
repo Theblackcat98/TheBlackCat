@@ -1,0 +1,31 @@
+{{ define "main" }}
+{{ partial "breadcrumbs.html" . }}
+{{- $isType := eq .Data.Plural "contenttype" -}}
+<header class="page-head">
+  <span class="kicker">Index</span>
+  <h1 class="h-page">{{ if $isType }}Content types{{ else }}{{ .Title }}{{ end }}</h1>
+  <p class="lede">
+    {{- if $isType }}What each thing in the library <em>is</em>, independent of where it came from.
+    {{- else }}Every {{ .Data.Singular }} used across the archive, most-used first. {{ len .Data.Terms }} in total.{{ end -}}
+  </p>
+</header>
+
+{{- if $isType }}
+<ul class="shelves" role="list">
+  {{- range .Data.Terms.ByCount }}
+  {{- $def := index site.Params.contenttypes (lower .Page.Title) }}
+  <li class="shelf">
+    <h3><a href="{{ .Page.RelPermalink }}">{{ with $def }}{{ .plural }}{{ else }}{{ .Page.Title | title }}{{ end }}</a></h3>
+    <span class="count">{{ .Count }} items</span>
+    {{- with $def }}<p>{{ .blurb }}</p>{{ end }}
+  </li>
+  {{- end }}
+</ul>
+{{- else }}
+<ul class="termlist" role="list">
+  {{- range .Data.Terms.ByCount }}
+  <li><a href="{{ .Page.RelPermalink }}"><span>{{ lower .Page.Title }}</span><small>{{ .Count }}</small></a></li>
+  {{- end }}
+</ul>
+{{- end }}
+{{ end }}

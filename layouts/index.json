@@ -1,0 +1,21 @@
+{{- /* Client-side search index (served at /index.json). Titles, descriptions, tags and a short excerpt only. */ -}}
+{{- $idx := slice -}}
+{{- range site.RegularPages -}}
+  {{- if and (not .Params.excludesearch) (ne .Params.status "inbox") (ne .Section "inbox") -}}
+    {{- $kind := partial "type-of.html" . -}}
+    {{- $idx = $idx | append (dict
+      "t" (partial "title.html" .)
+      "u" .RelPermalink
+      "k" $kind
+      "l" (partial "type-label.html" $kind)
+      "s" .Section
+      "d" (partial "description.html" .)
+      "g" (.Params.tags | default slice)
+      "o" (.Params.topics | default slice)
+      "h" (partial "source-host.html" (.Params.source | default ""))
+      "y" (cond .Date.IsZero "" (.Date.Format "2006-01-02"))
+      "x" (.Plain | htmlUnescape | replaceRE `\s+` " " | truncate 320)
+    ) -}}
+  {{- end -}}
+{{- end -}}
+{{- $idx | jsonify -}}

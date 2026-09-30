@@ -1,0 +1,7 @@
+{{- /* Linked metadata list. Usage: {{ partial "tag-list.html" (dict "items" .Params.tags "tax" "tags") }} */ -}}
+{{- $tax := .tax -}}
+{{- with .items -}}
+<ul class="tags{{ if eq $tax "topics" }} tags--topics{{ end }}" role="list">
+  {{- range . }}<li><a href="{{ printf "%s/%s/" $tax (. | urlize) | relURL }}">{{ . }}</a></li>{{ end -}}
+</ul>
+{{- end -}}

@@ -1,95 +1,146 @@
 {{ define "main" }}
-<div class="article-detail-wrap">
-  <div class="breadcrumbs">
-    <a href="{{ site.Home.RelPermalink }}">Home</a>
-    {{ range .Ancestors.Reverse }}
-      {{ if not .IsHome }}
-        <span>/</span>
-        <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-      {{ end }}
-    {{ end }}
-    <span>/</span>
-    <span>{{ .Title | truncate 45 }}</span>
-  </div>
+{{- $kind := partial "type-of.html" . -}}
+{{- $label := partial "type-label.html" $kind -}}
+{{- $host := partial "source-host.html" (.Params.source | default "") -}}
+{{- $isPost := eq .Section "blog" -}}
 
-  <article class="article-container">
-    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
-      <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <span class="bookmark-type">{{ .Params.contenttype | default .Section }}</span>
-        {{ with .Params.status }}
-          <span class="badge-status">status: {{ . }}</span>
-        {{ end }}
+{{- /* Guides and series get a chapter list on the left and prev/next below. */ -}}
+{{- $chapters := slice -}}
+{{- $deep := false -}}
+{{- with .Parent }}{{ with .Parent }}{{ $deep = not .IsHome }}{{ end }}{{ end -}}
+{{- if and $deep (in (slice "docs" "blog") .Section) -}}
+  {{- $chapters = partial "sort-natural.html" .Parent.RegularPages -}}
+{{- end -}}
+
+{{- $toc := "" -}}
+{{- if gt (len .Fragments.Headings) 0 -}}{{- $toc = .Fragments.ToHTML 2 3 false -}}{{- end -}}
+{{- $hasToc := and $toc (ge (len (findRE `<a ` $toc)) 3) -}}
+
+{{- $hasFacts := or (eq $kind "project") .Params.github .Params.stars .Params.language -}}
+{{- $hasAside := or $hasToc $hasFacts -}}
+
+{{ partial "breadcrumbs.html" . }}
+
+<div class="article-layout{{ if $chapters }} has-nav{{ end }}{{ if $hasAside }} has-aside{{ end }}">
+
+  {{- if $chapters }}
+  <nav class="doc-nav" aria-label="{{ partial "title.html" .Parent }}">
+    <details class="doc-nav__sticky" open data-close-narrow>
+      <summary>{{ partial "title.html" .Parent }} · {{ len $chapters }} parts</summary>
+      <span class="label">{{ partial "title.html" .Parent | truncate 30 }}</span>
+      <ol>
+        {{- range $chapters }}
+        <li><a href="{{ .RelPermalink }}"{{ if eq .RelPermalink $.RelPermalink }} aria-current="page"{{ end }}>{{ partial "title.html" . }}</a></li>
+        {{- end }}
+      </ol>
+    </details>
+  </nav>
+  {{- end }}
+
+  <article class="article">
+    <header class="article-head">
+      <div class="meta">
+        <span class="type">{{ $label }}</span>
+        {{- with .Params.status }}{{ if ne . "filed" }}<span>{{ . }}</span>{{ end }}{{ end }}
+        {{- with $host }}<span>{{ . }}</span>{{ end }}
+        {{- if not .Date.IsZero }}<span>Added <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "Jan 2, 2006" }}</time></span>{{ end }}
+        {{- if and (not .Date.IsZero) (ne (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02")) }}<span>Updated <time datetime="{{ .Lastmod.Format "2006-01-02" }}">{{ .Lastmod.Format "Jan 2, 2006" }}</time></span>{{ end }}
+        {{- if gt .WordCount 250 }}<span>{{ .ReadingTime }} min read</span>{{ end }}
       </div>
+      <h1 class="h-page">{{ partial "title.html" . }}</h1>
+      {{- with .Description }}<p class="lede">{{ . }}</p>{{ end }}
 
-      {{ with .Params.language }}
-        <span class="badge-lang">{{ . }}</span>
-      {{ end }}
-    </div>
+      {{- if or .Params.source .Params.github }}
+      <div class="actions">
+        {{- with .Params.source }}{{ if hasPrefix . "http" }}<a class="btn" href="{{ . }}" target="_blank" rel="noopener noreferrer">{{ if $host }}Visit {{ $host }}{{ else }}Open source{{ end }} {{ partial "icon.html" "arrow-ur" }}</a>{{ end }}{{ end }}
+        {{- with .Params.github }}<a class="btn{{ if $.Params.source }} btn--ghost{{ end }}" href="{{ . }}" target="_blank" rel="noopener noreferrer">{{ partial "icon.html" "github" }} View on GitHub</a>{{ end }}
+      </div>
+      {{- end }}
+    </header>
 
-    <h1 style="font-family: var(--font-serif-display); font-size: clamp(2rem, 4vw, 2.5rem); font-weight: 700; color: var(--text-primary); line-height: 1.2; margin-bottom: 1rem;">
-      {{ .Title }}
-    </h1>
+    {{- if $hasToc }}
+    <div class="toc-mobile-wrap"><details class="toc-mobile"><summary>On this page</summary><nav class="toc" aria-label="On this page">{{ $toc | safeHTML }}</nav></details></div>
+    {{- end }}
 
-    <div class="article-meta">
-      {{ with .Params.source }}
-        <a class="source-btn" href="{{ . }}" target="_blank" rel="noopener noreferrer">
-          <span>Open Canonical Source</span>
-          <span>↗</span>
-        </a>
-      {{ end }}
+    {{- if $hasFacts }}
+    <dl class="facts facts--inline">
+      {{- template "facts" . }}
+    </dl>
+    {{- end }}
 
-      {{ with .Params.github }}
-        <a class="source-btn" href="{{ . }}" target="_blank" rel="noopener noreferrer">
-          <span>GitHub Repository</span>
-          <span>↗</span>
-        </a>
-      {{ end }}
-
-      {{ with .Params.stars }}
-        <span class="badge-stars">★ {{ . }}</span>
-      {{ end }}
-
-      <span>~{{ .ReadingTime }} min read</span>
-
-      {{ if not .Date.IsZero }}
-        <span>Updated {{ .Date.Format "Jan 02, 2006" }}</span>
-      {{ end }}
-    </div>
-
-    <div class="prose">
+    <div class="prose" data-prose>
       {{ .Content }}
     </div>
 
-    {{ with .Params.topics }}
-    <div style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle);">
-      <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.5rem;">Topics & Domains</div>
-      <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
-        {{ range . }}<span class="tag-pill">{{ . }}</span>{{ end }}
-      </div>
-    </div>
-    {{ end }}
+    {{- if eq $kind "collection" }}
+      {{- $items := partial "collected.html" . }}
+      {{- if $items }}
+      <section class="section" style="margin-top: var(--s-7)" aria-label="In this collection">
+        <div class="section__head"><h2 class="h-section">In this collection · {{ len $items }}</h2></div>
+        <ul class="rows" role="list">
+          {{- range $items }}{{ partial "item-row.html" (dict "page" .) }}{{ end }}
+        </ul>
+      </section>
+      {{- end }}
+    {{- end }}
 
-    {{ with .Params.tags }}
-    <div style="margin-top: 1rem;">
-      <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.5rem;">Associated Tags</div>
-      <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
-        {{ range . }}<span class="tag-pill">#{{ . }}</span>{{ end }}
+    <footer class="article-foot">
+      {{- if or .Params.topics .Params.tags }}
+      <div>
+        {{- with .Params.topics }}<span class="label">Topics</span>{{ partial "tag-list.html" (dict "items" . "tax" "topics") }}{{ end }}
+        {{- with .Params.tags }}<span class="label" {{ if $.Params.topics }}style="margin-top: var(--s-4)"{{ end }}>Tags</span>{{ partial "tag-list.html" (dict "items" . "tax" "tags") }}{{ end }}
       </div>
-    </div>
-    {{ end }}
+      {{- end }}
 
-    {{ with .Params.related }}
-    <aside style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle);">
-      <h3 style="font-family: var(--font-serif-display); font-size: 1.15rem; margin-bottom: 0.75rem;">Related Knowledge Nodes</h3>
-      <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; padding: 0;">
-        {{ range . }}
-        <li><a href="{{ . | relURL }}" class="section-link" style="font-size: 0.85rem;">→ {{ . }}</a></li>
-        {{ end }}
-      </ul>
-    </aside>
-    {{ end }}
+      {{- /* related: explicit `related:` paths first, then Hugo's tag/topic similarity */ -}}
+      {{- $rel := slice -}}
+      {{- range .Params.related -}}{{- with site.GetPage . -}}{{- $rel = $rel | append . -}}{{- end -}}{{- end -}}
+      {{- if lt (len $rel) 4 -}}
+        {{- $auto := (site.RegularPages.Related . | first 6) -}}
+        {{- $auto = where $auto "Section" "ne" "docs" -}}
+        {{- $rel = $rel | append $auto | uniq -}}
+      {{- end -}}
+      {{- $rel = complement (slice .) $rel | first 4 -}}
+      {{- if and $rel (not $chapters) }}
+      <div>
+        <span class="label">Related</span>
+        <ul class="related" role="list">
+          {{- range $rel }}<li><a href="{{ .RelPermalink }}"><span>{{ partial "title.html" . }}</span><span class="label">{{ partial "type-label.html" (partial "type-of.html" .) }}</span></a></li>{{ end }}
+        </ul>
+      </div>
+      {{- end }}
+
+      {{- with .File }}
+      <p class="edit">
+        <a href="{{ site.Params.repo }}/edit/{{ site.Params.branch }}/content/{{ .Path }}" rel="noopener">Edit this page</a>
+        <a href="{{ site.Params.repo }}/commits/{{ site.Params.branch }}/content/{{ .Path }}" rel="noopener">History</a>
+        <a href="{{ site.Params.repo }}/blob/{{ site.Params.branch }}/content/{{ .Path }}" rel="noopener">View source</a>
+      </p>
+      {{- end }}
+    </footer>
+
+    {{- if $chapters }}
+      {{- $i := 0 }}{{ range $n, $c := $chapters }}{{ if eq $c.RelPermalink $.RelPermalink }}{{ $i = $n }}{{ end }}{{ end }}
+      <nav class="pager" aria-label="Previous and next">
+        {{- if gt $i 0 }}{{ with index $chapters (sub $i 1) }}<a class="prev" href="{{ .RelPermalink }}"><span class="label">← Previous</span><strong>{{ partial "title.html" . }}</strong></a>{{ end }}{{ end }}
+        {{- if lt $i (sub (len $chapters) 1) }}{{ with index $chapters (add $i 1) }}<a class="next" href="{{ .RelPermalink }}"><span class="label">Next →</span><strong>{{ partial "title.html" . }}</strong></a>{{ end }}{{ end }}
+      </nav>
+    {{- end }}
   </article>
+
+  {{- if $hasAside }}
+  <aside class="article-aside article-aside--desktop" aria-label="Page details">
+    <div class="article-aside__sticky">
+      {{- if $hasFacts }}<dl class="facts">{{ template "facts" . }}</dl>{{ end }}
+      {{- if $hasToc }}<nav class="toc" aria-label="On this page"><span class="label">On this page</span>{{ $toc | safeHTML }}</nav>{{ end }}
+    </div>
+  </aside>
+  {{- end }}
 </div>
 {{ end }}
 
-
+{{ define "facts" }}
+  {{- with .Params.language }}<div><dt>Language</dt><dd>{{ . }}</dd></div>{{ end }}
+  {{- with .Params.stars }}<div><dt>Stars</dt><dd>★ {{ . }}</dd></div>{{ end }}
+  {{- with .Params.github }}<div><dt>Repository</dt><dd><a href="{{ . }}" target="_blank" rel="noopener noreferrer">{{ strings.TrimPrefix "https://github.com/" . }}</a></dd></div>{{ end }}
+{{ end }}

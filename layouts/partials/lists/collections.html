@@ -1,0 +1,22 @@
+{{ partial "breadcrumbs.html" . }}
+<header class="page-head">
+  <span class="kicker">Curated views</span>
+  <h1 class="h-page">{{ partial "title.html" . }}</h1>
+  {{ with .Content }}<div class="lede prose" style="max-width: 38rem">{{ . }}</div>{{ end }}
+</header>
+
+{{- with .RegularPages.ByTitle }}
+<ul class="grid" role="list">
+  {{- range . }}
+  {{- $n := len (partial "collected.html" .) }}
+  <li class="card">
+    <div class="meta"><span class="type">Collection</span>{{ if $n }}<span>{{ $n }} items</span>{{ end }}</div>
+    <h3 class="card__title"><a href="{{ .RelPermalink }}">{{ partial "title.html" . }}</a></h3>
+    {{- with partial "description.html" . }}<p class="card__desc">{{ . }}</p>{{ end }}
+    {{- with .Params.tags }}<div class="card__foot">{{ partial "tag-list.html" (dict "items" (first 3 .) "tax" "tags") }}</div>{{ end }}
+  </li>
+  {{- end }}
+</ul>
+{{- else }}
+<div class="empty">{{ partial "icon.html" "inbox" }}<h2>No collections yet</h2><p>A collection is a curated view; it points at canonical items instead of copying them.</p></div>
+{{- end }}

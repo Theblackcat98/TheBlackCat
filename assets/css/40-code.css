@@ -1,0 +1,74 @@
+/* ==========================================================================
+   40 · Code: blocks, copy button, syntax tokens (Chroma classes)
+   ========================================================================== */
+
+.codeblock, .prose > pre {
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--code-bg);
+  overflow: hidden;
+  max-width: 100%;
+}
+.codeblock__bar {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
+  padding: .3rem .4rem .3rem var(--s-4);
+  border-bottom: 1px solid var(--rule);
+  font: 500 .68rem/1 var(--mono);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.codeblock__copy {
+  display: inline-flex; align-items: center; gap: .4em;
+  padding: .45rem .6rem;
+  font: inherit; letter-spacing: inherit; text-transform: inherit;
+  color: var(--ink-2);
+  background: none; border: 1px solid transparent; border-radius: var(--radius);
+  transition: color .15s, border-color .15s, background-color .15s;
+}
+.codeblock__copy:hover { color: var(--ink); border-color: var(--rule-2); background: var(--paper-2); }
+.codeblock__copy[data-state="done"] { color: var(--accent); }
+.codeblock__copy svg { width: .85rem; height: .85rem; }
+.no-js .codeblock__copy { display: none; }
+
+.codeblock .highlight, .codeblock pre { margin: 0; }
+.codeblock pre, .prose > pre {
+  padding: var(--s-4);
+  overflow-x: auto;
+  font: 400 .8rem/1.65 var(--mono);
+  tab-size: 2;
+  -moz-tab-size: 2;
+  color: var(--ink);
+  background: none;
+}
+.codeblock pre:focus-visible { outline-offset: -3px; }
+.codeblock pre code { display: block; width: max-content; min-width: 100%; }
+
+/* Mermaid: rendered client-side, plain source until then */
+pre.mermaid { padding: var(--s-4); background: var(--paper-2); border: 1px solid var(--rule); border-radius: var(--radius-lg); overflow-x: auto; font: 400 .75rem/1.5 var(--mono); color: var(--ink-3); white-space: pre; }
+pre.mermaid[data-processed="true"] { color: inherit; font: inherit; white-space: normal; text-align: center; }
+pre.mermaid svg { margin-inline: auto; max-width: 100%; height: auto; }
+
+/* ---- Tokens ------------------------------------------------------------ */
+.chroma { --t-kw: var(--accent); --t-str: light-dark(#4f6127, #b3c27b); --t-num: light-dark(#345d80, #93b8d8);
+          --t-fn: light-dark(#1c1915, #f3ede1); --t-cmt: light-dark(#6a6253, #8f8677); --t-ty: light-dark(#6b3f7a, #c9a3d6); }
+
+.chroma .k, .chroma .kd, .chroma .kn, .chroma .kp, .chroma .kr, .chroma .kc, .chroma .kt { color: var(--t-kw); }
+.chroma .kt, .chroma .nc, .chroma .nn { color: var(--t-ty); }
+.chroma .kc, .chroma .m, .chroma .mb, .chroma .mf, .chroma .mh, .chroma .mi, .chroma .il, .chroma .mo, .chroma .nb, .chroma .bp { color: var(--t-num); }
+.chroma .s, .chroma .sa, .chroma .sb, .chroma .sc, .chroma .dl, .chroma .sd, .chroma .s2, .chroma .sh, .chroma .si, .chroma .sx, .chroma .sr, .chroma .s1, .chroma .ss { color: var(--t-str); }
+.chroma .se { color: var(--t-num); }
+.chroma .nf, .chroma .fm, .chroma .nx { color: var(--t-fn); font-weight: 600; }
+.chroma .nt, .chroma .na { color: var(--t-kw); }
+.chroma .nv, .chroma .vc, .chroma .vg, .chroma .vi { color: var(--t-num); }
+.chroma .o, .chroma .ow { color: var(--ink-3); }
+.chroma .c, .chroma .ch, .chroma .cm, .chroma .c1, .chroma .cs, .chroma .cp, .chroma .cpf { color: var(--t-cmt); font-style: italic; }
+.chroma .gd { color: light-dark(#9a2a17, #f0a08f); background: light-dark(#f4dcd4, #33201b); }
+.chroma .gi { color: light-dark(#3d6320, #a9cf87); background: light-dark(#dfe9cf, #1f2a17); }
+.chroma .gh, .chroma .gu { color: var(--t-kw); font-weight: 600; }
+.chroma .ge { font-style: italic; }
+.chroma .gs { font-weight: 700; }
+.chroma .err { color: inherit; background: none; }
+.chroma .hl { display: block; background: var(--accent-wash); }
+.chroma .line { display: block; }
+.chroma .ln, .chroma .lnt { color: var(--ink-3); margin-right: var(--s-4); user-select: none; }

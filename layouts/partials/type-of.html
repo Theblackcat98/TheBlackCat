@@ -1,0 +1,6 @@
+{{- /* The "kind" of a page: contenttype if set, else "section" for list pages, else the top-level section name. */ -}}
+{{- $t := .Params.contenttype -}}
+{{- if not $t -}}
+  {{- if .IsSection -}}{{- $t = "section" -}}{{- else -}}{{- $t = .Section | default "page" -}}{{- end -}}
+{{- end -}}
+{{- return $t -}}

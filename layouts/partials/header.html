@@ -1,0 +1,33 @@
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="brand" href="{{ site.Home.RelPermalink }}" aria-label="{{ site.Title }}, home">
+      {{ partial "icon.html" "cat" }}
+      <span class="brand__name">{{ site.Title }}</span>
+    </a>
+
+    <nav class="site-nav" aria-label="Primary">
+      <ul>
+        {{- $here := .RelPermalink -}}
+        {{- range site.Menus.main }}
+        {{- $ext := hasPrefix .URL "http" }}
+        <li>
+          <a href="{{ .URL }}"
+            {{- if $ext }} target="_blank" rel="noopener noreferrer"
+            {{- else if and (ne .URL site.Home.RelPermalink) (hasPrefix $here .URL) }} aria-current="page"{{ end }}>
+            {{- .Name }}{{ if $ext }}<span class="ext-mark" aria-hidden="true">↗</span>{{ end -}}
+          </a>
+        </li>
+        {{- end }}
+      </ul>
+    </nav>
+
+    <div class="tools">
+      <button class="search-launch" type="button" data-search-open aria-label="Search the library" aria-keyshortcuts="Control+K Meta+K">
+        {{ partial "icon.html" "search" }}<span>Search</span><kbd>⌘K</kbd>
+      </button>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle colour theme">
+        <span class="i-moon">{{ partial "icon.html" "moon" }}</span><span class="i-sun">{{ partial "icon.html" "sun" }}</span>
+      </button>
+    </div>
+  </div>
+</header>

@@ -1,0 +1,16 @@
+{{- /* Project card. Everything comes from front matter; the body is optional. */ -}}
+{{- $lang := "" -}}{{- with .Params.language -}}{{- $lang = index (split . " / ") 0 -}}{{- end -}}
+{{- $tags := .Params.tags | default slice -}}
+{{- $tl := slice -}}{{- range $tags -}}{{- $tl = $tl | append (lower (string .)) -}}{{- end -}}
+<li class="card" data-title="{{ lower (partial "title.html" .) }}" data-tags="{{ delimit $tl " " }}" data-stars="{{ .Params.stars | default 0 }}" data-lang="{{ lower $lang }}">
+  <div class="meta">
+    {{- with $lang }}<span class="type">{{ . }}</span>{{ end }}
+    {{- with .Params.stars }}<span>★ {{ . }}</span>{{ end }}
+  </div>
+  <h3 class="card__title"><a href="{{ .RelPermalink }}">{{ partial "title.html" . }}</a></h3>
+  {{- with partial "description.html" . }}<p class="card__desc">{{ . }}</p>{{ end }}
+  <div class="card__foot">
+    {{- with first 3 $tags }}{{ partial "tag-list.html" (dict "items" . "tax" "tags") }}{{ else }}<span></span>{{ end }}
+    {{- with .Params.github }}<a class="card__link" href="{{ . }}" target="_blank" rel="noopener noreferrer" aria-label="{{ partial "title.html" $ }} on GitHub">{{ partial "icon.html" "github" }}<span>Repo</span></a>{{ end }}
+  </div>
+</li>

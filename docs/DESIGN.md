@@ -64,7 +64,7 @@ assets/js/    site.js   (one file, ~8 KB minified, no dependencies; Mermaid is l
 layouts/
   _default/   baseof, list (dispatcher), single, taxonomy (term page), terms
               _markup/  code blocks (copy + language), headings (anchors),
-                        links (external ↗), images (lazy), tables (scroll)
+                        links (external ↗, base-path-safe), images (lazy, base-path-safe), tables (scroll)
   partials/   shell (head, header, footer, search-dialog), components
               (item-row, project-card, tag-list, breadcrumbs, chapters,
               collected), helpers (type-of, domain, title, description …),

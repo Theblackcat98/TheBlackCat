@@ -83,14 +83,15 @@ broken: the reserved-key incident in the skill's own notes is the proof. This
 branch makes it executable (`scripts/lint_content.py`). Running it on today's
 tree finds:
 
-- **5 errors:** three skills with `source: local://inbox/...` (not a web link;
+- **3 errors:** three skills with `source: local://inbox/...` (not a web link;
   the site now hides the "Visit" button for these instead of rendering a dead
-  one); `library/ai/skills/theblackcat-site/SKILL.md` has neither `title` nor
-  `contenttype`.
-- **100 warnings**, mostly legacy: 44 files with no front matter (manuscript
-  chapters, the `docs/deep-research-at-home` chapters, skill support files),
-  43 non-kebab tags, 5 non-kebab file names, 3 drafts, 2 untitled files, 2
-  library items without `description`.
+  one).
+- **79 warnings**, mostly legacy: 43 non-kebab tag entries (`AI`, `Project`,
+  `Guide`), 25 pages with no front matter (manuscript chapters and the
+  `docs/deep-research-at-home` chapters), 4 non-kebab file names, 3 drafts, 2
+  untitled pages, 2 library items without `description`. (Markdown files that
+  sit inside a page bundle, such as a skill's `references/`, are resources
+  Hugo never renders, so the linter skips them.)
 
 Other things I noticed and deliberately **left alone** (rule 9: don't modify
 unrelated content):
@@ -130,7 +131,8 @@ scrollable regions (code, tables, diagrams), reduced motion.
 - `make serve | check | test | shots | lint | css | contrast` (see `make help`).
 - `.github/workflows/pages.yaml` now runs on pull requests too: lint (changed
   files only, so old debt doesn't block), CSS coverage, contrast, and a Hugo
-  build with `--panicOnWarning`. It deploys only on push to `main`.
+  build with `--panicOnWarning` on pull requests only, so a content push to
+  `main` is never blocked by a warning. It deploys only on push to `main`.
 - `.github/workflows/links.yaml` runs a weekly dead-link check
   (lychee) and opens one issue. **I could not run this one from the review
   sandbox**; trigger it once by hand and tune the accept list.

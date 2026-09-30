@@ -1,2 +1,9 @@
-{{- $ext := or (hasPrefix .Destination "http://") (hasPrefix .Destination "https://") -}}
-<a href="{{ .Destination | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}{{ if $ext }} class="ext" target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Text | safeHTML }}</a>
+{{- /* External links open in a new tab and get the ↗ marker. Root-absolute links ("/library/x/") are
+       prefixed with the site's base path, so they work on the GitHub Pages sub-path; links that
+       already carry the prefix ("/TheBlackCat/library/x/") are left alone. */ -}}
+{{- $d := .Destination -}}
+{{- $ext := or (hasPrefix $d "http://") (hasPrefix $d "https://") -}}
+{{- if and (hasPrefix $d "/") (not (hasPrefix $d "//")) (not (hasPrefix $d site.Home.RelPermalink)) -}}
+  {{- $d = relURL (strings.TrimPrefix "/" $d) -}}
+{{- end -}}
+<a href="{{ $d | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}{{ if $ext }} class="ext" target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Text | safeHTML }}</a>

@@ -1,1 +1,6 @@
-<img src="{{ .Destination | safeURL }}" alt="{{ .Text }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" decoding="async">
+{{- /* Root-absolute image paths ("/img/x.png" from static/) get the base path, like links do. */ -}}
+{{- $d := .Destination -}}
+{{- if and (hasPrefix $d "/") (not (hasPrefix $d "//")) (not (hasPrefix $d site.Home.RelPermalink)) -}}
+  {{- $d = relURL (strings.TrimPrefix "/" $d) -}}
+{{- end -}}
+<img src="{{ $d | safeURL }}" alt="{{ .Text }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" decoding="async">

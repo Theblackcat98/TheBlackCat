@@ -74,7 +74,11 @@ jobs:
           HUGO_ENV: production
         run: |
           BASE="${{ steps.pages.outputs.base_url }}"
-          hugo --gc --minify --panicOnWarning --baseURL "${BASE:-https://theblackcat98.github.io/TheBlackCat}/"
+          # Warnings fail pull requests, but never a push to main: an agent's content-only
+          # push must not be able to block a deploy over a warning.
+          STRICT=""
+          if [ "${{ github.event_name }}" = "pull_request" ]; then STRICT="--panicOnWarning"; fi
+          hugo --gc --minify $STRICT --baseURL "${BASE:-https://theblackcat98.github.io/TheBlackCat}/"
 
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'

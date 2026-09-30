@@ -8,7 +8,9 @@ agents and humans get the same feedback in CI, in `make check`, or as a pre-comm
   errors   (exit 1)  things that break Hugo or violate a hard rule
   warnings (exit 0)  drift worth fixing; `--strict` promotes them to errors
 
-Usage: python3 scripts/lint_content.py [--strict] [--verbose] [paths...]
+Usage: python3 scripts/lint_content.py [--strict] [--verbose] [--vocab] [paths...]
+  --vocab    print every tag, topic and library domain in use, with counts, then exit.
+             Run it before tagging anything new (AGENTS.md rule 1: prefer what exists).
   paths   report only on these files (duplicate-source detection still sees everything),
           so CI can hold *changed* files to the contract without failing on old debt.
   --verbose  list every warning instead of one summary line per rule."""
@@ -23,10 +25,9 @@ except ImportError:
 TYPES = {"bookmark", "skill", "article", "note", "project", "collection", "reference"}
 ARCHIVE = ("library", "inbox", "notes", "collections", "projects")   # sections governed by the content model
 KEBAB = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-strict, verbose = "--strict" in sys.argv, "--verbose" in sys.argv
+strict, verbose, vocab = "--strict" in sys.argv, "--verbose" in sys.argv, "--vocab" in sys.argv
 every = sorted(glob.glob("content/**/*.md", recursive=True))
 scope = {a for a in sys.argv[1:] if not a.startswith("--")}
-paths = every        # everything is parsed (duplicate detection needs it); reporting is filtered below
 
 errors, warns = [], []
 def err(f, m): errors.append(f"{f}: {m}")
@@ -39,6 +40,24 @@ def norm_url(u):
 
 seen_src = collections.defaultdict(list)
 tag_use = collections.Counter()
+topic_use = collections.Counter()
+domain_use = collections.Counter()
+
+import os
+
+def is_bundle_resource(f):
+    """A .md file under a leaf bundle (a folder with index.md) is an attached resource, not a page:
+    Hugo doesn't render it, so it needs no front matter (skill support files, reference docs...)."""
+    base = os.path.basename(f)
+    if base in ("index.md", "_index.md"): return False
+    d = os.path.dirname(f)
+    while d and d != "content":
+        if os.path.exists(os.path.join(d, "index.md")): return True
+        d = os.path.dirname(d)
+    return False
+
+resources = {f for f in every if is_bundle_resource(f)}
+paths = [f for f in every if f not in resources]
 
 for f in paths:
     txt = open(f, encoding="utf-8").read()
@@ -82,6 +101,7 @@ for f in paths:
         err(f, f"`updated` ({u}) is before `created` ({c})")
 
     if is_index: continue
+    if section == "library" and len(parts) > 3: domain_use[parts[2]] += 1
 
     # --- the content model applies to the archive sections -----------------
     if section in ARCHIVE:
@@ -97,7 +117,14 @@ for f in paths:
         for t in fm.get(k) or []:
             t = str(t)
             if k == "tags": tag_use[t.lower()] += 1
+            else: topic_use[t.lower()] += 1
             if not KEBAB.match(t): warn(f, f"{k[:-1]} {t!r} is not lowercase-kebab-case")
+
+if vocab:
+    for title, c in (("library domains", domain_use), ("topics", topic_use), ("tags", tag_use)):
+        print(f"{title} ({len(c)}):")
+        print("  " + ", ".join(f"{k} {n}" for k, n in c.most_common()))
+    sys.exit(0)
 
 for s, fs in seen_src.items():
     if len(fs) > 1:
@@ -106,7 +133,7 @@ for s, fs in seen_src.items():
 def in_scope(line): return not scope or line.split(":", 1)[0] in scope
 errors, warns = [e for e in errors if in_scope(e)], [w for w in warns if in_scope(w)]
 
-print(f"checked {len(every)} files · {len(tag_use)} distinct tags ({sum(1 for v in tag_use.values() if v == 1)} used once)")
+print(f"checked {len(paths)} pages (+{len(resources)} bundle resources skipped) · {len(tag_use)} distinct tags ({sum(1 for v in tag_use.values() if v == 1)} used once)")
 for e in errors: print("ERROR " + e)
 if verbose:
     for w in warns: print("warn  " + w)

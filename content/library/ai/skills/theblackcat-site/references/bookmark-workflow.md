@@ -12,8 +12,8 @@ private notes — BlackCat is public.
    Found → update that file's `updated:` + enrich Notes. Done.
 3. **Fetch metadata** (real title + description) via web_extract or
    `curl -sL <url>`. On failure: URL-derived title + note "page fetch failed".
-4. **Topics/tags**: check existing
-   (`git -C <repo> grep -h -A2 '^tags:' -- 'content/*.md'`), reuse
+4. **Topics/tags**: list what exists
+   (`python3 scripts/lint_content.py --vocab`), reuse
    case-insensitively, lowercase kebab-case.
 5. **Create** `content/inbox/<slug>.md` — front matter recipe in
    `references/content-model.md` (`contenttype: bookmark`, `source:` NOT
@@ -21,6 +21,8 @@ private notes — BlackCat is public.
    Body: `## Why I saved this` (user's reason or obvious factual one) +
    `## Notes` (short factual summary of the page).
    ⚠️ Reserved keys: `contenttype` not `type`, `source` not `url`.
+   Lint it: `python3 scripts/lint_content.py content/inbox/<slug>.md` (fix
+   any ERROR before committing).
 6. **Commit only that file**: `git commit -m "bookmark: <title>"`.
 7. **Push**. On rejection: `git pull --rebase`, push again.
 8. **Verify**: commit on `origin/main`
@@ -38,7 +40,10 @@ private notes — BlackCat is public.
 
 - Repo is PUBLIC — page title + description of a public page are fine;
   personal context needs confirmation first.
-- Don't run `hugo` locally (Pi constraints; CI builds on push).
+- Don't run `hugo` locally on the Pi (constraints; CI builds on push). The
+  lint script above is pure Python and is fine to run.
+- The inbox page is public but unlisted: `noindex`, not in search, home or the
+  library. It only appears at `/TheBlackCat/inbox/<slug>/` until triage.
 - Don't write into `public/`, `docs/`, `blog/`, or legacy sections — new
   bookmarks only go to `content/inbox/` (or `content/library/` when Nik
   asks to file directly).

@@ -35,10 +35,6 @@ Study https://simonwillison.net/ style before writing:
    description: "<one-line summary used in cards/search>"
    date: <YYYY-MM-DDTHH:MM:SS-07:00>
    draft: true
-   authors:
-     - name: theblackcat98
-       link: https://github.com/theblackcat98
-       image: https://github.com/theblackcat98.png
    tags:
      - <lowercase-kebab>
    ---
@@ -46,11 +42,14 @@ Study https://simonwillison.net/ style before writing:
    <body…optional <!--more--> marks the summary cutoff>
    ```
 
-   - `date`: real time via `date +%Y-%m-%dT%H:%M:%S-07:00` (PDT).
+   - `date`: real time via `date +%Y-%m-%dT%H:%M:%S-07:00` (PDT). (Older
+     posts carry an `authors:` block; the site does not display it, so
+     omit it.)
    - `draft: true` ALWAYS on first push.
    - Tags lowercase kebab (legacy posts use Title Case — don't imitate).
    - Images/assets go in the same bundle folder.
-4. Commit only that file: `git commit -m "post: <title> (draft)"`, push.
+4. Lint it (`python3 scripts/lint_content.py content/blog/<slug>/index.md`),
+   commit only that file: `git commit -m "post: <title> (draft)"`, push.
 5. Verify: CI `success`, then confirm the draft is NOT live —
    `curl -s -o /dev/null -w '%{http_code}' https://theblackcat98.github.io/TheBlackCat/blog/<slug>/`
    must be **404**. Report to Nik: title, slug, GitHub blob URL,

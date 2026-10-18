@@ -13,7 +13,7 @@ tags:
   - design
 status: filed
 created: 2026-09-04
-updated: 2026-09-06
+updated: 2026-10-18
 ---
 
 ## Why I saved this
@@ -43,3 +43,5 @@ By Jakub Krehel, design engineer and author of the [Interfaces](https://interfac
 **Install:** `npx skills add jakubkrehel/skills` · Claude Code plugin marketplace: `jakubkrehel/skills` · works as a Hermes skills tap source too.
 
 Initial commit (2026-07) consolidated his earlier `great-typography`, `make-interfaces-feel-better`, and `oklch-skill` repos into one skills.sh-compatible collection.
+
+**Pre-collection repos still live.** The standalone [make-interfaces-feel-better](https://github.com/jakubkrehel/make-interfaces-feel-better) repo (created 2026-03, ~3.7k★, MIT, last pushed 2026-08-29) remains installable on its own — `npx skills add jakubkrehel/make-interfaces-feel-better` — and is the canonical source of the UI-detail material (animations, typography, icons, hover states, optical alignment, concentric border radius, shadows, hit areas).

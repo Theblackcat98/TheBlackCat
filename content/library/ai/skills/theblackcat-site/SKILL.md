@@ -1,7 +1,7 @@
 ---
 name: theblackcat-site
 description: "Operate Nik's TheBlackCat site: save bookmarks, write blog posts (draft-flag flow), weekly triage, and maintain the Hugo repo safely."
-version: 1.1.0
+version: 1.2.0
 author: Hermes Agent
 license: MIT
 platforms: [linux]
@@ -58,7 +58,10 @@ includes personal/private context, confirm before writing it into the repo.
 4. Reuse existing tags/topics case-insensitively; write lowercase kebab-case.
 5. New items start in `content/inbox/` with `status: inbox` — promotion is
    triage's job (unless Nik asks to file directly).
-6. Commit only touched files; never mix content + template/config commits.
+6. Commit only files you touched — stage explicit paths (`git add <paths>`),
+   never `git add -A`/`commit -a`. The checkout can carry uncommitted edits
+   from another session; leave those alone and out of your commit. Never mix
+   content and non-content (layouts/CSS/config/scripts) commits.
 7. **Verify after every push**: CI run whose `headSha` matches YOUR commit →
    `success`, then live URL 200. Never gate on `gh run list -L 1` alone — right
    after a push the newest visible run can still be the previous commit's green
@@ -91,6 +94,10 @@ current, full version. So:
   bundle, commit, push, CI-gate, live-check — the standard verify loop.
   This counts as pre-authorized under hard rule 2 (it was Nik's explicit
   request, 2026-09-05) as long as ONLY the mirror changes.
+- **Drift check**: this skill can be edited outside a BlackCat session (skills
+  reviews, curator). At the start of any BlackCat task, compare md5s of the
+  skill files against the in-repo bundle; if they differ, refresh the mirror
+  first — same verify loop (commit, push, CI-gate, live-check).
 - **Hugo page bundles do not serve non-index `.md`** (verified 2026-09-05 —
   see hugo-site-maintenance `references/page-bundle-markdown-not-served.md`):
   the mirror's SKILL.md/references are browsable on GitHub only. Never

@@ -1,6 +1,12 @@
-# Weekly dead-link report for the library. Bookmarks rot; this opens (or updates) one issue
-# instead of failing builds. NOTE: written without being able to run it in the review sandbox.
-# First run manually (Actions -> Link check -> Run workflow) and tune lychee.toml if noisy.
+# Weekly dead-link report for the library. Bookmarks rot, so this keeps ONE issue
+# up to date — it updates the open report instead of filing a duplicate every Monday,
+# and closes it once every link resolves again.
+#
+# Internal links are written site-absolute (/library/..., /docs/...). lychee cannot
+# resolve those inside local Markdown without a root, so the site is built first and
+# lychee is pointed at public/ with --root-dir: /library/x/ then resolves to
+# public/library/x/index.html. That also means a broken internal link is reported
+# instead of silently skipped.
 name: Link check
 
 on:
@@ -12,29 +18,69 @@ permissions:
   contents: read
   issues: write
 
+env:
+  HUGO_VERSION: 0.147.4
+
 jobs:
   lychee:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check external links in content
+      - name: Setup Hugo
+        run: |
+          wget -q -O "${{ runner.temp }}/hugo.deb" \
+            "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb"
+          sudo dpkg -i "${{ runner.temp }}/hugo.deb"
+          hugo version
+
+      - name: Build the site (link targets)
+        env:
+          HUGO_ENVIRONMENT: production
+          HUGO_ENV: production
+        run: hugo --gc --minify
+
+      - name: Check external and internal links
         id: lychee
         uses: lycheeverse/lychee-action@v2
         with:
           args: >-
             --no-progress --max-concurrency 8 --max-retries 2 --timeout 20
             --accept 200,204,206,301,302,403,429
+            --root-dir public
             --exclude '^local://' --exclude 'localhost' --exclude '127\.0\.0\.1'
             --scheme https --scheme http
             'content/**/*.md'
           output: lychee-report.md
           fail: false
 
-      - name: Open or update the issue
+      # Reuse the open report rather than filing a new duplicate each week.
+      - name: Find the open report
+        id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          num=$(gh issue list --state open --label maintenance --limit 50 \
+                  --json number,title \
+                  --jq '.[] | select(.title == "Link check: dead links in the library") | .number' \
+                | head -1)
+          echo "number=${num}" >> "$GITHUB_OUTPUT"
+          echo "Existing issue: ${num:-none}"
+
+      - name: Open or update the report
         if: steps.lychee.outputs.exit_code != 0
         uses: peter-evans/create-issue-from-file@v5
         with:
           title: "Link check: dead links in the library"
           content-filepath: lychee-report.md
           labels: maintenance
+          issue-number: ${{ steps.find.outputs.number }}
+
+      # A clean run means the previous report is stale: close it.
+      - name: Close the report when every link resolves
+        if: steps.lychee.outputs.exit_code == 0 && steps.find.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue close "${{ steps.find.outputs.number }}" \
+            --comment "All checked links resolve as of $(date -u +%F). Closing — the next failure updates this report again."

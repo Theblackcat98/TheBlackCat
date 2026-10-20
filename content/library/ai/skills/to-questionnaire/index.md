@@ -2,7 +2,7 @@
 title: "To Questionnaire"
 description: "Turn a decision you can't fully answer into a questionnaire for someone else to fill in."
 contenttype: skill
-source: "https://github.com/mattpocock/skills/tree/main/skills/engineering/to-questionnaire"
+source: "https://github.com/mattpocock/skills/tree/main/skills/productivity/to-questionnaire"
 topics:
   - ai
 tags:
@@ -11,7 +11,7 @@ tags:
   - workflows
 status: filed
 created: 2026-08-28
-updated: 2026-08-28
+updated: 2026-10-20
 ---
 
 Turn something the user can't answer alone into a **questionnaire** — a Markdown document they hand to one person to fill in async, or fill out together over a meeting. The recipient holds knowledge the user lacks; the questionnaire pulls it out of them.

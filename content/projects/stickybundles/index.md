@@ -2,8 +2,6 @@
 title: "StickyBundles"
 contenttype: project
 language: JavaScript
-stars: 1
-github: "https://github.com/Theblackcat98/StickyBundles"
 tags:
   - javascript
   - web
@@ -11,4 +9,4 @@ tags:
 
 A JavaScript project centered around sticky bundles.
 
-[View on GitHub](https://github.com/Theblackcat98/StickyBundles)
+The GitHub repository is no longer public, so there is nothing to link to; this entry is the surviving description.

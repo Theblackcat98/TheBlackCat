@@ -1,7 +1,7 @@
 ---
 title: "TinyFish MCP — Web Infrastructure for AI Agents"
 contenttype: bookmark
-source: "https://agent.tinyfish.ai/mcp"
+source: "https://tinyfish.ai/"
 topics:
   - ai
 tags:
@@ -11,7 +11,7 @@ tags:
   - web
 status: filed
 created: 2026-08-28
-updated: 2026-08-28
+updated: 2026-10-20
 ---
 
 ## Why I saved this

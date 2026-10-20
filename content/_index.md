@@ -1,5 +1,6 @@
 ---
 date: '2025-05-20T18:39:58Z'
+updated: 2026-10-20
 draft: false
 title: 'TheBlackCat'
 ---
@@ -15,5 +16,5 @@ Here's a list of some of my public repositories:
 *   [AgenticPipelineCreator](https://github.com/Theblackcat98/AgenticPipelineCreator) - A project for creating and managing agentic pipelines.
 *   [Text-Adventure-TUI](https://github.com/Theblackcat98/Text-Adventure-TUI) - A text-based adventure game with a terminal user interface.
 *   [CL-AI](https://github.com/Theblackcat98/CL-AI) - A command-line AI tool.
-*   [IG-Post-Agent](https://github.com/Theblackcat98/IG-Post-Agent) - An agent for automating Instagram posts.
-*   [SVG-to-PNG](https://github.com/Theblackcat98/SVG-to-PNG) - A tool for converting SVG images to PNG format.
+*   [IG-Post-Agent](/docs/ig-post-agent/) - An agent for automating Instagram posts. The repository is no longer public; the docs page is what survives.
+*   [SVG-to-PNG](/docs/svg-to-png/) - A tool for converting SVG images to PNG format. The repository is private; the docs page is what survives.

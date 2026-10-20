@@ -2,7 +2,6 @@
 title: "Analyze Repo"
 description: "Deeply analyze a public GitHub repository by cloning it and applying a structured reverse-engineering framework. Trigger on phrases such as deeply analyze this GitHub repo, analyze this GitHub repo, deep analysis of repo, or when a GitHub URL is provided with an analysis request."
 contenttype: skill
-source: "https://github.com/mattpocock/skills/tree/main/skills/engineering/analyze-repo"
 topics:
   - ai
 tags:
@@ -11,10 +10,15 @@ tags:
   - workflows
 status: filed
 created: 2026-08-28
-updated: 2026-08-28
+updated: 2026-10-20
 ---
 
 # Analyze Repo
+
+> **Provenance:** this skill no longer exists upstream. The `mattpocock/skills`
+> repository has no `analyze-repo` skill and no page for it on aihero.dev, so the
+> old `source` URL was removed. This bundle (`index.md` +
+> `references/framework.md`) is the surviving copy and is now the canonical text.
 
 ## Overview
 

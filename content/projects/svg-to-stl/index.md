@@ -2,8 +2,6 @@
 title: "svg-to-stl"
 contenttype: project
 language: JavaScript
-stars: 1
-github: "https://github.com/Theblackcat98/svg-to-stl"
 tags:
   - javascript
   - svg
@@ -13,4 +11,4 @@ tags:
 
 Turn 2-dimensional SVG paths into 3-dimensional STL meshes.
 
-[View on GitHub](https://github.com/Theblackcat98/svg-to-stl)
+The GitHub repository is no longer public, so there is nothing to link to; this entry is the surviving description.

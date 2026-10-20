@@ -2,7 +2,7 @@
 title: "Resolving Merge Conflicts"
 description: "Use when you need to resolve an in-progress git merge/rebase conflict."
 contenttype: skill
-source: "https://github.com/mattpocock/skills/tree/main/skills/engineering/resolving-merge-conflicts"
+source: "https://www.aihero.dev/skills-resolving-merge-conflicts"
 topics:
   - ai
 tags:
@@ -11,8 +11,13 @@ tags:
   - workflows
 status: filed
 created: 2026-08-28
-updated: 2026-08-28
+updated: 2026-10-20
 ---
+
+> **Archived upstream.** Matt Pocock removed this skill in v1.3.0 — nothing
+> replaces it, because the agent handles a merge or rebase conflict without a
+> dedicated skill. The `source` now points at the archived docs page; the text
+> below is kept as the historical loop.
 
 1. **See the current state** of the merge/rebase. Check git history, and the conflicting files.
 

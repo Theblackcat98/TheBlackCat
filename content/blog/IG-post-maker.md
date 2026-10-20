@@ -15,7 +15,7 @@ excludeSearch: true
 
 # Automated Instagram Post Generation with IG-Post-Agent
 
-Have you ever wished to quickly create engaging Instagram content that includes slide ideas, catchy descriptions, and hashtags—all automatically? The **IG-Post-Agent** project from GitHub (https://github.com/theblackcat98/IG-Post-Agent) makes it possible. Leveraging a multi-agent system built with AutoGen alongside the power of Ollama’s large language model (LLM), this tool lets you generate complete Instagram posts in just a few steps.
+Have you ever wished to quickly create engaging Instagram content that includes slide ideas, catchy descriptions, and hashtags—all automatically? The **IG-Post-Agent** project (its GitHub repository is no longer public) makes it possible. Leveraging a multi-agent system built with AutoGen alongside the power of Ollama’s large language model (LLM), this tool lets you generate complete Instagram posts in just a few steps.
 
 ## Features
 

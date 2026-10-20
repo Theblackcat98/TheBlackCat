@@ -36,5 +36,5 @@ The skill lives in the agent's skill store; this entry documents its behavior as
 now also owns the blog draft-flag workflow, the weekly triage procedure, and
 the site model, backed by six reference files. The complete skill is mirrored
 verbatim in this library at
-[theblackcat-site](/TheBlackCat/library/ai/skills/theblackcat-site/); this
+[theblackcat-site](/library/ai/skills/theblackcat-site/); this
 entry remains as the historical description of the original bookmark pipeline.

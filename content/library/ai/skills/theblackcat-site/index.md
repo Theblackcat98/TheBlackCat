@@ -23,7 +23,7 @@ updated: 2026-09-29
 
 The full Hermes Agent skill that operates this site, mirrored into the library
 itself so the operating manual lives next to the thing it operates. The older
-[BlackCat Bookmark Skill](/TheBlackCat/library/ai/skills/blackcat-bookmark-skill/)
+[BlackCat Bookmark Skill](/library/ai/skills/blackcat-bookmark-skill/)
 entry documented an early, bookmark-only version; this bundle is the current
 skill in full — `SKILL.md` plus every reference file.
 

@@ -2,8 +2,6 @@
 title: "quickdash"
 contenttype: project
 language: JavaScript
-stars: 3
-github: "https://github.com/Theblackcat98/quickdash"
 tags:
   - javascript
   - web
@@ -12,4 +10,4 @@ tags:
 
 A lightweight JavaScript project for quickly building or using dashboards.
 
-[View on GitHub](https://github.com/Theblackcat98/quickdash)
+The GitHub repository is no longer public, so there is nothing to link to; this entry is the surviving description.

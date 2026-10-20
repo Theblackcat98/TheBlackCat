@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>TUI Design Study</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper:#f5f6f4;
+      --surface:#ffffff;
+      --surface-2:#e9ece8;
+      --ink:#18201d;
+      --muted:#56635e;
+      --faint:#7b8782;
+      --line:#cbd2ce;
+      --line-strong:#8f9c96;
+      --accent:#087f63;
+      --accent-ink:#065f4a;
+      --accent-soft:#d5eee6;
+      --warn:#a55c00;
+      --danger:#b63838;
+      --good:#087f63;
+      --code:#101815;
+      --code-ink:#d8e6df;
+      --code-muted:#83978e;
+      --code-line:#33433c;
+      --shadow:0 14px 40px rgba(20,36,30,.08);
+    }
+    @media (prefers-color-scheme:dark){
+      :root{
+        --paper:#0c1110;
+        --surface:#121917;
+        --surface-2:#19221f;
+        --ink:#e0e8e4;
+        --muted:#a4b2ac;
+        --faint:#7f8c86;
+        --line:#293832;
+        --line-strong:#51635b;
+        --accent:#6fd4b3;
+        --accent-ink:#9ae3ca;
+        --accent-soft:#173b31;
+        --warn:#e6a65e;
+        --danger:#ef8989;
+        --good:#6fd4b3;
+        --code:#080d0b;
+        --code-ink:#d8e6df;
+        --code-muted:#81958c;
+        --code-line:#2b3a34;
+        --shadow:0 18px 55px rgba(0,0,0,.28);
+      }
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:24px}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",sans-serif;line-height:1.58}
+    button,a{font:inherit}
+    a{color:var(--accent-ink);text-underline-offset:3px}
+    button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .shell{max-width:1280px;margin:0 auto;padding:28px 28px 80px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px}
+    .rail{position:sticky;top:24px;align-self:start;height:calc(100vh - 48px);display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid var(--line);padding-right:24px}
+    .rail nav{display:grid;gap:3px}
+    .rail a{text-decoration:none;color:var(--muted);padding:8px 10px;border-radius:6px;font-family:"IBM Plex Mono",monospace;font-size:13px}
+    .rail a:hover,.rail a.active{background:var(--accent-soft);color:var(--accent-ink)}
+    .rail-note{font-size:12px;color:var(--faint);font-family:"IBM Plex Mono",monospace;line-height:1.5}
+    main{min-width:0}
+    .hero{padding:18px 0 66px;border-bottom:1px solid var(--line)}
+    .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--accent-ink);margin:0 0 18px}
+    h1{font-size:clamp(36px,6vw,72px);line-height:.98;letter-spacing:-.045em;margin:0;max-width:850px;font-weight:700}
+    .lede{font-size:clamp(18px,2.1vw,24px);line-height:1.45;max-width:790px;color:var(--muted);margin:26px 0 32px}
+    .hero-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+    .stat{padding:19px 20px 20px 0}
+    .stat+.stat{padding-left:20px;border-left:1px solid var(--line)}
+    .stat strong{display:block;font-family:"IBM Plex Mono",monospace;font-size:25px;line-height:1.2}
+    .stat span{font-size:13px;color:var(--muted)}
+    .method{margin-top:28px;max-width:850px;color:var(--muted);font-size:14px}
+    .method strong{color:var(--ink)}
+    section{padding:66px 0;border-bottom:1px solid var(--line)}
+    .section-head{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(240px,.8fr);gap:48px;align-items:end;margin-bottom:34px}
+    h2{font-size:clamp(28px,4vw,44px);line-height:1.08;letter-spacing:-.035em;margin:0}
+    .section-head p{margin:0;color:var(--muted);font-size:15px}
+    h3{font-size:20px;line-height:1.25;margin:0 0 10px}
+    .source{font-family:"IBM Plex Mono",monospace;color:var(--faint);font-size:11px}
+    .thesis{font-size:clamp(23px,3vw,36px);line-height:1.25;letter-spacing:-.025em;max-width:900px;margin:0 0 38px}
+    .principles{display:grid;grid-template-columns:1fr 1fr;gap:0 28px;counter-reset:principle}
+    .principle{counter-increment:principle;display:grid;grid-template-columns:42px 1fr;gap:14px;padding:22px 0;border-top:1px solid var(--line)}
+    .principle::before{content:counter(principle,decimal-leading-zero);font-family:"IBM Plex Mono",monospace;color:var(--accent-ink);font-size:13px;padding-top:3px}
+    .principle h3{font-size:17px;margin-bottom:5px}
+    .principle p{margin:0;color:var(--muted);font-size:14px}
+    .terminal-demo{background:var(--code);color:var(--code-ink);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+    .demo-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px 14px;border-bottom:1px solid var(--code-line)}
+    .segmented{display:flex;gap:3px;background:#111b17;padding:3px;border-radius:7px}
+    .segmented button{border:0;background:transparent;color:var(--code-muted);padding:6px 10px;border-radius:5px;font-family:"IBM Plex Mono",monospace;font-size:12px;cursor:pointer}
+    .segmented button[aria-pressed="true"]{background:#283a33;color:#eef8f3}
+    .demo-note{font-family:"IBM Plex Mono",monospace;color:var(--code-muted);font-size:11px;text-align:right}
+    .frame{padding:22px;font-family:"IBM Plex Mono",monospace;font-size:13px;min-height:310px}
+    .frame.hidden{display:none}
+    .noisy{color:#edf8f3}
+    .ascii{margin:0;white-space:pre;overflow:hidden;line-height:1.36;color:#b7c9c0}
+    .ascii .hot{color:#73d6b5}.ascii .warn{color:#e5b56b}.ascii .dim{color:#60766c}
+    .quiet-ui{display:grid;grid-template-rows:auto 1fr auto;min-height:266px}
+    .quiet-top,.quiet-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#b8ccc2}
+    .quiet-top{padding-bottom:11px;border-bottom:1px solid #304139}
+    .quiet-bottom{padding-top:10px;border-top:1px solid #304139;font-size:11px;color:#82978d}
+    .quiet-top .status{color:#71d7b4}
+    .quiet-main{padding:20px 0;display:grid;grid-template-columns:1.15fr .85fr;gap:26px}
+    .quiet-main h4{font-size:11px;font-weight:500;color:#82978d;margin:0 0 10px;text-transform:none}
+    .model-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;padding:8px 0;border-bottom:1px solid #1f2c27}
+    .model-row.active{color:#83dfbf}
+    .meter{margin:0 0 16px}.meter-label{display:flex;justify-content:space-between;color:#a9bcb3;font-size:11px;margin-bottom:6px}.bar{height:8px;background:#1c2924}.fill{height:100%;background:#71d7b4}.fill.warn{background:#e5b56b}
+    .contrast-note{margin:14px 0 0;color:var(--muted);font-size:13px}
+    .signal-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:44px}
+    .bars{display:grid;gap:14px}.bar-row{display:grid;grid-template-columns:112px 1fr 34px;gap:12px;align-items:center;font-family:"IBM Plex Mono",monospace;font-size:13px}.track{height:10px;background:var(--surface-2)}.track span{display:block;height:100%;background:var(--accent)}
+    .theme-signal{background:var(--surface);padding:28px;border-radius:4px;box-shadow:var(--shadow)}
+    .theme-signal .big{font-family:"IBM Plex Mono",monospace;font-size:54px;line-height:1;color:var(--accent-ink);margin:8px 0 12px}.theme-signal p{margin:0;color:var(--muted)}
+    .cluster-list{margin:38px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .cluster-list li{border-top:1px solid var(--line);padding:16px 0}.cluster-list strong{display:block;margin-bottom:4px}.cluster-list span{color:var(--muted);font-size:14px}
+    .diagnosis{display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;align-items:start}
+    .stack{background:var(--code);color:var(--code-ink);padding:24px;border-radius:4px;font-family:"IBM Plex Mono",monospace;box-shadow:var(--shadow)}
+    .stack-title{color:var(--code-muted);font-size:11px;margin-bottom:16px}.layer{border:1px solid #5d7469;padding:14px;margin-top:-1px}.layer:nth-child(3){margin:10px 10px 0}.layer:nth-child(4){margin:10px 20px 0}.layer:nth-child(5){margin:10px 30px 0;border-color:#d09c58}.layer small{display:block;color:#81958c;margin-top:2px}.stack-caption{font-size:12px;color:var(--code-muted);margin:16px 0 0}
+    .finding-list{display:grid;gap:0}.finding{padding:18px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:30px 1fr;gap:12px}.finding .mark{font-family:"IBM Plex Mono",monospace;color:var(--danger)}.finding p{margin:5px 0 0;color:var(--muted);font-size:14px}
+    .good-list{margin-top:32px;padding:24px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.good-list h3{color:var(--good)}.good-list ul{margin:12px 0 0;padding-left:20px;color:var(--muted)}
+    .roadmap{counter-reset:road;display:grid;gap:0}.road{counter-increment:road;display:grid;grid-template-columns:50px minmax(0,1fr) auto;gap:18px;align-items:start;padding:20px 0;border-top:1px solid var(--line)}.road::before{content:counter(road,decimal-leading-zero);font-family:"IBM Plex Mono",monospace;color:var(--accent-ink)}.road h3{font-size:17px;margin:0}.road p{margin:4px 0 0;color:var(--muted);font-size:14px}.impact{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--faint);padding-top:3px}
+    .theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.theme-card{padding:20px;background:var(--surface);box-shadow:var(--shadow)}.theme-card h3{font-size:16px}.theme-card p{margin:0;color:var(--muted);font-size:14px}.swatches{display:flex;gap:5px;margin:15px 0}.swatch{height:28px;flex:1;min-width:0}.theme-card.problem{border-top:3px solid var(--danger)}.theme-card.add{border-top:3px solid var(--accent)}
+    .theme-facts{margin-top:30px;display:grid;gap:10px}.fact-line{display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;padding:13px 0;border-top:1px solid var(--line)}.fact-line code{font-family:"IBM Plex Mono",monospace;color:var(--accent-ink)}.fact-line span{color:var(--muted)}
+    .patterns{display:grid;grid-template-columns:1fr 1fr;gap:28px}.pattern-col{padding-top:18px;border-top:2px solid var(--good)}.pattern-col.avoid{border-color:var(--danger)}.pattern-col ul{padding:0;margin:16px 0 0;list-style:none}.pattern-col li{padding:10px 0;border-bottom:1px solid var(--line);color:var(--muted)}
+    .sources{padding-bottom:28px;border-bottom:0}.source-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.source-card{padding-top:15px;border-top:1px solid var(--line)}.source-card h3{font-size:15px}.source-card p{font-size:13px;color:var(--muted);margin:0}.caveat{margin-top:30px;padding:18px 20px;background:var(--surface-2);font-size:13px;color:var(--muted);border-radius:7px}.repo-link{display:inline-block;margin-top:10px;font-family:"IBM Plex Mono",monospace;font-size:12px}
+    @media(max-width:900px){
+      .shell{grid-template-columns:1fr;padding:20px 20px 64px;gap:0}.rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:0 0 14px;margin-bottom:22px}.rail nav{display:flex;flex-wrap:wrap;gap:4px;padding-bottom:4px}.rail a{white-space:nowrap;flex:0 1 auto}.rail-note{display:none}.section-head,.signal-layout,.diagnosis{grid-template-columns:1fr;gap:20px}.theme-grid{grid-template-columns:1fr}.source-grid{grid-template-columns:1fr}.quiet-main{grid-template-columns:1fr}.demo-note{display:none}
+    }
+    @media(max-width:620px){
+      .shell{padding-left:16px;padding-right:16px}.hero{padding-bottom:46px}section{padding:48px 0}.hero-grid{grid-template-columns:1fr}.stat{padding:15px 0}.stat+.stat{padding-left:0;border-left:0;border-top:1px solid var(--line)}.principles,.cluster-list,.patterns{grid-template-columns:1fr}.frame{padding:14px;min-height:0;font-size:10px}.ascii{font-size:9px}.road{grid-template-columns:38px minmax(0,1fr)}.impact{grid-column:2}.fact-line{grid-template-columns:1fr;gap:4px}.demo-toolbar{align-items:flex-start}.segmented{flex-wrap:wrap}.bar-row{grid-template-columns:86px 1fr 28px;font-size:11px}.theme-signal .big{font-size:44px}
+    }
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail" aria-label="Study sections">
+      <nav>
+        <a href="#thesis">Thesis</a>
+        <a href="#principles">Principles</a>
+        <a href="#taste">Star signal</a>
+        <a href="#critique">UI critique</a>
+        <a href="#roadmap">Change plan</a>
+        <a href="#themes">Themes</a>
+        <a href="#sources">Sources</a>
+      </nav>
+      <p class="rail-note">Compiled 2026-09-15<br />Qualitative synthesis<br />Static code review</p>
+    </aside>
+
+    <main>
+      <header class="hero" id="thesis">
+        <p class="eyebrow">A design study for llama-deck</p>
+        <h1>The terminal rewards restraint.</h1>
+        <p class="lede">The strongest TUIs feel dense, calm, and unmistakably native to the character grid. Their polish comes from hierarchy, alignment, semantic color, and instant response—not from adding more chrome.</p>
+        <div class="hero-grid" aria-label="Research scope">
+          <div class="stat"><strong>3</strong><span>evidence streams</span></div>
+          <div class="stat"><strong>857</strong><span>GitHub stars surveyed locally</span></div>
+          <div class="stat"><strong>1</strong><span>code-level interface review</span></div>
+        </div>
+        <p class="method"><strong>Method.</strong> This study combines terminal-community discussions around r/unixporn aesthetics, a local aggregation of Nick’s starred repositories extracted September 11, 2026, and a static review of llama-deck’s <code>src/ui</code> layer on September 15, 2026. The application was not run live.</p>
+      </header>
+
+      <section id="principles">
+        <div class="section-head">
+          <h2>Ten rules of a convincing TUI</h2>
+          <p>High-confidence qualitative patterns repeated across independent community discussions. They were not counted as a formal survey.</p>
+        </div>
+        <p class="thesis">Information first. Decoration last. Chrome should frame the work, then get out of the way.</p>
+        <div class="principles">
+          <article class="principle"><div><h3>Honor the grid</h3><p>Compose in character cells. Don’t transplant desktop widgets into a keyboard-first surface.</p></div></article>
+          <article class="principle"><div><h3>Make color mean something</h3><p>Use one accent, dimmed chrome, and semantic states rather than a 16-color rainbow.</p></div></article>
+          <article class="principle"><div><h3>Border selectively</h3><p>Thin rounded borders can signal focus; whitespace and dividers should do most of the structural work.</p></div></article>
+          <article class="principle"><div><h3>Keep the map stable</h3><p>Fixed panes, one clear focus, and a persistent breadcrumb reduce the user’s cognitive load.</p></div></article>
+          <article class="principle"><div><h3>Use glyphs as texture</h3><p>Nerd Font icons accelerate scanning, but every icon needs a clean ASCII fallback.</p></div></article>
+          <article class="principle"><div><h3>Align ruthlessly</h3><p>Right-align numbers, hold fixed column widths, and keep content away from borders.</p></div></article>
+          <article class="principle"><div><h3>Teach through the footer</h3><p>A one-line contextual hint bar plus <code>?</code> help makes the interface self-explanatory.</p></div></article>
+          <article class="principle"><div><h3>Reveal depth on demand</h3><p>Keep the default view quiet; surface power features only when context makes them useful.</p></div></article>
+          <article class="principle"><div><h3>Move with purpose</h3><p>Smooth graphs and live watch states should communicate change, never merely decorate.</p></div></article>
+          <article class="principle"><div><h3>Use familiar grammar</h3><p>Vim-style navigation, mnemonic single keys, <code>/</code> search, <code>q</code> quit, and <code>?</code> help.</p></div></article>
+        </div>
+        <p class="source">Community synthesis: Lobsters TUI discussions, Hacker News threads on btop/Textual/k9s, and unixporn-adjacent workflow coverage.</p>
+      </section>
+
+      <section aria-labelledby="chrome-title">
+        <div class="section-head">
+          <h2 id="chrome-title">Quiet chrome, shown</h2>
+          <p>The same information can feel noisy or composed. Toggle the frame to compare the hierarchy.</p>
+        </div>
+        <div class="terminal-demo">
+          <div class="demo-toolbar">
+            <div class="segmented" role="group" aria-label="Choose interface comparison">
+              <button type="button" data-frame="noisy" aria-pressed="false">Nested chrome</button>
+              <button type="button" data-frame="quiet" aria-pressed="true">Quiet chrome</button>
+            </div>
+            <span class="demo-note">Illustrative reconstruction, not a live app capture</span>
+          </div>
+          <div class="frame noisy hidden" id="frame-noisy" aria-hidden="true">
+<pre class="ascii">┌────────────────── <span class="hot">LLAMA-DECK v0.1.0</span> ──────────────────┐
+│ [1] Models  [2] Servers  [3] <span class="hot">Telemetry</span>  [4] Settings │
+├──────────────── <span class="warn">SERVER TELEMETRY</span> ─────────────────┤
+│ ┌────────────────── <span class="warn">STATUS</span> ───────────────────┐ │
+│ │ Running  llama-server  port 8080                │ │
+│ └─────────────────────────────────────────────────┘ │
+│ ┌────────────────── <span class="warn">METERS</span> ───────────────────┐ │
+│ │ VRAM  ███████████████░░░░░░░░░  61%            │ │
+│ │ KV    ████████░░░░░░░░░░░░░░░░  33%            │ │
+│ └─────────────────────────────────────────────────┘ │
+│ ┌──────────────── <span class="warn">THROUGHPUT</span> ─────────────────┐ │
+│ │ 24.8 tok/s  ▁▂▃▅▆▅▇█▇▆▆▇                     │ │
+│ └─────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│ q Quit  ? Help  Ctrl+P Palette  Tab Next  r Refresh │
+└─────────────────────────────────────────────────────┘</pre>
+          </div>
+          <div class="frame quiet" id="frame-quiet" aria-hidden="false">
+            <div class="quiet-ui">
+              <div class="quiet-top"><span>llama-deck <span style="color:#789087">/ telemetry</span></span><span class="status">● server online</span></div>
+              <div class="quiet-main">
+                <div>
+                  <h4>Recent throughput</h4>
+                  <div class="model-row active"><span>llama-server</span><span>24.8 tok/s</span></div>
+                  <div class="model-row"><span>prompt eval</span><span>118.2 tok/s</span></div>
+                  <div class="model-row"><span>active slots</span><span>2 / 4</span></div>
+                </div>
+                <div>
+                  <h4>Memory</h4>
+                  <div class="meter"><div class="meter-label"><span>VRAM</span><span>61%</span></div><div class="bar"><div class="fill warn" style="width:61%"></div></div></div>
+                  <div class="meter"><div class="meter-label"><span>KV cache</span><span>33%</span></div><div class="bar"><div class="fill" style="width:33%"></div></div></div>
+                  <div class="meter"><div class="meter-label"><span>trend</span><span>▁▂▃▅▆▅▇█▇▆▆▇</span></div></div>
+                </div>
+              </div>
+              <div class="quiet-bottom"><span>j/k navigate · r refresh</span><span>? all commands</span></div>
+            </div>
+          </div>
+        </div>
+        <p class="contrast-note">The refined version keeps status, metrics, and hints—but removes three framing layers and lets spacing establish the hierarchy.</p>
+      </section>
+
+      <section id="taste">
+        <div class="section-head">
+          <h2>The star graph says “polish”</h2>
+          <p>Nick’s 857-star archive contains roughly 45 curated TUI repositories. The framework mix is broad; the aesthetic signal is much clearer.</p>
+        </div>
+        <div class="signal-layout">
+          <div>
+            <h3>Languages across the curated TUI set</h3>
+            <div class="bars" aria-label="TUI repositories by primary language">
+              <div class="bar-row"><span>Rust</span><div class="track"><span style="width:100%"></span></div><strong>15</strong></div>
+              <div class="bar-row"><span>Go</span><div class="track"><span style="width:60%"></span></div><strong>9</strong></div>
+              <div class="bar-row"><span>TypeScript</span><div class="track"><span style="width:60%"></span></div><strong>9</strong></div>
+              <div class="bar-row"><span>Python</span><div class="track"><span style="width:46.67%"></span></div><strong>7</strong></div>
+            </div>
+          </div>
+          <div class="theme-signal">
+            <span class="source">Theme repositories</span>
+            <div class="big">15</div>
+            <h3>Catppuccin dominates</h3>
+            <p>Rose Pine appears twice and Flexoki once. Gruvbox, Tokyo Night, Dracula, Nord, and Everforest are absent from the starred-theme set.</p>
+          </div>
+        </div>
+        <ul class="cluster-list">
+          <li><strong>File managers</strong><span>yazi, joshuto, ranger, superfile—the strongest application cluster.</span></li>
+          <li><strong>AI and agent TUIs</strong><span>grok-build, veyyon, otui, and opencode.</span></li>
+          <li><strong>Task tools</strong><span>taskwarrior-tui, taman, epoch, and flow_state.</span></li>
+          <li><strong>Terminal finish</strong><span>tmux configurations, terminalizer, oh-my-posh, exa, zoxide, and emulator projects.</span></li>
+        </ul>
+        <p class="contrast-note"><strong>Interpretation:</strong> framework-agnostic and application-led, with Go/Charm and TypeScript/OpenTUI as current learning edges. The visual preference leans soothing and pastel, not high-contrast retro.</p>
+        <p class="source">Source: local GitHub star export extracted 2026-09-11. Counts and repository names come from the research aggregation.</p>
+      </section>
+
+      <section id="critique">
+        <div class="section-head">
+          <h2>llama-deck has strong bones—and too many frames</h2>
+          <p>The review covered the React shell, screens, components, and themes. This is code-level evidence, not a live usability test.</p>
+        </div>
+        <div class="diagnosis">
+          <div class="stack" aria-label="Four nested interface layers">
+            <div class="stack-title">Current hierarchy</div>
+            <div class="layer">Header box<small>full border + app title</small></div>
+            <div class="layer">Tab bar<small>global navigation</small>
+              <div class="layer">Screen pane<small>border + title when focused</small>
+                <div class="layer">Section boxes<small>status · meters · throughput · slots</small></div>
+              </div>
+            </div>
+            <p class="stack-caption">Four simultaneous chrome layers compete with the telemetry they are meant to support.</p>
+          </div>
+          <div class="finding-list">
+            <article class="finding"><span class="mark">01</span><div><h3>Chrome overload</h3><p>Drop the header, screen-pane, and footer boxes. Reserve borders for overlays and the single focused widget.</p></div></article>
+            <article class="finding"><span class="mark">02</span><div><h3>Titles shout</h3><p>“SERVER TELEMETRY,” “STATUS,” and “METERS” use volume where dimmed title case would create calmer hierarchy.</p></div></article>
+            <article class="finding"><span class="mark">03</span><div><h3>The footer spends three rows on one line</h3><p>Make it borderless and contextual. Keep <code>?</code> as the complete reference.</p></div></article>
+            <article class="finding"><span class="mark">04</span><div><h3>Gauges leave precision on the table</h3><p>Fixed 24-cell bars use only full blocks. Scale with width, add eighth-block resolution, and color thresholds semantically.</p></div></article>
+            <article class="finding"><span class="mark">05</span><div><h3>Help is not yet safely modal</h3><p>The fixed 76-column overlay can overflow smaller terminals. Center it, clamp it, and dim the backdrop.</p></div></article>
+            <article class="finding"><span class="mark">06</span><div><h3>Iconography is missing</h3><p>Add Nerd Font glyphs for tabs, file types, and states—with ASCII fallbacks and a support check.</p></div></article>
+          </div>
+        </div>
+        <div class="good-list">
+          <h3>Keep these foundations</h3>
+          <ul>
+            <li>Debounced resize relayout, degradation below 100×30, virtualized tables, and ring-buffered telemetry.</li>
+            <li>Command palette, <code>?</code> help, footer hints, and a one-owner focus engine.</li>
+            <li>Truecolor themes, OSC 52 clipboard support, braille spinners, sparklines, and golden-frame snapshots.</li>
+          </ul>
+        </div>
+        <a class="repo-link" href="https://github.com/Theblackcat98/llamacpp-runner.git" target="_blank" rel="noopener noreferrer">View the reviewed repository ↗</a>
+      </section>
+
+      <section id="roadmap">
+        <div class="section-head">
+          <h2>Change plan, in order</h2>
+          <p>Start with structure. Theme and micro-polish matter more after the interface has room to breathe.</p>
+        </div>
+        <div class="roadmap">
+          <article class="road"><div><h3>De-chrome the shell</h3><p>Borderless one-line header and footer; no screen-pane frame.</p></div><span class="impact">Highest impact</span></article>
+          <article class="road"><div><h3>Make rounded borders the exception</h3><p>Use rounded as the default box style, then show it only for focus and overlays.</p></div><span class="impact">Fast</span></article>
+          <article class="road"><div><h3>Move to quiet title case</h3><p>Let whitespace, weight, and muted color carry hierarchy.</p></div><span class="impact">Fast</span></article>
+          <article class="road"><div><h3>Repair the theme system</h3><p>Correct Catppuccin’s bright foreground; repair or remove Cyberpunk and Matrix; add contrast tests.</p></div><span class="impact">High</span></article>
+          <article class="road"><div><h3>Recompose telemetry</h3><p>Merge status into the header strip and place VRAM and KV gauges side by side where width permits.</p></div><span class="impact">High</span></article>
+          <article class="road"><div><h3>Add glyphs with fallbacks</h3><p>Improve scan speed without making Nerd Fonts a hard dependency.</p></div><span class="impact">Medium</span></article>
+          <article class="road"><div><h3>Increase gauge fidelity</h3><p>Fractional blocks, responsive widths, and warning thresholds.</p></div><span class="impact">Medium</span></article>
+          <article class="road"><div><h3>Fix the modal geometry</h3><p>Center and clamp help, with a dim backdrop.</p></div><span class="impact">Medium</span></article>
+          <article class="road"><div><h3>Read the version dynamically</h3><p>Replace the hardcoded <code>v0.1.0</code> with package metadata.</p></div><span class="impact">Small</span></article>
+        </div>
+      </section>
+
+      <section id="themes">
+        <div class="section-head">
+          <h2>Themes should preserve meaning</h2>
+          <p>Five themes exist in code: TokyoNight, Catppuccin, Gruvbox, Cyberpunk, and Matrix. The README also claims Nord and Monokai, which creates documentation drift.</p>
+        </div>
+        <div class="theme-grid">
+          <article class="theme-card problem"><h3>Repair Catppuccin</h3><div class="swatches"><span class="swatch" style="background:#f5e0dc"></span><span class="swatch" style="background:#cdd6f4"></span><span class="swatch" style="background:#89b4fa"></span></div><p><code>fgBright</code> is Rosewater <code>#f5e0dc</code>; use a near-white Text role in the <code>#cdd6f4</code> family.</p></article>
+          <article class="theme-card problem"><h3>Rework the joke themes</h3><div class="swatches"><span class="swatch" style="background:#0d0e15"></span><span class="swatch" style="background:#00f0ff"></span><span class="swatch" style="background:#4a5171"></span></div><p>Cyberpunk is harsh for sustained reading. Matrix flattens success and warning into similar greens and makes muted text nearly invisible.</p></article>
+          <article class="theme-card add"><h3>Add taste-aligned options</h3><div class="swatches"><span class="swatch" style="background:#232136"></span><span class="swatch" style="background:#ea9a97"></span><span class="swatch" style="background:#9ccfd8"></span></div><p>Rose Pine matches the star signal. Nord and Everforest also broaden the serious, low-fatigue set.</p></article>
+        </div>
+        <div class="theme-facts">
+          <div class="fact-line"><code>Cyberpunk</code><span>Body text <code>#00f0ff</code> on <code>#0d0e15</code>; muted <code>#4a5171</code> is weak against that background.</span></div>
+          <div class="fact-line"><code>Matrix</code><span>Success <code>#00ff41</code> and warning <code>#a3ff00</code> are hard to distinguish; muted <code>#003b00</code> nearly disappears on <code>#050b05</code>.</span></div>
+          <div class="fact-line"><code>Test rule</code><span>Add programmatic contrast checks, aiming for a WCAG-like minimum of 4.5:1 for foreground/background pairs.</span></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="pattern-title">
+        <div class="section-head"><h2 id="pattern-title">A compact design contract</h2><p>Use this as the review lens for every new screen.</p></div>
+        <div class="patterns">
+          <div class="pattern-col"><h3>Keep</h3><ul><li>Information-dense default views</li><li>One active accent and clear semantic states</li><li>Stable panes and a visible breadcrumb</li><li>Right-aligned numbers and fixed columns</li><li>Contextual hints plus full help</li><li>Fast, differential redraws</li></ul></div>
+          <div class="pattern-col avoid"><h3>Avoid</h3><ul><li>A border around every region</li><li>Desktop-widget cosplay</li><li>Hardcoded clashing color</li><li>Glyphs without fallbacks</li><li>Text touching frames</li><li>Flicker and full redraws</li></ul></div>
+        </div>
+      </section>
+
+      <section class="sources" id="sources">
+        <div class="section-head"><h2>Evidence and limits</h2><p>Each conclusion in this study belongs to one of these three evidence streams.</p></div>
+        <div class="source-grid">
+          <article class="source-card"><h3>Community aesthetic</h3><p>Search-grounded synthesis of Lobsters discussions, Hacker News threads, and unixporn-adjacent coverage. Repeated patterns are treated as qualitative consensus, not measured prevalence.</p></article>
+          <article class="source-card"><h3>Starred repositories</h3><p>Local export of 857 GitHub stars, extracted September 11, 2026. The TUI subset was curated to roughly 45 repositories, with language and theme counts reported directly.</p></article>
+          <article class="source-card"><h3>llama-deck review</h3><p>Static code review of <code>src/ui</code> on September 15, 2026. No live interaction or rendered-frame validation was part of the research pass.</p></article>
+        </div>
+        <div class="caveat"><strong>Open question.</strong> Because Reddit’s JSON endpoints could not be fetched directly, this study does not claim a quantitative sample of r/unixporn posts. A future live review should also validate the proposed layout at multiple terminal sizes and measure theme contrast programmatically.</div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const frameButtons = document.querySelectorAll('[data-frame]');
+    frameButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const target = button.dataset.frame;
+        frameButtons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+        ['noisy','quiet'].forEach((name) => {
+          const panel = document.getElementById(`frame-${name}`);
+          const shown = name === target;
+          panel.classList.toggle('hidden', !shown);
+          panel.setAttribute('aria-hidden', String(!shown));
+        });
+      });
+    });
+
+    const sectionLinks = [...document.querySelectorAll('.rail a')];
+    const observed = sectionLinks.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.filter(entry => entry.isIntersecting).sort((a,b) => b.intersectionRatio-a.intersectionRatio)[0];
+      if (!visible) return;
+      sectionLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${visible.target.id}`));
+    }, {rootMargin:'-15% 0px -65% 0px', threshold:[0,.2,.6]});
+    observed.forEach(section => observer.observe(section));
+  </script>
+</body>
+</html>

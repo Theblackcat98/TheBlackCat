@@ -64,6 +64,18 @@ Use for smaller pieces of personal or working knowledge. Notes can mature into a
 
 Use for a coherent project and its associated documentation, decisions, references, and implementation knowledge.
 
+A project page may be hand-written or generated. `scripts/sync_projects.py` keeps a
+page for every public, non-fork, non-archived repository on the owner's GitHub
+account (`content/projects/<slug>/index.md`, `contenttype: project`, with `github`,
+`language`, `stars`, `description` and the repository's topics as tags). It runs
+daily from `.github/workflows/projects.yaml` and commits what changed.
+
+The sync never rewrites a hand-written page — it only refreshes `stars` — and it
+never deletes one. Which pages are generated is recorded in
+`content/projects/.sync-manifest.json` (a dotfile, so Hugo does not publish it); a
+generated page whose repository stops qualifying is removed on the next run. To
+take a generated page over by hand, edit it and delete its slug from the manifest.
+
 ### Collection
 
 Use for a deliberate curated view such as `Favorite AI Skills`, `Local AI`, or `Tools I Actually Use`. Collections should reference canonical content rather than copy it.

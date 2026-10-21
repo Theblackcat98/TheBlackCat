@@ -1,0 +1,53 @@
+# Keep content/projects/ in step with the owner's public repositories.
+#
+# A project page is generated for every repository that is public, not a fork and
+# not archived (scripts/sync_projects.py). Hand-written pages are never rewritten:
+# only their star count is refreshed. A generated page whose repository stops
+# qualifying is removed; hand-written pages are never removed.
+#
+# The commit lands on main, which triggers "Deploy The BlackCat". No loop: this
+# workflow only runs on a schedule.
+name: Projects sync
+
+on:
+  schedule:
+    - cron: "40 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync content/projects with GitHub
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PROJECTS_OWNER: Theblackcat98
+        run: python3 scripts/sync_projects.py
+
+      - name: Check the generated content
+        run: |
+          pip install --quiet pyyaml
+          files=$(git status --porcelain --untracked-files=all content/projects \
+                  | awk '{print $2}' | grep -E '\.md$' | tr '\n' ' ')
+          if [ -n "$files" ]; then python3 scripts/lint_content.py $files; else echo "nothing new to lint"; fi
+
+      - name: Commit and push when something changed
+        run: |
+          if [ -z "$(git status --porcelain content/projects)" ]; then
+            echo "projects are already up to date"
+            exit 0
+          fi
+          git config user.name "Theblackcat98"
+          git config user.email "4934499+Theblackcat98@users.noreply.github.com"
+          git add content/projects
+          git commit -m "projects: sync from GitHub ($(date -u +%F))"
+          git push

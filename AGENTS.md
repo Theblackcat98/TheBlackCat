@@ -223,7 +223,8 @@ The linter needs only Python and PyYAML, so it works on small machines that cann
 
 - **Pull request:** lints the content files you changed, checks CSS coverage and colour contrast, and builds with warnings as errors. Never deploys.
 - **Push to `main`:** the same checks (the build does not fail on warnings), then deploys.
-- `.github/workflows/links.yaml` opens a weekly issue listing dead external links.
+- `.github/workflows/links.yaml` keeps one open issue listing dead links; it updates that issue instead of filing a duplicate each week, and closes it when a run comes back clean.
+- `.github/workflows/projects.yaml` runs `scripts/sync_projects.py` daily and commits the result: `content/projects/` always holds a page for every public, non-fork, non-archived repository on the owner's account.
 
 ## Recipes
 

@@ -36,9 +36,14 @@ jobs:
       - name: Check the generated content
         run: |
           pip install --quiet pyyaml
-          files=$(git status --porcelain --untracked-files=all content/projects \
-                  | awk '{print $2}' | grep -E '\.md$' | tr '\n' ' ')
-          if [ -n "$files" ]; then python3 scripts/lint_content.py $files; else echo "nothing new to lint"; fi
+          # `grep` exits 1 when nothing changed, and the job runs with -o pipefail.
+          changed=$(git status --porcelain --untracked-files=all content/projects \
+                    | awk '{print $2}' | grep -E '\.md$' || true)
+          if [ -n "$changed" ]; then
+            echo "$changed" | tr '\n' ' ' | xargs python3 scripts/lint_content.py
+          else
+            echo "nothing new to lint"
+          fi
 
       - name: Commit and push when something changed
         run: |

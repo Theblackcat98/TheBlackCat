@@ -1,14 +1,14 @@
 ---
 name: theblackcat-site
 description: "Operate Nik's TheBlackCat site: save bookmarks, write blog posts (draft-flag flow), weekly triage, and maintain the Hugo repo safely."
-version: 1.2.0
+version: 1.3.0
 author: Hermes Agent
 license: MIT
 platforms: [linux]
 metadata:
   hermes:
     tags: [GitHub, bookmarks, blog, Hugo, TheBlackCat, knowledge-base]
-    related_skills: [hugo-site-maintenance, github-repo-management, github-auth]
+    related_skills: [hugo-site-maintenance, github]
 ---
 
 # The BlackCat Site
@@ -41,6 +41,8 @@ includes personal/private context, confirm before writing it into the repo.
 | Write or publish a blog post | `references/blog-workflow.md` |
 | Site facts: layouts, config, taxonomy, CSS, menu, deploy | `references/site-model.md` |
 | Front matter recipes, reserved keys, placement rules | `references/content-model.md` |
+| Dead links, the weekly link-check issue, lychee/CI link checking | `references/link-check.md` |
+| Projects section, GitHub-repo sync, generated project pages | `references/projects-sync.md` |
 | Past build/rendering incidents (context for debugging) | `references/theblackcat-*.md` |
 | Generic Hugo debugging on any site (local builds, bisect) | `hugo-site-maintenance` skill |
 
@@ -71,6 +73,27 @@ includes personal/private context, confirm before writing it into the repo.
    (same version as CI, extracted without root). CI owns deploys.
 9. Never commit `public/` or `resources/` (gitignored 2026-09-04 — CI builds
    fresh; tracked build output shipped stale hextra-era files until purged).
+10. **Dead references are content debt, not issue debt.** When Nik says "amend
+   the issues" about a link-check report, fix the links in `content/`; the
+   issue list is the symptom. One dead URL in two entries is two edits, and a
+   report that reappears every Monday is a workflow bug, not a backlog item.
+   Procedure, rot classes and the verified local lychee recipe:
+   `references/link-check.md`.
+11. **The remote can move between your sync and your push** (another agent
+   pushes `main` too). Integrate with `git -c rebase.autoStash=true rebase
+   origin/main` — plain `rebase` refuses on the dirty tree another session left
+   behind, and `git stash`/`checkout` would disturb that session's work. Then
+   re-gate on CI for the NEW `headSha` (rule 7).
+12. **Long verification loops need a visible pulse.** After several minutes of
+   tool calls with nothing said (hugo builds, lychee sweeps, CI waits), send one
+   line: what is verified, what is left. Silence reads as a stall and Nik will
+   ask what is taking so long.
+13. **`content/projects/` is generated, not curated.** `scripts/sync_projects.py`
+   owns it; a page it created is rewritten every run and deleted when the repo
+   stops qualifying, while a hand-written page keeps its body and only has
+   `stars` refreshed. Never hand-add a page for a public repo (the sync will
+   make one), and never rewrite a curated `language` with GitHub's value.
+   Rules, manifest and verification ladder: `references/projects-sync.md`.
 
 ## Repo facts at a glance
 
@@ -83,9 +106,11 @@ includes personal/private context, confirm before writing it into the repo.
 ## Standing: repo mirror of this skill (since 2026-09-05, commit 6614d7f)
 
 This skill is mirrored **verbatim** into the repo at
-`content/library/ai/skills/theblackcat-site/` (SKILL.md + all 6 references,
-byte-for-byte; md5-checked at commit time), with a human-readable `index.md`
-catalog page. The older
+`content/library/ai/skills/theblackcat-site/` (SKILL.md + every file in
+`references/`, byte-for-byte; md5-checked at commit time), with a
+human-readable `index.md` catalog page. Mirror the whole `references/`
+directory, not a remembered count — the set grows, and a stale count in a
+remembered list is how a reference silently stops shipping. The older
 `library/ai/skills/blackcat-bookmark-skill/` entry points to it as the
 current, full version. So:
 
@@ -93,7 +118,11 @@ current, full version. So:
   a mirror refresh in the same pass**: copy the changed file(s) into the
   bundle, commit, push, CI-gate, live-check — the standard verify loop.
   This counts as pre-authorized under hard rule 2 (it was Nik's explicit
-  request, 2026-09-05) as long as ONLY the mirror changes.
+  request, 2026-09-05) as long as ONLY the mirror changes. It binds edits made
+  in ANY session, including a one-line `related_skills` change made while
+  tidying up unrelated skills — the mirror does not care why the file changed.
+  A tree carrying another session's uncommitted edits is not a reason to skip
+  the refresh: stage only the mirror file (hard rule 6).
 - **Drift check**: this skill can be edited outside a BlackCat session (skills
   reviews, curator). At the start of any BlackCat task, compare md5s of the
   skill files against the in-repo bundle; if they differ, refresh the mirror

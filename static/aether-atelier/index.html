@@ -1,0 +1,2223 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETHER // Mathematical & Chromatic Atelier</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cormorant Garamond, Plus Jakarta Sans, JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@300;400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: '#090A0F',
+                        slateGlass: '#12141D',
+                        alabaster: '#F3F4F6',
+                        mutedSilver: '#9CA3AF',
+                        graphite: '#6B7280',
+                        indigoAccent: '#6366F1',
+                        amberAccent: '#F59E0B',
+                        emeraldAccent: '#10B981'
+                    },
+                    fontFamily: {
+                        display: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            background-color: #090A0F;
+            color: #F3F4F6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        /* Glassmorphic Surface Utilities */
+        .glass-panel {
+            background: rgba(18, 20, 29, 0.76);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+        }
+        .glass-pill {
+            background: rgba(24, 27, 38, 0.72);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-pill:hover {
+            border-color: rgba(255, 255, 255, 0.24);
+            background: rgba(34, 38, 54, 0.85);
+        }
+        .glass-pill.active {
+            background: rgba(99, 102, 241, 0.18);
+            border-color: rgba(99, 102, 241, 0.65);
+            color: #FFFFFF;
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.25);
+        }
+
+        /* Custom Minimal Range Sliders */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #F3F4F6;
+            border: 2px solid #6366F1;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.8);
+            cursor: grab;
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+            background: #ffffff;
+        }
+        input[type="range"]::-webkit-slider-thumb:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+        }
+
+        /* Custom Scrollbars for Inspector Drawers */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(9, 10, 15, 0.4);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Subtle Ambient Grid Overlay */
+        .atelier-grid-bg {
+            background-size: 48px 48px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        }
+
+        .math-serif {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-style: italic;
+        }
+        
+        /* Toast Notification Animation */
+        @keyframes toastSlideUp {
+            0% { opacity: 0; transform: translate(-50%, 16px); }
+            100% { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .toast-enter {
+            animation: toastSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="relative w-screen h-screen overflow-hidden select-none">
+
+    <!-- MAIN INTERACTIVE GENERATIVE CANVAS (Full Viewport) -->
+    <canvas id="atelierCanvas" class="fixed inset-0 w-full h-full block z-0 cursor-crosshair atelier-grid-bg"></canvas>
+
+    <!-- CHROMATIC STUDIO OVERLAY VIEW (Active when in Studio IV: Chromatics) -->
+    <div id="chromaticStudioView" class="fixed inset-0 z-10 hidden overflow-y-auto pt-20 pb-24 px-4 sm:px-8 lg:px-12 bg-obsidian/90 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto space-y-8">
+            <!-- Header Banner -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-white/10 pb-6 gap-4">
+                <div>
+                    <span class="text-xs font-mono uppercase tracking-widest text-indigoAccent block mb-1">STUDIO IV // ALGORITHMIC COLOR & SPECTRAL HARMONY</span>
+                    <h1 class="font-display text-3xl sm:text-5xl font-semibold tracking-tight text-alabaster">Spectral Cosine Synthesizer & Perceptual Chords</h1>
+                </div>
+                <p class="text-sm text-mutedSilver max-w-md font-light">
+                    Craft continuous procedural color gradients using trigonometric wave functions or geometric harmony chords. Any palette synthesized here immediately drives all mathematical studios.
+                </p>
+            </div>
+
+            <!-- Main Grid: Cosine Wave Generator + Waveform Graph + Albers Contrast Tester -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left Column: Inigo Quilez Cosine Palette Synthesizer (7 cols) -->
+                <div class="lg:col-span-7 glass-panel rounded-2xl p-6 space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <h2 class="font-display text-2xl font-semibold text-white">Procedural Cosine Palette</h2>
+                            <p class="text-xs font-mono text-mutedSilver mt-0.5">
+                                C(t) = a + b &middot; cos(2&pi;(c &middot; t + d))
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="randomizeCosinePalette()" class="glass-pill px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 text-amberAccent border-amberAccent/30 hover:bg-amberAccent/10">
+                                <i class="ph ph-sparkle"></i> Randomize Waves
+                            </button>
+                            <button onclick="copyPaletteCSS()" class="glass-pill px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                                <i class="ph ph-copy"></i> Copy CSS &amp; GLSL
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Live Continuous Gradient Ribbon Preview -->
+                    <div class="space-y-2">
+                        <div id="cosineGradientBar" class="w-full h-16 rounded-xl border border-white/15 shadow-inner transition-all"></div>
+                        <!-- Discrete 8-Swatch Sample Strip (Click to copy HEX) -->
+                        <div id="cosineSwatchesRow" class="grid grid-cols-4 sm:grid-cols-8 gap-2 pt-1"></div>
+                    </div>
+
+                    <!-- R, G, B Cosine Wave Curves Canvas -->
+                    <div class="relative rounded-xl overflow-hidden border border-white/10 bg-black/50 p-3">
+                        <div class="flex justify-between items-center text-[11px] font-mono text-mutedSilver mb-1">
+                            <span>SPECTRAL WAVEFORM INTERFERENCE (t &isin; [0, 1])</span>
+                            <span class="flex items-center gap-3">
+                                <span class="text-rose-400">&bull; RED</span>
+                                <span class="text-emerald-400">&bull; GREEN</span>
+                                <span class="text-sky-400">&bull; BLUE</span>
+                            </span>
+                        </div>
+                        <canvas id="waveformCanvas" width="640" height="150" class="w-full h-36 block"></canvas>
+                    </div>
+
+                    <!-- Vector Controls (a: Offset, b: Amplitude, c: Frequency, d: Phase) -->
+                    <div id="cosineVectorsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <!-- Dynamically populated by JS for clean R,G,B sliders per vector -->
+                    </div>
+                </div>
+
+                <!-- Right Column: Geometric Harmony Wheel & Josef Albers Contrast Homage (5 cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    
+                    <!-- Curated Master Palettes -->
+                    <div class="glass-panel rounded-2xl p-6 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-display text-xl font-semibold text-white">Curated Atelier Palettes</h3>
+                            <span class="text-[11px] font-mono text-mutedSilver">SYNCED GLOBALLY</span>
+                        </div>
+                        <div id="curatedPalettesGrid" class="grid grid-cols-2 gap-2.5">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Josef Albers "Homage to the Square" Simultaneous Contrast & Harmony Chord Tester -->
+                    <div class="glass-panel rounded-2xl p-6 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-display text-xl font-semibold text-white">Albers Simultaneous Contrast</h3>
+                                <p class="text-xs text-mutedSilver">Explore how nested chromatic fields alter perceived luminance</p>
+                            </div>
+                            <select id="harmonyChordSelect" onchange="updateAlbersAndChords()" class="bg-black/60 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs font-mono text-alabaster focus:outline-none focus:border-indigoAccent">
+                                <option value="golden">Golden Ratio Spiral (137.5&deg;)</option>
+                                <option value="triadic">Triadic Symmetry (120&deg;)</option>
+                                <option value="split">Split-Complementary (150&deg;)</option>
+                                <option value="tetradic">Tetradic Square (90&deg;)</option>
+                                <option value="analogous">Analogous Flow (30&deg;)</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                            <!-- Interactive Nested Albers Squares -->
+                            <div id="albersOuter" class="aspect-square w-full rounded-2xl flex items-center justify-center p-6 transition-colors duration-300 shadow-2xl border border-white/10">
+                                <div id="albersMidOuter" class="w-full h-full rounded-xl flex items-center justify-center p-6 transition-colors duration-300 shadow-lg">
+                                    <div id="albersMidInner" class="w-full h-full rounded-lg flex items-center justify-center p-6 transition-colors duration-300 shadow-md">
+                                        <div id="albersCore" class="w-full h-full rounded-md transition-colors duration-300 shadow-inner flex items-end justify-center pb-2">
+                                            <span id="albersCoreLabel" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/50 text-white backdrop-blur-xs"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Harmonic Color Wheel Canvas -->
+                            <div class="flex flex-col items-center justify-center space-y-3">
+                                <canvas id="harmonyWheelCanvas" width="210" height="210" class="w-48 h-48 cursor-pointer rounded-full"></canvas>
+                                <div class="w-full space-y-1.5">
+                                    <div class="flex justify-between text-[11px] font-mono text-mutedSilver">
+                                        <span>BASE HUE ANGLE</span>
+                                        <span id="baseHueLabel">215&deg;</span>
+                                    </div>
+                                    <input type="range" id="baseHueSlider" min="0" max="360" value="215" oninput="updateAlbersAndChords()">
+                                </div>
+                                <button onclick="applyChordToGlobalPalette()" class="w-full glass-pill py-2 rounded-lg text-xs font-mono text-indigo-300 border-indigo-500/30 hover:bg-indigo-500/20 flex items-center justify-center gap-1.5">
+                                    <i class="ph ph-magic-wand"></i> Apply Chord to Active Visualizer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOP NAVIGATION BAR (Floating Glass Header) -->
+    <header class="fixed top-0 left-0 right-0 z-30 px-3 sm:px-6 py-3 flex items-center justify-between pointer-events-none">
+        <!-- Brand Identity -->
+        <div class="glass-panel px-4 py-2 rounded-2xl flex items-center gap-3 pointer-events-auto">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-amber-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <i class="ph-bold ph-infinity text-white text-lg"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="font-display font-bold tracking-wider text-lg leading-none text-white">AETHER</span>
+                    <span class="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-white/10 text-indigo-300">Atelier v4.2</span>
+                </div>
+                <p class="text-[10px] font-mono text-mutedSilver hidden sm:block">MATHEMATICAL FORMULAS &amp; CHROMATIC SYNTHESIS</p>
+            </div>
+        </div>
+
+        <!-- Primary Studio Switcher (4 Extensive Studios) -->
+        <nav class="glass-panel p-1.5 rounded-2xl flex items-center gap-1 sm:gap-1.5 pointer-events-auto overflow-x-auto max-w-[60vw] sm:max-w-none">
+            <button onclick="switchStudio('attractors')" id="tab-attractors" class="studio-tab glass-pill active px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap">
+                <i class="ph ph-planet text-sm text-indigo-400"></i>
+                <span>I. Strange Attractors</span>
+            </button>
+            <button onclick="switchStudio('harmonograph')" id="tab-harmonograph" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
+                <i class="ph ph-spiral text-sm text-amber-400"></i>
+                <span>II.Sacred &amp; Harmonics</span>
+            </button>
+            <button onclick="switchStudio('emergence')" id="tab-emergence" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
+                <i class="ph ph-waves text-sm text-emerald-400"></i>
+                <span>III. Cymatics &amp; Morphogenesis</span>
+            </button>
+            <button onclick="switchStudio('chromatics')" id="tab-chromatics" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
+                <i class="ph ph-palette text-sm text-rose-400"></i>
+                <span>IV. Chromatic Lab</span>
+            </button>
+        </nav>
+
+        <!-- Right Quick Actions: Global Palette Pill & Export -->
+        <div class="glass-panel px-3 py-1.5 rounded-2xl flex items-center gap-2 pointer-events-auto">
+            <button onclick="cycleGlobalPalette()" title="Cycle Active Color Palette" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <div id="miniPalettePreview" class="w-12 h-3.5 rounded-full"></div>
+                <span id="activePaletteName" class="text-[11px] font-mono text-alabaster hidden xl:inline">Vermeer Lapis</span>
+            </button>
+            <button onclick="toggleCodexModal()" title="Mathematical Formula Codex" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-alabaster transition">
+                <i class="ph ph-book-open-text text-base"></i>
+            </button>
+            <button onclick="exportArtworkPNG()" title="Export High-Res Artwork PNG" class="px-3 py-1.5 rounded-xl bg-indigoAccent/90 hover:bg-indigoAccent text-white text-xs font-medium flex items-center gap-1.5 shadow-lg shadow-indigoAccent/25 transition">
+                <i class="ph ph-camera"></i>
+                <span class="hidden md:inline">Capture</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- FLOATING LEFT MATHEMATICAL PLAQUE & PRESET SELECTOR (Visible in Studios I, II, III) -->
+    <aside id="leftFormulaPlaque" class="fixed top-20 left-3 sm:left-6 z-20 w-80 sm:w-96 flex flex-col gap-3 pointer-events-none transition-all duration-300">
+        
+        <!-- Live Equation Display Card -->
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 pointer-events-auto space-y-3">
+            <div class="flex items-center justify-between">
+                <span id="formulaCategoryTag" class="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    CHAOTIC DYNAMICAL SYSTEM
+                </span>
+                <div class="flex items-center gap-1.5 text-[11px] font-mono text-mutedSilver">
+                    <span id="fpsCounter">60 FPS</span>
+                    <span>&bull;</span>
+                    <button onclick="togglePanelCollapse('left')" class="hover:text-white" title="Minimize Info">
+                        <i class="ph ph-arrows-in-simple"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <h2 id="formulaTitle" class="font-display text-2xl sm:text-3xl font-semibold text-white tracking-tight">Clifford Strange Attractor</h2>
+                <p id="formulaSubtitle" class="text-xs text-mutedSilver mt-1 leading-relaxed">
+                    Iterative trigonometric phase-space folding discovered by Clifford Pickover.
+                </p>
+            </div>
+
+            <!-- Live Symbolic & Numeric Formula Box -->
+            <div class="rounded-xl bg-black/55 border border-white/10 p-3 font-mono text-xs space-y-1.5 overflow-x-auto">
+                <div id="symbolicEquation" class="text-indigo-200 leading-relaxed">
+                    x<sub>n+1</sub> = sin(a &middot; y<sub>n</sub>) + c &middot; cos(a &middot; x<sub>n</sub>)<br>
+                    y<sub>n+1</sub> = sin(b &middot; x<sub>n</sub>) + d &middot; cos(b &middot; y<sub>n</sub>)
+                </div>
+                <div id="liveEquationValues" class="text-[11px] text-amber-300/90 pt-1 border-t border-white/10">
+                    a = -1.70, b = 1.80, c = -0.90, d = -0.40
+                </div>
+            </div>
+
+            <!-- Mode Selector Pills within current Studio -->
+            <div class="space-y-1.5 pt-1">
+                <span class="text-[10px] font-mono uppercase tracking-wider text-mutedSilver">SELECT MATHEMATICAL SYSTEM</span>
+                <div id="subSystemSelector" class="grid grid-cols-2 gap-1.5">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+
+            <!-- Curated Gallery Presets for Current System -->
+            <div class="space-y-1.5 pt-1">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-mono uppercase tracking-wider text-mutedSilver">CURATED CONSTANTS</span>
+                    <button onclick="triggerSerendipity()" class="text-[11px] font-mono text-amberAccent hover:underline flex items-center gap-1">
+                        <i class="ph ph-sparkle"></i> Serendipity
+                    </button>
+                </div>
+                <div id="curatedPresetsRow" class="flex flex-wrap gap-1.5">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Hint Pill -->
+        <div class="glass-pill px-3.5 py-2 rounded-xl pointer-events-auto flex items-center justify-between text-xs text-mutedSilver">
+            <span id="interactionHint" class="flex items-center gap-2">
+                <i class="ph ph-hand-pointing text-indigo-400"></i>
+                <span>Drag canvas to orbit / perturb field &bull; Scroll to zoom</span>
+            </span>
+        </div>
+    </aside>
+
+    <!-- FLOATING RIGHT PARAMETER INSPECTOR HUD (Visible in Studios I, II, III) -->
+    <aside id="rightParameterHUD" class="fixed top-20 right-3 sm:right-6 z-20 w-72 sm:w-80 pointer-events-none transition-all duration-300">
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 pointer-events-auto max-h-[calc(100vh-140px)] overflow-y-auto space-y-4">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <div class="flex items-center gap-2">
+                    <i class="ph ph-sliders-horizontal text-indigo-400 text-lg"></i>
+                    <h3 class="font-sans text-xs font-semibold uppercase tracking-wider text-white">Live Parameters</h3>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button onclick="resetCurrentSystem()" title="Reset View & Canvas" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
+                        <i class="ph ph-arrow-counter-clockwise"></i>
+                    </button>
+                    <button onclick="togglePauseSimulation()" id="pauseBtn" title="Pause / Resume Integration" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
+                        <i id="pauseIcon" class="ph ph-pause"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Sliders Container -->
+            <div id="parameterSlidersContainer" class="space-y-3.5">
+                <!-- Populated dynamically based on active mathematical formula -->
+            </div>
+
+            <!-- Rendering & Aesthetic Controls -->
+            <div class="border-t border-white/10 pt-3.5 space-y-3">
+                <span class="text-[10px] font-mono uppercase tracking-wider text-mutedSilver block">AESTHETICS &amp; EXPOSURE</span>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-mutedSilver">Trail Persistence / Exposure</span>
+                        <span id="exposureVal" class="font-mono text-white">0.94</span>
+                    </div>
+                    <input type="range" id="exposureSlider" min="0.50" max="0.995" step="0.005" value="0.94" oninput="updateGlobalRenderParam('exposure', this.value)">
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-mutedSilver">Chromatic Cycle Speed</span>
+                        <span id="colorSpeedVal" class="font-mono text-white">1.0x</span>
+                    </div>
+                    <input type="range" id="colorSpeedSlider" min="0" max="4" step="0.1" value="1.0" oninput="updateGlobalRenderParam('colorSpeed', this.value)">
+                </div>
+
+                <div class="flex items-center justify-between pt-1">
+                    <span class="text-xs text-mutedSilver">Auto-Morph Parameters</span>
+                    <button id="autoMorphBtn" onclick="toggleAutoMorph()" class="px-3 py-1 rounded-lg text-xs font-mono border border-white/15 bg-white/5 text-mutedSilver hover:text-white transition">
+                        OFF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- BOTTOM QUICK DOCK (Minimize/Restore HUDs, Zoom Reset, Palette Strip) -->
+    <footer id="bottomDock" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
+        <div class="glass-panel px-3 py-1.5 rounded-2xl flex items-center gap-2 sm:gap-3">
+            <button onclick="toggleUIImmersion()" id="zenModeBtn" class="glass-pill px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 text-mutedSilver hover:text-white" title="Toggle Pure Canvas Zen Mode">
+                <i class="ph ph-eye"></i>
+                <span class="hidden sm:inline">Zen View</span>
+            </button>
+            <div class="h-4 w-[1px] bg-white/10"></div>
+            <button onclick="clearCanvasBuffer()" class="glass-pill px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 text-mutedSilver hover:text-white">
+                <i class="ph ph-eraser"></i>
+                <span class="hidden sm:inline">Clear Exposure</span>
+            </button>
+            <button onclick="triggerSerendipity()" class="glass-pill px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 text-amberAccent border-amberAccent/30">
+                <i class="ph ph-dice-five"></i>
+                <span>Mutate Formula</span>
+            </button>
+            <div class="h-4 w-[1px] bg-white/10 hidden sm:block"></div>
+            <button onclick="switchStudio('chromatics')" class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-xl hover:bg-white/5 transition text-xs text-mutedSilver hover:text-white">
+                <i class="ph ph-sliders text-rose-400"></i>
+                <span>Edit Spectral Waves</span>
+            </button>
+        </div>
+    </footer>
+
+    <!-- MATHEMATICAL CODEX MODAL (Educational Deep-Dive into the Equations) -->
+    <div id="codexModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel max-w-3xl w-full rounded-3xl p-6 sm:p-8 max-h-[85vh] overflow-y-auto space-y-6 border border-white/15">
+            <div class="flex items-start justify-between border-b border-white/10 pb-4">
+                <div>
+                    <span class="text-xs font-mono uppercase tracking-widest text-indigoAccent">ARCHITECTURAL CODEX</span>
+                    <h2 class="font-display text-3xl font-semibold text-white mt-0.5">The Mathematics of Generative Beauty</h2>
+                </div>
+                <button onclick="toggleCodexModal()" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white">
+                    <i class="ph ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                    <h3 class="font-display text-xl font-semibold text-indigo-300">I. Strange Attractors &amp; Chaos</h3>
+                    <p class="text-xs text-mutedSilver leading-relaxed">
+                        Deterministic nonlinear systems whose trajectories never repeat (aperiodic) yet remain confined to a complex fractal manifold in phase space. Slight changes to initial parameters ($a, b, c, d$) cause bifurcations between delicate silk filaments and dense topological knots.
+                    </p>
+                    <p class="font-mono text-[11px] text-alabaster/80 bg-black/40 p-2 rounded-lg">
+                        Clifford, De Jong, Lorenz ($\sigma, \rho, \beta$), and Halvorsen 3D cyclic symmetry.
+                    </p>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                    <h3 class="font-display text-xl font-semibold text-amber-300">II. Phyllotaxis &amp; Harmonographs</h3>
+                    <p class="text-xs text-mutedSilver leading-relaxed">
+                        Botanical primordia pack most efficiently when successive elements diverge by the Golden Angle $\phi = 360^\circ(1 - 1/\varphi) \approx 137.50776^\circ$. Deviating by even $0.1^\circ$ transforms Fibonacci spirals into radial spokes. Harmonographs model damped coupled pendulums.
+                    </p>
+                    <p class="font-mono text-[11px] text-alabaster/80 bg-black/40 p-2 rounded-lg">
+                        r = c&radic;n, &theta; = n &middot; 137.50776&deg; | Maurer Roses &amp; Fourier Phasors.
+                    </p>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                    <h3 class="font-display text-xl font-semibold text-emerald-300">III. Cymatics &amp; Morphogenesis</h3>
+                    <p class="text-xs text-mutedSilver leading-relaxed">
+                        Alan Turing's 1952 Reaction-Diffusion model describes how two chemical morphogens reacting and diffusing at unequal rates spontaneously self-organize into spots, stripes, and coral labyrinths. Ernst Chladni's equation maps acoustic standing-wave nodal lines.
+                    </p>
+                    <p class="font-mono text-[11px] text-alabaster/80 bg-black/40 p-2 rounded-lg">
+                        cos(n&pi;x)cos(m&pi;y) - cos(m&pi;x)cos(n&pi;y) = 0
+                    </p>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                    <h3 class="font-display text-xl font-semibold text-rose-300">IV. Spectral Cosine Synthesis</h3>
+                    <p class="text-xs text-mutedSilver leading-relaxed">
+                        Popularized by shader pioneer Inigo Quilez, any smooth continuous artistic gradient can be compactly parameterized by four 3D vectors $(a, b, c, d)$ driving a cosine wave for Red, Green, and Blue channels, avoiding muddy linear RGB transitions.
+                    </p>
+                    <p class="font-mono text-[11px] text-alabaster/80 bg-black/40 p-2 rounded-lg">
+                        C(t) = a + b &middot; cos(2&pi;(c &middot; t + d))
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <button onclick="toggleCodexModal()" class="px-5 py-2 rounded-xl bg-indigoAccent text-white text-xs font-medium">
+                    Return to Atelier
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toastBox" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 hidden pointer-events-none">
+        <div class="glass-panel px-4 py-2.5 rounded-xl border border-indigo-500/40 text-xs font-mono text-white shadow-2xl flex items-center gap-2 toast-enter">
+            <i class="ph-fill ph-check-circle text-emerald-400 text-base"></i>
+            <span id="toastMessage">Copied to clipboard</span>
+        </div>
+    </div>
+
+    <!-- APPLICATION LOGIC & MATHEMATICAL ENGINE -->
+    <script>
+        /***********************************************************************
+         * 1. GLOBAL STATE & PALETTE ENGINE (Cosine Spectral Palettes)
+         ***********************************************************************/
+        const canvas = document.getElementById('atelierCanvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+
+        let activeStudio = 'attractors'; // 'attractors' | 'harmonograph' | 'emergence' | 'chromatics'
+        let isPaused = false;
+        let autoMorph = false;
+        let zenMode = false;
+        let globalTime = 0;
+
+        // Camera & Interaction State
+        let camZoom = 1.0;
+        let camPanX = 0;
+        let camPanY = 0;
+        let rotX = 0.35;
+        let rotY = -0.45;
+        let pointer = { x: 0, y: 0, normX: 0, normY: 0, isDown: false, lastX: 0, lastY: 0 };
+
+        // Global Render Settings
+        let renderSettings = {
+            exposure: 0.94,
+            colorSpeed: 1.0
+        };
+
+        // Curated Cosine Palettes: C(t) = a + b * cos(2*pi*(c*t + d))
+        const CURATED_PALETTES = [
+            {
+                name: 'Vermeer Lapis & Gold',
+                a: [0.50, 0.50, 0.50],
+                b: [0.50, 0.50, 0.50],
+                c: [1.00, 1.00, 1.00],
+                d: [0.00, 0.15, 0.45]
+            },
+            {
+                name: 'Bioluminescent Abyss',
+                a: [0.40, 0.55, 0.65],
+                b: [0.45, 0.45, 0.35],
+                c: [0.80, 1.00, 1.00],
+                d: [0.52, 0.25, 0.10]
+            },
+            {
+                name: 'Infrared Sol',
+                a: [0.55, 0.40, 0.45],
+                b: [0.48, 0.42, 0.40],
+                c: [1.00, 0.70, 0.40],
+                d: [0.00, 0.15, 0.20]
+            },
+            {
+                name: 'Cybernetic Obsidian',
+                a: [0.50, 0.50, 0.58],
+                b: [0.50, 0.45, 0.42],
+                c: [1.00, 1.00, 0.50],
+                d: [0.80, 0.90, 0.30]
+            },
+            {
+                name: 'Sakura & Jade',
+                a: [0.62, 0.52, 0.56],
+                b: [0.38, 0.42, 0.38],
+                c: [1.00, 1.00, 1.00],
+                d: [0.92, 0.28, 0.42]
+            },
+            {
+                name: 'Prismatic Bauhaus',
+                a: [0.52, 0.52, 0.52],
+                b: [0.48, 0.48, 0.48],
+                c: [1.00, 1.00, 1.00],
+                d: [0.00, 0.33, 0.67]
+            },
+            {
+                name: 'Monochrome Silver',
+                a: [0.58, 0.60, 0.65],
+                b: [0.42, 0.40, 0.35],
+                c: [1.00, 1.00, 1.00],
+                d: [0.10, 0.10, 0.12]
+            },
+            {
+                name: 'Emerald Supernova',
+                a: [0.45, 0.58, 0.45],
+                b: [0.45, 0.42, 0.48],
+                c: [1.00, 1.20, 0.80],
+                d: [0.25, 0.05, 0.40]
+            }
+        ];
+
+        let currentPaletteIndex = 0;
+        let activePalette = JSON.parse(JSON.stringify(CURATED_PALETTES[0]));
+
+        // Evaluate Cosine Palette at parameter t in [0, 1]
+        function samplePaletteRGB(t) {
+            const TAU = Math.PI * 2;
+            const r = Math.min(255, Math.max(0, Math.floor(255 * (activePalette.a[0] + activePalette.b[0] * Math.cos(TAU * (activePalette.c[0] * t + activePalette.d[0]))))));
+            const g = Math.min(255, Math.max(0, Math.floor(255 * (activePalette.a[1] + activePalette.b[1] * Math.cos(TAU * (activePalette.c[1] * t + activePalette.d[1]))))));
+            const b = Math.min(255, Math.max(0, Math.floor(255 * (activePalette.a[2] + activePalette.b[2] * Math.cos(TAU * (activePalette.c[2] * t + activePalette.d[2]))))));
+            return { r, g, b };
+        }
+
+        function samplePaletteCSS(t, alpha = 1.0) {
+            const { r, g, b } = samplePaletteRGB(t);
+            return alpha >= 1.0 ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${alpha})`;
+        }
+
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+        }
+
+        /***********************************************************************
+         * 2. MATHEMATICAL SYSTEMS DEFINITIONS (Studios I, II, III)
+         ***********************************************************************/
+        const SYSTEMS = {
+            attractors: {
+                category: 'CHAOTIC DYNAMICAL SYSTEM',
+                activeSub: 'clifford',
+                modes: {
+                    clifford: {
+                        name: 'Clifford Attractor',
+                        subtitle: 'Iterative 2D trigonometric phase-space folding discovered by Clifford Pickover.',
+                        symbolic: 'x<sub>n+1</sub> = sin(a &middot; y<sub>n</sub>) + c &middot; cos(a &middot; x<sub>n</sub>)<br>y<sub>n+1</sub> = sin(b &middot; x<sub>n</sub>) + d &middot; cos(b &middot; y<sub>n</sub>)',
+                        hint: 'Drag canvas to pan &bull; Scroll to zoom &bull; Adjust a,b,c,d to fold space',
+                        params: {
+                            a: { label: 'Constant a', min: -3.0, max: 3.0, step: 0.01, val: -1.70 },
+                            b: { label: 'Constant b', min: -3.0, max: 3.0, step: 0.01, val: 1.80 },
+                            c: { label: 'Constant c', min: -3.0, max: 3.0, step: 0.01, val: -1.90 },
+                            d: { label: 'Constant d', min: -3.0, max: 3.0, step: 0.01, val: -0.40 },
+                            density: { label: 'Iterations / Frame', min: 4000, max: 35000, step: 1000, val: 18000 }
+                        },
+                        presets: [
+                            { name: 'Silk Veil', vals: { a: -1.70, b: 1.80, c: -1.90, d: -0.40 } },
+                            { name: 'Solar Flare', vals: { a: -1.40, b: 1.60, c: 1.00, d: 0.70 } },
+                            { name: 'Quantum Wing', vals: { a: 1.70, b: 1.70, c: 0.60, d: 1.20 } },
+                            { name: 'Nautilus Shell', vals: { a: 1.50, b: -1.80, c: 1.60, d: 0.90 } }
+                        ]
+                    },
+                    dejong: {
+                        name: 'Peter de Jong Attractor',
+                        subtitle: 'Harmonic sine-cosine difference map creating intricate interference curtains.',
+                        symbolic: 'x<sub>n+1</sub> = sin(a &middot; y<sub>n</sub>) - cos(b &middot; x<sub>n</sub>)<br>y<sub>n+1</sub> = sin(c &middot; x<sub>n</sub>) - cos(d &middot; y<sub>n</sub>)',
+                        hint: 'Drag canvas to pan &bull; Scroll to zoom &bull; Continuous density accumulation',
+                        params: {
+                            a: { label: 'Frequency a', min: -3.14, max: 3.14, step: 0.01, val: 1.40 },
+                            b: { label: 'Frequency b', min: -3.14, max: 3.14, step: 0.01, val: -2.30 },
+                            c: { label: 'Frequency c', min: -3.14, max: 3.14, step: 0.01, val: 2.40 },
+                            d: { label: 'Frequency d', min: -3.14, max: 3.14, step: 0.01, val: -2.10 },
+                            density: { label: 'Iterations / Frame', min: 4000, max: 35000, step: 1000, val: 18000 }
+                        },
+                        presets: [
+                            { name: 'Cathedral Glass', vals: { a: 1.40, b: -2.30, c: 2.40, d: -2.10 } },
+                            { name: 'nebula Fold', vals: { a: -2.24, b: 0.43, c: -0.65, d: -2.43 } },
+                            { name: 'Hyperbolic Harp', vals: { a: 2.01, b: -2.53, c: 1.61, d: -0.33 } }
+                        ]
+                    },
+                    lorenz: {
+                        name: 'Lorenz 3D Chaos System',
+                        subtitle: 'Atmospheric convection differential equations exhibiting the classic Butterfly Effect.',
+                        symbolic: 'dx/dt = &sigma;(y - x)<br>dy/dt = x(&rho; - z) - y, &nbsp; dz/dt = xy - &beta;z',
+                        hint: 'Drag anywhere on canvas to rotate in 3D space &bull; Scroll to zoom',
+                        params: {
+                            sigma: { label: 'Prandtl (\u03C3)', min: 2.0, max: 25.0, step: 0.1, val: 10.0 },
+                            rho: { label: 'Rayleigh (\u03C1)', min: 10.0, max: 60.0, step: 0.2, val: 28.0 },
+                            beta: { label: 'Geometry (\u03B2)', min: 0.5, max: 6.0, step: 0.05, val: 2.667 },
+                            spin: { label: 'Auto-Orbit Speed', min: 0.0, max: 2.0, step: 0.05, val: 0.45 }
+                        },
+                        presets: [
+                            { name: 'Classic Butterfly', vals: { sigma: 10.0, rho: 28.0, beta: 2.67 } },
+                            { name: 'High Rayleigh Knot', vals: { sigma: 14.0, rho: 45.0, beta: 3.20 } },
+                            { name: 'Tightly Wound', vals: { sigma: 7.5, rho: 24.5, beta: 1.80 } }
+                        ]
+                    },
+                    halvorsen: {
+                        name: 'Halvorsen 3D Attractor',
+                        subtitle: 'Cyclically symmetric three-dimensional system of coupled quadratic ODEs.',
+                        symbolic: 'dx/dt = -ax - 4y - 4z - y<sup>2</sup><br>dy/dt = -ay - 4z - 4x - z<sup>2</sup><br>dz/dt = -az - 4x - 4y - x<sup>2</sup>',
+                        hint: 'Drag canvas to orbit 3D trajectory ribbons &bull; Scroll to zoom',
+                        params: {
+                            a: { label: 'Damping (a)', min: 1.20, max: 2.00, step: 0.01, val: 1.40 },
+                            spin: { label: 'Auto-Orbit Speed', min: 0.0, max: 2.0, step: 0.05, val: 0.55 },
+                            ribbons: { label: 'Trajectory Streams', min: 8, max: 60, step: 2, val: 32 }
+                        },
+                        presets: [
+                            { name: 'Trefoil Vortex', vals: { a: 1.40, spin: 0.55, ribbons: 32 } },
+                            { name: 'Tight Celtic', vals: { a: 1.28, spin: 0.40, ribbons: 44 } },
+                            { name: 'Chaotic Crown', vals: { a: 1.65, spin: 0.70, ribbons: 24 } }
+                        ]
+                    }
+                }
+            },
+
+            harmonograph: {
+                category: 'PARAMETRIC & SACRED GEOMETRY',
+                activeSub: 'phyllotaxis',
+                modes: {
+                    phyllotaxis: {
+                        name: 'Golden Ratio Phyllotaxis',
+                        subtitle: 'Vogel’s botanical spiral model where divergence angle \u03D5 controls parastichy Fibonacci families.',
+                        symbolic: '&theta;<sub>n</sub> = n &middot; &phi;, &nbsp; r<sub>n</sub> = c &middot; &radic;n<br>&phi;<sub>golden</sub> = 360&deg;(1 - 1/&Phi;) &approx; 137.50776&deg;',
+                        hint: 'Shift Divergence Angle by 0.01° to watch spirals morph in real time',
+                        params: {
+                            angle: { label: 'Divergence Angle (\u03D5°)', min: 136.5, max: 138.5, step: 0.002, val: 137.508 },
+                            count: { label: 'Primordia Seeds (N)', min: 200, max: 2800, step: 50, val: 1400 },
+                            scale: { label: 'Radial Spread (c)', min: 4.0, max: 16.0, step: 0.2, val: 9.2 },
+                            connect: { label: 'Fibonacci Web Step', min: 0, max: 34, step: 1, val: 13 }
+                        },
+                        presets: [
+                            { name: 'True Golden (137.508°)', vals: { angle: 137.508, count: 1400, scale: 9.2, connect: 13 } },
+                            { name: 'Lucas Spiral (99.5°)', vals: { angle: 137.92, count: 1600, scale: 8.8, connect: 21 } },
+                            { name: 'Sunflower Mandala', vals: { angle: 137.508, count: 2200, scale: 7.5, connect: 34 } },
+                            { name: 'Starburst Resonance', vals: { angle: 137.334, count: 1500, scale: 9.0, connect: 8 } }
+                        ]
+                    },
+                    maurer: {
+                        name: 'Maurer Rose & Guilloché',
+                        subtitle: 'Rhodonea curve r = sin(n\u03B8) connected by discrete chord steps d across 360 chords.',
+                        symbolic: '(r, &theta;) = (sin(n &middot; k &middot; d), k &middot; d)<br>Epitrochoid Harmonic Interference',
+                        hint: 'Move cursor over canvas to phase-shift the inner guilloché harmonics',
+                        params: {
+                            n: { label: 'Rose Petals (n)', min: 1, max: 16, step: 0.5, val: 6 },
+                            d: { label: 'Chord Step Angle (d°)', min: 1, max: 179, step: 0.2, val: 71 },
+                            harmonics: { label: 'Secondary Harmonic', min: 0.0, max: 1.5, step: 0.02, val: 0.35 },
+                            layers: { label: 'Concentric Chords', min: 1, max: 6, step: 1, val: 3 }
+                        },
+                        presets: [
+                            { name: 'Hexagram Lotus (n=6, d=71)', vals: { n: 6, d: 71, harmonics: 0.35, layers: 3 } },
+                            { name: 'Gothic Rose (n=7, d=29)', vals: { n: 7, d: 29, harmonics: 0.20, layers: 4 } },
+                            { name: 'Astroid Web (n=4, d=97)', vals: { n: 4, d: 97, harmonics: 0.55, layers: 3 } },
+                            { name: 'Celestial Spiro (n=5, d=43)', vals: { n: 5, d: 43, harmonics: 0.40, layers: 5 } }
+                        ]
+                    },
+                    pendulum: {
+                        name: 'Rotary Harmonograph',
+                        subtitle: 'Three coupled damped pendulums tracing Lissajous interference weaves.',
+                        symbolic: 'x(t) = &Sigma; A<sub>i</sub> e<sup>-d<sub>i</sub>t</sup> sin(&omega;<sub>i</sub>t + p<sub>i</sub>)<br>y(t) = &Sigma; B<sub>i</sub> e<sup>-d<sub>i</sub>t</sup> cos(&omega;<sub>i</sub>t + q<sub>i</sub>)',
+                        hint: 'Adjust frequency ratio ω2 to tune musical intervals (2:1 Octave, 3:2 Fifth)',
+                        params: {
+                            f1: { label: 'Pendulum 1 Freq (\u03C91)', min: 1.0, max: 8.0, step: 0.01, val: 2.00 },
+                            f2: { label: 'Pendulum 2 Freq (\u03C92)', min: 1.0, max: 8.0, step: 0.01, val: 3.005 },
+                            f3: { label: 'Rotary Table Freq (\u03C93)', min: 0.5, max: 6.0, step: 0.01, val: 1.002 },
+                            damping: { label: 'Friction Decay (d)', min: 0.0002, max: 0.005, step: 0.0001, val: 0.0012 }
+                        },
+                        presets: [
+                            { name: 'Perfect Fifth (3:2)', vals: { f1: 2.00, f2: 3.004, f3: 1.002, damping: 0.0012 } },
+                            { name: 'Octave Twist (2:1)', vals: { f1: 2.00, f2: 4.006, f3: 1.003, damping: 0.0010 } },
+                            { name: 'Major Third (5:4)', vals: { f1: 4.00, f2: 5.005, f3: 2.002, damping: 0.0015 } },
+                            { name: 'Triskelion Resonance', vals: { f1: 3.00, f2: 3.005, f3: 1.001, damping: 0.0009 } }
+                        ]
+                    }
+                }
+            },
+
+            emergence: {
+                category: 'BIOLOGICAL & ACOUSTIC EMERGENCE',
+                activeSub: 'cymatics',
+                modes: {
+                    cymatics: {
+                        name: 'Chladni Cymatics Resonance',
+                        subtitle: '25,000 resonant grains settling along zero-amplitude nodal lines of a vibrating acoustic plate.',
+                        symbolic: 'A &middot; cos(n&pi;x)cos(m&pi;y) + B &middot; cos(m&pi;x)cos(n&pi;y) = 0',
+                        hint: 'Change frequencies (n, m) or click/drag on plate to scatter sand grains!',
+                        params: {
+                            n: { label: 'Harmonic Mode (n)', min: 1.0, max: 12.0, step: 0.1, val: 5.0 },
+                            m: { label: 'Harmonic Mode (m)', min: 1.0, max: 12.0, step: 0.1, val: 2.0 },
+                            mix: { label: 'Coupling Polarity (B/A)', min: -1.0, max: 1.0, step: 0.05, val: -1.0 },
+                            vibration: { label: 'Acoustic Excitation', min: 0.005, max: 0.05, step: 0.002, val: 0.022 }
+                        },
+                        presets: [
+                            { name: 'Cathedral Cross (5, 2)', vals: { n: 5.0, m: 2.0, mix: -1.0, vibration: 0.022 } },
+                            { name: 'Octagonal Mandala (7, 4)', vals: { n: 7.0, m: 4.0, mix: -1.0, vibration: 0.020 } },
+                            { name: 'Hyperbolic Lattice (6, 3)', vals: { n: 6.0, m: 3.0, mix: 1.0, vibration: 0.022 } },
+                            { name: 'Quantum High-Freq (11, 5)', vals: { n: 11.0, m: 5.0, mix: -1.0, vibration: 0.018 } }
+                        ]
+                    },
+                    turing: {
+                        name: 'Gray-Scott Morphogenesis',
+                        subtitle: 'Alan Turing’s chemical reaction-diffusion equations generating biological coral and mitosis patterns.',
+                        symbolic: '&part;u/&part;t = D<sub>u</sub>&nabla;<sup>2</sup>u - uv<sup>2</sup> + F(1 - u)<br>&part;v/&part;t = D<sub>v</sub>&nabla;<sup>2</sup>v + uv<sup>2</sup> - (F + k)v',
+                        hint: 'PAINT directly on the canvas with your mouse/finger to seed chemical V!',
+                        params: {
+                            F: { label: 'Feed Rate (F)', min: 0.018, max: 0.075, step: 0.0005, val: 0.0545 },
+                            k: { label: 'Kill Rate (k)', min: 0.045, max: 0.068, step: 0.0005, val: 0.0620 },
+                            steps: { label: 'Reaction Speed', min: 4, max: 16, step: 2, val: 10 },
+                            brush: { label: 'Catalyst Brush Size', min: 4, max: 28, step: 2, val: 12 }
+                        },
+                        presets: [
+                            { name: 'Brain Coral (F=.0545, k=.062)', vals: { F: 0.0545, k: 0.0620 } },
+                            { name: 'Cellular Mitosis (F=.0367, k=.0649)', vals: { F: 0.0367, k: 0.0649 } },
+                            { name: 'Fingerprint Maze (F=.029, k=.057)', vals: { F: 0.0290, k: 0.0570 } },
+                            { name: 'Soliton Waves (F=.025, k=.055)', vals: { F: 0.0250, k: 0.0550 } }
+                        ]
+                    },
+                    curlflow: {
+                        name: 'Divergence-Free Curl Field',
+                        subtitle: 'Luminous silk filaments advected through a solenoidal vector potential field \u2207 \u00D7 \u03A8.',
+                        symbolic: 'v(x, y) = (&part;&Psi;/&part;y, -&part;&Psi;/&part;x), &nbsp; &nabla; &middot; v = 0',
+                        hint: 'Move or drag cursor across canvas to create gravitational vortices',
+                        params: {
+                            scale: { label: 'Turbulence Scale', min: 0.001, max: 0.012, step: 0.0005, val: 0.0035 },
+                            speed: { label: 'Advection Velocity', min: 0.5, max: 5.0, step: 0.2, val: 2.2 },
+                            vortex: { label: 'Cursor Vortex Pull', min: 0.0, max: 3.0, step: 0.1, val: 1.4 },
+                            agents: { label: 'Silk Filaments', min: 800, max: 5000, step: 200, val: 2600 }
+                        },
+                        presets: [
+                            { name: 'Laminar Silk', vals: { scale: 0.0030, speed: 2.2, vortex: 1.4, agents: 2800 } },
+                            { name: 'Micro Eddies', vals: { scale: 0.0085, speed: 1.8, vortex: 2.0, agents: 3400 } },
+                            { name: 'Cosmic Currents', vals: { scale: 0.0018, speed: 3.2, vortex: 1.0, agents: 2400 } }
+                        ]
+                    }
+                }
+            }
+        };
+
+        /***********************************************************************
+         * 3. SIMULATION BUFFERS & PARTICLE POOLS
+         ***********************************************************************/
+        // Attractor state
+        let attX = 0.1, attY = 0.1, attZ = 0.1;
+        // 3D Ribbons for Lorenz & Halvorsen
+        let ribbons3D = [];
+
+        // Chladni Cymatics Particles
+        const CHLADNI_COUNT = 22000;
+        let chladniX = new Float32Array(CHLADNI_COUNT);
+        let chladniY = new Float32Array(CHLADNI_COUNT);
+
+        // Curl Flow Particles
+        const MAX_FLOW_AGENTS = 5000;
+        let flowAgents = [];
+
+        // Gray-Scott Reaction Diffusion Grids (200 x 200 for fast 60fps desktop & mobile execution)
+        const RD_W = 200;
+        const RD_H = 200;
+        let rdU = new Float32Array(RD_W * RD_H);
+        let rdV = new Float32Array(RD_W * RD_H);
+        let rdNextU = new Float32Array(RD_W * RD_H);
+        let rdNextV = new Float32Array(RD_W * RD_H);
+        let rdOffscreenCanvas = document.createElement('canvas');
+        rdOffscreenCanvas.width = RD_W;
+        rdOffscreenCanvas.height = RD_H;
+        let rdOffCtx = rdOffscreenCanvas.getContext('2d');
+        let rdImgData = rdOffCtx.createImageData(RD_W, RD_H);
+
+        function initSimulationBuffers() {
+            // Init 3D Ribbons
+            ribbons3D = [];
+            for (let i = 0; i < 60; i++) {
+                ribbons3D.push({
+                    x: (Math.random() - 0.5) * 4,
+                    y: (Math.random() - 0.5) * 4,
+                    z: (Math.random() - 0.5) * 4 + 15,
+                    history: [],
+                    colorOffset: i / 60
+                });
+            }
+
+            // Init Chladni sand particles in [-1, 1]
+            for (let i = 0; i < CHLADNI_COUNT; i++) {
+                chladniX[i] = (Math.random() * 2 - 1);
+                chladniY[i] = (Math.random() * 2 - 1);
+            }
+
+            // Init Flow Agents
+            flowAgents = [];
+            for (let i = 0; i < MAX_FLOW_AGENTS; i++) {
+                flowAgents.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    px: 0,
+                    py: 0,
+                    hueSeed: Math.random()
+                });
+                flowAgents[i].px = flowAgents[i].x;
+                flowAgents[i].py = flowAgents[i].y;
+            }
+
+            // Init Gray-Scott Reaction Diffusion
+            seedReactionDiffusion();
+        }
+
+        function seedReactionDiffusion() {
+            rdU.fill(1.0);
+            rdV.fill(0.0);
+            // Seed several symmetric & organic catalyst rings
+            const seeds = [
+                { cx: RD_W / 2, cy: RD_H / 2, r: 14 },
+                { cx: RD_W * 0.35, cy: RD_H * 0.38, r: 8 },
+                { cx: RD_W * 0.65, cy: RD_H * 0.62, r: 8 },
+                { cx: RD_W * 0.65, cy: RD_H * 0.38, r: 7 },
+                { cx: RD_W * 0.35, cy: RD_H * 0.62, r: 7 }
+            ];
+            for (let y = 0; y < RD_H; y++) {
+                for (let x = 0; x < RD_W; x++) {
+                    const idx = y * RD_W + x;
+                    for (const s of seeds) {
+                        const dist = Math.hypot(x - s.cx, y - s.cy);
+                        if (dist < s.r && dist > s.r - 4) {
+                            rdU[idx] = 0.5;
+                            rdV[idx] = 0.25 + Math.random() * 0.1;
+                        }
+                    }
+                }
+            }
+        }
+
+        /***********************************************************************
+         * 4. UI & HUD BUILDER FUNCTIONS
+         ***********************************************************************/
+        function switchStudio(studioKey) {
+            activeStudio = studioKey;
+
+            // Update Navigation Tabs
+            document.querySelectorAll('.studio-tab').forEach(btn => {
+                btn.classList.remove('active', 'text-white');
+                btn.classList.add('text-mutedSilver');
+            });
+            const activeTab = document.getElementById(`tab-${studioKey}`);
+            if (activeTab) {
+                activeTab.classList.add('active', 'text-white');
+                activeTab.classList.remove('text-mutedSilver');
+            }
+
+            const chromaticView = document.getElementById('chromaticStudioView');
+            const leftPlaque = document.getElementById('leftFormulaPlaque');
+            const rightHUD = document.getElementById('rightParameterHUD');
+            const bottomDock = document.getElementById('bottomDock');
+
+            if (studioKey === 'chromatics') {
+                chromaticView.classList.remove('hidden');
+                leftPlaque.classList.add('hidden');
+                rightHUD.classList.add('hidden');
+                bottomDock.classList.add('hidden');
+                renderChromaticStudioUI();
+            } else {
+                chromaticView.classList.add('hidden');
+                if (!zenMode) {
+                    leftPlaque.classList.remove('hidden');
+                    rightHUD.classList.remove('hidden');
+                }
+                bottomDock.classList.remove('hidden');
+                camPanX = 0;
+                camPanY = 0;
+                camZoom = 1.0;
+                clearCanvasBuffer();
+                syncStudioHUD();
+            }
+        }
+
+        function selectSubSystem(subKey) {
+            const studioObj = SYSTEMS[activeStudio];
+            if (!studioObj) return;
+            studioObj.activeSub = subKey;
+            camPanX = 0;
+            camPanY = 0;
+            camZoom = 1.0;
+            if (subKey === 'turing') seedReactionDiffusion();
+            clearCanvasBuffer();
+            syncStudioHUD();
+        }
+
+        function syncStudioHUD() {
+            const studioObj = SYSTEMS[activeStudio];
+            if (!studioObj) return;
+            const modeObj = studioObj.modes[studioObj.activeSub];
+
+            document.getElementById('formulaCategoryTag').textContent = studioObj.category;
+            document.getElementById('formulaTitle').textContent = modeObj.name;
+            document.getElementById('formulaSubtitle').textContent = modeObj.subtitle;
+            document.getElementById('symbolicEquation').innerHTML = modeObj.symbolic;
+            document.getElementById('interactionHint').innerHTML = `<i class="ph ph-hand-pointing text-indigo-400"></i><span>${modeObj.hint}</span>`;
+
+            // Populate Sub-System Buttons
+            const subContainer = document.getElementById('subSystemSelector');
+            subContainer.innerHTML = '';
+            Object.keys(studioObj.modes).forEach(key => {
+                const m = studioObj.modes[key];
+                const isSelected = key === studioObj.activeSub;
+                const btn = document.createElement('button');
+                btn.className = `px-2.5 py-1.5 rounded-lg text-xs font-medium text-left truncate transition border ${
+                    isSelected 
+                        ? 'bg-indigoAccent/25 border-indigoAccent text-white shadow-sm' 
+                        : 'bg-white/5 border-white/10 text-mutedSilver hover:text-white hover:bg-white/10'
+                }`;
+                btn.textContent = m.name;
+                btn.onclick = () => selectSubSystem(key);
+                subContainer.appendChild(btn);
+            });
+
+            // Populate Curated Presets
+            const presetsContainer = document.getElementById('curatedPresetsRow');
+            presetsContainer.innerHTML = '';
+            modeObj.presets.forEach(preset => {
+                const chip = document.createElement('button');
+                chip.className = 'px-2.5 py-1 rounded-md text-[11px] font-mono bg-white/5 hover:bg-indigo-500/20 border border-white/10 hover:border-indigo-400/50 text-alabaster transition';
+                chip.textContent = preset.name;
+                chip.onclick = () => applyPresetConstants(preset.vals);
+                presetsContainer.appendChild(chip);
+            });
+
+            // Populate Parameter Sliders
+            const slidersContainer = document.getElementById('parameterSlidersContainer');
+            slidersContainer.innerHTML = '';
+            Object.keys(modeObj.params).forEach(paramKey => {
+                const p = modeObj.params[paramKey];
+                const wrap = document.createElement('div');
+                wrap.innerHTML = `
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-mutedSilver">${p.label}</span>
+                        <span id="val-${paramKey}" class="font-mono text-indigo-200">${Number(p.val).toFixed(p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0))}</span>
+                    </div>
+                    <input type="range" id="slider-${paramKey}" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.val}">
+                `;
+                const input = wrap.querySelector('input');
+                input.addEventListener('input', (e) => {
+                    const num = parseFloat(e.target.value);
+                    p.val = num;
+                    document.getElementById(`val-${paramKey}`).textContent = num.toFixed(p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0));
+                    updateLiveFormulaPlaque();
+                    // Soft fade on parameter change for crisp feedback
+                    if (studioObj.activeSub === 'clifford' || studioObj.activeSub === 'dejong') {
+                        ctx.fillStyle = 'rgba(9, 10, 15, 0.35)';
+                        ctx.fillRect(0, 0, width, height);
+                    }
+                });
+                slidersContainer.appendChild(wrap);
+            });
+
+            updateLiveFormulaPlaque();
+        }
+
+        function updateLiveFormulaPlaque() {
+            const studioObj = SYSTEMS[activeStudio];
+            if (!studioObj) return;
+            const modeObj = studioObj.modes[studioObj.activeSub];
+            const parts = [];
+            Object.keys(modeObj.params).forEach(k => {
+                const p = modeObj.params[k];
+                const decimals = p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0);
+                parts.push(`${k} = ${Number(p.val).toFixed(decimals)}`);
+            });
+            document.getElementById('liveEquationValues').textContent = parts.join('  •  ');
+        }
+
+        function applyPresetConstants(vals) {
+            const studioObj = SYSTEMS[activeStudio];
+            if (!studioObj) return;
+            const modeObj = studioObj.modes[studioObj.activeSub];
+            Object.keys(vals).forEach(k => {
+                if (modeObj.params[k]) {
+                    modeObj.params[k].val = vals[k];
+                    const slider = document.getElementById(`slider-${k}`);
+                    const label = document.getElementById(`val-${k}`);
+                    if (slider) slider.value = vals[k];
+                    if (label) {
+                        const p = modeObj.params[k];
+                        label.textContent = Number(vals[k]).toFixed(p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0));
+                    }
+                }
+            });
+            if (studioObj.activeSub === 'turing') seedReactionDiffusion();
+            clearCanvasBuffer();
+            updateLiveFormulaPlaque();
+        }
+
+        function triggerSerendipity() {
+            if (activeStudio === 'chromatics') {
+                randomizeCosinePalette();
+                return;
+            }
+            const studioObj = SYSTEMS[activeStudio];
+            const subKey = studioObj.activeSub;
+            const modeObj = studioObj.modes[subKey];
+
+            if (subKey === 'clifford' || subKey === 'dejong') {
+                // Pick vibrant chaotic parameters that don't collapse to a point
+                ['a', 'b', 'c', 'd'].forEach(k => {
+                    let val = (Math.random() * 4.2 - 2.1);
+                    if (Math.abs(val) < 0.45) val = val < 0 ? -0.85 : 0.85;
+                    modeObj.params[k].val = parseFloat(val.toFixed(2));
+                });
+            } else if (subKey === 'phyllotaxis') {
+                modeObj.params.angle.val = parseFloat((137.0 + Math.random() * 1.0).toFixed(3));
+                const fibs = [5, 8, 13, 21, 34];
+                modeObj.params.connect.val = fibs[Math.floor(Math.random() * fibs.length)];
+            } else if (subKey === 'maurer') {
+                modeObj.params.n.val = Math.floor(Math.random() * 11) + 2;
+                modeObj.params.d.val = Math.floor(Math.random() * 140) + 17;
+                modeObj.params.harmonics.val = parseFloat((Math.random() * 0.8).toFixed(2));
+            } else if (subKey === 'cymatics') {
+                modeObj.params.n.val = Math.floor(Math.random() * 10) + 2;
+                modeObj.params.m.val = Math.floor(Math.random() * 9) + 1;
+                if (modeObj.params.n.val === modeObj.params.m.val) modeObj.params.m.val += 1;
+                modeObj.params.mix.val = Math.random() > 0.5 ? 1.0 : -1.0;
+            } else {
+                Object.keys(modeObj.params).forEach(k => {
+                    const p = modeObj.params[k];
+                    const rand = p.min + Math.random() * (p.max - p.min);
+                    p.val = parseFloat((Math.round(rand / p.step) * p.step).toFixed(4));
+                });
+            }
+
+            syncStudioHUD();
+            clearCanvasBuffer();
+            showToast('Mutated mathematical constants');
+        }
+
+        function updateGlobalRenderParam(key, val) {
+            renderSettings[key] = parseFloat(val);
+            if (key === 'exposure') {
+                document.getElementById('exposureVal').textContent = parseFloat(val).toFixed(3);
+            } else if (key === 'colorSpeed') {
+                document.getElementById('colorSpeedVal').textContent = parseFloat(val).toFixed(1) + 'x';
+            }
+        }
+
+        function clearCanvasBuffer() {
+            ctx.fillStyle = '#090A0F';
+            ctx.fillRect(0, 0, width, height);
+            attX = 0.1;
+            attY = 0.1;
+            attZ = 0.1;
+        }
+
+        function resetCurrentSystem() {
+            camZoom = 1.0;
+            camPanX = 0;
+            camPanY = 0;
+            rotX = 0.35;
+            rotY = -0.45;
+            const studioObj = SYSTEMS[activeStudio];
+            if (studioObj) {
+                const modeObj = studioObj.modes[studioObj.activeSub];
+                if (modeObj.presets && modeObj.presets[0]) {
+                    applyPresetConstants(modeObj.presets[0].vals);
+                }
+            }
+            clearCanvasBuffer();
+            showToast('System & camera reset');
+        }
+
+        function togglePauseSimulation() {
+            isPaused = !isPaused;
+            const icon = document.getElementById('pauseIcon');
+            icon.className = isPaused ? 'ph ph-play text-amberAccent' : 'ph ph-pause';
+        }
+
+        function toggleAutoMorph() {
+            autoMorph = !autoMorph;
+            const btn = document.getElementById('autoMorphBtn');
+            if (autoMorph) {
+                btn.textContent = 'ACTIVE';
+                btn.className = 'px-3 py-1 rounded-lg text-xs font-mono border border-indigoAccent bg-indigoAccent/20 text-indigo-300 transition';
+            } else {
+                btn.textContent = 'OFF';
+                btn.className = 'px-3 py-1 rounded-lg text-xs font-mono border border-white/15 bg-white/5 text-mutedSilver hover:text-white transition';
+            }
+        }
+
+        function toggleUIImmersion() {
+            zenMode = !zenMode;
+            const left = document.getElementById('leftFormulaPlaque');
+            const right = document.getElementById('rightParameterHUD');
+            const zenBtn = document.getElementById('zenModeBtn');
+            if (zenMode) {
+                left.classList.add('hidden');
+                right.classList.add('hidden');
+                zenBtn.classList.add('active');
+            } else {
+                left.classList.remove('hidden');
+                right.classList.remove('hidden');
+                zenBtn.classList.remove('active');
+            }
+        }
+
+        function toggleCodexModal() {
+            const modal = document.getElementById('codexModal');
+            modal.classList.toggle('hidden');
+        }
+
+        /***********************************************************************
+         * 5. STUDIO IV: CHROMATIC HARMONIES & COSINE SYNTHESIZER LOGIC
+         ***********************************************************************/
+        function updateMiniPaletteHeader() {
+            const stops = [];
+            for (let i = 0; i <= 6; i++) {
+                stops.push(samplePaletteCSS(i / 6));
+            }
+            const grad = `linear-gradient(90deg, ${stops.join(', ')})`;
+            document.getElementById('miniPalettePreview').style.background = grad;
+            document.getElementById('activePaletteName').textContent = activePalette.name;
+        }
+
+        function cycleGlobalPalette() {
+            currentPaletteIndex = (currentPaletteIndex + 1) % CURATED_PALETTES.length;
+            activePalette = JSON.parse(JSON.stringify(CURATED_PALETTES[currentPaletteIndex]));
+            updateMiniPaletteHeader();
+            if (activeStudio === 'chromatics') {
+                renderChromaticStudioUI();
+            } else {
+                clearCanvasBuffer();
+            }
+            showToast(`Palette: ${activePalette.name}`);
+        }
+
+        function renderChromaticStudioUI() {
+            // 1. Update Main Continuous Gradient Ribbon
+            const stops = [];
+            for (let i = 0; i <= 16; i++) {
+                stops.push(samplePaletteCSS(i / 16));
+            }
+            document.getElementById('cosineGradientBar').style.background = `linear-gradient(90deg, ${stops.join(', ')})`;
+
+            // 2. Render 8 Discrete Swatches with Click-to-Copy HEX
+            const swatchesRow = document.getElementById('cosineSwatchesRow');
+            swatchesRow.innerHTML = '';
+            for (let i = 0; i < 8; i++) {
+                const t = i / 7;
+                const { r, g, b } = samplePaletteRGB(t);
+                const hex = rgbToHex(r, g, b);
+                const card = document.createElement('button');
+                card.className = 'group flex flex-col items-center rounded-xl p-1.5 bg-white/5 hover:bg-white/10 border border-white/10 transition';
+                card.onclick = () => copyTextToClipboard(hex, `Copied ${hex}`);
+                card.innerHTML = `
+                    <div class="w-full h-10 rounded-lg shadow-inner mb-1.5 border border-white/10" style="background:${hex}"></div>
+                    <span class="text-[11px] font-mono text-alabaster group-hover:text-indigo-300">${hex}</span>
+                `;
+                swatchesRow.appendChild(card);
+            }
+
+            // 3. Draw R, G, B Waveform Interference Canvas
+            drawCosineWaveforms();
+
+            // 4. Build Vector Sliders (a, b, c, d)
+            const vecContainer = document.getElementById('cosineVectorsContainer');
+            vecContainer.innerHTML = '';
+            const vecMeta = [
+                { key: 'a', title: 'Vector a (DC Offset / Brightness)', min: 0, max: 1, step: 0.01 },
+                { key: 'b', title: 'Vector b (Wave Amplitude / Contrast)', min: 0, max: 1, step: 0.01 },
+                { key: 'c', title: 'Vector c (Oscillation Frequency)', min: 0, max: 2.5, step: 0.05 },
+                { key: 'd', title: 'Vector d (Phase Shift R, G, B)', min: 0, max: 1, step: 0.01 }
+            ];
+            const channels = ['Red', 'Green', 'Blue'];
+            const chColors = ['text-rose-400', 'text-emerald-400', 'text-sky-400'];
+
+            vecMeta.forEach(vm => {
+                const box = document.createElement('div');
+                box.className = 'p-3.5 rounded-xl bg-black/40 border border-white/10 space-y-2.5';
+                box.innerHTML = `<div class="text-xs font-mono text-white font-medium">${vm.title}</div>`;
+
+                for (let ch = 0; ch < 3; ch++) {
+                    const row = document.createElement('div');
+                    row.className = 'flex items-center gap-2 text-xs';
+                    row.innerHTML = `
+                        <span class="w-12 font-mono text-[11px] ${chColors[ch]}">${channels[ch]}</span>
+                        <input type="range" min="${vm.min}" max="${vm.max}" step="${vm.step}" value="${activePalette[vm.key][ch]}" class="flex-1">
+                        <span class="w-10 text-right font-mono text-[11px] text-mutedSilver">${activePalette[vm.key][ch].toFixed(2)}</span>
+                    `;
+                    const input = row.querySelector('input');
+                    const valSpan = row.querySelectorAll('span')[1];
+                    input.addEventListener('input', (e) => {
+                        activePalette[vm.key][ch] = parseFloat(e.target.value);
+                        activePalette.name = 'Custom Spectral Synth';
+                        valSpan.textContent = activePalette[vm.key][ch].toFixed(2);
+                        updateMiniPaletteHeader();
+                        updateChromaticPreviewsFast();
+                    });
+                    box.appendChild(row);
+                }
+                vecContainer.appendChild(box);
+            });
+
+            // 5. Populate Curated Master Palettes Grid
+            const curatedGrid = document.getElementById('curatedPalettesGrid');
+            curatedGrid.innerHTML = '';
+            CURATED_PALETTES.forEach((pal, idx) => {
+                const pStops = [];
+                const TAU = Math.PI * 2;
+                for (let s = 0; s <= 5; s++) {
+                    const t = s / 5;
+                    const r = Math.min(255, Math.max(0, Math.floor(255 * (pal.a[0] + pal.b[0] * Math.cos(TAU * (pal.c[0] * t + pal.d[0]))))));
+                    const g = Math.min(255, Math.max(0, Math.floor(255 * (pal.a[1] + pal.b[1] * Math.cos(TAU * (pal.c[1] * t + pal.d[1]))))));
+                    const b = Math.min(255, Math.max(0, Math.floor(255 * (pal.a[2] + pal.b[2] * Math.cos(TAU * (pal.c[2] * t + pal.d[2]))))));
+                    pStops.push(`rgb(${r},${g},${b})`);
+                }
+                const btn = document.createElement('button');
+                btn.className = 'p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-left space-y-1.5 transition';
+                btn.onclick = () => {
+                    currentPaletteIndex = idx;
+                    activePalette = JSON.parse(JSON.stringify(CURATED_PALETTES[idx]));
+                    updateMiniPaletteHeader();
+                    renderChromaticStudioUI();
+                    showToast(`Activated ${pal.name}`);
+                };
+                btn.innerHTML = `
+                    <div class="w-full h-5 rounded-md" style="background: linear-gradient(90deg, ${pStops.join(', ')})"></div>
+                    <div class="text-[11px] font-medium text-alabaster truncate">${pal.name}</div>
+                `;
+                curatedGrid.appendChild(btn);
+            });
+
+            updateAlbersAndChords();
+        }
+
+        function updateChromaticPreviewsFast() {
+            const stops = [];
+            for (let i = 0; i <= 16; i++) stops.push(samplePaletteCSS(i / 16));
+            document.getElementById('cosineGradientBar').style.background = `linear-gradient(90deg, ${stops.join(', ')})`;
+
+            const swatchesRow = document.getElementById('cosineSwatchesRow');
+            const cards = swatchesRow.children;
+            for (let i = 0; i < cards.length; i++) {
+                const { r, g, b } = samplePaletteRGB(i / 7);
+                const hex = rgbToHex(r, g, b);
+                cards[i].querySelector('div').style.background = hex;
+                cards[i].querySelector('span').textContent = hex;
+            }
+            drawCosineWaveforms();
+        }
+
+        function drawCosineWaveforms() {
+            const wCanvas = document.getElementById('waveformCanvas');
+            if (!wCanvas) return;
+            const wCtx = wCanvas.getContext('2d');
+            const W = wCanvas.width;
+            const H = wCanvas.height;
+            wCtx.clearRect(0, 0, W, H);
+
+            // Subtle horizontal grid lines
+            wCtx.strokeStyle = 'rgba(255,255,255,0.07)';
+            wCtx.lineWidth = 1;
+            [0.25, 0.5, 0.75].forEach(yFrac => {
+                wCtx.beginPath();
+                wCtx.moveTo(0, H * yFrac);
+                wCtx.lineTo(W, H * yFrac);
+                wCtx.stroke();
+            });
+
+            const strokeColors = ['#FB7185', '#34D399', '#38BDF8'];
+            const TAU = Math.PI * 2;
+
+            for (let ch = 0; ch < 3; ch++) {
+                wCtx.strokeStyle = strokeColors[ch];
+                wCtx.lineWidth = 2.5;
+                wCtx.beginPath();
+                for (let x = 0; x <= W; x += 3) {
+                    const t = x / W;
+                    const val = Math.min(1, Math.max(0, activePalette.a[ch] + activePalette.b[ch] * Math.cos(TAU * (activePalette.c[ch] * t + activePalette.d[ch]))));
+                    const py = H - (val * (H - 16) + 8);
+                    if (x === 0) wCtx.moveTo(x, py);
+                    else wCtx.lineTo(x, py);
+                }
+                wCtx.stroke();
+            }
+        }
+
+        function randomizeCosinePalette() {
+            activePalette = {
+                name: 'Serendipity Synth',
+                a: [+(0.4 + Math.random() * 0.25).toFixed(2), +(0.4 + Math.random() * 0.25).toFixed(2), +(0.4 + Math.random() * 0.25).toFixed(2)],
+                b: [+(0.35 + Math.random() * 0.3).toFixed(2), +(0.35 + Math.random() * 0.3).toFixed(2), +(0.35 + Math.random() * 0.3).toFixed(2)],
+                c: [+(0.5 + Math.floor(Math.random() * 3) * 0.5).toFixed(2), +(0.5 + Math.floor(Math.random() * 3) * 0.5).toFixed(2), +(0.5 + Math.floor(Math.random() * 3) * 0.5).toFixed(2)],
+                d: [+(Math.random()).toFixed(2), +(Math.random()).toFixed(2), +(Math.random()).toFixed(2)]
+            };
+            updateMiniPaletteHeader();
+            renderChromaticStudioUI();
+            showToast('Synthesized new trigonometric wave palette');
+        }
+
+        function copyPaletteCSS() {
+            const stops = [];
+            for (let i = 0; i < 6; i++) {
+                const { r, g, b } = samplePaletteRGB(i / 5);
+                stops.push(rgbToHex(r, g, b));
+            }
+            const glsl = `// Inigo Quilez Cosine Palette (${activePalette.name})\nvec3 palette(float t) {\n    vec3 a = vec3(${activePalette.a.join(', ')});\n    vec3 b = vec3(${activePalette.b.join(', ')});\n    vec3 c = vec3(${activePalette.c.join(', ')});\n    vec3 d = vec3(${activePalette.d.join(', ')});\n    return a + b * cos(6.28318 * (c * t + d));\n}\n/* CSS Gradient: linear-gradient(90deg, ${stops.join(', ')}); */`;
+            copyTextToClipboard(glsl, 'Copied GLSL Shader & CSS Gradient to clipboard');
+        }
+
+        // Harmony Wheel & Josef Albers Homage to the Square
+        function hslToHex(h, s, l) {
+            l /= 100;
+            const a = s * Math.min(l, 1 - l) / 100;
+            const f = n => {
+                const k = (n + h / 30) % 12;
+                const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+                return Math.round(255 * color).toString(16).padStart(2, '0');
+            };
+            return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
+        }
+
+        function updateAlbersAndChords() {
+            const baseHue = parseFloat(document.getElementById('baseHueSlider').value);
+            document.getElementById('baseHueLabel').textContent = `${Math.round(baseHue)}°`;
+            const mode = document.getElementById('harmonyChordSelect').value;
+
+            let angles = [baseHue];
+            if (mode === 'golden') {
+                angles = [baseHue, (baseHue + 137.5) % 360, (baseHue + 275) % 360, (baseHue + 52.5) % 360];
+            } else if (mode === 'triadic') {
+                angles = [baseHue, (baseHue + 120) % 360, (baseHue + 240) % 360, (baseHue + 60) % 360];
+            } else if (mode === 'split') {
+                angles = [baseHue, (baseHue + 150) % 360, (baseHue + 210) % 360, (baseHue + 180) % 360];
+            } else if (mode === 'tetradic') {
+                angles = [baseHue, (baseHue + 90) % 360, (baseHue + 180) % 360, (baseHue + 270) % 360];
+            } else {
+                angles = [baseHue, (baseHue + 30) % 360, (baseHue + 60) % 360, (baseHue + 330) % 360];
+            }
+
+            const cOuter = hslToHex(angles[0], 55, 22);
+            const cMidOuter = hslToHex(angles[1], 68, 38);
+            const cMidInner = hslToHex(angles[2], 78, 52);
+            const cCore = hslToHex(angles[3], 88, 66);
+
+            document.getElementById('albersOuter').style.backgroundColor = cOuter;
+            document.getElementById('albersMidOuter').style.backgroundColor = cMidOuter;
+            document.getElementById('albersMidInner').style.backgroundColor = cMidInner;
+            document.getElementById('albersCore').style.backgroundColor = cCore;
+            document.getElementById('albersCoreLabel').textContent = cCore;
+
+            // Draw Harmony Wheel Canvas
+            const hwCanvas = document.getElementById('harmonyWheelCanvas');
+            if (!hwCanvas) return;
+            const hwCtx = hwCanvas.getContext('2d');
+            const W = hwCanvas.width;
+            const H = hwCanvas.height;
+            const cx = W / 2;
+            const cy = H / 2;
+            const radius = W / 2 - 12;
+
+            hwCtx.clearRect(0, 0, W, H);
+
+            // Draw Hue Ring
+            for (let deg = 0; deg < 360; deg += 2) {
+                const rad1 = (deg - 1) * Math.PI / 180;
+                const rad2 = (deg + 2) * Math.PI / 180;
+                hwCtx.beginPath();
+                hwCtx.arc(cx, cy, radius, rad1, rad2);
+                hwCtx.strokeStyle = `hsl(${deg}, 80%, 55%)`;
+                hwCtx.lineWidth = 14;
+                hwCtx.stroke();
+            }
+
+            // Draw Geometric Chord Polygon Inside Wheel
+            hwCtx.beginPath();
+            angles.forEach((ang, i) => {
+                const rad = ang * Math.PI / 180;
+                const px = cx + Math.cos(rad) * (radius - 10);
+                const py = cy + Math.sin(rad) * (radius - 10);
+                if (i === 0) hwCtx.moveTo(px, py);
+                else hwCtx.lineTo(px, py);
+            });
+            hwCtx.closePath();
+            hwCtx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+            hwCtx.lineWidth = 1.5;
+            hwCtx.stroke();
+            hwCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+            hwCtx.fill();
+
+            // Draw Chord Nodes
+            angles.forEach((ang, i) => {
+                const rad = ang * Math.PI / 180;
+                const px = cx + Math.cos(rad) * (radius - 10);
+                const py = cy + Math.sin(rad) * (radius - 10);
+                hwCtx.beginPath();
+                hwCtx.arc(px, py, i === 0 ? 7 : 5, 0, Math.PI * 2);
+                hwCtx.fillStyle = `hsl(${ang}, 85%, 60%)`;
+                hwCtx.fill();
+                hwCtx.strokeStyle = '#FFFFFF';
+                hwCtx.lineWidth = 2;
+                hwCtx.stroke();
+            });
+        }
+
+        function applyChordToGlobalPalette() {
+            const baseHue = parseFloat(document.getElementById('baseHueSlider').value) / 360;
+            activePalette = {
+                name: 'Geometric Harmony Chord',
+                a: [0.52, 0.50, 0.52],
+                b: [0.46, 0.46, 0.46],
+                c: [1.0, 1.0, 1.0],
+                d: [baseHue, (baseHue + 0.382) % 1.0, (baseHue + 0.618) % 1.0]
+            };
+            updateMiniPaletteHeader();
+            renderChromaticStudioUI();
+            showToast('Applied Harmony Chord to Global Visualizers');
+        }
+
+        /***********************************************************************
+         * 6. MAIN RENDERING ENGINE (60FPS Canvas Loop for Studios I, II, III)
+         ***********************************************************************/
+        let lastFrameTime = performance.now();
+        let frameCount = 0;
+
+        function animateLoop(now) {
+            requestAnimationFrame(animateLoop);
+
+            // FPS Counter
+            frameCount++;
+            if (now - lastFrameTime >= 500) {
+                const fps = Math.min(60, Math.round((frameCount * 1000) / (now - lastFrameTime)));
+                const fpsEl = document.getElementById('fpsCounter');
+                if (fpsEl) fpsEl.textContent = `${fps} FPS`;
+                frameCount = 0;
+                lastFrameTime = now;
+            }
+
+            if (isPaused || activeStudio === 'chromatics') return;
+
+            globalTime += 0.012;
+
+            // Optional Auto-Morph slowly oscillates primary parameter
+            if (autoMorph) {
+                const studioObj = SYSTEMS[activeStudio];
+                const modeObj = studioObj.modes[studioObj.activeSub];
+                const firstKey = Object.keys(modeObj.params)[0];
+                if (firstKey) {
+                    const p = modeObj.params[firstKey];
+                    p.val += Math.sin(globalTime * 0.7) * (p.step * 0.25);
+                    p.val = Math.max(p.min, Math.min(p.max, p.val));
+                    const slider = document.getElementById(`slider-${firstKey}`);
+                    const label = document.getElementById(`val-${firstKey}`);
+                    if (slider) slider.value = p.val;
+                    if (label) label.textContent = Number(p.val).toFixed(p.step < 0.01 ? 4 : 2);
+                    updateLiveFormulaPlaque();
+                }
+            }
+
+            const sub = SYSTEMS[activeStudio].activeSub;
+
+            if (activeStudio === 'attractors') {
+                if (sub === 'clifford') renderCliffordAttractor();
+                else if (sub === 'dejong') renderDeJongAttractor();
+                else if (sub === 'lorenz') renderLorenz3D();
+                else if (sub === 'halvorsen') renderHalvorsen3D();
+            } else if (activeStudio === 'harmonograph') {
+                if (sub === 'phyllotaxis') renderPhyllotaxis();
+                else if (sub === 'maurer') renderMaurerRose();
+                else if (sub === 'pendulum') renderHarmonographPendulum();
+            } else if (activeStudio === 'emergence') {
+                if (sub === 'cymatics') renderChladniCymatics();
+                else if (sub === 'turing') renderGrayScottTuring();
+                else if (sub === 'curlflow') renderCurlFlowField();
+            }
+        }
+
+        // --- STUDIO I RENDERERS ---
+        function renderCliffordAttractor() {
+            const p = SYSTEMS.attractors.modes.clifford.params;
+            const a = p.a.val, b = p.b.val, c = p.c.val, d = p.d.val;
+            const count = p.density.val;
+
+            // Subtle exposure fade
+            ctx.fillStyle = `rgba(9, 10, 15, ${1 - renderSettings.exposure})`;
+            ctx.fillRect(0, 0, width, height);
+
+            const scale = Math.min(width, height) * 0.18 * camZoom;
+            const cx = width / 2 + camPanX;
+            const cy = height / 2 + camPanY;
+
+            for (let i = 0; i < count; i++) {
+                const nx = Math.sin(a * attY) + c * Math.cos(a * attX);
+                const ny = Math.sin(b * attX) + d * Math.cos(b * attY);
+                const dx = nx - attX;
+                const dy = ny - attY;
+                const vel = Math.sqrt(dx * dx + dy * dy);
+
+                attX = nx;
+                attY = ny;
+
+                const px = cx + attX * scale;
+                const py = cy + attY * scale;
+
+                if (i % 90 === 0) {
+                    const t = (vel * 0.25 + globalTime * 0.15 * renderSettings.colorSpeed) % 1.0;
+                    ctx.fillStyle = samplePaletteCSS(t, 0.45);
+                }
+                ctx.fillRect(px, py, 1.35, 1.35);
+            }
+        }
+
+        function renderDeJongAttractor() {
+            const p = SYSTEMS.attractors.modes.dejong.params;
+            const a = p.a.val, b = p.b.val, c = p.c.val, d = p.d.val;
+            const count = p.density.val;
+
+            ctx.fillStyle = `rgba(9, 10, 15, ${1 - renderSettings.exposure})`;
+            ctx.fillRect(0, 0, width, height);
+
+            const scale = Math.min(width, height) * 0.20 * camZoom;
+            const cx = width / 2 + camPanX;
+            const cy = height / 2 + camPanY;
+
+            for (let i = 0; i < count; i++) {
+                const nx = Math.sin(a * attY) - Math.cos(b * attX);
+                const ny = Math.sin(c * attX) - Math.cos(d * attY);
+                const vel = Math.hypot(nx - attX, ny - attY);
+
+                attX = nx;
+                attY = ny;
+
+                const px = cx + attX * scale;
+                const py = cy + attY * scale;
+
+                if (i % 90 === 0) {
+                    const t = (vel * 0.28 + globalTime * 0.15 * renderSettings.colorSpeed) % 1.0;
+                    ctx.fillStyle = samplePaletteCSS(t, 0.45);
+                }
+                ctx.fillRect(px, py, 1.35, 1.35);
+            }
+        }
+
+        function project3D(x, y, z, scale) {
+            // Rotate around Y then X
+            const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+            const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+
+            const x1 = x * cosY - z * sinY;
+            const z1 = z * cosY + x * sinY;
+            const y2 = y * cosX - z1 * sinX;
+            const z2 = z1 * cosX + y * sinX;
+
+            const fov = 420;
+            const perspective = fov / (fov + z2 + 65);
+            return {
+                x: width / 2 + camPanX + x1 * scale * perspective,
+                y: height / 2 + camPanY + y2 * scale * perspective,
+                depth: perspective
+            };
+        }
+
+        function renderLorenz3D() {
+            const p = SYSTEMS.attractors.modes.lorenz.params;
+            const sigma = p.sigma.val, rho = p.rho.val, beta = p.beta.val;
+            if (!pointer.isDown) rotY += 0.004 * p.spin.val;
+
+            ctx.fillStyle = `rgba(9, 10, 15, ${(1 - renderSettings.exposure) * 1.6})`;
+            ctx.fillRect(0, 0, width, height);
+
+            const scale = Math.min(width, height) * 0.0135 * camZoom;
+            const dt = 0.0065;
+
+            for (let r = 0; r < 36; r++) {
+                const rib = ribbons3D[r];
+                const prev = project3D(rib.x, rib.y, rib.z - 25, scale);
+
+                // Runge-Kutta / Euler step
+                const dx = sigma * (rib.y - rib.x) * dt;
+                const dy = (rib.x * (rho - rib.z) - rib.y) * dt;
+                const dz = (rib.x * rib.y - beta * rib.z) * dt;
+
+                rib.x += dx;
+                rib.y += dy;
+                rib.z += dz;
+
+                const curr = project3D(rib.x, rib.y, rib.z - 25, scale);
+                const t = (rib.colorOffset + globalTime * 0.12 * renderSettings.colorSpeed) % 1.0;
+
+                ctx.strokeStyle = samplePaletteCSS(t, 0.85);
+                ctx.lineWidth = Math.max(1, 2.2 * curr.depth);
+                ctx.beginPath();
+                ctx.moveTo(prev.x, prev.y);
+                ctx.lineTo(curr.x, curr.y);
+                ctx.stroke();
+            }
+        }
+
+        function renderHalvorsen3D() {
+            const p = SYSTEMS.attractors.modes.halvorsen.params;
+            const a = p.a.val;
+            const count = p.ribbons.val;
+            if (!pointer.isDown) rotY += 0.005 * p.spin.val;
+
+            ctx.fillStyle = `rgba(9, 10, 15, ${(1 - renderSettings.exposure) * 1.5})`;
+            ctx.fillRect(0, 0, width, height);
+
+            const scale = Math.min(width, height) * 0.032 * camZoom;
+            const dt = 0.005;
+
+            for (let r = 0; r < count; r++) {
+                const rib = ribbons3D[r];
+                // Keep within basin of attraction
+                if (Math.abs(rib.x) > 35 || Math.abs(rib.y) > 35 || isNaN(rib.x)) {
+                    rib.x = (Math.random() - 0.5) * 2;
+                    rib.y = (Math.random() - 0.5) * 2;
+                    rib.z = (Math.random() - 0.5) * 2;
+                }
+
+                const prev = project3D(rib.x, rib.y, rib.z, scale);
+
+                const dx = (-a * rib.x - 4 * rib.y - 4 * rib.z - rib.y * rib.y) * dt;
+                const dy = (-a * rib.y - 4 * rib.z - 4 * rib.x - rib.z * rib.z) * dt;
+                const dz = (-a * rib.z - 4 * rib.x - 4 * rib.y - rib.x * rib.x) * dt;
+
+                rib.x += dx;
+                rib.y += dy;
+                rib.z += dz;
+
+                const curr = project3D(rib.x, rib.y, rib.z, scale);
+                const t = (rib.colorOffset + globalTime * 0.15 * renderSettings.colorSpeed) % 1.0;
+
+                ctx.strokeStyle = samplePaletteCSS(t, 0.85);
+                ctx.lineWidth = Math.max(1, 2.2 * curr.depth);
+                ctx.beginPath();
+                ctx.moveTo(prev.x, prev.y);
+                ctx.lineTo(curr.x, curr.y);
+                ctx.stroke();
+            }
+        }
+
+        // --- STUDIO II RENDERERS ---
+        function renderPhyllotaxis() {
+            const p = SYSTEMS.harmonograph.modes.phyllotaxis.params;
+            const divAngle = p.angle.val * (Math.PI / 180);
+            const N = p.count.val;
+            const c = p.scale.val * camZoom * (Math.min(width, height) / 850);
+            const fibStep = Math.round(p.connect.val);
+
+            ctx.fillStyle = '#090A0F';
+            ctx.fillRect(0, 0, width, height);
+
+            const cx = width / 2 + camPanX;
+            const cy = height / 2 + camPanY;
+
+            const coords = new Array(N);
+            for (let n = 0; n < N; n++) {
+                const r = c * Math.sqrt(n);
+                const theta = n * divAngle + globalTime * 0.15;
+                coords[n] = {
+                    x: cx + r * Math.cos(theta),
+                    y: cy + r * Math.sin(theta),
+                    r: r
+                };
+            }
+
+            // Draw Parastichy Fibonacci Web Connections
+            if (fibStep > 0) {
+                ctx.lineWidth = 1.0;
+                for (let n = fibStep; n < N; n++) {
+                    const pt1 = coords[n];
+                    const pt2 = coords[n - fibStep];
+                    const t = (n / N + globalTime * 0.12 * renderSettings.colorSpeed) % 1.0;
+                    ctx.strokeStyle = samplePaletteCSS(t, 0.35);
+                    ctx.beginPath();
+                    ctx.moveTo(pt1.x, pt1.y);
+                    ctx.lineTo(pt2.x, pt2.y);
+                    ctx.stroke();
+                }
+            }
+
+            // Draw Luminous Primordia Nodes
+            for (let n = 0; n < N; n++) {
+                const pt = coords[n];
+                const t = (n / N + globalTime * 0.18 * renderSettings.colorSpeed) % 1.0;
+                const radius = Math.max(1.4, (1.2 + (n / N) * 3.5) * camZoom);
+                ctx.fillStyle = samplePaletteCSS(t, 0.92);
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function renderMaurerRose() {
+            const p = SYSTEMS.harmonograph.modes.maurer.params;
+            const n = p.n.val;
+            const d = p.d.val;
+            const harm = p.harmonics.val;
+            const layers = Math.round(p.layers.val);
+
+            ctx.fillStyle = `rgba(9, 10, 15, ${(1 - renderSettings.exposure) * 2.5})`;
+            ctx.fillRect(0, 0, width, height);
+
+            const cx = width / 2 + camPanX;
+            const cy = height / 2 + camPanY;
+            const baseRadius = Math.min(width, height) * 0.36 * camZoom;
+            const phaseShift = pointer.normX * 2.0 + globalTime * 0.25;
+
+            for (let l = 1; l <= layers; l++) {
+                const layerScale = baseRadius * (l / layers);
+                const tColor = (l / layers + globalTime * 0.15 * renderSettings.colorSpeed) % 1.0;
+                ctx.strokeStyle = samplePaletteCSS(tColor, 0.65);
+                ctx.lineWidth = 1.1;
+                ctx.beginPath();
+
+                for (let k = 0; k <= 360; k++) {
+                    const deg = k * d;
+                    const rad = deg * (Math.PI / 180);
+                    const r = Math.sin(n * rad + phaseShift * 0.2) + harm * Math.cos((n * 2) * rad - phaseShift);
+                    const px = cx + (layerScale * r) * Math.cos(rad) / (1 + harm);
+                    const py = cy + (layerScale * r) * Math.sin(rad) / (1 + harm);
+                    if (k === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+            }
+        }
+
+        function renderHarmonographPendulum() {
+            const p = SYSTEMS.harmonograph.modes.pendulum.params;
+            const f1 = p.f1.val, f2 = p.f2.val, f3 = p.f3.val, damp = p.damping.val;
+
+            ctx.fillStyle = '#090A0F';
+            ctx.fillRect(0, 0, width, height);
+
+            const cx = width / 2 + camPanX;
+            const cy = height / 2 + camPanY;
+            const R = Math.min(width, height) * 0.22 * camZoom;
+
+            const p1 = globalTime * 0.6;
+            const p2 = globalTime * 0.4 + pointer.normX * Math.PI;
+            const totalSteps = 3200;
+            const dt = 0.04;
+
+            ctx.lineWidth = 1.25;
+            for (let s = 0; s < totalSteps; s += 80) {
+                const tColor = (s / totalSteps + globalTime * 0.12 * renderSettings.colorSpeed) % 1.0;
+                ctx.strokeStyle = samplePaletteCSS(tColor, 0.78);
+                ctx.beginPath();
+                const end = Math.min(totalSteps, s + 81);
+                for (let i = s; i <= end; i++) {
+                    const t = i * dt;
+                    const env = Math.exp(-damp * t);
+                    const x = env * (R * Math.sin(f1 * t + p1) + R * 0.85 * Math.cos(f3 * t));
+                    const y = env * (R * Math.cos(f2 * t + p2) + R * 0.85 * Math.sin(f3 * t));
+                    if (i === s) ctx.moveTo(cx + x, cy + y);
+                    else ctx.lineTo(cx + x, cy + y);
+                }
+                ctx.stroke();
+            }
+        }
+
+        // --- STUDIO III RENDERERS ---
+        function renderChladniCymatics() {
+            const p = SYSTEMS.emergence.modes.cymatics.params;
+            const n = p.n.val, m = p.m.val, mix = p.mix.val, vib = p.vibration.val;
+
+            ctx.fillStyle = `rgba(9, 10, 15, ${(1 - renderSettings.exposure) * 2.2})`;
+            ctx.fillRect(0, 0, width, height);
+
+            const plateSize = Math.min(width, height) * 0.42 * camZoom;
+            const cx = width / 2 + camPanX;
+            const cy = height / 2 + camPanY;
+            const PI = Math.PI;
+
+            for (let i = 0; i < CHLADNI_COUNT; i++) {
+                let x = chladniX[i];
+                let y = chladniY[i];
+
+                // Chladni standing wave amplitude at (x, y)
+                const amp = Math.cos(n * PI * x) * Math.cos(m * PI * y) + mix * Math.cos(m * PI * x) * Math.cos(n * PI * y);
+                const stochasticStep = (Math.abs(amp) * vib) + 0.0012;
+
+                x += (Math.random() * 2 - 1) * stochasticStep;
+                y += (Math.random() * 2 - 1) * stochasticStep;
+
+                // Interactive pointer scattering when dragging on plate
+                if (pointer.isDown) {
+                    const mx = (pointer.x - cx) / plateSize;
+                    const my = (pointer.y - cy) / plateSize;
+                    const dist = Math.hypot(x - mx, y - my);
+                    if (dist < 0.22) {
+                        x += (Math.random() * 2 - 1) * 0.08;
+                        y += (Math.random() * 2 - 1) * 0.08;
+                    }
+                }
+
+                // Wrap inside acoustic plate [-1, 1]
+                if (x < -1) x = -1 + Math.random() * 0.05;
+                if (x > 1) x = 1 - Math.random() * 0.05;
+                if (y < -1) y = -1 + Math.random() * 0.05;
+                if (y > 1) y = 1 - Math.random() * 0.05;
+
+                chladniX[i] = x;
+                chladniY[i] = y;
+
+                const px = cx + x * plateSize;
+                const py = cy + y * plateSize;
+
+                if (i % 200 === 0) {
+                    const rNorm = Math.hypot(x, y) * 0.65;
+                    const t = (rNorm + globalTime * 0.1 * renderSettings.colorSpeed) % 1.0;
+                    ctx.fillStyle = samplePaletteCSS(t, 0.72);
+                }
+                ctx.fillRect(px, py, 1.5, 1.5);
+            }
+        }
+
+        function renderGrayScottTuring() {
+            const p = SYSTEMS.emergence.modes.turing.params;
+            const F = p.F.val, k = p.k.val, steps = Math.round(p.steps.val), brush = p.brush.val;
+
+            const plateScale = Math.min(width, height) * 0.82 * camZoom;
+            const drawX = width / 2 + camPanX - plateScale / 2;
+            const drawY = height / 2 + camPanY - plateScale / 2;
+
+            // Paint chemical V if user drags cursor
+            if (pointer.isDown) {
+                const gx = Math.floor(((pointer.x - drawX) / plateScale) * RD_W);
+                const gy = Math.floor(((pointer.y - drawY) / plateScale) * RD_H);
+                const r = Math.floor(brush / 2);
+                for (let dy = -r; dy <= r; dy++) {
+                    for (let dx = -r; dx <= r; dx++) {
+                        if (dx * dx + dy * dy <= r * r) {
+                            const nx = (gx + dx + RD_W) % RD_W;
+                            const ny = (gy + dy + RD_H) % RD_H;
+                            rdV[ny * RD_W + nx] = 0.9;
+                        }
+                    }
+                }
+            }
+
+            // Integrate Gray-Scott PDE steps
+            const Du = 0.16, Dv = 0.08;
+            for (let s = 0; s < steps; s++) {
+                for (let y = 0; y < RD_H; y++) {
+                    const yUp = ((y - 1 + RD_H) % RD_H) * RD_W;
+                    const yMid = y * RD_W;
+                    const yDown = ((y + 1) % RD_H) * RD_W;
+
+                    for (let x = 0; x < RD_W; x++) {
+                        const xLeft = (x - 1 + RD_W) % RD_W;
+                        const xRight = (x + 1) % RD_W;
+                        const idx = yMid + x;
+
+                        const u = rdU[idx];
+                        const v = rdV[idx];
+
+                        // 5-point discrete Laplacian
+                        const lapU = rdU[yUp + x] + rdU[yDown + x] + rdU[yMid + xLeft] + rdU[yMid + xRight] - 4 * u;
+                        const lapV = rdV[yUp + x] + rdV[yDown + x] + rdV[yMid + xLeft] + rdV[yMid + xRight] - 4 * v;
+
+                        const uvv = u * v * v;
+                        rdNextU[idx] = Math.min(1, Math.max(0, u + (Du * lapU - uvv + F * (1 - u))));
+                        rdNextV[idx] = Math.min(1, Math.max(0, v + (Dv * lapV + uvv - (F + k) * v)));
+                    }
+                }
+                // Swap buffers
+                let tmpU = rdU; rdU = rdNextU; rdNextU = tmpU;
+                let tmpV = rdV; rdV = rdNextV; rdNextV = tmpV;
+            }
+
+            // Map chemical concentration to active Cosine Palette
+            const data = rdImgData.data;
+            const timeShift = globalTime * 0.08 * renderSettings.colorSpeed;
+            for (let i = 0; i < RD_W * RD_H; i++) {
+                const v = rdV[i];
+                const u = rdU[i];
+                const idx4 = i * 4;
+                if (v < 0.02) {
+                    data[idx4] = 9;
+                    data[idx4 + 1] = 10;
+                    data[idx4 + 2] = 15;
+                    data[idx4 + 3] = 255;
+                } else {
+                    const t = Math.min(1, Math.max(0, (v * 2.4 + (1 - u) * 0.3 + timeShift) % 1.0));
+                    const { r, g, b } = samplePaletteRGB(t);
+                    data[idx4] = r;
+                    data[idx4 + 1] = g;
+                    data[idx4 + 2] = b;
+                    data[idx4 + 3] = 255;
+                }
+            }
+
+            rdOffCtx.putImageData(rdImgData, 0, 0);
+            ctx.fillStyle = '#090A0F';
+            ctx.fillRect(0, 0, width, height);
+            ctx.imageSmoothingEnabled = true;
+            ctx.drawImage(rdOffscreenCanvas, drawX, drawY, plateScale, plateScale);
+        }
+
+        function renderCurlFlowField() {
+            const p = SYSTEMS.emergence.modes.curlflow.params;
+            const scale = p.scale.val;
+            const speed = p.speed.val;
+            const vortex = p.vortex.val;
+            const count = Math.round(p.agents.val);
+
+            ctx.fillStyle = `rgba(9, 10, 15, ${1 - renderSettings.exposure})`;
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.lineWidth = 1.25;
+            for (let i = 0; i < count; i++) {
+                const ag = flowAgents[i];
+                ag.px = ag.x;
+                ag.py = ag.y;
+
+                // Trigonometric Curl Potential Ψ(x, y, t)
+                const sx = (ag.x - width / 2) * scale;
+                const sy = (ag.y - height / 2) * scale;
+                const t = globalTime * 0.35;
+
+                // Analytical partial derivatives of harmonic potential for divergence-free curl
+                let vx = Math.cos(sy + t) + Math.sin(sx * 1.4 - sy * 0.8 + t);
+                let vy = -Math.sin(sx - t) + Math.cos(sy * 1.4 + sx * 0.8 - t);
+
+                // Cursor vortex swirl
+                if (vortex > 0) {
+                    const dx = ag.x - pointer.x;
+                    const dy = ag.y - pointer.y;
+                    const distSq = dx * dx + dy * dy + 2500;
+                    const pull = (vortex * 3500) / distSq;
+                    vx += (-dy * 0.015 - dx * 0.005) * pull;
+                    vy += (dx * 0.015 - dy * 0.005) * pull;
+                }
+
+                ag.x += vx * speed;
+                ag.y += vy * speed;
+
+                const tColor = (ag.hueSeed * 0.5 + (Math.atan2(vy, vx) / (Math.PI * 2)) + 0.5 + globalTime * 0.1 * renderSettings.colorSpeed) % 1.0;
+                ctx.strokeStyle = samplePaletteCSS(tColor, 0.55);
+                ctx.beginPath();
+                ctx.moveTo(ag.px, ag.py);
+                ctx.lineTo(ag.x, ag.y);
+                ctx.stroke();
+
+                // Wrap screen boundaries cleanly
+                if (ag.x < 0 || ag.x > width || ag.y < 0 || ag.y > height) {
+                    ag.x = Math.random() * width;
+                    ag.y = Math.random() * height;
+                    ag.px = ag.x;
+                    ag.py = ag.y;
+                }
+            }
+        }
+
+        /***********************************************************************
+         * 7. INTERACTION, CLIPBOARD & ARTWORK EXPORT
+         ***********************************************************************/
+        function setupEventListeners() {
+            window.addEventListener('resize', () => {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                clearCanvasBuffer();
+            });
+
+            // Mouse & Touch Events on Main Canvas
+            canvas.addEventListener('pointerdown', (e) => {
+                pointer.isDown = true;
+                pointer.x = e.clientX;
+                pointer.y = e.clientY;
+                pointer.lastX = e.clientX;
+                pointer.lastY = e.clientY;
+            });
+
+            window.addEventListener('pointermove', (e) => {
+                pointer.x = e.clientX;
+                pointer.y = e.clientY;
+                pointer.normX = (e.clientX / width) * 2 - 1;
+                pointer.normY = (e.clientY / height) * 2 - 1;
+
+                if (!pointer.isDown || activeStudio === 'chromatics') return;
+
+                const dx = e.clientX - pointer.lastX;
+                const dy = e.clientY - pointer.lastY;
+                pointer.lastX = e.clientX;
+                pointer.lastY = e.clientY;
+
+                const sub = SYSTEMS[activeStudio].activeSub;
+                if (sub === 'lorenz' || sub === 'halvorsen') {
+                    rotY += dx * 0.007;
+                    rotX += dy * 0.007;
+                } else if (sub !== 'turing' && sub !== 'cymatics' && sub !== 'curlflow') {
+                    camPanX += dx;
+                    camPanY += dy;
+                    if (sub === 'clifford' || sub === 'dejong') {
+                        ctx.fillStyle = 'rgba(9, 10, 15, 0.45)';
+                        ctx.fillRect(0, 0, width, height);
+                    }
+                }
+            });
+
+            window.addEventListener('pointerup', () => {
+                pointer.isDown = false;
+            });
+
+            canvas.addEventListener('wheel', (e) => {
+                if (activeStudio === 'chromatics') return;
+                e.preventDefault();
+                const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+                camZoom = Math.max(0.25, Math.min(6.0, camZoom * zoomFactor));
+                const sub = SYSTEMS[activeStudio].activeSub;
+                if (sub === 'clifford' || sub === 'dejong') {
+                    ctx.fillStyle = 'rgba(9, 10, 15, 0.5)';
+                    ctx.fillRect(0, 0, width, height);
+                }
+            }, { passive: false });
+        }
+
+        function copyTextToClipboard(text, message) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast(message || 'Copied to clipboard');
+            } catch (err) {
+                showToast('Clipboard copy ready');
+            }
+            document.body.removeChild(ta);
+        }
+
+        let toastTimeout = null;
+        function showToast(msg) {
+            const box = document.getElementById('toastBox');
+            const text = document.getElementById('toastMessage');
+            text.textContent = msg;
+            box.classList.remove('hidden');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                box.classList.add('hidden');
+            }, 2600);
+        }
+
+        function exportArtworkPNG() {
+            // Create an offscreen composite with a subtle museum-style mathematical signature bar
+            const expCanvas = document.createElement('canvas');
+            expCanvas.width = width;
+            expCanvas.height = height;
+            const eCtx = expCanvas.getContext('2d');
+
+            eCtx.drawImage(canvas, 0, 0);
+
+            // Museum Plaque Watermark at bottom right
+            const title = document.getElementById('formulaTitle').textContent;
+            const eq = document.getElementById('liveEquationValues').textContent;
+            eCtx.fillStyle = 'rgba(9, 10, 15, 0.78)';
+            eCtx.fillRect(width - 440, height - 68, 420, 48);
+            eCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            eCtx.strokeRect(width - 440, height - 68, 420, 48);
+
+            eCtx.fillStyle = '#F3F4F6';
+            eCtx.font = '600 15px "Cormorant Garamond", serif';
+            eCtx.fillText(`AETHER // ${title} (${activePalette.name})`, width - 426, height - 46);
+
+            eCtx.fillStyle = '#9CA3AF';
+            eCtx.font = '11px "JetBrains Mono", monospace';
+            eCtx.fillText(eq.slice(0, 52), width - 426, height - 29);
+
+            const link = document.createElement('a');
+            link.download = `aether-${title.toLowerCase().replace(/\s+/g, '-')}.png`;
+            link.href = expCanvas.toDataURL('image/png');
+            link.click();
+            showToast('Exported high-resolution artwork PNG');
+        }
+
+        function togglePanelCollapse(side) {
+            if (side === 'left') {
+                const sub = document.getElementById('formulaSubtitle');
+                sub.classList.toggle('hidden');
+            }
+        }
+
+        // Initialize Atelier on Window Load
+        window.onload = function () {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            initSimulationBuffers();
+            setupEventListeners();
+            updateMiniPaletteHeader();
+            syncStudioHUD();
+            clearCanvasBuffer();
+            requestAnimationFrame(animateLoop);
+        };
+    </script>
+</body>
+</html>

@@ -17,7 +17,7 @@ tags:
 
 Most diagrams of a mechanism are a picture of a mechanism. They show you the parts and then stop, because a picture cannot answer the question you actually have: what happens when this moves.
 
-These five figures answer it. Each one is a machine drawn in isometric SVG, sitting on a test rig, with the mechanism live underneath. They run below in this page — no plugin, no download, no network once the page has loaded. Each is also a standalone file if you would rather have it full width: the whole set lives at [Anatomy](/anatomy/).
+These five figures answer it. Each one is a machine drawn in isometric SVG, sitting on a test rig, with the mechanism live underneath. They run below in this page: no plugin, no install, and no request to anyone else's server. Each is also a standalone file if you would rather have it full width: the whole set lives at [Anatomy](/anatomy/).
 
 ## How a quadcopter flies
 
@@ -55,13 +55,15 @@ A flame-licker engine has no boiler and no compressed air. A spirit lamp heats t
 
 The flywheel is not decoration. It is the only thing that gets the engine through the part of the cycle where the cylinder is doing no work at all.
 
-## FELIS-09, a quadruped on a stand
+## FELIS-09, and where the weight goes
 
-A walking robot is mostly a question about joints: how much torque, how much backlash, and how much of the leg you are willing to carry as actuator mass. FELIS-09 is drawn with harmonic-drive actuators, a carbon skeletal frame, a sensor suite and an articulated spine, held on a test stand so the gait can be stepped through joint by joint.
+A robot standing still is a statics problem, and a quadruped is an awkward one: the mass sits high, the feet are four small points, and anything that moves up top has to be paid for down below. FELIS-09 is a 9.2 kg machine — about 22.6 N on each foot at rest — standing on four strain-gauge load cells, with the readings fed to a bench console.
 
-{{< anatomy slug="robotic-cat" title="FELIS-09 robotic cat" height="798" >}}
+The optical collimator runs along a front rail and commands up to ±26° of gaze yaw. Move it and the centre of mass moves with it, so the five-link, 0.88 kg tail sweeps the other way to cancel the lateral drift while the bar meters show which feet take the difference. Crouching compresses the dorsal suspension up to 38 mm against the 80:1 harmonic-drive knees, and the dial reads the peak joint torque that the stance is asking for.
 
-Step the gait and watch the spine: the articulation is what keeps the feet planted while the body moves, and it is the part that a rigid frame cannot imitate.
+{{< anatomy slug="robotic-cat" title="FELIS-09 robotic cat" height="938" >}}
+
+Hover the rail and watch the load pads trade force between the front feet. Then crouch and watch all four climb at once — the tail can cancel a drift, but it cannot take weight off the ground.
 
 ## How they are built
 

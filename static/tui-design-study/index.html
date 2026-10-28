@@ -61,6 +61,12 @@
     button,a{font:inherit}
     a{color:var(--accent-ink);text-underline-offset:3px}
     button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .skip-link{position:absolute;left:16px;top:-64px;z-index:50;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:6px;font-family:"IBM Plex Mono",monospace;font-size:13px;text-decoration:none;transition:top .15s}
+    .skip-link:focus{top:12px}
+    .num{font-family:"IBM Plex Mono",monospace;color:var(--accent-ink);font-size:13px;padding-top:3px}
+    .permalink{opacity:0;margin-left:8px;text-decoration:none;color:var(--accent-ink);font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:400}
+    .principle:hover .permalink,.road:hover .permalink,.permalink:focus-visible{opacity:1}
+    @media(hover:none){.permalink{opacity:.45}}
     .shell{max-width:1280px;margin:0 auto;padding:28px 28px 80px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px}
     .rail{position:sticky;top:24px;align-self:start;height:calc(100vh - 48px);display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid var(--line);padding-right:24px}
     .rail nav{display:grid;gap:3px}
@@ -86,9 +92,8 @@
     h3{font-size:20px;line-height:1.25;margin:0 0 10px}
     .source{font-family:"IBM Plex Mono",monospace;color:var(--faint);font-size:11px}
     .thesis{font-size:clamp(23px,3vw,36px);line-height:1.25;letter-spacing:-.025em;max-width:900px;margin:0 0 38px}
-    .principles{display:grid;grid-template-columns:1fr 1fr;gap:0 28px;counter-reset:principle}
-    .principle{counter-increment:principle;display:grid;grid-template-columns:42px 1fr;gap:14px;padding:22px 0;border-top:1px solid var(--line)}
-    .principle::before{content:counter(principle,decimal-leading-zero);font-family:"IBM Plex Mono",monospace;color:var(--accent-ink);font-size:13px;padding-top:3px}
+    .principles{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+    .principle{display:grid;grid-template-columns:42px 1fr;gap:14px;padding:22px 0;border-top:1px solid var(--line)}
     .principle h3{font-size:17px;margin-bottom:5px}
     .principle p{margin:0;color:var(--muted);font-size:14px}
     .terminal-demo{background:var(--code);color:var(--code-ink);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
@@ -124,7 +129,7 @@
     .stack-title{color:var(--code-muted);font-size:11px;margin-bottom:16px}.layer{border:1px solid #5d7469;padding:14px;margin-top:-1px}.layer:nth-child(3){margin:10px 10px 0}.layer:nth-child(4){margin:10px 20px 0}.layer:nth-child(5){margin:10px 30px 0;border-color:#d09c58}.layer small{display:block;color:#81958c;margin-top:2px}.stack-caption{font-size:12px;color:var(--code-muted);margin:16px 0 0}
     .finding-list{display:grid;gap:0}.finding{padding:18px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:30px 1fr;gap:12px}.finding .mark{font-family:"IBM Plex Mono",monospace;color:var(--danger)}.finding p{margin:5px 0 0;color:var(--muted);font-size:14px}
     .good-list{margin-top:32px;padding:24px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.good-list h3{color:var(--good)}.good-list ul{margin:12px 0 0;padding-left:20px;color:var(--muted)}
-    .roadmap{counter-reset:road;display:grid;gap:0}.road{counter-increment:road;display:grid;grid-template-columns:50px minmax(0,1fr) auto;gap:18px;align-items:start;padding:20px 0;border-top:1px solid var(--line)}.road::before{content:counter(road,decimal-leading-zero);font-family:"IBM Plex Mono",monospace;color:var(--accent-ink)}.road h3{font-size:17px;margin:0}.road p{margin:4px 0 0;color:var(--muted);font-size:14px}.impact{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--faint);padding-top:3px}
+    .roadmap{display:grid;gap:0}.road{display:grid;grid-template-columns:50px minmax(0,1fr) auto;gap:18px;align-items:start;padding:20px 0;border-top:1px solid var(--line)}.road h3{font-size:17px;margin:0}.road p{margin:4px 0 0;color:var(--muted);font-size:14px}.impact{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--faint);padding-top:3px}
     .theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.theme-card{padding:20px;background:var(--surface);box-shadow:var(--shadow)}.theme-card h3{font-size:16px}.theme-card p{margin:0;color:var(--muted);font-size:14px}.swatches{display:flex;gap:5px;margin:15px 0}.swatch{height:28px;flex:1;min-width:0}.theme-card.problem{border-top:3px solid var(--danger)}.theme-card.add{border-top:3px solid var(--accent)}
     .theme-facts{margin-top:30px;display:grid;gap:10px}.fact-line{display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;padding:13px 0;border-top:1px solid var(--line)}.fact-line code{font-family:"IBM Plex Mono",monospace;color:var(--accent-ink)}.fact-line span{color:var(--muted)}
     .patterns{display:grid;grid-template-columns:1fr 1fr;gap:28px}.pattern-col{padding-top:18px;border-top:2px solid var(--good)}.pattern-col.avoid{border-color:var(--danger)}.pattern-col ul{padding:0;margin:16px 0 0;list-style:none}.pattern-col li{padding:10px 0;border-bottom:1px solid var(--line);color:var(--muted)}
@@ -139,21 +144,24 @@
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#content">Skip to content</a>
   <div class="shell">
     <aside class="rail" aria-label="Study sections">
       <nav>
         <a href="#thesis">Thesis</a>
         <a href="#principles">Principles</a>
+        <a href="#demo">Quiet chrome</a>
         <a href="#taste">Star signal</a>
         <a href="#critique">UI critique</a>
         <a href="#roadmap">Change plan</a>
         <a href="#themes">Themes</a>
+        <a href="#contract">Design contract</a>
         <a href="#sources">Sources</a>
       </nav>
       <p class="rail-note">Compiled 2026-09-15<br />Qualitative synthesis<br />Static code review</p>
     </aside>
 
-    <main>
+    <main id="content" tabindex="-1">
       <header class="hero" id="thesis">
         <p class="eyebrow">A design study for llama-deck</p>
         <h1>The terminal rewards restraint.</h1>
@@ -173,21 +181,21 @@
         </div>
         <p class="thesis">Information first. Decoration last. Chrome should frame the work, then get out of the way.</p>
         <div class="principles">
-          <article class="principle"><div><h3>Honor the grid</h3><p>Compose in character cells. Don’t transplant desktop widgets into a keyboard-first surface.</p></div></article>
-          <article class="principle"><div><h3>Make color mean something</h3><p>Use one accent, dimmed chrome, and semantic states rather than a 16-color rainbow.</p></div></article>
-          <article class="principle"><div><h3>Border selectively</h3><p>Thin rounded borders can signal focus; whitespace and dividers should do most of the structural work.</p></div></article>
-          <article class="principle"><div><h3>Keep the map stable</h3><p>Fixed panes, one clear focus, and a persistent breadcrumb reduce the user’s cognitive load.</p></div></article>
-          <article class="principle"><div><h3>Use glyphs as texture</h3><p>Nerd Font icons accelerate scanning, but every icon needs a clean ASCII fallback.</p></div></article>
-          <article class="principle"><div><h3>Align ruthlessly</h3><p>Right-align numbers, hold fixed column widths, and keep content away from borders.</p></div></article>
-          <article class="principle"><div><h3>Teach through the footer</h3><p>A one-line contextual hint bar plus <code>?</code> help makes the interface self-explanatory.</p></div></article>
-          <article class="principle"><div><h3>Reveal depth on demand</h3><p>Keep the default view quiet; surface power features only when context makes them useful.</p></div></article>
-          <article class="principle"><div><h3>Move with purpose</h3><p>Smooth graphs and live watch states should communicate change, never merely decorate.</p></div></article>
-          <article class="principle"><div><h3>Use familiar grammar</h3><p>Vim-style navigation, mnemonic single keys, <code>/</code> search, <code>q</code> quit, and <code>?</code> help.</p></div></article>
+          <article class="principle" id="rule-01"><span class="num">01</span><div><h3>Honor the grid<a class="permalink" href="#rule-01" aria-label="Link to rule 1, Honor the grid">#</a></h3><p>Compose in character cells. Don’t transplant desktop widgets into a keyboard-first surface.</p></div></article>
+          <article class="principle" id="rule-02"><span class="num">02</span><div><h3>Make color mean something<a class="permalink" href="#rule-02" aria-label="Link to rule 2, Make color mean something">#</a></h3><p>Use one accent, dimmed chrome, and semantic states rather than a 16-color rainbow.</p></div></article>
+          <article class="principle" id="rule-03"><span class="num">03</span><div><h3>Border selectively<a class="permalink" href="#rule-03" aria-label="Link to rule 3, Border selectively">#</a></h3><p>Thin rounded borders can signal focus; whitespace and dividers should do most of the structural work.</p></div></article>
+          <article class="principle" id="rule-04"><span class="num">04</span><div><h3>Keep the map stable<a class="permalink" href="#rule-04" aria-label="Link to rule 4, Keep the map stable">#</a></h3><p>Fixed panes, one clear focus, and a persistent breadcrumb reduce the user’s cognitive load.</p></div></article>
+          <article class="principle" id="rule-05"><span class="num">05</span><div><h3>Use glyphs as texture<a class="permalink" href="#rule-05" aria-label="Link to rule 5, Use glyphs as texture">#</a></h3><p>Nerd Font icons accelerate scanning, but every icon needs a clean ASCII fallback.</p></div></article>
+          <article class="principle" id="rule-06"><span class="num">06</span><div><h3>Align ruthlessly<a class="permalink" href="#rule-06" aria-label="Link to rule 6, Align ruthlessly">#</a></h3><p>Right-align numbers, hold fixed column widths, and keep content away from borders.</p></div></article>
+          <article class="principle" id="rule-07"><span class="num">07</span><div><h3>Teach through the footer<a class="permalink" href="#rule-07" aria-label="Link to rule 7, Teach through the footer">#</a></h3><p>A one-line contextual hint bar plus <code>?</code> help makes the interface self-explanatory.</p></div></article>
+          <article class="principle" id="rule-08"><span class="num">08</span><div><h3>Reveal depth on demand<a class="permalink" href="#rule-08" aria-label="Link to rule 8, Reveal depth on demand">#</a></h3><p>Keep the default view quiet; surface power features only when context makes them useful.</p></div></article>
+          <article class="principle" id="rule-09"><span class="num">09</span><div><h3>Move with purpose<a class="permalink" href="#rule-09" aria-label="Link to rule 9, Move with purpose">#</a></h3><p>Smooth graphs and live watch states should communicate change, never merely decorate.</p></div></article>
+          <article class="principle" id="rule-10"><span class="num">10</span><div><h3>Use familiar grammar<a class="permalink" href="#rule-10" aria-label="Link to rule 10, Use familiar grammar">#</a></h3><p>Vim-style navigation, mnemonic single keys, <code>/</code> search, <code>q</code> quit, and <code>?</code> help.</p></div></article>
         </div>
         <p class="source">Community synthesis: Lobsters TUI discussions, Hacker News threads on btop/Textual/k9s, and unixporn-adjacent workflow coverage.</p>
       </section>
 
-      <section aria-labelledby="chrome-title">
+      <section id="demo" aria-labelledby="chrome-title">
         <div class="section-head">
           <h2 id="chrome-title">Quiet chrome, shown</h2>
           <p>The same information can feel noisy or composed. Toggle the frame to compare the hierarchy.</p>
@@ -317,15 +325,15 @@
           <p>Start with structure. Theme and micro-polish matter more after the interface has room to breathe.</p>
         </div>
         <div class="roadmap">
-          <article class="road"><div><h3>De-chrome the shell</h3><p>Borderless one-line header and footer; no screen-pane frame.</p></div><span class="impact">Highest impact</span></article>
-          <article class="road"><div><h3>Make rounded borders the exception</h3><p>Use rounded as the default box style, then show it only for focus and overlays.</p></div><span class="impact">Fast</span></article>
-          <article class="road"><div><h3>Move to quiet title case</h3><p>Let whitespace, weight, and muted color carry hierarchy.</p></div><span class="impact">Fast</span></article>
-          <article class="road"><div><h3>Repair the theme system</h3><p>Correct Catppuccin’s bright foreground; repair or remove Cyberpunk and Matrix; add contrast tests.</p></div><span class="impact">High</span></article>
-          <article class="road"><div><h3>Recompose telemetry</h3><p>Merge status into the header strip and place VRAM and KV gauges side by side where width permits.</p></div><span class="impact">High</span></article>
-          <article class="road"><div><h3>Add glyphs with fallbacks</h3><p>Improve scan speed without making Nerd Fonts a hard dependency.</p></div><span class="impact">Medium</span></article>
-          <article class="road"><div><h3>Increase gauge fidelity</h3><p>Fractional blocks, responsive widths, and warning thresholds.</p></div><span class="impact">Medium</span></article>
-          <article class="road"><div><h3>Fix the modal geometry</h3><p>Center and clamp help, with a dim backdrop.</p></div><span class="impact">Medium</span></article>
-          <article class="road"><div><h3>Read the version dynamically</h3><p>Replace the hardcoded <code>v0.1.0</code> with package metadata.</p></div><span class="impact">Small</span></article>
+          <article class="road" id="step-01"><span class="num">01</span><div><h3>De-chrome the shell<a class="permalink" href="#step-01" aria-label="Link to step 1, De-chrome the shell">#</a></h3><p>Borderless one-line header and footer; no screen-pane frame.</p></div><span class="impact">Highest impact</span></article>
+          <article class="road" id="step-02"><span class="num">02</span><div><h3>Make rounded borders the exception<a class="permalink" href="#step-02" aria-label="Link to step 2, Make rounded borders the exception">#</a></h3><p>Use rounded as the default box style, then show it only for focus and overlays.</p></div><span class="impact">Fast</span></article>
+          <article class="road" id="step-03"><span class="num">03</span><div><h3>Move to quiet title case<a class="permalink" href="#step-03" aria-label="Link to step 3, Move to quiet title case">#</a></h3><p>Let whitespace, weight, and muted color carry hierarchy.</p></div><span class="impact">Fast</span></article>
+          <article class="road" id="step-04"><span class="num">04</span><div><h3>Repair the theme system<a class="permalink" href="#step-04" aria-label="Link to step 4, Repair the theme system">#</a></h3><p>Correct Catppuccin’s bright foreground; repair or remove Cyberpunk and Matrix; add contrast tests.</p></div><span class="impact">High</span></article>
+          <article class="road" id="step-05"><span class="num">05</span><div><h3>Recompose telemetry<a class="permalink" href="#step-05" aria-label="Link to step 5, Recompose telemetry">#</a></h3><p>Merge status into the header strip and place VRAM and KV gauges side by side where width permits.</p></div><span class="impact">High</span></article>
+          <article class="road" id="step-06"><span class="num">06</span><div><h3>Add glyphs with fallbacks<a class="permalink" href="#step-06" aria-label="Link to step 6, Add glyphs with fallbacks">#</a></h3><p>Improve scan speed without making Nerd Fonts a hard dependency.</p></div><span class="impact">Medium</span></article>
+          <article class="road" id="step-07"><span class="num">07</span><div><h3>Increase gauge fidelity<a class="permalink" href="#step-07" aria-label="Link to step 7, Increase gauge fidelity">#</a></h3><p>Fractional blocks, responsive widths, and warning thresholds.</p></div><span class="impact">Medium</span></article>
+          <article class="road" id="step-08"><span class="num">08</span><div><h3>Fix the modal geometry<a class="permalink" href="#step-08" aria-label="Link to step 8, Fix the modal geometry">#</a></h3><p>Center and clamp help, with a dim backdrop.</p></div><span class="impact">Medium</span></article>
+          <article class="road" id="step-09"><span class="num">09</span><div><h3>Read the version dynamically<a class="permalink" href="#step-09" aria-label="Link to step 9, Read the version dynamically">#</a></h3><p>Replace the hardcoded <code>v0.1.0</code> with package metadata.</p></div><span class="impact">Small</span></article>
         </div>
       </section>
 
@@ -346,7 +354,7 @@
         </div>
       </section>
 
-      <section aria-labelledby="pattern-title">
+      <section id="contract" aria-labelledby="pattern-title">
         <div class="section-head"><h2 id="pattern-title">A compact design contract</h2><p>Use this as the review lens for every new screen.</p></div>
         <div class="patterns">
           <div class="pattern-col"><h3>Keep</h3><ul><li>Information-dense default views</li><li>One active accent and clear semantic states</li><li>Stable panes and a visible breadcrumb</li><li>Right-aligned numbers and fixed columns</li><li>Contextual hints plus full help</li><li>Fast, differential redraws</li></ul></div>

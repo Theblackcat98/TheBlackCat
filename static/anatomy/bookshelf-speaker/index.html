@@ -1208,6 +1208,91 @@ run();
         b.addEventListener("click", () => { note.textContent = b.getAttribute("title") || ""; }));
     }
   }
+
+  /* deep links: the interesting state lives in the URL, restored on load */
+  const q = new URLSearchParams(location.search);
+  const setParam = (k, v) => {
+    const u = new URL(location.href);
+    if (v === null || v === undefined) u.searchParams.delete(k);
+    else u.searchParams.set(k, String(v));
+    history.replaceState(null, "", u);
+  };
+  const pressGroup = (group, key) => {
+    document.querySelectorAll('[data-anatomy-group="' + group + '"]').forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.anatomyKey === key)));
+  };
+
+  if (slug === "limited-slip-differential") {
+    stage.addEventListener("keydown", (e) => {
+      if (/^[1-4]$/.test(e.key)) { pressGroup("scenario", e.key); setParam("scenario", e.key); }
+    });
+    const v = q.get("scenario");
+    if (/^[1-4]$/.test(v || "")) { pressGroup("scenario", v); press(v); }
+    else pressGroup("scenario", "3"); /* the figure's own initial scenario */
+  }
+
+  if (slug === "robotic-cat") {
+    stage.addEventListener("keydown", (e) => {
+      if (/^[1-4]$/.test(e.key)) { pressGroup("preset", e.key); setParam("preset", e.key); }
+    });
+    const v = q.get("preset");
+    if (/^[1-4]$/.test(v || "")) { pressGroup("preset", v); press(v); }
+  }
+
+  if (slug === "bookshelf-speaker") {
+    const presetHz = { "1": 45, "2": 800, "3": 2800, "4": 12000 };
+    stage.addEventListener("keydown", (e) => {
+      if (presetHz[e.key]) setParam("hz", presetHz[e.key]);
+      if (e.key === " " || e.key.toLowerCase() === "c") {
+        setTimeout(() => setParam("cutaway", stage.getAttribute("data-cutaway") === "true" ? null : "0"), 0);
+      }
+    });
+    if (range) range.addEventListener("input", () => setParam("hz", range.value));
+    const hz = Number(q.get("hz"));
+    if (hz >= 40 && hz <= 20000 && range) {
+      range.value = String(Math.round(hz));
+      range.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    if (q.get("cutaway") === "0" && stage.getAttribute("data-cutaway") === "true") press("c");
+  }
+
+  if (slug === "drone") {
+    let throttleSteps = 0;
+    stage.addEventListener("keydown", (e) => {
+      if (e.key === "w" || e.key === "W") throttleSteps = Math.min(4, throttleSteps + 1);
+      else if (e.key === "s" || e.key === "S") throttleSteps = Math.max(-4, throttleSteps - 1);
+      else if (e.key === "Enter") throttleSteps = 0;
+      else return;
+      setParam("throttle", throttleSteps === 0 ? null : String(throttleSteps * 0.25));
+    });
+    const th = Number(q.get("throttle"));
+    if (th) {
+      const steps = Math.max(-4, Math.min(4, Math.round(th / 0.25)));
+      for (let i = 0; i < Math.abs(steps); i++) press(steps > 0 ? "w" : "s");
+    }
+  }
+
+  if (slug === "flame-licker") {
+    document.querySelectorAll("[data-phase-btn]").forEach((b) =>
+      b.addEventListener("click", () => setParam("step", b.dataset.phaseBtn)));
+    stage.addEventListener("keydown", (e) => {
+      if (/^[1-4]$/.test(e.key)) setParam("step", e.key);
+    });
+    const speed = document.querySelector("#speed-slider");
+    if (speed) {
+      speed.addEventListener("input", () => setParam("rpm", speed.value));
+      const rpm = Number(q.get("rpm"));
+      if (rpm >= 30 && rpm <= 180) {
+        speed.value = String(rpm);
+        speed.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
+    const step = q.get("step");
+    if (/^[1-4]$/.test(step || "")) {
+      const b = document.querySelector('[data-phase-btn="' + step + '"]');
+      if (b) b.click();
+    }
+  }
 })();
 </script>
 </body></html>

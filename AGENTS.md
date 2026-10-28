@@ -157,6 +157,7 @@ Nothing is stored anywhere but the repo. There is no database and no CMS. `publi
 - **Search** (Ctrl/⌘-K, `/`, or the header button): built from `/index.json`. It includes title, description, tags, topics, type, source domain and the first ~300 characters of the body. It **excludes** drafts, `status: inbox` items, and anything with `excludesearch: true`.
 - **Tag, topic and type pages** (`/tags/x/`, `/topics/x/`, `/contenttype/x/`): non-inbox items only.
 - **Projects** (`/projects/`): cards, sortable and filterable by tag.
+- **Tools** (`/tools/`): a hand-maintained index page (`content/tools.md`, in the main menu) linking the live interactive exhibits and apps — the static pages under `static/` (`aether-atelier/`, `tui-design-study/`, `mermaid-gallery/`) and the Online Tools site. When a new live tool ships, add it here as well as in its write-up.
 - **Collections** (`/collections/`): a card per collection. A collection page lists its members automatically.
 - **Blog and docs**: a guide or series (a folder with `_index.md` plus chapter files) gets a chapter list, and previous/next links. Chapters sort by `weight`, then by the first number in the file name (`chapter_2` before `chapter_10`).
 - **Article pages**: breadcrumbs mirroring the folders, a table of contents when there are three or more headings, a facts sidebar for projects, related items, and "Edit this page / History / View source" links.

@@ -106,6 +106,9 @@ menu:
     - name: Projects
       pageRef: /projects
       weight: 30
+    - name: Tools
+      pageRef: /tools
+      weight: 35
     - name: Notes
       pageRef: /notes
       weight: 40

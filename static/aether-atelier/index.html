@@ -41,8 +41,6 @@
     <style>
         * {
             box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
         }
         body {
             background-color: #090A0F;
@@ -51,6 +49,10 @@
             overflow: hidden;
             margin: 0;
             padding: 0;
+        }
+        :focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.9);
+            outline-offset: 2px;
         }
         /* Glassmorphic Surface Utilities */
         .glass-panel {
@@ -77,22 +79,45 @@
             box-shadow: 0 0 25px rgba(99, 102, 241, 0.25);
         }
 
-        /* Custom Minimal Range Sliders */
+        /* Custom Minimal Range Sliders — the input itself is a 24px-tall
+           touch target; only the 4px runnable track is drawn. */
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
             width: 100%;
+            height: 24px;
+            background: transparent;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
             height: 4px;
             background: rgba(255, 255, 255, 0.12);
             border-radius: 999px;
-            outline: none;
-            cursor: pointer;
+        }
+        input[type="range"]::-moz-range-track {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+        }
+        input[type="range"]:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.9);
+            outline-offset: 2px;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #F3F4F6;
+            border: 2px solid #6366F1;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.8);
+            cursor: grab;
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 14px;
-            height: 14px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             background: #F3F4F6;
             border: 2px solid #6366F1;
@@ -125,6 +150,13 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
+        /* Collapsed panels shrink to a slim chip on small screens, so a
+           collapsed panel never covers the other panel's controls. */
+        @media (max-width: 820px) {
+            .panel-chip { width: auto !important; }
+            .panel-chip .chip-hide { display: none !important; }
+        }
+
         /* Subtle Ambient Grid Overlay */
         .atelier-grid-bg {
             background-size: 48px 48px;
@@ -137,6 +169,21 @@
             font-family: 'Cormorant Garamond', Georgia, serif;
             font-style: italic;
         }
+
+        /* Compact numeric readouts paired with sliders (type exact values) */
+        .num-input {
+            width: 4.6rem;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #C7D2FE;
+            text-align: right;
+            outline: none;
+        }
+        .num-input:focus { border-color: rgba(99, 102, 241, 0.85); }
         
         /* Toast Notification Animation */
         @keyframes toastSlideUp {
@@ -148,7 +195,7 @@
         }
     </style>
 </head>
-<body class="relative w-screen h-screen overflow-hidden select-none">
+<body class="relative w-screen h-screen overflow-hidden">
 
     <!-- MAIN INTERACTIVE GENERATIVE CANVAS (Full Viewport) -->
     <canvas id="atelierCanvas" class="fixed inset-0 w-full h-full block z-0 cursor-crosshair atelier-grid-bg"></canvas>
@@ -179,12 +226,21 @@
                                 C(t) = a + b &middot; cos(2&pi;(c &middot; t + d))
                             </p>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex flex-wrap items-center gap-2">
                             <button onclick="randomizeCosinePalette()" class="glass-pill px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 text-amberAccent border-amberAccent/30 hover:bg-amberAccent/10">
                                 <i class="ph ph-sparkle"></i> Randomize Waves
                             </button>
                             <button onclick="copyPaletteCSS()" class="glass-pill px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5">
-                                <i class="ph ph-copy"></i> Copy CSS &amp; GLSL
+                                <i class="ph ph-copy"></i> Copy CSS
+                            </button>
+                            <button onclick="copyPaletteGLSL()" class="glass-pill px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                                <i class="ph ph-copy"></i> Copy GLSL
+                            </button>
+                            <button onclick="copyPaletteHexList()" class="glass-pill px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                                <i class="ph ph-copy"></i> Copy Hex List
+                            </button>
+                            <button onclick="downloadPaletteFile()" class="glass-pill px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                                <i class="ph ph-download-simple"></i> Save .css
                             </button>
                         </div>
                     </div>
@@ -194,6 +250,7 @@
                         <div id="cosineGradientBar" class="w-full h-16 rounded-xl border border-white/15 shadow-inner transition-all"></div>
                         <!-- Discrete 8-Swatch Sample Strip (Click to copy HEX) -->
                         <div id="cosineSwatchesRow" class="grid grid-cols-4 sm:grid-cols-8 gap-2 pt-1"></div>
+                        <p class="text-[10px] font-mono uppercase tracking-wider text-mutedSilver">Click any swatch to copy its hex</p>
                     </div>
 
                     <!-- R, G, B Cosine Wave Curves Canvas -->
@@ -234,7 +291,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 class="font-display text-xl font-semibold text-white">Albers Simultaneous Contrast</h3>
-                                <p class="text-xs text-mutedSilver">Explore how nested chromatic fields alter perceived luminance</p>
+                                <p class="text-xs text-mutedSilver">Nested fields sampled from your active palette; the chord wheel below still drives Apply Chord</p>
                             </div>
                             <select id="harmonyChordSelect" onchange="updateAlbersAndChords()" class="bg-black/60 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs font-mono text-alabaster focus:outline-none focus:border-indigoAccent">
                                 <option value="golden">Golden Ratio Spiral (137.5&deg;)</option>
@@ -247,9 +304,12 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                             <!-- Interactive Nested Albers Squares -->
-                            <div id="albersOuter" class="aspect-square w-full rounded-2xl flex items-center justify-center p-6 transition-colors duration-300 shadow-2xl border border-white/10">
-                                <div id="albersMidOuter" class="w-full h-full rounded-xl flex items-center justify-center p-6 transition-colors duration-300 shadow-lg">
-                                    <div id="albersMidInner" class="w-full h-full rounded-lg flex items-center justify-center p-6 transition-colors duration-300 shadow-md">
+                            <div id="albersOuter" class="relative aspect-square w-full rounded-2xl flex items-center justify-center p-6 transition-colors duration-300 shadow-2xl border border-white/10">
+                                <span id="albersOuterLabel" class="absolute top-1.5 left-1.5 text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/50 text-white"></span>
+                                <div id="albersMidOuter" class="relative w-full h-full rounded-xl flex items-center justify-center p-6 transition-colors duration-300 shadow-lg">
+                                    <span id="albersMidOuterLabel" class="absolute top-1.5 left-1.5 text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/50 text-white"></span>
+                                    <div id="albersMidInner" class="relative w-full h-full rounded-lg flex items-center justify-center p-6 transition-colors duration-300 shadow-md">
+                                        <span id="albersMidInnerLabel" class="absolute top-1.5 left-1.5 text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/50 text-white"></span>
                                         <div id="albersCore" class="w-full h-full rounded-md transition-colors duration-300 shadow-inner flex items-end justify-center pb-2">
                                             <span id="albersCoreLabel" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/50 text-white backdrop-blur-xs"></span>
                                         </div>
@@ -261,15 +321,38 @@
                             <div class="flex flex-col items-center justify-center space-y-3">
                                 <canvas id="harmonyWheelCanvas" width="210" height="210" class="w-48 h-48 cursor-pointer rounded-full"></canvas>
                                 <div class="w-full space-y-1.5">
-                                    <div class="flex justify-between text-[11px] font-mono text-mutedSilver">
-                                        <span>BASE HUE ANGLE</span>
-                                        <span id="baseHueLabel">215&deg;</span>
+                                    <div class="flex justify-between items-center text-[11px] font-mono text-mutedSilver">
+                                        <label for="baseHueNum">BASE HUE ANGLE</label>
+                                        <span class="flex items-center gap-1">
+                                            <input type="number" id="baseHueNum" class="num-input" style="width:3.6rem" min="0" max="360" step="1" value="215" aria-label="Base hue angle value">
+                                            <span>&deg;</span>
+                                        </span>
                                     </div>
-                                    <input type="range" id="baseHueSlider" min="0" max="360" value="215" oninput="updateAlbersAndChords()">
+                                    <input type="range" id="baseHueSlider" min="0" max="360" value="215" aria-label="Base hue angle" oninput="updateAlbersAndChords()">
                                 </div>
                                 <button onclick="applyChordToGlobalPalette()" class="w-full glass-pill py-2 rounded-lg text-xs font-mono text-indigo-300 border-indigo-500/30 hover:bg-indigo-500/20 flex items-center justify-center gap-1.5">
                                     <i class="ph ph-magic-wand"></i> Apply Chord to Active Visualizer
                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- Albers' classic exercise: one identical core color on two different grounds -->
+                        <div class="space-y-2">
+                            <div class="flex items-baseline justify-between gap-2">
+                                <span class="text-[11px] font-mono uppercase tracking-wider text-mutedSilver">Same core, two grounds</span>
+                                <span id="albersSameCoreLabel" class="text-[11px] font-mono text-indigo-200"></span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div id="albersGroundA" class="h-20 rounded-xl flex items-center justify-center border border-white/10 transition-colors duration-300">
+                                    <div id="albersSameCoreA" class="w-14 h-14 rounded-lg shadow-lg transition-colors duration-300"></div>
+                                </div>
+                                <div id="albersGroundB" class="h-20 rounded-xl flex items-center justify-center border border-white/10 transition-colors duration-300">
+                                    <div id="albersSameCoreB" class="w-14 h-14 rounded-lg shadow-lg transition-colors duration-300"></div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between text-[10px] font-mono text-mutedSilver">
+                                <span id="albersGroundALabel"></span>
+                                <span id="albersGroundBLabel"></span>
                             </div>
                         </div>
                     </div>
@@ -296,20 +379,20 @@
         </div>
 
         <!-- Primary Studio Switcher (4 Extensive Studios) -->
-        <nav class="glass-panel p-1.5 rounded-2xl flex items-center gap-1 sm:gap-1.5 pointer-events-auto overflow-x-auto max-w-[60vw] sm:max-w-none">
-            <button onclick="switchStudio('attractors')" id="tab-attractors" class="studio-tab glass-pill active px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap">
+        <nav role="tablist" aria-label="Studios" class="glass-panel p-1.5 rounded-2xl flex items-center gap-1 sm:gap-1.5 pointer-events-auto overflow-x-auto max-w-[60vw] sm:max-w-none">
+            <button onclick="switchStudio('attractors')" id="tab-attractors" role="tab" aria-selected="true" class="studio-tab glass-pill active px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap">
                 <i class="ph ph-planet text-sm text-indigo-400"></i>
                 <span>I. Strange Attractors</span>
             </button>
-            <button onclick="switchStudio('harmonograph')" id="tab-harmonograph" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
+            <button onclick="switchStudio('harmonograph')" id="tab-harmonograph" role="tab" aria-selected="false" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
                 <i class="ph ph-spiral text-sm text-amber-400"></i>
                 <span>II.Sacred &amp; Harmonics</span>
             </button>
-            <button onclick="switchStudio('emergence')" id="tab-emergence" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
+            <button onclick="switchStudio('emergence')" id="tab-emergence" role="tab" aria-selected="false" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
                 <i class="ph ph-waves text-sm text-emerald-400"></i>
                 <span>III. Cymatics &amp; Morphogenesis</span>
             </button>
-            <button onclick="switchStudio('chromatics')" id="tab-chromatics" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
+            <button onclick="switchStudio('chromatics')" id="tab-chromatics" role="tab" aria-selected="false" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
                 <i class="ph ph-palette text-sm text-rose-400"></i>
                 <span>IV. Chromatic Lab</span>
             </button>
@@ -317,38 +400,47 @@
 
         <!-- Right Quick Actions: Global Palette Pill & Export -->
         <div class="glass-panel px-3 py-1.5 rounded-2xl flex items-center gap-2 pointer-events-auto">
-            <button onclick="cycleGlobalPalette()" title="Cycle Active Color Palette" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+            <button onclick="cycleGlobalPalette()" title="Cycle Active Color Palette" aria-label="Cycle active color palette" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <div id="miniPalettePreview" class="w-12 h-3.5 rounded-full"></div>
                 <span id="activePaletteName" class="text-[11px] font-mono text-alabaster hidden xl:inline">Vermeer Lapis</span>
             </button>
-            <button onclick="toggleCodexModal()" title="Mathematical Formula Codex" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-alabaster transition">
+            <button onclick="toggleCodexModal()" id="codexOpenBtn" title="Mathematical Formula Codex" aria-label="Open mathematical formula codex" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-alabaster transition">
                 <i class="ph ph-book-open-text text-base"></i>
             </button>
-            <button onclick="exportArtworkPNG()" title="Export High-Res Artwork PNG" class="px-3 py-1.5 rounded-xl bg-indigoAccent/90 hover:bg-indigoAccent text-white text-xs font-medium flex items-center gap-1.5 shadow-lg shadow-indigoAccent/25 transition">
+            <button onclick="copyShareLink()" title="Copy a link that restores this exact atelier state" aria-label="Copy share link" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-alabaster transition">
+                <i class="ph ph-link text-base"></i>
+            </button>
+            <select id="exportScaleSelect" title="Export resolution scale" aria-label="Export resolution scale" class="bg-white/5 border border-white/10 rounded-xl text-[11px] font-mono text-alabaster px-1.5 py-1.5 focus:outline-none">
+                <option value="1">1&times;</option>
+                <option value="2" selected>2&times;</option>
+                <option value="3">3&times;</option>
+            </select>
+            <button onclick="exportArtworkPNG()" id="captureBtn" title="Export artwork PNG" aria-label="Export artwork PNG" class="px-3 py-1.5 rounded-xl bg-indigoAccent/90 hover:bg-indigoAccent text-white text-xs font-medium flex items-center gap-1.5 shadow-lg shadow-indigoAccent/25 transition">
                 <i class="ph ph-camera"></i>
-                <span class="hidden md:inline">Capture</span>
+                <span id="captureBtnLabel" class="hidden md:inline">Capture</span>
             </button>
         </div>
     </header>
 
     <!-- FLOATING LEFT MATHEMATICAL PLAQUE & PRESET SELECTOR (Visible in Studios I, II, III) -->
-    <aside id="leftFormulaPlaque" class="fixed top-20 left-3 sm:left-6 z-20 w-80 sm:w-96 flex flex-col gap-3 pointer-events-none transition-all duration-300">
-        
+    <aside id="leftFormulaPlaque" class="fixed top-20 left-3 sm:left-6 z-20 w-72 sm:w-96 flex flex-col gap-3 pointer-events-none transition-all duration-300">
+
         <!-- Live Equation Display Card -->
-        <div class="glass-panel rounded-2xl p-4 sm:p-5 pointer-events-auto space-y-3">
+        <div id="leftPanelCard" class="glass-panel rounded-2xl p-4 sm:p-5 pointer-events-auto space-y-3 max-h-[calc(100vh-190px)] overflow-y-auto">
             <div class="flex items-center justify-between">
-                <span id="formulaCategoryTag" class="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                <span id="formulaCategoryTag" class="chip-hide text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                     CHAOTIC DYNAMICAL SYSTEM
                 </span>
                 <div class="flex items-center gap-1.5 text-[11px] font-mono text-mutedSilver">
-                    <span id="fpsCounter">60 FPS</span>
-                    <span>&bull;</span>
-                    <button onclick="togglePanelCollapse('left')" class="hover:text-white" title="Minimize Info">
+                    <span id="fpsCounter" class="chip-hide">60 FPS</span>
+                    <span class="chip-hide">&bull;</span>
+                    <button onclick="togglePanelCollapse('left')" id="leftCollapseBtn" class="hover:text-white" title="Collapse panel" aria-label="Collapse info panel" aria-expanded="true">
                         <i class="ph ph-arrows-in-simple"></i>
                     </button>
                 </div>
             </div>
 
+            <div id="leftPanelBody" class="space-y-3">
             <div>
                 <h2 id="formulaTitle" class="font-display text-2xl sm:text-3xl font-semibold text-white tracking-tight">Clifford Strange Attractor</h2>
                 <p id="formulaSubtitle" class="text-xs text-mutedSilver mt-1 leading-relaxed">
@@ -380,12 +472,13 @@
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-mono uppercase tracking-wider text-mutedSilver">CURATED CONSTANTS</span>
                     <button onclick="triggerSerendipity()" class="text-[11px] font-mono text-amberAccent hover:underline flex items-center gap-1">
-                        <i class="ph ph-sparkle"></i> Serendipity
+                        <i class="ph ph-sparkle"></i> Mutate Constants
                     </button>
                 </div>
                 <div id="curatedPresetsRow" class="flex flex-wrap gap-1.5">
                     <!-- Populated dynamically by JS -->
                 </div>
+            </div>
             </div>
         </div>
 
@@ -402,19 +495,24 @@
     <aside id="rightParameterHUD" class="fixed top-20 right-3 sm:right-6 z-20 w-72 sm:w-80 pointer-events-none transition-all duration-300">
         <div class="glass-panel rounded-2xl p-4 sm:p-5 pointer-events-auto max-h-[calc(100vh-140px)] overflow-y-auto space-y-4">
             <div class="flex items-center justify-between border-b border-white/10 pb-3">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 chip-hide">
                     <i class="ph ph-sliders-horizontal text-indigo-400 text-lg"></i>
                     <h3 class="font-sans text-xs font-semibold uppercase tracking-wider text-white">Live Parameters</h3>
                 </div>
                 <div class="flex items-center gap-1">
-                    <button onclick="resetCurrentSystem()" title="Reset View & Canvas" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
+                    <button onclick="resetCurrentSystem()" title="Reset View & Canvas" aria-label="Reset view and canvas" class="chip-hide p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
                         <i class="ph ph-arrow-counter-clockwise"></i>
                     </button>
-                    <button onclick="togglePauseSimulation()" id="pauseBtn" title="Pause / Resume Integration" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
+                    <button onclick="togglePauseSimulation()" id="pauseBtn" title="Pause / Resume Integration" aria-label="Pause or resume simulation" class="chip-hide p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
                         <i id="pauseIcon" class="ph ph-pause"></i>
+                    </button>
+                    <button onclick="togglePanelCollapse('right')" id="rightCollapseBtn" title="Collapse panel" aria-label="Collapse parameters panel" aria-expanded="true" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
+                        <i class="ph ph-arrows-in-simple"></i>
                     </button>
                 </div>
             </div>
+
+            <div id="rightPanelBody" class="space-y-4">
 
             <!-- Dynamic Sliders Container -->
             <div id="parameterSlidersContainer" class="space-y-3.5">
@@ -426,19 +524,35 @@
                 <span class="text-[10px] font-mono uppercase tracking-wider text-mutedSilver block">AESTHETICS &amp; EXPOSURE</span>
 
                 <div>
-                    <div class="flex justify-between text-xs mb-1">
-                        <span class="text-mutedSilver">Trail Persistence / Exposure</span>
-                        <span id="exposureVal" class="font-mono text-white">0.94</span>
+                    <div class="flex justify-between items-center text-xs mb-1">
+                        <label class="text-mutedSilver" for="exposureVal">Trail Persistence / Exposure</label>
+                        <input type="number" id="exposureVal" class="num-input" min="0.50" max="0.995" step="0.005" value="0.940" aria-label="Exposure value" onchange="commitRenderNumber('exposure', this)">
                     </div>
-                    <input type="range" id="exposureSlider" min="0.50" max="0.995" step="0.005" value="0.94" oninput="updateGlobalRenderParam('exposure', this.value)">
+                    <input type="range" id="exposureSlider" min="0.50" max="0.995" step="0.005" value="0.94" aria-label="Trail persistence / exposure" oninput="updateGlobalRenderParam('exposure', this.value)">
                 </div>
 
                 <div>
-                    <div class="flex justify-between text-xs mb-1">
-                        <span class="text-mutedSilver">Chromatic Cycle Speed</span>
-                        <span id="colorSpeedVal" class="font-mono text-white">1.0x</span>
+                    <div class="flex justify-between items-center text-xs mb-1">
+                        <label class="text-mutedSilver" for="colorSpeedVal">Chromatic Cycle Speed</label>
+                        <span class="flex items-center gap-1">
+                            <input type="number" id="colorSpeedVal" class="num-input" min="0" max="4" step="0.1" value="1.0" aria-label="Chromatic cycle speed value" onchange="commitRenderNumber('colorSpeed', this)">
+                            <span class="font-mono text-white text-[11px]">x</span>
+                        </span>
                     </div>
-                    <input type="range" id="colorSpeedSlider" min="0" max="4" step="0.1" value="1.0" oninput="updateGlobalRenderParam('colorSpeed', this.value)">
+                    <input type="range" id="colorSpeedSlider" min="0" max="4" step="0.1" value="1.0" aria-label="Chromatic cycle speed" oninput="updateGlobalRenderParam('colorSpeed', this.value)">
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center text-xs mb-1">
+                        <label class="text-mutedSilver" for="qualitySelect">Render Quality</label>
+                        <select id="qualitySelect" onchange="setQuality(this.value)" class="bg-black/40 border border-white/10 rounded-md px-1.5 py-1 font-mono text-[11px] text-indigo-200 focus:outline-none" aria-label="Render quality">
+                            <option value="auto">Auto</option>
+                            <option value="high">High</option>
+                            <option value="balanced">Balanced</option>
+                            <option value="eco">Eco</option>
+                        </select>
+                    </div>
+                    <p id="qualityNote" class="text-[10px] font-mono text-mutedSilver"></p>
                 </div>
 
                 <div class="flex items-center justify-between pt-1">
@@ -447,6 +561,7 @@
                         OFF
                     </button>
                 </div>
+            </div>
             </div>
         </div>
     </aside>
@@ -463,27 +578,45 @@
                 <i class="ph ph-eraser"></i>
                 <span class="hidden sm:inline">Clear Exposure</span>
             </button>
+            <button onclick="undoLastAction()" id="undoBtn" disabled title="Undo last change (Ctrl+Z)" aria-label="Undo last change" class="glass-pill px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 text-mutedSilver hover:text-white opacity-40">
+                <i class="ph ph-arrow-u-up-left"></i>
+                <span class="hidden sm:inline">Undo</span>
+            </button>
             <button onclick="triggerSerendipity()" class="glass-pill px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 text-amberAccent border-amberAccent/30">
                 <i class="ph ph-dice-five"></i>
                 <span>Mutate Formula</span>
             </button>
             <div class="h-4 w-[1px] bg-white/10 hidden sm:block"></div>
-            <button onclick="switchStudio('chromatics')" class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-xl hover:bg-white/5 transition text-xs text-mutedSilver hover:text-white">
+            <button onclick="switchStudio('chromatics')" title="Edit Spectral Waves — Chromatic Lab" class="flex items-center gap-2 px-2.5 py-1 rounded-xl hover:bg-white/5 transition text-xs text-mutedSilver hover:text-white">
                 <i class="ph ph-sliders text-rose-400"></i>
-                <span>Edit Spectral Waves</span>
+                <span class="hidden sm:inline">Edit Spectral Waves</span>
             </button>
         </div>
     </footer>
 
+    <!-- FIRST-RUN ORIENTATION STRIP (dismissible; new visitors only) -->
+    <div id="orientationBar" class="fixed z-30 left-1/2 -translate-x-1/2 bottom-24 sm:bottom-auto sm:top-[4.75rem] w-[calc(100vw-1.5rem)] sm:w-auto max-w-xl hidden">
+        <div class="glass-panel rounded-2xl px-4 py-3 flex items-center gap-3">
+            <i class="ph ph-compass text-indigo-300 text-xl shrink-0"></i>
+            <p class="text-xs text-mutedSilver leading-relaxed">
+                <span class="text-white font-medium">Start here:</span> pick a system on the left, tune it or hit <span class="text-amberAccent">Mutate</span>, then <span class="text-white">Capture</span>. Palettes are made in <span class="text-rose-300">Studio IV &middot; Chromatic Lab</span> and drive every visualizer. Everything auto-saves in this browser.
+            </p>
+            <div class="flex flex-col gap-1.5 shrink-0">
+                <button onclick="switchStudio('chromatics'); dismissOrientation();" class="glass-pill px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-rose-200 whitespace-nowrap">Open the Lab</button>
+                <button onclick="dismissOrientation()" class="glass-pill px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-mutedSilver whitespace-nowrap">Got it</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MATHEMATICAL CODEX MODAL (Educational Deep-Dive into the Equations) -->
-    <div id="codexModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div id="codexModal" role="dialog" aria-modal="true" aria-labelledby="codexTitle" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
         <div class="glass-panel max-w-3xl w-full rounded-3xl p-6 sm:p-8 max-h-[85vh] overflow-y-auto space-y-6 border border-white/15">
             <div class="flex items-start justify-between border-b border-white/10 pb-4">
                 <div>
                     <span class="text-xs font-mono uppercase tracking-widest text-indigoAccent">ARCHITECTURAL CODEX</span>
-                    <h2 class="font-display text-3xl font-semibold text-white mt-0.5">The Mathematics of Generative Beauty</h2>
+                    <h2 id="codexTitle" class="font-display text-3xl font-semibold text-white mt-0.5">The Mathematics of Generative Beauty</h2>
                 </div>
-                <button onclick="toggleCodexModal()" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white">
+                <button onclick="toggleCodexModal()" id="codexCloseBtn" aria-label="Close codex" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white">
                     <i class="ph ph-x text-lg"></i>
                 </button>
             </div>
@@ -492,21 +625,23 @@
                 <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
                     <h3 class="font-display text-xl font-semibold text-indigo-300">I. Strange Attractors &amp; Chaos</h3>
                     <p class="text-xs text-mutedSilver leading-relaxed">
-                        Deterministic nonlinear systems whose trajectories never repeat (aperiodic) yet remain confined to a complex fractal manifold in phase space. Slight changes to initial parameters ($a, b, c, d$) cause bifurcations between delicate silk filaments and dense topological knots.
+                        Deterministic nonlinear systems whose trajectories never repeat (aperiodic) yet remain confined to a complex fractal manifold in phase space. Slight changes to initial parameters (<span class="math-serif">a, b, c, d</span>) cause bifurcations between delicate silk filaments and dense topological knots.
                     </p>
                     <p class="font-mono text-[11px] text-alabaster/80 bg-black/40 p-2 rounded-lg">
-                        Clifford, De Jong, Lorenz ($\sigma, \rho, \beta$), and Halvorsen 3D cyclic symmetry.
+                        Clifford, De Jong, Lorenz (<span class="math-serif">&sigma;, &rho;, &beta;</span>), and Halvorsen 3D cyclic symmetry.
                     </p>
+                    <button onclick="openCodexSystem('attractors')" class="glass-pill px-3 py-1.5 rounded-lg text-[11px] font-mono text-indigo-200">Open Studio I &rarr;</button>
                 </div>
 
                 <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
                     <h3 class="font-display text-xl font-semibold text-amber-300">II. Phyllotaxis &amp; Harmonographs</h3>
                     <p class="text-xs text-mutedSilver leading-relaxed">
-                        Botanical primordia pack most efficiently when successive elements diverge by the Golden Angle $\phi = 360^\circ(1 - 1/\varphi) \approx 137.50776^\circ$. Deviating by even $0.1^\circ$ transforms Fibonacci spirals into radial spokes. Harmonographs model damped coupled pendulums.
+                        Botanical primordia pack most efficiently when successive elements diverge by the Golden Angle <span class="math-serif">&phi; = 360&deg;(1 &minus; 1/&phi;) &asymp; 137.50776&deg;</span>. Deviating by even 0.1&deg; transforms Fibonacci spirals into radial spokes. Harmonographs model damped coupled pendulums.
                     </p>
                     <p class="font-mono text-[11px] text-alabaster/80 bg-black/40 p-2 rounded-lg">
                         r = c&radic;n, &theta; = n &middot; 137.50776&deg; | Maurer Roses &amp; Fourier Phasors.
                     </p>
+                    <button onclick="openCodexSystem('harmonograph')" class="glass-pill px-3 py-1.5 rounded-lg text-[11px] font-mono text-amber-200">Open Studio II &rarr;</button>
                 </div>
 
                 <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
@@ -517,16 +652,18 @@
                     <p class="font-mono text-[11px] text-alabaster/80 bg-black/40 p-2 rounded-lg">
                         cos(n&pi;x)cos(m&pi;y) - cos(m&pi;x)cos(n&pi;y) = 0
                     </p>
+                    <button onclick="openCodexSystem('emergence')" class="glass-pill px-3 py-1.5 rounded-lg text-[11px] font-mono text-emerald-200">Open Studio III &rarr;</button>
                 </div>
 
                 <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
                     <h3 class="font-display text-xl font-semibold text-rose-300">IV. Spectral Cosine Synthesis</h3>
                     <p class="text-xs text-mutedSilver leading-relaxed">
-                        Popularized by shader pioneer Inigo Quilez, any smooth continuous artistic gradient can be compactly parameterized by four 3D vectors $(a, b, c, d)$ driving a cosine wave for Red, Green, and Blue channels, avoiding muddy linear RGB transitions.
+                        Popularized by shader pioneer Inigo Quilez, any smooth continuous artistic gradient can be compactly parameterized by four 3D vectors (<span class="math-serif">a, b, c, d</span>) driving a cosine wave for Red, Green, and Blue channels, avoiding muddy linear RGB transitions.
                     </p>
                     <p class="font-mono text-[11px] text-alabaster/80 bg-black/40 p-2 rounded-lg">
                         C(t) = a + b &middot; cos(2&pi;(c &middot; t + d))
                     </p>
+                    <button onclick="openCodexSystem('chromatics')" class="glass-pill px-3 py-1.5 rounded-lg text-[11px] font-mono text-rose-200">Open Studio IV &rarr;</button>
                 </div>
             </div>
 
@@ -539,7 +676,7 @@
     </div>
 
     <!-- TOAST NOTIFICATION -->
-    <div id="toastBox" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 hidden pointer-events-none">
+    <div id="toastBox" role="status" aria-live="polite" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 hidden pointer-events-none">
         <div class="glass-panel px-4 py-2.5 rounded-xl border border-indigo-500/40 text-xs font-mono text-white shadow-2xl flex items-center gap-2 toast-enter">
             <i class="ph-fill ph-check-circle text-emerald-400 text-base"></i>
             <span id="toastMessage">Copied to clipboard</span>
@@ -954,6 +1091,203 @@
         }
 
         /***********************************************************************
+         * 3B. STATE PERSISTENCE, SHARE LINKS & UNDO HISTORY
+         * The whole atelier (studio, sub-system, every parameter, palette,
+         * render settings, camera) autosaves to localStorage, can be packed
+         * into a shareable URL hash, and destructive actions are undoable.
+         ***********************************************************************/
+        const STORAGE_KEY = 'aether-atelier-state-v1';
+        let stateDirty = false;
+        let undoStack = [];
+        let qualityMode = 'auto'; // 'auto' | 'high' | 'balanced' | 'eco'
+        let isFirstRun = false;
+
+        function markDirty() { stateDirty = true; }
+
+        function collectState() {
+            const subs = {}, params = {};
+            Object.keys(SYSTEMS).forEach(sk => {
+                subs[sk] = SYSTEMS[sk].activeSub;
+                params[sk] = {};
+                Object.keys(SYSTEMS[sk].modes).forEach(mk => {
+                    params[sk][mk] = {};
+                    Object.keys(SYSTEMS[sk].modes[mk].params).forEach(pk => {
+                        params[sk][mk][pk] = SYSTEMS[sk].modes[mk].params[pk].val;
+                    });
+                });
+            });
+            const hueEl = document.getElementById('baseHueSlider');
+            const chordEl = document.getElementById('harmonyChordSelect');
+            return {
+                v: 1,
+                studio: activeStudio,
+                subs, params,
+                palette: JSON.parse(JSON.stringify(activePalette)),
+                paletteIndex: currentPaletteIndex,
+                render: { exposure: renderSettings.exposure, colorSpeed: renderSettings.colorSpeed },
+                camera: { zoom: camZoom, panX: camPanX, panY: camPanY, rotX: rotX, rotY: rotY },
+                paused: isPaused,
+                autoMorph: autoMorph,
+                chroma: {
+                    hue: hueEl ? parseFloat(hueEl.value) : 215,
+                    chord: chordEl ? chordEl.value : 'golden'
+                },
+                quality: qualityMode
+            };
+        }
+
+        function applyStateData(s) {
+            if (!s || typeof s !== 'object') return false;
+            if (s.studio && SYSTEMS[s.studio]) activeStudio = s.studio;
+            if (s.subs) {
+                Object.keys(SYSTEMS).forEach(sk => {
+                    if (s.subs[sk] && SYSTEMS[sk].modes[s.subs[sk]]) SYSTEMS[sk].activeSub = s.subs[sk];
+                });
+            }
+            if (s.params) {
+                Object.keys(SYSTEMS).forEach(sk => {
+                    Object.keys(SYSTEMS[sk].modes).forEach(mk => {
+                        const savedMode = s.params[sk] && s.params[sk][mk];
+                        if (!savedMode) return;
+                        Object.keys(SYSTEMS[sk].modes[mk].params).forEach(pk => {
+                            const p = SYSTEMS[sk].modes[mk].params[pk];
+                            const v = parseFloat(savedMode[pk]);
+                            if (Number.isFinite(v)) p.val = Math.min(p.max, Math.max(p.min, v));
+                        });
+                    });
+                });
+            }
+            if (s.palette && ['a', 'b', 'c', 'd'].every(k => Array.isArray(s.palette[k]) && s.palette[k].length === 3)) {
+                activePalette = JSON.parse(JSON.stringify(s.palette));
+                if (Number.isFinite(s.paletteIndex)) currentPaletteIndex = s.paletteIndex;
+            }
+            if (s.render) {
+                const ex = parseFloat(s.render.exposure);
+                if (Number.isFinite(ex)) renderSettings.exposure = Math.min(0.995, Math.max(0.5, ex));
+                const cs = parseFloat(s.render.colorSpeed);
+                if (Number.isFinite(cs)) renderSettings.colorSpeed = Math.min(4, Math.max(0, cs));
+            }
+            if (s.camera) {
+                const cam = s.camera;
+                if (Number.isFinite(cam.zoom)) camZoom = Math.min(6, Math.max(0.25, cam.zoom));
+                if (Number.isFinite(cam.panX)) camPanX = cam.panX;
+                if (Number.isFinite(cam.panY)) camPanY = cam.panY;
+                if (Number.isFinite(cam.rotX)) rotX = cam.rotX;
+                if (Number.isFinite(cam.rotY)) rotY = cam.rotY;
+            }
+            isPaused = !!s.paused;
+            autoMorph = !!s.autoMorph;
+            if (s.quality && ['auto', 'high', 'balanced', 'eco'].includes(s.quality)) qualityMode = s.quality;
+            if (s.chroma) {
+                const hueEl = document.getElementById('baseHueSlider');
+                const chordEl = document.getElementById('harmonyChordSelect');
+                const hv = parseFloat(s.chroma.hue);
+                if (hueEl && Number.isFinite(hv)) hueEl.value = Math.min(360, Math.max(0, hv));
+                if (chordEl && typeof s.chroma.chord === 'string') chordEl.value = s.chroma.chord;
+            }
+            return true;
+        }
+
+        function setReadout(id, text) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (el.tagName === 'INPUT') el.value = text;
+            else el.textContent = text;
+        }
+
+        function syncRenderSettingsUI() {
+            const ex = document.getElementById('exposureSlider');
+            const cs = document.getElementById('colorSpeedSlider');
+            if (ex) ex.value = renderSettings.exposure;
+            if (cs) cs.value = renderSettings.colorSpeed;
+            setReadout('exposureVal', Number(renderSettings.exposure).toFixed(3));
+            setReadout('colorSpeedVal', Number(renderSettings.colorSpeed).toFixed(1));
+            const q = document.getElementById('qualitySelect');
+            if (q) q.value = qualityMode;
+            const icon = document.getElementById('pauseIcon');
+            if (icon) icon.className = isPaused ? 'ph ph-play text-amberAccent' : 'ph ph-pause';
+            const morphBtn = document.getElementById('autoMorphBtn');
+            if (morphBtn) {
+                morphBtn.textContent = autoMorph ? 'ACTIVE' : 'OFF';
+                morphBtn.className = autoMorph
+                    ? 'px-3 py-1 rounded-lg text-xs font-mono border border-indigoAccent bg-indigoAccent/20 text-indigo-300 transition'
+                    : 'px-3 py-1 rounded-lg text-xs font-mono border border-white/15 bg-white/5 text-mutedSilver hover:text-white transition';
+            }
+        }
+
+        function restoreState(s) {
+            if (!applyStateData(s)) return;
+            const cam = { zoom: camZoom, panX: camPanX, panY: camPanY, rotX: rotX, rotY: rotY };
+            updateMiniPaletteHeader();
+            switchStudio(activeStudio); // rebuilds tabs/HUD; also resets camera, restored below
+            camZoom = cam.zoom; camPanX = cam.panX; camPanY = cam.panY; rotX = cam.rotX; rotY = cam.rotY;
+            syncRenderSettingsUI();
+            if (typeof applyQuality === 'function') applyQuality(false);
+            updateUndoButton();
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(collectState()));
+            } catch (e) { /* storage unavailable (private mode) — session-only state */ }
+        }
+
+        function loadStoredState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) { return null; }
+        }
+
+        function encodeStateToHash(s) {
+            return '#s=' + btoa(unescape(encodeURIComponent(JSON.stringify(s))))
+                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function decodeStateFromHash() {
+            const m = location.hash.match(/#s=([A-Za-z0-9\-_]+)/);
+            if (!m) return null;
+            try {
+                return JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, '+').replace(/_/g, '/')))));
+            } catch (e) { return null; }
+        }
+
+        function copyShareLink() {
+            const url = location.href.split('#')[0] + encodeStateToHash(collectState());
+            history.replaceState(null, '', url);
+            copyTextToClipboard(url, 'Link copied — it restores this exact atelier state');
+        }
+
+        function pushUndo(label) {
+            try {
+                undoStack.push({ label, state: collectState() });
+                if (undoStack.length > 40) undoStack.shift();
+            } catch (e) { /* snapshot failed; undo is best-effort */ }
+            updateUndoButton();
+        }
+
+        function undoLastAction() {
+            const snap = undoStack.pop();
+            if (!snap) {
+                showToast('Nothing to undo');
+                return;
+            }
+            restoreState(snap.state);
+            saveState();
+            stateDirty = false;
+            showToast(`Undid: ${snap.label}`);
+            updateUndoButton();
+        }
+
+        function updateUndoButton() {
+            const btn = document.getElementById('undoBtn');
+            if (!btn) return;
+            const has = undoStack.length > 0;
+            btn.disabled = !has;
+            btn.classList.toggle('opacity-40', !has);
+        }
+
+        /***********************************************************************
          * 4. UI & HUD BUILDER FUNCTIONS
          ***********************************************************************/
         function switchStudio(studioKey) {
@@ -963,17 +1297,29 @@
             document.querySelectorAll('.studio-tab').forEach(btn => {
                 btn.classList.remove('active', 'text-white');
                 btn.classList.add('text-mutedSilver');
+                btn.setAttribute('aria-selected', 'false');
             });
             const activeTab = document.getElementById(`tab-${studioKey}`);
             if (activeTab) {
                 activeTab.classList.add('active', 'text-white');
                 activeTab.classList.remove('text-mutedSilver');
+                activeTab.setAttribute('aria-selected', 'true');
             }
 
             const chromaticView = document.getElementById('chromaticStudioView');
             const leftPlaque = document.getElementById('leftFormulaPlaque');
             const rightHUD = document.getElementById('rightParameterHUD');
             const bottomDock = document.getElementById('bottomDock');
+
+            // The header Capture button exports a palette sheet while the
+            // Chromatic Lab covers the (frozen) canvas — never the stale frame.
+            const captureLabel = document.getElementById('captureBtnLabel');
+            const captureBtn = document.getElementById('captureBtn');
+            if (captureLabel) captureLabel.textContent = studioKey === 'chromatics' ? 'Palette Sheet' : 'Capture';
+            if (captureBtn) {
+                captureBtn.title = studioKey === 'chromatics' ? 'Export palette sheet PNG' : 'Export artwork PNG';
+                captureBtn.setAttribute('aria-label', captureBtn.title);
+            }
 
             if (studioKey === 'chromatics') {
                 chromaticView.classList.remove('hidden');
@@ -994,6 +1340,7 @@
                 clearCanvasBuffer();
                 syncStudioHUD();
             }
+            markDirty();
         }
 
         function selectSubSystem(subKey) {
@@ -1006,6 +1353,7 @@
             if (subKey === 'turing') seedReactionDiffusion();
             clearCanvasBuffer();
             syncStudioHUD();
+            markDirty();
         }
 
         function syncStudioHUD() {
@@ -1052,20 +1400,40 @@
             slidersContainer.innerHTML = '';
             Object.keys(modeObj.params).forEach(paramKey => {
                 const p = modeObj.params[paramKey];
+                const decimals = p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0);
                 const wrap = document.createElement('div');
                 wrap.innerHTML = `
-                    <div class="flex justify-between text-xs mb-1">
-                        <span class="text-mutedSilver">${p.label}</span>
-                        <span id="val-${paramKey}" class="font-mono text-indigo-200">${Number(p.val).toFixed(p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0))}</span>
+                    <div class="flex justify-between items-center text-xs mb-1">
+                        <label class="text-mutedSilver" for="val-${paramKey}">${p.label}</label>
+                        <input type="number" id="val-${paramKey}" class="num-input" min="${p.min}" max="${p.max}" step="${p.step}" value="${Number(p.val).toFixed(decimals)}" aria-label="${p.label} value">
                     </div>
-                    <input type="range" id="slider-${paramKey}" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.val}">
+                    <input type="range" id="slider-${paramKey}" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.val}" aria-label="${p.label}">
                 `;
-                const input = wrap.querySelector('input');
+                const input = wrap.querySelector('input[type="range"]');
+                const numInput = wrap.querySelector('input[type="number"]');
+                numInput.addEventListener('change', () => {
+                    let v = parseFloat(numInput.value);
+                    if (!Number.isFinite(v)) {
+                        numInput.value = Number(p.val).toFixed(decimals);
+                        return;
+                    }
+                    v = Math.min(p.max, Math.max(p.min, v));
+                    p.val = v;
+                    input.value = v;
+                    numInput.value = Number(v).toFixed(decimals);
+                    updateLiveFormulaPlaque();
+                    if (studioObj.activeSub === 'clifford' || studioObj.activeSub === 'dejong') {
+                        ctx.fillStyle = 'rgba(9, 10, 15, 0.35)';
+                        ctx.fillRect(0, 0, width, height);
+                    }
+                    markDirty();
+                });
                 input.addEventListener('input', (e) => {
                     const num = parseFloat(e.target.value);
                     p.val = num;
-                    document.getElementById(`val-${paramKey}`).textContent = num.toFixed(p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0));
+                    setReadout(`val-${paramKey}`, num.toFixed(p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0)));
                     updateLiveFormulaPlaque();
+                    markDirty();
                     // Soft fade on parameter change for crisp feedback
                     if (studioObj.activeSub === 'clifford' || studioObj.activeSub === 'dejong') {
                         ctx.fillStyle = 'rgba(9, 10, 15, 0.35)';
@@ -1091,25 +1459,24 @@
             document.getElementById('liveEquationValues').textContent = parts.join('  •  ');
         }
 
-        function applyPresetConstants(vals) {
+        function applyPresetConstants(vals, recordUndo = true) {
             const studioObj = SYSTEMS[activeStudio];
             if (!studioObj) return;
+            if (recordUndo) pushUndo('Apply preset');
             const modeObj = studioObj.modes[studioObj.activeSub];
             Object.keys(vals).forEach(k => {
                 if (modeObj.params[k]) {
                     modeObj.params[k].val = vals[k];
                     const slider = document.getElementById(`slider-${k}`);
-                    const label = document.getElementById(`val-${k}`);
                     if (slider) slider.value = vals[k];
-                    if (label) {
-                        const p = modeObj.params[k];
-                        label.textContent = Number(vals[k]).toFixed(p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0));
-                    }
+                    const p = modeObj.params[k];
+                    setReadout(`val-${k}`, Number(vals[k]).toFixed(p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0)));
                 }
             });
             if (studioObj.activeSub === 'turing') seedReactionDiffusion();
             clearCanvasBuffer();
             updateLiveFormulaPlaque();
+            markDirty();
         }
 
         function triggerSerendipity() {
@@ -1117,6 +1484,7 @@
                 randomizeCosinePalette();
                 return;
             }
+            pushUndo('Mutate constants');
             const studioObj = SYSTEMS[activeStudio];
             const subKey = studioObj.activeSub;
             const modeObj = studioObj.modes[subKey];
@@ -1151,16 +1519,20 @@
 
             syncStudioHUD();
             clearCanvasBuffer();
+            markDirty();
             showToast('Mutated mathematical constants');
         }
 
         function updateGlobalRenderParam(key, val) {
             renderSettings[key] = parseFloat(val);
             if (key === 'exposure') {
-                document.getElementById('exposureVal').textContent = parseFloat(val).toFixed(3);
+                setReadout('exposureVal', parseFloat(val).toFixed(3));
             } else if (key === 'colorSpeed') {
-                document.getElementById('colorSpeedVal').textContent = parseFloat(val).toFixed(1) + 'x';
+                const csEl = document.getElementById('colorSpeedVal');
+                if (csEl && csEl.tagName === 'INPUT') csEl.value = parseFloat(val).toFixed(1);
+                else setReadout('colorSpeedVal', parseFloat(val).toFixed(1) + 'x');
             }
+            markDirty();
         }
 
         function clearCanvasBuffer() {
@@ -1172,6 +1544,7 @@
         }
 
         function resetCurrentSystem() {
+            pushUndo('Reset system');
             camZoom = 1.0;
             camPanX = 0;
             camPanY = 0;
@@ -1181,10 +1554,11 @@
             if (studioObj) {
                 const modeObj = studioObj.modes[studioObj.activeSub];
                 if (modeObj.presets && modeObj.presets[0]) {
-                    applyPresetConstants(modeObj.presets[0].vals);
+                    applyPresetConstants(modeObj.presets[0].vals, false);
                 }
             }
             clearCanvasBuffer();
+            markDirty();
             showToast('System & camera reset');
         }
 
@@ -1222,9 +1596,25 @@
             }
         }
 
-        function toggleCodexModal() {
+        let codexReturnFocus = null;
+        function toggleCodexModal(force) {
             const modal = document.getElementById('codexModal');
-            modal.classList.toggle('hidden');
+            const willOpen = typeof force === 'boolean' ? force : modal.classList.contains('hidden');
+            if (willOpen) {
+                codexReturnFocus = document.activeElement;
+                modal.classList.remove('hidden');
+                const closeBtn = document.getElementById('codexCloseBtn');
+                if (closeBtn) closeBtn.focus();
+            } else {
+                modal.classList.add('hidden');
+                if (codexReturnFocus && typeof codexReturnFocus.focus === 'function') codexReturnFocus.focus();
+                codexReturnFocus = null;
+            }
+        }
+
+        function openCodexSystem(studioKey) {
+            toggleCodexModal(false);
+            switchStudio(studioKey);
         }
 
         /***********************************************************************
@@ -1241,6 +1631,7 @@
         }
 
         function cycleGlobalPalette() {
+            pushUndo('Cycle palette');
             currentPaletteIndex = (currentPaletteIndex + 1) % CURATED_PALETTES.length;
             activePalette = JSON.parse(JSON.stringify(CURATED_PALETTES[currentPaletteIndex]));
             updateMiniPaletteHeader();
@@ -1249,6 +1640,7 @@
             } else {
                 clearCanvasBuffer();
             }
+            markDirty();
             showToast(`Palette: ${activePalette.name}`);
         }
 
@@ -1302,17 +1694,34 @@
                     row.className = 'flex items-center gap-2 text-xs';
                     row.innerHTML = `
                         <span class="w-12 font-mono text-[11px] ${chColors[ch]}">${channels[ch]}</span>
-                        <input type="range" min="${vm.min}" max="${vm.max}" step="${vm.step}" value="${activePalette[vm.key][ch]}" class="flex-1">
-                        <span class="w-10 text-right font-mono text-[11px] text-mutedSilver">${activePalette[vm.key][ch].toFixed(2)}</span>
+                        <input type="range" min="${vm.min}" max="${vm.max}" step="${vm.step}" value="${activePalette[vm.key][ch]}" class="flex-1" aria-label="Vector ${vm.key} ${channels[ch]}">
+                        <input type="number" class="num-input" style="width:3.9rem" min="${vm.min}" max="${vm.max}" step="${vm.step}" value="${activePalette[vm.key][ch].toFixed(2)}" aria-label="Vector ${vm.key} ${channels[ch]} value">
                     `;
-                    const input = row.querySelector('input');
-                    const valSpan = row.querySelectorAll('span')[1];
+                    const input = row.querySelector('input[type="range"]');
+                    const valSpan = row.querySelector('input[type="number"]');
+                    valSpan.addEventListener('change', () => {
+                        let v = parseFloat(valSpan.value);
+                        if (!Number.isFinite(v)) {
+                            valSpan.value = activePalette[vm.key][ch].toFixed(2);
+                            return;
+                        }
+                        v = Math.min(vm.max, Math.max(vm.min, v));
+                        activePalette[vm.key][ch] = v;
+                        activePalette.name = 'Custom Spectral Synth';
+                        input.value = v;
+                        valSpan.value = v.toFixed(2);
+                        updateMiniPaletteHeader();
+                        updateChromaticPreviewsFast();
+                        markDirty();
+                    });
                     input.addEventListener('input', (e) => {
                         activePalette[vm.key][ch] = parseFloat(e.target.value);
                         activePalette.name = 'Custom Spectral Synth';
-                        valSpan.textContent = activePalette[vm.key][ch].toFixed(2);
+                        if (valSpan.tagName === 'INPUT') valSpan.value = activePalette[vm.key][ch].toFixed(2);
+                        else valSpan.textContent = activePalette[vm.key][ch].toFixed(2);
                         updateMiniPaletteHeader();
                         updateChromaticPreviewsFast();
+                        markDirty();
                     });
                     box.appendChild(row);
                 }
@@ -1335,10 +1744,12 @@
                 const btn = document.createElement('button');
                 btn.className = 'p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-left space-y-1.5 transition';
                 btn.onclick = () => {
+                    pushUndo('Curated palette');
                     currentPaletteIndex = idx;
                     activePalette = JSON.parse(JSON.stringify(CURATED_PALETTES[idx]));
                     updateMiniPaletteHeader();
                     renderChromaticStudioUI();
+                    markDirty();
                     showToast(`Activated ${pal.name}`);
                 };
                 btn.innerHTML = `
@@ -1365,6 +1776,7 @@
                 cards[i].querySelector('span').textContent = hex;
             }
             drawCosineWaveforms();
+            updateAlbersAndChords();
         }
 
         function drawCosineWaveforms() {
@@ -1404,6 +1816,7 @@
         }
 
         function randomizeCosinePalette() {
+            pushUndo('Randomize palette');
             activePalette = {
                 name: 'Serendipity Synth',
                 a: [+(0.4 + Math.random() * 0.25).toFixed(2), +(0.4 + Math.random() * 0.25).toFixed(2), +(0.4 + Math.random() * 0.25).toFixed(2)],
@@ -1413,34 +1826,57 @@
             };
             updateMiniPaletteHeader();
             renderChromaticStudioUI();
+            markDirty();
             showToast('Synthesized new trigonometric wave palette');
         }
 
-        function copyPaletteCSS() {
+        function paletteHexStops() {
             const stops = [];
-            for (let i = 0; i < 6; i++) {
-                const { r, g, b } = samplePaletteRGB(i / 5);
+            for (let i = 0; i < 8; i++) {
+                const { r, g, b } = samplePaletteRGB(i / 7);
                 stops.push(rgbToHex(r, g, b));
             }
-            const glsl = `// Inigo Quilez Cosine Palette (${activePalette.name})\nvec3 palette(float t) {\n    vec3 a = vec3(${activePalette.a.join(', ')});\n    vec3 b = vec3(${activePalette.b.join(', ')});\n    vec3 c = vec3(${activePalette.c.join(', ')});\n    vec3 d = vec3(${activePalette.d.join(', ')});\n    return a + b * cos(6.28318 * (c * t + d));\n}\n/* CSS Gradient: linear-gradient(90deg, ${stops.join(', ')}); */`;
-            copyTextToClipboard(glsl, 'Copied GLSL Shader & CSS Gradient to clipboard');
+            return stops;
+        }
+
+        function buildPaletteCSS() {
+            const stops = paletteHexStops();
+            return `/* ${activePalette.name} — AETHER cosine palette */\n:root {\n${stops.map((h, i) => `  --palette-${i + 1}: ${h};`).join('\n')}\n}\nbackground: linear-gradient(90deg, ${stops.join(', ')});`;
+        }
+
+        function buildPaletteGLSL() {
+            return `// Inigo Quilez Cosine Palette (${activePalette.name})\nvec3 palette(float t) {\n    vec3 a = vec3(${activePalette.a.join(', ')});\n    vec3 b = vec3(${activePalette.b.join(', ')});\n    vec3 c = vec3(${activePalette.c.join(', ')});\n    vec3 d = vec3(${activePalette.d.join(', ')});\n    return a + b * cos(6.28318 * (c * t + d));\n}`;
+        }
+
+        function copyPaletteCSS() {
+            copyTextToClipboard(buildPaletteCSS(), 'Copied CSS gradient & swatch variables');
+        }
+
+        function copyPaletteGLSL() {
+            copyTextToClipboard(buildPaletteGLSL(), 'Copied GLSL palette() function');
+        }
+
+        function copyPaletteHexList() {
+            copyTextToClipboard(paletteHexStops().join(', '), 'Copied hex list');
+        }
+
+        function downloadPaletteFile() {
+            const text = buildPaletteCSS() + '\n\n' + buildPaletteGLSL() + '\n';
+            const blob = new Blob([text], { type: 'text/css' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = `aether-palette-${activePalette.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.css`;
+            link.href = url;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
+            showToast('Saved palette .css file');
         }
 
         // Harmony Wheel & Josef Albers Homage to the Square
-        function hslToHex(h, s, l) {
-            l /= 100;
-            const a = s * Math.min(l, 1 - l) / 100;
-            const f = n => {
-                const k = (n + h / 30) % 12;
-                const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-                return Math.round(255 * color).toString(16).padStart(2, '0');
-            };
-            return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
-        }
-
         function updateAlbersAndChords() {
             const baseHue = parseFloat(document.getElementById('baseHueSlider').value);
-            document.getElementById('baseHueLabel').textContent = `${Math.round(baseHue)}°`;
+            const hueNumEl = document.getElementById('baseHueNum');
+            if (hueNumEl && document.activeElement !== hueNumEl) hueNumEl.value = Math.round(baseHue);
             const mode = document.getElementById('harmonyChordSelect').value;
 
             let angles = [baseHue];
@@ -1456,16 +1892,34 @@
                 angles = [baseHue, (baseHue + 30) % 360, (baseHue + 60) % 360, (baseHue + 330) % 360];
             }
 
-            const cOuter = hslToHex(angles[0], 55, 22);
-            const cMidOuter = hslToHex(angles[1], 68, 38);
-            const cMidInner = hslToHex(angles[2], 78, 52);
-            const cCore = hslToHex(angles[3], 88, 66);
+            // Nested squares sample the ACTIVE cosine palette — the study is
+            // about the palette being built. (The chord select drives only
+            // the harmony wheel polygon and Apply Chord.)
+            const ringT = [0.06, 0.36, 0.64, 0.92];
+            const ringIds = ['albersOuter', 'albersMidOuter', 'albersMidInner', 'albersCore'];
+            const ringLabelIds = ['albersOuterLabel', 'albersMidOuterLabel', 'albersMidInnerLabel', 'albersCoreLabel'];
+            ringT.forEach((t, i) => {
+                const { r, g, b } = samplePaletteRGB(t);
+                const hex = rgbToHex(r, g, b);
+                document.getElementById(ringIds[i]).style.backgroundColor = hex;
+                document.getElementById(ringLabelIds[i]).textContent = hex;
+            });
 
-            document.getElementById('albersOuter').style.backgroundColor = cOuter;
-            document.getElementById('albersMidOuter').style.backgroundColor = cMidOuter;
-            document.getElementById('albersMidInner').style.backgroundColor = cMidInner;
-            document.getElementById('albersCore').style.backgroundColor = cCore;
-            document.getElementById('albersCoreLabel').textContent = cCore;
+            // Albers' classic exercise: the SAME core color (t = 0.5) laid on
+            // two different grounds drawn from the same palette.
+            const coreRGB = samplePaletteRGB(0.5);
+            const coreHex = rgbToHex(coreRGB.r, coreRGB.g, coreRGB.b);
+            const groundA = samplePaletteRGB(0.14);
+            const groundB = samplePaletteRGB(0.86);
+            const groundAHex = rgbToHex(groundA.r, groundA.g, groundA.b);
+            const groundBHex = rgbToHex(groundB.r, groundB.g, groundB.b);
+            document.getElementById('albersGroundA').style.backgroundColor = groundAHex;
+            document.getElementById('albersGroundB').style.backgroundColor = groundBHex;
+            document.getElementById('albersSameCoreA').style.backgroundColor = coreHex;
+            document.getElementById('albersSameCoreB').style.backgroundColor = coreHex;
+            document.getElementById('albersSameCoreLabel').textContent = `core ${coreHex} on both grounds`;
+            document.getElementById('albersGroundALabel').textContent = `ground ${groundAHex}`;
+            document.getElementById('albersGroundBLabel').textContent = `ground ${groundBHex}`;
 
             // Draw Harmony Wheel Canvas
             const hwCanvas = document.getElementById('harmonyWheelCanvas');
@@ -1522,6 +1976,7 @@
         }
 
         function applyChordToGlobalPalette() {
+            pushUndo('Apply harmony chord');
             const baseHue = parseFloat(document.getElementById('baseHueSlider').value) / 360;
             activePalette = {
                 name: 'Geometric Harmony Chord',
@@ -1532,6 +1987,7 @@
             };
             updateMiniPaletteHeader();
             renderChromaticStudioUI();
+            markDirty();
             showToast('Applied Harmony Chord to Global Visualizers');
         }
 
@@ -1552,6 +2008,21 @@
                 if (fpsEl) fpsEl.textContent = `${fps} FPS`;
                 frameCount = 0;
                 lastFrameTime = now;
+                // Auto quality: sustained low FPS steps the caps down (with a
+                // toast, so the change is visible rather than mysterious).
+                if (qualityMode === 'auto' && activeStudio !== 'chromatics' && !isPaused) {
+                    if (fps < 38) {
+                        lowFpsStreak++;
+                        if (lowFpsStreak >= 4 && perfLevel < 2) {
+                            perfLevel++;
+                            lowFpsStreak = 0;
+                            applyQuality(false);
+                            showToast('Quality auto-adjusted for smoothness — see Render Quality in the HUD');
+                        }
+                    } else {
+                        lowFpsStreak = 0;
+                    }
+                }
             }
 
             if (isPaused || activeStudio === 'chromatics') return;
@@ -1568,10 +2039,10 @@
                     p.val += Math.sin(globalTime * 0.7) * (p.step * 0.25);
                     p.val = Math.max(p.min, Math.min(p.max, p.val));
                     const slider = document.getElementById(`slider-${firstKey}`);
-                    const label = document.getElementById(`val-${firstKey}`);
                     if (slider) slider.value = p.val;
-                    if (label) label.textContent = Number(p.val).toFixed(p.step < 0.01 ? 4 : 2);
+                    setReadout(`val-${firstKey}`, Number(p.val).toFixed(p.step < 0.01 ? 4 : 2));
                     updateLiveFormulaPlaque();
+                    markDirty();
                 }
             }
 
@@ -1597,7 +2068,7 @@
         function renderCliffordAttractor() {
             const p = SYSTEMS.attractors.modes.clifford.params;
             const a = p.a.val, b = p.b.val, c = p.c.val, d = p.d.val;
-            const count = p.density.val;
+            const count = Math.min(p.density.val, capsNow.density);
 
             // Subtle exposure fade
             ctx.fillStyle = `rgba(9, 10, 15, ${1 - renderSettings.exposure})`;
@@ -1631,7 +2102,7 @@
         function renderDeJongAttractor() {
             const p = SYSTEMS.attractors.modes.dejong.params;
             const a = p.a.val, b = p.b.val, c = p.c.val, d = p.d.val;
-            const count = p.density.val;
+            const count = Math.min(p.density.val, capsNow.density);
 
             ctx.fillStyle = `rgba(9, 10, 15, ${1 - renderSettings.exposure})`;
             ctx.fillRect(0, 0, width, height);
@@ -1890,8 +2361,9 @@
             const cx = width / 2 + camPanX;
             const cy = height / 2 + camPanY;
             const PI = Math.PI;
+            const grainTotal = Math.floor(CHLADNI_COUNT * capsNow.grains);
 
-            for (let i = 0; i < CHLADNI_COUNT; i++) {
+            for (let i = 0; i < grainTotal; i++) {
                 let x = chladniX[i];
                 let y = chladniY[i];
 
@@ -1936,7 +2408,7 @@
 
         function renderGrayScottTuring() {
             const p = SYSTEMS.emergence.modes.turing.params;
-            const F = p.F.val, k = p.k.val, steps = Math.round(p.steps.val), brush = p.brush.val;
+            const F = p.F.val, k = p.k.val, steps = Math.min(Math.round(p.steps.val), capsNow.rdSteps), brush = p.brush.val;
 
             const plateScale = Math.min(width, height) * 0.82 * camZoom;
             const drawX = width / 2 + camPanX - plateScale / 2;
@@ -2073,16 +2545,109 @@
         }
 
         /***********************************************************************
+         * 6B. RENDER QUALITY, DPR SCALING, RESIZE-SAFE CANVAS, ORIENTATION
+         ***********************************************************************/
+        let perfLevel = 0; // auto-mode step-down level (0 = full quality)
+        let lowFpsStreak = 0;
+
+        function computeCaps() {
+            const dpr = window.devicePixelRatio || 1;
+            if (qualityMode === 'high') return { dpr: Math.min(dpr, 2), grains: 1, rdSteps: 16, density: 35000 };
+            if (qualityMode === 'balanced') return { dpr: Math.min(dpr, 1.5), grains: 0.6, rdSteps: 10, density: 22000 };
+            if (qualityMode === 'eco') return { dpr: 1, grains: 0.35, rdSteps: 6, density: 12000 };
+            // auto: start at full quality; the FPS watcher steps this down
+            return [
+                { dpr: Math.min(dpr, 2), grains: 1, rdSteps: 16, density: 35000 },
+                { dpr: 1.5, grains: 0.6, rdSteps: 10, density: 22000 },
+                { dpr: 1, grains: 0.35, rdSteps: 6, density: 12000 }
+            ][perfLevel];
+        }
+        let capsNow = computeCaps();
+
+        function currentDPR() { return capsNow.dpr; }
+
+        function updateQualityNote() {
+            const note = document.getElementById('qualityNote');
+            if (!note) return;
+            const grains = Math.round(CHLADNI_COUNT * capsNow.grains / 1000);
+            note.textContent = `backing ${capsNow.dpr}× · ${grains}k grains · ≤${capsNow.rdSteps} RD steps${qualityMode === 'auto' && perfLevel > 0 ? ' · auto-adjusted' : ''}`;
+        }
+
+        function applyQuality(announce = true) {
+            capsNow = computeCaps();
+            resizeCanvas(true);
+            updateQualityNote();
+            if (announce) showToast(`Render quality: ${qualityMode}`);
+        }
+
+        function setQuality(mode) {
+            qualityMode = mode;
+            perfLevel = 0;
+            lowFpsStreak = 0;
+            applyQuality(true);
+            markDirty();
+        }
+
+        // Resize the backing store WITHOUT wiping the accumulated artwork:
+        // the old frame is snapshotted and drawn back pixel-for-pixel.
+        // (Android URL-bar show/hide fires resize constantly — losing a
+        // long-exposure attractor to it was the original bug.)
+        function resizeCanvas(preserve = true) {
+            let snapshot = null;
+            if (preserve && canvas.width > 0 && canvas.height > 0) {
+                snapshot = document.createElement('canvas');
+                snapshot.width = canvas.width;
+                snapshot.height = canvas.height;
+                snapshot.getContext('2d').drawImage(canvas, 0, 0);
+            }
+            width = window.innerWidth;
+            height = window.innerHeight;
+            const dpr = currentDPR();
+            canvas.width = Math.round(width * dpr);
+            canvas.height = Math.round(height * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            if (snapshot) {
+                ctx.save();
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.drawImage(snapshot, 0, 0);
+                ctx.restore();
+            } else {
+                clearCanvasBuffer();
+            }
+        }
+
+        function maybeShowOrientation() {
+            if (!isFirstRun) return;
+            try {
+                if (localStorage.getItem('aether-orient-dismissed')) return;
+            } catch (e) { return; }
+            const bar = document.getElementById('orientationBar');
+            if (bar) bar.classList.remove('hidden');
+        }
+
+        function dismissOrientation() {
+            const bar = document.getElementById('orientationBar');
+            if (bar) bar.classList.add('hidden');
+            try { localStorage.setItem('aether-orient-dismissed', '1'); } catch (e) { /* ignore */ }
+        }
+
+        /***********************************************************************
          * 7. INTERACTION, CLIPBOARD & ARTWORK EXPORT
          ***********************************************************************/
         function setupEventListeners() {
+            let resizeTimer = null;
             window.addEventListener('resize', () => {
-                width = window.innerWidth;
-                height = window.innerHeight;
-                canvas.width = width;
-                canvas.height = height;
-                clearCanvasBuffer();
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => resizeCanvas(true), 120);
             });
+
+            // Codex modal: clicking the backdrop (not the panel) closes it
+            const codexModalEl = document.getElementById('codexModal');
+            if (codexModalEl) {
+                codexModalEl.addEventListener('click', (e) => {
+                    if (e.target === codexModalEl) toggleCodexModal(false);
+                });
+            }
 
             // Mouse & Touch Events on Main Canvas
             canvas.addEventListener('pointerdown', (e) => {
@@ -2122,13 +2687,72 @@
 
             window.addEventListener('pointerup', () => {
                 pointer.isDown = false;
+                markDirty(); // camera moves settle here; autosave picks them up
             });
+
+            // Keyboard: Ctrl/Cmd+Z undoes the last destructive action;
+            // Escape closes the Codex when it is open.
+            window.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
+                    const t = e.target;
+                    if (t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && t.type === 'number'))) return;
+                    e.preventDefault();
+                    undoLastAction();
+                    return;
+                }
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('codexModal');
+                    if (modal && !modal.classList.contains('hidden')) toggleCodexModal();
+                }
+            });
+
+            const hueSliderEl = document.getElementById('baseHueSlider');
+            if (hueSliderEl) hueSliderEl.addEventListener('input', markDirty);
+            const hueNumEl = document.getElementById('baseHueNum');
+            if (hueNumEl) {
+                hueNumEl.addEventListener('change', () => {
+                    let v = parseFloat(hueNumEl.value);
+                    if (!Number.isFinite(v)) return;
+                    v = Math.min(360, Math.max(0, v));
+                    hueSliderEl.value = v;
+                    updateAlbersAndChords();
+                    markDirty();
+                });
+            }
+            const chordSelectEl = document.getElementById('harmonyChordSelect');
+            if (chordSelectEl) chordSelectEl.addEventListener('change', markDirty);
+
+            // Harmony wheel: it looks like an instrument, so make it one —
+            // click or drag on the wheel sets the base hue from the angle.
+            const wheel = document.getElementById('harmonyWheelCanvas');
+            if (wheel) {
+                let wheelDown = false;
+                const setHueFromPointer = (e) => {
+                    const rect = wheel.getBoundingClientRect();
+                    const dx = e.clientX - (rect.left + rect.width / 2);
+                    const dy = e.clientY - (rect.top + rect.height / 2);
+                    let deg = Math.atan2(dy, dx) * 180 / Math.PI;
+                    if (deg < 0) deg += 360;
+                    document.getElementById('baseHueSlider').value = Math.round(deg);
+                    updateAlbersAndChords();
+                    markDirty();
+                };
+                wheel.addEventListener('pointerdown', (e) => {
+                    wheelDown = true;
+                    try { wheel.setPointerCapture(e.pointerId); } catch (err) { /* capture is best-effort */ }
+                    setHueFromPointer(e);
+                });
+                wheel.addEventListener('pointermove', (e) => { if (wheelDown) setHueFromPointer(e); });
+                wheel.addEventListener('pointerup', () => { wheelDown = false; });
+                wheel.addEventListener('pointercancel', () => { wheelDown = false; });
+            }
 
             canvas.addEventListener('wheel', (e) => {
                 if (activeStudio === 'chromatics') return;
                 e.preventDefault();
                 const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
                 camZoom = Math.max(0.25, Math.min(6.0, camZoom * zoomFactor));
+                markDirty();
                 const sub = SYSTEMS[activeStudio].activeSub;
                 if (sub === 'clifford' || sub === 'dejong') {
                     ctx.fillStyle = 'rgba(9, 10, 15, 0.5)';
@@ -2137,20 +2761,27 @@
             }, { passive: false });
         }
 
-        function copyTextToClipboard(text, message) {
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            ta.style.position = 'fixed';
-            ta.style.opacity = '0';
-            document.body.appendChild(ta);
-            ta.select();
-            try {
-                document.execCommand('copy');
-                showToast(message || 'Copied to clipboard');
-            } catch (err) {
-                showToast('Clipboard copy ready');
+        async function copyTextToClipboard(text, message) {
+            let copied = false;
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    copied = true;
+                } catch (err) { copied = false; }
             }
-            document.body.removeChild(ta);
+            if (!copied) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { copied = document.execCommand('copy'); } catch (err) { copied = false; }
+                document.body.removeChild(ta);
+            }
+            // Honest result: a blocked clipboard says so instead of claiming success.
+            showToast(copied ? (message || 'Copied to clipboard') : 'Copy failed — clipboard access was blocked');
+            return copied;
         }
 
         let toastTimeout = null;
@@ -2165,58 +2796,190 @@
             }, 2600);
         }
 
+        function roundRectPath(x, px, py, w, h, r) {
+            x.beginPath();
+            x.moveTo(px + r, py);
+            x.arcTo(px + w, py, px + w, py + h, r);
+            x.arcTo(px + w, py + h, px, py + h, r);
+            x.arcTo(px, py + h, px, py, r);
+            x.arcTo(px, py, px + w, py, r);
+            x.closePath();
+        }
+
+        function exportPaletteSheetPNG() {
+            // Chromatic Lab export: a palette sheet (gradient, swatches, vectors)
+            // at 2x — never the frozen canvas hidden behind the Lab overlay.
+            const S = 2, W = 800 * S, H = 520 * S;
+            const sheet = document.createElement('canvas');
+            sheet.width = W;
+            sheet.height = H;
+            const x = sheet.getContext('2d');
+            x.scale(S, S);
+
+            x.fillStyle = '#090A0F';
+            x.fillRect(0, 0, 800, 520);
+            x.fillStyle = '#F3F4F6';
+            x.font = '600 30px "Cormorant Garamond", serif';
+            x.fillText(`AETHER // ${activePalette.name}`, 40, 58);
+            x.fillStyle = '#9CA3AF';
+            x.font = '12px "JetBrains Mono", monospace';
+            x.fillText('COSINE PALETTE · C(t) = a + b·cos(2π(c·t + d))', 40, 84);
+
+            const grad = x.createLinearGradient(40, 0, 760, 0);
+            for (let i = 0; i <= 16; i++) grad.addColorStop(i / 16, samplePaletteCSS(i / 16));
+            x.fillStyle = grad;
+            roundRectPath(x, 40, 110, 720, 84, 12);
+            x.fill();
+
+            paletteHexStops().forEach((hex, i) => {
+                const sx = 40 + i * 92;
+                x.fillStyle = hex;
+                roundRectPath(x, sx, 224, 80, 64, 10);
+                x.fill();
+                x.fillStyle = '#F3F4F6';
+                x.font = '11px "JetBrains Mono", monospace';
+                x.fillText(hex, sx, 310);
+            });
+
+            x.font = '13px "JetBrains Mono", monospace';
+            x.fillStyle = '#C7D2FE';
+            [['a (offset)', activePalette.a], ['b (amplitude)', activePalette.b],
+             ['c (frequency)', activePalette.c], ['d (phase)', activePalette.d]].forEach((row, i) => {
+                x.fillText(`${row[0].padEnd(14)} [ ${row[1].map(v => Number(v).toFixed(2)).join(', ')} ]`, 40, 358 + i * 26);
+            });
+
+            x.fillStyle = '#6B7280';
+            x.font = '11px "JetBrains Mono", monospace';
+            x.fillText('Generated in the AETHER Chromatic Lab', 40, 494);
+
+            const link = document.createElement('a');
+            link.download = `aether-palette-${activePalette.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
+            link.href = sheet.toDataURL('image/png');
+            link.click();
+            showToast(`Exported palette sheet PNG · ${W}×${H}`);
+        }
+
         function exportArtworkPNG() {
-            // Create an offscreen composite with a subtle museum-style mathematical signature bar
+            if (activeStudio === 'chromatics') {
+                exportPaletteSheetPNG();
+                return;
+            }
+            // Composite at the chosen export scale (1x/2x/3x of the CSS viewport),
+            // drawing the DPR-backed canvas scaled to the export size.
+            const scaleSel = document.getElementById('exportScaleSelect');
+            const scale = scaleSel ? (parseInt(scaleSel.value, 10) || 2) : 2;
+            const expW = Math.round(width * scale);
+            const expH = Math.round(height * scale);
             const expCanvas = document.createElement('canvas');
-            expCanvas.width = width;
-            expCanvas.height = height;
+            expCanvas.width = expW;
+            expCanvas.height = expH;
             const eCtx = expCanvas.getContext('2d');
 
-            eCtx.drawImage(canvas, 0, 0);
+            eCtx.drawImage(canvas, 0, 0, expW, expH);
 
-            // Museum Plaque Watermark at bottom right
+            // Museum Plaque Watermark at bottom right (scaled with the export)
             const title = document.getElementById('formulaTitle').textContent;
             const eq = document.getElementById('liveEquationValues').textContent;
             eCtx.fillStyle = 'rgba(9, 10, 15, 0.78)';
-            eCtx.fillRect(width - 440, height - 68, 420, 48);
+            eCtx.fillRect(expW - 440 * scale, expH - 68 * scale, 420 * scale, 48 * scale);
             eCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-            eCtx.strokeRect(width - 440, height - 68, 420, 48);
+            eCtx.strokeRect(expW - 440 * scale, expH - 68 * scale, 420 * scale, 48 * scale);
 
             eCtx.fillStyle = '#F3F4F6';
-            eCtx.font = '600 15px "Cormorant Garamond", serif';
-            eCtx.fillText(`AETHER // ${title} (${activePalette.name})`, width - 426, height - 46);
+            eCtx.font = `600 ${15 * scale}px "Cormorant Garamond", serif`;
+            eCtx.fillText(`AETHER // ${title} (${activePalette.name})`, expW - 426 * scale, expH - 46 * scale);
 
             eCtx.fillStyle = '#9CA3AF';
-            eCtx.font = '11px "JetBrains Mono", monospace';
-            eCtx.fillText(eq.slice(0, 52), width - 426, height - 29);
+            eCtx.font = `${11 * scale}px "JetBrains Mono", monospace`;
+            eCtx.fillText(eq.slice(0, 52), expW - 426 * scale, expH - 29 * scale);
 
             const link = document.createElement('a');
             link.download = `aether-${title.toLowerCase().replace(/\s+/g, '-')}.png`;
             link.href = expCanvas.toDataURL('image/png');
             link.click();
-            showToast('Exported high-resolution artwork PNG');
+            showToast(`Exported artwork PNG · ${expW}×${expH}`);
         }
 
+        const panelCollapsed = { left: false, right: false };
         function togglePanelCollapse(side) {
-            if (side === 'left') {
-                const sub = document.getElementById('formulaSubtitle');
-                sub.classList.toggle('hidden');
+            const body = document.getElementById(side === 'left' ? 'leftPanelBody' : 'rightPanelBody');
+            const btn = document.getElementById(side === 'left' ? 'leftCollapseBtn' : 'rightCollapseBtn');
+            if (!body) return;
+            const willCollapse = !body.classList.contains('hidden');
+            // On narrow screens the panels behave as drawers: opening one
+            // closes the other, so they never overlap the canvas together.
+            if (!willCollapse && window.innerWidth < 900) {
+                const other = side === 'left' ? 'right' : 'left';
+                const otherBody = document.getElementById(other === 'left' ? 'leftPanelBody' : 'rightPanelBody');
+                if (otherBody && !otherBody.classList.contains('hidden')) togglePanelCollapse(other);
             }
+            body.classList.toggle('hidden', willCollapse);
+            panelCollapsed[side] = willCollapse;
+            const aside = body.closest('aside');
+            if (aside) aside.classList.toggle('panel-chip', willCollapse);
+            if (btn) {
+                btn.setAttribute('aria-expanded', String(!willCollapse));
+                btn.title = willCollapse ? 'Expand panel' : 'Collapse panel';
+            }
+        }
+
+        function commitRenderNumber(key, el) {
+            const slider = document.getElementById(key === 'exposure' ? 'exposureSlider' : 'colorSpeedSlider');
+            let v = parseFloat(el.value);
+            if (!slider || !Number.isFinite(v)) {
+                syncRenderSettingsUI();
+                return;
+            }
+            v = Math.min(parseFloat(slider.max), Math.max(parseFloat(slider.min), v));
+            slider.value = v;
+            updateGlobalRenderParam(key, v);
         }
 
         // Initialize Atelier on Window Load
         window.onload = function () {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
+            resizeCanvas(false);
 
             initSimulationBuffers();
             setupEventListeners();
-            updateMiniPaletteHeader();
-            syncStudioHUD();
-            clearCanvasBuffer();
+
+            // A shared link (#s=…) wins over the local draft; either restores
+            // the full atelier — studio, parameters, palette, camera.
+            const hashState = decodeStateFromHash();
+            const initialState = hashState || loadStoredState();
+            isFirstRun = !initialState;
+            if (initialState) {
+                restoreState(initialState);
+                if (hashState) saveState(); // adopt the shared state as the local draft
+            } else {
+                updateMiniPaletteHeader();
+                syncStudioHUD();
+                clearCanvasBuffer();
+            }
+            updateUndoButton();
+            updateQualityNote();
+            // On phone-width screens the parameter HUD starts collapsed, so
+            // the two panels never stack across the canvas on first paint.
+            if (window.innerWidth < 760) togglePanelCollapse('right');
             requestAnimationFrame(animateLoop);
+
+            // Autosave loop + flush when the tab goes away
+            setInterval(() => {
+                if (stateDirty) {
+                    saveState();
+                    stateDirty = false;
+                }
+            }, 1200);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden' && stateDirty) {
+                    saveState();
+                    stateDirty = false;
+                }
+            });
+            window.addEventListener('beforeunload', () => {
+                if (stateDirty) saveState();
+            });
+
+            if (typeof maybeShowOrientation === 'function') maybeShowOrientation();
         };
     </script>
 </body>

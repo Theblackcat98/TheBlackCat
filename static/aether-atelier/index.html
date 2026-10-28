@@ -137,6 +137,21 @@
             font-family: 'Cormorant Garamond', Georgia, serif;
             font-style: italic;
         }
+
+        /* Compact numeric readouts paired with sliders (type exact values) */
+        .num-input {
+            width: 4.6rem;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #C7D2FE;
+            text-align: right;
+            outline: none;
+        }
+        .num-input:focus { border-color: rgba(99, 102, 241, 0.85); }
         
         /* Toast Notification Animation */
         @keyframes toastSlideUp {
@@ -261,11 +276,14 @@
                             <div class="flex flex-col items-center justify-center space-y-3">
                                 <canvas id="harmonyWheelCanvas" width="210" height="210" class="w-48 h-48 cursor-pointer rounded-full"></canvas>
                                 <div class="w-full space-y-1.5">
-                                    <div class="flex justify-between text-[11px] font-mono text-mutedSilver">
-                                        <span>BASE HUE ANGLE</span>
-                                        <span id="baseHueLabel">215&deg;</span>
+                                    <div class="flex justify-between items-center text-[11px] font-mono text-mutedSilver">
+                                        <label for="baseHueNum">BASE HUE ANGLE</label>
+                                        <span class="flex items-center gap-1">
+                                            <input type="number" id="baseHueNum" class="num-input" style="width:3.6rem" min="0" max="360" step="1" value="215" aria-label="Base hue angle value">
+                                            <span>&deg;</span>
+                                        </span>
                                     </div>
-                                    <input type="range" id="baseHueSlider" min="0" max="360" value="215" oninput="updateAlbersAndChords()">
+                                    <input type="range" id="baseHueSlider" min="0" max="360" value="215" aria-label="Base hue angle" oninput="updateAlbersAndChords()">
                                 </div>
                                 <button onclick="applyChordToGlobalPalette()" class="w-full glass-pill py-2 rounded-lg text-xs font-mono text-indigo-300 border-indigo-500/30 hover:bg-indigo-500/20 flex items-center justify-center gap-1.5">
                                     <i class="ph ph-magic-wand"></i> Apply Chord to Active Visualizer
@@ -335,10 +353,10 @@
     </header>
 
     <!-- FLOATING LEFT MATHEMATICAL PLAQUE & PRESET SELECTOR (Visible in Studios I, II, III) -->
-    <aside id="leftFormulaPlaque" class="fixed top-20 left-3 sm:left-6 z-20 w-80 sm:w-96 flex flex-col gap-3 pointer-events-none transition-all duration-300">
-        
+    <aside id="leftFormulaPlaque" class="fixed top-20 left-3 sm:left-6 z-20 w-72 sm:w-96 flex flex-col gap-3 pointer-events-none transition-all duration-300">
+
         <!-- Live Equation Display Card -->
-        <div class="glass-panel rounded-2xl p-4 sm:p-5 pointer-events-auto space-y-3">
+        <div id="leftPanelCard" class="glass-panel rounded-2xl p-4 sm:p-5 pointer-events-auto space-y-3 max-h-[calc(100vh-190px)] overflow-y-auto">
             <div class="flex items-center justify-between">
                 <span id="formulaCategoryTag" class="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                     CHAOTIC DYNAMICAL SYSTEM
@@ -346,12 +364,13 @@
                 <div class="flex items-center gap-1.5 text-[11px] font-mono text-mutedSilver">
                     <span id="fpsCounter">60 FPS</span>
                     <span>&bull;</span>
-                    <button onclick="togglePanelCollapse('left')" class="hover:text-white" title="Minimize Info">
+                    <button onclick="togglePanelCollapse('left')" id="leftCollapseBtn" class="hover:text-white" title="Collapse panel" aria-label="Collapse info panel" aria-expanded="true">
                         <i class="ph ph-arrows-in-simple"></i>
                     </button>
                 </div>
             </div>
 
+            <div id="leftPanelBody" class="space-y-3">
             <div>
                 <h2 id="formulaTitle" class="font-display text-2xl sm:text-3xl font-semibold text-white tracking-tight">Clifford Strange Attractor</h2>
                 <p id="formulaSubtitle" class="text-xs text-mutedSilver mt-1 leading-relaxed">
@@ -390,6 +409,7 @@
                     <!-- Populated dynamically by JS -->
                 </div>
             </div>
+            </div>
         </div>
 
         <!-- Interactive Hint Pill -->
@@ -410,14 +430,19 @@
                     <h3 class="font-sans text-xs font-semibold uppercase tracking-wider text-white">Live Parameters</h3>
                 </div>
                 <div class="flex items-center gap-1">
-                    <button onclick="resetCurrentSystem()" title="Reset View & Canvas" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
+                    <button onclick="resetCurrentSystem()" title="Reset View & Canvas" aria-label="Reset view and canvas" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
                         <i class="ph ph-arrow-counter-clockwise"></i>
                     </button>
-                    <button onclick="togglePauseSimulation()" id="pauseBtn" title="Pause / Resume Integration" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
+                    <button onclick="togglePauseSimulation()" id="pauseBtn" title="Pause / Resume Integration" aria-label="Pause or resume simulation" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
                         <i id="pauseIcon" class="ph ph-pause"></i>
+                    </button>
+                    <button onclick="togglePanelCollapse('right')" id="rightCollapseBtn" title="Collapse panel" aria-label="Collapse parameters panel" aria-expanded="true" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
+                        <i class="ph ph-arrows-in-simple"></i>
                     </button>
                 </div>
             </div>
+
+            <div id="rightPanelBody" class="space-y-4">
 
             <!-- Dynamic Sliders Container -->
             <div id="parameterSlidersContainer" class="space-y-3.5">
@@ -429,19 +454,22 @@
                 <span class="text-[10px] font-mono uppercase tracking-wider text-mutedSilver block">AESTHETICS &amp; EXPOSURE</span>
 
                 <div>
-                    <div class="flex justify-between text-xs mb-1">
-                        <span class="text-mutedSilver">Trail Persistence / Exposure</span>
-                        <span id="exposureVal" class="font-mono text-white">0.94</span>
+                    <div class="flex justify-between items-center text-xs mb-1">
+                        <label class="text-mutedSilver" for="exposureVal">Trail Persistence / Exposure</label>
+                        <input type="number" id="exposureVal" class="num-input" min="0.50" max="0.995" step="0.005" value="0.940" aria-label="Exposure value" onchange="commitRenderNumber('exposure', this)">
                     </div>
-                    <input type="range" id="exposureSlider" min="0.50" max="0.995" step="0.005" value="0.94" oninput="updateGlobalRenderParam('exposure', this.value)">
+                    <input type="range" id="exposureSlider" min="0.50" max="0.995" step="0.005" value="0.94" aria-label="Trail persistence / exposure" oninput="updateGlobalRenderParam('exposure', this.value)">
                 </div>
 
                 <div>
-                    <div class="flex justify-between text-xs mb-1">
-                        <span class="text-mutedSilver">Chromatic Cycle Speed</span>
-                        <span id="colorSpeedVal" class="font-mono text-white">1.0x</span>
+                    <div class="flex justify-between items-center text-xs mb-1">
+                        <label class="text-mutedSilver" for="colorSpeedVal">Chromatic Cycle Speed</label>
+                        <span class="flex items-center gap-1">
+                            <input type="number" id="colorSpeedVal" class="num-input" min="0" max="4" step="0.1" value="1.0" aria-label="Chromatic cycle speed value" onchange="commitRenderNumber('colorSpeed', this)">
+                            <span class="font-mono text-white text-[11px]">x</span>
+                        </span>
                     </div>
-                    <input type="range" id="colorSpeedSlider" min="0" max="4" step="0.1" value="1.0" oninput="updateGlobalRenderParam('colorSpeed', this.value)">
+                    <input type="range" id="colorSpeedSlider" min="0" max="4" step="0.1" value="1.0" aria-label="Chromatic cycle speed" oninput="updateGlobalRenderParam('colorSpeed', this.value)">
                 </div>
 
                 <div class="flex items-center justify-between pt-1">
@@ -450,6 +478,7 @@
                         OFF
                     </button>
                 </div>
+            </div>
             </div>
         </div>
     </aside>
@@ -1258,15 +1287,34 @@
             slidersContainer.innerHTML = '';
             Object.keys(modeObj.params).forEach(paramKey => {
                 const p = modeObj.params[paramKey];
+                const decimals = p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0);
                 const wrap = document.createElement('div');
                 wrap.innerHTML = `
-                    <div class="flex justify-between text-xs mb-1">
-                        <span class="text-mutedSilver">${p.label}</span>
-                        <span id="val-${paramKey}" class="font-mono text-indigo-200">${Number(p.val).toFixed(p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0))}</span>
+                    <div class="flex justify-between items-center text-xs mb-1">
+                        <label class="text-mutedSilver" for="val-${paramKey}">${p.label}</label>
+                        <input type="number" id="val-${paramKey}" class="num-input" min="${p.min}" max="${p.max}" step="${p.step}" value="${Number(p.val).toFixed(decimals)}" aria-label="${p.label} value">
                     </div>
-                    <input type="range" id="slider-${paramKey}" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.val}">
+                    <input type="range" id="slider-${paramKey}" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.val}" aria-label="${p.label}">
                 `;
-                const input = wrap.querySelector('input');
+                const input = wrap.querySelector('input[type="range"]');
+                const numInput = wrap.querySelector('input[type="number"]');
+                numInput.addEventListener('change', () => {
+                    let v = parseFloat(numInput.value);
+                    if (!Number.isFinite(v)) {
+                        numInput.value = Number(p.val).toFixed(decimals);
+                        return;
+                    }
+                    v = Math.min(p.max, Math.max(p.min, v));
+                    p.val = v;
+                    input.value = v;
+                    numInput.value = Number(v).toFixed(decimals);
+                    updateLiveFormulaPlaque();
+                    if (studioObj.activeSub === 'clifford' || studioObj.activeSub === 'dejong') {
+                        ctx.fillStyle = 'rgba(9, 10, 15, 0.35)';
+                        ctx.fillRect(0, 0, width, height);
+                    }
+                    markDirty();
+                });
                 input.addEventListener('input', (e) => {
                     const num = parseFloat(e.target.value);
                     p.val = num;
@@ -1517,11 +1565,26 @@
                     row.className = 'flex items-center gap-2 text-xs';
                     row.innerHTML = `
                         <span class="w-12 font-mono text-[11px] ${chColors[ch]}">${channels[ch]}</span>
-                        <input type="range" min="${vm.min}" max="${vm.max}" step="${vm.step}" value="${activePalette[vm.key][ch]}" class="flex-1">
-                        <span class="w-10 text-right font-mono text-[11px] text-mutedSilver">${activePalette[vm.key][ch].toFixed(2)}</span>
+                        <input type="range" min="${vm.min}" max="${vm.max}" step="${vm.step}" value="${activePalette[vm.key][ch]}" class="flex-1" aria-label="Vector ${vm.key} ${channels[ch]}">
+                        <input type="number" class="num-input" style="width:3.9rem" min="${vm.min}" max="${vm.max}" step="${vm.step}" value="${activePalette[vm.key][ch].toFixed(2)}" aria-label="Vector ${vm.key} ${channels[ch]} value">
                     `;
-                    const input = row.querySelector('input');
-                    const valSpan = row.querySelectorAll('span')[1];
+                    const input = row.querySelector('input[type="range"]');
+                    const valSpan = row.querySelector('input[type="number"]');
+                    valSpan.addEventListener('change', () => {
+                        let v = parseFloat(valSpan.value);
+                        if (!Number.isFinite(v)) {
+                            valSpan.value = activePalette[vm.key][ch].toFixed(2);
+                            return;
+                        }
+                        v = Math.min(vm.max, Math.max(vm.min, v));
+                        activePalette[vm.key][ch] = v;
+                        activePalette.name = 'Custom Spectral Synth';
+                        input.value = v;
+                        valSpan.value = v.toFixed(2);
+                        updateMiniPaletteHeader();
+                        updateChromaticPreviewsFast();
+                        markDirty();
+                    });
                     input.addEventListener('input', (e) => {
                         activePalette[vm.key][ch] = parseFloat(e.target.value);
                         activePalette.name = 'Custom Spectral Synth';
@@ -1661,7 +1724,8 @@
 
         function updateAlbersAndChords() {
             const baseHue = parseFloat(document.getElementById('baseHueSlider').value);
-            document.getElementById('baseHueLabel').textContent = `${Math.round(baseHue)}°`;
+            const hueNumEl = document.getElementById('baseHueNum');
+            if (hueNumEl && document.activeElement !== hueNumEl) hueNumEl.value = Math.round(baseHue);
             const mode = document.getElementById('harmonyChordSelect').value;
 
             let angles = [baseHue];
@@ -2366,6 +2430,17 @@
 
             const hueSliderEl = document.getElementById('baseHueSlider');
             if (hueSliderEl) hueSliderEl.addEventListener('input', markDirty);
+            const hueNumEl = document.getElementById('baseHueNum');
+            if (hueNumEl) {
+                hueNumEl.addEventListener('change', () => {
+                    let v = parseFloat(hueNumEl.value);
+                    if (!Number.isFinite(v)) return;
+                    v = Math.min(360, Math.max(0, v));
+                    hueSliderEl.value = v;
+                    updateAlbersAndChords();
+                    markDirty();
+                });
+            }
             const chordSelectEl = document.getElementById('harmonyChordSelect');
             if (chordSelectEl) chordSelectEl.addEventListener('change', markDirty);
 
@@ -2443,11 +2518,37 @@
             showToast('Exported high-resolution artwork PNG');
         }
 
+        const panelCollapsed = { left: false, right: false };
         function togglePanelCollapse(side) {
-            if (side === 'left') {
-                const sub = document.getElementById('formulaSubtitle');
-                sub.classList.toggle('hidden');
+            const body = document.getElementById(side === 'left' ? 'leftPanelBody' : 'rightPanelBody');
+            const btn = document.getElementById(side === 'left' ? 'leftCollapseBtn' : 'rightCollapseBtn');
+            if (!body) return;
+            const willCollapse = !body.classList.contains('hidden');
+            // On narrow screens the panels behave as drawers: opening one
+            // closes the other, so they never overlap the canvas together.
+            if (!willCollapse && window.innerWidth < 640) {
+                const other = side === 'left' ? 'right' : 'left';
+                const otherBody = document.getElementById(other === 'left' ? 'leftPanelBody' : 'rightPanelBody');
+                if (otherBody && !otherBody.classList.contains('hidden')) togglePanelCollapse(other);
             }
+            body.classList.toggle('hidden', willCollapse);
+            panelCollapsed[side] = willCollapse;
+            if (btn) {
+                btn.setAttribute('aria-expanded', String(!willCollapse));
+                btn.title = willCollapse ? 'Expand panel' : 'Collapse panel';
+            }
+        }
+
+        function commitRenderNumber(key, el) {
+            const slider = document.getElementById(key === 'exposure' ? 'exposureSlider' : 'colorSpeedSlider');
+            let v = parseFloat(el.value);
+            if (!slider || !Number.isFinite(v)) {
+                syncRenderSettingsUI();
+                return;
+            }
+            v = Math.min(parseFloat(slider.max), Math.max(parseFloat(slider.min), v));
+            slider.value = v;
+            updateGlobalRenderParam(key, v);
         }
 
         // Initialize Atelier on Window Load
@@ -2474,6 +2575,9 @@
                 clearCanvasBuffer();
             }
             updateUndoButton();
+            // On phone-width screens the parameter HUD starts collapsed, so
+            // the two panels never stack across the canvas on first paint.
+            if (window.innerWidth < 640) togglePanelCollapse('right');
             requestAnimationFrame(animateLoop);
 
             // Autosave loop + flush when the tab goes away

@@ -25,6 +25,18 @@ Each project's `build.mjs` writes two files, one per theme, into the folder abov
 and the gallery both link to those two names, and `site.js` §8 swaps between them
 when the reader changes theme.
 
+### Shipped UX layer (2026-10-28)
+
+The kit is not in this repository, so the build cannot be re-run from here.
+The shipped pages therefore carry a hand-applied UX layer on top of the last
+kit build: `index.html` is the single themed page (it resolves `?theme=`,
+then `localStorage "bc-theme"`, then the OS preference, and switches theme
+in-page); `light.html` is a small redirect alias to `index.html?theme=light`,
+kept under that name because the `anatomy` shortcode and `site.js` §8 still
+reference it. The layer also adds figure navigation, on-screen controls,
+metadata and deep-link state. A future kit rebuild restores the two-file
+output and drops this layer — reapply it before publishing such a rebuild.
+
 ## Rebuilding
 
 ```bash

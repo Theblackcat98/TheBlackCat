@@ -1,6 +1,6 @@
 ---
 title: "Tools"
-description: "The live tools and interactive exhibits: the AETHER atelier, TUI Design Study and Mermaid.js Gallery on this site, and the Online Tools apps — Color Token Workshop, Mermaid Viewer, hashes, encodings and converters."
+description: "The live tools and interactive exhibits: the AETHER atelier, TUI Design Study, Mermaid.js Gallery and the Anatomy figures on this site, and the Online Tools apps — Color Token Workshop, Mermaid Viewer, hashes, encodings and converters."
 tags:
   - tools
   - web
@@ -15,6 +15,7 @@ The things that run, not just the things that are written down. Everything here 
 - [AETHER atelier](/aether-atelier/) — a mathematical and chromatic atelier: a cosine-palette synthesizer driving a Clifford strange-attractor visualizer, Albers contrast studies, and a codex on generative beauty. [The write-up](/library/tools/aether-atelier/).
 - [TUI Design Study](/tui-design-study/) — the interactive exhibit for the llama-deck design study: ten rules of a convincing terminal interface, with the evidence behind them. [The write-up](/library/programming/tui-design-study/).
 - [Mermaid.js Gallery](/mermaid-gallery/) — every Mermaid diagram type on one page: twenty-three Mermaid v11 types, each with a working example and copyable source. [The write-up](/library/tools/mermaid-gallery/).
+- [Anatomy](/anatomy/) — five machines as interactive isometric figures: a quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine and a quadruped robot, each with a dark and a light build. [The write-up](/blog/anatomy-machines/).
 
 ## Running on Online Tools
 

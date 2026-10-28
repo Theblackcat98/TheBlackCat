@@ -321,8 +321,11 @@
                 <div id="miniPalettePreview" class="w-12 h-3.5 rounded-full"></div>
                 <span id="activePaletteName" class="text-[11px] font-mono text-alabaster hidden xl:inline">Vermeer Lapis</span>
             </button>
-            <button onclick="toggleCodexModal()" title="Mathematical Formula Codex" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-alabaster transition">
+            <button onclick="toggleCodexModal()" title="Mathematical Formula Codex" aria-label="Open mathematical formula codex" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-alabaster transition">
                 <i class="ph ph-book-open-text text-base"></i>
+            </button>
+            <button onclick="copyShareLink()" title="Copy a link that restores this exact atelier state" aria-label="Copy share link" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-alabaster transition">
+                <i class="ph ph-link text-base"></i>
             </button>
             <button onclick="exportArtworkPNG()" title="Export High-Res Artwork PNG" class="px-3 py-1.5 rounded-xl bg-indigoAccent/90 hover:bg-indigoAccent text-white text-xs font-medium flex items-center gap-1.5 shadow-lg shadow-indigoAccent/25 transition">
                 <i class="ph ph-camera"></i>
@@ -462,6 +465,10 @@
             <button onclick="clearCanvasBuffer()" class="glass-pill px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 text-mutedSilver hover:text-white">
                 <i class="ph ph-eraser"></i>
                 <span class="hidden sm:inline">Clear Exposure</span>
+            </button>
+            <button onclick="undoLastAction()" id="undoBtn" disabled title="Undo last change (Ctrl+Z)" aria-label="Undo last change" class="glass-pill px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 text-mutedSilver hover:text-white opacity-40">
+                <i class="ph ph-arrow-u-up-left"></i>
+                <span class="hidden sm:inline">Undo</span>
             </button>
             <button onclick="triggerSerendipity()" class="glass-pill px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 text-amberAccent border-amberAccent/30">
                 <i class="ph ph-dice-five"></i>
@@ -954,6 +961,203 @@
         }
 
         /***********************************************************************
+         * 3B. STATE PERSISTENCE, SHARE LINKS & UNDO HISTORY
+         * The whole atelier (studio, sub-system, every parameter, palette,
+         * render settings, camera) autosaves to localStorage, can be packed
+         * into a shareable URL hash, and destructive actions are undoable.
+         ***********************************************************************/
+        const STORAGE_KEY = 'aether-atelier-state-v1';
+        let stateDirty = false;
+        let undoStack = [];
+        let qualityMode = 'auto'; // 'auto' | 'high' | 'balanced' | 'eco'
+        let isFirstRun = false;
+
+        function markDirty() { stateDirty = true; }
+
+        function collectState() {
+            const subs = {}, params = {};
+            Object.keys(SYSTEMS).forEach(sk => {
+                subs[sk] = SYSTEMS[sk].activeSub;
+                params[sk] = {};
+                Object.keys(SYSTEMS[sk].modes).forEach(mk => {
+                    params[sk][mk] = {};
+                    Object.keys(SYSTEMS[sk].modes[mk].params).forEach(pk => {
+                        params[sk][mk][pk] = SYSTEMS[sk].modes[mk].params[pk].val;
+                    });
+                });
+            });
+            const hueEl = document.getElementById('baseHueSlider');
+            const chordEl = document.getElementById('harmonyChordSelect');
+            return {
+                v: 1,
+                studio: activeStudio,
+                subs, params,
+                palette: JSON.parse(JSON.stringify(activePalette)),
+                paletteIndex: currentPaletteIndex,
+                render: { exposure: renderSettings.exposure, colorSpeed: renderSettings.colorSpeed },
+                camera: { zoom: camZoom, panX: camPanX, panY: camPanY, rotX: rotX, rotY: rotY },
+                paused: isPaused,
+                autoMorph: autoMorph,
+                chroma: {
+                    hue: hueEl ? parseFloat(hueEl.value) : 215,
+                    chord: chordEl ? chordEl.value : 'golden'
+                },
+                quality: qualityMode
+            };
+        }
+
+        function applyStateData(s) {
+            if (!s || typeof s !== 'object') return false;
+            if (s.studio && SYSTEMS[s.studio]) activeStudio = s.studio;
+            if (s.subs) {
+                Object.keys(SYSTEMS).forEach(sk => {
+                    if (s.subs[sk] && SYSTEMS[sk].modes[s.subs[sk]]) SYSTEMS[sk].activeSub = s.subs[sk];
+                });
+            }
+            if (s.params) {
+                Object.keys(SYSTEMS).forEach(sk => {
+                    Object.keys(SYSTEMS[sk].modes).forEach(mk => {
+                        const savedMode = s.params[sk] && s.params[sk][mk];
+                        if (!savedMode) return;
+                        Object.keys(SYSTEMS[sk].modes[mk].params).forEach(pk => {
+                            const p = SYSTEMS[sk].modes[mk].params[pk];
+                            const v = parseFloat(savedMode[pk]);
+                            if (Number.isFinite(v)) p.val = Math.min(p.max, Math.max(p.min, v));
+                        });
+                    });
+                });
+            }
+            if (s.palette && ['a', 'b', 'c', 'd'].every(k => Array.isArray(s.palette[k]) && s.palette[k].length === 3)) {
+                activePalette = JSON.parse(JSON.stringify(s.palette));
+                if (Number.isFinite(s.paletteIndex)) currentPaletteIndex = s.paletteIndex;
+            }
+            if (s.render) {
+                const ex = parseFloat(s.render.exposure);
+                if (Number.isFinite(ex)) renderSettings.exposure = Math.min(0.995, Math.max(0.5, ex));
+                const cs = parseFloat(s.render.colorSpeed);
+                if (Number.isFinite(cs)) renderSettings.colorSpeed = Math.min(4, Math.max(0, cs));
+            }
+            if (s.camera) {
+                const cam = s.camera;
+                if (Number.isFinite(cam.zoom)) camZoom = Math.min(6, Math.max(0.25, cam.zoom));
+                if (Number.isFinite(cam.panX)) camPanX = cam.panX;
+                if (Number.isFinite(cam.panY)) camPanY = cam.panY;
+                if (Number.isFinite(cam.rotX)) rotX = cam.rotX;
+                if (Number.isFinite(cam.rotY)) rotY = cam.rotY;
+            }
+            isPaused = !!s.paused;
+            autoMorph = !!s.autoMorph;
+            if (s.quality && ['auto', 'high', 'balanced', 'eco'].includes(s.quality)) qualityMode = s.quality;
+            if (s.chroma) {
+                const hueEl = document.getElementById('baseHueSlider');
+                const chordEl = document.getElementById('harmonyChordSelect');
+                const hv = parseFloat(s.chroma.hue);
+                if (hueEl && Number.isFinite(hv)) hueEl.value = Math.min(360, Math.max(0, hv));
+                if (chordEl && typeof s.chroma.chord === 'string') chordEl.value = s.chroma.chord;
+            }
+            return true;
+        }
+
+        function setReadout(id, text) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (el.tagName === 'INPUT') el.value = text;
+            else el.textContent = text;
+        }
+
+        function syncRenderSettingsUI() {
+            const ex = document.getElementById('exposureSlider');
+            const cs = document.getElementById('colorSpeedSlider');
+            if (ex) ex.value = renderSettings.exposure;
+            if (cs) cs.value = renderSettings.colorSpeed;
+            setReadout('exposureVal', Number(renderSettings.exposure).toFixed(3));
+            setReadout('colorSpeedVal', Number(renderSettings.colorSpeed).toFixed(1));
+            const q = document.getElementById('qualitySelect');
+            if (q) q.value = qualityMode;
+            const icon = document.getElementById('pauseIcon');
+            if (icon) icon.className = isPaused ? 'ph ph-play text-amberAccent' : 'ph ph-pause';
+            const morphBtn = document.getElementById('autoMorphBtn');
+            if (morphBtn) {
+                morphBtn.textContent = autoMorph ? 'ACTIVE' : 'OFF';
+                morphBtn.className = autoMorph
+                    ? 'px-3 py-1 rounded-lg text-xs font-mono border border-indigoAccent bg-indigoAccent/20 text-indigo-300 transition'
+                    : 'px-3 py-1 rounded-lg text-xs font-mono border border-white/15 bg-white/5 text-mutedSilver hover:text-white transition';
+            }
+        }
+
+        function restoreState(s) {
+            if (!applyStateData(s)) return;
+            const cam = { zoom: camZoom, panX: camPanX, panY: camPanY, rotX: rotX, rotY: rotY };
+            updateMiniPaletteHeader();
+            switchStudio(activeStudio); // rebuilds tabs/HUD; also resets camera, restored below
+            camZoom = cam.zoom; camPanX = cam.panX; camPanY = cam.panY; rotX = cam.rotX; rotY = cam.rotY;
+            syncRenderSettingsUI();
+            if (typeof applyQuality === 'function') applyQuality(false);
+            updateUndoButton();
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(collectState()));
+            } catch (e) { /* storage unavailable (private mode) — session-only state */ }
+        }
+
+        function loadStoredState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) { return null; }
+        }
+
+        function encodeStateToHash(s) {
+            return '#s=' + btoa(unescape(encodeURIComponent(JSON.stringify(s))))
+                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function decodeStateFromHash() {
+            const m = location.hash.match(/#s=([A-Za-z0-9\-_]+)/);
+            if (!m) return null;
+            try {
+                return JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, '+').replace(/_/g, '/')))));
+            } catch (e) { return null; }
+        }
+
+        function copyShareLink() {
+            const url = location.href.split('#')[0] + encodeStateToHash(collectState());
+            history.replaceState(null, '', url);
+            copyTextToClipboard(url, 'Link copied — it restores this exact atelier state');
+        }
+
+        function pushUndo(label) {
+            try {
+                undoStack.push({ label, state: collectState() });
+                if (undoStack.length > 40) undoStack.shift();
+            } catch (e) { /* snapshot failed; undo is best-effort */ }
+            updateUndoButton();
+        }
+
+        function undoLastAction() {
+            const snap = undoStack.pop();
+            if (!snap) {
+                showToast('Nothing to undo');
+                return;
+            }
+            restoreState(snap.state);
+            saveState();
+            stateDirty = false;
+            showToast(`Undid: ${snap.label}`);
+            updateUndoButton();
+        }
+
+        function updateUndoButton() {
+            const btn = document.getElementById('undoBtn');
+            if (!btn) return;
+            const has = undoStack.length > 0;
+            btn.disabled = !has;
+            btn.classList.toggle('opacity-40', !has);
+        }
+
+        /***********************************************************************
          * 4. UI & HUD BUILDER FUNCTIONS
          ***********************************************************************/
         function switchStudio(studioKey) {
@@ -994,6 +1198,7 @@
                 clearCanvasBuffer();
                 syncStudioHUD();
             }
+            markDirty();
         }
 
         function selectSubSystem(subKey) {
@@ -1006,6 +1211,7 @@
             if (subKey === 'turing') seedReactionDiffusion();
             clearCanvasBuffer();
             syncStudioHUD();
+            markDirty();
         }
 
         function syncStudioHUD() {
@@ -1064,8 +1270,9 @@
                 input.addEventListener('input', (e) => {
                     const num = parseFloat(e.target.value);
                     p.val = num;
-                    document.getElementById(`val-${paramKey}`).textContent = num.toFixed(p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0));
+                    setReadout(`val-${paramKey}`, num.toFixed(p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0)));
                     updateLiveFormulaPlaque();
+                    markDirty();
                     // Soft fade on parameter change for crisp feedback
                     if (studioObj.activeSub === 'clifford' || studioObj.activeSub === 'dejong') {
                         ctx.fillStyle = 'rgba(9, 10, 15, 0.35)';
@@ -1091,25 +1298,24 @@
             document.getElementById('liveEquationValues').textContent = parts.join('  •  ');
         }
 
-        function applyPresetConstants(vals) {
+        function applyPresetConstants(vals, recordUndo = true) {
             const studioObj = SYSTEMS[activeStudio];
             if (!studioObj) return;
+            if (recordUndo) pushUndo('Apply preset');
             const modeObj = studioObj.modes[studioObj.activeSub];
             Object.keys(vals).forEach(k => {
                 if (modeObj.params[k]) {
                     modeObj.params[k].val = vals[k];
                     const slider = document.getElementById(`slider-${k}`);
-                    const label = document.getElementById(`val-${k}`);
                     if (slider) slider.value = vals[k];
-                    if (label) {
-                        const p = modeObj.params[k];
-                        label.textContent = Number(vals[k]).toFixed(p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0));
-                    }
+                    const p = modeObj.params[k];
+                    setReadout(`val-${k}`, Number(vals[k]).toFixed(p.step < 0.01 ? 4 : (p.step < 1 ? 2 : 0)));
                 }
             });
             if (studioObj.activeSub === 'turing') seedReactionDiffusion();
             clearCanvasBuffer();
             updateLiveFormulaPlaque();
+            markDirty();
         }
 
         function triggerSerendipity() {
@@ -1117,6 +1323,7 @@
                 randomizeCosinePalette();
                 return;
             }
+            pushUndo('Mutate constants');
             const studioObj = SYSTEMS[activeStudio];
             const subKey = studioObj.activeSub;
             const modeObj = studioObj.modes[subKey];
@@ -1151,16 +1358,20 @@
 
             syncStudioHUD();
             clearCanvasBuffer();
+            markDirty();
             showToast('Mutated mathematical constants');
         }
 
         function updateGlobalRenderParam(key, val) {
             renderSettings[key] = parseFloat(val);
             if (key === 'exposure') {
-                document.getElementById('exposureVal').textContent = parseFloat(val).toFixed(3);
+                setReadout('exposureVal', parseFloat(val).toFixed(3));
             } else if (key === 'colorSpeed') {
-                document.getElementById('colorSpeedVal').textContent = parseFloat(val).toFixed(1) + 'x';
+                const csEl = document.getElementById('colorSpeedVal');
+                if (csEl && csEl.tagName === 'INPUT') csEl.value = parseFloat(val).toFixed(1);
+                else setReadout('colorSpeedVal', parseFloat(val).toFixed(1) + 'x');
             }
+            markDirty();
         }
 
         function clearCanvasBuffer() {
@@ -1172,6 +1383,7 @@
         }
 
         function resetCurrentSystem() {
+            pushUndo('Reset system');
             camZoom = 1.0;
             camPanX = 0;
             camPanY = 0;
@@ -1181,10 +1393,11 @@
             if (studioObj) {
                 const modeObj = studioObj.modes[studioObj.activeSub];
                 if (modeObj.presets && modeObj.presets[0]) {
-                    applyPresetConstants(modeObj.presets[0].vals);
+                    applyPresetConstants(modeObj.presets[0].vals, false);
                 }
             }
             clearCanvasBuffer();
+            markDirty();
             showToast('System & camera reset');
         }
 
@@ -1241,6 +1454,7 @@
         }
 
         function cycleGlobalPalette() {
+            pushUndo('Cycle palette');
             currentPaletteIndex = (currentPaletteIndex + 1) % CURATED_PALETTES.length;
             activePalette = JSON.parse(JSON.stringify(CURATED_PALETTES[currentPaletteIndex]));
             updateMiniPaletteHeader();
@@ -1249,6 +1463,7 @@
             } else {
                 clearCanvasBuffer();
             }
+            markDirty();
             showToast(`Palette: ${activePalette.name}`);
         }
 
@@ -1310,9 +1525,11 @@
                     input.addEventListener('input', (e) => {
                         activePalette[vm.key][ch] = parseFloat(e.target.value);
                         activePalette.name = 'Custom Spectral Synth';
-                        valSpan.textContent = activePalette[vm.key][ch].toFixed(2);
+                        if (valSpan.tagName === 'INPUT') valSpan.value = activePalette[vm.key][ch].toFixed(2);
+                        else valSpan.textContent = activePalette[vm.key][ch].toFixed(2);
                         updateMiniPaletteHeader();
                         updateChromaticPreviewsFast();
+                        markDirty();
                     });
                     box.appendChild(row);
                 }
@@ -1335,10 +1552,12 @@
                 const btn = document.createElement('button');
                 btn.className = 'p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-left space-y-1.5 transition';
                 btn.onclick = () => {
+                    pushUndo('Curated palette');
                     currentPaletteIndex = idx;
                     activePalette = JSON.parse(JSON.stringify(CURATED_PALETTES[idx]));
                     updateMiniPaletteHeader();
                     renderChromaticStudioUI();
+                    markDirty();
                     showToast(`Activated ${pal.name}`);
                 };
                 btn.innerHTML = `
@@ -1404,6 +1623,7 @@
         }
 
         function randomizeCosinePalette() {
+            pushUndo('Randomize palette');
             activePalette = {
                 name: 'Serendipity Synth',
                 a: [+(0.4 + Math.random() * 0.25).toFixed(2), +(0.4 + Math.random() * 0.25).toFixed(2), +(0.4 + Math.random() * 0.25).toFixed(2)],
@@ -1413,6 +1633,7 @@
             };
             updateMiniPaletteHeader();
             renderChromaticStudioUI();
+            markDirty();
             showToast('Synthesized new trigonometric wave palette');
         }
 
@@ -1522,6 +1743,7 @@
         }
 
         function applyChordToGlobalPalette() {
+            pushUndo('Apply harmony chord');
             const baseHue = parseFloat(document.getElementById('baseHueSlider').value) / 360;
             activePalette = {
                 name: 'Geometric Harmony Chord',
@@ -1532,6 +1754,7 @@
             };
             updateMiniPaletteHeader();
             renderChromaticStudioUI();
+            markDirty();
             showToast('Applied Harmony Chord to Global Visualizers');
         }
 
@@ -1568,10 +1791,10 @@
                     p.val += Math.sin(globalTime * 0.7) * (p.step * 0.25);
                     p.val = Math.max(p.min, Math.min(p.max, p.val));
                     const slider = document.getElementById(`slider-${firstKey}`);
-                    const label = document.getElementById(`val-${firstKey}`);
                     if (slider) slider.value = p.val;
-                    if (label) label.textContent = Number(p.val).toFixed(p.step < 0.01 ? 4 : 2);
+                    setReadout(`val-${firstKey}`, Number(p.val).toFixed(p.step < 0.01 ? 4 : 2));
                     updateLiveFormulaPlaque();
+                    markDirty();
                 }
             }
 
@@ -2122,13 +2345,36 @@
 
             window.addEventListener('pointerup', () => {
                 pointer.isDown = false;
+                markDirty(); // camera moves settle here; autosave picks them up
             });
+
+            // Keyboard: Ctrl/Cmd+Z undoes the last destructive action;
+            // Escape closes the Codex when it is open.
+            window.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
+                    const t = e.target;
+                    if (t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && t.type === 'number'))) return;
+                    e.preventDefault();
+                    undoLastAction();
+                    return;
+                }
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('codexModal');
+                    if (modal && !modal.classList.contains('hidden')) toggleCodexModal();
+                }
+            });
+
+            const hueSliderEl = document.getElementById('baseHueSlider');
+            if (hueSliderEl) hueSliderEl.addEventListener('input', markDirty);
+            const chordSelectEl = document.getElementById('harmonyChordSelect');
+            if (chordSelectEl) chordSelectEl.addEventListener('change', markDirty);
 
             canvas.addEventListener('wheel', (e) => {
                 if (activeStudio === 'chromatics') return;
                 e.preventDefault();
                 const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
                 camZoom = Math.max(0.25, Math.min(6.0, camZoom * zoomFactor));
+                markDirty();
                 const sub = SYSTEMS[activeStudio].activeSub;
                 if (sub === 'clifford' || sub === 'dejong') {
                     ctx.fillStyle = 'rgba(9, 10, 15, 0.5)';
@@ -2213,10 +2459,41 @@
 
             initSimulationBuffers();
             setupEventListeners();
-            updateMiniPaletteHeader();
-            syncStudioHUD();
-            clearCanvasBuffer();
+
+            // A shared link (#s=…) wins over the local draft; either restores
+            // the full atelier — studio, parameters, palette, camera.
+            const hashState = decodeStateFromHash();
+            const initialState = hashState || loadStoredState();
+            isFirstRun = !initialState;
+            if (initialState) {
+                restoreState(initialState);
+                if (hashState) saveState(); // adopt the shared state as the local draft
+            } else {
+                updateMiniPaletteHeader();
+                syncStudioHUD();
+                clearCanvasBuffer();
+            }
+            updateUndoButton();
             requestAnimationFrame(animateLoop);
+
+            // Autosave loop + flush when the tab goes away
+            setInterval(() => {
+                if (stateDirty) {
+                    saveState();
+                    stateDirty = false;
+                }
+            }, 1200);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden' && stateDirty) {
+                    saveState();
+                    stateDirty = false;
+                }
+            });
+            window.addEventListener('beforeunload', () => {
+                if (stateDirty) saveState();
+            });
+
+            if (typeof maybeShowOrientation === 'function') maybeShowOrientation();
         };
     </script>
 </body>

@@ -259,7 +259,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 class="font-display text-xl font-semibold text-white">Albers Simultaneous Contrast</h3>
-                                <p class="text-xs text-mutedSilver">Explore how nested chromatic fields alter perceived luminance</p>
+                                <p class="text-xs text-mutedSilver">Nested fields sampled from your active palette; the chord wheel below still drives Apply Chord</p>
                             </div>
                             <select id="harmonyChordSelect" onchange="updateAlbersAndChords()" class="bg-black/60 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs font-mono text-alabaster focus:outline-none focus:border-indigoAccent">
                                 <option value="golden">Golden Ratio Spiral (137.5&deg;)</option>
@@ -272,9 +272,12 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                             <!-- Interactive Nested Albers Squares -->
-                            <div id="albersOuter" class="aspect-square w-full rounded-2xl flex items-center justify-center p-6 transition-colors duration-300 shadow-2xl border border-white/10">
-                                <div id="albersMidOuter" class="w-full h-full rounded-xl flex items-center justify-center p-6 transition-colors duration-300 shadow-lg">
-                                    <div id="albersMidInner" class="w-full h-full rounded-lg flex items-center justify-center p-6 transition-colors duration-300 shadow-md">
+                            <div id="albersOuter" class="relative aspect-square w-full rounded-2xl flex items-center justify-center p-6 transition-colors duration-300 shadow-2xl border border-white/10">
+                                <span id="albersOuterLabel" class="absolute top-1.5 left-1.5 text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/50 text-white"></span>
+                                <div id="albersMidOuter" class="relative w-full h-full rounded-xl flex items-center justify-center p-6 transition-colors duration-300 shadow-lg">
+                                    <span id="albersMidOuterLabel" class="absolute top-1.5 left-1.5 text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/50 text-white"></span>
+                                    <div id="albersMidInner" class="relative w-full h-full rounded-lg flex items-center justify-center p-6 transition-colors duration-300 shadow-md">
+                                        <span id="albersMidInnerLabel" class="absolute top-1.5 left-1.5 text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/50 text-white"></span>
                                         <div id="albersCore" class="w-full h-full rounded-md transition-colors duration-300 shadow-inner flex items-end justify-center pb-2">
                                             <span id="albersCoreLabel" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/50 text-white backdrop-blur-xs"></span>
                                         </div>
@@ -298,6 +301,26 @@
                                 <button onclick="applyChordToGlobalPalette()" class="w-full glass-pill py-2 rounded-lg text-xs font-mono text-indigo-300 border-indigo-500/30 hover:bg-indigo-500/20 flex items-center justify-center gap-1.5">
                                     <i class="ph ph-magic-wand"></i> Apply Chord to Active Visualizer
                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- Albers' classic exercise: one identical core color on two different grounds -->
+                        <div class="space-y-2">
+                            <div class="flex items-baseline justify-between gap-2">
+                                <span class="text-[11px] font-mono uppercase tracking-wider text-mutedSilver">Same core, two grounds</span>
+                                <span id="albersSameCoreLabel" class="text-[11px] font-mono text-indigo-200"></span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div id="albersGroundA" class="h-20 rounded-xl flex items-center justify-center border border-white/10 transition-colors duration-300">
+                                    <div id="albersSameCoreA" class="w-14 h-14 rounded-lg shadow-lg transition-colors duration-300"></div>
+                                </div>
+                                <div id="albersGroundB" class="h-20 rounded-xl flex items-center justify-center border border-white/10 transition-colors duration-300">
+                                    <div id="albersSameCoreB" class="w-14 h-14 rounded-lg shadow-lg transition-colors duration-300"></div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between text-[10px] font-mono text-mutedSilver">
+                                <span id="albersGroundALabel"></span>
+                                <span id="albersGroundBLabel"></span>
                             </div>
                         </div>
                     </div>
@@ -1672,6 +1695,7 @@
                 cards[i].querySelector('span').textContent = hex;
             }
             drawCosineWaveforms();
+            updateAlbersAndChords();
         }
 
         function drawCosineWaveforms() {
@@ -1768,17 +1792,6 @@
         }
 
         // Harmony Wheel & Josef Albers Homage to the Square
-        function hslToHex(h, s, l) {
-            l /= 100;
-            const a = s * Math.min(l, 1 - l) / 100;
-            const f = n => {
-                const k = (n + h / 30) % 12;
-                const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-                return Math.round(255 * color).toString(16).padStart(2, '0');
-            };
-            return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
-        }
-
         function updateAlbersAndChords() {
             const baseHue = parseFloat(document.getElementById('baseHueSlider').value);
             const hueNumEl = document.getElementById('baseHueNum');
@@ -1798,16 +1811,34 @@
                 angles = [baseHue, (baseHue + 30) % 360, (baseHue + 60) % 360, (baseHue + 330) % 360];
             }
 
-            const cOuter = hslToHex(angles[0], 55, 22);
-            const cMidOuter = hslToHex(angles[1], 68, 38);
-            const cMidInner = hslToHex(angles[2], 78, 52);
-            const cCore = hslToHex(angles[3], 88, 66);
+            // Nested squares sample the ACTIVE cosine palette — the study is
+            // about the palette being built. (The chord select drives only
+            // the harmony wheel polygon and Apply Chord.)
+            const ringT = [0.06, 0.36, 0.64, 0.92];
+            const ringIds = ['albersOuter', 'albersMidOuter', 'albersMidInner', 'albersCore'];
+            const ringLabelIds = ['albersOuterLabel', 'albersMidOuterLabel', 'albersMidInnerLabel', 'albersCoreLabel'];
+            ringT.forEach((t, i) => {
+                const { r, g, b } = samplePaletteRGB(t);
+                const hex = rgbToHex(r, g, b);
+                document.getElementById(ringIds[i]).style.backgroundColor = hex;
+                document.getElementById(ringLabelIds[i]).textContent = hex;
+            });
 
-            document.getElementById('albersOuter').style.backgroundColor = cOuter;
-            document.getElementById('albersMidOuter').style.backgroundColor = cMidOuter;
-            document.getElementById('albersMidInner').style.backgroundColor = cMidInner;
-            document.getElementById('albersCore').style.backgroundColor = cCore;
-            document.getElementById('albersCoreLabel').textContent = cCore;
+            // Albers' classic exercise: the SAME core color (t = 0.5) laid on
+            // two different grounds drawn from the same palette.
+            const coreRGB = samplePaletteRGB(0.5);
+            const coreHex = rgbToHex(coreRGB.r, coreRGB.g, coreRGB.b);
+            const groundA = samplePaletteRGB(0.14);
+            const groundB = samplePaletteRGB(0.86);
+            const groundAHex = rgbToHex(groundA.r, groundA.g, groundA.b);
+            const groundBHex = rgbToHex(groundB.r, groundB.g, groundB.b);
+            document.getElementById('albersGroundA').style.backgroundColor = groundAHex;
+            document.getElementById('albersGroundB').style.backgroundColor = groundBHex;
+            document.getElementById('albersSameCoreA').style.backgroundColor = coreHex;
+            document.getElementById('albersSameCoreB').style.backgroundColor = coreHex;
+            document.getElementById('albersSameCoreLabel').textContent = `core ${coreHex} on both grounds`;
+            document.getElementById('albersGroundALabel').textContent = `ground ${groundAHex}`;
+            document.getElementById('albersGroundBLabel').textContent = `ground ${groundBHex}`;
 
             // Draw Harmony Wheel Canvas
             const hwCanvas = document.getElementById('harmonyWheelCanvas');
@@ -2500,6 +2531,31 @@
             }
             const chordSelectEl = document.getElementById('harmonyChordSelect');
             if (chordSelectEl) chordSelectEl.addEventListener('change', markDirty);
+
+            // Harmony wheel: it looks like an instrument, so make it one —
+            // click or drag on the wheel sets the base hue from the angle.
+            const wheel = document.getElementById('harmonyWheelCanvas');
+            if (wheel) {
+                let wheelDown = false;
+                const setHueFromPointer = (e) => {
+                    const rect = wheel.getBoundingClientRect();
+                    const dx = e.clientX - (rect.left + rect.width / 2);
+                    const dy = e.clientY - (rect.top + rect.height / 2);
+                    let deg = Math.atan2(dy, dx) * 180 / Math.PI;
+                    if (deg < 0) deg += 360;
+                    document.getElementById('baseHueSlider').value = Math.round(deg);
+                    updateAlbersAndChords();
+                    markDirty();
+                };
+                wheel.addEventListener('pointerdown', (e) => {
+                    wheelDown = true;
+                    try { wheel.setPointerCapture(e.pointerId); } catch (err) { /* capture is best-effort */ }
+                    setHueFromPointer(e);
+                });
+                wheel.addEventListener('pointermove', (e) => { if (wheelDown) setHueFromPointer(e); });
+                wheel.addEventListener('pointerup', () => { wheelDown = false; });
+                wheel.addEventListener('pointercancel', () => { wheelDown = false; });
+            }
 
             canvas.addEventListener('wheel', (e) => {
                 if (activeStudio === 'chromatics') return;

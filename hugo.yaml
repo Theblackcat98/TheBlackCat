@@ -95,6 +95,51 @@ params:
       plural: Collections
       blurb: "Curated views across the library."
 
+  # The live tools index (/tools/). Data, not template copy: the lists/tools
+  # partial renders these as cards. `url` is either a site-relative path
+  # (rendered with relURL) or an absolute https URL. `writeup` is the
+  # site-relative path of the page that documents the tool.
+  tools:
+    - group: "Running on this site"
+      items:
+        - name: "AETHER atelier"
+          kind: "Interactive exhibit"
+          desc: "A mathematical and chromatic atelier: a cosine-palette synthesizer driving a Clifford strange-attractor visualizer, Albers simultaneous-contrast studies, and a codex on generative beauty."
+          url: "aether-atelier/"
+          writeup: "library/tools/aether-atelier/"
+        - name: "TUI Design Study"
+          kind: "Interactive exhibit"
+          desc: "Ten rules of a convincing terminal interface: a survey of 857 starred repositories, a code-level critique of llama-deck's UI layer, and an ordered change plan."
+          url: "tui-design-study/"
+          writeup: "library/programming/tui-design-study/"
+        - name: "Mermaid.js Gallery"
+          kind: "Interactive exhibit"
+          desc: "Every Mermaid diagram type on one page: twenty-three Mermaid v11 types, each with a working example and copyable source."
+          url: "mermaid-gallery/"
+          writeup: "library/tools/mermaid-gallery/"
+        - name: "Anatomy"
+          kind: "Interactive exhibit"
+          desc: "Five machines as interactive isometric figures: a quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine and a quadruped robot — each with a dark and a light build."
+          url: "anatomy/"
+          writeup: "blog/anatomy-machines/"
+    - group: "Running on Online Tools"
+      items:
+        - name: "Color Token Workshop"
+          kind: "App"
+          desc: "OKLCH palette builder with WCAG 2.1 and APCA contrast checks, auto-fix suggestions, light and dark palettes, and CSS/JSON export."
+          url: "https://theblackcat98.github.io/Online-Tools/color-token-workshop.html"
+          writeup: "projects/online-tools/"
+        - name: "Mermaid Viewer"
+          kind: "App"
+          desc: "Paste Mermaid source and render it with pan and zoom; export the result as SVG or PNG."
+          url: "https://theblackcat98.github.io/Online-Tools/mermaid-viewer.html"
+          writeup: "projects/online-tools/"
+        - name: "Hashes, encodings & converters"
+          kind: "Utility collection"
+          desc: "The Online Tools utility belt: MD, SHA, Keccak and RIPEMD hashes and file checksums, Base32/Base58/Base64, HTML and URL encoding, and image converters (ICO, SVG, STL)."
+          url: "https://theblackcat98.github.io/Online-Tools/"
+          writeup: "projects/online-tools/"
+
 menu:
   main:
     - name: Library

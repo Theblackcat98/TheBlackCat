@@ -1,0 +1,30 @@
+{{ partial "breadcrumbs.html" . }}
+<header class="page-head">
+  <span class="kicker">Live</span>
+  <h1 class="h-page">{{ partial "title.html" . }}</h1>
+  {{ with .Content }}<div class="lede prose" style="max-width: 38rem">{{ . }}</div>{{ end }}
+</header>
+
+{{- range site.Params.tools }}
+<section class="section" aria-label="{{ .group }}">
+  <div class="section__head">
+    <h2 class="h-section">{{ .group }}</h2>
+    <span class="count">{{ len .items }} tools</span>
+  </div>
+  <ul class="grid" role="list">
+    {{- range .items }}
+    {{- $ext := hasPrefix .url "http" }}
+    {{- $href := cond $ext .url (.url | relURL) }}
+    <li class="card">
+      <div class="meta"><span class="type">{{ .kind }}</span></div>
+      <h3 class="card__title"><a href="{{ $href }}"{{ if $ext }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .name }}</a></h3>
+      <p class="card__desc">{{ .desc }}</p>
+      <div class="card__foot">
+        <a class="card__link" href="{{ $href }}"{{ if $ext }} target="_blank" rel="noopener noreferrer"{{ end }}>Open {{ partial "icon.html" "arrow-ur" }}</a>
+        {{- with .writeup }}<a class="card__link" href="{{ . | relURL }}">Write-up</a>{{ end }}
+      </div>
+    </li>
+    {{- end }}
+  </ul>
+</section>
+{{- end }}

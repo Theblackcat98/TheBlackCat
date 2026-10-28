@@ -1,0 +1,29 @@
+.dr-stage {
+  touch-action: pan-y;
+  cursor: grab;
+  outline: none;
+  border-radius: 8px;
+}
+.dr-stage:focus-visible {
+  outline: 1px solid var(--anatomy-muted);
+  outline-offset: 6px;
+}
+.dr-stage[data-drag] {
+  cursor: grabbing;
+}
+.tx-screen {
+  fill: var(--anatomy-shade-0);
+  stroke: var(--anatomy-lo);
+  stroke-width: var(--anatomy-weight);
+}
+.tx-bar {
+  fill: var(--anatomy-hi);
+  stroke: none;
+}
+.tx-shaft {
+  stroke-width: 1.2px;
+  stroke-linecap: round;
+}
+[data-part="needle"] {
+  stroke-width: 1.1px;
+}

@@ -1,0 +1,33 @@
+{{- /* anatomy.html — embed one self-contained Anatomy figure from static/anatomy/<slug>/.
+
+   {{< anatomy slug="drone" title="How a quadcopter flies" >}}
+
+   Params
+     slug    required; folder under static/anatomy/ holding index.html (dark) and light.html
+     title   caption and iframe accessible name
+     height  fallback iframe height in px before the fit script measures the real height (default 720)
+
+   The iframe loads the light build; assets/js/site.js §8 swaps in the dark build when the
+   reader's theme is dark and resizes the frame to the figure's own height (same origin).
+   Without JavaScript the light build still renders at the fallback height. */ -}}
+
+{{- $slug := .Get "slug" -}}
+{{- if not $slug -}}{{ errorf "anatomy shortcode: slug is required (%s)" .Position }}{{ end -}}
+{{- $title := .Get "title" | default $slug -}}
+{{- $h := .Get "height" | default "720" -}}
+{{- $light := printf "anatomy/%s/light.html" $slug | relURL -}}
+{{- $dark := printf "anatomy/%s/index.html" $slug | relURL -}}
+{{- $full := printf "anatomy/%s/" $slug | relURL -}}
+<figure class="anatomy-embed" data-anatomy data-light="{{ $light }}" data-dark="{{ $dark }}">
+  <div class="anatomy-embed__frame">
+    <iframe class="anatomy-embed__iframe" src="{{ $light }}" title="{{ $title }} — interactive figure" loading="lazy" scrolling="no" height="{{ $h }}" style="height: {{ $h }}px"></iframe>
+  </div>
+  <figcaption class="anatomy-embed__caption">
+    <span class="anatomy-embed__label">{{ $title }}</span>
+    <span class="anatomy-embed__links">
+      <a class="anatomy-embed__open" href="{{ $full }}">Full page</a>
+      <a class="anatomy-embed__open" href="{{ $light }}">Light</a>
+      <a class="anatomy-embed__open" href="{{ $dark }}">Dark</a>
+    </span>
+  </figcaption>
+</figure>

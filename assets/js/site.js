@@ -282,4 +282,38 @@
   const fold = () => $$("details[data-close-narrow]").forEach((d) => { d.open = wide.matches; });
   fold();
   wide.addEventListener?.("change", fold);
+
+  /* ---- 8 · Anatomy embeds (figures from static/anatomy/) ------------- */
+  /* Each figure is its own document, so the iframe is sized from its content.
+     Same origin is required for the measurement; cross-origin keeps the fallback. */
+  const figures = $$("[data-anatomy]");
+  if (figures.length) {
+    const pathOf = (u) => { try { return new URL(u, location.href).pathname; } catch (_) { return ""; } };
+    const fit = (f) => {
+      try {
+        const d = f.contentDocument;
+        if (!d) return;
+        const h = Math.max(d.documentElement.scrollHeight, d.body ? d.body.scrollHeight : 0);
+        if (h > 160) f.style.height = h + "px";
+      } catch (_) {}
+    };
+    const matchTheme = () => figures.forEach((fig) => {
+      const f = fig.querySelector("iframe");
+      const want = isDark() ? fig.dataset.dark : fig.dataset.light;
+      if (f && want && pathOf(f.src) !== pathOf(want)) f.src = want;
+    });
+    figures.forEach((fig) => {
+      const f = fig.querySelector("iframe");
+      if (!f) return;
+      f.addEventListener("load", () => fit(f));
+      fit(f);
+    });
+    matchTheme();
+    window.addEventListener("themechange", matchTheme);
+    let t = 0;
+    window.addEventListener("resize", () => {
+      clearTimeout(t);
+      t = setTimeout(() => figures.forEach((fig) => { const f = fig.querySelector("iframe"); if (f) fit(f); }), 150);
+    });
+  }
 })();

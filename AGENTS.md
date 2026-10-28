@@ -130,7 +130,7 @@ The lint script encodes these rules: `python3 scripts/lint_content.py` (needs `p
 content/**/*.md ──┐
 hugo.yaml         ├─ Hugo 0.147.4 ─→ public/ ─→ GitHub Pages
 layouts/ assets/ ─┘   (CI, on push to main)
-static/ (fonts, favicon, og.png, mermaid-gallery)
+static/ (fonts, favicon, og.png, mermaid-gallery, anatomy)
 ```
 
 Nothing is stored anywhere but the repo. There is no database and no CMS. `public/` and `resources/` are build output; never commit them.
@@ -145,7 +145,7 @@ Nothing is stored anywhere but the repo. There is no database and no CMS. `publi
 | `layouts/` | Templates. `_default/` = base, page, list dispatcher, term pages, render hooks. `partials/` = shell, components and helpers. `partials/lists/<section>.html` = the view for each section. `index.html` = home. `index.json` = the search index. |
 | `assets/css/` | Six files, concatenated in order: tokens, base, layout, components, code, pages. |
 | `assets/js/site.js` | All client behaviour (search, filters, theme, copy buttons, TOC, diagrams). No dependencies. |
-| `static/` | Copied as-is: self-hosted fonts, favicon, `og.png` (social card), `mermaid-gallery/`. |
+| `static/` | Copied as-is: self-hosted fonts, favicon, `og.png` (social card), `mermaid-gallery/`, `anatomy/`. |
 | `archetypes/` | Front matter templates for `hugo new`. |
 | `scripts/` | Content lint, design checks, browser tests, the OG card generator. |
 | `docs/` | `CONTENT_MODEL.md` (the model), `DESIGN.md` (design system), `REVIEW.md` (audit and open issues). |
@@ -182,6 +182,7 @@ Nothing is stored anywhere but the repo. There is no database and no CMS. `publi
 - Standard Markdown plus attribute blocks. Raw HTML is allowed but should be rare.
 - Fenced code blocks get syntax colours, a language label and a copy button; give every fence a language. A ` ```mermaid ` fence renders as a diagram in the browser.
 - Callout shortcode: `{{< callout type="tip" title="Optional" >}}text{{< /callout >}}` (`type` is `note`, `tip` or `warning`).
+- Anatomy shortcode: `{{< anatomy slug="drone" title="How a quadcopter flies" >}}` embeds one interactive figure from `static/anatomy/<slug>/` in an iframe. `slug` is required; `title` is the caption and the frame's accessible name; `height` is the pre-measurement fallback (default 720). The script in `site.js` picks the dark or light build and sizes the frame, so never write the iframe by hand and never hard-code the `/TheBlackCat/` prefix.
 - Links: external links open in a new tab automatically. Internal links can be written `/library/ai/…` or relatively; the site adds the `/TheBlackCat/` prefix. Do not hard-code the prefix in new content.
 - Headings: start at `##`; the page title is the `h1`. Headings get anchor links and feed the table of contents.
 - Bookmarks: keep the body to `## Why I saved this` and `## Notes`, factual and short.

@@ -69,9 +69,16 @@ layouts/
               (item-row, project-card, tag-list, breadcrumbs, chapters,
               collected), helpers (type-of, domain, title, description …),
               lists/<section>.html
-  shortcodes/ callout
+  shortcodes/ callout, anatomy (embeds a figure from static/anatomy/ in an iframe)
   index.json  the client-side search index
 ```
+
+Self-contained exhibits live in `static/` and are copied as-is:
+`aether-atelier/`, `tui-design-study/`, `mermaid-gallery/`, `anatomy/`. The
+Anatomy figures are embedded in a post through the `anatomy` shortcode, which
+emits a lazy iframe; `site.js` §8 picks the dark or light build and sizes the
+frame to the figure's own height (same origin). Their source and screenshots
+ship under `static/anatomy/src/`.
 
 Two Hugo details that will bite you again:
 

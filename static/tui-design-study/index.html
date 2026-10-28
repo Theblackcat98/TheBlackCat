@@ -149,6 +149,28 @@
       .shell{padding-left:16px;padding-right:16px}.hero{padding-bottom:46px}section{padding:48px 0}.hero-grid{grid-template-columns:1fr}.stat{padding:15px 0}.stat+.stat{padding-left:0;border-left:0;border-top:1px solid var(--line)}.principles,.cluster-list,.patterns{grid-template-columns:1fr}.frame{padding:14px;min-height:0;font-size:10px}.ascii{font-size:9px}.road{grid-template-columns:38px minmax(0,1fr)}.impact{grid-column:2}.fact-line{grid-template-columns:1fr;gap:4px}.demo-toolbar{align-items:flex-start}.segmented{flex-wrap:wrap}.bar-row{grid-template-columns:86px 1fr 28px;font-size:11px}.theme-signal .big{font-size:44px}
     }
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+    @media print{
+      body{background:#fff;color:#000}
+      a{color:#000}
+      .skip-link,.progress,.rail,.segmented{display:none}
+      .shell{grid-template-columns:1fr;max-width:none;padding:0}
+      .site-footer{max-width:none;padding:20px 0 0}
+      section{padding:26px 0}
+      h2,.principle,.finding,.road,.theme-card,.source-card{break-inside:avoid}
+      .terminal-demo,.stack{background:#fff;color:#000;border:1px solid #888;box-shadow:none}
+      .demo-toolbar{border-bottom:1px solid #888}
+      .demo-note{color:#000}
+      .frame.hidden{display:block}
+      .frame.noisy::before{content:"Before — nested chrome";display:block;font-weight:600;margin-bottom:12px}
+      .frame.quiet::before{content:"After — quiet chrome";display:block;font-weight:600;margin-bottom:12px}
+      .ascii,.ascii .hot,.ascii .warn,.ascii .dim,.quiet-top,.quiet-bottom,.quiet-label,.model-row,.meter-label,.quiet-top .status,.model-row.active,.layer small,.stack-caption,.stack-title{color:#000}
+      .quiet-top,.quiet-bottom{border-color:#888}
+      .model-row{border-color:#bbb}
+      .layer{border-color:#888}
+      .track,.bar{background:#fff;border:1px solid #888}
+      .track span,.fill{background:#888;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .theme-card,.theme-signal{box-shadow:none;border:1px solid #bbb}
+    }
   </style>
 </head>
 <body>
@@ -218,8 +240,8 @@
             </div>
             <span class="demo-note">Illustrative reconstruction, not a live app capture</span>
           </div>
-          <div class="frame noisy" id="frame-noisy" aria-hidden="false">
-<pre class="ascii">┌────────────────── <span class="hot">LLAMA-DECK v0.1.0</span> ──────────────────┐
+          <div class="frame noisy" id="frame-noisy" aria-hidden="false" role="img" aria-label="Before: an illustrative llama-deck telemetry screen wrapped in nested bordered boxes — an app header, a tab bar, a screen pane, and separate boxes for status, meters, and throughput — above a boxed shortcut footer.">
+<pre class="ascii" aria-hidden="true">┌────────────────── <span class="hot">LLAMA-DECK v0.1.0</span> ──────────────────┐
 │ [1] Models  [2] Servers  [3] <span class="hot">Telemetry</span>  [4] Settings │
 ├──────────────── <span class="warn">SERVER TELEMETRY</span> ─────────────────┤
 │ ┌────────────────── <span class="warn">STATUS</span> ───────────────────┐ │
@@ -299,7 +321,7 @@
           <p>The review covered the React shell, screens, components, and themes. This is code-level evidence, not a live usability test.</p>
         </div>
         <div class="diagnosis">
-          <div class="stack" aria-label="Four nested interface layers">
+          <div class="stack" role="img" aria-label="Four nested interface layers: a header box around a tab bar, around a screen pane, around section boxes for status, meters, throughput, and slots.">
             <div class="stack-title">Current hierarchy</div>
             <div class="layer">Header box<small>full border + app title</small></div>
             <div class="layer">Tab bar<small>global navigation</small>
@@ -353,9 +375,9 @@
           <p>Five themes exist in code: TokyoNight, Catppuccin, Gruvbox, Cyberpunk, and Matrix. The README also claims Nord and Monokai, which creates documentation drift.</p>
         </div>
         <div class="theme-grid">
-          <article class="theme-card problem"><h3>Repair Catppuccin</h3><div class="swatches"><span class="swatch" style="background:#f5e0dc"></span><span class="swatch" style="background:#cdd6f4"></span><span class="swatch" style="background:#89b4fa"></span></div><p><code>fgBright</code> is Rosewater <code>#f5e0dc</code>; use a near-white Text role in the <code>#cdd6f4</code> family.</p></article>
-          <article class="theme-card problem"><h3>Rework the joke themes</h3><div class="swatches"><span class="swatch" style="background:#0d0e15"></span><span class="swatch" style="background:#00f0ff"></span><span class="swatch" style="background:#4a5171"></span></div><p>Cyberpunk is harsh for sustained reading. Matrix flattens success and warning into similar greens and makes muted text nearly invisible.</p></article>
-          <article class="theme-card add"><h3>Add taste-aligned options</h3><div class="swatches"><span class="swatch" style="background:#232136"></span><span class="swatch" style="background:#ea9a97"></span><span class="swatch" style="background:#9ccfd8"></span></div><p>Rose Pine matches the star signal. Nord and Everforest also broaden the serious, low-fatigue set.</p></article>
+          <article class="theme-card problem"><h3>Repair Catppuccin</h3><div class="swatches" role="img" aria-label="Catppuccin swatches: Rosewater #f5e0dc, Text #cdd6f4, and Blue #89b4fa"><span class="swatch" style="background:#f5e0dc"></span><span class="swatch" style="background:#cdd6f4"></span><span class="swatch" style="background:#89b4fa"></span></div><p><code>fgBright</code> is Rosewater <code>#f5e0dc</code>; use a near-white Text role in the <code>#cdd6f4</code> family.</p></article>
+          <article class="theme-card problem"><h3>Rework the joke themes</h3><div class="swatches" role="img" aria-label="Cyberpunk and Matrix swatches: near-black #0d0e15, cyan #00f0ff, and muted slate #4a5171"><span class="swatch" style="background:#0d0e15"></span><span class="swatch" style="background:#00f0ff"></span><span class="swatch" style="background:#4a5171"></span></div><p>Cyberpunk is harsh for sustained reading. Matrix flattens success and warning into similar greens and makes muted text nearly invisible.</p></article>
+          <article class="theme-card add"><h3>Add taste-aligned options</h3><div class="swatches" role="img" aria-label="Rosé Pine swatches: Base #232136, Rose #ea9a97, and Foam #9ccfd8"><span class="swatch" style="background:#232136"></span><span class="swatch" style="background:#ea9a97"></span><span class="swatch" style="background:#9ccfd8"></span></div><p>Rose Pine matches the star signal. Nord and Everforest also broaden the serious, low-fatigue set.</p></article>
         </div>
         <div class="theme-facts">
           <div class="fact-line"><code>Cyberpunk</code><span>Body text <code>#00f0ff</code> on <code>#0d0e15</code>; muted <code>#4a5171</code> is weak against that background.</span></div>

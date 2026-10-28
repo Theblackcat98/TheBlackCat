@@ -7,6 +7,7 @@
   <link rel="icon" href="data:," />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <title>TUI Design Study</title>
   <style>
@@ -17,7 +18,7 @@
       --surface-2:#e9ece8;
       --ink:#18201d;
       --muted:#56635e;
-      --faint:#7b8782;
+      --faint:#5d6a64;
       --line:#cbd2ce;
       --line-strong:#8f9c96;
       --accent:#087f63;
@@ -39,7 +40,7 @@
         --surface-2:#19221f;
         --ink:#e0e8e4;
         --muted:#a4b2ac;
-        --faint:#7f8c86;
+        --faint:#8b9992;
         --line:#293832;
         --line-strong:#51635b;
         --accent:#6fd4b3;
@@ -61,6 +62,20 @@
     button,a{font:inherit}
     a{color:var(--accent-ink);text-underline-offset:3px}
     button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .skip-link{position:absolute;left:16px;top:-64px;z-index:50;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:6px;font-family:"IBM Plex Mono",monospace;font-size:13px;text-decoration:none;transition:top .15s}
+    .skip-link:focus{top:12px}
+    .num{font-family:"IBM Plex Mono",monospace;color:var(--accent-ink);font-size:13px;padding-top:3px}
+    .permalink{opacity:0;margin-left:8px;text-decoration:none;color:var(--accent-ink);font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:400}
+    .principle:hover .permalink,.road:hover .permalink,.permalink:focus-visible{opacity:1}
+    @media(hover:none){.permalink{opacity:.45}}
+    .progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:60}
+    .progress span{display:block;height:100%;background:var(--accent);transform:scaleX(0);transform-origin:0 50%}
+    .read-meta{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--muted);margin:0 0 26px}
+    .site-footer{max-width:1280px;margin:0 auto;padding:26px 28px 40px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px 28px;align-items:baseline;justify-content:space-between}
+    .site-footer nav{display:flex;flex-wrap:wrap;gap:8px 24px}
+    .site-footer a{font-family:"IBM Plex Mono",monospace;font-size:13px;text-decoration:none}
+    .site-footer a:hover{text-decoration:underline}
+    .site-footer .colophon{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--faint);margin:0}
     .shell{max-width:1280px;margin:0 auto;padding:28px 28px 80px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px}
     .rail{position:sticky;top:24px;align-self:start;height:calc(100vh - 48px);display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid var(--line);padding-right:24px}
     .rail nav{display:grid;gap:3px}
@@ -84,17 +99,16 @@
     h2{font-size:clamp(28px,4vw,44px);line-height:1.08;letter-spacing:-.035em;margin:0}
     .section-head p{margin:0;color:var(--muted);font-size:15px}
     h3{font-size:20px;line-height:1.25;margin:0 0 10px}
-    .source{font-family:"IBM Plex Mono",monospace;color:var(--faint);font-size:11px}
+    .source{font-family:"IBM Plex Mono",monospace;color:var(--faint);font-size:12px}
     .thesis{font-size:clamp(23px,3vw,36px);line-height:1.25;letter-spacing:-.025em;max-width:900px;margin:0 0 38px}
-    .principles{display:grid;grid-template-columns:1fr 1fr;gap:0 28px;counter-reset:principle}
-    .principle{counter-increment:principle;display:grid;grid-template-columns:42px 1fr;gap:14px;padding:22px 0;border-top:1px solid var(--line)}
-    .principle::before{content:counter(principle,decimal-leading-zero);font-family:"IBM Plex Mono",monospace;color:var(--accent-ink);font-size:13px;padding-top:3px}
+    .principles{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+    .principle{display:grid;grid-template-columns:42px 1fr;gap:14px;padding:22px 0;border-top:1px solid var(--line)}
     .principle h3{font-size:17px;margin-bottom:5px}
-    .principle p{margin:0;color:var(--muted);font-size:14px}
+    .principle p{margin:0;color:var(--muted);font-size:15px}
     .terminal-demo{background:var(--code);color:var(--code-ink);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
     .demo-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px 14px;border-bottom:1px solid var(--code-line)}
     .segmented{display:flex;gap:3px;background:#111b17;padding:3px;border-radius:7px}
-    .segmented button{border:0;background:transparent;color:var(--code-muted);padding:6px 10px;border-radius:5px;font-family:"IBM Plex Mono",monospace;font-size:12px;cursor:pointer}
+    .segmented button{border:0;background:transparent;color:var(--code-muted);min-height:40px;padding:10px 14px;border-radius:5px;font-family:"IBM Plex Mono",monospace;font-size:12px;cursor:pointer}
     .segmented button[aria-pressed="true"]{background:#283a33;color:#eef8f3}
     .demo-note{font-family:"IBM Plex Mono",monospace;color:var(--code-muted);font-size:11px;text-align:right}
     .frame{padding:22px;font-family:"IBM Plex Mono",monospace;font-size:13px;min-height:310px}
@@ -108,7 +122,7 @@
     .quiet-bottom{padding-top:10px;border-top:1px solid #304139;font-size:11px;color:#82978d}
     .quiet-top .status{color:#71d7b4}
     .quiet-main{padding:20px 0;display:grid;grid-template-columns:1.15fr .85fr;gap:26px}
-    .quiet-main h4{font-size:11px;font-weight:500;color:#82978d;margin:0 0 10px;text-transform:none}
+    .quiet-label{font-size:11px;font-weight:500;color:#82978d;margin:0 0 10px;text-transform:none}
     .model-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;padding:8px 0;border-bottom:1px solid #1f2c27}
     .model-row.active{color:#83dfbf}
     .meter{margin:0 0 16px}.meter-label{display:flex;justify-content:space-between;color:#a9bcb3;font-size:11px;margin-bottom:6px}.bar{height:8px;background:#1c2924}.fill{height:100%;background:#71d7b4}.fill.warn{background:#e5b56b}
@@ -118,46 +132,73 @@
     .theme-signal{background:var(--surface);padding:28px;border-radius:4px;box-shadow:var(--shadow)}
     .theme-signal .big{font-family:"IBM Plex Mono",monospace;font-size:54px;line-height:1;color:var(--accent-ink);margin:8px 0 12px}.theme-signal p{margin:0;color:var(--muted)}
     .cluster-list{margin:38px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-    .cluster-list li{border-top:1px solid var(--line);padding:16px 0}.cluster-list strong{display:block;margin-bottom:4px}.cluster-list span{color:var(--muted);font-size:14px}
+    .cluster-list li{border-top:1px solid var(--line);padding:16px 0}.cluster-list strong{display:block;margin-bottom:4px}.cluster-list span{color:var(--muted);font-size:15px}
     .diagnosis{display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;align-items:start}
     .stack{background:var(--code);color:var(--code-ink);padding:24px;border-radius:4px;font-family:"IBM Plex Mono",monospace;box-shadow:var(--shadow)}
     .stack-title{color:var(--code-muted);font-size:11px;margin-bottom:16px}.layer{border:1px solid #5d7469;padding:14px;margin-top:-1px}.layer:nth-child(3){margin:10px 10px 0}.layer:nth-child(4){margin:10px 20px 0}.layer:nth-child(5){margin:10px 30px 0;border-color:#d09c58}.layer small{display:block;color:#81958c;margin-top:2px}.stack-caption{font-size:12px;color:var(--code-muted);margin:16px 0 0}
-    .finding-list{display:grid;gap:0}.finding{padding:18px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:30px 1fr;gap:12px}.finding .mark{font-family:"IBM Plex Mono",monospace;color:var(--danger)}.finding p{margin:5px 0 0;color:var(--muted);font-size:14px}
+    .finding-list{display:grid;gap:0}.finding{padding:18px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:30px 1fr;gap:12px}.finding .mark{font-family:"IBM Plex Mono",monospace;color:var(--danger)}.finding p{margin:5px 0 0;color:var(--muted);font-size:15px}
     .good-list{margin-top:32px;padding:24px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.good-list h3{color:var(--good)}.good-list ul{margin:12px 0 0;padding-left:20px;color:var(--muted)}
-    .roadmap{counter-reset:road;display:grid;gap:0}.road{counter-increment:road;display:grid;grid-template-columns:50px minmax(0,1fr) auto;gap:18px;align-items:start;padding:20px 0;border-top:1px solid var(--line)}.road::before{content:counter(road,decimal-leading-zero);font-family:"IBM Plex Mono",monospace;color:var(--accent-ink)}.road h3{font-size:17px;margin:0}.road p{margin:4px 0 0;color:var(--muted);font-size:14px}.impact{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--faint);padding-top:3px}
-    .theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.theme-card{padding:20px;background:var(--surface);box-shadow:var(--shadow)}.theme-card h3{font-size:16px}.theme-card p{margin:0;color:var(--muted);font-size:14px}.swatches{display:flex;gap:5px;margin:15px 0}.swatch{height:28px;flex:1;min-width:0}.theme-card.problem{border-top:3px solid var(--danger)}.theme-card.add{border-top:3px solid var(--accent)}
+    .roadmap{display:grid;gap:0}.road{display:grid;grid-template-columns:50px minmax(0,1fr) auto;gap:18px;align-items:start;padding:20px 0;border-top:1px solid var(--line)}.road h3{font-size:17px;margin:0}.road p{margin:4px 0 0;color:var(--muted);font-size:15px}.impact{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--faint);padding-top:3px}
+    .theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.theme-card{padding:20px;background:var(--surface);box-shadow:var(--shadow)}.theme-card h3{font-size:16px}.theme-card p{margin:0;color:var(--muted);font-size:15px}.swatches{display:flex;gap:5px;margin:15px 0}.swatch{height:28px;flex:1;min-width:0}.theme-card.problem{border-top:3px solid var(--danger)}.theme-card.add{border-top:3px solid var(--accent)}
     .theme-facts{margin-top:30px;display:grid;gap:10px}.fact-line{display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;padding:13px 0;border-top:1px solid var(--line)}.fact-line code{font-family:"IBM Plex Mono",monospace;color:var(--accent-ink)}.fact-line span{color:var(--muted)}
     .patterns{display:grid;grid-template-columns:1fr 1fr;gap:28px}.pattern-col{padding-top:18px;border-top:2px solid var(--good)}.pattern-col.avoid{border-color:var(--danger)}.pattern-col ul{padding:0;margin:16px 0 0;list-style:none}.pattern-col li{padding:10px 0;border-bottom:1px solid var(--line);color:var(--muted)}
     .sources{padding-bottom:28px;border-bottom:0}.source-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.source-card{padding-top:15px;border-top:1px solid var(--line)}.source-card h3{font-size:15px}.source-card p{font-size:13px;color:var(--muted);margin:0}.caveat{margin-top:30px;padding:18px 20px;background:var(--surface-2);font-size:13px;color:var(--muted);border-radius:7px}.repo-link{display:inline-block;margin-top:10px;font-family:"IBM Plex Mono",monospace;font-size:12px}
     @media(max-width:900px){
-      .shell{grid-template-columns:1fr;padding:20px 20px 64px;gap:0}.rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:0 0 14px;margin-bottom:22px}.rail nav{display:flex;flex-wrap:wrap;gap:4px;padding-bottom:4px}.rail a{white-space:nowrap;flex:0 1 auto}.rail-note{display:none}.section-head,.signal-layout,.diagnosis{grid-template-columns:1fr;gap:20px}.theme-grid{grid-template-columns:1fr}.source-grid{grid-template-columns:1fr}.quiet-main{grid-template-columns:1fr}.demo-note{display:none}
+      html{scroll-padding-top:76px}.shell{grid-template-columns:1fr;padding:20px 20px 64px;gap:0}.rail{position:sticky;top:0;z-index:40;height:auto;min-width:0;border-right:0;border-bottom:1px solid var(--line);padding:10px 0;background:var(--paper);margin-bottom:22px}.rail nav{display:flex;flex-wrap:nowrap;gap:4px;overflow-x:auto;padding-bottom:2px;min-width:0;max-width:100%}.rail a{white-space:nowrap;flex:0 0 auto;padding:10px 12px}.rail-note{display:none}.section-head,.signal-layout,.diagnosis{grid-template-columns:1fr;gap:20px}.theme-grid{grid-template-columns:1fr}.source-grid{grid-template-columns:1fr}.quiet-main{grid-template-columns:1fr}.demo-toolbar{flex-wrap:wrap}
     }
     @media(max-width:620px){
       .shell{padding-left:16px;padding-right:16px}.hero{padding-bottom:46px}section{padding:48px 0}.hero-grid{grid-template-columns:1fr}.stat{padding:15px 0}.stat+.stat{padding-left:0;border-left:0;border-top:1px solid var(--line)}.principles,.cluster-list,.patterns{grid-template-columns:1fr}.frame{padding:14px;min-height:0;font-size:10px}.ascii{font-size:9px}.road{grid-template-columns:38px minmax(0,1fr)}.impact{grid-column:2}.fact-line{grid-template-columns:1fr;gap:4px}.demo-toolbar{align-items:flex-start}.segmented{flex-wrap:wrap}.bar-row{grid-template-columns:86px 1fr 28px;font-size:11px}.theme-signal .big{font-size:44px}
     }
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+    @media print{
+      body{background:#fff;color:#000}
+      a{color:#000}
+      .skip-link,.progress,.rail,.segmented{display:none}
+      .shell{grid-template-columns:1fr;max-width:none;padding:0}
+      .site-footer{max-width:none;padding:20px 0 0}
+      section{padding:26px 0}
+      h2,.principle,.finding,.road,.theme-card,.source-card{break-inside:avoid}
+      .terminal-demo,.stack{background:#fff;color:#000;border:1px solid #888;box-shadow:none}
+      .demo-toolbar{border-bottom:1px solid #888}
+      .demo-note{color:#000}
+      .frame.hidden{display:block}
+      .frame.noisy::before{content:"Before — nested chrome";display:block;font-weight:600;margin-bottom:12px}
+      .frame.quiet::before{content:"After — quiet chrome";display:block;font-weight:600;margin-bottom:12px}
+      .ascii,.ascii .hot,.ascii .warn,.ascii .dim,.quiet-top,.quiet-bottom,.quiet-label,.model-row,.meter-label,.quiet-top .status,.model-row.active,.layer small,.stack-caption,.stack-title{color:#000}
+      .quiet-top,.quiet-bottom{border-color:#888}
+      .model-row{border-color:#bbb}
+      .layer{border-color:#888}
+      .track,.bar{background:#fff;border:1px solid #888}
+      .track span,.fill{background:#888;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .theme-card,.theme-signal{box-shadow:none;border:1px solid #bbb}
+    }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <div class="progress" aria-hidden="true"><span id="progress-fill"></span></div>
   <div class="shell">
     <aside class="rail" aria-label="Study sections">
       <nav>
         <a href="#thesis">Thesis</a>
         <a href="#principles">Principles</a>
+        <a href="#demo">Quiet chrome</a>
         <a href="#taste">Star signal</a>
         <a href="#critique">UI critique</a>
         <a href="#roadmap">Change plan</a>
         <a href="#themes">Themes</a>
+        <a href="#contract">Design contract</a>
         <a href="#sources">Sources</a>
       </nav>
       <p class="rail-note">Compiled 2026-09-15<br />Qualitative synthesis<br />Static code review</p>
     </aside>
 
-    <main>
+    <main id="content" tabindex="-1">
       <header class="hero" id="thesis">
         <p class="eyebrow">A design study for llama-deck</p>
         <h1>The terminal rewards restraint.</h1>
         <p class="lede">The strongest TUIs feel dense, calm, and unmistakably native to the character grid. Their polish comes from hierarchy, alignment, semantic color, and instant response—not from adding more chrome.</p>
+        <p class="read-meta">9 sections · about a 10-minute read</p>
         <div class="hero-grid" aria-label="Research scope">
           <div class="stat"><strong>3</strong><span>evidence streams</span></div>
           <div class="stat"><strong>857</strong><span>GitHub stars surveyed locally</span></div>
@@ -173,21 +214,21 @@
         </div>
         <p class="thesis">Information first. Decoration last. Chrome should frame the work, then get out of the way.</p>
         <div class="principles">
-          <article class="principle"><div><h3>Honor the grid</h3><p>Compose in character cells. Don’t transplant desktop widgets into a keyboard-first surface.</p></div></article>
-          <article class="principle"><div><h3>Make color mean something</h3><p>Use one accent, dimmed chrome, and semantic states rather than a 16-color rainbow.</p></div></article>
-          <article class="principle"><div><h3>Border selectively</h3><p>Thin rounded borders can signal focus; whitespace and dividers should do most of the structural work.</p></div></article>
-          <article class="principle"><div><h3>Keep the map stable</h3><p>Fixed panes, one clear focus, and a persistent breadcrumb reduce the user’s cognitive load.</p></div></article>
-          <article class="principle"><div><h3>Use glyphs as texture</h3><p>Nerd Font icons accelerate scanning, but every icon needs a clean ASCII fallback.</p></div></article>
-          <article class="principle"><div><h3>Align ruthlessly</h3><p>Right-align numbers, hold fixed column widths, and keep content away from borders.</p></div></article>
-          <article class="principle"><div><h3>Teach through the footer</h3><p>A one-line contextual hint bar plus <code>?</code> help makes the interface self-explanatory.</p></div></article>
-          <article class="principle"><div><h3>Reveal depth on demand</h3><p>Keep the default view quiet; surface power features only when context makes them useful.</p></div></article>
-          <article class="principle"><div><h3>Move with purpose</h3><p>Smooth graphs and live watch states should communicate change, never merely decorate.</p></div></article>
-          <article class="principle"><div><h3>Use familiar grammar</h3><p>Vim-style navigation, mnemonic single keys, <code>/</code> search, <code>q</code> quit, and <code>?</code> help.</p></div></article>
+          <article class="principle" id="rule-01"><span class="num">01</span><div><h3>Honor the grid<a class="permalink" href="#rule-01" aria-label="Link to rule 1, Honor the grid">#</a></h3><p>Compose in character cells. Don’t transplant desktop widgets into a keyboard-first surface.</p></div></article>
+          <article class="principle" id="rule-02"><span class="num">02</span><div><h3>Make color mean something<a class="permalink" href="#rule-02" aria-label="Link to rule 2, Make color mean something">#</a></h3><p>Use one accent, dimmed chrome, and semantic states rather than a 16-color rainbow.</p></div></article>
+          <article class="principle" id="rule-03"><span class="num">03</span><div><h3>Border selectively<a class="permalink" href="#rule-03" aria-label="Link to rule 3, Border selectively">#</a></h3><p>Thin rounded borders can signal focus; whitespace and dividers should do most of the structural work.</p></div></article>
+          <article class="principle" id="rule-04"><span class="num">04</span><div><h3>Keep the map stable<a class="permalink" href="#rule-04" aria-label="Link to rule 4, Keep the map stable">#</a></h3><p>Fixed panes, one clear focus, and a persistent breadcrumb reduce the user’s cognitive load.</p></div></article>
+          <article class="principle" id="rule-05"><span class="num">05</span><div><h3>Use glyphs as texture<a class="permalink" href="#rule-05" aria-label="Link to rule 5, Use glyphs as texture">#</a></h3><p>Nerd Font icons accelerate scanning, but every icon needs a clean ASCII fallback.</p></div></article>
+          <article class="principle" id="rule-06"><span class="num">06</span><div><h3>Align ruthlessly<a class="permalink" href="#rule-06" aria-label="Link to rule 6, Align ruthlessly">#</a></h3><p>Right-align numbers, hold fixed column widths, and keep content away from borders.</p></div></article>
+          <article class="principle" id="rule-07"><span class="num">07</span><div><h3>Teach through the footer<a class="permalink" href="#rule-07" aria-label="Link to rule 7, Teach through the footer">#</a></h3><p>A one-line contextual hint bar plus <code>?</code> help makes the interface self-explanatory.</p></div></article>
+          <article class="principle" id="rule-08"><span class="num">08</span><div><h3>Reveal depth on demand<a class="permalink" href="#rule-08" aria-label="Link to rule 8, Reveal depth on demand">#</a></h3><p>Keep the default view quiet; surface power features only when context makes them useful.</p></div></article>
+          <article class="principle" id="rule-09"><span class="num">09</span><div><h3>Move with purpose<a class="permalink" href="#rule-09" aria-label="Link to rule 9, Move with purpose">#</a></h3><p>Smooth graphs and live watch states should communicate change, never merely decorate.</p></div></article>
+          <article class="principle" id="rule-10"><span class="num">10</span><div><h3>Use familiar grammar<a class="permalink" href="#rule-10" aria-label="Link to rule 10, Use familiar grammar">#</a></h3><p>Vim-style navigation, mnemonic single keys, <code>/</code> search, <code>q</code> quit, and <code>?</code> help.</p></div></article>
         </div>
         <p class="source">Community synthesis: Lobsters TUI discussions, Hacker News threads on btop/Textual/k9s, and unixporn-adjacent workflow coverage.</p>
       </section>
 
-      <section aria-labelledby="chrome-title">
+      <section id="demo" aria-labelledby="chrome-title">
         <div class="section-head">
           <h2 id="chrome-title">Quiet chrome, shown</h2>
           <p>The same information can feel noisy or composed. Toggle the frame to compare the hierarchy.</p>
@@ -195,13 +236,13 @@
         <div class="terminal-demo">
           <div class="demo-toolbar">
             <div class="segmented" role="group" aria-label="Choose interface comparison">
-              <button type="button" data-frame="noisy" aria-pressed="false">Nested chrome</button>
-              <button type="button" data-frame="quiet" aria-pressed="true">Quiet chrome</button>
+              <button type="button" data-frame="noisy" aria-pressed="true">Nested chrome</button>
+              <button type="button" data-frame="quiet" aria-pressed="false">Quiet chrome</button>
             </div>
             <span class="demo-note">Illustrative reconstruction, not a live app capture</span>
           </div>
-          <div class="frame noisy hidden" id="frame-noisy" aria-hidden="true">
-<pre class="ascii">┌────────────────── <span class="hot">LLAMA-DECK v0.1.0</span> ──────────────────┐
+          <div class="frame noisy" id="frame-noisy" aria-hidden="false" role="img" aria-label="Before: an illustrative llama-deck telemetry screen wrapped in nested bordered boxes — an app header, a tab bar, a screen pane, and separate boxes for status, meters, and throughput — above a boxed shortcut footer.">
+<pre class="ascii" aria-hidden="true">┌────────────────── <span class="hot">LLAMA-DECK v0.1.0</span> ──────────────────┐
 │ [1] Models  [2] Servers  [3] <span class="hot">Telemetry</span>  [4] Settings │
 ├──────────────── <span class="warn">SERVER TELEMETRY</span> ─────────────────┤
 │ ┌────────────────── <span class="warn">STATUS</span> ───────────────────┐ │
@@ -219,18 +260,18 @@
 │ q Quit  ? Help  Ctrl+P Palette  Tab Next  r Refresh │
 └─────────────────────────────────────────────────────┘</pre>
           </div>
-          <div class="frame quiet" id="frame-quiet" aria-hidden="false">
+          <div class="frame quiet hidden" id="frame-quiet" aria-hidden="true">
             <div class="quiet-ui">
               <div class="quiet-top"><span>llama-deck <span style="color:#789087">/ telemetry</span></span><span class="status">● server online</span></div>
               <div class="quiet-main">
                 <div>
-                  <h4>Recent throughput</h4>
+                  <p class="quiet-label">Recent throughput</p>
                   <div class="model-row active"><span>llama-server</span><span>24.8 tok/s</span></div>
                   <div class="model-row"><span>prompt eval</span><span>118.2 tok/s</span></div>
                   <div class="model-row"><span>active slots</span><span>2 / 4</span></div>
                 </div>
                 <div>
-                  <h4>Memory</h4>
+                  <p class="quiet-label">Memory</p>
                   <div class="meter"><div class="meter-label"><span>VRAM</span><span>61%</span></div><div class="bar"><div class="fill warn" style="width:61%"></div></div></div>
                   <div class="meter"><div class="meter-label"><span>KV cache</span><span>33%</span></div><div class="bar"><div class="fill" style="width:33%"></div></div></div>
                   <div class="meter"><div class="meter-label"><span>trend</span><span>▁▂▃▅▆▅▇█▇▆▆▇</span></div></div>
@@ -281,7 +322,7 @@
           <p>The review covered the React shell, screens, components, and themes. This is code-level evidence, not a live usability test.</p>
         </div>
         <div class="diagnosis">
-          <div class="stack" aria-label="Four nested interface layers">
+          <div class="stack" role="img" aria-label="Four nested interface layers: a header box around a tab bar, around a screen pane, around section boxes for status, meters, throughput, and slots.">
             <div class="stack-title">Current hierarchy</div>
             <div class="layer">Header box<small>full border + app title</small></div>
             <div class="layer">Tab bar<small>global navigation</small>
@@ -317,15 +358,15 @@
           <p>Start with structure. Theme and micro-polish matter more after the interface has room to breathe.</p>
         </div>
         <div class="roadmap">
-          <article class="road"><div><h3>De-chrome the shell</h3><p>Borderless one-line header and footer; no screen-pane frame.</p></div><span class="impact">Highest impact</span></article>
-          <article class="road"><div><h3>Make rounded borders the exception</h3><p>Use rounded as the default box style, then show it only for focus and overlays.</p></div><span class="impact">Fast</span></article>
-          <article class="road"><div><h3>Move to quiet title case</h3><p>Let whitespace, weight, and muted color carry hierarchy.</p></div><span class="impact">Fast</span></article>
-          <article class="road"><div><h3>Repair the theme system</h3><p>Correct Catppuccin’s bright foreground; repair or remove Cyberpunk and Matrix; add contrast tests.</p></div><span class="impact">High</span></article>
-          <article class="road"><div><h3>Recompose telemetry</h3><p>Merge status into the header strip and place VRAM and KV gauges side by side where width permits.</p></div><span class="impact">High</span></article>
-          <article class="road"><div><h3>Add glyphs with fallbacks</h3><p>Improve scan speed without making Nerd Fonts a hard dependency.</p></div><span class="impact">Medium</span></article>
-          <article class="road"><div><h3>Increase gauge fidelity</h3><p>Fractional blocks, responsive widths, and warning thresholds.</p></div><span class="impact">Medium</span></article>
-          <article class="road"><div><h3>Fix the modal geometry</h3><p>Center and clamp help, with a dim backdrop.</p></div><span class="impact">Medium</span></article>
-          <article class="road"><div><h3>Read the version dynamically</h3><p>Replace the hardcoded <code>v0.1.0</code> with package metadata.</p></div><span class="impact">Small</span></article>
+          <article class="road" id="step-01"><span class="num">01</span><div><h3>De-chrome the shell<a class="permalink" href="#step-01" aria-label="Link to step 1, De-chrome the shell">#</a></h3><p>Borderless one-line header and footer; no screen-pane frame.</p></div><span class="impact">Highest impact</span></article>
+          <article class="road" id="step-02"><span class="num">02</span><div><h3>Make rounded borders the exception<a class="permalink" href="#step-02" aria-label="Link to step 2, Make rounded borders the exception">#</a></h3><p>Use rounded as the default box style, then show it only for focus and overlays.</p></div><span class="impact">Fast</span></article>
+          <article class="road" id="step-03"><span class="num">03</span><div><h3>Move to quiet title case<a class="permalink" href="#step-03" aria-label="Link to step 3, Move to quiet title case">#</a></h3><p>Let whitespace, weight, and muted color carry hierarchy.</p></div><span class="impact">Fast</span></article>
+          <article class="road" id="step-04"><span class="num">04</span><div><h3>Repair the theme system<a class="permalink" href="#step-04" aria-label="Link to step 4, Repair the theme system">#</a></h3><p>Correct Catppuccin’s bright foreground; repair or remove Cyberpunk and Matrix; add contrast tests.</p></div><span class="impact">High</span></article>
+          <article class="road" id="step-05"><span class="num">05</span><div><h3>Recompose telemetry<a class="permalink" href="#step-05" aria-label="Link to step 5, Recompose telemetry">#</a></h3><p>Merge status into the header strip and place VRAM and KV gauges side by side where width permits.</p></div><span class="impact">High</span></article>
+          <article class="road" id="step-06"><span class="num">06</span><div><h3>Add glyphs with fallbacks<a class="permalink" href="#step-06" aria-label="Link to step 6, Add glyphs with fallbacks">#</a></h3><p>Improve scan speed without making Nerd Fonts a hard dependency.</p></div><span class="impact">Medium</span></article>
+          <article class="road" id="step-07"><span class="num">07</span><div><h3>Increase gauge fidelity<a class="permalink" href="#step-07" aria-label="Link to step 7, Increase gauge fidelity">#</a></h3><p>Fractional blocks, responsive widths, and warning thresholds.</p></div><span class="impact">Medium</span></article>
+          <article class="road" id="step-08"><span class="num">08</span><div><h3>Fix the modal geometry<a class="permalink" href="#step-08" aria-label="Link to step 8, Fix the modal geometry">#</a></h3><p>Center and clamp help, with a dim backdrop.</p></div><span class="impact">Medium</span></article>
+          <article class="road" id="step-09"><span class="num">09</span><div><h3>Read the version dynamically<a class="permalink" href="#step-09" aria-label="Link to step 9, Read the version dynamically">#</a></h3><p>Replace the hardcoded <code>v0.1.0</code> with package metadata.</p></div><span class="impact">Small</span></article>
         </div>
       </section>
 
@@ -335,9 +376,9 @@
           <p>Five themes exist in code: TokyoNight, Catppuccin, Gruvbox, Cyberpunk, and Matrix. The README also claims Nord and Monokai, which creates documentation drift.</p>
         </div>
         <div class="theme-grid">
-          <article class="theme-card problem"><h3>Repair Catppuccin</h3><div class="swatches"><span class="swatch" style="background:#f5e0dc"></span><span class="swatch" style="background:#cdd6f4"></span><span class="swatch" style="background:#89b4fa"></span></div><p><code>fgBright</code> is Rosewater <code>#f5e0dc</code>; use a near-white Text role in the <code>#cdd6f4</code> family.</p></article>
-          <article class="theme-card problem"><h3>Rework the joke themes</h3><div class="swatches"><span class="swatch" style="background:#0d0e15"></span><span class="swatch" style="background:#00f0ff"></span><span class="swatch" style="background:#4a5171"></span></div><p>Cyberpunk is harsh for sustained reading. Matrix flattens success and warning into similar greens and makes muted text nearly invisible.</p></article>
-          <article class="theme-card add"><h3>Add taste-aligned options</h3><div class="swatches"><span class="swatch" style="background:#232136"></span><span class="swatch" style="background:#ea9a97"></span><span class="swatch" style="background:#9ccfd8"></span></div><p>Rose Pine matches the star signal. Nord and Everforest also broaden the serious, low-fatigue set.</p></article>
+          <article class="theme-card problem"><h3>Repair Catppuccin</h3><div class="swatches" role="img" aria-label="Catppuccin swatches: Rosewater #f5e0dc, Text #cdd6f4, and Blue #89b4fa"><span class="swatch" style="background:#f5e0dc"></span><span class="swatch" style="background:#cdd6f4"></span><span class="swatch" style="background:#89b4fa"></span></div><p><code>fgBright</code> is Rosewater <code>#f5e0dc</code>; use a near-white Text role in the <code>#cdd6f4</code> family.</p></article>
+          <article class="theme-card problem"><h3>Rework the joke themes</h3><div class="swatches" role="img" aria-label="Cyberpunk and Matrix swatches: near-black #0d0e15, cyan #00f0ff, and muted slate #4a5171"><span class="swatch" style="background:#0d0e15"></span><span class="swatch" style="background:#00f0ff"></span><span class="swatch" style="background:#4a5171"></span></div><p>Cyberpunk is harsh for sustained reading. Matrix flattens success and warning into similar greens and makes muted text nearly invisible.</p></article>
+          <article class="theme-card add"><h3>Add taste-aligned options</h3><div class="swatches" role="img" aria-label="Rosé Pine swatches: Base #232136, Rose #ea9a97, and Foam #9ccfd8"><span class="swatch" style="background:#232136"></span><span class="swatch" style="background:#ea9a97"></span><span class="swatch" style="background:#9ccfd8"></span></div><p>Rose Pine matches the star signal. Nord and Everforest also broaden the serious, low-fatigue set.</p></article>
         </div>
         <div class="theme-facts">
           <div class="fact-line"><code>Cyberpunk</code><span>Body text <code>#00f0ff</code> on <code>#0d0e15</code>; muted <code>#4a5171</code> is weak against that background.</span></div>
@@ -346,7 +387,7 @@
         </div>
       </section>
 
-      <section aria-labelledby="pattern-title">
+      <section id="contract" aria-labelledby="pattern-title">
         <div class="section-head"><h2 id="pattern-title">A compact design contract</h2><p>Use this as the review lens for every new screen.</p></div>
         <div class="patterns">
           <div class="pattern-col"><h3>Keep</h3><ul><li>Information-dense default views</li><li>One active accent and clear semantic states</li><li>Stable panes and a visible breadcrumb</li><li>Right-aligned numbers and fixed columns</li><li>Contextual hints plus full help</li><li>Fast, differential redraws</li></ul></div>
@@ -365,6 +406,15 @@
       </section>
     </main>
   </div>
+  <footer class="site-footer">
+    <nav aria-label="Back to the site">
+      <a href="../">← The BlackCat</a>
+      <a href="../tools/">All tools</a>
+      <a href="../library/programming/tui-design-study/">The write-up</a>
+      <a href="#thesis">Back to top ↑</a>
+    </nav>
+    <p class="colophon">TUI Design Study · part of The BlackCat library</p>
+  </footer>
   <script>
     const frameButtons = document.querySelectorAll('[data-frame]');
     frameButtons.forEach((button) => {
@@ -388,6 +438,16 @@
       sectionLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${visible.target.id}`));
     }, {rootMargin:'-15% 0px -65% 0px', threshold:[0,.2,.6]});
     observed.forEach(section => observer.observe(section));
+
+    const progressFill = document.getElementById('progress-fill');
+    const updateProgress = () => {
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - doc.clientHeight;
+      progressFill.style.transform = `scaleX(${max > 0 ? Math.min(1, doc.scrollTop / max) : 0})`;
+    };
+    addEventListener('scroll', updateProgress, {passive:true});
+    addEventListener('resize', updateProgress);
+    updateProgress();
   </script>
 </body>
 </html>

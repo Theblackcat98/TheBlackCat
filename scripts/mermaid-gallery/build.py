@@ -7,7 +7,7 @@ edits (new examples, wording, structure) can be made in the data/template
 here and regenerated deterministically instead of hand-editing 2.3k lines.
 After regenerating, verify with a local server (see PR #9 notes).
 """
-import json, html, os, sys
+import json, html, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "mermaid_data.json")
@@ -22,12 +22,75 @@ idx_of = {d["id"]: i + 1 for i, d in enumerate(DIAGRAMS)}
 
 def esc(s): return html.escape(s, quote=True)
 
+# Extra search vocabulary per diagram: the words people actually type
+# (aliases, the code keyword's common names) that name/blurb/uses miss.
+KEYWORDS = {
+    "flowchart": ["flow chart", "process flow", "workflow", "decision tree"],
+    "sequence-diagram": ["uml", "api messages", "interactions", "autonumber", "alt text"],
+    "class-diagram": ["uml", "oop", "object oriented", "inheritance"],
+    "state-diagram": ["state machine", "fsm", "statechart", "finite state"],
+    "entity-relationship": ["erd", "er diagram", "database schema", "db schema", "entities", "database"],
+    "user-journey": ["ux", "experience map", "customer journey"],
+    "gantt-chart": ["project schedule", "roadmap", "project timeline", "scheduling"],
+    "requirement-diagram": ["requirements", "sysml", "specification"],
+    "mindmap": ["mind map", "brainstorm", "ideas"],
+    "timeline": ["history", "events", "milestones", "chronology"],
+    "kanban-board": ["board", "tasks", "todo", "to do", "agile"],
+    "pie-chart": ["proportions", "share", "percentage"],
+    "quadrant-chart": ["matrix", "2x2", "priority matrix", "two by two"],
+    "xy-chart": ["line chart", "bar chart", "scatter", "axes"],
+    "sankey-diagram": ["flow diagram", "energy flow", "conservation"],
+    "radar-chart": ["spider chart", "skills chart", "comparison"],
+    "treemap": ["tree map", "hierarchy", "nested rectangles"],
+    "git-graph": ["gitgraph", "branching", "commits", "version control", "git"],
+    "c4-diagram": ["c4context", "software architecture", "system context", "architecture"],
+    "packet-diagram": ["network", "protocol", "bits", "bytes", "tcp", "header"],
+    "block-diagram": ["blocks", "components", "system diagram"],
+    "architecture-diagram": ["infrastructure", "cloud", "services", "architecture"],
+    "info": ["version", "diagnostic", "about"],
+}
+
+# Diagram-type keywords that open an example; highlighted in the source.
+DIAGRAM_KEYWORDS = {
+    "flowchart", "graph", "sequenceDiagram", "classDiagram", "stateDiagram-v2",
+    "stateDiagram", "erDiagram", "journey", "gantt", "requirementDiagram",
+    "mindmap", "timeline", "kanban", "pie", "quadrantChart", "xychart-beta",
+    "sankey-beta", "radar-beta", "treemap-beta", "gitGraph", "C4Context",
+    "C4Container", "C4Component", "packet-beta", "block-beta",
+    "architecture-beta", "info",
+}
+
+_TOKEN_RE = re.compile(r'(%%[^\n]*)|("(?:[^"\\]|\\.)*")')
+
+def highlight(code):
+    """Escape Mermaid source, wrapping comments, quoted strings and the
+    opening diagram keyword in token spans. Purely presentational: the
+    text content of the result is identical to the input."""
+    parts, pos = [], 0
+    for m in _TOKEN_RE.finditer(code):
+        if m.start() > pos:
+            parts.append((code[pos:m.start()], None))
+        parts.append((m.group(0), "tok-c" if m.group(1) is not None else "tok-s"))
+        pos = m.end()
+    if pos < len(code):
+        parts.append((code[pos:], None))
+    if parts and parts[0][1] is None:
+        m = re.match(r"(\s*)([A-Za-z][\w-]*)", parts[0][0])
+        if m and m.group(2) in DIAGRAM_KEYWORDS:
+            head, tail = parts[0][0][:m.end()], parts[0][0][m.end():]
+            parts = [(head, "tok-k")] + ([(tail, None)] if tail else []) + parts[1:]
+    return "".join(
+        f'<span class="{cls}">{esc(text)}</span>' if cls else esc(text)
+        for text, cls in parts)
+
 def code_block(d):
-    return f"<pre><code>{esc(d['code'])}</code></pre>"
+    return f"<pre><code>{highlight(d['code'])}</code></pre>"
 
 def card(d):
     i = idx_of[d["id"]]
-    search = esc((d["name"] + " " + d["blurb"] + " " + " ".join(d["uses"])).lower())
+    haystack = " ".join([d["name"], d["blurb"], " ".join(d["uses"]),
+                         " ".join(KEYWORDS.get(d["id"], [])), d["code"]])
+    search = esc(haystack.lower())
     uses = "".join(f"<li>{esc(u)}</li>" for u in d["uses"])
     note = f'<div class="curiosity">{esc(d["note"])}</div>' if d.get("note") else ""
     return f'''<article class="diagram-card" id="{d["id"]}" data-name="{esc(d["name"])}" data-search="{search}">
@@ -39,6 +102,7 @@ def card(d):
               </div>
               <div class="card-actions js-only">
                 <button class="mini-btn" type="button" data-copy="{d["id"]}">{ICON_COPY}<span>Copy</span></button>
+                <button class="mini-btn" type="button" data-link="{d["id"]}">{ICON_LINK}<span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="{d["id"]}">{ICON_UP}<span>Use as template</span></button>
               </div>
             </header>
@@ -83,6 +147,7 @@ def mobile_group(c):
     return f'<div><span class="mobile-index-title">{esc(c["label"])}</span>{links}</div>'
 
 ICON_COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>'
+ICON_LINK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>'
 ICON_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg>'
 ICON_ZOOM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg>'
 ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg>'
@@ -136,7 +201,7 @@ DARK_VARS = """      --bg: #0f1719;
       --warning-bg: #3c321b;
       --warning-ink: #f3d781;
       --shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
-      --diagram-bg: #f8fbfb;
+      --diagram-bg: #141f22;
       --focus: #ffad66;"""
 
 TEMPLATE = r'''<!doctype html>
@@ -272,10 +337,10 @@ TEMPLATE = r'''<!doctype html>
     #search::-webkit-search-cancel-button { display: none; }
     .search-clear {
       position: absolute;
-      right: 5px;
-      top: 5px;
-      width: 34px;
-      height: 34px;
+      right: 2px;
+      top: 2px;
+      width: 40px;
+      height: 40px;
       display: none;
       place-items: center;
       border: 0;
@@ -317,7 +382,7 @@ TEMPLATE = r'''<!doctype html>
     }
     .filter-list { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
     .filter {
-      min-height: 36px;
+      min-height: 40px;
       padding: 7px 11px;
       border: 1px solid transparent;
       border-radius: 999px;
@@ -397,7 +462,7 @@ TEMPLATE = r'''<!doctype html>
     #scratch-status { font-weight: 600; color: var(--accent); }
     .scratch-hint { color: var(--muted); }
     .scratch-bar button {
-      min-height: 34px;
+      min-height: 40px;
       padding: 6px 12px;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -442,7 +507,7 @@ TEMPLATE = r'''<!doctype html>
       display: flex;
       align-items: center;
       gap: 9px;
-      min-height: 31px;
+      min-height: 40px;
       padding: 4px 7px;
       border-radius: 7px;
       color: var(--muted);
@@ -516,7 +581,7 @@ TEMPLATE = r'''<!doctype html>
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      min-height: 36px;
+      min-height: 40px;
       padding: 6px 11px;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -588,8 +653,8 @@ TEMPLATE = r'''<!doctype html>
       right: 10px;
       display: grid;
       place-items: center;
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: color-mix(in srgb, var(--surface) 88%, transparent);
@@ -643,7 +708,7 @@ TEMPLATE = r'''<!doctype html>
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      min-height: 34px;
+      min-height: 40px;
       padding: 6px 10px;
       border: 1px solid #34494d;
       border-radius: 7px;
@@ -657,12 +722,14 @@ TEMPLATE = r'''<!doctype html>
     pre {
       margin: 0;
       padding: 14px 18px 22px;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      word-break: normal;
+      white-space: pre;
+      overflow-x: auto;
       font: 0.82rem/1.62 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
       tab-size: 2;
     }
+    pre .tok-k { color: #7ee0d2; font-weight: 600; }
+    pre .tok-s { color: #f3d781; }
+    pre .tok-c { color: #91a9ac; font-style: italic; }
 
     /* ---- zoom overlay ---- */
     .zoom-overlay {
@@ -686,8 +753,8 @@ TEMPLATE = r'''<!doctype html>
     .zoom-top h2 { margin: 0; font-size: 1.05rem; font-weight: 650; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .zoom-controls { display: flex; align-items: center; gap: 8px; }
     .zoom-controls button {
-      min-height: 34px;
-      min-width: 34px;
+      min-height: 40px;
+      min-width: 40px;
       padding: 4px 10px;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -721,6 +788,28 @@ TEMPLATE = r'''<!doctype html>
       background: var(--surface);
     }
     .empty-state strong { display: block; color: var(--ink); font-size: 1.15rem; margin-bottom: 4px; }
+    .empty-state p { margin: 0 0 16px; }
+    .empty-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .empty-actions button {
+      min-height: 40px;
+      padding: 6px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .empty-actions button:hover { background: var(--surface-2); }
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
     .footnote {
       margin-top: 28px;
       padding-top: 20px;
@@ -781,13 +870,8 @@ TEMPLATE = r'''<!doctype html>
       .card-head { grid-template-columns: 1fr; gap: 13px; }
       .card-actions { justify-content: flex-start; }
       .good-for { gap: 7px; }
-      .good-for::before { width: 100%; }
-      .good-for li { width: 100%; }
-      .good-for li:not(:last-child)::after { display: none; }
-      .good-for li::before { content: "—"; color: var(--accent); }
       .diagram-stage { min-height: 235px; padding: 14px; }
-      .diagram-stage svg { max-height: 540px; }
-      pre { font-size: 0.75rem; }
+      pre { font-size: 0.78rem; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -877,11 +961,17 @@ TEMPLATE = r'''<!doctype html>
 
     <div class="empty-state" id="empty-state" role="status">
       <strong>No matching diagrams</strong>
-      Try a different term or choose another category.
+      <p id="empty-detail">Try a different term or choose another category.</p>
+      <div class="empty-actions">
+        <button type="button" id="empty-clear">Clear search</button>
+        <button type="button" id="empty-all">Show all %%N%%</button>
+      </div>
     </div>
 
     <p class="footnote"><strong>Scope note.</strong> These %%N%% examples were syntax-checked with Mermaid 11.17.2, which is bundled with this page (<code>vendor/mermaid.min.js</code>)—no third-party requests. ZenUML is not included because it requires an experimental configuration; the final “Info” example is a diagnostic that displays the Mermaid version currently running.</p>
   </main>
+
+  <div id="app-status" class="sr-only" role="status"></div>
 
   <div class="zoom-overlay" id="zoom-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="zoom-title">
     <div class="zoom-top">
@@ -922,6 +1012,7 @@ TEMPLATE = r'''<!doctype html>
     let scratchCycle = 0;
     let zoomBase = null;
     let zoomScale = 1;
+    let renderObserver = null;
 
     const escapeHtml = value => String(value).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
     const cardById = id => document.getElementById(id);
@@ -933,14 +1024,44 @@ TEMPLATE = r'''<!doctype html>
       label.textContent = message;
       setTimeout(() => { label.textContent = previous; }, ms || 1600);
     };
+    const announce = message => {
+      const el = $("#app-status");
+      if (el) el.textContent = message;
+    };
+
+    function isDark() {
+      const forced = document.documentElement.dataset.theme;
+      if (forced) return forced === "dark";
+      return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
 
     function mermaidConfig() {
+      const pie = {
+        pie1: "#087c72",
+        pie2: "#e37726",
+        pie3: "#5b748d",
+        pie4: "#d2ab37",
+        pie5: "#9b6b80"
+      };
       return {
         startOnLoad: false,
         securityLevel: "strict",
         theme: "base",
         fontFamily: '"Avenir Next", "Segoe UI", Helvetica, sans-serif',
-        themeVariables: {
+        themeVariables: isDark() ? Object.assign({
+          background: "#141f22",
+          primaryColor: "#173d3a",
+          primaryTextColor: "#e7eeee",
+          primaryBorderColor: "#58c8bb",
+          lineColor: "#9db8ba",
+          secondaryColor: "#1e2c2f",
+          tertiaryColor: "#3c321b",
+          clusterBkg: "#1a282b",
+          clusterBorder: "#4a6165",
+          titleColor: "#e7eeee",
+          edgeLabelBackground: "#141f22",
+          fontSize: "15px"
+        }, pie) : Object.assign({
           background: "#fbfdfd",
           primaryColor: "#d8f1ed",
           primaryTextColor: "#172225",
@@ -952,13 +1073,8 @@ TEMPLATE = r'''<!doctype html>
           clusterBorder: "#8da5a8",
           titleColor: "#172225",
           edgeLabelBackground: "#fbfdfd",
-          fontSize: "15px",
-          pie1: "#087c72",
-          pie2: "#e37726",
-          pie3: "#5b748d",
-          pie4: "#d2ab37",
-          pie5: "#9b6b80"
-        },
+          fontSize: "15px"
+        }, pie),
         flowchart: { htmlLabels: true, curve: "basis" },
         sequence: { useMaxWidth: true, diagramMarginX: 20, diagramMarginY: 20 },
         gantt: { useMaxWidth: true },
@@ -998,16 +1114,32 @@ TEMPLATE = r'''<!doctype html>
     }
 
     function observeRenders() {
-      const io = new IntersectionObserver(entries => {
+      renderObserver = new IntersectionObserver(entries => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
             renderCard(entry.target);
-            io.unobserve(entry.target);
+            renderObserver.unobserve(entry.target);
           }
         }
       }, { rootMargin: "700px 0px" });
-      cards.forEach(card => io.observe(card));
+      cards.forEach(card => renderObserver.observe(card));
       renderNearViewport();
+    }
+
+    /* theme switch: diagrams are themed at render time, so re-render them
+       with the new config (visible/near ones now, the rest on approach) */
+    function rerenderDiagrams() {
+      if (!window.mermaid) return;
+      mermaid.initialize(mermaidConfig());
+      cards.forEach(card => {
+        delete card.dataset.rendered;
+        const target = $(".render-target", card);
+        if (target) target.innerHTML = '<span class="rendering">Rendering diagram…</span>';
+        if (renderObserver) renderObserver.observe(card);
+      });
+      renderNearViewport();
+      if (!overlay.hidden) closeZoom();
+      if (scratch.value.trim()) renderScratch();
     }
 
     /* rect-based fallback: IntersectionObserver delivery is unreliable in
@@ -1081,7 +1213,7 @@ TEMPLATE = r'''<!doctype html>
         try { copied = document.execCommand("copy"); } catch (_) { copied = false; }
         area.remove();
       }
-      if (copied) { flash(button, "Copied"); return true; }
+      if (copied) { flash(button, "Copied"); announce("Copied to clipboard"); return true; }
       const panel = button.closest(".source-panel");
       if (panel) {
         panel.open = true;
@@ -1092,6 +1224,10 @@ TEMPLATE = r'''<!doctype html>
         sel.removeAllRanges();
         sel.addRange(range);
         flash(button, "Press Ctrl+C", 2600);
+        announce("Copy failed — the code is selected; press Ctrl+C to copy it");
+      } else {
+        flash(button, "Copy failed", 2200);
+        announce("Copy failed");
       }
       return false;
     }
@@ -1133,7 +1269,7 @@ TEMPLATE = r'''<!doctype html>
         canvas.width = s.w * scale;
         canvas.height = s.h * scale;
         const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--diagram-bg").trim() || "#ffffff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         URL.revokeObjectURL(url);
@@ -1208,7 +1344,8 @@ TEMPLATE = r'''<!doctype html>
         let categoryShown = 0;
         section.querySelectorAll(".diagram-card").forEach(card => {
           const matchesCategory = activeCategory === "all" || section.dataset.category === activeCategory;
-          const matchesSearch = !query || card.dataset.search.includes(query);
+          const tokens = query.split(/\s+/).filter(Boolean);
+          const matchesSearch = tokens.every(token => card.dataset.search.includes(token));
           const visible = matchesCategory && matchesSearch;
           card.hidden = !visible;
           if (visible) { shown++; categoryShown++; }
@@ -1224,6 +1361,12 @@ TEMPLATE = r'''<!doctype html>
         });
       });
       emptyState.style.display = shown === 0 ? "block" : "none";
+      if (shown === 0) {
+        const catBtn = $(`.filter[data-filter="${activeCategory}"]`);
+        const where = activeCategory !== "all" && catBtn ? ` in “${catBtn.textContent.trim()}”` : "";
+        const what = query ? ` for “${searchInput.value.trim()}”` : "";
+        $("#empty-detail").textContent = `No results${what}${where}. Search matches names, use cases, code keywords and aliases — try fewer words, or reset below.`;
+      }
       searchClear.style.display = query ? "grid" : "none";
       matchCount.textContent = `${shown} / ${cards.length}`;
       syncUrl();
@@ -1263,6 +1406,12 @@ TEMPLATE = r'''<!doctype html>
       if (copy) {
         const card = copy.closest(".diagram-card");
         if (card) copyText(codeOf(card), copy);
+        return;
+      }
+
+      const link = event.target.closest("[data-link]");
+      if (link) {
+        copyText(location.origin + location.pathname + "#" + link.dataset.link, link);
         return;
       }
       if (event.target.closest("#scratch-copy")) {
@@ -1324,6 +1473,18 @@ TEMPLATE = r'''<!doctype html>
       searchInput.value = "";
       applyFilters();
       searchInput.focus();
+    });
+
+    $("#empty-clear").addEventListener("click", () => {
+      searchInput.value = "";
+      applyFilters();
+      searchInput.focus();
+    });
+    $("#empty-all").addEventListener("click", () => {
+      searchInput.value = "";
+      activeCategory = "all";
+      setFilterUI();
+      applyFilters();
     });
 
     document.addEventListener("keydown", event => {
@@ -1395,6 +1556,11 @@ TEMPLATE = r'''<!doctype html>
     themeBtn.addEventListener("click", () => {
       const current = document.documentElement.dataset.theme || "auto";
       applyTheme(THEMES[(THEMES.indexOf(current) + 1) % THEMES.length]);
+      rerenderDiagrams();
+    });
+
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+      if (!document.documentElement.dataset.theme) rerenderDiagrams();
     });
 
     window.addEventListener("hashchange", revealHashTarget);

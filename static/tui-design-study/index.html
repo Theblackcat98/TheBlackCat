@@ -70,6 +70,11 @@
     .progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:60}
     .progress span{display:block;height:100%;background:var(--accent);transform:scaleX(0);transform-origin:0 50%}
     .read-meta{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--muted);margin:0 0 26px}
+    .site-footer{max-width:1280px;margin:0 auto;padding:26px 28px 40px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px 28px;align-items:baseline;justify-content:space-between}
+    .site-footer nav{display:flex;flex-wrap:wrap;gap:8px 24px}
+    .site-footer a{font-family:"IBM Plex Mono",monospace;font-size:13px;text-decoration:none}
+    .site-footer a:hover{text-decoration:underline}
+    .site-footer .colophon{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--faint);margin:0}
     .shell{max-width:1280px;margin:0 auto;padding:28px 28px 80px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px}
     .rail{position:sticky;top:24px;align-self:start;height:calc(100vh - 48px);display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid var(--line);padding-right:24px}
     .rail nav{display:grid;gap:3px}
@@ -378,6 +383,15 @@
       </section>
     </main>
   </div>
+  <footer class="site-footer">
+    <nav aria-label="Back to the site">
+      <a href="../">← The BlackCat</a>
+      <a href="../tools/">All tools</a>
+      <a href="../library/programming/tui-design-study/">The write-up</a>
+      <a href="#thesis">Back to top ↑</a>
+    </nav>
+    <p class="colophon">TUI Design Study · part of The BlackCat library</p>
+  </footer>
   <script>
     const frameButtons = document.querySelectorAll('[data-frame]');
     frameButtons.forEach((button) => {

@@ -99,7 +99,7 @@
     .terminal-demo{background:var(--code);color:var(--code-ink);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
     .demo-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px 14px;border-bottom:1px solid var(--code-line)}
     .segmented{display:flex;gap:3px;background:#111b17;padding:3px;border-radius:7px}
-    .segmented button{border:0;background:transparent;color:var(--code-muted);padding:6px 10px;border-radius:5px;font-family:"IBM Plex Mono",monospace;font-size:12px;cursor:pointer}
+    .segmented button{border:0;background:transparent;color:var(--code-muted);min-height:40px;padding:10px 14px;border-radius:5px;font-family:"IBM Plex Mono",monospace;font-size:12px;cursor:pointer}
     .segmented button[aria-pressed="true"]{background:#283a33;color:#eef8f3}
     .demo-note{font-family:"IBM Plex Mono",monospace;color:var(--code-muted);font-size:11px;text-align:right}
     .frame{padding:22px;font-family:"IBM Plex Mono",monospace;font-size:13px;min-height:310px}
@@ -113,7 +113,7 @@
     .quiet-bottom{padding-top:10px;border-top:1px solid #304139;font-size:11px;color:#82978d}
     .quiet-top .status{color:#71d7b4}
     .quiet-main{padding:20px 0;display:grid;grid-template-columns:1.15fr .85fr;gap:26px}
-    .quiet-main h4{font-size:11px;font-weight:500;color:#82978d;margin:0 0 10px;text-transform:none}
+    .quiet-label{font-size:11px;font-weight:500;color:#82978d;margin:0 0 10px;text-transform:none}
     .model-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;padding:8px 0;border-bottom:1px solid #1f2c27}
     .model-row.active{color:#83dfbf}
     .meter{margin:0 0 16px}.meter-label{display:flex;justify-content:space-between;color:#a9bcb3;font-size:11px;margin-bottom:6px}.bar{height:8px;background:#1c2924}.fill{height:100%;background:#71d7b4}.fill.warn{background:#e5b56b}
@@ -135,7 +135,7 @@
     .patterns{display:grid;grid-template-columns:1fr 1fr;gap:28px}.pattern-col{padding-top:18px;border-top:2px solid var(--good)}.pattern-col.avoid{border-color:var(--danger)}.pattern-col ul{padding:0;margin:16px 0 0;list-style:none}.pattern-col li{padding:10px 0;border-bottom:1px solid var(--line);color:var(--muted)}
     .sources{padding-bottom:28px;border-bottom:0}.source-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.source-card{padding-top:15px;border-top:1px solid var(--line)}.source-card h3{font-size:15px}.source-card p{font-size:13px;color:var(--muted);margin:0}.caveat{margin-top:30px;padding:18px 20px;background:var(--surface-2);font-size:13px;color:var(--muted);border-radius:7px}.repo-link{display:inline-block;margin-top:10px;font-family:"IBM Plex Mono",monospace;font-size:12px}
     @media(max-width:900px){
-      .shell{grid-template-columns:1fr;padding:20px 20px 64px;gap:0}.rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:0 0 14px;margin-bottom:22px}.rail nav{display:flex;flex-wrap:wrap;gap:4px;padding-bottom:4px}.rail a{white-space:nowrap;flex:0 1 auto}.rail-note{display:none}.section-head,.signal-layout,.diagnosis{grid-template-columns:1fr;gap:20px}.theme-grid{grid-template-columns:1fr}.source-grid{grid-template-columns:1fr}.quiet-main{grid-template-columns:1fr}.demo-note{display:none}
+      .shell{grid-template-columns:1fr;padding:20px 20px 64px;gap:0}.rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:0 0 14px;margin-bottom:22px}.rail nav{display:flex;flex-wrap:wrap;gap:4px;padding-bottom:4px}.rail a{white-space:nowrap;flex:0 1 auto}.rail-note{display:none}.section-head,.signal-layout,.diagnosis{grid-template-columns:1fr;gap:20px}.theme-grid{grid-template-columns:1fr}.source-grid{grid-template-columns:1fr}.quiet-main{grid-template-columns:1fr}.demo-toolbar{flex-wrap:wrap}
     }
     @media(max-width:620px){
       .shell{padding-left:16px;padding-right:16px}.hero{padding-bottom:46px}section{padding:48px 0}.hero-grid{grid-template-columns:1fr}.stat{padding:15px 0}.stat+.stat{padding-left:0;border-left:0;border-top:1px solid var(--line)}.principles,.cluster-list,.patterns{grid-template-columns:1fr}.frame{padding:14px;min-height:0;font-size:10px}.ascii{font-size:9px}.road{grid-template-columns:38px minmax(0,1fr)}.impact{grid-column:2}.fact-line{grid-template-columns:1fr;gap:4px}.demo-toolbar{align-items:flex-start}.segmented{flex-wrap:wrap}.bar-row{grid-template-columns:86px 1fr 28px;font-size:11px}.theme-signal .big{font-size:44px}
@@ -203,12 +203,12 @@
         <div class="terminal-demo">
           <div class="demo-toolbar">
             <div class="segmented" role="group" aria-label="Choose interface comparison">
-              <button type="button" data-frame="noisy" aria-pressed="false">Nested chrome</button>
-              <button type="button" data-frame="quiet" aria-pressed="true">Quiet chrome</button>
+              <button type="button" data-frame="noisy" aria-pressed="true">Nested chrome</button>
+              <button type="button" data-frame="quiet" aria-pressed="false">Quiet chrome</button>
             </div>
             <span class="demo-note">Illustrative reconstruction, not a live app capture</span>
           </div>
-          <div class="frame noisy hidden" id="frame-noisy" aria-hidden="true">
+          <div class="frame noisy" id="frame-noisy" aria-hidden="false">
 <pre class="ascii">┌────────────────── <span class="hot">LLAMA-DECK v0.1.0</span> ──────────────────┐
 │ [1] Models  [2] Servers  [3] <span class="hot">Telemetry</span>  [4] Settings │
 ├──────────────── <span class="warn">SERVER TELEMETRY</span> ─────────────────┤
@@ -227,18 +227,18 @@
 │ q Quit  ? Help  Ctrl+P Palette  Tab Next  r Refresh │
 └─────────────────────────────────────────────────────┘</pre>
           </div>
-          <div class="frame quiet" id="frame-quiet" aria-hidden="false">
+          <div class="frame quiet hidden" id="frame-quiet" aria-hidden="true">
             <div class="quiet-ui">
               <div class="quiet-top"><span>llama-deck <span style="color:#789087">/ telemetry</span></span><span class="status">● server online</span></div>
               <div class="quiet-main">
                 <div>
-                  <h4>Recent throughput</h4>
+                  <p class="quiet-label">Recent throughput</p>
                   <div class="model-row active"><span>llama-server</span><span>24.8 tok/s</span></div>
                   <div class="model-row"><span>prompt eval</span><span>118.2 tok/s</span></div>
                   <div class="model-row"><span>active slots</span><span>2 / 4</span></div>
                 </div>
                 <div>
-                  <h4>Memory</h4>
+                  <p class="quiet-label">Memory</p>
                   <div class="meter"><div class="meter-label"><span>VRAM</span><span>61%</span></div><div class="bar"><div class="fill warn" style="width:61%"></div></div></div>
                   <div class="meter"><div class="meter-label"><span>KV cache</span><span>33%</span></div><div class="bar"><div class="fill" style="width:33%"></div></div></div>
                   <div class="meter"><div class="meter-label"><span>trend</span><span>▁▂▃▅▆▅▇█▇▆▆▇</span></div></div>

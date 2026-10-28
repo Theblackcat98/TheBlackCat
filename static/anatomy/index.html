@@ -164,10 +164,15 @@ h1{font-size:clamp(2rem,5vw,2.75rem);line-height:1.1;letter-spacing:-.02em;font-
 </div>
 
 <script>
-/* Open the build that matches the reader's theme; both files are always reachable by direct link. */
+/* Follow the theme the reader chose on the main site, then fall back to the OS.
+   Both builds stay reachable by direct link either way. */
 (function () {
   var root = document.documentElement;
   var dark = window.matchMedia("(prefers-color-scheme: dark)");
+  try {
+    var saved = localStorage.getItem("bc-theme");
+    if (saved === "light" || saved === "dark") { root.dataset.theme = saved; root.style.colorScheme = saved; }
+  } catch (_) {}
   function isDark() { return root.dataset.theme ? root.dataset.theme === "dark" : dark.matches; }
   function sync() {
     var pick = isDark() ? "data-dark" : "data-light";

@@ -41,8 +41,6 @@
     <style>
         * {
             box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
         }
         body {
             background-color: #090A0F;
@@ -51,6 +49,10 @@
             overflow: hidden;
             margin: 0;
             padding: 0;
+        }
+        :focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.9);
+            outline-offset: 2px;
         }
         /* Glassmorphic Surface Utilities */
         .glass-panel {
@@ -77,22 +79,45 @@
             box-shadow: 0 0 25px rgba(99, 102, 241, 0.25);
         }
 
-        /* Custom Minimal Range Sliders */
+        /* Custom Minimal Range Sliders — the input itself is a 24px-tall
+           touch target; only the 4px runnable track is drawn. */
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
             width: 100%;
+            height: 24px;
+            background: transparent;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
             height: 4px;
             background: rgba(255, 255, 255, 0.12);
             border-radius: 999px;
-            outline: none;
-            cursor: pointer;
+        }
+        input[type="range"]::-moz-range-track {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+        }
+        input[type="range"]:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.9);
+            outline-offset: 2px;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #F3F4F6;
+            border: 2px solid #6366F1;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.8);
+            cursor: grab;
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 14px;
-            height: 14px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             background: #F3F4F6;
             border: 2px solid #6366F1;
@@ -163,7 +188,7 @@
         }
     </style>
 </head>
-<body class="relative w-screen h-screen overflow-hidden select-none">
+<body class="relative w-screen h-screen overflow-hidden">
 
     <!-- MAIN INTERACTIVE GENERATIVE CANVAS (Full Viewport) -->
     <canvas id="atelierCanvas" class="fixed inset-0 w-full h-full block z-0 cursor-crosshair atelier-grid-bg"></canvas>
@@ -347,20 +372,20 @@
         </div>
 
         <!-- Primary Studio Switcher (4 Extensive Studios) -->
-        <nav class="glass-panel p-1.5 rounded-2xl flex items-center gap-1 sm:gap-1.5 pointer-events-auto overflow-x-auto max-w-[60vw] sm:max-w-none">
-            <button onclick="switchStudio('attractors')" id="tab-attractors" class="studio-tab glass-pill active px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap">
+        <nav role="tablist" aria-label="Studios" class="glass-panel p-1.5 rounded-2xl flex items-center gap-1 sm:gap-1.5 pointer-events-auto overflow-x-auto max-w-[60vw] sm:max-w-none">
+            <button onclick="switchStudio('attractors')" id="tab-attractors" role="tab" aria-selected="true" class="studio-tab glass-pill active px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap">
                 <i class="ph ph-planet text-sm text-indigo-400"></i>
                 <span>I. Strange Attractors</span>
             </button>
-            <button onclick="switchStudio('harmonograph')" id="tab-harmonograph" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
+            <button onclick="switchStudio('harmonograph')" id="tab-harmonograph" role="tab" aria-selected="false" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
                 <i class="ph ph-spiral text-sm text-amber-400"></i>
                 <span>II.Sacred &amp; Harmonics</span>
             </button>
-            <button onclick="switchStudio('emergence')" id="tab-emergence" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
+            <button onclick="switchStudio('emergence')" id="tab-emergence" role="tab" aria-selected="false" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
                 <i class="ph ph-waves text-sm text-emerald-400"></i>
                 <span>III. Cymatics &amp; Morphogenesis</span>
             </button>
-            <button onclick="switchStudio('chromatics')" id="tab-chromatics" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
+            <button onclick="switchStudio('chromatics')" id="tab-chromatics" role="tab" aria-selected="false" class="studio-tab glass-pill px-3 sm:px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-2 whitespace-nowrap text-mutedSilver">
                 <i class="ph ph-palette text-sm text-rose-400"></i>
                 <span>IV. Chromatic Lab</span>
             </button>
@@ -368,11 +393,11 @@
 
         <!-- Right Quick Actions: Global Palette Pill & Export -->
         <div class="glass-panel px-3 py-1.5 rounded-2xl flex items-center gap-2 pointer-events-auto">
-            <button onclick="cycleGlobalPalette()" title="Cycle Active Color Palette" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+            <button onclick="cycleGlobalPalette()" title="Cycle Active Color Palette" aria-label="Cycle active color palette" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <div id="miniPalettePreview" class="w-12 h-3.5 rounded-full"></div>
                 <span id="activePaletteName" class="text-[11px] font-mono text-alabaster hidden xl:inline">Vermeer Lapis</span>
             </button>
-            <button onclick="toggleCodexModal()" title="Mathematical Formula Codex" aria-label="Open mathematical formula codex" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-alabaster transition">
+            <button onclick="toggleCodexModal()" id="codexOpenBtn" title="Mathematical Formula Codex" aria-label="Open mathematical formula codex" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-alabaster transition">
                 <i class="ph ph-book-open-text text-base"></i>
             </button>
             <button onclick="copyShareLink()" title="Copy a link that restores this exact atelier state" aria-label="Copy share link" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-alabaster transition">
@@ -577,14 +602,14 @@
     </div>
 
     <!-- MATHEMATICAL CODEX MODAL (Educational Deep-Dive into the Equations) -->
-    <div id="codexModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div id="codexModal" role="dialog" aria-modal="true" aria-labelledby="codexTitle" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
         <div class="glass-panel max-w-3xl w-full rounded-3xl p-6 sm:p-8 max-h-[85vh] overflow-y-auto space-y-6 border border-white/15">
             <div class="flex items-start justify-between border-b border-white/10 pb-4">
                 <div>
                     <span class="text-xs font-mono uppercase tracking-widest text-indigoAccent">ARCHITECTURAL CODEX</span>
-                    <h2 class="font-display text-3xl font-semibold text-white mt-0.5">The Mathematics of Generative Beauty</h2>
+                    <h2 id="codexTitle" class="font-display text-3xl font-semibold text-white mt-0.5">The Mathematics of Generative Beauty</h2>
                 </div>
-                <button onclick="toggleCodexModal()" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white">
+                <button onclick="toggleCodexModal()" id="codexCloseBtn" aria-label="Close codex" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white">
                     <i class="ph ph-x text-lg"></i>
                 </button>
             </div>
@@ -593,21 +618,23 @@
                 <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
                     <h3 class="font-display text-xl font-semibold text-indigo-300">I. Strange Attractors &amp; Chaos</h3>
                     <p class="text-xs text-mutedSilver leading-relaxed">
-                        Deterministic nonlinear systems whose trajectories never repeat (aperiodic) yet remain confined to a complex fractal manifold in phase space. Slight changes to initial parameters ($a, b, c, d$) cause bifurcations between delicate silk filaments and dense topological knots.
+                        Deterministic nonlinear systems whose trajectories never repeat (aperiodic) yet remain confined to a complex fractal manifold in phase space. Slight changes to initial parameters (<span class="math-serif">a, b, c, d</span>) cause bifurcations between delicate silk filaments and dense topological knots.
                     </p>
                     <p class="font-mono text-[11px] text-alabaster/80 bg-black/40 p-2 rounded-lg">
-                        Clifford, De Jong, Lorenz ($\sigma, \rho, \beta$), and Halvorsen 3D cyclic symmetry.
+                        Clifford, De Jong, Lorenz (<span class="math-serif">&sigma;, &rho;, &beta;</span>), and Halvorsen 3D cyclic symmetry.
                     </p>
+                    <button onclick="openCodexSystem('attractors')" class="glass-pill px-3 py-1.5 rounded-lg text-[11px] font-mono text-indigo-200">Open Studio I &rarr;</button>
                 </div>
 
                 <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
                     <h3 class="font-display text-xl font-semibold text-amber-300">II. Phyllotaxis &amp; Harmonographs</h3>
                     <p class="text-xs text-mutedSilver leading-relaxed">
-                        Botanical primordia pack most efficiently when successive elements diverge by the Golden Angle $\phi = 360^\circ(1 - 1/\varphi) \approx 137.50776^\circ$. Deviating by even $0.1^\circ$ transforms Fibonacci spirals into radial spokes. Harmonographs model damped coupled pendulums.
+                        Botanical primordia pack most efficiently when successive elements diverge by the Golden Angle <span class="math-serif">&phi; = 360&deg;(1 &minus; 1/&phi;) &asymp; 137.50776&deg;</span>. Deviating by even 0.1&deg; transforms Fibonacci spirals into radial spokes. Harmonographs model damped coupled pendulums.
                     </p>
                     <p class="font-mono text-[11px] text-alabaster/80 bg-black/40 p-2 rounded-lg">
                         r = c&radic;n, &theta; = n &middot; 137.50776&deg; | Maurer Roses &amp; Fourier Phasors.
                     </p>
+                    <button onclick="openCodexSystem('harmonograph')" class="glass-pill px-3 py-1.5 rounded-lg text-[11px] font-mono text-amber-200">Open Studio II &rarr;</button>
                 </div>
 
                 <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
@@ -618,16 +645,18 @@
                     <p class="font-mono text-[11px] text-alabaster/80 bg-black/40 p-2 rounded-lg">
                         cos(n&pi;x)cos(m&pi;y) - cos(m&pi;x)cos(n&pi;y) = 0
                     </p>
+                    <button onclick="openCodexSystem('emergence')" class="glass-pill px-3 py-1.5 rounded-lg text-[11px] font-mono text-emerald-200">Open Studio III &rarr;</button>
                 </div>
 
                 <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
                     <h3 class="font-display text-xl font-semibold text-rose-300">IV. Spectral Cosine Synthesis</h3>
                     <p class="text-xs text-mutedSilver leading-relaxed">
-                        Popularized by shader pioneer Inigo Quilez, any smooth continuous artistic gradient can be compactly parameterized by four 3D vectors $(a, b, c, d)$ driving a cosine wave for Red, Green, and Blue channels, avoiding muddy linear RGB transitions.
+                        Popularized by shader pioneer Inigo Quilez, any smooth continuous artistic gradient can be compactly parameterized by four 3D vectors (<span class="math-serif">a, b, c, d</span>) driving a cosine wave for Red, Green, and Blue channels, avoiding muddy linear RGB transitions.
                     </p>
                     <p class="font-mono text-[11px] text-alabaster/80 bg-black/40 p-2 rounded-lg">
                         C(t) = a + b &middot; cos(2&pi;(c &middot; t + d))
                     </p>
+                    <button onclick="openCodexSystem('chromatics')" class="glass-pill px-3 py-1.5 rounded-lg text-[11px] font-mono text-rose-200">Open Studio IV &rarr;</button>
                 </div>
             </div>
 
@@ -640,7 +669,7 @@
     </div>
 
     <!-- TOAST NOTIFICATION -->
-    <div id="toastBox" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 hidden pointer-events-none">
+    <div id="toastBox" role="status" aria-live="polite" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 hidden pointer-events-none">
         <div class="glass-panel px-4 py-2.5 rounded-xl border border-indigo-500/40 text-xs font-mono text-white shadow-2xl flex items-center gap-2 toast-enter">
             <i class="ph-fill ph-check-circle text-emerald-400 text-base"></i>
             <span id="toastMessage">Copied to clipboard</span>
@@ -1261,11 +1290,13 @@
             document.querySelectorAll('.studio-tab').forEach(btn => {
                 btn.classList.remove('active', 'text-white');
                 btn.classList.add('text-mutedSilver');
+                btn.setAttribute('aria-selected', 'false');
             });
             const activeTab = document.getElementById(`tab-${studioKey}`);
             if (activeTab) {
                 activeTab.classList.add('active', 'text-white');
                 activeTab.classList.remove('text-mutedSilver');
+                activeTab.setAttribute('aria-selected', 'true');
             }
 
             const chromaticView = document.getElementById('chromaticStudioView');
@@ -1558,9 +1589,25 @@
             }
         }
 
-        function toggleCodexModal() {
+        let codexReturnFocus = null;
+        function toggleCodexModal(force) {
             const modal = document.getElementById('codexModal');
-            modal.classList.toggle('hidden');
+            const willOpen = typeof force === 'boolean' ? force : modal.classList.contains('hidden');
+            if (willOpen) {
+                codexReturnFocus = document.activeElement;
+                modal.classList.remove('hidden');
+                const closeBtn = document.getElementById('codexCloseBtn');
+                if (closeBtn) closeBtn.focus();
+            } else {
+                modal.classList.add('hidden');
+                if (codexReturnFocus && typeof codexReturnFocus.focus === 'function') codexReturnFocus.focus();
+                codexReturnFocus = null;
+            }
+        }
+
+        function openCodexSystem(studioKey) {
+            toggleCodexModal(false);
+            switchStudio(studioKey);
         }
 
         /***********************************************************************
@@ -2586,6 +2633,14 @@
                 clearTimeout(resizeTimer);
                 resizeTimer = setTimeout(() => resizeCanvas(true), 120);
             });
+
+            // Codex modal: clicking the backdrop (not the panel) closes it
+            const codexModalEl = document.getElementById('codexModal');
+            if (codexModalEl) {
+                codexModalEl.addEventListener('click', (e) => {
+                    if (e.target === codexModalEl) toggleCodexModal(false);
+                });
+            }
 
             // Mouse & Touch Events on Main Canvas
             canvas.addEventListener('pointerdown', (e) => {

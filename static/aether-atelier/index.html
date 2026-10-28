@@ -150,6 +150,13 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
+        /* Collapsed panels shrink to a slim chip on small screens, so a
+           collapsed panel never covers the other panel's controls. */
+        @media (max-width: 820px) {
+            .panel-chip { width: auto !important; }
+            .panel-chip .chip-hide { display: none !important; }
+        }
+
         /* Subtle Ambient Grid Overlay */
         .atelier-grid-bg {
             background-size: 48px 48px;
@@ -421,12 +428,12 @@
         <!-- Live Equation Display Card -->
         <div id="leftPanelCard" class="glass-panel rounded-2xl p-4 sm:p-5 pointer-events-auto space-y-3 max-h-[calc(100vh-190px)] overflow-y-auto">
             <div class="flex items-center justify-between">
-                <span id="formulaCategoryTag" class="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                <span id="formulaCategoryTag" class="chip-hide text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                     CHAOTIC DYNAMICAL SYSTEM
                 </span>
                 <div class="flex items-center gap-1.5 text-[11px] font-mono text-mutedSilver">
-                    <span id="fpsCounter">60 FPS</span>
-                    <span>&bull;</span>
+                    <span id="fpsCounter" class="chip-hide">60 FPS</span>
+                    <span class="chip-hide">&bull;</span>
                     <button onclick="togglePanelCollapse('left')" id="leftCollapseBtn" class="hover:text-white" title="Collapse panel" aria-label="Collapse info panel" aria-expanded="true">
                         <i class="ph ph-arrows-in-simple"></i>
                     </button>
@@ -488,15 +495,15 @@
     <aside id="rightParameterHUD" class="fixed top-20 right-3 sm:right-6 z-20 w-72 sm:w-80 pointer-events-none transition-all duration-300">
         <div class="glass-panel rounded-2xl p-4 sm:p-5 pointer-events-auto max-h-[calc(100vh-140px)] overflow-y-auto space-y-4">
             <div class="flex items-center justify-between border-b border-white/10 pb-3">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 chip-hide">
                     <i class="ph ph-sliders-horizontal text-indigo-400 text-lg"></i>
                     <h3 class="font-sans text-xs font-semibold uppercase tracking-wider text-white">Live Parameters</h3>
                 </div>
                 <div class="flex items-center gap-1">
-                    <button onclick="resetCurrentSystem()" title="Reset View & Canvas" aria-label="Reset view and canvas" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
+                    <button onclick="resetCurrentSystem()" title="Reset View & Canvas" aria-label="Reset view and canvas" class="chip-hide p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
                         <i class="ph ph-arrow-counter-clockwise"></i>
                     </button>
-                    <button onclick="togglePauseSimulation()" id="pauseBtn" title="Pause / Resume Integration" aria-label="Pause or resume simulation" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
+                    <button onclick="togglePauseSimulation()" id="pauseBtn" title="Pause / Resume Integration" aria-label="Pause or resume simulation" class="chip-hide p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
                         <i id="pauseIcon" class="ph ph-pause"></i>
                     </button>
                     <button onclick="togglePanelCollapse('right')" id="rightCollapseBtn" title="Collapse panel" aria-label="Collapse parameters panel" aria-expanded="true" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-mutedSilver hover:text-white text-xs transition">
@@ -2901,13 +2908,15 @@
             const willCollapse = !body.classList.contains('hidden');
             // On narrow screens the panels behave as drawers: opening one
             // closes the other, so they never overlap the canvas together.
-            if (!willCollapse && window.innerWidth < 640) {
+            if (!willCollapse && window.innerWidth < 900) {
                 const other = side === 'left' ? 'right' : 'left';
                 const otherBody = document.getElementById(other === 'left' ? 'leftPanelBody' : 'rightPanelBody');
                 if (otherBody && !otherBody.classList.contains('hidden')) togglePanelCollapse(other);
             }
             body.classList.toggle('hidden', willCollapse);
             panelCollapsed[side] = willCollapse;
+            const aside = body.closest('aside');
+            if (aside) aside.classList.toggle('panel-chip', willCollapse);
             if (btn) {
                 btn.setAttribute('aria-expanded', String(!willCollapse));
                 btn.title = willCollapse ? 'Expand panel' : 'Collapse panel';
@@ -2950,7 +2959,7 @@
             updateQualityNote();
             // On phone-width screens the parameter HUD starts collapsed, so
             // the two panels never stack across the canvas on first paint.
-            if (window.innerWidth < 640) togglePanelCollapse('right');
+            if (window.innerWidth < 760) togglePanelCollapse('right');
             requestAnimationFrame(animateLoop);
 
             // Autosave loop + flush when the tab goes away

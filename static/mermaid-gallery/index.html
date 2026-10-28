@@ -4,6 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Every Mermaid v11 diagram type — 23 working examples with copyable source, plus a live scratchpad: paste any Mermaid code and render it as you type." />
+  <meta property="og:site_name" content="The BlackCat" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Mermaid.js Gallery — every diagram type, with a live scratchpad" />
+  <meta property="og:description" content="23 Mermaid v11 diagram types with working examples and copyable source, plus a scratchpad that renders your own code as you type." />
+  <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/mermaid-gallery/" />
+  <meta property="og:image" content="../og.png" />
+  <meta name="twitter:card" content="summary" />
   <link rel="icon" href="data:," />
   <title>Mermaid.js Gallery</title>
   <style>
@@ -28,26 +36,43 @@
       --radius-lg: 20px;
       --radius-md: 12px;
     }
-
     @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0f1719;
-        --surface: #162124;
-        --surface-2: #1e2c2f;
-        --ink: #e7eeee;
-        --muted: #adbdc0;
-        --line: #314145;
-        --accent: #58c8bb;
-        --accent-ink: #082c28;
-        --accent-soft: #173d3a;
-        --code-bg: #091113;
-        --code-ink: #d5e4e5;
-        --warning-bg: #3c321b;
-        --warning-ink: #f3d781;
-        --shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
-        --diagram-bg: #f8fbfb;
-        --focus: #ffad66;
+      :root:not([data-theme="light"]) {
+      --bg: #0f1719;
+      --surface: #162124;
+      --surface-2: #1e2c2f;
+      --ink: #e7eeee;
+      --muted: #adbdc0;
+      --line: #314145;
+      --accent: #58c8bb;
+      --accent-ink: #082c28;
+      --accent-soft: #173d3a;
+      --code-bg: #091113;
+      --code-ink: #d5e4e5;
+      --warning-bg: #3c321b;
+      --warning-ink: #f3d781;
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
+      --diagram-bg: #f8fbfb;
+      --focus: #ffad66;
       }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0f1719;
+      --surface: #162124;
+      --surface-2: #1e2c2f;
+      --ink: #e7eeee;
+      --muted: #adbdc0;
+      --line: #314145;
+      --accent: #58c8bb;
+      --accent-ink: #082c28;
+      --accent-soft: #173d3a;
+      --code-bg: #091113;
+      --code-ink: #d5e4e5;
+      --warning-bg: #3c321b;
+      --warning-ink: #f3d781;
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
+      --diagram-bg: #f8fbfb;
+      --focus: #ffad66;
     }
 
     * { box-sizing: border-box; }
@@ -61,7 +86,7 @@
       font-size: 16px;
       line-height: 1.5;
     }
-    button, input, select { font: inherit; }
+    button, input, select, textarea { font: inherit; }
     button, a { -webkit-tap-highlight-color: transparent; }
     a { color: inherit; }
     :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
@@ -116,7 +141,7 @@
       top: 0;
       z-index: 20;
       display: grid;
-      grid-template-columns: minmax(230px, 1fr) auto;
+      grid-template-columns: minmax(230px, 1fr) auto auto;
       gap: 12px;
       align-items: center;
       margin: 18px 0 24px;
@@ -148,6 +173,7 @@
       box-shadow: inset 0 0 0 1px var(--line);
     }
     #search::placeholder { color: var(--muted); }
+    #search::-webkit-search-cancel-button { display: none; }
     .search-clear {
       position: absolute;
       right: 5px;
@@ -163,6 +189,26 @@
       cursor: pointer;
     }
     .search-clear:hover { background: var(--surface-2); color: var(--ink); }
+    .match-count {
+      min-width: 92px;
+      text-align: center;
+      color: var(--muted);
+      font: 0.78rem/1.3 "SFMono-Regular", Consolas, monospace;
+      white-space: nowrap;
+    }
+    .theme-toggle {
+      min-height: 40px;
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .theme-toggle:hover { background: var(--surface-2); }
     .toolbar select {
       display: none;
       width: 100%;
@@ -188,6 +234,83 @@
     }
     .filter:hover { background: var(--surface-2); color: var(--ink); }
     .filter.active { background: var(--accent); color: var(--accent-ink); }
+
+    .mobile-index { display: none; }
+
+    /* ---- scratchpad ---- */
+    .scratchpad {
+      margin: 26px 0 40px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: clip;
+    }
+    .scratch-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 24px;
+      align-items: end;
+      justify-content: space-between;
+      padding: clamp(18px, 3vw, 26px) clamp(18px, 3.5vw, 34px) 14px;
+    }
+    .scratch-head h2 {
+      margin: 0 0 6px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 400;
+      font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+      letter-spacing: -0.02em;
+    }
+    .scratch-head p { margin: 0; color: var(--muted); font-size: 0.92rem; max-width: 560px; }
+    .scratch-start { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
+    .scratch-start select {
+      height: 38px;
+      padding: 0 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+      max-width: 220px;
+    }
+    #scratch-code {
+      display: block;
+      width: calc(100% - 2 * clamp(18px, 3.5vw, 34px));
+      min-height: 170px;
+      max-height: 60vh;
+      margin: 0 clamp(18px, 3.5vw, 34px);
+      padding: 14px 16px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--code-bg);
+      color: var(--code-ink);
+      font: 0.84rem/1.6 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      tab-size: 2;
+    }
+    #scratch-code::placeholder { color: #7d9599; }
+    .scratch-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      align-items: center;
+      padding: 12px clamp(18px, 3.5vw, 34px);
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+    .scratch-bar .grow { flex: 1; min-width: 120px; }
+    #scratch-status { font-weight: 600; color: var(--accent); }
+    .scratch-hint { color: var(--muted); }
+    .scratch-bar button {
+      min-height: 34px;
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .scratch-bar button:hover { background: var(--surface-2); }
 
     .layout {
       display: grid;
@@ -292,22 +415,24 @@
       margin: 8px 0 0;
       color: var(--muted);
     }
-    .source-toggle {
+    .card-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .mini-btn {
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      min-height: 38px;
-      padding: 7px 12px;
+      min-height: 36px;
+      padding: 6px 11px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--surface);
       color: var(--ink);
       cursor: pointer;
-      font-weight: 650;
+      font-weight: 600;
+      font-size: 0.85rem;
       white-space: nowrap;
     }
-    .source-toggle:hover { background: var(--surface-2); }
-    .source-toggle svg { width: 16px; height: 16px; }
+    .mini-btn:hover { background: var(--surface-2); }
+    .mini-btn svg { width: 15px; height: 15px; }
 
     .good-for {
       display: flex;
@@ -346,13 +471,11 @@
         repeating-linear-gradient(0deg, transparent 0 27px, rgba(6,124,114,.04) 27px 28px);
       border-top: 1px solid var(--line);
       overflow: hidden;
+      cursor: zoom-in;
     }
     .diagram-stage .render-target { width: 100%; min-width: 0; text-align: center; }
     .diagram-stage svg { display: block; max-width: 100% !important; height: auto !important; margin: 0 auto; }
-    .rendering {
-      color: #51676b;
-      font-size: 0.9rem;
-    }
+    .rendering { color: #51676b; font-size: 0.9rem; }
     .render-error {
       width: min(560px, 100%);
       padding: 16px;
@@ -361,24 +484,65 @@
       background: #fff0ef;
       color: #74241f;
       text-align: left;
+      cursor: default;
     }
+    .zoom-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+      color: var(--ink);
+      cursor: zoom-in;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .zoom-btn svg { width: 18px; height: 18px; }
+    .diagram-stage:hover .zoom-btn, .diagram-stage:focus-within .zoom-btn, .zoom-btn:focus-visible { opacity: 1; }
+    @media (hover: none) { .zoom-btn { opacity: 1; } }
 
-    .source-panel {
-      display: none;
-      background: var(--code-bg);
-      color: var(--code-ink);
-      border-top: 1px solid color-mix(in srgb, var(--line) 45%, transparent);
+    .source-panel { border-top: 1px solid var(--line); }
+    .source-panel summary {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px clamp(18px, 3.5vw, 34px);
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 650;
+      font-size: 0.92rem;
+      list-style: none;
+      user-select: none;
     }
-    .source-panel.open { display: block; }
+    .source-panel summary::-webkit-details-marker { display: none; }
+    .source-panel summary::before {
+      content: "";
+      width: 0; height: 0;
+      border-left: 6px solid var(--accent);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      transition: transform 0.15s;
+    }
+    .source-panel[open] summary::before { transform: rotate(90deg); }
+    .source-panel[open] summary { border-bottom: 1px solid color-mix(in srgb, var(--line) 45%, transparent); }
+    .source-body { background: var(--code-bg); color: var(--code-ink); }
     .source-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
       gap: 12px;
       padding: 11px 14px 0 18px;
       color: #91a9ac;
       font: 0.76rem/1.4 "SFMono-Regular", Consolas, monospace;
     }
+    .source-actions { display: flex; gap: 8px; flex-wrap: wrap; }
     .copy-btn {
       display: inline-flex;
       align-items: center;
@@ -390,6 +554,7 @@
       background: #203034;
       color: #d9e7e8;
       cursor: pointer;
+      font-size: 0.82rem;
     }
     .copy-btn:hover { background: #293d41; }
     .copy-btn svg { width: 14px; height: 14px; }
@@ -402,6 +567,44 @@
       font: 0.82rem/1.62 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
       tab-size: 2;
     }
+
+    /* ---- zoom overlay ---- */
+    .zoom-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      backdrop-filter: blur(6px);
+    }
+    .zoom-overlay[hidden] { display: none; }
+    .zoom-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .zoom-top h2 { margin: 0; font-size: 1.05rem; font-weight: 650; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .zoom-controls { display: flex; align-items: center; gap: 8px; }
+    .zoom-controls button {
+      min-height: 34px;
+      min-width: 34px;
+      padding: 4px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 650;
+    }
+    .zoom-controls button:hover { background: var(--surface-2); }
+    #zoom-pct { min-width: 52px; text-align: center; color: var(--muted); font: 0.82rem "SFMono-Regular", Consolas, monospace; }
+    .zoom-scroll { overflow: auto; padding: 24px; }
+    .zoom-scroll svg { max-width: none !important; height: auto !important; display: block; margin: 0 auto; background: var(--diagram-bg); border-radius: 8px; }
+    .zoom-overlay .diagram-stage { min-height: 0; }
 
     .curiosity {
       margin: 20px clamp(18px, 3.5vw, 34px) 0;
@@ -439,6 +642,27 @@
       .toolbar { grid-template-columns: minmax(0, 1fr) 180px; }
       .filter-list { display: none; }
       .toolbar select { display: block; }
+      .mobile-index {
+        display: block;
+        margin: 14px 0 22px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+      }
+      .mobile-index summary {
+        padding: 11px 14px;
+        cursor: pointer;
+        font-weight: 650;
+        list-style: none;
+      }
+      .mobile-index summary::-webkit-details-marker { display: none; }
+      .mobile-index summary::before { content: "☰ "; color: var(--accent); }
+      .mobile-index[open] summary { border-bottom: 1px solid var(--line); }
+      .mobile-index nav { padding: 8px 14px 14px; column-width: 150px; column-gap: 24px; }
+      .mobile-index nav > div { break-inside: avoid; margin-bottom: 10px; }
+      .mobile-index-title { display: block; color: var(--muted); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+      .mobile-index nav a { display: block; padding: 4px 0; color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+      .mobile-index nav a:hover { color: var(--ink); }
     }
 
     @media (max-width: 620px) {
@@ -453,12 +677,13 @@
         margin: 12px 0 22px;
         padding: 8px;
       }
+      .match-count { text-align: left; }
       .category-block { margin-bottom: 38px; }
       .category-head { padding: 0 4px; }
       .category-head span { display: none; }
       .diagram-card { border-radius: 15px; margin-bottom: 14px; }
       .card-head { grid-template-columns: 1fr; gap: 13px; }
-      .source-toggle { width: 100%; justify-content: center; }
+      .card-actions { justify-content: flex-start; }
       .good-for { gap: 7px; }
       .good-for::before { width: 100%; }
       .good-for li { width: 100%; }
@@ -473,16 +698,22 @@
       html { scroll-behavior: auto; }
     }
   </style>
+  <noscript>
+    <style>
+      .js-only, .rendering, .zoom-overlay, .zoom-btn { display: none !important; }
+      .diagram-stage { cursor: default; min-height: 60px; }
+    </style>
+  </noscript>
 </head>
 <body>
   <main class="page">
     <section class="intro" aria-labelledby="page-title">
       <div>
         <h1 id="page-title">Every Mermaid diagram, one page.</h1>
-        <p>Twenty-three Mermaid v11 diagram types—from flowcharts and sequence diagrams to architecture, Sankey, radar, and treemap—each with a working example and copyable source.</p>
+        <p>Twenty-three Mermaid v11 diagram types—from flowcharts and sequence diagrams to architecture, Sankey, radar, and treemap—each with a working example and copyable source. Paste your own code in the scratchpad to render it live.</p>
       </div>
       <div class="counter" aria-label="23 diagram types">
-        <strong>23</strong>
+        <strong id="type-count">23</strong>
         <span>diagram types · Mermaid v11</span>
       </div>
     </section>
@@ -491,87 +722,187 @@
       <div class="search-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg>
         <label class="sr-only" for="search" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Search diagram types</label>
-        <input id="search" type="search" placeholder="Search diagrams or use cases…" autocomplete="off" />
+        <input id="search" type="search" placeholder="Search diagrams or use cases…  ( / )" autocomplete="off" />
         <button class="search-clear" type="button" aria-label="Clear search">×</button>
       </div>
-      <div class="filter-list" aria-label="Filter by category"></div>
-      <select id="mobile-filter" aria-label="Filter by category"></select>
+      <span class="match-count" id="match-count" aria-live="polite">23 / 23</span>
+      <button class="theme-toggle" type="button" id="theme-toggle" aria-label="Cycle colour theme">Theme: auto</button>
+      <div class="filter-list" aria-label="Filter by category">
+        <button class="filter active" type="button" data-filter="all">All 23</button>
+<button class="filter" type="button" data-filter="essentials">Essentials</button><button class="filter" type="button" data-filter="planning">Planning &amp; product</button><button class="filter" type="button" data-filter="charts">Charts &amp; data</button><button class="filter" type="button" data-filter="technical">Technical systems</button><button class="filter" type="button" data-filter="utility">Utility</button>
+      </div>
+      <select id="mobile-filter" aria-label="Filter by category">
+        <option value="all">All 23 types</option>
+<option value="essentials">Essentials</option><option value="planning">Planning &amp; product</option><option value="charts">Charts &amp; data</option><option value="technical">Technical systems</option><option value="utility">Utility</option>
+      </select>
     </div>
+
+    <details class="mobile-index" id="mobile-index">
+      <summary>Diagram index</summary>
+      <nav aria-label="Diagram index (mobile)">
+<div><span class="mobile-index-title">Essentials</span><a href="#flowchart">Flowchart</a><a href="#sequence-diagram">Sequence Diagram</a><a href="#class-diagram">Class Diagram</a><a href="#state-diagram">State Diagram</a><a href="#entity-relationship">Entity Relationship Diagram</a></div>
+<div><span class="mobile-index-title">Planning &amp; product</span><a href="#user-journey">User Journey</a><a href="#gantt-chart">Gantt Chart</a><a href="#requirement-diagram">Requirement Diagram</a><a href="#mindmap">Mindmap</a><a href="#timeline">Timeline</a><a href="#kanban-board">Kanban Board</a></div>
+<div><span class="mobile-index-title">Charts &amp; data</span><a href="#pie-chart">Pie Chart</a><a href="#quadrant-chart">Quadrant Chart</a><a href="#xy-chart">XY Chart</a><a href="#sankey-diagram">Sankey Diagram</a><a href="#radar-chart">Radar Chart</a><a href="#treemap">Treemap</a></div>
+<div><span class="mobile-index-title">Technical systems</span><a href="#git-graph">Git Graph</a><a href="#c4-diagram">C4 Diagram</a><a href="#packet-diagram">Packet Diagram</a><a href="#block-diagram">Block Diagram</a><a href="#architecture-diagram">Architecture Diagram</a></div>
+<div><span class="mobile-index-title">Utility</span><a href="#info">Info</a></div>
+      </nav>
+    </details>
+
+    <section class="scratchpad" id="scratchpad" aria-label="Scratchpad">
+      <header class="scratch-head">
+        <div>
+          <h2>Scratchpad</h2>
+          <p>Paste or edit any Mermaid code — it renders as you type and is saved in this browser. Ctrl/⌘+Enter forces a re-render, Tab indents.</p>
+        </div>
+        <label class="scratch-start">Start from
+          <select id="scratch-start"><option value="">Pick an example…</option><option value="flowchart">Flowchart</option><option value="sequence-diagram">Sequence Diagram</option><option value="class-diagram">Class Diagram</option><option value="state-diagram">State Diagram</option><option value="entity-relationship">Entity Relationship Diagram</option><option value="user-journey">User Journey</option><option value="gantt-chart">Gantt Chart</option><option value="requirement-diagram">Requirement Diagram</option><option value="mindmap">Mindmap</option><option value="timeline">Timeline</option><option value="kanban-board">Kanban Board</option><option value="pie-chart">Pie Chart</option><option value="quadrant-chart">Quadrant Chart</option><option value="xy-chart">XY Chart</option><option value="sankey-diagram">Sankey Diagram</option><option value="radar-chart">Radar Chart</option><option value="treemap">Treemap</option><option value="git-graph">Git Graph</option><option value="c4-diagram">C4 Diagram</option><option value="packet-diagram">Packet Diagram</option><option value="block-diagram">Block Diagram</option><option value="architecture-diagram">Architecture Diagram</option><option value="info">Info</option></select>
+        </label>
+      </header>
+      <textarea id="scratch-code" spellcheck="false" rows="8" placeholder="flowchart TD&#10;    A[Paste code] --> B{Renders?}&#10;    B -->|Yes| C[Copy or download]&#10;    B -->|No| D[Fix the syntax]"></textarea>
+      <div class="scratch-bar">
+        <span id="scratch-status" role="status"></span>
+        <span class="scratch-hint">Drag the editor's corner to resize</span>
+        <span class="grow"></span>
+        <button type="button" id="scratch-copy">Copy code</button>
+        <button type="button" id="scratch-clear">Clear</button>
+      </div>
+      <div class="diagram-stage" id="scratch-stage" aria-label="Scratchpad render">
+        <div class="render-target" id="scratch-render"><span class="rendering">Nothing to render yet — paste Mermaid code above.</span></div>
+      </div>
+    </section>
 
     <div class="layout">
       <aside class="sidebar" aria-label="Diagram index">
         <p class="side-heading">Diagram index</p>
-        <nav id="sidebar-nav"></nav>
+        <nav id="sidebar-nav">
+<div class="side-group" data-nav-category="essentials"><span class="side-group-title">Essentials</span><a class="side-link" href="#flowchart" data-target="flowchart"><span class="side-index">01</span><span>Flowchart</span></a><a class="side-link" href="#sequence-diagram" data-target="sequence-diagram"><span class="side-index">02</span><span>Sequence Diagram</span></a><a class="side-link" href="#class-diagram" data-target="class-diagram"><span class="side-index">03</span><span>Class Diagram</span></a><a class="side-link" href="#state-diagram" data-target="state-diagram"><span class="side-index">04</span><span>State Diagram</span></a><a class="side-link" href="#entity-relationship" data-target="entity-relationship"><span class="side-index">05</span><span>Entity Relationship Diagram</span></a></div>
+<div class="side-group" data-nav-category="planning"><span class="side-group-title">Planning &amp; product</span><a class="side-link" href="#user-journey" data-target="user-journey"><span class="side-index">06</span><span>User Journey</span></a><a class="side-link" href="#gantt-chart" data-target="gantt-chart"><span class="side-index">07</span><span>Gantt Chart</span></a><a class="side-link" href="#requirement-diagram" data-target="requirement-diagram"><span class="side-index">08</span><span>Requirement Diagram</span></a><a class="side-link" href="#mindmap" data-target="mindmap"><span class="side-index">09</span><span>Mindmap</span></a><a class="side-link" href="#timeline" data-target="timeline"><span class="side-index">10</span><span>Timeline</span></a><a class="side-link" href="#kanban-board" data-target="kanban-board"><span class="side-index">11</span><span>Kanban Board</span></a></div>
+<div class="side-group" data-nav-category="charts"><span class="side-group-title">Charts &amp; data</span><a class="side-link" href="#pie-chart" data-target="pie-chart"><span class="side-index">12</span><span>Pie Chart</span></a><a class="side-link" href="#quadrant-chart" data-target="quadrant-chart"><span class="side-index">13</span><span>Quadrant Chart</span></a><a class="side-link" href="#xy-chart" data-target="xy-chart"><span class="side-index">14</span><span>XY Chart</span></a><a class="side-link" href="#sankey-diagram" data-target="sankey-diagram"><span class="side-index">15</span><span>Sankey Diagram</span></a><a class="side-link" href="#radar-chart" data-target="radar-chart"><span class="side-index">16</span><span>Radar Chart</span></a><a class="side-link" href="#treemap" data-target="treemap"><span class="side-index">17</span><span>Treemap</span></a></div>
+<div class="side-group" data-nav-category="technical"><span class="side-group-title">Technical systems</span><a class="side-link" href="#git-graph" data-target="git-graph"><span class="side-index">18</span><span>Git Graph</span></a><a class="side-link" href="#c4-diagram" data-target="c4-diagram"><span class="side-index">19</span><span>C4 Diagram</span></a><a class="side-link" href="#packet-diagram" data-target="packet-diagram"><span class="side-index">20</span><span>Packet Diagram</span></a><a class="side-link" href="#block-diagram" data-target="block-diagram"><span class="side-index">21</span><span>Block Diagram</span></a><a class="side-link" href="#architecture-diagram" data-target="architecture-diagram"><span class="side-index">22</span><span>Architecture Diagram</span></a></div>
+<div class="side-group" data-nav-category="utility"><span class="side-group-title">Utility</span><a class="side-link" href="#info" data-target="info"><span class="side-index">23</span><span>Info</span></a></div>
+        </nav>
       </aside>
-      <div class="gallery" id="gallery" aria-live="polite"></div>
-    </div>
-
-    <div class="empty-state" id="empty-state">
-      <strong>No matching diagrams</strong>
-      Try a different term or choose another category.
-    </div>
-
-    <p class="footnote"><strong>Scope note.</strong> These 23 examples were syntax-checked with Mermaid 11.17.2. ZenUML is not included because it requires an experimental configuration; the final “Info” example is a diagnostic that displays the Mermaid version currently running.</p>
-  </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.min.js"></script>
-  <script>
-    const categories = [
-      { id: "essentials", label: "Essentials" },
-      { id: "planning", label: "Planning & product" },
-      { id: "charts", label: "Charts & data" },
-      { id: "technical", label: "Technical systems" },
-      { id: "utility", label: "Utility" }
-    ];
-
-    const diagrams = [
-      {
-        id: "flowchart", name: "Flowchart", category: "essentials",
-        blurb: "Nodes and edges for processes, decisions, and flows—the workhorse of the Mermaid family.",
-        uses: ["CI/CD pipelines", "Decision trees", "Algorithms and business processes"],
-        code: `flowchart TD
-    A[Push to main] --> B{CI checks pass?}
-    B -->|Yes| C[Build container image]
-    B -->|No| D[Notify author]
-    D --> E[Fix and re-push]
-    E --> B
-    C --> F[Push to registry]
-    F --> G{Deploy approved?}
-    G -->|Yes| H[Rolling deploy to prod]
-    G -->|No| I[Hold for review]
-    H --> J[Smoke tests]
-    J --> K{Healthy?}
-    K -->|Yes| L[Done]
-    K -->|No| M[Rollback]`
-      },
-      {
-        id: "sequence-diagram", name: "Sequence Diagram", category: "essentials",
-        blurb: "How actors and systems exchange messages over time—the classic for API and protocol docs.",
-        uses: ["API request flows", "Auth handshakes (OAuth, SAML)", "Debugging distributed interactions"],
-        code: `sequenceDiagram
+      <div class="gallery" id="gallery">
+<section class="category-block" data-category="essentials" aria-labelledby="category-essentials">
+          <div class="category-head"><h2 id="category-essentials">Essentials</h2><span>5 types</span></div>
+          <article class="diagram-card" id="flowchart" data-name="Flowchart" data-search="flowchart nodes and edges for processes, decisions, and flows—the workhorse of the mermaid family. ci/cd pipelines decision trees algorithms and business processes">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">01</span><h3>Flowchart</h3></div>
+                <p>Nodes and edges for processes, decisions, and flows—the workhorse of the Mermaid family.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="flowchart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="flowchart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>CI/CD pipelines</li><li>Decision trees</li><li>Algorithms and business processes</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Flowchart example">
+              <div class="render-target" id="render-flowchart"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="flowchart" aria-label="Zoom Flowchart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-flowchart">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="flowchart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="flowchart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="flowchart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>flowchart TD
+    A[Push to main] --&gt; B{CI checks pass?}
+    B --&gt;|Yes| C[Build container image]
+    B --&gt;|No| D[Notify author]
+    D --&gt; E[Fix and re-push]
+    E --&gt; B
+    C --&gt; F[Push to registry]
+    F --&gt; G{Deploy approved?}
+    G --&gt;|Yes| H[Rolling deploy to prod]
+    G --&gt;|No| I[Hold for review]
+    H --&gt; J[Smoke tests]
+    J --&gt; K{Healthy?}
+    K --&gt;|Yes| L[Done]
+    K --&gt;|No| M[Rollback]</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="sequence-diagram" data-name="Sequence Diagram" data-search="sequence diagram how actors and systems exchange messages over time—the classic for api and protocol docs. api request flows auth handshakes (oauth, saml) debugging distributed interactions">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">02</span><h3>Sequence Diagram</h3></div>
+                <p>How actors and systems exchange messages over time—the classic for API and protocol docs.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="sequence-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="sequence-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>API request flows</li><li>Auth handshakes (OAuth, SAML)</li><li>Debugging distributed interactions</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Sequence Diagram example">
+              <div class="render-target" id="render-sequence-diagram"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="sequence-diagram" aria-label="Zoom Sequence Diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-sequence-diagram">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="sequence-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="sequence-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="sequence-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>sequenceDiagram
     autonumber
     participant U as User
     participant C as Client App
     participant A as Auth Server
     participant R as Resource API
 
-    U->>C: Click "Sign in"
-    C->>A: GET /authorize (client_id, scope)
-    A->>U: Login page
-    U->>A: Enter credentials
-    A->>C: Redirect with auth code
-    C->>A: POST /token (code, client_secret)
-    A-->>C: access_token + refresh_token
-    C->>R: GET /profile (Bearer token)
-    R-->>C: User profile JSON
-    C-->>U: Signed-in dashboard
-    Note over C,R: Tokens expire in 1h - the refresh_token renews them`
-      },
-      {
-        id: "class-diagram", name: "Class Diagram", category: "essentials",
-        blurb: "UML classes, members, and relationships for object-oriented designs.",
-        uses: ["Domain modeling", "Codebase documentation", "Planning refactors"],
-        code: `classDiagram
+    U-&gt;&gt;C: Click &quot;Sign in&quot;
+    C-&gt;&gt;A: GET /authorize (client_id, scope)
+    A-&gt;&gt;U: Login page
+    U-&gt;&gt;A: Enter credentials
+    A-&gt;&gt;C: Redirect with auth code
+    C-&gt;&gt;A: POST /token (code, client_secret)
+    A--&gt;&gt;C: access_token + refresh_token
+    C-&gt;&gt;R: GET /profile (Bearer token)
+    R--&gt;&gt;C: User profile JSON
+    C--&gt;&gt;U: Signed-in dashboard
+    Note over C,R: Tokens expire in 1h - the refresh_token renews them</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="class-diagram" data-name="Class Diagram" data-search="class diagram uml classes, members, and relationships for object-oriented designs. domain modeling codebase documentation planning refactors">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">03</span><h3>Class Diagram</h3></div>
+                <p>UML classes, members, and relationships for object-oriented designs.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="class-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="class-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Domain modeling</li><li>Codebase documentation</li><li>Planning refactors</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Class Diagram example">
+              <div class="render-target" id="render-class-diagram"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="class-diagram" aria-label="Zoom Class Diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-class-diagram">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="class-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="class-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="class-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>classDiagram
     class Vehicle {
         +String make
         +String model
@@ -591,35 +922,83 @@
         +String name
         +drive(Vehicle v) void
     }
-    Vehicle <|-- Car
+    Vehicle &lt;|-- Car
     Car *-- Engine : contains
-    Driver --> Vehicle : drives`
-      },
-      {
-        id: "state-diagram", name: "State Diagram", category: "essentials",
-        blurb: "States and the transitions between them—perfect for anything with a lifecycle.",
-        uses: ["Order or ticket lifecycles", "UI component states", "Protocol state machines"],
-        code: `stateDiagram-v2
-    [*] --> Created
-    Created --> Paid : payment received
-    Created --> Cancelled : timeout
-    Paid --> Shipped : packed
-    Paid --> Refunded : chargeback
-    Shipped --> Delivered : signed
-    Shipped --> Returned : customer return
-    Delivered --> [*]
-    Cancelled --> [*]
-    Refunded --> [*]
-    Returned --> Refunded : refund issued`
-      },
-      {
-        id: "entity-relationship", name: "Entity Relationship Diagram", category: "essentials",
-        blurb: "Database tables, attributes, and cardinalities without opening a schema tool.",
-        uses: ["Database schema design", "Onboarding to an existing database", "Data-model reviews"],
-        code: `erDiagram
+    Driver --&gt; Vehicle : drives</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="state-diagram" data-name="State Diagram" data-search="state diagram states and the transitions between them—perfect for anything with a lifecycle. order or ticket lifecycles ui component states protocol state machines">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">04</span><h3>State Diagram</h3></div>
+                <p>States and the transitions between them—perfect for anything with a lifecycle.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="state-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="state-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Order or ticket lifecycles</li><li>UI component states</li><li>Protocol state machines</li></ul>
+            <div class="diagram-stage" aria-label="Rendered State Diagram example">
+              <div class="render-target" id="render-state-diagram"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="state-diagram" aria-label="Zoom State Diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-state-diagram">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="state-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="state-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="state-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>stateDiagram-v2
+    [*] --&gt; Created
+    Created --&gt; Paid : payment received
+    Created --&gt; Cancelled : timeout
+    Paid --&gt; Shipped : packed
+    Paid --&gt; Refunded : chargeback
+    Shipped --&gt; Delivered : signed
+    Shipped --&gt; Returned : customer return
+    Delivered --&gt; [*]
+    Cancelled --&gt; [*]
+    Refunded --&gt; [*]
+    Returned --&gt; Refunded : refund issued</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="entity-relationship" data-name="Entity Relationship Diagram" data-search="entity relationship diagram database tables, attributes, and cardinalities without opening a schema tool. database schema design onboarding to an existing database data-model reviews">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">05</span><h3>Entity Relationship Diagram</h3></div>
+                <p>Database tables, attributes, and cardinalities without opening a schema tool.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="entity-relationship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="entity-relationship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Database schema design</li><li>Onboarding to an existing database</li><li>Data-model reviews</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Entity Relationship Diagram example">
+              <div class="render-target" id="render-entity-relationship"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="entity-relationship" aria-label="Zoom Entity Relationship Diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-entity-relationship">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="entity-relationship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="entity-relationship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="entity-relationship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>erDiagram
     CUSTOMER ||--o{ ORDER : places
     ORDER ||--|{ LINE_ITEM : contains
-    PRODUCT ||--o{ LINE_ITEM : "listed in"
+    PRODUCT ||--o{ LINE_ITEM : &quot;listed in&quot;
     CUSTOMER {
         string id PK
         string name
@@ -640,13 +1019,40 @@
         string id PK
         string name
         float price
-    }`
-      },
-      {
-        id: "user-journey", name: "User Journey", category: "planning",
-        blurb: "A user's experience across steps, scored for satisfaction—UX's favorite one-pager.",
-        uses: ["UX research synthesis", "Customer experience mapping", "Pain-point spotting"],
-        code: `journey
+    }</code></pre>
+            </details>
+          </article>
+        </section>
+<section class="category-block" data-category="planning" aria-labelledby="category-planning">
+          <div class="category-head"><h2 id="category-planning">Planning &amp; product</h2><span>6 types</span></div>
+          <article class="diagram-card" id="user-journey" data-name="User Journey" data-search="user journey a user&#x27;s experience across steps, scored for satisfaction—ux&#x27;s favorite one-pager. ux research synthesis customer experience mapping pain-point spotting">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">06</span><h3>User Journey</h3></div>
+                <p>A user&#x27;s experience across steps, scored for satisfaction—UX&#x27;s favorite one-pager.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="user-journey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="user-journey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>UX research synthesis</li><li>Customer experience mapping</li><li>Pain-point spotting</li></ul>
+            <div class="diagram-stage" aria-label="Rendered User Journey example">
+              <div class="render-target" id="render-user-journey"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="user-journey" aria-label="Zoom User Journey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-user-journey">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="user-journey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="user-journey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="user-journey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>journey
     title Morning coffee run
     section Leave home
       Grab keys: 5: Me
@@ -657,13 +1063,37 @@
       Wait for drink: 2: Me
       Pay: 4: Me
     section Head to work
-      Drive to office: 5: Me`
-      },
-      {
-        id: "gantt-chart", name: "Gantt Chart", category: "planning",
-        blurb: "Tasks on a timeline with dependencies—a project plan that fits in a Markdown file.",
-        uses: ["Release planning", "Sprint or milestone tracking", "Dependency visualization"],
-        code: `gantt
+      Drive to office: 5: Me</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="gantt-chart" data-name="Gantt Chart" data-search="gantt chart tasks on a timeline with dependencies—a project plan that fits in a markdown file. release planning sprint or milestone tracking dependency visualization">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">07</span><h3>Gantt Chart</h3></div>
+                <p>Tasks on a timeline with dependencies—a project plan that fits in a Markdown file.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="gantt-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="gantt-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Release planning</li><li>Sprint or milestone tracking</li><li>Dependency visualization</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Gantt Chart example">
+              <div class="render-target" id="render-gantt-chart"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="gantt-chart" aria-label="Zoom Gantt Chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-gantt-chart">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="gantt-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="gantt-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="gantt-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>gantt
     title Website relaunch plan
     dateFormat YYYY-MM-DD
     section Design
@@ -674,37 +1104,85 @@
     Backend API     :        dev2, after des2, 12d
     section Launch
     QA pass         :        qa1, after dev1, 5d
-    Deploy to prod  :crit,   dep1, after qa1, 2d`
-      },
-      {
-        id: "requirement-diagram", name: "Requirement Diagram", category: "planning",
-        blurb: "Requirements, system elements, and how they satisfy, trace, and verify each other.",
-        uses: ["Systems engineering docs", "Compliance traceability", "Acceptance criteria mapping"],
-        code: `requirementDiagram
+    Deploy to prod  :crit,   dep1, after qa1, 2d</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="requirement-diagram" data-name="Requirement Diagram" data-search="requirement diagram requirements, system elements, and how they satisfy, trace, and verify each other. systems engineering docs compliance traceability acceptance criteria mapping">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">08</span><h3>Requirement Diagram</h3></div>
+                <p>Requirements, system elements, and how they satisfy, trace, and verify each other.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="requirement-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="requirement-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Systems engineering docs</li><li>Compliance traceability</li><li>Acceptance criteria mapping</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Requirement Diagram example">
+              <div class="render-target" id="render-requirement-diagram"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="requirement-diagram" aria-label="Zoom Requirement Diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-requirement-diagram">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="requirement-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="requirement-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="requirement-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>requirementDiagram
     requirement login_req {
         id: 1
-        text: "Users can sign in with email and password."
+        text: &quot;Users can sign in with email and password.&quot;
         risk: high
         verifymethod: test
     }
     requirement sso_req {
         id: 2
-        text: "Users can sign in with Google SSO."
+        text: &quot;Users can sign in with Google SSO.&quot;
         risk: medium
         verifymethod: inspection
     }
     element web_app {
-        type: "web application"
+        type: &quot;web application&quot;
     }
-    web_app - satisfies -> login_req
-    web_app - satisfies -> sso_req
-    sso_req - traces -> login_req`
-      },
-      {
-        id: "mindmap", name: "Mindmap", category: "planning",
-        blurb: "Ideas radiating from a central topic—brainstorming that can live directly in the doc.",
-        uses: ["Brainstorming sessions", "Topic outlines", "Knowledge mapping"],
-        code: `mindmap
+    web_app - satisfies -&gt; login_req
+    web_app - satisfies -&gt; sso_req
+    sso_req - traces -&gt; login_req</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="mindmap" data-name="Mindmap" data-search="mindmap ideas radiating from a central topic—brainstorming that can live directly in the doc. brainstorming sessions topic outlines knowledge mapping">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">09</span><h3>Mindmap</h3></div>
+                <p>Ideas radiating from a central topic—brainstorming that can live directly in the doc.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="mindmap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="mindmap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Brainstorming sessions</li><li>Topic outlines</li><li>Knowledge mapping</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Mindmap example">
+              <div class="render-target" id="render-mindmap"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="mindmap" aria-label="Zoom Mindmap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-mindmap">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="mindmap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="mindmap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="mindmap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>mindmap
   root((Mermaid))
     Diagrams
       Flowchart
@@ -722,26 +1200,74 @@
       Idea maps
       Roadmaps
       Gitgraph
-      Kanban`
-      },
-      {
-        id: "timeline", name: "Timeline", category: "planning",
-        blurb: "Events laid out chronologically—history lessons and roadmaps in plain text.",
-        uses: ["Project roadmaps", "Company history", "Incident timelines"],
-        code: `timeline
+      Kanban</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="timeline" data-name="Timeline" data-search="timeline events laid out chronologically—history lessons and roadmaps in plain text. project roadmaps company history incident timelines">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">10</span><h3>Timeline</h3></div>
+                <p>Events laid out chronologically—history lessons and roadmaps in plain text.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Project roadmaps</li><li>Company history</li><li>Incident timelines</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Timeline example">
+              <div class="render-target" id="render-timeline"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="timeline" aria-label="Zoom Timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-timeline">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>timeline
     title History of the web
     1990 : Tim Berners-Lee proposes the World Wide Web
     1993 : Mosaic browser launches
     1998 : Google founded
     2004 : Web 2.0 and social media take off
     2007 : iPhone launches the mobile era
-    2022 : ChatGPT sparks the AI wave`
-      },
-      {
-        id: "kanban-board", name: "Kanban Board", category: "planning",
-        blurb: "Columns of cards for work in progress—a board that can live in your repo.",
-        uses: ["Lightweight task tracking", "Sprint boards in docs", "Personal to-do walls"],
-        code: `kanban
+    2022 : ChatGPT sparks the AI wave</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="kanban-board" data-name="Kanban Board" data-search="kanban board columns of cards for work in progress—a board that can live in your repo. lightweight task tracking sprint boards in docs personal to-do walls">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">11</span><h3>Kanban Board</h3></div>
+                <p>Columns of cards for work in progress—a board that can live in your repo.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="kanban-board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="kanban-board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Lightweight task tracking</li><li>Sprint boards in docs</li><li>Personal to-do walls</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Kanban Board example">
+              <div class="render-target" id="render-kanban-board"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="kanban-board" aria-label="Zoom Kanban Board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-kanban-board">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="kanban-board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="kanban-board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="kanban-board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>kanban
   Backlog
     setup[Set up repo]
     design[Draft UI mockups]
@@ -750,155 +1276,425 @@
   Review
     api[REST API endpoints]
   Done
-    ci[CI pipeline]`
-      },
-      {
-        id: "pie-chart", name: "Pie Chart", category: "charts",
-        blurb: "Part-of-a-whole proportions in a few lines, with no separate charting library required.",
-        uses: ["Survey results", "Market or traffic share", "Budget breakdowns"],
-        code: `pie title Browser share, Sept 2026
-    "Chrome" : 62
-    "Safari" : 19
-    "Edge" : 6
-    "Firefox" : 5
-    "Other" : 8`
-      },
-      {
-        id: "quadrant-chart", name: "Quadrant Chart", category: "charts",
-        blurb: "Two axes, four boxes—the classic 2×2 matrix for prioritization.",
-        uses: ["Feature prioritization", "Risk matrices", "Market positioning"],
-        code: `quadrantChart
+    ci[CI pipeline]</code></pre>
+            </details>
+          </article>
+        </section>
+<section class="category-block" data-category="charts" aria-labelledby="category-charts">
+          <div class="category-head"><h2 id="category-charts">Charts &amp; data</h2><span>6 types</span></div>
+          <article class="diagram-card" id="pie-chart" data-name="Pie Chart" data-search="pie chart part-of-a-whole proportions in a few lines, with no separate charting library required. survey results market or traffic share budget breakdowns">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">12</span><h3>Pie Chart</h3></div>
+                <p>Part-of-a-whole proportions in a few lines, with no separate charting library required.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="pie-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="pie-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Survey results</li><li>Market or traffic share</li><li>Budget breakdowns</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Pie Chart example">
+              <div class="render-target" id="render-pie-chart"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="pie-chart" aria-label="Zoom Pie Chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-pie-chart">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="pie-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="pie-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="pie-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>pie title Browser share, Sept 2026
+    &quot;Chrome&quot; : 62
+    &quot;Safari&quot; : 19
+    &quot;Edge&quot; : 6
+    &quot;Firefox&quot; : 5
+    &quot;Other&quot; : 8</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="quadrant-chart" data-name="Quadrant Chart" data-search="quadrant chart two axes, four boxes—the classic 2×2 matrix for prioritization. feature prioritization risk matrices market positioning">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">13</span><h3>Quadrant Chart</h3></div>
+                <p>Two axes, four boxes—the classic 2×2 matrix for prioritization.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="quadrant-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="quadrant-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Feature prioritization</li><li>Risk matrices</li><li>Market positioning</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Quadrant Chart example">
+              <div class="render-target" id="render-quadrant-chart"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="quadrant-chart" aria-label="Zoom Quadrant Chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-quadrant-chart">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="quadrant-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="quadrant-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="quadrant-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>quadrantChart
     title Prioritize features
-    x-axis "Low effort" --> "High effort"
-    y-axis "Low value" --> "High value"
-    quadrant-1 "Do later"
-    quadrant-2 "Quick wins"
-    quadrant-3 "Skip"
-    quadrant-4 "Big bets"
+    x-axis &quot;Low effort&quot; --&gt; &quot;High effort&quot;
+    y-axis &quot;Low value&quot; --&gt; &quot;High value&quot;
+    quadrant-1 &quot;Do later&quot;
+    quadrant-2 &quot;Quick wins&quot;
+    quadrant-3 &quot;Skip&quot;
+    quadrant-4 &quot;Big bets&quot;
     Dark mode: [0.3, 0.8]
     SSO login: [0.2, 0.9]
     Rewrite in Rust: [0.9, 0.5]
-    New logo: [0.2, 0.2]`
-      },
-      {
-        id: "xy-chart", name: "XY Chart", category: "charts",
-        blurb: "Bar and line charts on x/y axes—the spreadsheet chart you can version-control.",
-        uses: ["Metrics dashboards in docs", "Trend reporting", "A/B test results"],
-        code: `xychart-beta
-    title "Signups per month"
+    New logo: [0.2, 0.2]</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="xy-chart" data-name="XY Chart" data-search="xy chart bar and line charts on x/y axes—the spreadsheet chart you can version-control. metrics dashboards in docs trend reporting a/b test results">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">14</span><h3>XY Chart</h3></div>
+                <p>Bar and line charts on x/y axes—the spreadsheet chart you can version-control.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="xy-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="xy-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Metrics dashboards in docs</li><li>Trend reporting</li><li>A/B test results</li></ul>
+            <div class="diagram-stage" aria-label="Rendered XY Chart example">
+              <div class="render-target" id="render-xy-chart"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="xy-chart" aria-label="Zoom XY Chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-xy-chart">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="xy-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="xy-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="xy-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>xychart-beta
+    title &quot;Signups per month&quot;
     x-axis [Jan, Feb, Mar, Apr, May, Jun]
-    y-axis "Signups" 0 --> 500
+    y-axis &quot;Signups&quot; 0 --&gt; 500
     bar [120, 200, 180, 320, 410, 480]
-    line [100, 150, 220, 260, 380, 450]`
-      },
-      {
-        id: "sankey-diagram", name: "Sankey Diagram", category: "charts",
-        blurb: "Flows with widths proportional to quantity—see where energy, money, or users go.",
-        uses: ["Energy or budget flows", "User funnels", "Resource allocation"],
-        code: `sankey-beta
+    line [100, 150, 220, 260, 380, 450]</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="sankey-diagram" data-name="Sankey Diagram" data-search="sankey diagram flows with widths proportional to quantity—see where energy, money, or users go. energy or budget flows user funnels resource allocation">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">15</span><h3>Sankey Diagram</h3></div>
+                <p>Flows with widths proportional to quantity—see where energy, money, or users go.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="sankey-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="sankey-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Energy or budget flows</li><li>User funnels</li><li>Resource allocation</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Sankey Diagram example">
+              <div class="render-target" id="render-sankey-diagram"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="sankey-diagram" aria-label="Zoom Sankey Diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-sankey-diagram">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="sankey-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="sankey-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="sankey-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>sankey-beta
 Solar, Grid, 120
 Wind, Grid, 80
 Grid, Homes, 110
 Grid, Industry, 60
-Grid, Loss, 30`
-      },
-      {
-        id: "radar-chart", name: "Radar Chart", category: "charts",
-        blurb: "A multi-axis comparison on a spider web, ideal for compact spec-sheet showdowns.",
-        uses: ["Product comparisons", "Skill assessments", "Benchmark summaries"],
-        code: `radar-beta
-  title "Phone comparison"
-  axis b["Battery"], c["Camera"], s["Screen"], p["Price"], w["Weight"]
-  curve i["Phone A"]{80, 90, 85, 40, 70}
-  curve j["Phone B"]{70, 75, 90, 80, 60}
+Grid, Loss, 30</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="radar-chart" data-name="Radar Chart" data-search="radar chart a multi-axis comparison on a spider web, ideal for compact spec-sheet showdowns. product comparisons skill assessments benchmark summaries">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">16</span><h3>Radar Chart</h3></div>
+                <p>A multi-axis comparison on a spider web, ideal for compact spec-sheet showdowns.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="radar-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="radar-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Product comparisons</li><li>Skill assessments</li><li>Benchmark summaries</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Radar Chart example">
+              <div class="render-target" id="render-radar-chart"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="radar-chart" aria-label="Zoom Radar Chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-radar-chart">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="radar-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="radar-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="radar-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>radar-beta
+  title &quot;Phone comparison&quot;
+  axis b[&quot;Battery&quot;], c[&quot;Camera&quot;], s[&quot;Screen&quot;], p[&quot;Price&quot;], w[&quot;Weight&quot;]
+  curve i[&quot;Phone A&quot;]{80, 90, 85, 40, 70}
+  curve j[&quot;Phone B&quot;]{70, 75, 90, 80, 60}
   max 100
-  min 0`
-      },
-      {
-        id: "treemap", name: "Treemap", category: "charts",
-        blurb: "Nested rectangles sized by value—a hierarchy whose weight is visible at a glance.",
-        uses: ["Budget breakdowns", "Disk or resource usage", "Portfolio composition"],
-        code: `treemap-beta
-"Q3 Revenue"
-    "Hardware": 420
-    "Software": 310
-    "Services"
-        "Consulting": 120
-        "Support": 90`
-      },
-      {
-        id: "git-graph", name: "Git Graph", category: "technical",
-        blurb: "Branches, commits, merges, and tags as a picture—worth a thousand git log commands.",
-        uses: ["Explaining branching strategy", "Release-note visuals", "Git tutorials"],
-        code: `gitGraph
-    commit id: "init"
+  min 0</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="treemap" data-name="Treemap" data-search="treemap nested rectangles sized by value—a hierarchy whose weight is visible at a glance. budget breakdowns disk or resource usage portfolio composition">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">17</span><h3>Treemap</h3></div>
+                <p>Nested rectangles sized by value—a hierarchy whose weight is visible at a glance.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="treemap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="treemap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Budget breakdowns</li><li>Disk or resource usage</li><li>Portfolio composition</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Treemap example">
+              <div class="render-target" id="render-treemap"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="treemap" aria-label="Zoom Treemap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-treemap">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="treemap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="treemap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="treemap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>treemap-beta
+&quot;Q3 Revenue&quot;
+    &quot;Hardware&quot;: 420
+    &quot;Software&quot;: 310
+    &quot;Services&quot;
+        &quot;Consulting&quot;: 120
+        &quot;Support&quot;: 90</code></pre>
+            </details>
+          </article>
+        </section>
+<section class="category-block" data-category="technical" aria-labelledby="category-technical">
+          <div class="category-head"><h2 id="category-technical">Technical systems</h2><span>5 types</span></div>
+          <article class="diagram-card" id="git-graph" data-name="Git Graph" data-search="git graph branches, commits, merges, and tags as a picture—worth a thousand git log commands. explaining branching strategy release-note visuals git tutorials">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">18</span><h3>Git Graph</h3></div>
+                <p>Branches, commits, merges, and tags as a picture—worth a thousand git log commands.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="git-graph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="git-graph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Explaining branching strategy</li><li>Release-note visuals</li><li>Git tutorials</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Git Graph example">
+              <div class="render-target" id="render-git-graph"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="git-graph" aria-label="Zoom Git Graph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-git-graph">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="git-graph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="git-graph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="git-graph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>gitGraph
+    commit id: &quot;init&quot;
     branch feature
     checkout feature
-    commit id: "add parser"
-    commit id: "add tests"
+    commit id: &quot;add parser&quot;
+    commit id: &quot;add tests&quot;
     checkout main
-    commit id: "hotfix"
+    commit id: &quot;hotfix&quot;
     checkout feature
     merge main
     checkout main
     merge feature
-    commit id: "release v1.0" tag: "v1.0"`
-      },
-      {
-        id: "c4-diagram", name: "C4 Diagram", category: "technical",
-        blurb: "Experimental C4-model syntax for context, container, and component views of software architecture.",
-        uses: ["System context docs", "Architecture reviews", "Onboarding engineers"],
-        code: `C4Context
+    commit id: &quot;release v1.0&quot; tag: &quot;v1.0&quot;</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="c4-diagram" data-name="C4 Diagram" data-search="c4 diagram experimental c4-model syntax for context, container, and component views of software architecture. system context docs architecture reviews onboarding engineers">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">19</span><h3>C4 Diagram</h3></div>
+                <p>Experimental C4-model syntax for context, container, and component views of software architecture.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="c4-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="c4-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>System context docs</li><li>Architecture reviews</li><li>Onboarding engineers</li></ul>
+            <div class="diagram-stage" aria-label="Rendered C4 Diagram example">
+              <div class="render-target" id="render-c4-diagram"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="c4-diagram" aria-label="Zoom C4 Diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-c4-diagram">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="c4-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="c4-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="c4-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>C4Context
     title Online bookstore - system context
-    Person(customer, "Customer", "Buys books online")
-    System(shop, "Bookstore", "Lets customers browse and order books")
-    System_Ext(payments, "Payment gateway", "Processes card payments")
-    SystemDb(warehouse, "Warehouse DB", "Tracks stock and shipments")
+    Person(customer, &quot;Customer&quot;, &quot;Buys books online&quot;)
+    System(shop, &quot;Bookstore&quot;, &quot;Lets customers browse and order books&quot;)
+    System_Ext(payments, &quot;Payment gateway&quot;, &quot;Processes card payments&quot;)
+    SystemDb(warehouse, &quot;Warehouse DB&quot;, &quot;Tracks stock and shipments&quot;)
 
-    Rel(customer, shop, "Browses and orders")
-    Rel(shop, payments, "Charges cards via")
-    Rel(shop, warehouse, "Reads and writes")`
-      },
-      {
-        id: "packet-diagram", name: "Packet Diagram", category: "technical",
-        blurb: "Bit-level layouts of network packets and binary formats.",
-        uses: ["Protocol documentation", "Binary format specifications", "Networking tutorials"],
-        code: `packet-beta
-0-15: "Source Port"
-16-31: "Destination Port"
-32-63: "Sequence Number"
-64-95: "Acknowledgment Number"
-96-99: "Data Offset"
-100-105: "Reserved"
-106-111: "Flags"
-112-127: "Window Size"
-128-143: "Checksum"
-144-159: "Urgent Pointer"`
-      },
-      {
-        id: "block-diagram", name: "Block Diagram", category: "technical",
-        blurb: "Composable blocks with columns and nesting for quick infrastructure sketches.",
-        uses: ["Infrastructure sketches", "System block layouts", "Hardware diagrams"],
-        code: `block-beta
+    Rel(customer, shop, &quot;Browses and orders&quot;)
+    Rel(shop, payments, &quot;Charges cards via&quot;)
+    Rel(shop, warehouse, &quot;Reads and writes&quot;)</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="packet-diagram" data-name="Packet Diagram" data-search="packet diagram bit-level layouts of network packets and binary formats. protocol documentation binary format specifications networking tutorials">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">20</span><h3>Packet Diagram</h3></div>
+                <p>Bit-level layouts of network packets and binary formats.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="packet-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="packet-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Protocol documentation</li><li>Binary format specifications</li><li>Networking tutorials</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Packet Diagram example">
+              <div class="render-target" id="render-packet-diagram"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="packet-diagram" aria-label="Zoom Packet Diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-packet-diagram">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="packet-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="packet-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="packet-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>packet-beta
+0-15: &quot;Source Port&quot;
+16-31: &quot;Destination Port&quot;
+32-63: &quot;Sequence Number&quot;
+64-95: &quot;Acknowledgment Number&quot;
+96-99: &quot;Data Offset&quot;
+100-105: &quot;Reserved&quot;
+106-111: &quot;Flags&quot;
+112-127: &quot;Window Size&quot;
+128-143: &quot;Checksum&quot;
+144-159: &quot;Urgent Pointer&quot;</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="block-diagram" data-name="Block Diagram" data-search="block diagram composable blocks with columns and nesting for quick infrastructure sketches. infrastructure sketches system block layouts hardware diagrams">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">21</span><h3>Block Diagram</h3></div>
+                <p>Composable blocks with columns and nesting for quick infrastructure sketches.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="block-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="block-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Infrastructure sketches</li><li>System block layouts</li><li>Hardware diagrams</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Block Diagram example">
+              <div class="render-target" id="render-block-diagram"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="block-diagram" aria-label="Zoom Block Diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-block-diagram">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="block-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="block-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="block-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>block-beta
     columns 3
-    db["Database"] app["App Server"] cache["Cache"]
+    db[&quot;Database&quot;] app[&quot;App Server&quot;] cache[&quot;Cache&quot;]
     block:net:3
         columns 1
-        lb["Load Balancer"]
+        lb[&quot;Load Balancer&quot;]
     end
-    web1["Web 1"] web2["Web 2"] web3["Web 3"]
-    lb --> web1
-    lb --> web2
-    lb --> web3
-    web1 --> app
-    app --> db
-    app --> cache`
-      },
-      {
-        id: "architecture-diagram", name: "Architecture Diagram", category: "technical",
-        blurb: "Cloud-style architecture with icons, groups, and directional edges.",
-        uses: ["Cloud topology docs", "Deployment overviews", "Network diagrams"],
-        code: `architecture-beta
+    web1[&quot;Web 1&quot;] web2[&quot;Web 2&quot;] web3[&quot;Web 3&quot;]
+    lb --&gt; web1
+    lb --&gt; web2
+    lb --&gt; web3
+    web1 --&gt; app
+    app --&gt; db
+    app --&gt; cache</code></pre>
+            </details>
+          </article>
+<article class="diagram-card" id="architecture-diagram" data-name="Architecture Diagram" data-search="architecture diagram cloud-style architecture with icons, groups, and directional edges. cloud topology docs deployment overviews network diagrams">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">22</span><h3>Architecture Diagram</h3></div>
+                <p>Cloud-style architecture with icons, groups, and directional edges.</p>
+                
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="architecture-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="architecture-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Cloud topology docs</li><li>Deployment overviews</li><li>Network diagrams</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Architecture Diagram example">
+              <div class="render-target" id="render-architecture-diagram"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="architecture-diagram" aria-label="Zoom Architecture Diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-architecture-diagram">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="architecture-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="architecture-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="architecture-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>architecture-beta
     group cloud(cloud)[Cloud VPC]
 
     service lb(server)[Load Balancer] in cloud
@@ -908,86 +1704,106 @@ Grid, Loss, 30`
 
     lb:R -- L:api
     api:B -- T:db
-    api:B -- T:cache`
-      },
-      {
-        id: "info", name: "Info", category: "utility",
-        blurb: "A diagnostic box showing the running Mermaid version—meta, but it counts as a type.",
-        uses: ["Debugging render issues", "Confirming the Mermaid version in a document pipeline"],
-        note: "The Info diagram is intentionally minimal: its entire source is the word “info.”",
-        code: `info`
-      }
-    ];
+    api:B -- T:cache</code></pre>
+            </details>
+          </article>
+        </section>
+<section class="category-block" data-category="utility" aria-labelledby="category-utility">
+          <div class="category-head"><h2 id="category-utility">Utility</h2><span>1 type</span></div>
+          <article class="diagram-card" id="info" data-name="Info" data-search="info a diagnostic box showing the running mermaid version—meta, but it counts as a type. debugging render issues confirming the mermaid version in a document pipeline">
+            <header class="card-head">
+              <div>
+                <div class="title-row"><span class="card-number">23</span><h3>Info</h3></div>
+                <p>A diagnostic box showing the running Mermaid version—meta, but it counts as a type.</p>
+                <div class="curiosity">The Info diagram is intentionally minimal: its entire source is the word “info.”</div>
+              </div>
+              <div class="card-actions js-only">
+                <button class="mini-btn" type="button" data-copy="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                <button class="mini-btn" type="button" data-template="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+              </div>
+            </header>
+            <ul class="good-for"><li>Debugging render issues</li><li>Confirming the Mermaid version in a document pipeline</li></ul>
+            <div class="diagram-stage" aria-label="Rendered Info example">
+              <div class="render-target" id="render-info"><span class="rendering">Rendering diagram…</span></div>
+              <button class="zoom-btn" type="button" data-zoom="info" aria-label="Zoom Info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg></button>
+            </div>
+            <details class="source-panel" id="source-info">
+              <summary>View source</summary>
+              <div class="source-bar js-only">
+                <span>mermaid</span>
+                <span class="source-actions">
+                  <button class="copy-btn" type="button" data-copy="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
+                  <button class="copy-btn" type="button" data-svg="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg><span>Copy SVG</span></button>
+                  <button class="copy-btn" type="button" data-png="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="m5 18 5-5 3 3 3-3 3 3"></path></svg><span>PNG</span></button>
+                </span>
+              </div>
+              <pre><code>info</code></pre>
+            </details>
+          </article>
+        </section>
+      </div>
+    </div>
 
-    const categoryMap = Object.fromEntries(categories.map(c => [c.id, c]));
-    const gallery = document.getElementById("gallery");
-    const nav = document.getElementById("sidebar-nav");
-    const filterList = document.querySelector(".filter-list");
-    const mobileFilter = document.getElementById("mobile-filter");
-    const searchInput = document.getElementById("search");
-    const searchClear = document.querySelector(".search-clear");
-    const emptyState = document.getElementById("empty-state");
+    <div class="empty-state" id="empty-state" role="status">
+      <strong>No matching diagrams</strong>
+      Try a different term or choose another category.
+    </div>
+
+    <p class="footnote"><strong>Scope note.</strong> These 23 examples were syntax-checked with Mermaid 11.17.2, which is bundled with this page (<code>vendor/mermaid.min.js</code>)—no third-party requests. ZenUML is not included because it requires an experimental configuration; the final “Info” example is a diagnostic that displays the Mermaid version currently running.</p>
+  </main>
+
+  <div class="zoom-overlay" id="zoom-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="zoom-title">
+    <div class="zoom-top">
+      <h2 id="zoom-title">Diagram</h2>
+      <div class="zoom-controls">
+        <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+        <span id="zoom-pct">100%</span>
+        <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+        <button type="button" id="zoom-fit">Fit</button>
+        <button type="button" id="zoom-close" aria-label="Close zoom view">✕ Close</button>
+      </div>
+    </div>
+    <div class="zoom-scroll" id="zoom-scroll"></div>
+  </div>
+
+  <script src="vendor/mermaid.min.js"></script>
+  <script>
+    "use strict";
+    const $ = (sel, root) => (root || document).querySelector(sel);
+    const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+    const cards = $$(".diagram-card");
+    const gallery = $("#gallery");
+    const nav = $("#sidebar-nav");
+    const filterList = $(".filter-list");
+    const mobileFilter = $("#mobile-filter");
+    const searchInput = $("#search");
+    const searchClear = $(".search-clear");
+    const matchCount = $("#match-count");
+    const emptyState = $("#empty-state");
+    const scratch = $("#scratch-code");
+    const scratchTarget = $("#scratch-render");
+    const scratchStatus = $("#scratch-status");
+    const overlay = $("#zoom-overlay");
+    const zoomScroll = $("#zoom-scroll");
+    const themeBtn = $("#theme-toggle");
     let activeCategory = "all";
-    let renderCycle = 0;
+    let scratchTimer = null;
+    let scratchCycle = 0;
+    let zoomBase = null;
+    let zoomScale = 1;
 
-    const icons = {
-      code: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m8 9-3 3 3 3"></path><path d="m16 9 3 3-3 3"></path><path d="m14 6-4 12"></path></svg>',
-      copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>'
+    const escapeHtml = value => String(value).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+    const cardById = id => document.getElementById(id);
+    const codeOf = card => card.querySelector("pre code").textContent;
+    const flash = (button, message, ms) => {
+      const label = button.querySelector("span:not(:empty)");
+      if (!label) return;
+      const previous = label.textContent;
+      label.textContent = message;
+      setTimeout(() => { label.textContent = previous; }, ms || 1600);
     };
 
-    function escapeHtml(value) {
-      return value.replace(/[&<>]/g, char => ({"&":"&amp;","<":"&lt;",">":["&gt;"][0]})[char]);
-    }
-
-    function renderStructure() {
-      filterList.innerHTML = [
-        '<button class="filter active" type="button" data-filter="all">All 23</button>',
-        ...categories.map(c => `<button class="filter" type="button" data-filter="${c.id}">${c.label}</button>`)
-      ].join("");
-      mobileFilter.innerHTML = '<option value="all">All 23 types</option>' + categories.map(c => `<option value="${c.id}">${c.label}</option>`).join("");
-
-      nav.innerHTML = categories.map(category => {
-        const items = diagrams.filter(d => d.category === category.id);
-        return `<div class="side-group" data-nav-category="${category.id}">
-          <span class="side-group-title">${category.label}</span>
-          ${items.map(item => {
-            const index = diagrams.indexOf(item) + 1;
-            return `<a class="side-link" href="#${item.id}" data-target="${item.id}"><span class="side-index">${String(index).padStart(2, "0")}</span><span>${item.name}</span></a>`;
-          }).join("")}
-        </div>`;
-      }).join("");
-
-      gallery.innerHTML = categories.map(category => {
-        const items = diagrams.filter(d => d.category === category.id);
-        return `<section class="category-block" data-category="${category.id}" aria-labelledby="category-${category.id}">
-          <div class="category-head"><h2 id="category-${category.id}">${category.label}</h2><span>${items.length} ${items.length === 1 ? "type" : "types"}</span></div>
-          ${items.map(item => {
-            const index = diagrams.indexOf(item) + 1;
-            return `<article class="diagram-card" id="${item.id}" data-name="${item.name.toLowerCase()}" data-search="${(item.name + " " + item.blurb + " " + item.uses.join(" ")).toLowerCase()}">
-              <header class="card-head">
-                <div>
-                  <div class="title-row"><span class="card-number">${String(index).padStart(2, "0")}</span><h3>${item.name}</h3></div>
-                  <p>${item.blurb}</p>
-                  ${item.note ? `<div class="curiosity">${item.note}</div>` : ""}
-                </div>
-                <button class="source-toggle" type="button" data-source="${item.id}" aria-expanded="false" aria-controls="source-${item.id}">${icons.code}<span>View source</span></button>
-              </header>
-              <ul class="good-for">${item.uses.map(use => `<li>${use}</li>`).join("")}</ul>
-              <div class="diagram-stage" aria-label="Rendered ${item.name} example">
-                <div class="render-target" id="render-${item.id}"><span class="rendering">Rendering diagram…</span></div>
-              </div>
-              <div class="source-panel" id="source-${item.id}">
-                <div class="source-bar"><span>mermaid</span><button class="copy-btn" type="button" data-copy="${item.id}">${icons.copy}<span>Copy</span></button></div>
-                <pre><code>${escapeHtml(item.code)}</code></pre>
-              </div>
-            </article>`;
-          }).join("")}
-        </section>`;
-      }).join("");
-    }
-
     function mermaidConfig() {
-      const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       return {
         startOnLoad: false,
         securityLevel: "strict",
@@ -995,7 +1811,7 @@ Grid, Loss, 30`
         fontFamily: '"Avenir Next", "Segoe UI", Helvetica, sans-serif',
         themeVariables: {
           background: "#fbfdfd",
-          primaryColor: dark ? "#d8f1ed" : "#d8f1ed",
+          primaryColor: "#d8f1ed",
           primaryTextColor: "#172225",
           primaryBorderColor: "#067c72",
           lineColor: "#506a6e",
@@ -1019,63 +1835,105 @@ Grid, Loss, 30`
       };
     }
 
-    async function renderAllDiagrams() {
-      const cycle = ++renderCycle;
-      if (!window.mermaid) {
-        document.querySelectorAll(".render-target").forEach(el => {
-          el.innerHTML = '<div class="render-error"><strong>Mermaid could not load.</strong><br>Check the network connection and reload this page.</div>';
-        });
-        return;
-      }
-      mermaid.initialize(mermaidConfig());
-      for (let i = 0; i < diagrams.length; i++) {
-        if (cycle !== renderCycle) return;
-        const item = diagrams[i];
-        const target = document.getElementById(`render-${item.id}`);
-        if (!target) continue;
+    function mermaidDown() {
+      $$(".render-target").forEach(el => {
+        el.innerHTML = '<div class="render-error"><strong>Mermaid could not load.</strong><br>Check the network connection and reload this page.</div>';
+      });
+      scratchStatus.textContent = "Mermaid failed to load";
+    }
+
+    /* mermaid.render is not concurrency-safe (shared temp state) — serialize */
+    let renderQueue = Promise.resolve();
+    function renderCard(card) {
+      if (card.dataset.rendered || !window.mermaid) return;
+      card.dataset.rendered = "1";
+      renderQueue = renderQueue.then(async () => {
+        const target = $(".render-target", card);
         try {
-          const result = await mermaid.render(`mermaid-svg-${cycle}-${i}`, item.code);
-          if (cycle !== renderCycle) return;
+          const result = await mermaid.render(`mg-card-${card.id}`, codeOf(card));
           target.innerHTML = result.svg;
           if (result.bindFunctions) result.bindFunctions(target);
           const svg = target.querySelector("svg");
           if (svg) {
             svg.removeAttribute("height");
             svg.setAttribute("role", "img");
-            svg.setAttribute("aria-label", `${item.name} example`);
+            svg.setAttribute("aria-label", `${card.dataset.name} example`);
           }
         } catch (error) {
           target.innerHTML = `<div class="render-error"><strong>This diagram did not render.</strong><br>${escapeHtml(String(error.message || error))}</div>`;
         }
+      });
+      return renderQueue;
+    }
+
+    function observeRenders() {
+      const io = new IntersectionObserver(entries => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            renderCard(entry.target);
+            io.unobserve(entry.target);
+          }
+        }
+      }, { rootMargin: "700px 0px" });
+      cards.forEach(card => io.observe(card));
+      renderNearViewport();
+    }
+
+    /* rect-based fallback: IntersectionObserver delivery is unreliable in
+       background/occluded tabs, so independently render anything near the fold */
+    function renderNearViewport() {
+      const limit = window.innerHeight + 900;
+      for (const card of cards) {
+        if (card.dataset.rendered || card.hidden) continue;
+        const top = card.getBoundingClientRect().top;
+        if (top < limit) renderCard(card);
       }
     }
+    /* bounded sweep: guarantees near-viewport cards render regardless of
+       IntersectionObserver/timer quirks in background or occluded tabs;
+       costs one cheap 23-card loop per 700ms and stops when all are done */
+    let sweeps = 0;
+    const sweep = setInterval(() => {
+      renderNearViewport();
+      sweeps += 1;
+      if (sweeps > 400 || !document.querySelector(".diagram-card:not([data-rendered])")) clearInterval(sweep);
+    }, 700);
 
-    function applyFilters() {
-      const query = searchInput.value.trim().toLowerCase();
-      let shown = 0;
-      document.querySelectorAll(".category-block").forEach(section => {
-        let categoryShown = 0;
-        section.querySelectorAll(".diagram-card").forEach(card => {
-          const matchesCategory = activeCategory === "all" || section.dataset.category === activeCategory;
-          const matchesSearch = !query || card.dataset.search.includes(query);
-          const visible = matchesCategory && matchesSearch;
-          card.hidden = !visible;
-          if (visible) { shown++; categoryShown++; }
-        });
-        section.hidden = categoryShown === 0;
-      });
-      document.querySelectorAll(".side-group").forEach(group => {
-        const section = document.querySelector(`.category-block[data-category="${group.dataset.navCategory}"]`);
-        group.hidden = !section || section.hidden;
-        group.querySelectorAll(".side-link").forEach(link => {
-          const card = document.getElementById(link.dataset.target);
-          link.hidden = !card || card.hidden;
-        });
-      });
-      emptyState.style.display = shown === 0 ? "block" : "none";
-      searchClear.style.display = query ? "grid" : "none";
+    /* ---------- scratchpad ---------- */
+    function persistScratch() {
+      try { localStorage.setItem("mg-scratch", JSON.stringify({ code: scratch.value, h: scratch.style.height })); } catch (_) {}
+    }
+    async function renderScratch() {
+      const code = scratch.value.trim();
+      if (!code) {
+        scratchTarget.innerHTML = '<span class="rendering">Nothing to render yet — paste Mermaid code above.</span>';
+        scratchStatus.textContent = "";
+        return;
+      }
+      scratchStatus.textContent = "Rendering…";
+      try {
+        const result = await mermaid.render(`mg-scratch-${++scratchCycle}`, code);
+        scratchTarget.innerHTML = result.svg;
+        const svg = scratchTarget.querySelector("svg");
+        if (svg) { svg.removeAttribute("height"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "Scratchpad diagram"); }
+        scratchStatus.textContent = "Rendered";
+      } catch (error) {
+        scratchTarget.innerHTML = `<div class="render-error"><strong>Parse error.</strong><br>${escapeHtml(String(error.message || error))}</div>`;
+        scratchStatus.textContent = "Parse error";
+      }
+    }
+    const renderScratchSoon = () => { clearTimeout(scratchTimer); scratchTimer = setTimeout(renderScratch, 400); };
+
+    function loadIntoScratch(code, id) {
+      scratch.value = code;
+      $("#scratch-start").value = id || "";
+      persistScratch();
+      renderScratch();
+      scratchpad.scrollIntoView({ behavior: "smooth", block: "start" });
+      scratch.focus({ preventScroll: true });
     }
 
+    /* ---------- clipboard & export ---------- */
     async function copyText(text, button) {
       let copied = false;
       try {
@@ -1089,63 +1947,367 @@ Grid, Loss, 30`
         area.style.opacity = "0";
         document.body.appendChild(area);
         area.select();
-        copied = document.execCommand("copy");
+        try { copied = document.execCommand("copy"); } catch (_) { copied = false; }
         area.remove();
       }
-      const label = button.querySelector("span");
-      const previous = label.textContent;
-      label.textContent = copied ? "Copied" : "Select code";
-      setTimeout(() => { label.textContent = previous; }, 1600);
+      if (copied) { flash(button, "Copied"); return true; }
+      const panel = button.closest(".source-panel");
+      if (panel) {
+        panel.open = true;
+        const pre = panel.querySelector("pre");
+        const range = document.createRange();
+        range.selectNodeContents(pre);
+        const sel = getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        flash(button, "Press Ctrl+C", 2600);
+      }
+      return false;
     }
 
-    renderStructure();
+    function svgOf(card) {
+      const svg = $(".render-target svg", card);
+      if (!svg) return null;
+      const clone = svg.cloneNode(true);
+      const vb = (svg.getAttribute("viewBox") || "").trim().split(/[\s,]+/).map(Number);
+      const rect = svg.getBoundingClientRect();
+      const w = Math.round(vb[2] || rect.width) || 800;
+      const h = Math.round(vb[3] || rect.height) || 600;
+      clone.setAttribute("width", w);
+      clone.setAttribute("height", h);
+      clone.removeAttribute("style");
+      return { markup: new XMLSerializer().serializeToString(clone), w, h };
+    }
 
+    function downloadSvg(card) {
+      const s = svgOf(card);
+      if (!s) return false;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([s.markup], { type: "image/svg+xml;charset=utf-8" }));
+      a.download = `${card.id}.svg`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      return true;
+    }
+
+    async function downloadPng(card, button) {
+      const s = svgOf(card);
+      if (!s) { flash(button, "Still rendering"); return; }
+      try {
+        const url = URL.createObjectURL(new Blob([s.markup], { type: "image/svg+xml;charset=utf-8" }));
+        const img = new Image();
+        await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = url; });
+        const scale = 2;
+        const canvas = document.createElement("canvas");
+        canvas.width = s.w * scale;
+        canvas.height = s.h * scale;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let inked = 0;
+        for (let i = 0; i < data.length; i += 4) if (data[i] < 248 || data[i + 1] < 248 || data[i + 2] < 248) inked++;
+        if (inked < data.length / 4 * 0.0005) throw new Error("raster came back blank");
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL("image/png");
+        a.download = `${card.id}.png`;
+        a.click();
+        flash(button, "PNG saved");
+      } catch (_) {
+        downloadSvg(card);
+        flash(button, "SVG saved", 2200);
+      }
+    }
+
+    /* ---------- zoom overlay ---------- */
+    function applyZoom() {
+      if (zoomBase) {
+        const svg = zoomScroll.querySelector("svg");
+        if (svg) svg.style.width = Math.round(zoomBase * zoomScale) + "px";
+      }
+      $("#zoom-pct").textContent = Math.round(zoomScale * 100) + "%";
+    }
+    function openZoom(card) {
+      const svg = $(".render-target svg", card);
+      if (!svg) { renderCard(card).then(() => openZoom(card)); return; }
+      const s = svgOf(card);
+      zoomScroll.innerHTML = "";
+      const holder = document.createElement("div");
+      holder.innerHTML = s.markup;
+      const clone = holder.querySelector("svg");
+      clone.removeAttribute("id");
+      zoomScroll.appendChild(clone);
+      $("#zoom-title").textContent = card.dataset.name;
+      zoomBase = s.w;
+      zoomScale = 1;
+      overlay.hidden = false;
+      document.body.style.overflow = "hidden";
+      applyZoom();
+      $("#zoom-close").focus();
+    }
+    function closeZoom() {
+      overlay.hidden = true;
+      zoomScroll.innerHTML = "";
+      document.body.style.overflow = "";
+    }
+    const nudgeZoom = factor => {
+      zoomScale = Math.min(5, Math.max(0.2, zoomScale * factor));
+      applyZoom();
+    };
+
+    /* ---------- filters, search, url state ---------- */
+    function syncUrl() {
+      const params = new URLSearchParams();
+      if (activeCategory !== "all") params.set("cat", activeCategory);
+      const q = searchInput.value.trim();
+      if (q) params.set("q", q);
+      const s = params.toString();
+      history.replaceState(null, "", location.pathname + (s ? "?" + s : "") + location.hash);
+    }
+    function setFilterUI() {
+      $$(".filter").forEach(btn => btn.classList.toggle("active", btn.dataset.filter === activeCategory));
+      mobileFilter.value = activeCategory;
+    }
+    function applyFilters() {
+      const query = searchInput.value.trim().toLowerCase();
+      let shown = 0;
+      $$(".category-block").forEach(section => {
+        let categoryShown = 0;
+        section.querySelectorAll(".diagram-card").forEach(card => {
+          const matchesCategory = activeCategory === "all" || section.dataset.category === activeCategory;
+          const matchesSearch = !query || card.dataset.search.includes(query);
+          const visible = matchesCategory && matchesSearch;
+          card.hidden = !visible;
+          if (visible) { shown++; categoryShown++; }
+        });
+        section.hidden = categoryShown === 0;
+      });
+      $$(".side-group").forEach(group => {
+        const section = $(`.category-block[data-category="${group.dataset.navCategory}"]`);
+        group.hidden = !section || section.hidden;
+        group.querySelectorAll(".side-link").forEach(link => {
+          const card = cardById(link.dataset.target);
+          link.hidden = !card || card.hidden;
+        });
+      });
+      emptyState.style.display = shown === 0 ? "block" : "none";
+      searchClear.style.display = query ? "grid" : "none";
+      matchCount.textContent = `${shown} / ${cards.length}`;
+      syncUrl();
+    }
+
+    function revealHashTarget() {
+      const id = location.hash.slice(1);
+      if (!id) return;
+      const card = cardById(id);
+      if (card && card.hidden) {
+        activeCategory = "all";
+        searchInput.value = "";
+        setFilterUI();
+        applyFilters();
+      }
+    }
+
+    /* ---------- theme ---------- */
+    const THEMES = ["auto", "light", "dark"];
+    function applyTheme(theme) {
+      if (theme === "auto") delete document.documentElement.dataset.theme;
+      else document.documentElement.dataset.theme = theme;
+      try { localStorage.setItem("mg-theme", theme); } catch (_) {}
+      themeBtn.textContent = "Theme: " + theme;
+    }
+
+    /* ---------- wiring ---------- */
     document.addEventListener("click", event => {
       const filter = event.target.closest(".filter");
       if (filter) {
         activeCategory = filter.dataset.filter;
-        document.querySelectorAll(".filter").forEach(btn => btn.classList.toggle("active", btn === filter));
-        mobileFilter.value = activeCategory;
+        setFilterUI();
         applyFilters();
       }
 
-      const toggle = event.target.closest(".source-toggle");
-      if (toggle) {
-        const panel = document.getElementById(`source-${toggle.dataset.source}`);
-        const open = panel.classList.toggle("open");
-        toggle.setAttribute("aria-expanded", String(open));
-        toggle.querySelector("span").textContent = open ? "Hide source" : "View source";
+      const copy = event.target.closest("[data-copy]");
+      if (copy) {
+        const card = copy.closest(".diagram-card");
+        if (card) copyText(codeOf(card), copy);
+        return;
+      }
+      if (event.target.closest("#scratch-copy")) {
+        copyText(scratch.value, $("#scratch-copy"));
+        return;
       }
 
-      const copy = event.target.closest(".copy-btn");
-      if (copy) {
-        const item = diagrams.find(d => d.id === copy.dataset.copy);
-        if (item) copyText(item.code, copy);
+      const template = event.target.closest("[data-template]");
+      if (template) {
+        const card = cardById(template.dataset.template);
+        if (card) loadIntoScratch(codeOf(card), card.id);
+        return;
+      }
+
+      const svgCopy = event.target.closest("[data-svg]");
+      if (svgCopy) {
+        const card = cardById(svgCopy.dataset.svg);
+        const s = card && svgOf(card);
+        if (s) copyText(s.markup, svgCopy);
+        else flash(svgCopy, "Still rendering");
+        return;
+      }
+
+      const png = event.target.closest("[data-png]");
+      if (png) {
+        const card = cardById(png.dataset.png);
+        if (card) downloadPng(card, png);
+        return;
+      }
+
+      const zoomBtn = event.target.closest("[data-zoom]");
+      if (zoomBtn) {
+        const card = cardById(zoomBtn.dataset.zoom);
+        if (card) openZoom(card);
+        return;
+      }
+      const stage = event.target.closest(".gallery .diagram-stage, #scratch-stage");
+      if (stage && event.target.closest("svg")) {
+        const card = stage.closest(".diagram-card");
+        if (card) openZoom(card);
+        return;
       }
     });
 
     mobileFilter.addEventListener("change", () => {
       activeCategory = mobileFilter.value;
-      document.querySelectorAll(".filter").forEach(btn => btn.classList.toggle("active", btn.dataset.filter === activeCategory));
+      setFilterUI();
       applyFilters();
     });
+
     searchInput.addEventListener("input", applyFilters);
+    searchInput.addEventListener("keydown", event => {
+      if (event.key === "Escape" && searchInput.value) {
+        searchInput.value = "";
+        applyFilters();
+      }
+    });
     searchClear.addEventListener("click", () => {
       searchInput.value = "";
       applyFilters();
       searchInput.focus();
     });
 
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        document.querySelectorAll(".side-link").forEach(link => link.classList.toggle("active", link.dataset.target === entry.target.id));
-      });
-    }, { rootMargin: "-20% 0px -65% 0px", threshold: 0 });
-    document.querySelectorAll(".diagram-card").forEach(card => observer.observe(card));
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        if (!overlay.hidden) { closeZoom(); return; }
+        if (document.activeElement === searchInput && searchInput.value) {
+          searchInput.value = "";
+          applyFilters();
+        }
+        return;
+      }
+      if (event.key === "/" && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        const t = event.target;
+        const typing = t.closest && (t.closest("input, textarea, select") || t.isContentEditable);
+        if (!typing) {
+          event.preventDefault();
+          searchInput.focus();
+          searchInput.select();
+        }
+      }
+    });
 
-    window.addEventListener("load", renderAllDiagrams);
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAllDiagrams);
+    scratch.addEventListener("input", () => { persistScratch(); renderScratchSoon(); });
+    scratch.addEventListener("keydown", event => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+        event.preventDefault();
+        clearTimeout(scratchTimer);
+        renderScratch();
+      } else if (event.key === "Tab") {
+        event.preventDefault();
+        const start = scratch.selectionStart;
+        const end = scratch.selectionEnd;
+        scratch.value = scratch.value.slice(0, start) + "  " + scratch.value.slice(end);
+        scratch.selectionStart = scratch.selectionEnd = start + 2;
+      }
+    });
+    scratch.addEventListener("mouseup", persistScratch);
+    $("#scratch-clear").addEventListener("click", () => {
+      scratch.value = "";
+      persistScratch();
+      scratchTarget.innerHTML = '<span class="rendering">Nothing to render yet — paste Mermaid code above.</span>';
+      scratchStatus.textContent = "";
+      scratch.focus();
+    });
+    $("#scratch-start").addEventListener("change", event => {
+      const card = cardById(event.target.value);
+      if (card) loadIntoScratch(codeOf(card), card.id);
+    });
+
+    $("#zoom-close").addEventListener("click", closeZoom);
+    $("#zoom-in").addEventListener("click", () => nudgeZoom(1.25));
+    $("#zoom-out").addEventListener("click", () => nudgeZoom(1 / 1.25));
+    $("#zoom-fit").addEventListener("click", () => {
+      const svg = zoomScroll.querySelector("svg");
+      if (!svg) return;
+      const natural = zoomBase || 800;
+      zoomScale = Math.min(1, (zoomScroll.clientWidth - 48) / natural);
+      applyZoom();
+    });
+    zoomScroll.addEventListener("wheel", event => {
+      if (!event.ctrlKey) return;
+      event.preventDefault();
+      nudgeZoom(event.deltaY < 0 ? 1.15 : 1 / 1.15);
+    }, { passive: false });
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay || event.target === zoomScroll) closeZoom();
+    });
+
+    themeBtn.addEventListener("click", () => {
+      const current = document.documentElement.dataset.theme || "auto";
+      applyTheme(THEMES[(THEMES.indexOf(current) + 1) % THEMES.length]);
+    });
+
+    window.addEventListener("hashchange", revealHashTarget);
+
+    /* ---------- init ---------- */
+    (function init() {
+      $("#type-count").textContent = cards.length;
+      const allBtn = $('.filter[data-filter="all"]');
+      if (allBtn) allBtn.textContent = `All ${cards.length}`;
+      mobileFilter.options[0].textContent = `All ${cards.length} types`;
+
+      let theme = "auto";
+      try { theme = localStorage.getItem("mg-theme") || "auto"; } catch (_) {}
+      applyTheme(theme);
+
+      const params = new URLSearchParams(location.search);
+      if (params.get("cat")) activeCategory = params.get("cat");
+      const q = params.get("q");
+      if (q) searchInput.value = q;
+      setFilterUI();
+      applyFilters();
+      revealHashTarget();
+
+      try {
+        const saved = JSON.parse(localStorage.getItem("mg-scratch") || "null");
+        if (saved && typeof saved.code === "string" && saved.code.trim()) {
+          scratch.value = saved.code;
+          if (saved.h) scratch.style.height = saved.h;
+        }
+      } catch (_) {}
+
+      const activeNav = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          $$(".side-link").forEach(link => link.classList.toggle("active", link.dataset.target === entry.target.id));
+        });
+      }, { rootMargin: "-20% 0px -65% 0px", threshold: 0 });
+      cards.forEach(card => activeNav.observe(card));
+
+      if (!window.mermaid) { mermaidDown(); return; }
+      mermaid.initialize(mermaidConfig());
+      observeRenders();
+      if (scratch.value.trim()) renderScratch();
+    })();
   </script>
 </body>
 </html>

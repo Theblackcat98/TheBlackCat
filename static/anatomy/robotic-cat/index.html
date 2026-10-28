@@ -1,4 +1,10 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>FELIS-09 Cybernetic Feline // Anatomy Figure</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>FELIS-09 robotic cat</title>
+<meta name="description" content="A 9.2 kg quadruped robot on a balance rig, tracking a sliding optical target.">
+<meta property="og:title" content="FELIS-09 robotic cat · Anatomy">
+<meta property="og:description" content="A 9.2 kg quadruped robot on a balance rig, tracking a sliding optical target.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/anatomy/robotic-cat/">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/anatomy/thumbs/robotic-cat.webp"><style>
 .iso{
   --anatomy-page:#0b0b0b;--anatomy-card:#131313;--anatomy-text:#a3a3a3;--anatomy-strong:#e6e6e6;--anatomy-muted:#6e6e6e;
   --anatomy-paper:#131313;--anatomy-face:#1b1b1b;--anatomy-top:#1c1c1c;
@@ -111,7 +117,22 @@ html{color-scheme:dark}
 body[data-theme="light"]{color-scheme:light}
 body{margin:0;background:var(--anatomy-page);color:var(--anatomy-text);font:14px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
 .iso-page{width:min(740px,100% - 32px);margin:64px auto 96px}
-</style></head><body class="iso" data-theme="dark"><main class="iso-page"><figure class="iso-figure"><div class="iso-plate"><div class="iso-plate-corners" aria-hidden="true"><span class="iso-plate-corner" data-corner="fig">Fig 1</span><span class="iso-plate-corner" data-corner="title">FELIS-09 Robotic Cat · Balance Rig</span><span class="iso-plate-corner" data-corner="hint">Hover or ←/→ target · ↑/↓ crouch · Space pounce</span><span class="iso-plate-corner" data-corner="readout" data-readout>yaw +0.0° · crouch 0 mm · 3.2 N·m · IDLE</span></div><style>.rc-stage {
+</style></head><body class="iso" data-theme="dark">
+<script data-anatomy-theme-init>
+(function () {
+  try {
+    var q = new URLSearchParams(location.search).get("theme");
+    var t = (q === "light" || q === "dark") ? q : null;
+    if (!t) { try { t = localStorage.getItem("bc-theme"); } catch (e) {} }
+    if (t !== "light" && t !== "dark") {
+      t = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+    document.body.setAttribute("data-theme", t);
+    document.documentElement.setAttribute("data-anatomy-theme", t);
+    if (window.self !== window.top) document.documentElement.classList.add("anatomy-embedded");
+  } catch (e) {}
+})();
+</script><main class="iso-page"><figure class="iso-figure"><div class="iso-plate"><div class="iso-plate-corners" aria-hidden="true"><span class="iso-plate-corner" data-corner="fig">Fig 5</span><span class="iso-plate-corner" data-corner="title">FELIS-09 robotic cat</span><span class="iso-plate-corner" data-corner="hint">Hover or ←/→ target · ↑/↓ crouch · Space pounce</span><span class="iso-plate-corner" data-corner="readout" data-readout>yaw +0.0° · crouch 0 mm · 3.2 N·m · IDLE</span></div><style>.rc-stage {
   position: relative;
   cursor: grab;
   touch-action: pan-y;

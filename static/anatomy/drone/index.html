@@ -1,4 +1,10 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>How a quadcopter flies</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>How a quadcopter flies</title>
+<meta name="description" content="A 1.4 kg quadcopter on a gimbal test rig — four motor speeds are its only controls.">
+<meta property="og:title" content="How a quadcopter flies · Anatomy">
+<meta property="og:description" content="A 1.4 kg quadcopter on a gimbal test rig — four motor speeds are its only controls.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/anatomy/drone/">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/anatomy/thumbs/drone.webp"><style>
 .iso{
   --anatomy-page:#0b0b0b;--anatomy-card:#131313;--anatomy-text:#a3a3a3;--anatomy-strong:#e6e6e6;--anatomy-muted:#6e6e6e;
   --anatomy-paper:#131313;--anatomy-face:#1b1b1b;--anatomy-top:#1c1c1c;
@@ -111,7 +117,22 @@ html{color-scheme:dark}
 body[data-theme="light"]{color-scheme:light}
 body{margin:0;background:var(--anatomy-page);color:var(--anatomy-text);font:14px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
 .iso-page{width:min(700px,100% - 32px);margin:64px auto 96px}
-</style></head><body class="iso" data-theme="dark"><main class="iso-page"><figure class="iso-figure"><div class="iso-plate"><div class="iso-plate-corners" aria-hidden="true"><span class="iso-plate-corner" data-corner="fig">Fig 1</span><span class="iso-plate-corner" data-corner="title">How a quadcopter flies</span><span class="iso-plate-corner" data-corner="hint">Arrows tilt · W/S throttle · A/D yaw</span><span class="iso-plate-corner" data-corner="readout" data-readout>hover · 4 × 4,924 rpm</span></div><style>.iso-live{--tn-0:var(--anatomy-shade-0);--tn-1:var(--anatomy-shade-1);--tn-2:var(--anatomy-shade-2);--tn-3:var(--anatomy-shade-3);--tn-4:var(--anatomy-top)}
+</style></head><body class="iso" data-theme="dark">
+<script data-anatomy-theme-init>
+(function () {
+  try {
+    var q = new URLSearchParams(location.search).get("theme");
+    var t = (q === "light" || q === "dark") ? q : null;
+    if (!t) { try { t = localStorage.getItem("bc-theme"); } catch (e) {} }
+    if (t !== "light" && t !== "dark") {
+      t = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+    document.body.setAttribute("data-theme", t);
+    document.documentElement.setAttribute("data-anatomy-theme", t);
+    if (window.self !== window.top) document.documentElement.classList.add("anatomy-embedded");
+  } catch (e) {}
+})();
+</script><main class="iso-page"><figure class="iso-figure"><div class="iso-plate"><div class="iso-plate-corners" aria-hidden="true"><span class="iso-plate-corner" data-corner="fig">Fig 1</span><span class="iso-plate-corner" data-corner="title">How a quadcopter flies</span><span class="iso-plate-corner" data-corner="hint">Arrows tilt · W/S throttle · A/D yaw</span><span class="iso-plate-corner" data-corner="readout" data-readout>hover · 4 × 4,924 rpm</span></div><style>.iso-live{--tn-0:var(--anatomy-shade-0);--tn-1:var(--anatomy-shade-1);--tn-2:var(--anatomy-shade-2);--tn-3:var(--anatomy-shade-3);--tn-4:var(--anatomy-top)}
 .iso-live [data-mat]{--tn-0:var(--anatomy-shade-0);--tn-1:var(--anatomy-shade-1);--tn-2:var(--anatomy-shade-2);--tn-3:var(--anatomy-shade-3);--tn-4:var(--anatomy-top)}
 .iso-live [data-lit]{--tn-0:var(--anatomy-lit-shade);--tn-1:var(--anatomy-lit-shade);--tn-2:var(--anatomy-lit-shade);--tn-3:var(--anatomy-lit-shade);--tn-4:var(--anatomy-lit-top)}
 .iso-tn{stroke-width:.4;stroke-linejoin:round;--ta:var(--tn-0);--tb:var(--tn-1);fill:color-mix(in srgb,var(--ta) calc(100% - var(--f,0) * 100%),var(--tb));stroke:color-mix(in srgb,var(--ta) calc(100% - var(--f,0) * 100%),var(--tb))}

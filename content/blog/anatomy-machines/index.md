@@ -2,7 +2,6 @@
 title: "Five machines, drawn to be taken apart"
 description: "A quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine and a quadruped robot: five interactive isometric figures, running inline in this post."
 date: 2026-10-27
-draft: true
 topics:
   - design
   - tools

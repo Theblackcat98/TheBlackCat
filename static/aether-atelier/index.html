@@ -194,12 +194,21 @@
                                 C(t) = a + b &middot; cos(2&pi;(c &middot; t + d))
                             </p>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex flex-wrap items-center gap-2">
                             <button onclick="randomizeCosinePalette()" class="glass-pill px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 text-amberAccent border-amberAccent/30 hover:bg-amberAccent/10">
                                 <i class="ph ph-sparkle"></i> Randomize Waves
                             </button>
                             <button onclick="copyPaletteCSS()" class="glass-pill px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5">
-                                <i class="ph ph-copy"></i> Copy CSS &amp; GLSL
+                                <i class="ph ph-copy"></i> Copy CSS
+                            </button>
+                            <button onclick="copyPaletteGLSL()" class="glass-pill px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                                <i class="ph ph-copy"></i> Copy GLSL
+                            </button>
+                            <button onclick="copyPaletteHexList()" class="glass-pill px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                                <i class="ph ph-copy"></i> Copy Hex List
+                            </button>
+                            <button onclick="downloadPaletteFile()" class="glass-pill px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                                <i class="ph ph-download-simple"></i> Save .css
                             </button>
                         </div>
                     </div>
@@ -209,6 +218,7 @@
                         <div id="cosineGradientBar" class="w-full h-16 rounded-xl border border-white/15 shadow-inner transition-all"></div>
                         <!-- Discrete 8-Swatch Sample Strip (Click to copy HEX) -->
                         <div id="cosineSwatchesRow" class="grid grid-cols-4 sm:grid-cols-8 gap-2 pt-1"></div>
+                        <p class="text-[10px] font-mono uppercase tracking-wider text-mutedSilver">Click any swatch to copy its hex</p>
                     </div>
 
                     <!-- R, G, B Cosine Wave Curves Canvas -->
@@ -345,9 +355,14 @@
             <button onclick="copyShareLink()" title="Copy a link that restores this exact atelier state" aria-label="Copy share link" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-alabaster transition">
                 <i class="ph ph-link text-base"></i>
             </button>
-            <button onclick="exportArtworkPNG()" title="Export High-Res Artwork PNG" class="px-3 py-1.5 rounded-xl bg-indigoAccent/90 hover:bg-indigoAccent text-white text-xs font-medium flex items-center gap-1.5 shadow-lg shadow-indigoAccent/25 transition">
+            <select id="exportScaleSelect" title="Export resolution scale" aria-label="Export resolution scale" class="bg-white/5 border border-white/10 rounded-xl text-[11px] font-mono text-alabaster px-1.5 py-1.5 focus:outline-none">
+                <option value="1">1&times;</option>
+                <option value="2" selected>2&times;</option>
+                <option value="3">3&times;</option>
+            </select>
+            <button onclick="exportArtworkPNG()" id="captureBtn" title="Export artwork PNG" aria-label="Export artwork PNG" class="px-3 py-1.5 rounded-xl bg-indigoAccent/90 hover:bg-indigoAccent text-white text-xs font-medium flex items-center gap-1.5 shadow-lg shadow-indigoAccent/25 transition">
                 <i class="ph ph-camera"></i>
-                <span class="hidden md:inline">Capture</span>
+                <span id="captureBtnLabel" class="hidden md:inline">Capture</span>
             </button>
         </div>
     </header>
@@ -1208,6 +1223,16 @@
             const rightHUD = document.getElementById('rightParameterHUD');
             const bottomDock = document.getElementById('bottomDock');
 
+            // The header Capture button exports a palette sheet while the
+            // Chromatic Lab covers the (frozen) canvas — never the stale frame.
+            const captureLabel = document.getElementById('captureBtnLabel');
+            const captureBtn = document.getElementById('captureBtn');
+            if (captureLabel) captureLabel.textContent = studioKey === 'chromatics' ? 'Palette Sheet' : 'Capture';
+            if (captureBtn) {
+                captureBtn.title = studioKey === 'chromatics' ? 'Export palette sheet PNG' : 'Export artwork PNG';
+                captureBtn.setAttribute('aria-label', captureBtn.title);
+            }
+
             if (studioKey === 'chromatics') {
                 chromaticView.classList.remove('hidden');
                 leftPlaque.classList.add('hidden');
@@ -1700,14 +1725,46 @@
             showToast('Synthesized new trigonometric wave palette');
         }
 
-        function copyPaletteCSS() {
+        function paletteHexStops() {
             const stops = [];
-            for (let i = 0; i < 6; i++) {
-                const { r, g, b } = samplePaletteRGB(i / 5);
+            for (let i = 0; i < 8; i++) {
+                const { r, g, b } = samplePaletteRGB(i / 7);
                 stops.push(rgbToHex(r, g, b));
             }
-            const glsl = `// Inigo Quilez Cosine Palette (${activePalette.name})\nvec3 palette(float t) {\n    vec3 a = vec3(${activePalette.a.join(', ')});\n    vec3 b = vec3(${activePalette.b.join(', ')});\n    vec3 c = vec3(${activePalette.c.join(', ')});\n    vec3 d = vec3(${activePalette.d.join(', ')});\n    return a + b * cos(6.28318 * (c * t + d));\n}\n/* CSS Gradient: linear-gradient(90deg, ${stops.join(', ')}); */`;
-            copyTextToClipboard(glsl, 'Copied GLSL Shader & CSS Gradient to clipboard');
+            return stops;
+        }
+
+        function buildPaletteCSS() {
+            const stops = paletteHexStops();
+            return `/* ${activePalette.name} — AETHER cosine palette */\n:root {\n${stops.map((h, i) => `  --palette-${i + 1}: ${h};`).join('\n')}\n}\nbackground: linear-gradient(90deg, ${stops.join(', ')});`;
+        }
+
+        function buildPaletteGLSL() {
+            return `// Inigo Quilez Cosine Palette (${activePalette.name})\nvec3 palette(float t) {\n    vec3 a = vec3(${activePalette.a.join(', ')});\n    vec3 b = vec3(${activePalette.b.join(', ')});\n    vec3 c = vec3(${activePalette.c.join(', ')});\n    vec3 d = vec3(${activePalette.d.join(', ')});\n    return a + b * cos(6.28318 * (c * t + d));\n}`;
+        }
+
+        function copyPaletteCSS() {
+            copyTextToClipboard(buildPaletteCSS(), 'Copied CSS gradient & swatch variables');
+        }
+
+        function copyPaletteGLSL() {
+            copyTextToClipboard(buildPaletteGLSL(), 'Copied GLSL palette() function');
+        }
+
+        function copyPaletteHexList() {
+            copyTextToClipboard(paletteHexStops().join(', '), 'Copied hex list');
+        }
+
+        function downloadPaletteFile() {
+            const text = buildPaletteCSS() + '\n\n' + buildPaletteGLSL() + '\n';
+            const blob = new Blob([text], { type: 'text/css' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = `aether-palette-${activePalette.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.css`;
+            link.href = url;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
+            showToast('Saved palette .css file');
         }
 
         // Harmony Wheel & Josef Albers Homage to the Square
@@ -2458,20 +2515,27 @@
             }, { passive: false });
         }
 
-        function copyTextToClipboard(text, message) {
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            ta.style.position = 'fixed';
-            ta.style.opacity = '0';
-            document.body.appendChild(ta);
-            ta.select();
-            try {
-                document.execCommand('copy');
-                showToast(message || 'Copied to clipboard');
-            } catch (err) {
-                showToast('Clipboard copy ready');
+        async function copyTextToClipboard(text, message) {
+            let copied = false;
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    copied = true;
+                } catch (err) { copied = false; }
             }
-            document.body.removeChild(ta);
+            if (!copied) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { copied = document.execCommand('copy'); } catch (err) { copied = false; }
+                document.body.removeChild(ta);
+            }
+            // Honest result: a blocked clipboard says so instead of claiming success.
+            showToast(copied ? (message || 'Copied to clipboard') : 'Copy failed — clipboard access was blocked');
+            return copied;
         }
 
         let toastTimeout = null;
@@ -2486,36 +2550,108 @@
             }, 2600);
         }
 
+        function roundRectPath(x, px, py, w, h, r) {
+            x.beginPath();
+            x.moveTo(px + r, py);
+            x.arcTo(px + w, py, px + w, py + h, r);
+            x.arcTo(px + w, py + h, px, py + h, r);
+            x.arcTo(px, py + h, px, py, r);
+            x.arcTo(px, py, px + w, py, r);
+            x.closePath();
+        }
+
+        function exportPaletteSheetPNG() {
+            // Chromatic Lab export: a palette sheet (gradient, swatches, vectors)
+            // at 2x — never the frozen canvas hidden behind the Lab overlay.
+            const S = 2, W = 800 * S, H = 520 * S;
+            const sheet = document.createElement('canvas');
+            sheet.width = W;
+            sheet.height = H;
+            const x = sheet.getContext('2d');
+            x.scale(S, S);
+
+            x.fillStyle = '#090A0F';
+            x.fillRect(0, 0, 800, 520);
+            x.fillStyle = '#F3F4F6';
+            x.font = '600 30px "Cormorant Garamond", serif';
+            x.fillText(`AETHER // ${activePalette.name}`, 40, 58);
+            x.fillStyle = '#9CA3AF';
+            x.font = '12px "JetBrains Mono", monospace';
+            x.fillText('COSINE PALETTE · C(t) = a + b·cos(2π(c·t + d))', 40, 84);
+
+            const grad = x.createLinearGradient(40, 0, 760, 0);
+            for (let i = 0; i <= 16; i++) grad.addColorStop(i / 16, samplePaletteCSS(i / 16));
+            x.fillStyle = grad;
+            roundRectPath(x, 40, 110, 720, 84, 12);
+            x.fill();
+
+            paletteHexStops().forEach((hex, i) => {
+                const sx = 40 + i * 92;
+                x.fillStyle = hex;
+                roundRectPath(x, sx, 224, 80, 64, 10);
+                x.fill();
+                x.fillStyle = '#F3F4F6';
+                x.font = '11px "JetBrains Mono", monospace';
+                x.fillText(hex, sx, 310);
+            });
+
+            x.font = '13px "JetBrains Mono", monospace';
+            x.fillStyle = '#C7D2FE';
+            [['a (offset)', activePalette.a], ['b (amplitude)', activePalette.b],
+             ['c (frequency)', activePalette.c], ['d (phase)', activePalette.d]].forEach((row, i) => {
+                x.fillText(`${row[0].padEnd(14)} [ ${row[1].map(v => Number(v).toFixed(2)).join(', ')} ]`, 40, 358 + i * 26);
+            });
+
+            x.fillStyle = '#6B7280';
+            x.font = '11px "JetBrains Mono", monospace';
+            x.fillText('Generated in the AETHER Chromatic Lab', 40, 494);
+
+            const link = document.createElement('a');
+            link.download = `aether-palette-${activePalette.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
+            link.href = sheet.toDataURL('image/png');
+            link.click();
+            showToast(`Exported palette sheet PNG · ${W}×${H}`);
+        }
+
         function exportArtworkPNG() {
-            // Create an offscreen composite with a subtle museum-style mathematical signature bar
+            if (activeStudio === 'chromatics') {
+                exportPaletteSheetPNG();
+                return;
+            }
+            // Composite at the chosen export scale (1x/2x/3x of the CSS viewport),
+            // drawing the DPR-backed canvas scaled to the export size.
+            const scaleSel = document.getElementById('exportScaleSelect');
+            const scale = scaleSel ? (parseInt(scaleSel.value, 10) || 2) : 2;
+            const expW = Math.round(width * scale);
+            const expH = Math.round(height * scale);
             const expCanvas = document.createElement('canvas');
-            expCanvas.width = width;
-            expCanvas.height = height;
+            expCanvas.width = expW;
+            expCanvas.height = expH;
             const eCtx = expCanvas.getContext('2d');
 
-            eCtx.drawImage(canvas, 0, 0);
+            eCtx.drawImage(canvas, 0, 0, expW, expH);
 
-            // Museum Plaque Watermark at bottom right
+            // Museum Plaque Watermark at bottom right (scaled with the export)
             const title = document.getElementById('formulaTitle').textContent;
             const eq = document.getElementById('liveEquationValues').textContent;
             eCtx.fillStyle = 'rgba(9, 10, 15, 0.78)';
-            eCtx.fillRect(width - 440, height - 68, 420, 48);
+            eCtx.fillRect(expW - 440 * scale, expH - 68 * scale, 420 * scale, 48 * scale);
             eCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-            eCtx.strokeRect(width - 440, height - 68, 420, 48);
+            eCtx.strokeRect(expW - 440 * scale, expH - 68 * scale, 420 * scale, 48 * scale);
 
             eCtx.fillStyle = '#F3F4F6';
-            eCtx.font = '600 15px "Cormorant Garamond", serif';
-            eCtx.fillText(`AETHER // ${title} (${activePalette.name})`, width - 426, height - 46);
+            eCtx.font = `600 ${15 * scale}px "Cormorant Garamond", serif`;
+            eCtx.fillText(`AETHER // ${title} (${activePalette.name})`, expW - 426 * scale, expH - 46 * scale);
 
             eCtx.fillStyle = '#9CA3AF';
-            eCtx.font = '11px "JetBrains Mono", monospace';
-            eCtx.fillText(eq.slice(0, 52), width - 426, height - 29);
+            eCtx.font = `${11 * scale}px "JetBrains Mono", monospace`;
+            eCtx.fillText(eq.slice(0, 52), expW - 426 * scale, expH - 29 * scale);
 
             const link = document.createElement('a');
             link.download = `aether-${title.toLowerCase().replace(/\s+/g, '-')}.png`;
             link.href = expCanvas.toDataURL('image/png');
             link.click();
-            showToast('Exported high-resolution artwork PNG');
+            showToast(`Exported artwork PNG · ${expW}×${expH}`);
         }
 
         const panelCollapsed = { left: false, right: false };

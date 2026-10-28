@@ -2608,7 +2608,7 @@
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             if (snapshot) {
                 ctx.save();
-                ctx.setTransform(1, 0, 0, 1);
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.drawImage(snapshot, 0, 0);
                 ctx.restore();
             } else {

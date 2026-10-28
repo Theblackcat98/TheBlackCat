@@ -440,7 +440,7 @@
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-mono uppercase tracking-wider text-mutedSilver">CURATED CONSTANTS</span>
                     <button onclick="triggerSerendipity()" class="text-[11px] font-mono text-amberAccent hover:underline flex items-center gap-1">
-                        <i class="ph ph-sparkle"></i> Serendipity
+                        <i class="ph ph-sparkle"></i> Mutate Constants
                     </button>
                 </div>
                 <div id="curatedPresetsRow" class="flex flex-wrap gap-1.5">
@@ -510,6 +510,19 @@
                     <input type="range" id="colorSpeedSlider" min="0" max="4" step="0.1" value="1.0" aria-label="Chromatic cycle speed" oninput="updateGlobalRenderParam('colorSpeed', this.value)">
                 </div>
 
+                <div>
+                    <div class="flex justify-between items-center text-xs mb-1">
+                        <label class="text-mutedSilver" for="qualitySelect">Render Quality</label>
+                        <select id="qualitySelect" onchange="setQuality(this.value)" class="bg-black/40 border border-white/10 rounded-md px-1.5 py-1 font-mono text-[11px] text-indigo-200 focus:outline-none" aria-label="Render quality">
+                            <option value="auto">Auto</option>
+                            <option value="high">High</option>
+                            <option value="balanced">Balanced</option>
+                            <option value="eco">Eco</option>
+                        </select>
+                    </div>
+                    <p id="qualityNote" class="text-[10px] font-mono text-mutedSilver"></p>
+                </div>
+
                 <div class="flex items-center justify-between pt-1">
                     <span class="text-xs text-mutedSilver">Auto-Morph Parameters</span>
                     <button id="autoMorphBtn" onclick="toggleAutoMorph()" class="px-3 py-1 rounded-lg text-xs font-mono border border-white/15 bg-white/5 text-mutedSilver hover:text-white transition">
@@ -542,12 +555,26 @@
                 <span>Mutate Formula</span>
             </button>
             <div class="h-4 w-[1px] bg-white/10 hidden sm:block"></div>
-            <button onclick="switchStudio('chromatics')" class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-xl hover:bg-white/5 transition text-xs text-mutedSilver hover:text-white">
+            <button onclick="switchStudio('chromatics')" title="Edit Spectral Waves — Chromatic Lab" class="flex items-center gap-2 px-2.5 py-1 rounded-xl hover:bg-white/5 transition text-xs text-mutedSilver hover:text-white">
                 <i class="ph ph-sliders text-rose-400"></i>
-                <span>Edit Spectral Waves</span>
+                <span class="hidden sm:inline">Edit Spectral Waves</span>
             </button>
         </div>
     </footer>
+
+    <!-- FIRST-RUN ORIENTATION STRIP (dismissible; new visitors only) -->
+    <div id="orientationBar" class="fixed z-30 left-1/2 -translate-x-1/2 bottom-24 sm:bottom-auto sm:top-[4.75rem] w-[calc(100vw-1.5rem)] sm:w-auto max-w-xl hidden">
+        <div class="glass-panel rounded-2xl px-4 py-3 flex items-center gap-3">
+            <i class="ph ph-compass text-indigo-300 text-xl shrink-0"></i>
+            <p class="text-xs text-mutedSilver leading-relaxed">
+                <span class="text-white font-medium">Start here:</span> pick a system on the left, tune it or hit <span class="text-amberAccent">Mutate</span>, then <span class="text-white">Capture</span>. Palettes are made in <span class="text-rose-300">Studio IV &middot; Chromatic Lab</span> and drive every visualizer. Everything auto-saves in this browser.
+            </p>
+            <div class="flex flex-col gap-1.5 shrink-0">
+                <button onclick="switchStudio('chromatics'); dismissOrientation();" class="glass-pill px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-rose-200 whitespace-nowrap">Open the Lab</button>
+                <button onclick="dismissOrientation()" class="glass-pill px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-mutedSilver whitespace-nowrap">Got it</button>
+            </div>
+        </div>
+    </div>
 
     <!-- MATHEMATICAL CODEX MODAL (Educational Deep-Dive into the Equations) -->
     <div id="codexModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
@@ -1927,6 +1954,21 @@
                 if (fpsEl) fpsEl.textContent = `${fps} FPS`;
                 frameCount = 0;
                 lastFrameTime = now;
+                // Auto quality: sustained low FPS steps the caps down (with a
+                // toast, so the change is visible rather than mysterious).
+                if (qualityMode === 'auto' && activeStudio !== 'chromatics' && !isPaused) {
+                    if (fps < 38) {
+                        lowFpsStreak++;
+                        if (lowFpsStreak >= 4 && perfLevel < 2) {
+                            perfLevel++;
+                            lowFpsStreak = 0;
+                            applyQuality(false);
+                            showToast('Quality auto-adjusted for smoothness — see Render Quality in the HUD');
+                        }
+                    } else {
+                        lowFpsStreak = 0;
+                    }
+                }
             }
 
             if (isPaused || activeStudio === 'chromatics') return;
@@ -1972,7 +2014,7 @@
         function renderCliffordAttractor() {
             const p = SYSTEMS.attractors.modes.clifford.params;
             const a = p.a.val, b = p.b.val, c = p.c.val, d = p.d.val;
-            const count = p.density.val;
+            const count = Math.min(p.density.val, capsNow.density);
 
             // Subtle exposure fade
             ctx.fillStyle = `rgba(9, 10, 15, ${1 - renderSettings.exposure})`;
@@ -2006,7 +2048,7 @@
         function renderDeJongAttractor() {
             const p = SYSTEMS.attractors.modes.dejong.params;
             const a = p.a.val, b = p.b.val, c = p.c.val, d = p.d.val;
-            const count = p.density.val;
+            const count = Math.min(p.density.val, capsNow.density);
 
             ctx.fillStyle = `rgba(9, 10, 15, ${1 - renderSettings.exposure})`;
             ctx.fillRect(0, 0, width, height);
@@ -2265,8 +2307,9 @@
             const cx = width / 2 + camPanX;
             const cy = height / 2 + camPanY;
             const PI = Math.PI;
+            const grainTotal = Math.floor(CHLADNI_COUNT * capsNow.grains);
 
-            for (let i = 0; i < CHLADNI_COUNT; i++) {
+            for (let i = 0; i < grainTotal; i++) {
                 let x = chladniX[i];
                 let y = chladniY[i];
 
@@ -2311,7 +2354,7 @@
 
         function renderGrayScottTuring() {
             const p = SYSTEMS.emergence.modes.turing.params;
-            const F = p.F.val, k = p.k.val, steps = Math.round(p.steps.val), brush = p.brush.val;
+            const F = p.F.val, k = p.k.val, steps = Math.min(Math.round(p.steps.val), capsNow.rdSteps), brush = p.brush.val;
 
             const plateScale = Math.min(width, height) * 0.82 * camZoom;
             const drawX = width / 2 + camPanX - plateScale / 2;
@@ -2448,15 +2491,100 @@
         }
 
         /***********************************************************************
+         * 6B. RENDER QUALITY, DPR SCALING, RESIZE-SAFE CANVAS, ORIENTATION
+         ***********************************************************************/
+        let perfLevel = 0; // auto-mode step-down level (0 = full quality)
+        let lowFpsStreak = 0;
+
+        function computeCaps() {
+            const dpr = window.devicePixelRatio || 1;
+            if (qualityMode === 'high') return { dpr: Math.min(dpr, 2), grains: 1, rdSteps: 16, density: 35000 };
+            if (qualityMode === 'balanced') return { dpr: Math.min(dpr, 1.5), grains: 0.6, rdSteps: 10, density: 22000 };
+            if (qualityMode === 'eco') return { dpr: 1, grains: 0.35, rdSteps: 6, density: 12000 };
+            // auto: start at full quality; the FPS watcher steps this down
+            return [
+                { dpr: Math.min(dpr, 2), grains: 1, rdSteps: 16, density: 35000 },
+                { dpr: 1.5, grains: 0.6, rdSteps: 10, density: 22000 },
+                { dpr: 1, grains: 0.35, rdSteps: 6, density: 12000 }
+            ][perfLevel];
+        }
+        let capsNow = computeCaps();
+
+        function currentDPR() { return capsNow.dpr; }
+
+        function updateQualityNote() {
+            const note = document.getElementById('qualityNote');
+            if (!note) return;
+            const grains = Math.round(CHLADNI_COUNT * capsNow.grains / 1000);
+            note.textContent = `backing ${capsNow.dpr}× · ${grains}k grains · ≤${capsNow.rdSteps} RD steps${qualityMode === 'auto' && perfLevel > 0 ? ' · auto-adjusted' : ''}`;
+        }
+
+        function applyQuality(announce = true) {
+            capsNow = computeCaps();
+            resizeCanvas(true);
+            updateQualityNote();
+            if (announce) showToast(`Render quality: ${qualityMode}`);
+        }
+
+        function setQuality(mode) {
+            qualityMode = mode;
+            perfLevel = 0;
+            lowFpsStreak = 0;
+            applyQuality(true);
+            markDirty();
+        }
+
+        // Resize the backing store WITHOUT wiping the accumulated artwork:
+        // the old frame is snapshotted and drawn back pixel-for-pixel.
+        // (Android URL-bar show/hide fires resize constantly — losing a
+        // long-exposure attractor to it was the original bug.)
+        function resizeCanvas(preserve = true) {
+            let snapshot = null;
+            if (preserve && canvas.width > 0 && canvas.height > 0) {
+                snapshot = document.createElement('canvas');
+                snapshot.width = canvas.width;
+                snapshot.height = canvas.height;
+                snapshot.getContext('2d').drawImage(canvas, 0, 0);
+            }
+            width = window.innerWidth;
+            height = window.innerHeight;
+            const dpr = currentDPR();
+            canvas.width = Math.round(width * dpr);
+            canvas.height = Math.round(height * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            if (snapshot) {
+                ctx.save();
+                ctx.setTransform(1, 0, 0, 1);
+                ctx.drawImage(snapshot, 0, 0);
+                ctx.restore();
+            } else {
+                clearCanvasBuffer();
+            }
+        }
+
+        function maybeShowOrientation() {
+            if (!isFirstRun) return;
+            try {
+                if (localStorage.getItem('aether-orient-dismissed')) return;
+            } catch (e) { return; }
+            const bar = document.getElementById('orientationBar');
+            if (bar) bar.classList.remove('hidden');
+        }
+
+        function dismissOrientation() {
+            const bar = document.getElementById('orientationBar');
+            if (bar) bar.classList.add('hidden');
+            try { localStorage.setItem('aether-orient-dismissed', '1'); } catch (e) { /* ignore */ }
+        }
+
+        /***********************************************************************
          * 7. INTERACTION, CLIPBOARD & ARTWORK EXPORT
          ***********************************************************************/
         function setupEventListeners() {
+            let resizeTimer = null;
             window.addEventListener('resize', () => {
-                width = window.innerWidth;
-                height = window.innerHeight;
-                canvas.width = width;
-                canvas.height = height;
-                clearCanvasBuffer();
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => resizeCanvas(true), 120);
             });
 
             // Mouse & Touch Events on Main Canvas
@@ -2745,10 +2873,7 @@
 
         // Initialize Atelier on Window Load
         window.onload = function () {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
+            resizeCanvas(false);
 
             initSimulationBuffers();
             setupEventListeners();
@@ -2767,6 +2892,7 @@
                 clearCanvasBuffer();
             }
             updateUndoButton();
+            updateQualityNote();
             // On phone-width screens the parameter HUD starts collapsed, so
             // the two panels never stack across the canvas on first paint.
             if (window.innerWidth < 640) togglePanelCollapse('right');

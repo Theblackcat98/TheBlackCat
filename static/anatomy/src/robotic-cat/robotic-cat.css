@@ -1,0 +1,44 @@
+.rc-stage {
+  position: relative;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  outline: none;
+}
+.rc-stage:active {
+  cursor: grabbing;
+}
+.rc-stage:focus-visible {
+  outline: 1px solid var(--anatomy-muted);
+  outline-offset: 6px;
+  border-radius: 4px;
+}
+.rc-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.rc-screen {
+  fill: var(--anatomy-shade-0);
+  stroke: var(--anatomy-lo);
+  stroke-width: var(--anatomy-weight);
+}
+.rc-bar {
+  fill: var(--anatomy-hi);
+  stroke: none;
+}
+.rc-pupil {
+  fill: var(--anatomy-green);
+  stroke: none;
+}
+.rc-beacon {
+  fill: var(--anatomy-lit-top);
+  stroke: var(--anatomy-lit);
+  stroke-width: 0.75px;
+}

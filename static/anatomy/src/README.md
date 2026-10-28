@@ -8,7 +8,8 @@ HTML can be traced back to something editable.
 src/drone/                     build.mjs, model.mjs, live.js, drone.css, shots/
 src/bookshelf-speaker/         build.mjs, shots/
 src/limited-slip-differential/ build.mjs, shots/
-src/flamelicker/               build.mjs, marks.png, shots/   (flame-licker and robotic-cat)
+src/flamelicker/               build.mjs, marks.png, shots/
+src/robotic-cat/               build.mjs, model.mjs, live.js, robotic-cat.css, shots/
 ```
 
 ## How a figure is published

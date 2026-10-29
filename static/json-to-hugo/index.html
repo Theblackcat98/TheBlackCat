@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON-to-Hugo Frontmatter Converter</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.5; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        textarea { width: 100%; height: 400px; font-family: monospace; padding: 0.5rem; box-sizing: border-box; }
+        .col { display: flex; flex-direction: column; }
+        button { padding: 0.5rem 1rem; cursor: pointer; background: #0066cc; color: white; border: none; border-radius: 4px; margin-top: 1rem; align-self: flex-start; }
+        button:hover { background: #0052a3; }
+        .error { color: #cc0000; margin-top: 0.5rem; font-weight: bold; }
+        @media (prefers-color-scheme: dark) {
+            body { background: #1a1a1a; color: #f0f0f0; }
+            textarea { background: #333; color: white; border: 1px solid #555; }
+            .error { color: #ff6666; }
+        }
+    </style>
+</head>
+<body>
+    <h1>JSON-to-Hugo Frontmatter Converter</h1>
+    <p>Paste JSON below to convert it into Hugo-compatible YAML frontmatter.</p>
+
+    <div class="grid">
+        <div class="col">
+            <label for="json-input"><strong>JSON Input:</strong></label>
+            <textarea id="json-input" placeholder='{"title": "Example", "tags": ["a", "b"]}'></textarea>
+            <div id="error-msg" class="error"></div>
+        </div>
+        <div class="col">
+            <label for="yaml-output"><strong>YAML Frontmatter Output:</strong></label>
+            <textarea id="yaml-output" readonly></textarea>
+            <button onclick="copyOutput()">Copy to Clipboard</button>
+        </div>
+    </div>
+
+    <script>
+        const inputEl = document.getElementById('json-input');
+        const outputEl = document.getElementById('yaml-output');
+        const errorEl = document.getElementById('error-msg');
+
+        // Simple YAML converter for basic JSON objects
+        function toYAML(obj, indent = 0) {
+            const spaces = ' '.repeat(indent);
+            let yaml = '';
+
+            for (const key in obj) {
+                if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
+
+                const val = obj[key];
+
+                // Escape keys if needed (simple check)
+                const safeKey = /^[a-zA-Z0-9_-]+$/.test(key) ? key : `"${key}"`;
+
+                if (val === null) {
+                    yaml += `${spaces}${safeKey}: null\n`;
+                } else if (typeof val === 'boolean' || typeof val === 'number') {
+                    yaml += `${spaces}${safeKey}: ${val}\n`;
+                } else if (typeof val === 'string') {
+                    // Quote string if it contains special chars or newlines
+                    if (val.includes('\n') || val.includes(':') || val.includes('#') || val.startsWith('{') || val.startsWith('[')) {
+                         yaml += `${spaces}${safeKey}: "${val.replace(/"/g, '\\"')}"\n`;
+                    } else {
+                         yaml += `${spaces}${safeKey}: ${val}\n`;
+                    }
+                } else if (Array.isArray(val)) {
+                    if (val.length === 0) {
+                        yaml += `${spaces}${safeKey}: []\n`;
+                    } else {
+                        yaml += `${spaces}${safeKey}:\n`;
+                        for (const item of val) {
+                            if (typeof item === 'object' && item !== null) {
+                                // Basic support for objects in arrays
+                                const objStr = toYAML(item, indent + 2).trim();
+                                yaml += `${spaces}  - ${objStr}\n`;
+                            } else {
+                                const safeItem = typeof item === 'string' && (item.includes(':') || item.includes('#'))
+                                    ? `"${item.replace(/"/g, '\\"')}"`
+                                    : item;
+                                yaml += `${spaces}  - ${safeItem}\n`;
+                            }
+                        }
+                    }
+                } else if (typeof val === 'object') {
+                    if (Object.keys(val).length === 0) {
+                        yaml += `${spaces}${safeKey}: {}\n`;
+                    } else {
+                        yaml += `${spaces}${safeKey}:\n`;
+                        yaml += toYAML(val, indent + 2);
+                    }
+                }
+            }
+            return yaml;
+        }
+
+        function convert() {
+            const raw = inputEl.value.trim();
+            if (!raw) {
+                outputEl.value = '';
+                errorEl.textContent = '';
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(raw);
+                if (typeof parsed !== 'object' || Array.isArray(parsed) || parsed === null) {
+                    throw new Error("Input must be a JSON object at the root level.");
+                }
+
+                const yamlBody = toYAML(parsed);
+                outputEl.value = `---\n${yamlBody}---\n`;
+                errorEl.textContent = '';
+            } catch (err) {
+                errorEl.textContent = `Error: ${err.message}`;
+            }
+        }
+
+        inputEl.addEventListener('input', convert);
+        // Initial check in case browser auto-fills
+        convert();
+
+        function copyOutput() {
+            navigator.clipboard.writeText(outputEl.value).then(() => {
+                const btn = document.querySelector('.col:nth-child(2) button');
+                const orig = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = orig, 1500);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenGraph Social Card Previewer</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 1000px; margin: 0 auto; padding: 2rem; line-height: 1.5; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+
+        /* Inputs */
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-weight: bold; margin-bottom: 0.25rem; }
+        input[type="text"] { width: 100%; padding: 0.5rem; box-sizing: border-box; }
+        input[type="url"] { width: 100%; padding: 0.5rem; box-sizing: border-box; }
+
+        /* Previews */
+        .preview-label { font-weight: bold; margin-top: 2rem; margin-bottom: 0.5rem; color: #666; }
+
+        /* Twitter / X Style */
+        .card-x {
+            border: 1px solid #cfd9de;
+            border-radius: 16px;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            max-width: 504px;
+            background: #fff;
+            cursor: pointer;
+        }
+        .card-x:hover { background: #f7f9f9; }
+        .card-x-img { width: 100%; aspect-ratio: 1.91 / 1; background-color: #f7f9f9; background-size: cover; background-position: center; border-bottom: 1px solid #cfd9de; }
+        .card-x-body { padding: 12px; color: #0f1419; }
+        .card-x-domain { color: #536471; font-size: 13px; margin-bottom: 2px; }
+        .card-x-title { font-size: 15px; margin: 0; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+        .card-x-desc { font-size: 15px; color: #536471; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* LinkedIn Style */
+        .card-li {
+            border-radius: 8px;
+            overflow: hidden;
+            background: #eef3f8;
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Fira Sans", Ubuntu, Oxygen, "Oxygen Sans", Cantarell, "Droid Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Lucida Grande", Helvetica, Arial, sans-serif;
+            max-width: 504px;
+            cursor: pointer;
+        }
+        .card-li-img { width: 100%; aspect-ratio: 1.91 / 1; background-color: #d9e5eb; background-size: cover; background-position: center; }
+        .card-li-body { padding: 8px 16px 12px; background: #eef3f8; }
+        .card-li-title { font-size: 14px; font-weight: 600; color: rgba(0,0,0,0.9); margin: 0 0 2px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-li-domain { font-size: 12px; color: rgba(0,0,0,0.6); }
+
+        @media (prefers-color-scheme: dark) {
+            body { background: #1a1a1a; color: #f0f0f0; }
+            input { background: #333; color: white; border: 1px solid #555; }
+            .preview-label { color: #aaa; }
+
+            .card-x { background: #000; border-color: #2f3336; }
+            .card-x:hover { background: #16181c; }
+            .card-x-img { border-color: #2f3336; background-color: #16181c; }
+            .card-x-body { color: #e7e9ea; }
+            .card-x-domain, .card-x-desc { color: #71767b; }
+
+            .card-li { background: #1d2226; }
+            .card-li-img { background-color: #38434f; }
+            .card-li-body { background: #1d2226; }
+            .card-li-title { color: rgba(255,255,255,0.9); }
+            .card-li-domain { color: rgba(255,255,255,0.6); }
+        }
+    </style>
+</head>
+<body>
+    <h1>OpenGraph Social Card Previewer</h1>
+    <p>Simulate how a link will look when shared on social platforms based on its meta tags.</p>
+
+    <div class="grid">
+        <div class="controls">
+            <h3>Meta Tag Data</h3>
+
+            <div class="form-group">
+                <label>og:title</label>
+                <input type="text" id="i-title" value="The BlackCat: A git-native personal library">
+            </div>
+
+            <div class="form-group">
+                <label>og:description</label>
+                <input type="text" id="i-desc" value="Bookmarks, AI skills, research and projects. Markdown is the source of truth, git holds the history, and Hugo provides the reading room.">
+            </div>
+
+            <div class="form-group">
+                <label>og:image (URL)</label>
+                <input type="url" id="i-img" value="https://theblackcat98.github.io/TheBlackCat/og.png">
+            </div>
+
+            <div class="form-group">
+                <label>og:url (or Domain)</label>
+                <input type="text" id="i-domain" value="theblackcat98.github.io">
+            </div>
+        </div>
+
+        <div class="previews">
+            <h3>Live Previews</h3>
+
+            <div class="preview-label">X / Twitter (Summary Card with Large Image)</div>
+            <div class="card-x">
+                <div class="card-x-img" id="x-img" style="background-image: url('https://theblackcat98.github.io/TheBlackCat/og.png')"></div>
+                <div class="card-x-body">
+                    <div class="card-x-domain" id="x-domain">theblackcat98.github.io</div>
+                    <div class="card-x-title" id="x-title">The BlackCat: A git-native personal library</div>
+                    <div class="card-x-desc" id="x-desc">Bookmarks, AI skills, research and projects. Markdown is the source of truth, git holds the history, and Hugo provides the reading room.</div>
+                </div>
+            </div>
+
+            <div class="preview-label">LinkedIn</div>
+            <div class="card-li">
+                <div class="card-li-img" id="li-img" style="background-image: url('https://theblackcat98.github.io/TheBlackCat/og.png')"></div>
+                <div class="card-li-body">
+                    <div class="card-li-title" id="li-title">The BlackCat: A git-native personal library</div>
+                    <div class="card-li-domain" id="li-domain">theblackcat98.github.io</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputs = {
+            title: document.getElementById('i-title'),
+            desc: document.getElementById('i-desc'),
+            img: document.getElementById('i-img'),
+            domain: document.getElementById('i-domain')
+        };
+
+        function getDomain(str) {
+            try {
+                if (str.startsWith('http')) return new URL(str).hostname;
+                return str;
+            } catch(e) {
+                return str;
+            }
+        }
+
+        function update() {
+            const title = inputs.title.value || 'Title goes here';
+            const desc = inputs.desc.value || 'Description goes here';
+            const img = inputs.img.value || '';
+            const domain = getDomain(inputs.domain.value) || 'example.com';
+
+            // Update X
+            document.getElementById('x-title').textContent = title;
+            document.getElementById('x-desc').textContent = desc;
+            document.getElementById('x-domain').textContent = domain;
+            document.getElementById('x-img').style.backgroundImage = `url('${img}')`;
+
+            // Update LinkedIn
+            document.getElementById('li-title').textContent = title;
+            document.getElementById('li-domain').textContent = domain;
+            document.getElementById('li-img').style.backgroundImage = `url('${img}')`;
+        }
+
+        Object.values(inputs).forEach(input => {
+            input.addEventListener('input', update);
+        });
+    </script>
+</body>
+</html>

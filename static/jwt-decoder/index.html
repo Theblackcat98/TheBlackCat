@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Decoder & Debugger</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.5; }
+        textarea { width: 100%; height: 150px; font-family: monospace; padding: 0.5rem; box-sizing: border-box; word-break: break-all; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+        .box { background: #f0f0f0; padding: 1rem; border-radius: 4px; overflow-x: auto; font-family: monospace; white-space: pre-wrap; }
+        .header-box { border-top: 4px solid #cc0000; }
+        .payload-box { border-top: 4px solid #a335ee; }
+        .signature-box { border-top: 4px solid #00aadd; margin-top: 1rem; }
+        .error { color: #cc0000; font-weight: bold; margin-top: 0.5rem; }
+        .claim-desc { font-family: system-ui, sans-serif; font-size: 0.85rem; color: #666; display: block; margin-top: 0.25rem; }
+        @media (prefers-color-scheme: dark) {
+            body { background: #1a1a1a; color: #f0f0f0; }
+            textarea { background: #333; color: white; border: 1px solid #555; }
+            .box { background: #222; }
+            .error { color: #ff6666; }
+            .claim-desc { color: #aaa; }
+        }
+    </style>
+</head>
+<body>
+    <h1>JWT Decoder</h1>
+    <p>Decode JSON Web Tokens securely. <strong>Client-side only:</strong> your token never leaves the browser.</p>
+
+    <label for="jwt-input"><strong>Encoded Token:</strong></label>
+    <textarea id="jwt-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI..."></textarea>
+    <div id="error-msg" class="error"></div>
+
+    <div class="grid">
+        <div>
+            <h3>Header <small>(Algorithm & Type)</small></h3>
+            <div id="header-output" class="box header-box"></div>
+        </div>
+        <div>
+            <h3>Payload <small>(Data & Claims)</small></h3>
+            <div id="payload-output" class="box payload-box"></div>
+        </div>
+    </div>
+
+    <h3>Signature</h3>
+    <div id="signature-output" class="box signature-box"></div>
+
+    <script>
+        const inputEl = document.getElementById('jwt-input');
+        const headerEl = document.getElementById('header-output');
+        const payloadEl = document.getElementById('payload-output');
+        const sigEl = document.getElementById('signature-output');
+        const errorEl = document.getElementById('error-msg');
+
+        const stdClaims = {
+            'iss': 'Issuer',
+            'sub': 'Subject',
+            'aud': 'Audience',
+            'exp': 'Expiration Time',
+            'nbf': 'Not Before',
+            'iat': 'Issued At',
+            'jti': 'JWT ID'
+        };
+
+        function formatDate(unixSecs) {
+            try {
+                const d = new Date(unixSecs * 1000);
+                return d.toLocaleString() + (d < new Date() ? ' (Expired/Past)' : ' (Future)');
+            } catch (e) {
+                return String(unixSecs);
+            }
+        }
+
+        function syntaxHighlight(jsonObj) {
+            let json = JSON.stringify(jsonObj, null, 2);
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            // Add tooltips for standard claims in payload
+            return json.replace(/"([^"]+)":/g, (match, key) => {
+                let html = `<strong>"${key}"</strong>:`;
+                if (stdClaims[key]) {
+                    html += `<span class="claim-desc">// ${stdClaims[key]}`;
+                    if (['exp', 'iat', 'nbf'].includes(key) && typeof jsonObj[key] === 'number') {
+                         html += ` &rarr; ${formatDate(jsonObj[key])}`;
+                    }
+                    html += `</span>`;
+                }
+                return html;
+            });
+        }
+
+        function decodeJWT() {
+            const raw = inputEl.value.trim();
+            errorEl.textContent = '';
+            headerEl.innerHTML = '';
+            payloadEl.innerHTML = '';
+            sigEl.textContent = '';
+
+            if (!raw) return;
+
+            const parts = raw.split('.');
+            if (parts.length !== 3) {
+                errorEl.textContent = 'Invalid JWT format. Must contain 3 parts separated by dots.';
+                return;
+            }
+
+            try {
+                // Fix Base64Url to Base64
+                const decodeB64Url = (str) => {
+                    let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+                    while (b64.length % 4 !== 0) b64 += '=';
+                    // Decode to UTF-8
+                    const binStr = atob(b64);
+                    const bytes = new Uint8Array(binStr.length);
+                    for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+                    const decoder = new TextDecoder('utf-8');
+                    return decoder.decode(bytes);
+                };
+
+                const headerObj = JSON.parse(decodeB64Url(parts[0]));
+                const payloadObj = JSON.parse(decodeB64Url(parts[1]));
+
+                headerEl.innerHTML = syntaxHighlight(headerObj);
+                payloadEl.innerHTML = syntaxHighlight(payloadObj);
+
+                // Signature is binary, just show the hex or raw b64url
+                sigEl.textContent = parts[2] + '\n\n(Signature verification not supported client-side without the secret/key)';
+            } catch (err) {
+                errorEl.textContent = 'Failed to decode token: ' + err.message;
+            }
+        }
+
+        inputEl.addEventListener('input', decodeJWT);
+        decodeJWT();
+    </script>
+</body>
+</html>

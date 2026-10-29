@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Templating Sandbox</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.5; }
+        textarea { width: 100%; height: 150px; margin-bottom: 1rem; font-family: monospace; padding: 0.5rem; }
+        .variables { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+        .var-group { display: flex; flex-direction: column; }
+        input { padding: 0.5rem; margin-top: 0.25rem; }
+        .output-box { background: #f0f0f0; padding: 1rem; border-radius: 4px; white-space: pre-wrap; font-family: monospace; margin-top: 1rem; }
+        button { padding: 0.5rem 1rem; cursor: pointer; background: #0066cc; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #0052a3; }
+        @media (prefers-color-scheme: dark) {
+            body { background: #1a1a1a; color: #f0f0f0; }
+            .output-box { background: #333; }
+            textarea, input { background: #333; color: white; border: 1px solid #555; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Prompt Templating Sandbox</h1>
+    <p>Test prompt templates with variables. Use <code>{{variable_name}}</code> syntax.</p>
+
+    <label for="template">Template:</label>
+    <textarea id="template">You are a helpful assistant. Please summarize the following text for a {{audience}} audience:
+
+{{input_text}}</textarea>
+
+    <div id="variables-container" class="variables">
+        <!-- Variables will be auto-generated here -->
+    </div>
+
+    <button onclick="renderTemplate()">Render Prompt</button>
+
+    <h3>Output:</h3>
+    <div id="output" class="output-box"></div>
+
+    <script>
+        const templateEl = document.getElementById('template');
+        const varsContainer = document.getElementById('variables-container');
+        const outputEl = document.getElementById('output');
+
+        let currentVars = new Set();
+
+        function extractVariables(text) {
+            const regex = /{{([\w_]+)}}/g;
+            const vars = new Set();
+            let match;
+            while ((match = regex.exec(text)) !== null) {
+                vars.add(match[1]);
+            }
+            return vars;
+        }
+
+        function updateInputs() {
+            const text = templateEl.value;
+            const newVars = extractVariables(text);
+
+            // Remove old variables
+            for (const v of currentVars) {
+                if (!newVars.has(v)) {
+                    const el = document.getElementById(`var-group-${v}`);
+                    if (el) el.remove();
+                }
+            }
+
+            // Add new variables
+            for (const v of newVars) {
+                if (!currentVars.has(v)) {
+                    const div = document.createElement('div');
+                    div.className = 'var-group';
+                    div.id = `var-group-${v}`;
+
+                    const label = document.createElement('label');
+                    label.textContent = v;
+                    label.htmlFor = `input-${v}`;
+
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = `input-${v}`;
+                    input.placeholder = `Value for ${v}`;
+
+                    div.appendChild(label);
+                    div.appendChild(input);
+                    varsContainer.appendChild(div);
+                }
+            }
+
+            currentVars = newVars;
+            renderTemplate();
+        }
+
+        function renderTemplate() {
+            let text = templateEl.value;
+            for (const v of currentVars) {
+                const val = document.getElementById(`input-${v}`).value;
+                text = text.replaceAll(`{{${v}}}`, val || `{{${v}}}`);
+            }
+            outputEl.textContent = text;
+        }
+
+        templateEl.addEventListener('input', updateInputs);
+        updateInputs();
+    </script>
+</body>
+</html>

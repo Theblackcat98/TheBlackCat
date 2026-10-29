@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Commit Message Formatter</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.5; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-weight: bold; margin-bottom: 0.25rem; }
+        select, input, textarea { width: 100%; padding: 0.5rem; box-sizing: border-box; font-family: monospace; }
+        textarea { height: 100px; }
+        .help { font-size: 0.85rem; color: #666; margin-top: 0.25rem; }
+        .counter { float: right; font-size: 0.85rem; }
+        .over-limit { color: #cc0000; font-weight: bold; }
+        .output-box { background: #f0f0f0; padding: 1rem; border-radius: 4px; white-space: pre-wrap; font-family: monospace; font-size: 1.1rem; }
+        button { padding: 0.5rem 1rem; cursor: pointer; background: #0066cc; color: white; border: none; border-radius: 4px; margin-top: 1rem; }
+        button:hover { background: #0052a3; }
+        @media (prefers-color-scheme: dark) {
+            body { background: #1a1a1a; color: #f0f0f0; }
+            select, input, textarea { background: #333; color: white; border: 1px solid #555; }
+            .help { color: #aaa; }
+            .over-limit { color: #ff6666; }
+            .output-box { background: #222; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Git Commit Message Formatter</h1>
+    <p>Standardizes commit messages according to <a href="https://www.conventionalcommits.org/" target="_blank">Conventional Commit</a> guidelines.</p>
+
+    <div class="form-group">
+        <label>Type <span class="help">(Required)</span></label>
+        <select id="i-type">
+            <option value="feat">feat (A new feature)</option>
+            <option value="fix">fix (A bug fix)</option>
+            <option value="docs">docs (Documentation only changes)</option>
+            <option value="style">style (Changes that do not affect the meaning of the code)</option>
+            <option value="refactor">refactor (A code change that neither fixes a bug nor adds a feature)</option>
+            <option value="perf">perf (A code change that improves performance)</option>
+            <option value="test">test (Adding missing tests or correcting existing tests)</option>
+            <option value="build">build (Changes that affect the build system or external dependencies)</option>
+            <option value="ci">ci (Changes to CI configuration files and scripts)</option>
+            <option value="chore">chore (Other changes that don't modify src or test files)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Scope <span class="help">(Optional - e.g. 'parser', 'api')</span></label>
+        <input type="text" id="i-scope" placeholder="component">
+    </div>
+
+    <div class="form-group">
+        <label>Description <span class="counter" id="c-desc">0/50</span></label>
+        <input type="text" id="i-desc" placeholder="add ability to parse arrays">
+        <div class="help">Use the imperative mood (e.g. "add" not "adds" or "added").</div>
+    </div>
+
+    <div class="form-group">
+        <label>Breaking Change? <span class="help">(Appends '!' to type)</span></label>
+        <input type="checkbox" id="i-breaking" style="width: auto;"> Yes
+    </div>
+
+    <div class="form-group">
+        <label>Body <span class="help">(Optional - wraps at 72 chars)</span></label>
+        <textarea id="i-body" placeholder="Detailed explanation of the change..."></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Footer / Issue Ref <span class="help">(Optional)</span></label>
+        <input type="text" id="i-footer" placeholder="Fixes #123">
+    </div>
+
+    <h3>Result:</h3>
+    <div id="output" class="output-box"></div>
+    <button onclick="copyOutput()">Copy Message</button>
+
+    <script>
+        const iType = document.getElementById('i-type');
+        const iScope = document.getElementById('i-scope');
+        const iDesc = document.getElementById('i-desc');
+        const iBreaking = document.getElementById('i-breaking');
+        const iBody = document.getElementById('i-body');
+        const iFooter = document.getElementById('i-footer');
+        const cDesc = document.getElementById('c-desc');
+        const output = document.getElementById('output');
+
+        // Simple text wrapper to 72 columns
+        function wrapText(text, maxLineLength = 72) {
+            const words = text.split(/(\s+)/); // Preserve whitespace to avoid squishing
+            let lines = [];
+            let currentLine = '';
+
+            for (let word of words) {
+                // If it's a newline, force break
+                if (word.includes('\n')) {
+                    const parts = word.split('\n');
+                    currentLine += parts[0];
+                    lines.push(currentLine);
+                    for (let i = 1; i < parts.length - 1; i++) {
+                        lines.push(parts[i]);
+                    }
+                    currentLine = parts[parts.length - 1];
+                    continue;
+                }
+
+                if (currentLine.length + word.length > maxLineLength && currentLine.trim().length > 0) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine += word;
+                }
+            }
+            if (currentLine.trim().length > 0 || currentLine.length > 0) {
+                lines.push(currentLine);
+            }
+            return lines.join('\n');
+        }
+
+        function update() {
+            const type = iType.value;
+            const scope = iScope.value.trim();
+            const desc = iDesc.value.trim();
+            const isBreaking = iBreaking.checked;
+            const body = iBody.value.trim();
+            const footer = iFooter.value.trim();
+
+            // Format subject
+            let subject = type;
+            if (scope) subject += `(${scope})`;
+            if (isBreaking) subject += '!';
+            subject += `: ${desc}`;
+
+            // Update counter
+            cDesc.textContent = `${subject.length}/50 (soft limit) | 72 (hard limit)`;
+            cDesc.className = subject.length > 72 ? 'counter over-limit' : 'counter';
+
+            // Build full message
+            let msg = subject;
+            if (body || footer || isBreaking) {
+                msg += '\n\n';
+            }
+
+            if (body) {
+                msg += wrapText(body) + '\n';
+            }
+
+            if (isBreaking && !footer.toUpperCase().includes('BREAKING CHANGE')) {
+                msg += '\nBREAKING CHANGE: (Describe the breaking change here)\n';
+            }
+
+            if (footer) {
+                msg += '\n' + footer;
+            }
+
+            output.textContent = msg.trim();
+        }
+
+        const inputs = [iType, iScope, iDesc, iBreaking, iBody, iFooter];
+        inputs.forEach(el => el.addEventListener('input', update));
+
+        update();
+
+        function copyOutput() {
+            navigator.clipboard.writeText(output.textContent).then(() => alert('Copied to clipboard!'));
+        }
+    </script>
+</body>
+</html>

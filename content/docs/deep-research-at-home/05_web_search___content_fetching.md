@@ -28,7 +28,7 @@ So, the Pipe first performs a **Search** to get a list of potential sources, and
 Let's break down the process:
 
 1.  **Web Search:**
-    *   The [Research Pipe](01_the_research_pipe_.md), often using the AI model, generates specific search queries based on the current research topic identified in the [Iterative Research Cycles](04_iterative_research_cycles.md).
+    *   The [Research Pipe](01_the_research_pipe.md), often using the AI model, generates specific search queries based on the current research topic identified in the [Iterative Research Cycles](04_iterative_research_cycles.md).
     *   These queries are sent to an external search tool (like a self-hosted SearXNG instance or OpenWebUI's built-in search feature).
     *   The search tool returns a list of results, typically including the title, URL, and a short snippet for each.
 

@@ -1,7 +1,7 @@
 
 # Chapter 2: Configuration (Valves)
 
-Welcome back to the Deep Research at Home tutorial! In the last chapter, [The Research Pipe](01_the_research_pipe_.md), we introduced the core idea: the Research Pipe acts like a conductor, orchestrating different tools to perform complex research for you.
+Welcome back to the Deep Research at Home tutorial! In the last chapter, [The Research Pipe](01_the_research_pipe.md), we introduced the core idea: the Research Pipe acts like a conductor, orchestrating different tools to perform complex research for you.
 
 But what if you want to tell the conductor *how* to conduct the symphony? Maybe you want the tempo to be faster, certain instruments to play more softly, or perhaps focus only on string instruments for a while. This is where **Configuration (Valves)** comes in.
 

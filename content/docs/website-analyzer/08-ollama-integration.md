@@ -15,7 +15,7 @@ excludeSearch: true
 
 # Chapter 8: Ollama LLM Integration
 
-Welcome back! In the last two chapters, we saw how our Website Analyzer generated structured **Business Specifications** and **Brand Specifications** ([Chapter 6](06_specification_generation_.md)) and then used these specs to create a final HTML report ([Chapter 7](07_html_summary_generation_.md)).
+Welcome back! In the last two chapters, we saw how our Website Analyzer generated structured **Business Specifications** and **Brand Specifications** ([Chapter 6](06-specification-generation.md)) and then used these specs to create a final HTML report ([Chapter 7](07-html-summary-generation.md)).
 
 You might have noticed that these steps required more than just collecting data. They involved summarizing, synthesizing, and even making educated guesses based on the extracted information. For example, how do you turn a list of products and testimonials into a description of a business's target audience or its brand personality? This isn't a simple data lookup; it requires analysis and inference.
 
@@ -99,7 +99,7 @@ print("Brand Consultant says:", ai_response)
 
 The `call_llm` utility is primarily used in the parts of the flow that require the LLM's analytical and generation capabilities:
 
-1.  **Specification Generation ([Chapter 6](06_specification_generation_.md)):** The `generate_business_spec` and `generate_brand_spec` functions within `utils/generate_specs.py` heavily rely on `call_llm`. They gather the extracted data, format it into a prompt with specific instructions (including a system message to act as a business/brand analyst), and then call `call_llm` to get the LLM's analysis. The LLM is instructed to return the specifications in JSON format, which these functions then parse.
+1.  **Specification Generation ([Chapter 6](06-specification-generation.md)):** The `generate_business_spec` and `generate_brand_spec` functions within `utils/generate_specs.py` heavily rely on `call_llm`. They gather the extracted data, format it into a prompt with specific instructions (including a system message to act as a business/brand analyst), and then call `call_llm` to get the LLM's analysis. The LLM is instructed to return the specifications in JSON format, which these functions then parse.
 
     ```python
     # Simplified snippet from utils/generate_specs.py
@@ -121,7 +121,7 @@ The `call_llm` utility is primarily used in the parts of the flow that require t
     # ... parse llm_response_text (expected JSON) ...
     ```
 
-2.  **HTML Summary Generation ([Chapter 7](07_html_summary_generation_.md)):** The LLM-based approach for generating the final HTML report (often handled by a script like `generate_llm_summary.py` which is called by the node or an intermediary utility) also uses `call_llm`. It takes the structured specifications, crafts a prompt asking the LLM to generate the full HTML code for a report page, and calls `call_llm`.
+2.  **HTML Summary Generation ([Chapter 7](07-html-summary-generation.md)):** The LLM-based approach for generating the final HTML report (often handled by a script like `generate_llm_summary.py` which is called by the node or an intermediary utility) also uses `call_llm`. It takes the structured specifications, crafts a prompt asking the LLM to generate the full HTML code for a report page, and calls `call_llm`.
 
     ```python
     # Simplified snippet from generate_llm_summary.py (or similar)
@@ -264,7 +264,7 @@ Using Ollama provides several benefits for a project like this:
 
 Ollama LLM Integration is the crucial layer that allows our Website Analyzer to perform intelligent text analysis and generation tasks. By centralizing the communication with an Ollama server via the `call_llm` utility function, the rest of the project can leverage the power of Large Language Models for tasks like generating structured specifications and creating final HTML reports. This utility handles the details of sending prompts (data + instructions) and receiving generated text responses, often configured using environment variables for flexibility. This integration transforms the analyzer from a simple data collector into a system capable of synthesizing insights, acting like an AI assistant for complex analytical steps.
 
-Now that we understand how the LLM helps generate structured output and potentially HTML, we'll look closer at the fallback method for generating the HTML report in the next chapter: [HTML Templating](09_html_templating_.md).
+Now that we understand how the LLM helps generate structured output and potentially HTML, we'll look closer at the fallback method for generating the HTML report in the next chapter: [HTML Templating](09-html-templating.md).
 
 ---
 

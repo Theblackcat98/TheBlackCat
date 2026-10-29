@@ -1,7 +1,7 @@
 
 # Chapter 4: Iterative Research Cycles
 
-Welcome back to the Deep Research at Home tutorial! In the previous chapters, we introduced [The Research Pipe](01_the_research_pipe_.md) as the conductor orchestrating the research process, learned how to customize its behavior using [Configuration (Valves)](02_configuration__valves.md), and understood how it keeps track of everything using [Research State Management](03_research_state_management.md).
+Welcome back to the Deep Research at Home tutorial! In the previous chapters, we introduced [The Research Pipe](01_the_research_pipe.md) as the conductor orchestrating the research process, learned how to customize its behavior using [Configuration (Valves)](02_configuration__valves.md), and understood how it keeps track of everything using [Research State Management](03_research_state_management.md).
 
 Now, let's dive into the engine room of the Research Pipe – the **Iterative Research Cycles**. This is where the actual "deep" research happens, not in one big step, but through repeated cycles of learning and refinement.
 

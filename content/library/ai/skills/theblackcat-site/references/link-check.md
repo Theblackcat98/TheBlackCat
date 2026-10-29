@@ -72,7 +72,7 @@ breakage CI could not see (the blind spots below). Push only after `0 Errors`.
   180 lines of noise.
 - `--exclude` cannot silence unresolvable root-relative links: they error
   before the exclude filter runs. No exclude pattern fixes them.
-- Relative links to files that don't exist on disk (`[x](AGENT-BRIEF.md)` inside
+- Relative links to files that don't exist on disk (`[x](../../triage/AGENT-BRIEF.md)` inside
   a page bundle) come back as "Excluded" under `--scheme https --scheme http`.
   They still 404 live, because Hugo does not publish non-index `.md`/`.sh`
   bundle files. Link the upstream GitHub blob URL instead, or name the file

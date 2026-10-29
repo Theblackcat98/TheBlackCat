@@ -15,7 +15,7 @@ excludeSearch: true
 
 # Chapter 7: HTML Summary Generation
 
-Welcome back! In the previous chapter, [Specification Generation](06_specification_generation_.md), we learned how our Website Analyzer synthesizes all the extracted data (content, design, sitemap) into structured **Business Specifications** and **Brand Specifications**. These specifications are like detailed reports prepared by an analyst, summarizing key aspects of the website.
+Welcome back! In the previous chapter, [Specification Generation](06-specification-generation.md), we learned how our Website Analyzer synthesizes all the extracted data (content, design, sitemap) into structured **Business Specifications** and **Brand Specifications**. These specifications are like detailed reports prepared by an analyst, summarizing key aspects of the website.
 
 However, these specifications are typically stored in a structured format like JSON (JavaScript Object Notation), which is great for computers and other parts of the analysis flow, but not very user-friendly for a human reader who just wants a quick overview.
 
@@ -31,7 +31,7 @@ We have all the analysis results captured in the Business and Brand Specificatio
 
 ### Which Node Does This?
 
-In our Flow Orchestration ([Chapter 1](01_flow_orchestration_.md)), the step responsible for creating this final HTML report is handled by the **`CreateHtmlSummaryNode`**.
+In our Flow Orchestration ([Chapter 1](01-flow-orchestration.md)), the step responsible for creating this final HTML report is handled by the **`CreateHtmlSummaryNode`**.
 
 Looking at the flow definition in `flow.py`, this node comes right after the `GenerateSpecsNode`:
 
@@ -51,7 +51,7 @@ flow.add_transition("create_html", "next", "complete_flow_action_or_node")
 # ... other transitions like "error" ...
 ```
 
-The `CreateHtmlSummaryNode` requires the `business_spec` and `brand_spec` to be present in the `shared` data dictionary before it runs. These were added to `shared` by the preceding `GenerateSpecsNode` ([Chapter 6](06_specification_generation_.md)).
+The `CreateHtmlSummaryNode` requires the `business_spec` and `brand_spec` to be present in the `shared` data dictionary before it runs. These were added to `shared` by the preceding `GenerateSpecsNode` ([Chapter 6](06-specification-generation.md)).
 
 ### How to Use `CreateHtmlSummaryNode`
 
@@ -199,7 +199,7 @@ Let's look conceptually at how the two main methods work:
 
 #### Method 1: LLM-based Generation (Primary)
 
-This method leverages an LLM ([Chapter 8](08_ollama_llm_integration_.md)) to generate the entire HTML structure and content based on the provided specifications.
+This method leverages an LLM ([Chapter 8](08-ollama-integration.md)) to generate the entire HTML structure and content based on the provided specifications.
 
 *   **Input:** Business Spec (dict), Brand Spec (dict), potentially other data, and a prompt telling the LLM what kind of HTML to create. The prompt might even include a basic HTML structure template for the LLM to follow.
 *   **Process:** The relevant specification data is formatted (e.g., as JSON or simple text) and included in the prompt sent to the LLM (via a utility like `call_llm`). The prompt instructs the LLM to output *only* the HTML code for a summary page.
@@ -353,7 +353,7 @@ This utility handles creating the directory if needed, generating a sensible fil
 
 HTML Summary Generation is the final presentation layer of our Website Analyzer. It takes the structured Business and Brand Specifications created in the previous step and turns them into a user-friendly HTML web page. This is handled by the `CreateHtmlSummaryNode`, which collects the necessary data from the `shared` dictionary, calls a utility function that performs the actual HTML generation (preferring the LLM-based method when available, and falling back to a template if not), and finally saves the resulting HTML to a file using the `save_html_summary` utility. The path to this final HTML report is then stored in `shared` for the user to easily find the output.
 
-Understanding this step shows how the complex analysis data is transformed into a consumable report, making the results accessible. In the next chapter, we will dive deeper into how the LLM integration, which is a key part of the Specification Generation and HTML Summary Generation steps, actually works: [Ollama LLM Integration](08_ollama_llm_integration_.md).
+Understanding this step shows how the complex analysis data is transformed into a consumable report, making the results accessible. In the next chapter, we will dive deeper into how the LLM integration, which is a key part of the Specification Generation and HTML Summary Generation steps, actually works: [Ollama LLM Integration](08-ollama-integration.md).
 
 ---
 

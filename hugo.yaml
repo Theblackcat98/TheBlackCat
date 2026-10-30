@@ -137,6 +137,11 @@ params:
           desc: "Timestamp Toolkit for epoch/ISO conversions and relative math, paired with a UUID/ULID Studio for bulk generation and deep inspection of modern IDs."
           url: "time-id-toolkit/"
           writeup: "library/tools/time-id-toolkit/"
+        - name: "Hugo Frontmatter Doctor"
+          kind: "Utility"
+          desc: "A tool to validate and auto-fix Hugo Markdown frontmatter against the specific lint rules used by The BlackCat."
+          url: "frontmatter-doctor/"
+          writeup: "library/tools/frontmatter-doctor/"
     - group: "Running on Online Tools"
       items:
         - name: "Color Token Workshop"

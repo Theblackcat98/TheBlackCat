@@ -12,37 +12,43 @@
   <style>
     :root {
       color-scheme: light dark;
-      --paper: #f6f2e9;
-      --paper-2: #fbf9f3;
-      --paper-3: #ece6d8;
-      --ink: #1c1915;
-      --ink-2: #453f36;
-      --ink-3: #655d51;
-      --rule: #ddd5c2;
-      --accent: #9a4707;
-      --accent-ink: #7a3704;
-      --accent-wash: #f2e2c8;
-      --danger: #b63838;
-      --good: #087f63;
-      --focus: #9a4707;
+      --paper: #e9eaed;
+      --paper-2: #f7f7f9;
+      --paper-3: #ececf0;
+      --ink: #1d2126;
+      --ink-2: #5b6068;
+      --ink-3: #62666e;
+      --rule: #d6d7dc;
+      --accent: #2f6db3;
+      --accent-ink: #26598f;
+      --accent-wash: rgba(47, 109, 179, .10);
+      --danger: #8f2d23;
+      --good: #2e7d4f;
+      --focus: #2f6db3;
+      --err-bg: #fdeeee;
+      --err-line: #efc2c2;
+      --shadow: 0 1px 2px rgba(24, 28, 38, .05), 0 10px 28px rgba(24, 28, 38, .07);
       --ui-font: "Outfit", sans-serif;
       --mono-font: "JetBrains Mono", monospace;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --paper: #15120f;
-        --paper-2: #1b1814;
-        --paper-3: #241f19;
-        --ink: #ede7db;
-        --ink-2: #c3baa9;
-        --ink-3: #9d9484;
-        --rule: #2c2620;
-        --accent: #eba74f;
-        --accent-ink: #f4c184;
-        --accent-wash: #2a2013;
-        --danger: #ef8989;
-        --good: #6fd4b3;
-        --focus: #eba74f;
+        --paper: #121316;
+        --paper-2: #1a1b1f;
+        --paper-3: #26272e;
+        --ink: #eceef2;
+        --ink-2: #a2a6af;
+        --ink-3: #9ba0aa;
+        --rule: #2d2f36;
+        --accent: #7db0e6;
+        --accent-ink: #9cc3ee;
+        --accent-wash: rgba(125, 176, 230, .14);
+        --danger: #f0a9a0;
+        --good: #6fce97;
+        --focus: #7db0e6;
+        --err-bg: #3a2120;
+        --err-line: #6e3a36;
+        --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .35);
       }
     }
 
@@ -52,7 +58,8 @@
       background: var(--paper);
       color: var(--ink);
       font-family: var(--ui-font);
-      line-height: 1.5;
+      font-size: 15px;
+      line-height: 1.45;
     }
     a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
     button, input, select, textarea { font: inherit; }
@@ -126,7 +133,8 @@
     .card {
       background: var(--paper-2);
       border: 1px solid var(--rule);
-      border-radius: 8px;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
       padding: 24px;
     }
 
@@ -145,7 +153,7 @@
       padding: 10px;
       background: var(--paper);
       border: 1px solid var(--rule);
-      border-radius: 6px;
+      border-radius: 9px;
       color: var(--ink);
       font-family: var(--mono-font);
       font-size: 14px;
@@ -165,7 +173,7 @@
       border: 1px solid var(--rule);
       color: var(--ink);
       padding: 6px 12px;
-      border-radius: 4px;
+      border-radius: 9px;
       font-size: 13px;
       cursor: pointer;
       font-weight: 500;
@@ -190,7 +198,7 @@
       height: 36px;
       padding: 0;
       border: 1px solid var(--rule);
-      border-radius: 4px;
+      border-radius: 9px;
       cursor: pointer;
     }
 
@@ -222,7 +230,7 @@
 
     .drop-zone {
       border: 2px dashed var(--rule);
-      border-radius: 8px;
+      border-radius: 14px;
       padding: 40px 20px;
       text-align: center;
       transition: background 0.2s;
@@ -239,7 +247,7 @@
     .result-content {
       background: var(--paper);
       border: 1px solid var(--rule);
-      border-radius: 6px;
+      border-radius: 9px;
       padding: 16px;
       font-family: var(--mono-font);
       font-size: 14px;
@@ -266,10 +274,11 @@
     .warning.active { display: block; }
 
     .error-banner {
-      background: #ef8989;
-      color: #7a0000;
+      background: var(--err-bg);
+      color: var(--danger);
+      border: 1px solid var(--err-line);
       padding: 12px;
-      border-radius: 6px;
+      border-radius: 9px;
       margin-bottom: 24px;
       display: none;
     }

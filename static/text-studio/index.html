@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Text Studio: Readability metrics and Text Cleanup lab." />
+  <meta property="og:site_name" content="The BlackCat" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Text Studio" />
+  <meta property="og:description" content="Text Studio: Readability metrics and Text Cleanup lab." />
+  <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/text-studio/" />
+  <link rel="icon" href="data:," />
+  <title>Text Studio</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f7f8;
+      --surface: #ffffff;
+      --ink: #172225;
+      --muted: #54666b;
+      --line: #d7e0e2;
+      --accent: #067c72;
+      --accent-ink: #ffffff;
+      --accent-soft: #d8f1ed;
+      --code-bg: #152124;
+      --code-ink: #d9e7e8;
+      --radius-md: 12px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1719;
+        --surface: #162124;
+        --ink: #e7eeee;
+        --muted: #adbdc0;
+        --line: #314145;
+        --accent: #58c8bb;
+        --accent-ink: #082c28;
+        --accent-soft: #173d3a;
+        --code-bg: #091113;
+        --code-ink: #d5e4e5;
+      }
+    }
+    body {
+      font-family: "Outfit", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+      line-height: 1.5;
+    }
+    h1 {
+      font-size: 1.75rem;
+      margin: 0 0 16px;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .tab {
+      padding: 8px 16px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .tab.active {
+      background: var(--accent);
+      color: var(--accent-ink);
+      border-color: var(--accent);
+    }
+    .layout {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    @media (min-width: 768px) {
+      .layout { flex-direction: row; }
+      .input-pane, .tools-pane { flex: 1; }
+    }
+    textarea {
+      width: 100%;
+      height: 400px;
+      padding: 12px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.9rem;
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    .tools-pane {
+      background: var(--surface);
+      padding: 24px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+    }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .metric:last-child { border-bottom: none; }
+    .metric-val { font-family: "JetBrains Mono", monospace; }
+    button {
+      padding: 8px 16px;
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-family: inherit;
+      margin: 4px;
+    }
+    button:hover { background: var(--accent-soft); }
+    .actions { margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="input-pane">
+      <h1>Text Studio</h1>
+      <textarea id="text-input" aria-label="Text to analyze or transform" placeholder="Paste or type text here..."></textarea>
+      <div class="actions">
+        <button id="btn-undo" aria-label="Undo last change" disabled>Undo</button>
+        <button id="btn-copy" aria-label="Copy text">Copy</button>
+        <span id="copy-status" style="margin-left:8px;font-size:0.9rem;color:var(--muted);"></span>
+      </div>
+    </div>
+
+    <div class="tools-pane">
+      <div class="tabs">
+        <button class="tab active" data-target="readability" aria-label="Readability tab">Readability</button>
+        <button class="tab" data-target="cleanup" aria-label="Cleanup tab">Cleanup</button>
+      </div>
+
+      <div id="readability" class="panel active">
+        <h2>Metrics</h2>
+        <div class="metric"><span>Characters</span><span class="metric-val" id="m-chars">0</span></div>
+        <div class="metric"><span>Characters (no spaces)</span><span class="metric-val" id="m-chars-nospace">0</span></div>
+        <div class="metric"><span>Words</span><span class="metric-val" id="m-words">0</span></div>
+        <div class="metric"><span>Sentences</span><span class="metric-val" id="m-sentences">0</span></div>
+      </div>
+
+      <div id="cleanup" class="panel">
+        <h2>Transforms</h2>
+        <button data-action="upper" aria-label="Convert to Uppercase">UPPERCASE</button>
+        <button data-action="lower" aria-label="Convert to Lowercase">lowercase</button>
+        <button data-action="title" aria-label="Convert to Title Case">Title Case</button>
+        <button data-action="trim" aria-label="Trim whitespace">Trim Whitespace</button>
+        <button data-action="remove-blank" aria-label="Remove blank lines">Remove Blank Lines</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById("text-input");
+    const undoBtn = document.getElementById("btn-undo");
+    const copyBtn = document.getElementById("btn-copy");
+    const copyStatus = document.getElementById("copy-status");
+    const tabs = document.querySelectorAll(".tab");
+    const panels = document.querySelectorAll(".panel");
+
+    let history = [];
+
+    function saveState() {
+      const val = input.value;
+      if (history.length === 0 || history[history.length - 1] !== val) {
+        history.push(val);
+        if (history.length > 20) history.shift();
+        undoBtn.disabled = history.length <= 1;
+        try { localStorage.setItem("ts-text", val); } catch(e){}
+      }
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem("ts-text");
+        if (saved !== null) {
+          input.value = saved;
+          saveState();
+        }
+      } catch(e){}
+    }
+
+    function updateMetrics() {
+      const text = input.value;
+      document.getElementById("m-chars").textContent = text.length;
+      document.getElementById("m-chars-nospace").textContent = text.replace(/\s/g, '').length;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      document.getElementById("m-words").textContent = words;
+      const sentences = text.trim() ? text.split(/[.!?]+/).filter(s => s.trim().length > 0).length : 0;
+      document.getElementById("m-sentences").textContent = sentences;
+    }
+
+    input.addEventListener("input", () => {
+      updateMetrics();
+      saveState();
+    });
+
+    undoBtn.addEventListener("click", () => {
+      if (history.length > 1) {
+        history.pop();
+        input.value = history[history.length - 1];
+        try { localStorage.setItem("ts-text", input.value); } catch(e){}
+        updateMetrics();
+        undoBtn.disabled = history.length <= 1;
+      }
+    });
+
+    copyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(input.value).then(() => {
+        copyStatus.textContent = "Copied!";
+        setTimeout(() => copyStatus.textContent = "", 2000);
+      });
+    });
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("active"));
+        panels.forEach(p => p.classList.remove("active"));
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.target).classList.add("active");
+      });
+    });
+
+    document.getElementById("cleanup").addEventListener("click", (e) => {
+      const action = e.target.dataset.action;
+      if (!action) return;
+      let val = input.value;
+      if (!val) return;
+
+      if (action === "upper") val = val.toUpperCase();
+      if (action === "lower") val = val.toLowerCase();
+      if (action === "title") {
+        val = val.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      }
+      if (action === "trim") val = val.trim();
+      if (action === "remove-blank") val = val.split('\n').filter(l => l.trim().length > 0).join('\n');
+
+      input.value = val;
+      updateMetrics();
+      saveState();
+    });
+
+    loadState();
+    updateMetrics();
+    saveState();
+  </script>
+</body>
+</html>

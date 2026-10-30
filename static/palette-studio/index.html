@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Palette Studio</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #f3f5f8;
+      --paper-2: #ffffff;
+      --paper-3: #e6ebf1;
+      --ink: #182128;
+      --ink-2: #44515e;
+      --ink-3: #68778a;
+      --rule: #d4dce5;
+      --accent: #2b6cb0;
+      --accent-ink: #1d4fd0;
+      --accent-wash: #dde8fa;
+      --good: #0e7a5f;
+      --danger: #b3382e;
+      --focus: #1d4fd0;
+      --ui-font: "Outfit", sans-serif;
+      --mono-font: "JetBrains Mono", monospace;
+      --checker: #c3ccd6;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #10151b;
+        --paper-2: #171e27;
+        --paper-3: #202a36;
+        --ink: #e6edf5;
+        --ink-2: #b3c0cf;
+        --ink-3: #8595a8;
+        --rule: #26313f;
+        --accent: #6ea8fe;
+        --accent-ink: #9cc2ff;
+        --accent-wash: #1b2a44;
+        --good: #5fc9a7;
+        --danger: #ef9a93;
+        --focus: #9cc2ff;
+        --checker: #2b3644;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--ui-font);
+      font-size: 15px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, select, textarea { font: inherit; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+    code, .mono { font-family: var(--mono-font); }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--paper);
+      border-bottom: 1px solid var(--rule);
+      padding: 14px 24px;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    }
+    .topbar h1 { margin: 0; font-size: 21px; font-weight: 600; letter-spacing: -.01em; }
+    .topbar .sub { color: var(--ink-3); font-size: 13px; }
+
+    .container { max-width: 1060px; margin: 0 auto; padding: 24px 24px 64px; }
+
+    .label {
+      font-size: 11.5px; font-weight: 600; letter-spacing: .07em;
+      text-transform: uppercase; color: var(--ink-3); margin: 0 0 8px;
+    }
+
+    /* pill segmented control */
+    .seg {
+      display: inline-flex; gap: 2px; padding: 3px;
+      background: var(--paper-3); border: 1px solid var(--rule); border-radius: 999px;
+    }
+    .seg button {
+      border: 0; background: transparent; color: var(--ink-2);
+      padding: 6px 14px; border-radius: 999px; font-size: 13.5px; font-weight: 600;
+      cursor: pointer;
+    }
+    .seg button[aria-pressed="true"] {
+      background: var(--paper-2); color: var(--accent-ink);
+      box-shadow: 0 1px 2px rgba(16, 24, 40, .12);
+    }
+
+    .card {
+      background: var(--paper-2); border: 1px solid var(--rule); border-radius: 14px;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 8px 28px rgba(16, 24, 40, .06);
+      padding: 18px;
+    }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .stack { display: grid; gap: 16px; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .row-between { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+
+    .btn {
+      border: 1px solid var(--rule); background: var(--paper-2); color: var(--ink);
+      border-radius: 9px; padding: 7px 13px; font-size: 13.5px; font-weight: 600; cursor: pointer;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent-ink); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover { color: #fff; filter: brightness(1.08); }
+    .btn.small { padding: 4px 9px; font-size: 12.5px; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    input[type="range"] { accent-color: var(--accent); }
+    input[type="number"], select {
+      border: 1px solid var(--rule); background: var(--paper-2); color: var(--ink);
+      border-radius: 9px; padding: 6px 9px; font-size: 13.5px;
+    }
+    input[type="number"] { width: 74px; font-family: var(--mono-font); }
+    input[type="color"] {
+      width: 42px; height: 32px; padding: 2px; border: 1px solid var(--rule);
+      border-radius: 9px; background: var(--paper-2); cursor: pointer;
+    }
+
+    .checker {
+      background-image: conic-gradient(var(--checker) 25%, transparent 0 50%, var(--checker) 0 75%, transparent 0);
+      background-size: 16px 16px;
+      background-color: var(--paper-3);
+    }
+
+    /* photo mode */
+    .dropzone {
+      border: 1px dashed var(--ink-3); border-radius: 14px; padding: 14px;
+      background: var(--paper); text-align: center;
+    }
+    .dropzone.dragover { border-color: var(--accent); background: var(--accent-wash); }
+    .dropzone canvas {
+      max-width: 100%; height: auto; border-radius: 9px; display: block; margin: 0 auto;
+    }
+    .drop-hint { color: var(--ink-3); font-size: 13px; margin: 10px 0 0; }
+
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 10px; }
+    .swatch {
+      border: 1px solid var(--rule); border-radius: 14px; overflow: hidden;
+      background: var(--paper-2); cursor: pointer; text-align: left; padding: 0; width: 100%;
+    }
+    .swatch .chip { height: 64px; }
+    .swatch .meta { padding: 8px 10px 10px; display: grid; gap: 2px; }
+    .swatch .hex { font-family: var(--mono-font); font-weight: 600; font-size: 14px; color: var(--ink); }
+    .swatch .detail { font-family: var(--mono-font); font-size: 11px; color: var(--ink-3); }
+    .swatch .share { font-size: 12px; color: var(--ink-2); font-weight: 600; }
+
+    /* gradient mode */
+    .grad-preview {
+      height: 220px; border-radius: 14px; border: 1px solid var(--rule);
+    }
+    .grad-text-preview {
+      border-radius: 14px; border: 1px solid var(--rule); padding: 22px;
+      display: grid; gap: 6px;
+    }
+    .grad-text-preview .big { font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
+    .stop-row {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      border: 1px solid var(--rule); border-radius: 14px; padding: 10px 12px; background: var(--paper);
+    }
+    .stop-row .grow { flex: 1 1 140px; display: flex; align-items: center; gap: 8px; }
+    .stop-row input[type="range"] { flex: 1; }
+    .stop-hex { font-family: var(--mono-font); font-size: 12.5px; color: var(--ink-2); min-width: 62px; }
+
+    textarea.output, pre.output {
+      width: 100%; min-height: 92px; margin: 0;
+      border: 1px solid var(--rule); border-radius: 14px; background: var(--paper);
+      color: var(--ink); padding: 12px; font-family: var(--mono-font); font-size: 12.5px;
+      white-space: pre-wrap; word-break: break-word;
+    }
+
+    /* simulator mode */
+    .sim-list { display: grid; gap: 8px; }
+    .sim-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: stretch;
+    }
+    .sim-cell {
+      border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; background: var(--paper-2);
+    }
+    .sim-cell .chip { height: 44px; }
+    .sim-cell .cap {
+      padding: 6px 10px; font-family: var(--mono-font); font-size: 11.5px; color: var(--ink-2);
+      display: flex; justify-content: space-between; gap: 8px;
+    }
+    .sim-images { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .sim-images figure { margin: 0; }
+    .sim-images canvas { max-width: 100%; height: auto; border-radius: 9px; border: 1px solid var(--rule); display: block; }
+    .sim-images figcaption { font-size: 12px; color: var(--ink-3); margin-top: 6px; }
+    @media (max-width: 640px) {
+      .sim-images, .sim-row { grid-template-columns: 1fr; }
+      .topbar { padding: 12px 16px; }
+      .container { padding: 18px 14px 48px; }
+    }
+
+    .status { min-height: 20px; font-size: 13px; color: var(--good); font-weight: 600; }
+    .note { font-size: 13px; color: var(--ink-3); }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Palette Studio</h1>
+    <span class="sub">Photo palettes · gradients · color-blindness simulation — all in your browser</span>
+  </header>
+
+  <main class="container stack">
+    <div class="row-between">
+      <nav class="seg" aria-label="Palette Studio modes">
+        <button type="button" data-tab="photo" aria-pressed="true">Photo Palette</button>
+        <button type="button" data-tab="gradient" aria-pressed="false">Gradient Studio</button>
+        <button type="button" data-tab="sim" aria-pressed="false">Blindness Simulator</button>
+      </nav>
+      <span class="status" id="status" role="status" aria-live="polite"></span>
+    </div>
+
+    <!-- ============ PHOTO PALETTE ============ -->
+    <section class="panel active" id="panel-photo">
+      <div class="stack">
+        <div class="card stack">
+          <div>
+            <p class="label">Source image</p>
+            <div class="dropzone checker" id="dropZone">
+              <canvas id="imageCanvas" width="640" height="400" aria-label="Source image preview"></canvas>
+              <p class="drop-hint">Drop an image anywhere on this card, or use the buttons below. Nothing leaves your browser.</p>
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn primary" type="button" id="uploadBtn">Upload image</button>
+            <input type="file" id="fileInput" accept="image/*" hidden />
+            <button class="btn" type="button" id="sampleBtn">Use built-in sample</button>
+            <label class="row" style="gap:6px;">
+              <span class="label" style="margin:0;">Colors</span>
+              <select id="colorCount" aria-label="Number of palette colors">
+                <option>3</option><option>4</option><option selected>5</option><option>6</option>
+                <option>7</option><option>8</option><option>9</option><option>10</option>
+              </select>
+            </label>
+            <button class="btn" type="button" id="extractBtn">Extract palette</button>
+          </div>
+        </div>
+
+        <div class="card stack">
+          <div class="row-between">
+            <p class="label" style="margin:0;">Palette — click a swatch to copy its hex</p>
+            <span class="note" id="extractStatus"></span>
+          </div>
+          <div class="swatches" id="paletteGrid"></div>
+          <div>
+            <p class="label">Export palette</p>
+            <div class="row">
+              <button class="btn small" type="button" id="copyCssBtn">Copy CSS variables</button>
+              <button class="btn small" type="button" id="copyJsonBtn">Copy JSON</button>
+              <button class="btn small" type="button" id="copyTokensBtn">Copy Workshop tokens JSON</button>
+              <button class="btn small" type="button" id="downloadCssBtn">Download .css</button>
+              <button class="btn small" type="button" id="downloadJsonBtn">Download .json</button>
+            </div>
+          </div>
+          <pre class="output" id="exportOut" aria-label="Palette export preview"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ GRADIENT STUDIO ============ -->
+    <section class="panel" id="panel-gradient">
+      <div class="stack">
+        <div class="card stack">
+          <div class="row-between">
+            <p class="label" style="margin:0;">Preview</p>
+            <div class="seg" aria-label="Gradient type">
+              <button type="button" id="gradTypeLinear" aria-pressed="true">Linear</button>
+              <button type="button" id="gradTypeRadial" aria-pressed="false">Radial</button>
+            </div>
+          </div>
+          <div class="grad-preview checker" aria-label="Gradient preview"><div class="grad-preview" id="gradPreview" style="border:0;"></div></div>
+          <div class="grad-text-preview" id="gradTextPreview">
+            <span class="big">Palette Studio</span>
+            <span>Gradient text-sample preview — headings and body copy over the current gradient.</span>
+          </div>
+          <div class="row">
+            <label class="row" style="gap:6px;">
+              <span class="label" style="margin:0;">Angle</span>
+              <input type="range" id="gradAngle" min="0" max="360" step="1" value="90" aria-label="Gradient angle in degrees" />
+              <input type="number" id="gradAngleNum" min="0" max="360" step="1" value="90" aria-label="Gradient angle value" />
+              <span class="note">deg</span>
+            </label>
+            <button class="btn" type="button" id="fromPaletteBtn">Stops from palette</button>
+          </div>
+        </div>
+
+        <div class="card stack">
+          <div class="row-between">
+            <p class="label" style="margin:0;">Stops</p>
+            <button class="btn primary" type="button" id="addStopBtn">Add stop</button>
+          </div>
+          <div class="stack" id="stopsList" style="gap:8px;"></div>
+          <div>
+            <p class="label">CSS</p>
+            <textarea class="output" id="gradCss" readonly aria-label="Gradient CSS"></textarea>
+            <div class="row" style="margin-top:8px;">
+              <button class="btn small" type="button" id="copyGradCssBtn">Copy CSS</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ COLOR BLINDNESS SIMULATOR ============ -->
+    <section class="panel" id="panel-sim">
+      <div class="stack">
+        <div class="card stack">
+          <div class="row-between">
+            <p class="label" style="margin:0;">Deficiency (matrix approximation)</p>
+            <div class="seg" aria-label="Deficiency type" id="simSeg">
+              <button type="button" data-sim="protanopia" aria-pressed="true">Protanopia</button>
+              <button type="button" data-sim="deuteranopia" aria-pressed="false">Deuteranopia</button>
+              <button type="button" data-sim="tritanopia" aria-pressed="false">Tritanopia</button>
+              <button type="button" data-sim="achromatopsia" aria-pressed="false">Achromatopsia</button>
+            </div>
+          </div>
+          <p class="note" style="margin:0;">Left: original palette color. Right: the same color run through a standard
+            3&times;3 simulation matrix (Machado-style; achromatopsia uses ITU-R BT.601 luminance).
+            These are approximations of how the palette reads to a viewer with that deficiency — not a medical model.</p>
+          <div class="sim-list" id="simGrid"></div>
+        </div>
+
+        <div class="card stack">
+          <p class="label">Image simulation</p>
+          <div class="sim-images">
+            <figure>
+              <canvas id="simOrigCanvas" width="320" height="200"></canvas>
+              <figcaption>Original (source image from Photo Palette)</figcaption>
+            </figure>
+            <figure>
+              <canvas id="simCanvas" width="320" height="200"></canvas>
+              <figcaption>Simulated — <span id="simName">Protanopia</span></figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+    const $ = (id) => document.getElementById(id);
+    const clamp255 = (v) => Math.max(0, Math.min(255, Math.round(v)));
+
+    /* ---------- color helpers ---------- */
+    function rgbToHex(r, g, b) {
+      return "#" + [r, g, b].map((v) => clamp255(v).toString(16).padStart(2, "0")).join("");
+    }
+    function hexToRgb(hex) {
+      const n = parseInt(hex.slice(1), 16);
+      return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+    }
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      const l = (max + min) / 2;
+      if (max === min) return { h: 0, s: 0, l: Math.round(l * 100) };
+      const d = max - min;
+      const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      let h;
+      if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      return { h: Math.round(h * 60), s: Math.round(s * 100), l: Math.round(l * 100) };
+    }
+    function colorObj(r, g, b, share) {
+      const hsl = rgbToHsl(r, g, b);
+      return {
+        r: clamp255(r), g: clamp255(g), b: clamp255(b),
+        hex: rgbToHex(r, g, b),
+        rgb: `rgb(${clamp255(r)}, ${clamp255(g)}, ${clamp255(b)})`,
+        hsl: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`,
+        share: share
+      };
+    }
+
+    function setStatus(msg) {
+      const el = $("status");
+      el.textContent = msg;
+      if (msg) setTimeout(() => { if (el.textContent === msg) el.textContent = ""; }, 2600);
+    }
+    async function copyText(text, label) {
+      try { await navigator.clipboard.writeText(text); setStatus(`Copied ${label}`); }
+      catch (e) {
+        const ta = document.createElement("textarea");
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); setStatus(`Copied ${label}`); }
+        catch (err) { setStatus("Copy failed — select the export text manually"); }
+        ta.remove();
+      }
+    }
+    function download(name, text, type) {
+      const blob = new Blob([text], { type });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      setStatus(`Downloaded ${name}`);
+    }
+
+    /* ---------- state ---------- */
+    const LS_PALETTE = "palette-studio:palette";
+    const LS_GRADIENT = "palette-studio:gradient";
+    let palette = [];
+    let simType = "protanopia";
+
+    function savePalette() {
+      try { localStorage.setItem(LS_PALETTE, JSON.stringify(palette)); } catch (e) {}
+    }
+    function loadPalette() {
+      try {
+        const raw = localStorage.getItem(LS_PALETTE);
+        if (!raw) return null;
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) && arr.length ? arr : null;
+      } catch (e) { return null; }
+    }
+
+    /* ---------- source image ---------- */
+    const imgCanvas = $("imageCanvas");
+    const imgCtx = imgCanvas.getContext("2d", { willReadFrequently: true });
+    let hasImage = false;
+
+    function drawSample() {
+      const w = imgCanvas.width, h = imgCanvas.height;
+      const sky = imgCtx.createLinearGradient(0, 0, 0, h * 0.7);
+      sky.addColorStop(0, "#7fb0dd"); sky.addColorStop(0.6, "#c8ddef"); sky.addColorStop(1, "#eef3e2");
+      imgCtx.fillStyle = sky; imgCtx.fillRect(0, 0, w, h * 0.7);
+      imgCtx.fillStyle = "#f2c14e";
+      imgCtx.beginPath(); imgCtx.arc(w * 0.78, h * 0.22, 34, 0, Math.PI * 2); imgCtx.fill();
+      imgCtx.fillStyle = "#46617e";
+      imgCtx.beginPath(); imgCtx.moveTo(0, h * 0.7); imgCtx.lineTo(w * 0.3, h * 0.34);
+      imgCtx.lineTo(w * 0.52, h * 0.7); imgCtx.closePath(); imgCtx.fill();
+      imgCtx.fillStyle = "#5d7d99";
+      imgCtx.beginPath(); imgCtx.moveTo(w * 0.34, h * 0.7); imgCtx.lineTo(w * 0.62, h * 0.42);
+      imgCtx.lineTo(w * 0.86, h * 0.7); imgCtx.closePath(); imgCtx.fill();
+      imgCtx.fillStyle = "#dcebf5";
+      imgCtx.beginPath(); imgCtx.moveTo(w * 0.545, h * 0.475); imgCtx.lineTo(w * 0.62, h * 0.42);
+      imgCtx.lineTo(w * 0.695, h * 0.475); imgCtx.lineTo(w * 0.645, h * 0.5); imgCtx.lineTo(w * 0.6, h * 0.485);
+      imgCtx.lineTo(w * 0.565, h * 0.505); imgCtx.closePath(); imgCtx.fill();
+      imgCtx.fillStyle = "#4d7c59"; imgCtx.fillRect(0, h * 0.7, w, h * 0.1);
+      const water = imgCtx.createLinearGradient(0, h * 0.8, 0, h);
+      water.addColorStop(0, "#2e6da4"); water.addColorStop(1, "#173f63");
+      imgCtx.fillStyle = water; imgCtx.fillRect(0, h * 0.8, w, h * 0.2);
+      imgCtx.fillStyle = "rgba(242, 193, 78, 0.5)"; imgCtx.fillRect(w * 0.72, h * 0.82, w * 0.12, 5);
+      hasImage = true;
+    }
+
+    function loadImageFile(file) {
+      if (!file || !file.type.startsWith("image/")) { setStatus("That file is not an image"); return; }
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const max = 640;
+        const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+        imgCanvas.width = Math.max(2, Math.round(img.naturalWidth * scale));
+        imgCanvas.height = Math.max(2, Math.round(img.naturalHeight * scale));
+        imgCtx.drawImage(img, 0, 0, imgCanvas.width, imgCanvas.height);
+        URL.revokeObjectURL(url);
+        hasImage = true;
+        extractPalette();
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); setStatus("Could not load that image"); };
+      img.src = url;
+    }
+
+    /* ---------- median-cut extraction ---------- */
+    function samplePixels() {
+      const maxDim = 144;
+      const scale = Math.min(1, maxDim / Math.max(imgCanvas.width, imgCanvas.height));
+      const w = Math.max(2, Math.round(imgCanvas.width * scale));
+      const h = Math.max(2, Math.round(imgCanvas.height * scale));
+      const off = document.createElement("canvas");
+      off.width = w; off.height = h;
+      const ctx = off.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(imgCanvas, 0, 0, w, h);
+      const data = ctx.getImageData(0, 0, w, h).data;
+      /* Quantize to 5-bit-per-channel histogram bins (MMCQ-style): each bin
+         keeps the true average of its pixels plus a population count. */
+      const bins = new Map();
+      let total = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] < 125) continue;
+        const r = data[i], g = data[i + 1], b = data[i + 2];
+        const key = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
+        let bin = bins.get(key);
+        if (!bin) { bin = { r: 0, g: 0, b: 0, n: 0 }; bins.set(key, bin); }
+        bin.r += r; bin.g += g; bin.b += b; bin.n++;
+        total++;
+      }
+      return { bins: [...bins.values()], total };
+    }
+
+    function medianCut(bins, total, count) {
+      const avg = (bin) => [bin.r / bin.n, bin.g / bin.n, bin.b / bin.n];
+      const stats = (box) => {
+        let mins = [255, 255, 255], maxs = [0, 0, 0], n = 0;
+        for (const bin of box) {
+          const a = avg(bin);
+          for (let c = 0; c < 3; c++) {
+            if (a[c] < mins[c]) mins[c] = a[c];
+            if (a[c] > maxs[c]) maxs[c] = a[c];
+          }
+          n += bin.n;
+        }
+        const ranges = [maxs[0] - mins[0], maxs[1] - mins[1], maxs[2] - mins[2]];
+        return { ranges, rangeSum: ranges[0] + ranges[1] + ranges[2], n };
+      };
+      let boxes = [bins];
+      while (boxes.length < count) {
+        /* Split the box with the greatest color volume (population x range),
+           so big flat areas do not swallow small saturated regions. */
+        let idx = -1, best = -1, bestStats = null;
+        for (let i = 0; i < boxes.length; i++) {
+          if (boxes[i].length < 2) continue;
+          const s = stats(boxes[i]);
+          const score = s.n * s.rangeSum;
+          if (score > best) { best = score; idx = i; bestStats = s; }
+        }
+        if (idx < 0 || bestStats.rangeSum === 0) break;
+        const ch = bestStats.ranges.indexOf(Math.max(...bestStats.ranges));
+        const box = [...boxes[idx]].sort((a, b) => avg(a)[ch] - avg(b)[ch]);
+        const half = bestStats.n / 2;
+        let cum = 0, cut = 0;
+        for (let i = 0; i < box.length; i++) {
+          cum += box[i].n; cut = i + 1;
+          if (cum >= half) break;
+        }
+        if (cut >= box.length) cut = box.length - 1;
+        boxes.splice(idx, 1, box.slice(0, cut), box.slice(cut));
+      }
+      return boxes.filter((b) => b.length).map((box) => {
+        let r = 0, g = 0, b = 0, n = 0;
+        for (const bin of box) { r += bin.r; g += bin.g; b += bin.b; n += bin.n; }
+        return colorObj(r / n, g / n, b / n, n / (total || 1));
+      }).sort((a, b) => b.share - a.share);
+    }
+
+    function extractPalette() {
+      if (!hasImage) drawSample();
+      const n = parseInt($("colorCount").value, 10) || 5;
+      const { bins, total } = samplePixels();
+      if (!bins.length || !total) { setStatus("No readable pixels in that image"); return; }
+      palette = medianCut(bins, total, n);
+      savePalette();
+      renderPalette();
+      renderSim();
+      setStatus(`Extracted ${palette.length} colors`);
+    }
+
+    /* ---------- palette rendering + export ---------- */
+    function renderPalette() {
+      const grid = $("paletteGrid");
+      grid.innerHTML = "";
+      for (const c of palette) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "swatch";
+        btn.dataset.hex = c.hex;
+        btn.setAttribute("aria-label", `Copy ${c.hex}`);
+        const chip = document.createElement("div");
+        chip.className = "chip checker";
+        const fill = document.createElement("div");
+        fill.style.cssText = `height:100%;background:${c.hex}`;
+        chip.appendChild(fill);
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.innerHTML = `<span class="hex">${c.hex}</span>` +
+          `<span class="detail">${c.rgb}</span><span class="detail">${c.hsl}</span>` +
+          `<span class="share">${(c.share * 100).toFixed(1)}% of image</span>`;
+        btn.appendChild(chip); btn.appendChild(meta);
+        btn.addEventListener("click", () => copyText(c.hex, c.hex));
+        grid.appendChild(btn);
+      }
+      $("extractStatus").textContent = palette.length
+        ? `${palette.length} colors · median-cut on sampled pixels` : "";
+      renderExport();
+    }
+
+    function paletteCss() {
+      const lines = palette.map((c, i) => `  --palette-${i + 1}: ${c.hex};`);
+      return `/* Palette — generated with Palette Studio */\n:root {\n${lines.join("\n")}\n}\n`;
+    }
+    function paletteJson() {
+      return JSON.stringify({
+        source: "Palette Studio",
+        colors: palette.map((c, i) => ({
+          name: `palette-${i + 1}`, hex: c.hex, rgb: c.rgb, hsl: c.hsl,
+          share: +(c.share * 100).toFixed(1)
+        }))
+      }, null, 2);
+    }
+    function paletteTokensJson() {
+      /* Mirrors the Color Token Workshop JSON export shape: a group object
+         whose entries are { value, hex } per token name. */
+      const group = {};
+      palette.forEach((c, i) => { group[`palette-${i + 1}`] = { value: c.hex, hex: c.hex }; });
+      return JSON.stringify({ palette: group }, null, 2);
+    }
+    function renderExport() { $("exportOut").textContent = paletteCss(); }
+
+    /* ---------- gradient ---------- */
+    let gradType = "linear";
+    let gradAngle = 90;
+    let gradStops = [
+      { color: "#2b6cb0", pos: 0 },
+      { color: "#7fb0dd", pos: 55 },
+      { color: "#dcebf5", pos: 100 }
+    ];
+
+    function saveGradient() {
+      try {
+        localStorage.setItem(LS_GRADIENT, JSON.stringify({ type: gradType, angle: gradAngle, stops: gradStops }));
+      } catch (e) {}
+    }
+    function loadGradient() {
+      try {
+        const raw = localStorage.getItem(LS_GRADIENT);
+        if (!raw) return;
+        const g = JSON.parse(raw);
+        if (g && Array.isArray(g.stops) && g.stops.length >= 2) {
+          gradStops = g.stops;
+          if (g.type === "radial" || g.type === "linear") gradType = g.type;
+          if (typeof g.angle === "number") gradAngle = g.angle;
+        }
+      } catch (e) {}
+    }
+
+    function gradientCssValue() {
+      const stops = [...gradStops]
+        .sort((a, b) => a.pos - b.pos)
+        .map((s) => `${s.color} ${s.pos}%`).join(", ");
+      return gradType === "radial"
+        ? `radial-gradient(circle, ${stops})`
+        : `linear-gradient(${gradAngle}deg, ${stops})`;
+    }
+
+    function updateGradPreview() {
+      const value = gradientCssValue();
+      $("gradPreview").style.background = value;
+      const tp = $("gradTextPreview");
+      tp.style.background = value;
+      tp.style.color = "#10151b";
+      $("gradCss").value = `background: ${value};`;
+      if (document.activeElement !== $("gradAngle")) $("gradAngle").value = gradAngle;
+      if (document.activeElement !== $("gradAngleNum")) $("gradAngleNum").value = gradAngle;
+      $("gradAngle").disabled = gradType === "radial";
+      $("gradAngleNum").disabled = gradType === "radial";
+      $("gradTypeLinear").setAttribute("aria-pressed", String(gradType === "linear"));
+      $("gradTypeRadial").setAttribute("aria-pressed", String(gradType === "radial"));
+    }
+
+    function renderGradient() {
+      updateGradPreview();
+      const list = $("stopsList");
+      list.innerHTML = "";
+      gradStops.forEach((s, i) => {
+        const row = document.createElement("div");
+        row.className = "stop-row";
+        row.dataset.index = i;
+        const color = document.createElement("input");
+        color.type = "color"; color.value = s.color;
+        color.setAttribute("aria-label", `Stop ${i + 1} color`);
+        const hex = document.createElement("span");
+        hex.className = "stop-hex"; hex.textContent = s.color;
+        color.addEventListener("input", () => {
+          s.color = color.value; hex.textContent = s.color;
+          saveGradient(); updateGradPreview();
+        });
+        const grow = document.createElement("div");
+        grow.className = "grow";
+        const range = document.createElement("input");
+        range.type = "range"; range.min = 0; range.max = 100; range.step = 1; range.value = s.pos;
+        range.setAttribute("aria-label", `Stop ${i + 1} position`);
+        const num = document.createElement("input");
+        num.type = "number"; num.min = 0; num.max = 100; num.step = 1; num.value = s.pos;
+        num.setAttribute("aria-label", `Stop ${i + 1} position value`);
+        range.addEventListener("input", () => {
+          s.pos = +range.value; num.value = s.pos;
+          saveGradient(); updateGradPreview();
+        });
+        num.addEventListener("input", () => {
+          const v = Math.max(0, Math.min(100, +num.value || 0));
+          s.pos = v; range.value = v;
+          saveGradient(); updateGradPreview();
+        });
+        grow.appendChild(range); grow.appendChild(num);
+        const up = document.createElement("button");
+        up.type = "button"; up.className = "btn small"; up.textContent = "↑";
+        up.setAttribute("aria-label", `Move stop ${i + 1} earlier`);
+        up.disabled = i === 0;
+        up.addEventListener("click", () => {
+          [gradStops[i - 1], gradStops[i]] = [gradStops[i], gradStops[i - 1]];
+          saveGradient(); renderGradient();
+        });
+        const down = document.createElement("button");
+        down.type = "button"; down.className = "btn small"; down.textContent = "↓";
+        down.setAttribute("aria-label", `Move stop ${i + 1} later`);
+        down.disabled = i === gradStops.length - 1;
+        down.addEventListener("click", () => {
+          [gradStops[i + 1], gradStops[i]] = [gradStops[i], gradStops[i + 1]];
+          saveGradient(); renderGradient();
+        });
+        const del = document.createElement("button");
+        del.type = "button"; del.className = "btn small"; del.textContent = "Remove";
+        del.disabled = gradStops.length <= 2;
+        del.addEventListener("click", () => {
+          gradStops.splice(i, 1); saveGradient(); renderGradient();
+        });
+        row.append(color, hex, grow, up, down, del);
+        list.appendChild(row);
+      });
+    }
+
+    /* ---------- color blindness simulation ---------- */
+    const SIM_MATRICES = {
+      protanopia:     [0.567, 0.433, 0.000,  0.558, 0.442, 0.000,  0.000, 0.242, 0.758],
+      deuteranopia:   [0.625, 0.375, 0.000,  0.700, 0.300, 0.000,  0.000, 0.300, 0.700],
+      tritanopia:     [0.950, 0.050, 0.000,  0.000, 0.433, 0.567,  0.000, 0.475, 0.525],
+      achromatopsia:  [0.299, 0.587, 0.114,  0.299, 0.587, 0.114,  0.299, 0.587, 0.114]
+    };
+    const SIM_NAMES = {
+      protanopia: "Protanopia", deuteranopia: "Deuteranopia",
+      tritanopia: "Tritanopia", achromatopsia: "Achromatopsia"
+    };
+    function simulate(r, g, b, type) {
+      const m = SIM_MATRICES[type];
+      return {
+        r: clamp255(m[0] * r + m[1] * g + m[2] * b),
+        g: clamp255(m[3] * r + m[4] * g + m[5] * b),
+        b: clamp255(m[6] * r + m[7] * g + m[8] * b)
+      };
+    }
+
+    function renderSim() {
+      document.querySelectorAll("#simSeg button").forEach((b) =>
+        b.setAttribute("aria-pressed", String(b.dataset.sim === simType)));
+      $("simName").textContent = SIM_NAMES[simType];
+      const grid = $("simGrid");
+      grid.innerHTML = "";
+      for (const c of palette) {
+        const s = simulate(c.r, c.g, c.b, simType);
+        const sHex = rgbToHex(s.r, s.g, s.b);
+        const row = document.createElement("div");
+        row.className = "sim-row";
+        row.innerHTML =
+          `<div class="sim-cell"><div class="chip" style="background:${c.hex}"></div>` +
+          `<div class="cap"><span>original</span><span>${c.hex}</span></div></div>` +
+          `<div class="sim-cell"><div class="chip sim-chip" data-orig="${c.hex}" data-sim="${sHex}" style="background:${sHex}"></div>` +
+          `<div class="cap"><span>${SIM_NAMES[simType].toLowerCase()}</span><span>${sHex}</span></div></div>`;
+        grid.appendChild(row);
+      }
+      renderSimImage();
+    }
+
+    function renderSimImage() {
+      if (!hasImage) return;
+      const maxDim = 320;
+      const scale = Math.min(1, maxDim / Math.max(imgCanvas.width, imgCanvas.height));
+      const w = Math.max(2, Math.round(imgCanvas.width * scale));
+      const h = Math.max(2, Math.round(imgCanvas.height * scale));
+      const orig = $("simOrigCanvas"), sim = $("simCanvas");
+      orig.width = w; orig.height = h; sim.width = w; sim.height = h;
+      const oCtx = orig.getContext("2d");
+      oCtx.drawImage(imgCanvas, 0, 0, w, h);
+      const sCtx = sim.getContext("2d", { willReadFrequently: true });
+      sCtx.drawImage(imgCanvas, 0, 0, w, h);
+      const imgData = sCtx.getImageData(0, 0, w, h);
+      const d = imgData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const s = simulate(d[i], d[i + 1], d[i + 2], simType);
+        d[i] = s.r; d[i + 1] = s.g; d[i + 2] = s.b;
+      }
+      sCtx.putImageData(imgData, 0, 0);
+    }
+
+    /* ---------- tabs ---------- */
+    document.querySelectorAll("[data-tab]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("[data-tab]").forEach((b) =>
+          b.setAttribute("aria-pressed", String(b === btn)));
+        document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+        $("panel-" + btn.dataset.tab).classList.add("active");
+        if (btn.dataset.tab === "sim") renderSim();
+      });
+    });
+
+    /* ---------- wiring ---------- */
+    $("uploadBtn").addEventListener("click", () => $("fileInput").click());
+    $("fileInput").addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) loadImageFile(e.target.files[0]);
+      e.target.value = "";
+    });
+    const dz = $("dropZone");
+    ["dragenter", "dragover"].forEach((ev) => dz.addEventListener(ev, (e) => {
+      e.preventDefault(); dz.classList.add("dragover");
+    }));
+    ["dragleave", "drop"].forEach((ev) => dz.addEventListener(ev, (e) => {
+      e.preventDefault(); dz.classList.remove("dragover");
+    }));
+    dz.addEventListener("drop", (e) => {
+      const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) loadImageFile(f);
+    });
+    $("sampleBtn").addEventListener("click", () => {
+      imgCanvas.width = 640; imgCanvas.height = 400;
+      drawSample(); extractPalette();
+    });
+    $("colorCount").addEventListener("change", extractPalette);
+    $("extractBtn").addEventListener("click", extractPalette);
+
+    $("copyCssBtn").addEventListener("click", () => copyText(paletteCss(), "CSS variables"));
+    $("copyJsonBtn").addEventListener("click", () => copyText(paletteJson(), "palette JSON"));
+    $("copyTokensBtn").addEventListener("click", () => copyText(paletteTokensJson(), "Workshop tokens JSON"));
+    $("downloadCssBtn").addEventListener("click", () => download("palette.css", paletteCss(), "text/css"));
+    $("downloadJsonBtn").addEventListener("click", () => download("palette.json", paletteJson(), "application/json"));
+
+    $("gradTypeLinear").addEventListener("click", () => { gradType = "linear"; saveGradient(); renderGradient(); });
+    $("gradTypeRadial").addEventListener("click", () => { gradType = "radial"; saveGradient(); renderGradient(); });
+    $("gradAngle").addEventListener("input", () => { gradAngle = +$("gradAngle").value; saveGradient(); updateGradPreview(); });
+    $("gradAngleNum").addEventListener("input", () => {
+      gradAngle = Math.max(0, Math.min(360, +$("gradAngleNum").value || 0)); saveGradient(); updateGradPreview();
+    });
+    $("addStopBtn").addEventListener("click", () => {
+      const mid = palette.length ? palette[gradStops.length % palette.length].hex : "#5d7d99";
+      gradStops.push({ color: mid, pos: 50 });
+      saveGradient(); renderGradient();
+      setStatus("Stop added");
+    });
+    $("fromPaletteBtn").addEventListener("click", () => {
+      if (palette.length < 2) { setStatus("Extract a palette first"); return; }
+      const cols = palette.slice(0, 5);
+      gradStops = cols.map((c, i) => ({ color: c.hex, pos: Math.round((i / (cols.length - 1)) * 100) }));
+      saveGradient(); renderGradient();
+      setStatus("Gradient stops set from palette");
+    });
+    $("copyGradCssBtn").addEventListener("click", () => copyText($("gradCss").value, "gradient CSS"));
+
+    document.querySelectorAll("#simSeg button").forEach((b) => {
+      b.addEventListener("click", () => { simType = b.dataset.sim; renderSim(); });
+    });
+
+    /* ---------- init ---------- */
+    drawSample();
+    loadGradient();
+    const saved = loadPalette();
+    if (saved) {
+      palette = saved.map((c) => colorObj(c.r, c.g, c.b, c.share || 0));
+      renderPalette();
+      renderSim();
+    } else {
+      extractPalette();
+    }
+    renderGradient();
+  </script>
+</body>
+</html>

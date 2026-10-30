@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="SQL Formatter: format and minify SQL across eight dialects, entirely in the browser." />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>SQL Formatter</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #f3f5f8;
+      --paper-2: #ffffff;
+      --paper-3: #e7ecf1;
+      --ink: #182230;
+      --ink-2: #44536a;
+      --ink-3: #68778e;
+      --rule: #d5dce4;
+      --accent: #2e6be6;
+      --accent-ink: #1e55c4;
+      --accent-wash: #e2ebfd;
+      --danger: #b3373c;
+      --danger-wash: #fbe9e9;
+      --good: #177a5b;
+      --good-wash: #e2f3ec;
+      --focus: #2e6be6;
+      --editor-bg: #fbfcfe;
+      --ui-font: "Outfit", sans-serif;
+      --mono-font: "JetBrains Mono", monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #10151c;
+        --paper-2: #161d27;
+        --paper-3: #1e2836;
+        --ink: #e6ecf3;
+        --ink-2: #aebbd0;
+        --ink-3: #8595ad;
+        --rule: #283445;
+        --accent: #7aa8f8;
+        --accent-ink: #a9c6fb;
+        --accent-wash: #1d2c47;
+        --danger: #f09296;
+        --danger-wash: #3d2023;
+        --good: #67d3ae;
+        --good-wash: #17352b;
+        --focus: #7aa8f8;
+        --editor-bg: #121924;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--ui-font);
+      font-size: 15px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, select, textarea { font: inherit; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--paper);
+      border-bottom: 1px solid var(--rule);
+      padding: 14px 24px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .topbar h1 { margin: 0; font-size: 21px; font-weight: 600; letter-spacing: -0.01em; }
+    .topbar p { margin: 0; color: var(--ink-2); font-size: 13.5px; }
+    .lib-status {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--rule);
+      background: var(--paper-2);
+      color: var(--ink-2);
+    }
+    .lib-status.ok { color: var(--good); background: var(--good-wash); border-color: transparent; }
+    .lib-status.bad { color: var(--danger); background: var(--danger-wash); border-color: transparent; }
+
+    .container { max-width: 1180px; margin: 0 auto; padding: 24px 24px 56px; }
+
+    .card {
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 8px 28px rgba(16, 24, 40, 0.06);
+      padding: 16px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 24px;
+      align-items: end;
+      margin-bottom: 16px;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .label {
+      font-size: 11.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--ink-3);
+    }
+    select {
+      appearance: none;
+      background: var(--editor-bg);
+      color: var(--ink);
+      border: 1px solid var(--rule);
+      border-radius: 9px;
+      padding: 7px 30px 7px 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      background-image: linear-gradient(45deg, transparent 50%, var(--ink-2) 50%), linear-gradient(135deg, var(--ink-2) 50%, transparent 50%);
+      background-position: calc(100% - 16px) 55%, calc(100% - 11px) 55%;
+      background-size: 5px 5px;
+      background-repeat: no-repeat;
+    }
+    .tray {
+      display: inline-flex;
+      gap: 2px;
+      background: var(--paper-3);
+      border-radius: 999px;
+      padding: 3px;
+    }
+    .tray button {
+      border: 0;
+      background: transparent;
+      color: var(--ink-2);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tray button[aria-pressed="true"] {
+      background: var(--paper-2);
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.12);
+    }
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink-2);
+      cursor: pointer;
+      padding-bottom: 7px;
+    }
+    .toggle input { width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer; }
+
+    .error-bar {
+      display: none;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      font-size: 13.5px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .error-bar.show { display: block; }
+    .error-bar.error { background: var(--danger-wash); color: var(--danger); }
+    .error-bar.info { background: var(--accent-wash); color: var(--accent-ink); }
+
+    .panes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 820px) { .panes { grid-template-columns: 1fr; } }
+    .pane { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .pane-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .counts { font-family: var(--mono-font); font-size: 12px; color: var(--ink-3); }
+    textarea {
+      width: 100%;
+      min-height: 340px;
+      resize: vertical;
+      background: var(--editor-bg);
+      color: var(--ink);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-family: var(--mono-font);
+      font-size: 13px;
+      line-height: 1.55;
+      tab-size: 2;
+    }
+    textarea[readonly] { background: var(--paper-2); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+      align-items: center;
+    }
+    .btn {
+      border: 1px solid var(--rule);
+      background: var(--paper-2);
+      color: var(--ink);
+      border-radius: 9px;
+      padding: 8px 14px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn:hover { border-color: var(--ink-3); }
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+    .btn.primary:hover { background: var(--accent-ink); border-color: var(--accent-ink); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .actions .spacer { flex: 1; }
+    .copy-status { font-size: 13px; color: var(--good); font-weight: 600; min-width: 70px; }
+
+    .note { margin-top: 20px; color: var(--ink-2); font-size: 13.5px; }
+    .note code { font-family: var(--mono-font); font-size: 12.5px; background: var(--paper-3); padding: 1px 5px; border-radius: 6px; }
+    kbd {
+      font-family: var(--mono-font);
+      font-size: 12px;
+      background: var(--paper-3);
+      border: 1px solid var(--rule);
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      padding: 0 5px;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <h1>SQL Formatter</h1>
+    <p>Format and minify SQL in the browser. Nothing leaves this page.</p>
+    <span class="lib-status" id="libStatus" role="status">Loading formatter library…</span>
+  </header>
+
+  <main class="container">
+    <div class="card toolbar" role="group" aria-label="Formatting settings">
+      <div class="field">
+        <label class="label" for="dialect">Dialect</label>
+        <select id="dialect">
+          <option value="sql" selected>Standard SQL</option>
+          <option value="postgresql">PostgreSQL</option>
+          <option value="mysql">MySQL</option>
+          <option value="mariadb">MariaDB</option>
+          <option value="sqlite">SQLite</option>
+          <option value="bigquery">BigQuery</option>
+          <option value="snowflake">Snowflake</option>
+          <option value="transactsql">Transact-SQL (SQL Server)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label" id="kwLabel">Keyword case</span>
+        <div class="tray" role="group" aria-labelledby="kwLabel" id="keywordCase">
+          <button type="button" data-value="upper" aria-pressed="true">UPPER</button>
+          <button type="button" data-value="lower" aria-pressed="false">lower</button>
+          <button type="button" data-value="preserve" aria-pressed="false">Preserve</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="label" id="indentLabel">Indent</span>
+        <div class="tray" role="group" aria-labelledby="indentLabel" id="indent">
+          <button type="button" data-value="2" aria-pressed="true">2 spaces</button>
+          <button type="button" data-value="4" aria-pressed="false">4 spaces</button>
+          <button type="button" data-value="tab" aria-pressed="false">Tab</button>
+        </div>
+      </div>
+
+      <label class="toggle">
+        <input type="checkbox" id="autoFormat" />
+        Auto-format as I type
+      </label>
+    </div>
+
+    <div class="error-bar" id="errorBar" role="alert"></div>
+
+    <div class="panes">
+      <div class="pane">
+        <div class="pane-head">
+          <label class="label" for="input">Input SQL</label>
+          <span class="counts" id="inputCounts">0 lines · 0 chars</span>
+        </div>
+        <textarea id="input" spellcheck="false" aria-describedby="inputCounts"
+          placeholder="Paste a query here, e.g. select id, name from users where active = 1"></textarea>
+      </div>
+      <div class="pane">
+        <div class="pane-head">
+          <label class="label" for="output">Output</label>
+          <span class="counts" id="outputCounts">0 lines · 0 chars</span>
+        </div>
+        <textarea id="output" readonly spellcheck="false" aria-describedby="outputCounts"
+          placeholder="Formatted SQL appears here."></textarea>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn primary" id="btnFormat">Format</button>
+      <button type="button" class="btn" id="btnMinify">Minify</button>
+      <button type="button" class="btn" id="btnSample">Load sample</button>
+      <button type="button" class="btn" id="btnClear">Clear</button>
+      <span class="spacer"></span>
+      <span class="copy-status" id="copyStatus" role="status"></span>
+      <button type="button" class="btn" id="btnCopy">Copy output</button>
+      <button type="button" class="btn" id="btnDownload">Download .sql</button>
+    </div>
+
+    <p class="note">
+      Press <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Enter</kbd> in the input to format.
+      Formatting only moves whitespace around: string literals, quoted identifiers and comments
+      come through untouched. Minify is a small hand-rolled pass that collapses whitespace
+      outside string literals and comments, so it also works when the formatter library
+      cannot be loaded. Formatting itself is done by the
+      <code>sql-formatter</code> library, loaded from the jsDelivr CDN; everything runs
+      client-side and your SQL is never sent anywhere.
+    </p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/sql-formatter@15/dist/sql-formatter.min.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      var LS_KEY = "sql-formatter:v1";
+      var SAMPLE = "select u.id, u.name, count(o.id) as order_count from users u " +
+        "left join orders o on o.user_id = u.id " +
+        "where u.status = 'active, verified' and u.note <> 'it''s fine, really' " +
+        "-- TODO: keep this comment\n" +
+        "group by u.id, u.name having count(o.id) > 0 order by order_count desc limit 25;";
+
+      var input = document.getElementById("input");
+      var output = document.getElementById("output");
+      var dialect = document.getElementById("dialect");
+      var autoFormat = document.getElementById("autoFormat");
+      var errorBar = document.getElementById("errorBar");
+      var libStatus = document.getElementById("libStatus");
+      var inputCounts = document.getElementById("inputCounts");
+      var outputCounts = document.getElementById("outputCounts");
+      var copyStatus = document.getElementById("copyStatus");
+      var btnFormat = document.getElementById("btnFormat");
+
+      var state = {
+        keywordCase: "upper",
+        indent: "2"
+      };
+
+      var lib = (typeof window !== "undefined" && window.sqlFormatter) || null;
+
+      function counts(text) {
+        if (!text) return "0 lines · 0 chars";
+        var lines = text.split("\n").length;
+        return lines + (lines === 1 ? " line · " : " lines · ") + text.length + " chars";
+      }
+      function refreshCounts() {
+        inputCounts.textContent = counts(input.value);
+        outputCounts.textContent = counts(output.value);
+      }
+
+      function showError(message) {
+        errorBar.textContent = message;
+        errorBar.className = "error-bar show error";
+      }
+      function showInfo(message) {
+        errorBar.textContent = message;
+        errorBar.className = "error-bar show info";
+      }
+      function clearMessage() {
+        errorBar.textContent = "";
+        errorBar.className = "error-bar";
+      }
+
+      function save() {
+        try {
+          localStorage.setItem(LS_KEY, JSON.stringify({
+            input: input.value,
+            dialect: dialect.value,
+            keywordCase: state.keywordCase,
+            indent: state.indent,
+            autoFormat: autoFormat.checked
+          }));
+        } catch (e) { /* storage unavailable: carry on */ }
+      }
+      function restore() {
+        try {
+          var raw = localStorage.getItem(LS_KEY);
+          if (!raw) return;
+          var saved = JSON.parse(raw);
+          if (typeof saved.input === "string") input.value = saved.input;
+          if (saved.dialect) dialect.value = saved.dialect;
+          if (saved.keywordCase) state.keywordCase = saved.keywordCase;
+          if (saved.indent) state.indent = String(saved.indent);
+          if (typeof saved.autoFormat === "boolean") autoFormat.checked = saved.autoFormat;
+        } catch (e) { /* corrupt saved state: ignore */ }
+      }
+
+      function trayValue(containerId, value) {
+        var tray = document.getElementById(containerId);
+        var buttons = tray.querySelectorAll("button[data-value]");
+        buttons.forEach(function (btn) {
+          btn.setAttribute("aria-pressed", btn.getAttribute("data-value") === value ? "true" : "false");
+        });
+      }
+      function wireTray(containerId, onPick) {
+        var tray = document.getElementById(containerId);
+        tray.addEventListener("click", function (event) {
+          var btn = event.target.closest("button[data-value]");
+          if (!btn) return;
+          trayValue(containerId, btn.getAttribute("data-value"));
+          onPick(btn.getAttribute("data-value"));
+        });
+      }
+
+      function formatOptions() {
+        var opts = {
+          language: dialect.value,
+          keywordCase: state.keywordCase
+        };
+        if (state.indent === "tab") {
+          opts.useTabs = true;
+        } else {
+          opts.tabWidth = parseInt(state.indent, 10);
+        }
+        return opts;
+      }
+
+      function runFormat() {
+        if (!lib) {
+          showError("The formatting library failed to load (offline?). Minify, Copy and Download still work — Minify collapses whitespace without the library.");
+          return false;
+        }
+        var source = input.value;
+        if (!source.trim()) {
+          output.value = "";
+          clearMessage();
+          refreshCounts();
+          return true;
+        }
+        try {
+          output.value = lib.format(source, formatOptions());
+          clearMessage();
+        } catch (err) {
+          output.value = "";
+          showError("Could not format: " + (err && err.message ? err.message : String(err)));
+          refreshCounts();
+          return false;
+        }
+        refreshCounts();
+        return true;
+      }
+
+      /* Minify: collapse whitespace outside string literals, quoted
+         identifiers and comments. Protected segments are copied verbatim. */
+      function minifySql(sql) {
+        var out = [];
+        var i = 0;
+        var pendingSpace = false;
+        function pushText(text) {
+          if (pendingSpace && out.length) out.push(" ");
+          pendingSpace = false;
+          out.push(text);
+        }
+        while (i < sql.length) {
+          var ch = sql[i];
+          var two = sql.substr(i, 2);
+
+          if (ch === "'" || ch === '"' || ch === "`") {
+            var quote = ch;
+            var j = i + 1;
+            while (j < sql.length) {
+              if (sql[j] === "\\" && quote !== "`") { j += 2; continue; }
+              if (sql[j] === quote) {
+                if (sql[j + 1] === quote) { j += 2; continue; }
+                j += 1;
+                break;
+              }
+              j += 1;
+            }
+            pushText(sql.slice(i, j));
+            i = j;
+          } else if (ch === "[") {
+            var k = sql.indexOf("]", i + 1);
+            k = (k === -1) ? sql.length : k + 1;
+            pushText(sql.slice(i, k));
+            i = k;
+          } else if (two === "--" && (i + 2 >= sql.length || /\s/.test(sql[i + 2]))) {
+            var eol = sql.indexOf("\n", i);
+            eol = (eol === -1) ? sql.length : eol;
+            pushText(sql.slice(i, eol));
+            // A line comment must stay last on its line: keep one newline
+            // after it, or the code that follows would be commented out.
+            out.push("\n");
+            pendingSpace = false;
+            i = eol;
+          } else if (two === "/*") {
+            var end = sql.indexOf("*/", i + 2);
+            end = (end === -1) ? sql.length : end + 2;
+            pushText(sql.slice(i, end));
+            i = end;
+          } else if (/\s/.test(ch)) {
+            pendingSpace = true;
+            i += 1;
+          } else if (ch === "," || ch === ";") {
+            pendingSpace = false;
+            out.push(ch);
+            i += 1;
+          } else {
+            if (pendingSpace && out.length) out.push(" ");
+            pendingSpace = false;
+            out.push(ch);
+            i += 1;
+          }
+        }
+        return out.join("").trim();
+      }
+
+      function runMinify() {
+        var source = input.value;
+        if (!source.trim()) {
+          output.value = "";
+          clearMessage();
+          refreshCounts();
+          return;
+        }
+        output.value = minifySql(source);
+        clearMessage();
+        refreshCounts();
+      }
+
+      var debounce = null;
+      function maybeAutoFormat() {
+        if (!autoFormat.checked || !lib) return;
+        if (debounce) clearTimeout(debounce);
+        debounce = setTimeout(runFormat, 350);
+      }
+
+      function setLibState() {
+        if (lib) {
+          var dialects = Array.isArray(lib.supportedDialects) ? lib.supportedDialects : null;
+          // Hide any dialect the loaded build does not actually support.
+          if (dialects) {
+            Array.prototype.slice.call(dialect.options).forEach(function (opt) {
+              if (dialects.indexOf(opt.value) === -1) opt.disabled = true;
+            });
+            if (dialect.selectedOptions.length && dialect.selectedOptions[0].disabled) {
+              dialect.value = "sql";
+            }
+          }
+          libStatus.textContent = "sql-formatter library loaded" + (dialects ? " · " + dialects.length + " dialects" : "");
+          libStatus.className = "lib-status ok";
+          btnFormat.disabled = false;
+        } else {
+          libStatus.textContent = "Formatter library failed to load";
+          libStatus.className = "lib-status bad";
+          btnFormat.disabled = true;
+          showError("The formatting library failed to load from the CDN (offline?). The page still works: Minify collapses whitespace with a built-in pass, and Copy / Download work on whatever is in the output pane.");
+        }
+      }
+
+      input.addEventListener("input", function () {
+        refreshCounts();
+        save();
+        maybeAutoFormat();
+      });
+      input.addEventListener("keydown", function (event) {
+        if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+          event.preventDefault();
+          runFormat();
+        }
+      });
+      dialect.addEventListener("change", function () { save(); maybeAutoFormat(); });
+      autoFormat.addEventListener("change", function () { save(); maybeAutoFormat(); });
+      wireTray("keywordCase", function (value) {
+        state.keywordCase = value;
+        save();
+        maybeAutoFormat();
+      });
+      wireTray("indent", function (value) {
+        state.indent = value;
+        save();
+        maybeAutoFormat();
+      });
+
+      btnFormat.addEventListener("click", runFormat);
+      document.getElementById("btnMinify").addEventListener("click", runMinify);
+      document.getElementById("btnSample").addEventListener("click", function () {
+        input.value = SAMPLE;
+        refreshCounts();
+        save();
+        if (lib) runFormat(); else clearMessage();
+        input.focus();
+      });
+      document.getElementById("btnClear").addEventListener("click", function () {
+        input.value = "";
+        output.value = "";
+        clearMessage();
+        refreshCounts();
+        save();
+        input.focus();
+      });
+      document.getElementById("btnCopy").addEventListener("click", function () {
+        var text = output.value;
+        if (!text) {
+          if (lib && runFormat()) text = output.value;
+          else text = input.value;
+        }
+        if (!text) return;
+        function done() {
+          copyStatus.textContent = "Copied!";
+          setTimeout(function () { copyStatus.textContent = ""; }, 2000);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, function () {
+            output.removeAttribute("readonly");
+            output.select();
+            try { document.execCommand("copy"); } catch (e) { /* ignore */ }
+            output.setAttribute("readonly", "");
+            done();
+          });
+        } else {
+          output.removeAttribute("readonly");
+          output.select();
+          try { document.execCommand("copy"); } catch (e) { /* ignore */ }
+          output.setAttribute("readonly", "");
+          done();
+        }
+      });
+      document.getElementById("btnDownload").addEventListener("click", function () {
+        var text = output.value || input.value;
+        if (!text) {
+          showInfo("Nothing to download yet — paste some SQL first.");
+          return;
+        }
+        var blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "query.sql";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 500);
+      });
+
+      restore();
+      trayValue("keywordCase", state.keywordCase);
+      trayValue("indent", state.indent);
+      setLibState();
+      refreshCounts();
+      if (autoFormat.checked && input.value.trim()) runFormat();
+    })();
+  </script>
+</body>
+</html>

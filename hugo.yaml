@@ -152,6 +152,11 @@ params:
           desc: "A tool to validate and auto-fix Hugo Markdown frontmatter against the specific lint rules used by The BlackCat."
           url: "frontmatter-doctor/"
           writeup: "library/tools/frontmatter-doctor/"
+        - name: "Meta Tag & Web Manifest Generator"
+          kind: "Utility"
+          desc: "Client-side tool to generate HTML meta tags and Web Manifest JSON with live mock previews and as-you-type validation."
+          url: "meta-generator/"
+          writeup: "library/tools/meta-generator/"
     - group: "Running on Online Tools"
       items:
         - name: "Color Token Workshop"

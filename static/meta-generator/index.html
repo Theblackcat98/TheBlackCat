@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Generate HTML meta tags and Web Manifest JSON with live previews." />
+  <meta property="og:site_name" content="The BlackCat" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Meta Tag & Web Manifest Generator" />
+  <meta property="og:description" content="Generate HTML meta tags and Web Manifest JSON with live mock previews." />
+  <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/meta-generator/" />
+  <meta property="og:image" content="../og.png" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Meta Tag & Web Manifest Generator</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f7f8;
+      --surface: #ffffff;
+      --surface-2: #edf2f3;
+      --ink: #172225;
+      --muted: #54666b;
+      --line: #d7e0e2;
+      --accent: #067c72;
+      --accent-ink: #ffffff;
+      --accent-soft: #d8f1ed;
+      --code-bg: #152124;
+      --code-ink: #d9e7e8;
+
+      --warn: #eab308;
+      --warn-text: #854d0e;
+      --warn-bg: #fef9c3;
+      --error: #ef4444;
+      --error-text: #991b1b;
+      --error-bg: #fee2e2;
+
+      font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b1112;
+        --surface: #152124;
+        --surface-2: #1c2b30;
+        --ink: #e5edef;
+        --muted: #8fa5aa;
+        --line: #2d4247;
+        --accent: #0ec4b5;
+        --accent-ink: #002d29;
+        --accent-soft: #11423f;
+        --code-bg: #06090a;
+        --code-ink: #b2c9cd;
+
+        --warn: #eab308;
+        --warn-text: #fef08a;
+        --warn-bg: #422006;
+        --error: #ef4444;
+        --error-text: #fecaca;
+        --error-bg: #450a0a;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      padding: 2rem 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1, h2, h3 { line-height: 1.2; margin-bottom: 0.5em; }
+    h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; border-bottom: 1px solid var(--line); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.125rem; margin-top: 1.5rem; }
+    p { margin-bottom: 1rem; color: var(--muted); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    @media (min-width: 768px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+      font-size: 0.9375rem;
+    }
+
+    .form-group .hint {
+      display: block;
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="text"], input[type="url"], input[type="color"], select, textarea {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: -1px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .meter-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.25rem;
+      font-size: 0.8125rem;
+    }
+    .meter {
+      height: 4px;
+      background: var(--line);
+      flex: 1;
+      margin-right: 1rem;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .meter-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.2s, background-color 0.2s;
+    }
+    .meter-text {
+      font-variant-numeric: tabular-nums;
+      color: var(--muted);
+    }
+    .meter-fill.warn { background: var(--warn); }
+    .meter-fill.error { background: var(--error); }
+    .meter-text.warn { color: var(--warn-text); font-weight: 600; }
+    .meter-text.error { color: var(--error-text); font-weight: 600; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: var(--surface-2);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--line); }
+    .btn.primary {
+      background: var(--accent);
+      color: var(--accent-ink);
+      border-color: var(--accent);
+    }
+    .btn.primary:hover { opacity: 0.9; }
+    .btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 0.5rem;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9375rem;
+      cursor: pointer;
+    }
+    .checkbox-label input { margin: 0; }
+
+    .output-wrap {
+      position: relative;
+      margin-top: 1rem;
+    }
+    pre {
+      background: var(--code-bg);
+      color: var(--code-ink);
+      padding: 1.25rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      line-height: 1.4;
+      tab-size: 2;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: rgba(255,255,255,0.1);
+      color: var(--code-ink);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8125rem;
+      border-radius: 4px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+    }
+    .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+    @media (prefers-color-scheme: light) {
+      .copy-btn {
+        background: rgba(0,0,0,0.4);
+        color: white;
+        border: none;
+      }
+      .copy-btn:hover { background: rgba(0,0,0,0.6); }
+    }
+
+    /* Mock Previews */
+    .mock-preview {
+      margin-top: 1.5rem;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .mock-header {
+      background: var(--surface-2);
+      padding: 0.5rem 1rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .mock-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      margin: 1rem;
+      overflow: hidden;
+      background: var(--surface);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+    }
+    .mock-image {
+      width: 100%;
+      aspect-ratio: 1.91 / 1;
+      background: var(--surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 0.875rem;
+      border-bottom: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .mock-image img { width: 100%; height: 100%; object-fit: cover; display: none; }
+    .mock-content { padding: 0.75rem 1rem; }
+    .mock-site { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.25rem; text-transform: lowercase; }
+    .mock-title { font-weight: 600; font-size: 0.9375rem; margin-bottom: 0.25rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .mock-desc { font-size: 0.875rem; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* SERP Mock */
+    .mock-serp {
+      padding: 1rem;
+    }
+    .serp-url { font-size: 0.875rem; color: var(--ink); margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem;}
+    .serp-url span { opacity: 0.7; }
+    .serp-title { color: #1a0dab; font-size: 1.25rem; text-decoration: none; display: inline-block; margin-bottom: 0.25rem; }
+    @media (prefers-color-scheme: dark) { .serp-title { color: #8ab4f8; } }
+    .serp-title:hover { text-decoration: underline; }
+    .serp-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.58; }
+
+    .missing-tags {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: var(--warn-bg);
+      border: 1px solid var(--warn);
+      border-radius: 6px;
+      color: var(--warn-text);
+      font-size: 0.875rem;
+      display: none;
+    }
+    .missing-tags h4 { margin-bottom: 0.5rem; font-weight: 600; }
+    .missing-tags ul { margin-left: 1.5rem; margin-top: 0.25rem; }
+
+    .tabs { display: flex; gap: 1rem; border-bottom: 1px solid var(--line); margin-bottom: 1rem; }
+    .tab { background: none; border: none; padding: 0.5rem 0; font-family: inherit; font-size: 1rem; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
+    .tab.active { color: var(--ink); border-bottom-color: var(--accent); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .flex-row { display: flex; gap: 1rem; }
+    .flex-row .form-group { flex: 1; }
+
+    .visually-hidden {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Meta Tag & Web Manifest Generator</h1>
+    <p>Build your HTML head block and PWA manifest. Live validating previews, local storage, client-side only.</p>
+  </header>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="tabs" role="tablist" aria-label="Input sections">
+        <button class="tab active" role="tab" aria-selected="true" aria-controls="tab-meta" id="tab-btn-meta">Meta Tags</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="tab-manifest" id="tab-btn-manifest">Web Manifest</button>
+      </div>
+
+      <div id="tab-meta" class="tab-content active" role="tabpanel" aria-labelledby="tab-btn-meta">
+        <div class="form-group">
+          <label for="f-title">Page Title</label>
+          <input type="text" id="f-title" placeholder="e.g. My Website - Home" />
+          <div class="meter-wrap">
+            <div class="meter"><div class="meter-fill" id="meter-title"></div></div>
+            <div class="meter-text" id="count-title">0 / 60</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="f-desc">Description</label>
+          <textarea id="f-desc" placeholder="A short description of the page content..."></textarea>
+          <div class="meter-wrap">
+            <div class="meter"><div class="meter-fill" id="meter-desc"></div></div>
+            <div class="meter-text" id="count-desc">0 / 155</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="f-url">Canonical URL</label>
+          <input type="url" id="f-url" placeholder="https://example.com/page" />
+        </div>
+
+        <div class="flex-row">
+          <div class="form-group">
+            <label for="f-site">Site Name (OG)</label>
+            <input type="text" id="f-site" placeholder="My Website" />
+          </div>
+          <div class="form-group">
+            <label for="f-author">Author</label>
+            <input type="text" id="f-author" placeholder="John Doe" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="f-image">OpenGraph Image URL</label>
+          <input type="url" id="f-image" placeholder="https://example.com/og-image.png" />
+          <span class="hint">Recommended: 1200x630px, JPG/PNG/WebP</span>
+        </div>
+
+        <div class="flex-row">
+          <div class="form-group">
+            <label for="f-ogtype">OG Type</label>
+            <select id="f-ogtype">
+              <option value="website">website</option>
+              <option value="article">article</option>
+              <option value="profile">profile</option>
+              <option value="book">book</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="f-twitter">Twitter Card</label>
+            <select id="f-twitter">
+              <option value="summary_large_image">summary_large_image</option>
+              <option value="summary">summary</option>
+              <option value="app">app</option>
+              <option value="player">player</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex-row">
+          <div class="form-group">
+            <label for="f-robots">Robots Indexing</label>
+            <select id="f-robots">
+              <option value="index, follow">index, follow</option>
+              <option value="noindex, follow">noindex, follow</option>
+              <option value="index, nofollow">index, nofollow</option>
+              <option value="noindex, nofollow">noindex, nofollow</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="f-themecolor">Theme Color</label>
+            <input type="color" id="f-themecolor" value="#ffffff" />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+          <button type="button" class="btn" id="btn-clear-meta">Clear Meta Data</button>
+        </div>
+      </div>
+
+      <div id="tab-manifest" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-manifest">
+        <div class="form-group">
+          <label for="m-name">App Name</label>
+          <input type="text" id="m-name" placeholder="My Awesome App" />
+        </div>
+
+        <div class="form-group">
+          <label for="m-short">Short Name</label>
+          <input type="text" id="m-short" placeholder="My App" />
+          <span class="hint">Used on home screen (keep under 12 chars)</span>
+        </div>
+
+        <div class="form-group">
+          <label for="m-desc">Description</label>
+          <textarea id="m-desc" placeholder="What does this app do?"></textarea>
+        </div>
+
+        <div class="flex-row">
+          <div class="form-group">
+            <label for="m-display">Display Mode</label>
+            <select id="m-display">
+              <option value="standalone">standalone</option>
+              <option value="minimal-ui">minimal-ui</option>
+              <option value="fullscreen">fullscreen</option>
+              <option value="browser">browser</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="m-start">Start URL</label>
+            <input type="text" id="m-start" value="/" />
+          </div>
+        </div>
+
+        <div class="flex-row">
+          <div class="form-group">
+            <label for="m-bg">Background Color</label>
+            <input type="color" id="m-bg" value="#ffffff" />
+          </div>
+          <div class="form-group">
+            <label for="m-theme">Theme Color</label>
+            <input type="color" id="m-theme" value="#000000" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Icon Sizes (maskable PNGs)</label>
+          <span class="hint">Will generate definitions for checked sizes</span>
+          <div class="checkbox-group" style="margin-top: 0.5rem;">
+            <label class="checkbox-label"><input type="checkbox" class="m-icon-cb" value="72x72"> 72x72</label>
+            <label class="checkbox-label"><input type="checkbox" class="m-icon-cb" value="96x96"> 96x96</label>
+            <label class="checkbox-label"><input type="checkbox" class="m-icon-cb" value="128x128"> 128x128</label>
+            <label class="checkbox-label"><input type="checkbox" class="m-icon-cb" value="144x144"> 144x144</label>
+            <label class="checkbox-label"><input type="checkbox" class="m-icon-cb" value="152x152"> 152x152</label>
+            <label class="checkbox-label"><input type="checkbox" class="m-icon-cb" value="192x192" checked> 192x192</label>
+            <label class="checkbox-label"><input type="checkbox" class="m-icon-cb" value="384x384"> 384x384</label>
+            <label class="checkbox-label"><input type="checkbox" class="m-icon-cb" value="512x512" checked> 512x512</label>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+          <button type="button" class="btn" id="btn-clear-manifest">Clear Manifest Data</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Generated Output</h2>
+
+      <div id="missing-tags" class="missing-tags">
+        <h4>Missing Recommendations</h4>
+        <ul id="missing-list"></ul>
+      </div>
+
+      <div class="output-wrap">
+        <button class="copy-btn" id="copy-html" aria-label="Copy HTML Head block">Copy HTML</button>
+        <pre id="out-html">&lt;!-- HTML Head --&gt;</pre>
+      </div>
+
+      <div class="output-wrap">
+        <button class="copy-btn" id="copy-json" aria-label="Copy site.webmanifest JSON">Copy JSON</button>
+        <pre id="out-json">{}</pre>
+      </div>
+
+      <h2>Live Mock Previews</h2>
+
+      <div class="mock-preview">
+        <div class="mock-header">
+          <span>Search Engine (Approximation)</span>
+        </div>
+        <div class="mock-serp">
+          <div class="serp-url"><span class="mock-favicon" style="width:16px;height:16px;background:#ccc;border-radius:50%;display:inline-block;"></span><span id="prev-serp-url">example.com</span></div>
+          <a href="#" class="serp-title" id="prev-serp-title" onclick="event.preventDefault()">Page Title</a>
+          <div class="serp-desc" id="prev-serp-desc">Page description...</div>
+        </div>
+      </div>
+
+      <div class="mock-preview">
+        <div class="mock-header">
+          <span>Social Card / Unfurl (Approximation)</span>
+        </div>
+        <div class="mock-card">
+          <div class="mock-image">
+            <img id="prev-og-img" alt="Preview Image" />
+            <span id="prev-og-img-ph">No Image Provided</span>
+          </div>
+          <div class="mock-content">
+            <div class="mock-site" id="prev-og-site">example.com</div>
+            <div class="mock-title" id="prev-og-title">Page Title</div>
+            <div class="mock-desc" id="prev-og-desc">Page description...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const d = document;
+    const get = id => d.getElementById(id);
+
+    // State and elements
+    const f = {
+      title: get("f-title"), desc: get("f-desc"), url: get("f-url"),
+      site: get("f-site"), author: get("f-author"), image: get("f-image"),
+      ogtype: get("f-ogtype"), twitter: get("f-twitter"), robots: get("f-robots"),
+      themecolor: get("f-themecolor")
+    };
+    const m = {
+      name: get("m-name"), short: get("m-short"), desc: get("m-desc"),
+      display: get("m-display"), start: get("m-start"),
+      bg: get("m-bg"), theme: get("m-theme")
+    };
+    const mIcons = d.querySelectorAll(".m-icon-cb");
+
+    const prev = {
+      serpUrl: get("prev-serp-url"), serpTitle: get("prev-serp-title"), serpDesc: get("prev-serp-desc"),
+      ogImg: get("prev-og-img"), ogImgPh: get("prev-og-img-ph"),
+      ogSite: get("prev-og-site"), ogTitle: get("prev-og-title"), ogDesc: get("prev-og-desc")
+    };
+
+    // Tabs
+    const tabs = d.querySelectorAll(".tab");
+    const tabContents = d.querySelectorAll(".tab-content");
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(t => { t.classList.remove("active"); t.setAttribute("aria-selected", "false"); });
+        tabContents.forEach(c => c.classList.remove("active"));
+        tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
+        get(tab.getAttribute("aria-controls")).classList.add("active");
+      });
+    });
+
+    // Load from localStorage
+    const loadState = () => {
+      const data = JSON.parse(localStorage.getItem("blackcat_meta_gen") || "{}");
+      Object.keys(f).forEach(k => { if (data[k] !== undefined) f[k].value = data[k]; });
+      Object.keys(m).forEach(k => { if (data.m && data.m[k] !== undefined) m[k].value = data.m[k]; });
+      if (data.mIcons) {
+        mIcons.forEach(cb => cb.checked = data.mIcons.includes(cb.value));
+      }
+    };
+
+    // Save to localStorage
+    const saveState = () => {
+      const data = { m: {}, mIcons: [] };
+      Object.keys(f).forEach(k => data[k] = f[k].value);
+      Object.keys(m).forEach(k => data.m[k] = m[k].value);
+      mIcons.forEach(cb => { if (cb.checked) data.mIcons.push(cb.value); });
+      localStorage.setItem("blackcat_meta_gen", JSON.stringify(data));
+    };
+
+    // Validation & Meters
+    const updateMeters = () => {
+      const tLen = f.title.value.length;
+      const dLen = f.desc.value.length;
+
+      const tMeter = get("meter-title");
+      const tCount = get("count-title");
+      tCount.textContent = `${tLen} / 60`;
+      tMeter.style.width = `${Math.min((tLen / 60) * 100, 100)}%`;
+      tMeter.className = `meter-fill ${tLen === 0 ? "" : tLen > 60 ? "error" : tLen > 50 ? "warn" : ""}`;
+      tCount.className = `meter-text ${tLen === 0 ? "" : tLen > 60 ? "error" : tLen > 50 ? "warn" : ""}`;
+
+      const dMeter = get("meter-desc");
+      const dCount = get("count-desc");
+      dCount.textContent = `${dLen} / 155`;
+      dMeter.style.width = `${Math.min((dLen / 155) * 100, 100)}%`;
+      dMeter.className = `meter-fill ${dLen === 0 ? "" : dLen > 155 ? "error" : dLen > 140 ? "warn" : ""}`;
+      dCount.className = `meter-text ${dLen === 0 ? "" : dLen > 155 ? "error" : dLen > 140 ? "warn" : ""}`;
+    };
+
+    // Live Mock Previews
+    const updatePreviews = () => {
+      const title = f.title.value || "Page Title";
+      const desc = f.desc.value || "Page description...";
+      let domain = "example.com";
+      try { if (f.url.value) domain = new URL(f.url.value).hostname; } catch(e) {}
+
+      prev.serpUrl.textContent = domain;
+      prev.serpTitle.textContent = title;
+      prev.serpDesc.textContent = desc;
+
+      prev.ogSite.textContent = f.site.value || domain;
+      prev.ogTitle.textContent = title;
+      prev.ogDesc.textContent = desc;
+
+      if (f.image.value) {
+        prev.ogImg.src = f.image.value;
+        prev.ogImg.style.display = "block";
+        prev.ogImgPh.style.display = "none";
+      } else {
+        prev.ogImg.style.display = "none";
+        prev.ogImgPh.style.display = "block";
+      }
+    };
+
+    // Missing Recommendations
+    const checkMissing = () => {
+      const missing = [];
+      if (!f.title.value) missing.push("Page Title");
+      if (!f.desc.value) missing.push("Description");
+      if (!f.url.value) missing.push("Canonical URL");
+      if (!f.image.value) missing.push("OpenGraph Image URL");
+
+      const container = get("missing-tags");
+      const list = get("missing-list");
+
+      if (missing.length > 0) {
+        list.innerHTML = missing.map(m => `<li>${m}</li>`).join("");
+        container.style.display = "block";
+      } else {
+        container.style.display = "none";
+      }
+    };
+
+    // Generators
+    const generateOutputs = () => {
+      // HTML
+      const lines = [];
+      if (f.title.value) lines.push(`<title>${f.title.value}</title>`);
+      if (f.desc.value) lines.push(`<meta name="description" content="${f.desc.value}" />`);
+      if (f.robots.value) lines.push(`<meta name="robots" content="${f.robots.value}" />`);
+      if (f.url.value) lines.push(`<link rel="canonical" href="${f.url.value}" />`);
+      if (f.themecolor.value && f.themecolor.value !== "#ffffff") lines.push(`<meta name="theme-color" content="${f.themecolor.value}" />`);
+      if (f.author.value) lines.push(`<meta name="author" content="${f.author.value}" />`);
+
+      if (lines.length > 0) lines.push("");
+
+      // OG
+      if (f.site.value) lines.push(`<meta property="og:site_name" content="${f.site.value}" />`);
+      if (f.ogtype.value) lines.push(`<meta property="og:type" content="${f.ogtype.value}" />`);
+      if (f.title.value) lines.push(`<meta property="og:title" content="${f.title.value}" />`);
+      if (f.desc.value) lines.push(`<meta property="og:description" content="${f.desc.value}" />`);
+      if (f.url.value) lines.push(`<meta property="og:url" content="${f.url.value}" />`);
+      if (f.image.value) lines.push(`<meta property="og:image" content="${f.image.value}" />`);
+
+      if (lines.length > 0 && lines[lines.length-1] !== "") lines.push("");
+
+      // Twitter
+      if (f.twitter.value) lines.push(`<meta name="twitter:card" content="${f.twitter.value}" />`);
+
+      const htmlCode = lines.join("\n").trim();
+      get("out-html").textContent = htmlCode || "<!-- Start typing to generate HTML head tags -->";
+
+      // JSON Manifest
+      const manifest = {};
+      if (m.name.value) manifest.name = m.name.value;
+      if (m.short.value) manifest.short_name = m.short.value;
+      if (m.desc.value) manifest.description = m.desc.value;
+      if (m.display.value) manifest.display = m.display.value;
+      if (m.start.value) manifest.start_url = m.start.value;
+      if (m.bg.value) manifest.background_color = m.bg.value;
+      if (m.theme.value) manifest.theme_color = m.theme.value;
+
+      const selectedIcons = Array.from(mIcons).filter(cb => cb.checked).map(cb => cb.value);
+      if (selectedIcons.length > 0) {
+        manifest.icons = selectedIcons.map(size => ({
+          src: `icon-${size}.png`,
+          sizes: size,
+          type: "image/png",
+          purpose: "any maskable"
+        }));
+      }
+
+      get("out-json").textContent = Object.keys(manifest).length > 0 ? JSON.stringify(manifest, null, 2) : "{}";
+    };
+
+    // Main update loop
+    const updateAll = () => {
+      saveState();
+      updateMeters();
+      updatePreviews();
+      checkMissing();
+      generateOutputs();
+    };
+
+    // Copy Buttons
+    get("copy-html").addEventListener("click", async function() {
+      const text = get("out-html").textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        const orig = this.textContent;
+        this.textContent = "Copied!";
+        setTimeout(() => this.textContent = orig, 2000);
+      } catch (err) {}
+    });
+
+    get("copy-json").addEventListener("click", async function() {
+      const text = get("out-json").textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        const orig = this.textContent;
+        this.textContent = "Copied!";
+        setTimeout(() => this.textContent = orig, 2000);
+      } catch (err) {}
+    });
+
+    // Listeners
+    d.querySelectorAll("input, textarea, select").forEach(el => {
+      el.addEventListener("input", updateAll);
+      el.addEventListener("change", updateAll);
+    });
+
+    get("btn-clear-meta").addEventListener("click", () => {
+      Object.values(f).forEach(el => {
+        if (el.type === "color") el.value = "#ffffff";
+        else if (el.type === "select-one") el.selectedIndex = 0;
+        else el.value = "";
+      });
+      updateAll();
+    });
+
+    get("btn-clear-manifest").addEventListener("click", () => {
+      Object.values(m).forEach(el => {
+        if (el.id === "m-start") el.value = "/";
+        else if (el.id === "m-bg") el.value = "#ffffff";
+        else if (el.id === "m-theme") el.value = "#000000";
+        else if (el.type === "select-one") el.selectedIndex = 0;
+        else el.value = "";
+      });
+      mIcons.forEach(cb => cb.checked = ['192x192', '512x512'].includes(cb.value));
+      updateAll();
+    });
+
+    // Init
+    loadState();
+    updateAll();
+  </script>
+</body>
+</html>

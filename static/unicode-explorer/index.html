@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Unicode Explorer: search characters by name or codepoint, browse Unicode blocks, and inspect strings character by character." />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Unicode Explorer</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #f3f6f8;
+      --paper-2: #ffffff;
+      --paper-3: #e7edf1;
+      --ink: #182126;
+      --ink-2: #43525c;
+      --ink-3: #687985;
+      --rule: #d3dde3;
+      --accent: #0b6fa4;
+      --accent-ink: #075a87;
+      --accent-wash: #ddeef7;
+      --good: #0c7a55;
+      --focus: #0b6fa4;
+      --ui-font: "Outfit", sans-serif;
+      --mono-font: "JetBrains Mono", monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #11181c;
+        --paper-2: #182126;
+        --paper-3: #232f36;
+        --ink: #e6edf1;
+        --ink-2: #b3c0c9;
+        --ink-3: #8496a1;
+        --rule: #2b3941;
+        --accent: #55b3e0;
+        --accent-ink: #8ecdf1;
+        --accent-wash: #17303f;
+        --good: #63d6ab;
+        --focus: #55b3e0;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--ui-font);
+      font-size: 15px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent-ink); }
+    button, input, select, textarea { font: inherit; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+    .mono, code { font-family: var(--mono-font); }
+
+    .header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      background: var(--paper);
+      z-index: 5;
+    }
+    .header h1 { margin: 0; font-size: 23px; font-weight: 600; }
+    .header p { margin: 2px 0 0; color: var(--ink-2); font-size: 13.5px; }
+    .header-links a { font-size: 14px; color: var(--ink-2); text-decoration: none; white-space: nowrap; }
+    .header-links a:hover { color: var(--accent-ink); text-decoration: underline; }
+
+    .container { max-width: 1060px; margin: 0 auto; padding: 28px 24px 64px; }
+
+    .card {
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      box-shadow: 0 1px 2px rgba(24, 33, 38, .05), 0 8px 28px rgba(24, 33, 38, .06);
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+    .label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      margin-bottom: 10px;
+    }
+    .card h2 { margin: 0 0 6px; font-size: 18px; font-weight: 600; }
+    .hint { color: var(--ink-2); font-size: 13.5px; margin: 0 0 14px; }
+
+    textarea, input[type="text"], select {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 9px;
+      color: var(--ink);
+      font-size: 14px;
+    }
+    textarea { min-height: 84px; resize: vertical; font-family: var(--mono-font); }
+
+    .btn {
+      background: var(--paper-3);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent-ink); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover { background: var(--accent-ink); color: #fff; }
+    @media (prefers-color-scheme: dark) {
+      .btn.primary { color: #0d1b22; }
+      .btn.primary:hover { color: #0d1b22; }
+    }
+
+    .seg-tray {
+      display: inline-flex;
+      gap: 4px;
+      background: var(--paper-3);
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      padding: 4px;
+      margin-bottom: 18px;
+    }
+    .seg-tray .seg {
+      border: none;
+      background: transparent;
+      color: var(--ink-2);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .seg-tray .seg[aria-selected="true"] {
+      background: var(--paper-2);
+      color: var(--ink);
+      box-shadow: 0 1px 3px rgba(24, 33, 38, .18);
+    }
+
+    .search-row { display: flex; gap: 10px; }
+    .search-row input { flex: 1; }
+    .count-line { color: var(--ink-3); font-size: 13px; margin: 12px 0 0; }
+
+    .results { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 10px; margin-top: 14px; }
+    .result-item {
+      display: flex; align-items: center; gap: 12px;
+      text-align: left;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      color: var(--ink);
+    }
+    .result-item:hover { border-color: var(--accent); }
+    .result-item .glyph { font-size: 26px; line-height: 1; min-width: 34px; text-align: center; }
+    .result-item .rname { font-size: 12px; color: var(--ink-2); text-transform: capitalize; display: block; }
+    .result-item .rcp { font-family: var(--mono-font); font-size: 13px; font-weight: 600; }
+
+    .browse-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 8px; margin-top: 14px; }
+    .browse-cell {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      padding: 7px 2px 5px;
+      cursor: pointer;
+      color: var(--ink);
+      text-align: center;
+    }
+    .browse-cell:hover { border-color: var(--accent); }
+    .browse-cell .glyph { display: block; font-size: 22px; line-height: 1.2; }
+    .browse-cell .cp { display: block; font-family: var(--mono-font); font-size: 10px; color: var(--ink-3); }
+
+    .table-wrap { overflow-x: auto; margin-top: 14px; border: 1px solid var(--rule); border-radius: 12px; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; background: var(--paper); }
+    th, td { padding: 8px 10px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+    th { font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover { background: var(--accent-wash); }
+    td.glyph-cell { font-size: 20px; line-height: 1; text-align: center; min-width: 44px; }
+    td.mono, th.mono { font-family: var(--mono-font); white-space: nowrap; }
+    td.name-cell { text-transform: capitalize; color: var(--ink-2); min-width: 150px; }
+
+    .detail { display: flex; gap: 22px; flex-wrap: wrap; }
+    .detail-glyph {
+      font-size: 84px; line-height: 1;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      min-width: 132px; height: 132px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .detail-main { flex: 1; min-width: 260px; }
+    .detail-main h2 { text-transform: capitalize; }
+    .facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px 20px; margin: 12px 0 16px; }
+    .fact .flabel { font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; display: block; }
+    .fact .fval { font-family: var(--mono-font); font-size: 13.5px; word-break: break-all; }
+    .copy-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .copy-status { color: var(--good); font-size: 13px; font-weight: 600; }
+    .empty-note { color: var(--ink-3); font-size: 14px; margin: 0; }
+    .footer-note { color: var(--ink-3); font-size: 13px; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>Unicode Explorer</h1>
+      <p>Search, browse, and inspect Unicode characters — entirely in your browser.</p>
+    </div>
+    <div class="header-links">
+      <a href="/TheBlackCat/">← Library</a>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- Character detail -->
+    <section class="card" aria-label="Character detail">
+      <span class="label">Character</span>
+      <div id="detail">
+        <p class="empty-note">Pick a character from search, browse, or the inspector below to see its full details here.</p>
+      </div>
+    </section>
+
+    <!-- String inspector -->
+    <section class="card" aria-label="String inspector">
+      <span class="label">String Inspector</span>
+      <h2>Inspect a string</h2>
+      <p class="hint">Paste any text — combining marks, zero-width characters, and astral-plane emoji included. Iteration is by code point, so surrogate pairs count once. Click a row for full details.</p>
+      <textarea id="inspector-input" aria-label="String to inspect" placeholder="Paste or type a string here…"></textarea>
+      <p class="count-line" id="inspector-summary"></p>
+      <div class="table-wrap" id="inspector-wrap" hidden>
+        <table>
+          <thead>
+            <tr>
+              <th aria-label="Index">#</th>
+              <th>Glyph</th>
+              <th>Codepoint</th>
+              <th>Decimal</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Script</th>
+              <th>UTF-8</th>
+              <th>UTF-16</th>
+              <th>HTML entity</th>
+            </tr>
+          </thead>
+          <tbody id="inspector-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Search + browse -->
+    <section class="card" aria-label="Search and browse">
+      <span class="label">Find characters</span>
+      <div class="seg-tray" role="tablist" aria-label="Find mode">
+        <button class="seg" role="tab" id="tab-search" aria-selected="true" aria-controls="panel-search">Search</button>
+        <button class="seg" role="tab" id="tab-browse" aria-selected="false" aria-controls="panel-browse">Browse</button>
+      </div>
+
+      <div id="panel-search" role="tabpanel" aria-labelledby="tab-search">
+        <div class="search-row">
+          <input type="text" id="search-input" aria-label="Search Unicode characters" placeholder="e.g. snowman, U+2603, 0x2603, 9731, or paste a character" />
+          <button class="btn primary" id="search-btn" type="button">Search</button>
+        </div>
+        <p class="count-line" id="search-count"></p>
+        <div class="results" id="results"></div>
+      </div>
+
+      <div id="panel-browse" role="tabpanel" aria-labelledby="tab-browse" hidden>
+        <label class="label" for="block-select">Block</label>
+        <select id="block-select" aria-label="Unicode block"></select>
+        <p class="count-line" id="browse-count"></p>
+        <div class="browse-grid" id="browse-grid"></div>
+      </div>
+    </section>
+
+    <p class="footer-note" id="dataset-note"></p>
+  </div>
+
+  <script src="unicode-data.js"></script>
+  <script>
+    const $ = s => document.querySelector(s);
+
+    /* ---------- dataset ---------- */
+    const ENTRIES = [];           // {cp, name, ch}
+    const NAME_BY_CP = new Map();
+    for (const line of UNICODE_DATA.split("\n")) {
+      if (!line) continue;
+      const sp = line.indexOf(" ");
+      const cp = parseInt(line.slice(0, sp), 16);
+      const name = line.slice(sp + 1);
+      const entry = { cp, name, ch: String.fromCodePoint(cp) };
+      ENTRIES.push(entry);
+      NAME_BY_CP.set(cp, name);
+    }
+    ENTRIES.sort((a, b) => a.cp - b.cp);
+
+    /* ---------- character facts ---------- */
+    const GC = [
+      ["Lu", "Uppercase_Letter", "Letter, Uppercase"], ["Ll", "Lowercase_Letter", "Letter, Lowercase"],
+      ["Lt", "Titlecase_Letter", "Letter, Titlecase"], ["Lm", "Modifier_Letter", "Letter, Modifier"],
+      ["Lo", "Other_Letter", "Letter, Other"], ["Mn", "Nonspacing_Mark", "Mark, Nonspacing"],
+      ["Mc", "Spacing_Mark", "Mark, Spacing"], ["Me", "Enclosing_Mark", "Mark, Enclosing"],
+      ["Nd", "Decimal_Number", "Number, Decimal"], ["Nl", "Letter_Number", "Number, Letter"],
+      ["No", "Other_Number", "Number, Other"], ["Pc", "Connector_Punctuation", "Punctuation, Connector"],
+      ["Pd", "Dash_Punctuation", "Punctuation, Dash"], ["Ps", "Open_Punctuation", "Punctuation, Open"],
+      ["Pe", "Close_Punctuation", "Punctuation, Close"], ["Pi", "Initial_Punctuation", "Punctuation, Initial Quote"],
+      ["Pf", "Final_Punctuation", "Punctuation, Final Quote"], ["Po", "Other_Punctuation", "Punctuation, Other"],
+      ["Sm", "Math_Symbol", "Symbol, Math"], ["Sc", "Currency_Symbol", "Symbol, Currency"],
+      ["Sk", "Modifier_Symbol", "Symbol, Modifier"], ["So", "Other_Symbol", "Symbol, Other"],
+      ["Zs", "Space_Separator", "Separator, Space"], ["Zl", "Line_Separator", "Separator, Line"],
+      ["Zp", "Paragraph_Separator", "Separator, Paragraph"], ["Cc", "Control", "Other, Control"],
+      ["Cf", "Format", "Other, Format"], ["Cs", "Surrogate", "Other, Surrogate"],
+      ["Co", "Private_Use", "Other, Private Use"], ["Cn", "Unassigned", "Other, Unassigned"]
+    ].map(([code, prop, label]) => {
+      let re = null;
+      try { re = new RegExp("^\\p{General_Category=" + prop + "}$", "u"); } catch (e) { /* older engine */ }
+      return { code, label, re };
+    });
+
+    const SCRIPTS = ["Latin", "Greek", "Cyrillic", "Armenian", "Georgian", "Hebrew", "Arabic", "Syriac",
+      "Devanagari", "Bengali", "Tamil", "Telugu", "Thai", "Lao", "Tibetan", "Ethiopic", "Mongolian",
+      "Han", "Hiragana", "Katakana", "Hangul", "Bopomofo", "Cherokee", "Runic", "Ogham", "Common", "Inherited"
+    ].map(name => {
+      let re = null;
+      try { re = new RegExp("^\\p{Script=" + name + "}$", "u"); } catch (e) { /* older engine */ }
+      return { name, re };
+    });
+
+    const catCache = new Map(), scriptCache = new Map();
+    function categoryOf(ch) {
+      if (catCache.has(ch)) return catCache.get(ch);
+      let out = { code: "?", label: "Unknown" };
+      for (const g of GC) { if (g.re && g.re.test(ch)) { out = g; break; } }
+      catCache.set(ch, out);
+      return out;
+    }
+    function scriptOf(ch) {
+      if (scriptCache.has(ch)) return scriptCache.get(ch);
+      let out = "—";
+      for (const s of SCRIPTS) { if (s.re && s.re.test(ch)) { out = s.name; break; } }
+      scriptCache.set(ch, out);
+      return out;
+    }
+
+    const encoder = new TextEncoder();
+    function utf8Hex(ch) {
+      return [...encoder.encode(ch)].map(b => b.toString(16).toUpperCase().padStart(2, "0")).join(" ");
+    }
+    function utf16Units(ch) {
+      const units = [];
+      for (let i = 0; i < ch.length; i++) units.push("U+" + ch.charCodeAt(i).toString(16).toUpperCase().padStart(4, "0"));
+      return units.join(" ");
+    }
+    function fmtCp(cp) { return "U+" + cp.toString(16).toUpperCase().padStart(4, "0"); }
+    function nameOf(cp) { return NAME_BY_CP.get(cp) || null; }
+    function displayGlyph(ch, cp) {
+      // Make invisible / whitespace / combining characters legible in tables.
+      if (ch === " ") return "␣";
+      if (categoryOf(ch).code === "Cc" || categoryOf(ch).code === "Cf" || categoryOf(ch).code === "Zs" ||
+          categoryOf(ch).code === "Zl" || categoryOf(ch).code === "Zp") return "◌" + ch;
+      if (categoryOf(ch).code.startsWith("M")) return "◌" + ch;
+      return ch;
+    }
+
+    /* ---------- copy helper ---------- */
+    function copyText(text, statusEl) {
+      const done = () => { if (statusEl) { statusEl.textContent = "Copied " + text; setTimeout(() => statusEl.textContent = "", 1800); } };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+      } else fallbackCopy(text, done);
+    }
+    function fallbackCopy(text, done) {
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) { /* clipboard unavailable */ }
+      document.body.removeChild(ta);
+    }
+
+    /* ---------- detail panel ---------- */
+    const detailEl = $("#detail");
+    function showDetail(cp) {
+      const ch = String.fromCodePoint(cp);
+      const name = nameOf(cp);
+      const cat = categoryOf(ch);
+      detailEl.innerHTML = "";
+      const wrap = document.createElement("div");
+      wrap.className = "detail";
+
+      const glyph = document.createElement("div");
+      glyph.className = "detail-glyph";
+      glyph.textContent = displayGlyph(ch, cp);
+      wrap.appendChild(glyph);
+
+      const main = document.createElement("div");
+      main.className = "detail-main";
+      const h = document.createElement("h2");
+      h.textContent = name ? name.toLowerCase() : "No name in dataset";
+      main.appendChild(h);
+
+      const facts = document.createElement("div");
+      facts.className = "facts";
+      const rows = [
+        ["Codepoint", fmtCp(cp)],
+        ["Decimal", String(cp)],
+        ["HTML entity", "&#x" + cp.toString(16).toUpperCase() + ";"],
+        ["Decimal entity", "&#" + cp + ";"],
+        ["Category", cat.code + " — " + cat.label],
+        ["Script", scriptOf(ch)],
+        ["UTF-8 bytes", utf8Hex(ch)],
+        ["UTF-16 units", utf16Units(ch)]
+      ];
+      for (const [k, v] of rows) {
+        const f = document.createElement("div");
+        f.className = "fact";
+        const fl = document.createElement("span"); fl.className = "flabel"; fl.textContent = k;
+        const fv = document.createElement("span"); fv.className = "fval"; fv.textContent = v;
+        f.appendChild(fl); f.appendChild(fv); facts.appendChild(f);
+      }
+      main.appendChild(facts);
+
+      const copyRow = document.createElement("div");
+      copyRow.className = "copy-row";
+      const status = document.createElement("span");
+      status.className = "copy-status"; status.setAttribute("aria-live", "polite");
+      const mk = (label, text) => {
+        const b = document.createElement("button");
+        b.className = "btn"; b.type = "button"; b.textContent = label;
+        b.addEventListener("click", () => copyText(text, status));
+        return b;
+      };
+      copyRow.appendChild(mk("Copy character", ch));
+      copyRow.appendChild(mk("Copy codepoint", fmtCp(cp)));
+      copyRow.appendChild(mk("Copy entity", "&#x" + cp.toString(16).toUpperCase() + ";"));
+      copyRow.appendChild(status);
+      main.appendChild(copyRow);
+
+      wrap.appendChild(main);
+      detailEl.appendChild(wrap);
+    }
+
+    /* ---------- string inspector ---------- */
+    const inspInput = $("#inspector-input");
+    const inspRows = $("#inspector-rows");
+    const inspWrap = $("#inspector-wrap");
+    const inspSummary = $("#inspector-summary");
+    const MAX_INSPECT = 500;
+
+    function inspect() {
+      const value = inspInput.value;
+      try { localStorage.setItem("unicode-explorer-input", value); } catch (e) { /* private mode */ }
+      const chars = [...value]; // iterates by code point: astral chars stay whole
+      inspRows.innerHTML = "";
+      if (chars.length === 0) {
+        inspWrap.hidden = true;
+        inspSummary.textContent = "";
+        return;
+      }
+      const shown = chars.slice(0, MAX_INSPECT);
+      let utf16Total = 0, utf8Total = 0;
+      shown.forEach((ch, i) => {
+        const cp = ch.codePointAt(0);
+        utf16Total += ch.length;
+        utf8Total += encoder.encode(ch).length;
+        const cat = categoryOf(ch);
+        const tr = document.createElement("tr");
+        tr.className = "insp-row";
+        tr.dataset.cp = cp;
+        const cells = [
+          { v: String(i + 1) },
+          { v: displayGlyph(ch, cp), cls: "glyph-cell" },
+          { v: fmtCp(cp), cls: "mono" },
+          { v: String(cp), cls: "mono" },
+          { v: (nameOf(cp) || "— (outside dataset)").toLowerCase(), cls: "name-cell" },
+          { v: cat.code, cls: "mono" },
+          { v: scriptOf(ch) },
+          { v: utf8Hex(ch), cls: "mono" },
+          { v: utf16Units(ch), cls: "mono" },
+          { v: "&#x" + cp.toString(16).toUpperCase() + ";", cls: "mono" }
+        ];
+        for (const c of cells) {
+          const td = document.createElement("td");
+          if (c.cls) td.className = c.cls;
+          td.textContent = c.v;
+          tr.appendChild(td);
+        }
+        tr.addEventListener("click", () => showDetail(cp));
+        inspRows.appendChild(tr);
+      });
+      inspWrap.hidden = false;
+      let summary = chars.length + (chars.length === 1 ? " code point" : " code points") +
+        " · " + utf16Total + " UTF-16 code units · " + utf8Total + " UTF-8 bytes";
+      if (chars.length > MAX_INSPECT) summary += " · showing the first " + MAX_INSPECT;
+      inspSummary.textContent = summary;
+    }
+    inspInput.addEventListener("input", inspect);
+
+    /* ---------- search ---------- */
+    const searchInput = $("#search-input");
+    const resultsEl = $("#results");
+    const searchCount = $("#search-count");
+
+    function codepointCandidates(q) {
+      const cps = new Set();
+      let m;
+      if ((m = q.match(/^u\+([0-9a-f]+)$/i))) cps.add(parseInt(m[1], 16));
+      else if ((m = q.match(/^0x([0-9a-f]+)$/i))) cps.add(parseInt(m[1], 16));
+      else if ((m = q.match(/^&#x([0-9a-f]+);?$/i))) cps.add(parseInt(m[1], 16));
+      else if ((m = q.match(/^&#(\d+);?$/))) cps.add(parseInt(m[1], 10));
+      else if ([...q].length === 1) cps.add(q.codePointAt(0));
+      else if (/^[0-9a-f]+$/i.test(q) && q.length >= 2) {
+        cps.add(parseInt(q, 16));                    // bare hex, e.g. 2603
+        if (/^\d+$/.test(q)) cps.add(parseInt(q, 10)); // …and its decimal reading, e.g. 9731
+      }
+      return [...cps].filter(cp => cp >= 0 && cp <= 0x10FFFF && !(cp >= 0xD800 && cp <= 0xDFFF));
+    }
+
+    function resultItem(entry) {
+      const b = document.createElement("button");
+      b.className = "result-item"; b.type = "button";
+      const g = document.createElement("span"); g.className = "glyph"; g.textContent = displayGlyph(entry.ch, entry.cp);
+      const meta = document.createElement("span");
+      const cpEl = document.createElement("span"); cpEl.className = "rcp"; cpEl.textContent = fmtCp(entry.cp);
+      const nm = document.createElement("span"); nm.className = "rname";
+      nm.textContent = entry.name ? entry.name.toLowerCase() : "no name in dataset";
+      meta.appendChild(cpEl); meta.appendChild(nm);
+      b.appendChild(g); b.appendChild(meta);
+      b.addEventListener("click", () => showDetail(entry.cp));
+      return b;
+    }
+
+    const SEARCH_LIMIT = 200;
+    function runSearch() {
+      const q = searchInput.value.trim();
+      resultsEl.innerHTML = "";
+      if (!q) { searchCount.textContent = ""; return; }
+      let matches = [];
+      const cps = codepointCandidates(q);
+      if (cps.length) {
+        matches = cps.map(cp => ({ cp, name: nameOf(cp), ch: String.fromCodePoint(cp) }));
+      } else {
+        const tokens = q.toUpperCase().split(/\s+/).filter(Boolean);
+        matches = ENTRIES.filter(e => tokens.every(t => e.name.includes(t)));
+      }
+      searchCount.textContent = matches.length === 0
+        ? "No matches. Names only cover the dataset ranges listed below; the inspector above works for any character."
+        : matches.length + (matches.length === 1 ? " match" : " matches") +
+          (matches.length > SEARCH_LIMIT ? " — showing the first " + SEARCH_LIMIT : "");
+      for (const entry of matches.slice(0, SEARCH_LIMIT)) resultsEl.appendChild(resultItem(entry));
+    }
+    $("#search-btn").addEventListener("click", runSearch);
+    searchInput.addEventListener("input", runSearch);
+    searchInput.addEventListener("keydown", e => { if (e.key === "Enter") runSearch(); });
+
+    /* ---------- browse ---------- */
+    const blockSelect = $("#block-select");
+    const browseGrid = $("#browse-grid");
+    const browseCount = $("#browse-count");
+    for (const [name, start, end] of UNICODE_BLOCKS) {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name + " (" + fmtCp(start) + "–" + fmtCp(end) + ")";
+      blockSelect.appendChild(opt);
+    }
+    function runBrowse() {
+      const block = UNICODE_BLOCKS.find(b => b[0] === blockSelect.value) || UNICODE_BLOCKS[0];
+      const inBlock = ENTRIES.filter(e => e.cp >= block[1] && e.cp <= block[2]);
+      browseGrid.innerHTML = "";
+      for (const entry of inBlock) {
+        const b = document.createElement("button");
+        b.className = "browse-cell"; b.type = "button";
+        b.title = fmtCp(entry.cp) + " " + entry.name;
+        const g = document.createElement("span"); g.className = "glyph"; g.textContent = displayGlyph(entry.ch, entry.cp);
+        const c = document.createElement("span"); c.className = "cp"; c.textContent = entry.cp.toString(16).toUpperCase();
+        b.appendChild(g); b.appendChild(c);
+        b.addEventListener("click", () => showDetail(entry.cp));
+        browseGrid.appendChild(b);
+      }
+      browseCount.textContent = inBlock.length + " named characters in this block (unassigned codepoints are skipped).";
+    }
+    blockSelect.addEventListener("change", runBrowse);
+
+    /* ---------- tabs ---------- */
+    const tabSearch = $("#tab-search"), tabBrowse = $("#tab-browse");
+    function switchTab(which) {
+      const search = which === "search";
+      tabSearch.setAttribute("aria-selected", search ? "true" : "false");
+      tabBrowse.setAttribute("aria-selected", search ? "false" : "true");
+      $("#panel-search").hidden = !search;
+      $("#panel-browse").hidden = search;
+      if (!search && browseGrid.childElementCount === 0) runBrowse();
+    }
+    tabSearch.addEventListener("click", () => switchTab("search"));
+    tabBrowse.addEventListener("click", () => switchTab("browse"));
+
+    /* ---------- init ---------- */
+    $("#dataset-note").textContent =
+      "Dataset: " + ENTRIES.length.toLocaleString("en-US") + " named characters (Unicode 15.0), generated from Python's unicodedata. " +
+      "Coverage: Latin, Greek, Cyrillic, punctuation, currency, letterlike symbols, number forms, arrows, math operators, " +
+      "geometric shapes, dingbats, miscellaneous symbols, and the main emoji blocks. Characters outside those ranges still " +
+      "inspect fully — only the name lookup may come back empty. Everything runs client-side; nothing leaves your browser.";
+    let saved = null;
+    try { saved = localStorage.getItem("unicode-explorer-input"); } catch (e) { /* private mode */ }
+    inspInput.value = saved !== null && saved !== "" ? saved : "Café ☃ — grinning: 😀";
+    inspect();
+    showDetail(0x2603);
+  </script>
+</body>
+</html>

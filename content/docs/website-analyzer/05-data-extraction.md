@@ -15,7 +15,7 @@ excludeSearch: true
 
 # Chapter 5: Data Extraction Utilities
 
-Welcome back! In the previous chapter, [Website Content Fetching](04_website_content_fetching_.md), we learned how our Website Analyzer gets the raw ingredients for analysis: the HTML content of web pages. We saw how the `get_website_content` utility fetches the page and turns the raw HTML text into a structured `soup` object using `BeautifulSoup`.
+Welcome back! In the previous chapter, [Website Content Fetching](04-content-fetching.md), we learned how our Website Analyzer gets the raw ingredients for analysis: the HTML content of web pages. We saw how the `get_website_content` utility fetches the page and turns the raw HTML text into a structured `soup` object using `BeautifulSoup`.
 
 But having the raw HTML `soup` object, while useful, isn't the final goal. Imagine you're reading a book about a company. You don't just want the book's raw text; you want to easily find their business name, their contact information, a list of their products, or maybe some customer reviews.
 
@@ -177,7 +177,7 @@ This illustrates how the utility needs to look in different places within and li
 
 ### How Nodes Use Extraction Utilities
 
-As we saw in [Chapter 3: Batch Processing](03_batch_processing_.md), `BatchNode`s are designed to process multiple items (like web pages). The `DesignElementsBatchNode` and `ContentBatchNode` are specifically designed to call these extraction utilities for each page they process.
+As we saw in [Chapter 3: Batch Processing](03-batch.md), `BatchNode`s are designed to process multiple items (like web pages). The `DesignElementsBatchNode` and `ContentBatchNode` are specifically designed to call these extraction utilities for each page they process.
 
 Let's look at the simplified `exec` methods of these nodes:
 
@@ -290,7 +290,7 @@ This diagram highlights that the `BatchNode` manages the list of items, retrieve
 
 Data Extraction Utilities are essential components of our Website Analyzer. They are the specialized tools that take the raw HTML `soup` object obtained from fetching and transform it into structured, meaningful data about a website's content, business details, and design elements. By using specific utility functions like `extract_business_info`, `extract_products`, and `extract_design_elements`, which internally use `BeautifulSoup` and regular expressions to scan the HTML, we can collect the precise information needed for analysis. These utilities are typically called by `BatchNode`s that process multiple pages, with the results being consolidated in the central `shared` data store.
 
-Now that we have the structured data extracted from the website's pages, the next step is to make sense of it and present it in a useful format. In the next chapter, we'll learn about [Specification Generation](06_specification_generation_.md).
+Now that we have the structured data extracted from the website's pages, the next step is to make sense of it and present it in a useful format. In the next chapter, we'll learn about [Specification Generation](06-specification-generation.md).
 
 ---
 

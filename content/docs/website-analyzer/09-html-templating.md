@@ -15,7 +15,7 @@ excludeSearch: true
 
 # Chapter 9: HTML Templating
 
-Welcome back! In our journey through the Website Analyzer project, we've reached the point where we have gathered raw website content ([Chapter 4](04_website_content_fetching_.md)), extracted specific data from it ([Chapter 5](05_data_extraction_utilities_.md)), synthesized that data into structured Business and Brand Specifications ([Chapter 6](06_specification_generation_.md)), and even explored using an LLM ([Chapter 8](08_ollama_llm_integration_.md)) to help write those specifications and potentially the final report ([Chapter 7](07_html_summary_generation_.md)).
+Welcome back! In our journey through the Website Analyzer project, we've reached the point where we have gathered raw website content ([Chapter 4](04-content-fetching.md)), extracted specific data from it ([Chapter 5](05-data-extraction.md)), synthesized that data into structured Business and Brand Specifications ([Chapter 6](06-specification-generation.md)), and even explored using an LLM ([Chapter 8](08-ollama-integration.md)) to help write those specifications and potentially the final report ([Chapter 7](07-html-summary-generation.md)).
 
 Chapter 7 introduced the `CreateHtmlSummaryNode` as the step responsible for generating the final, user-friendly HTML report. While the LLM approach can be powerful for generating flexible and creative reports, sometimes you need a guarantee of a certain structure and appearance. What if the LLM is offline, returns invalid HTML, or just doesn't format things the way you need?
 
@@ -32,7 +32,7 @@ HTML Templating solves this by letting you define a pre-formatted HTML file with
 Think of HTML Templating like using a fancy pre-printed form or report paper.
 
 *   **The Template:** This is the pre-printed paper itself. It has a fixed structure – headings, sections, tables, and maybe some basic styling. Crucially, it also has blank spaces or labels that say "Fill in the Business Name here," "Add the list of colors here," etc. In our case, the template is an HTML file (`html_template.html`) with special placeholders.
-*   **The Data:** This is the information you've collected – our Business and Brand Specifications ([Chapter 6](06_specification_generation_.md)) and perhaps other extracted details. This is the content you need to fill into the blanks.
+*   **The Data:** This is the information you've collected – our Business and Brand Specifications ([Chapter 6](06-specification-generation.md)) and perhaps other extracted details. This is the content you need to fill into the blanks.
 *   **The Renderer:** This is the process or script that takes the data and the template, finds all the placeholders in the template, and replaces them with the actual data. The output is a complete, filled-out document (the final HTML report).
 
 The key advantage of templating is that the *structure* and basic *appearance* are controlled by the template file, not by potentially unpredictable LLM output.
@@ -41,12 +41,12 @@ The key advantage of templating is that the *structure* and basic *appearance* a
 
 1.  **Template File:** An HTML file containing the fixed structure and presentation. It includes special markers indicating where dynamic content should be inserted. In our project, a primary template is located at `utils/templates/html_template.html`.
 2.  **Placeholders:** These are special strings within the template that the renderer script looks for. They act as markers for where data should be placed. For example, a template might have `{business_name}` or a more complex loop like sections for displaying lists of items (products, colors).
-3.  **Data Source:** The structured information used to fill the placeholders. In our project, this is primarily the `business_spec` and `brand_spec` dictionaries and potentially other details from the `shared` data ([Chapter 1](01_flow_orchestration_.md)).
+3.  **Data Source:** The structured information used to fill the placeholders. In our project, this is primarily the `business_spec` and `brand_spec` dictionaries and potentially other details from the `shared` data ([Chapter 1](01-flow-orchestration.md)).
 4.  **Rendering Logic:** The Python code that reads the template, takes the data, finds the placeholders, and generates the final HTML string by inserting the data into the template. This logic is implemented in our project, mainly within `utils/generate_html_summary.py`.
 
 ### How is Templating Used in the Project?
 
-As discussed in [Chapter 7: HTML Summary Generation](07_html_summary_generation_.md), the `CreateHtmlSummaryNode` is responsible for generating the final HTML. This node delegates the actual HTML creation to a utility function, `generate_html_summary`, found in `utils/generate_html_summary.py`.
+As discussed in [Chapter 7: HTML Summary Generation](07-html-summary-generation.md), the `CreateHtmlSummaryNode` is responsible for generating the final HTML. This node delegates the actual HTML creation to a utility function, `generate_html_summary`, found in `utils/generate_html_summary.py`.
 
 This `generate_html_summary` utility is designed to potentially use different methods for HTML creation. In our project's current structure, it includes logic to check if a templated approach is available and preferred (`USE_TEMPLATE` flag). If it is, it calls a dedicated templating function (like `templated_html_summary`). If not, or if the template method fails, it falls back to a simpler, hardcoded HTML generation logic.
 
@@ -130,7 +130,7 @@ sequenceDiagram
 Here's a breakdown of the steps performed by the `TemplatingRenderer` (the logic within `utils/templates/html_summary_template.py`):
 
 1.  **Load Template:** The script reads the raw text content of the template HTML file (`utils/templates/html_template.html`). This template contains the fixed HTML structure and placeholder like `{business_name}`.
-2.  **Get Data:** It receives the structured data, primarily the `business_spec` and `brand_spec` dictionaries, which were previously generated ([Chapter 6](06_specification_generation_.md)) and passed down from the `CreateHtmlSummaryNode`.
+2.  **Get Data:** It receives the structured data, primarily the `business_spec` and `brand_spec` dictionaries, which were previously generated ([Chapter 6](06-specification-generation.md)) and passed down from the `CreateHtmlSummaryNode`.
 3.  **Populate Placeholders:** It iterates through the template string, finds the placeholders (e.g., `{business_name}`), looks up the corresponding data in the specification dictionaries (e.g., `business_spec['business_overview']['name']`), and replaces the placeholder in the template string with the actual data value. This often involves handling nested data structures and lists.
 4.  **Generate Final HTML:** After replacing all placeholders, the result is a complete HTML string that is ready to be saved to a file.
 
@@ -214,13 +214,13 @@ This simplified snippet shows how the Python code:
 
 The actual code in `utils/generate_html_summary.py` and potentially `utils/templates/html_summary_template.py` includes more detailed logic to handle the complex structure of the specification dictionaries and insert the data into various parts of the pre-defined HTML template, including generating lists of items (like colors or products) as HTML list items or cards. It effectively takes the structured data and maps it onto the visual structure defined by the template.
 
-After `templated_html_summary` returns the complete HTML string, the `generate_html_summary` utility (or the `CreateHtmlSummaryNode` itself) calls the `save_html_summary` function (introduced in [Chapter 7](07_html_summary_generation_.md)) to write this string to a `.html` file in the output directory. The path to this file is then stored in `shared` for the user to find.
+After `templated_html_summary` returns the complete HTML string, the `generate_html_summary` utility (or the `CreateHtmlSummaryNode` itself) calls the `save_html_summary` function (introduced in [Chapter 7](07-html-summary-generation.md)) to write this string to a `.html` file in the output directory. The path to this file is then stored in `shared` for the user to find.
 
 ### Why Use Templating (vs LLM HTML Generation)?
 
 Templating offers distinct advantages, especially as a reliable fallback:
 
-| Feature         | HTML Templating                     | LLM HTML Generation ([Chapter 8](08_ollama_llm_integration_.md)) |
+| Feature         | HTML Templating                     | LLM HTML Generation ([Chapter 8](08-ollama-integration.md)) |
 | :-------------- | :---------------------------------- | :--------------------------------------- |
 | **Predictability** | Very High: Output structure is fixed by the template. | Lower: Output structure and wording can vary. |
 | **Reliability** | High: Code logic is deterministic.  | Lower: Depends on LLM availability and ability to follow instructions perfectly. |

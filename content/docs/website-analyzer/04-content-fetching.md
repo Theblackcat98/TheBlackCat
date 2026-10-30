@@ -15,9 +15,9 @@ excludeSearch: true
 
 # Chapter 4: Website Content Fetching
 
-Welcome back! In the last chapter, [Batch Processing](03_batch_processing_.md), we explored how `BatchNode`s help us efficiently process many items, like multiple pages of a website. But before we can process anything *from* a website, we need to actually *get* the content of its pages.
+Welcome back! In the last chapter, [Batch Processing](03-batch.md), we explored how `BatchNode`s help us efficiently process many items, like multiple pages of a website. But before we can process anything *from* a website, we need to actually *get* the content of its pages.
 
-Think of analyzing a website like cooking a meal. [Flow Orchestration](01_flow_orchestration_.md) is the recipe, telling you the steps and order. [Processing Nodes](02_processing_nodes_.md) are the different chefs responsible for specific parts (chopping vegetables, baking bread). [Batch Processing](03_batch_processing_.md) is like having multiple chefs prepare ingredients simultaneously. But none of this can start until you have the actual **ingredients**!
+Think of analyzing a website like cooking a meal. [Flow Orchestration](01-flow-orchestration.md) is the recipe, telling you the steps and order. [Processing Nodes](02-processing-nodes.md) are the different chefs responsible for specific parts (chopping vegetables, baking bread). [Batch Processing](03-batch.md) is like having multiple chefs prepare ingredients simultaneously. But none of this can start until you have the actual **ingredients**!
 
 For a website, the "ingredients" are the raw HTML source code of its pages. **Website Content Fetching** is the process of getting these ingredients. It's the fundamental first step that provides the raw material for everything else our analyzer does.
 
@@ -64,7 +64,7 @@ The `get_website_content` function is designed to be reusable. Any part of the p
 
 The very first step in our main website analysis flow is to fetch the content of the *initial* URL provided by the user. This job is handled by a specific Node: `InitialFetchNode`.
 
-As we learned in [Processing Nodes](02_processing_nodes_.md), a Node's main work happens in its `run` method, which often calls `prep`, `exec`, and `post`. For `InitialFetchNode`, the fetching happens in the `exec` method.
+As we learned in [Processing Nodes](02-processing-nodes.md), a Node's main work happens in its `run` method, which often calls `prep`, `exec`, and `post`. For `InitialFetchNode`, the fetching happens in the `exec` method.
 
 Let's look at a simplified version of `InitialFetchNode`:
 
@@ -114,7 +114,7 @@ class InitialFetchNode(Node):
 
 Here's what's happening:
 
-1.  The `Flow` ([Chapter 1](01_flow_orchestration_.md)) calls the `run` method of `InitialFetchNode`.
+1.  The `Flow` ([Chapter 1](01-flow-orchestration.md)) calls the `run` method of `InitialFetchNode`.
 2.  The `InitialFetchNode`'s `run` method internally calls its `prep`, then its `exec`, then its `post`.
 3.  In `exec`, the node retrieves the `url` from the `shared` data (which was put there when the flow started, see `main.py`). It then calls `get_website_content(url)`.
 4.  `get_website_content` does the actual work of downloading and parsing.
@@ -204,7 +204,7 @@ As you can see, the `InitialFetchNode` acts as the intermediary, calling the ded
 
 ### Fetching Content in Batch Nodes
 
-We briefly touched upon this in [Batch Processing](03_batch_processing_.md). Batch Nodes like `SitemapBatchNode`, `DesignElementsBatchNode`, and `ContentBatchNode` also need the content of multiple pages.
+We briefly touched upon this in [Batch Processing](03-batch.md). Batch Nodes like `SitemapBatchNode`, `DesignElementsBatchNode`, and `ContentBatchNode` also need the content of multiple pages.
 
 The `SitemapBatchNode` is special because it's the one that *discovers* and *initially fetches* the content for subsequent pages during the crawling process. Its `exec` method also calls `get_website_content` for *each* URL in its batch:
 
@@ -232,7 +232,7 @@ The `SitemapBatchNode` is special because it's the one that *discovers* and *ini
         
         return {"url": url, "structure": page_structure, "links": links}
 ```
-Notice that the `SitemapBatchNode.exec` also includes `"soup": soup` in the dictionary it returns for *each* page. Its `post` method ([Chapter 3](03_batch_processing_.md)) then collects these `soup` objects from all pages in the batch and stores them in `shared["soups"]`.
+Notice that the `SitemapBatchNode.exec` also includes `"soup": soup` in the dictionary it returns for *each* page. Its `post` method ([Chapter 3](03-batch.md)) then collects these `soup` objects from all pages in the batch and stores them in `shared["soups"]`.
 
 This is important because the `DesignElementsBatchNode` and `ContentBatchNode` often *don't* need to fetch the content again. Their `prep` methods get the list of pages *and* the corresponding `soup` objects from `shared["soups"]`, which were stored by the `SitemapBatchNode`. Their `exec` methods then work directly with the `soup` object passed to them, avoiding redundant fetching.
 
@@ -265,7 +265,7 @@ This shows a good pattern: the `get_website_content` utility is the single place
 
 In this chapter, we explored Website Content Fetching, the essential first step of getting the raw HTML "ingredients" from a web page. We learned about the `get_website_content` utility function, which uses `requests` to download the HTML and `BeautifulSoup` to parse it into a usable `soup` object, returning the soup, status, and any errors. We saw how the `InitialFetchNode` uses this utility to get the first page's content and store the resulting `soup` in the `shared` data. Finally, we briefly touched on how `BatchNode`s, particularly the `SitemapBatchNode`, also use this utility to fetch multiple pages, ensuring the fetched `soup` objects are available in `shared` for subsequent batch nodes that perform analysis.
 
-Now that we know how to fetch the content, the next logical step is to figure out how to find specific pieces of information *within* that fetched HTML. In the next chapter, we'll dive into [Data Extraction Utilities](05_data_extraction_utilities_.md).
+Now that we know how to fetch the content, the next logical step is to figure out how to find specific pieces of information *within* that fetched HTML. In the next chapter, we'll dive into [Data Extraction Utilities](05-data-extraction.md).
 
 ---
 

@@ -15,7 +15,7 @@ excludeSearch: true
 
 # Chapter 3: Batch Processing
 
-Welcome back! In the last two chapters, we introduced [Flow Orchestration](01_flow_orchestration_.md) as the conductor of our analysis process and learned about [Processing Nodes](02_processing_nodes_.md) as the individual workers performing specific tasks.
+Welcome back! In the last two chapters, we introduced [Flow Orchestration](01-flow-orchestration.md) as the conductor of our analysis process and learned about [Processing Nodes](02-processing-nodes.md) as the individual workers performing specific tasks.
 
 Nodes are great for single steps, like fetching the very first page of a website. But what happens when you need to analyze *many* pages? Or extract data from dozens of different links found on a page? If you only had simple Nodes, you'd need a complicated flow with a separate node for *each* page, which is clearly not practical for large websites.
 
@@ -266,7 +266,7 @@ The `DesignElementsBatchNode` and `ContentBatchNode` work similarly. Their `prep
 
 Batch Processing, using `BatchNode`s, is a key abstraction in our Website Analyzer for efficiently handling tasks that involve processing multiple items, like the many pages of a website. `BatchNode`s simplify the Flow by managing the looping and individual item processing internally, exposing just three main steps (`prep`, `exec`, `post`) to the developer implementing the specific batch logic. The `exec` method does the work on a single item, `prep` gathers the items, and `post` aggregates the results and determines the Flow's next step, potentially returning `"continue"` to process another batch.
 
-Understanding `BatchNode`s is essential to see how the project scales to handle larger websites. In the next chapter, we'll dive deeper into one of the core functions performed by these batch nodes: [Website Content Fetching](04_website_content_fetching_.md).
+Understanding `BatchNode`s is essential to see how the project scales to handle larger websites. In the next chapter, we'll dive deeper into one of the core functions performed by these batch nodes: [Website Content Fetching](04-content-fetching.md).
 
 ---
 

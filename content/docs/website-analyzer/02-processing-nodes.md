@@ -15,7 +15,7 @@ excludeSearch: true
 
 # Chapter 2: Processing Nodes
 
-Welcome back! In the previous chapter, [Flow Orchestration](01_flow_orchestration_.md), we learned that the `Flow` is like the conductor of an orchestra, directing the overall process of analyzing a website. But who are the musicians? Who actually *does* the work?
+Welcome back! In the previous chapter, [Flow Orchestration](01-flow-orchestration.md), we learned that the `Flow` is like the conductor of an orchestra, directing the overall process of analyzing a website. But who are the musicians? Who actually *does* the work?
 
 That's where **Processing Nodes** come in.
 
@@ -27,7 +27,7 @@ In the context of our `Website-Analyzer` project:
 
 *   A **Node** is a single, self-contained unit of work.
 *   Each Node performs one specific task, like "Fetch a web page", "Find links on a page", or "Extract business information".
-*   Nodes work together in a sequence defined by the [Flow](01_flow_orchestration_.md), passing information between them using the `shared` data storage.
+*   Nodes work together in a sequence defined by the [Flow](01-flow-orchestration.md), passing information between them using the `shared` data storage.
 
 Let's revisit our simple example from Chapter 1:
 
@@ -40,7 +40,7 @@ The `Flow` doesn't know *how* to fetch a page or process content itself. It just
 
 ### The Basic Structure of a Node
 
-All Nodes in our project are built upon a base `Node` class. This base class provides the fundamental structure and the `run` method that the [Flow](01_flow_orchestration_.md) calls.
+All Nodes in our project are built upon a base `Node` class. This base class provides the fundamental structure and the `run` method that the [Flow](01-flow-orchestration.md) calls.
 
 While the actual `Node` class in `nodes.py` has a few methods like `prep`, `exec`, and `post` for more complex operations (which we'll touch on later), the most important method for understanding what a Node *does* when the Flow runs it is the `run` method:
 
@@ -68,7 +68,7 @@ class Node:
         return "next" 
 ```
 
-Every specific Node you create will inherit from `Node` and implement its unique task, usually by overriding the `run` method or its internal `prep`/`exec`/`post` steps. When the [Flow](01_flow_orchestration_.md) calls `node_instance.run(shared_data)`, the Node executes its job, potentially updates the `shared_data` dictionary, and returns an action string.
+Every specific Node you create will inherit from `Node` and implement its unique task, usually by overriding the `run` method or its internal `prep`/`exec`/`post` steps. When the [Flow](01-flow-orchestration.md) calls `node_instance.run(shared_data)`, the Node executes its job, potentially updates the `shared_data` dictionary, and returns an action string.
 
 ### How Nodes Use Shared Data
 
@@ -155,7 +155,7 @@ class GreetingNode(Node):
 
 This `GreetingNode` is simple: it inherits from `Node`, overrides the `run` method, prints a message, adds an item to the `shared` dictionary, and returns `"next"`.
 
-To use this Node, you'd add it to a [Flow](01_flow_orchestration_.md) just like we saw in Chapter 1:
+To use this Node, you'd add it to a [Flow](01-flow-orchestration.md) just like we saw in Chapter 1:
 
 ```python
 # Using the custom GreetingNode
@@ -295,17 +295,17 @@ def create_website_cloner_flow(...):
     return flow
 ```
 
-This snippet shows exactly how instances of our specialized Node classes are created and registered with the `Flow` object under specific names (`"initial_fetch"`, `"sitemap_batch"`, etc.). These names are what the [Flow](01_flow_orchestration_.md) uses in its transition map.
+This snippet shows exactly how instances of our specialized Node classes are created and registered with the `Flow` object under specific names (`"initial_fetch"`, `"sitemap_batch"`, etc.). These names are what the [Flow](01-flow-orchestration.md) uses in its transition map.
 
 Some of these nodes, like `SitemapBatchNode`, `DesignElementsBatchNode`, and `ContentBatchNode`, inherit from a special type called `BatchNode`. These are designed to process a *list* of items (like many different pages) efficiently. We'll explore `BatchNode`s in the next chapter.
 
 ### Conclusion
 
-In this chapter, we focused on Processing Nodes, the individual workers or steps in our website analysis assembly line. We learned that each Node performs a specific task, communicates by reading from and writing to a `shared` data dictionary, and signals its outcome to the [Flow](01_orchestration_.md) by returning an action string from its `run` method. We saw how basic Nodes are structured and how they are added to a Flow.
+In this chapter, we focused on Processing Nodes, the individual workers or steps in our website analysis assembly line. We learned that each Node performs a specific task, communicates by reading from and writing to a `shared` data dictionary, and signals its outcome to the [Flow](01-flow-orchestration.md) by returning an action string from its `run` method. We saw how basic Nodes are structured and how they are added to a Flow.
 
 Understanding Nodes is crucial because they contain the actual logic for *what* the Website Analyzer does. The Flow defines the *order* and *paths*, but the Nodes define the *actions*.
 
-In the next chapter, we'll look at a special type of Node, the [Batch Processing](03_batch_processing_.md) Node, which is essential for handling tasks that need to be performed on multiple items, like analyzing many web pages.
+In the next chapter, we'll look at a special type of Node, the [Batch Processing](03-batch.md) Node, which is essential for handling tasks that need to be performed on multiple items, like analyzing many web pages.
 
 ---
 

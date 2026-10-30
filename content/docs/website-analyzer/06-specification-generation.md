@@ -15,7 +15,7 @@ excludeSearch: true
 
 # Chapter 6: Specification Generation
 
-Welcome back! In the last chapter, [Data Extraction Utilities](05_data_extraction_utilities_.md), we learned how to take the raw HTML `soup` object for each page and use specialized tools to pull out specific pieces of information – like the text content, business details, and design elements.
+Welcome back! In the last chapter, [Data Extraction Utilities](05-data-extraction.md), we learned how to take the raw HTML `soup` object for each page and use specialized tools to pull out specific pieces of information – like the text content, business details, and design elements.
 
 Now we have all these pieces of data scattered across potentially many pages. Imagine you're a market researcher, and you've collected survey data, interview notes, and competitor information. That raw data is valuable, but it's not a summary you can present to someone to understand the whole picture of a business or market.
 
@@ -45,7 +45,7 @@ These specifications provide a structured overview of the analyzed website, maki
 
 ### Which Node Does This?
 
-In our Flow Orchestration ([Chapter 1](01_flow_orchestration_.md)), this crucial step is handled by the **`GenerateSpecsNode`**.
+In our Flow Orchestration ([Chapter 1](01-flow-orchestration.md)), this crucial step is handled by the **`GenerateSpecsNode`**.
 
 Looking at the flow definition in `flow.py`, the `GenerateSpecsNode` comes after the batch processing nodes have finished collecting all the design and content data. Its job is to take that combined data from the `shared` store and produce the specifications.
 
@@ -304,7 +304,7 @@ def generate_business_spec(content_data, design_data, sitemap_data):
 2.  It then prepares a smaller, relevant dictionary (`input_data_for_llm`) containing the key pieces of information needed for the business specification. This helps focus the LLM.
 3.  A `prompt` string is constructed. This string tells the LLM what task to perform (analyze data and generate a business spec) and provides the prepared data, often formatted as JSON for clarity.
 4.  A `system_message` string helps set the role for the LLM (business analyst) and specifies the desired output format (JSON only).
-5.  The `call_llm(prompt, system_message)` utility function is called. This utility handles the communication with the actual LLM service (like Ollama) ([Chapter 8: Ollama LLM Integration](08_ollama_llm_integration_.md) explains this in more detail).
+5.  The `call_llm(prompt, system_message)` utility function is called. This utility handles the communication with the actual LLM service (like Ollama) ([Chapter 8: Ollama LLM Integration](08-ollama-integration.md) explains this in more detail).
 6.  The `call_llm` utility sends the prompt and system message to the LLM and returns the LLM's text response.
 7.  The function attempts to parse the LLM's response, which is expected to be a JSON string, into a Python dictionary using `json.loads()`.
 8.  Finally, it returns the resulting Python dictionary, which represents the structured Business Specification. `generate_brand_spec` does the same for the Brand Specification.
@@ -350,7 +350,7 @@ This utility is straightforward: it takes the generated specs, combines them, de
 
 Specification Generation is a critical step where our Website Analyzer synthesizes the raw, extracted data into structured, high-level summaries of the website's business and brand. This is primarily handled by the `GenerateSpecsNode`, which relies on the `generate_specs` utility function. The `generate_specs` utility, in turn, leverages the power of a Large Language Model (LLM) by preparing prompts based on the extracted data and sending them via the `call_llm` utility. The LLM performs the complex analysis and returns structured results (like JSON), which are then parsed and saved. The resulting `business_spec` and `brand_spec` are stored in the `shared` data, ready for the next stage.
 
-Now that we have these structured specifications, we can use them to create a final, user-friendly report. In the next chapter, we'll learn about [HTML Summary Generation](07_html_summary_generation_.md).
+Now that we have these structured specifications, we can use them to create a final, user-friendly report. In the next chapter, we'll learn about [HTML Summary Generation](07-html-summary-generation.md).
 
 ---
 

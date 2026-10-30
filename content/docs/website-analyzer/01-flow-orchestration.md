@@ -50,7 +50,7 @@ Let's look at the core components of our flow orchestration system.
 Our Flow Orchestration system is built around three main ideas:
 
 *   **Flow:** This is the overall blueprint or the entire musical score. It defines the network of steps and the possible paths between them.
-*   **Nodes:** These are the individual steps or tasks in the process. Each Node does one specific job, like "Fetch a page" or "Extract design elements". In our orchestra analogy, these are the musicians playing their instruments. We'll dive deeper into Nodes in the next chapter, [Processing Nodes](02_processing_nodes_.md).
+*   **Nodes:** These are the individual steps or tasks in the process. Each Node does one specific job, like "Fetch a page" or "Extract design elements". In our orchestra analogy, these are the musicians playing their instruments. We'll dive deeper into Nodes in the next chapter, [Processing Nodes](02-processing-nodes.md).
 *   **Transitions:** These are the rules that connect Nodes. A transition says, "After Node A finishes and produces result 'X', go to Node B." These are like the conductor's cues, telling the orchestra which section plays next.
 
 There's also a crucial concept for sharing information:
@@ -146,7 +146,7 @@ Shared data: {'page_content': '<html>...</html>'}
 
 This simple example shows the core pattern: create nodes, add them to a flow with names, define transitions based on actions, and then tell the flow to `run` starting at a specific node, providing a shared data object.
 
-In our actual `Website-Analyzer` project ([`flow.py`](flow.py)), the flow setup looks very similar. Here's a snippet from `create_website_cloner_flow` showing adding nodes:
+In our actual `Website-Analyzer` project ([`flow.py`](https://github.com/Theblackcat98/Website-Analyzer/blob/main/flow.py)), the flow setup looks very similar. Here's a snippet from `create_website_cloner_flow` showing adding nodes:
 
 ```python
 # From flow.py (simplified)
@@ -175,7 +175,7 @@ def create_website_cloner_flow(...):
     return flow
 ```
 
-And here's a snippet showing how transitions are added in [`flow.py`](flow.py):
+And here's a snippet showing how transitions are added in [`flow.py`](https://github.com/Theblackcat98/Website-Analyzer/blob/main/flow.py):
 
 ```python
 # From flow.py (simplified) - inside create_website_cloner_flow
@@ -198,7 +198,7 @@ And here's a snippet showing how transitions are added in [`flow.py`](flow.py):
 ```
 This illustrates how different outcomes from a node (`"next"`, `"error"`, `"continue"`) can lead to different subsequent nodes, making the flow dynamic.
 
-Finally, the `main.py` script ([`main.py`](main.py)) gets this flow and runs it:
+Finally, the `main.py` script ([`main.py`](https://github.com/Theblackcat98/Website-Analyzer/blob/main/main.py)) gets this flow and runs it:
 
 ```python
 # From main.py (simplified)
@@ -271,7 +271,7 @@ Here's what's happening step-by-step:
 
 This loop continues until a node returns an action for which there is no defined transition, or the node explicitly signals the end of the flow (which isn't the primary mechanism here, the transitions control the flow).
 
-Looking at the actual `Flow.run` method in [`nodes.py`](nodes.py):
+Looking at the actual `Flow.run` method in [`nodes.py`](https://github.com/Theblackcat98/Website-Analyzer/blob/main/nodes.py):
 
 ```python
 # From nodes.py (simplified) - inside Flow class
@@ -325,7 +325,7 @@ This structured approach, orchestrated by the `Flow`, makes the entire website a
 
 In this chapter, we introduced Flow Orchestration as the conductor of our website analysis symphony. We learned that it uses **Nodes** for individual steps, **Transitions** to define the sequence based on **Actions**, and a **Shared Data** store to pass information between nodes. We saw a simple example of how to define and run a flow and got a peek at how the `Flow.run` method manages the execution sequence.
 
-Understanding Flow Orchestration is key to seeing how all the different parts of the Website Analyzer project fit together. In the next chapter, we'll take a closer look at the individual **Processing Nodes** themselves: [Processing Nodes](02_processing_nodes_.md).
+Understanding Flow Orchestration is key to seeing how all the different parts of the Website Analyzer project fit together. In the next chapter, we'll take a closer look at the individual **Processing Nodes** themselves: [Processing Nodes](02-processing-nodes.md).
 
 ---
 

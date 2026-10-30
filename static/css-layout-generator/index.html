@@ -3,37 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <title>CSS Layout Generator</title>
     <style>
-        body { font-family: system-ui, sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; flex-direction: column; }
-        header { padding: 1rem 2rem; background: #f0f0f0; border-bottom: 1px solid #ccc; }
+    :root {
+      color-scheme: light dark;
+      --bg: #e9eaed; --panel: #f7f7f9; --panel2: #ffffff;
+      --ink: #1d2126; --mut: #5b6068; --faint: #62666e;
+      --line: #d6d7dc; --line2: #bfc2ca; --chip: #ececf0;
+      --acc: #2f6db3; --acc-strong: #26598f; --acc-ink: #ffffff;
+      --ok: #2e7d4f; --err-bg: #fdeeee; --err-line: #efc2c2; --err-ink: #8f2d23;
+      --shadow: 0 1px 2px rgba(24, 28, 38, .05), 0 10px 28px rgba(24, 28, 38, .07);
+      --ui-font: "Outfit", sans-serif; --mono-font: "JetBrains Mono", monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121316; --panel: #1a1b1f; --panel2: #222329;
+        --ink: #eceef2; --mut: #a2a6af; --faint: #9ba0aa;
+        --line: #2d2f36; --line2: #3d404a; --chip: #26272e;
+        --acc: #7db0e6; --acc-strong: #9cc3ee; --acc-ink: #0d1724;
+        --ok: #6fce97; --err-bg: #3a2120; --err-line: #6e3a36; --err-ink: #f0a9a0;
+        --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .35);
+      }
+    }
+        * { box-sizing: border-box; }
+        body { font-family: var(--ui-font); font-size: 15px; line-height: 1.45; margin: 0; padding: 0; display: flex; height: 100vh; flex-direction: column; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+        header { padding: 1rem 2rem; background: var(--panel); border-bottom: 1px solid var(--line); }
         .main { display: flex; flex: 1; overflow: hidden; }
-
-        .sidebar { width: 300px; padding: 1rem; background: #fafafa; border-right: 1px solid #ccc; overflow-y: auto; }
-        .canvas-area { flex: 1; padding: 2rem; background: #e0e0e0; display: flex; align-items: center; justify-content: center; }
-        .code-area { width: 300px; padding: 1rem; background: #222; color: #fff; overflow-y: auto; font-family: monospace; }
-
-        /* The dynamic container we manipulate */
-        #container { background: white; width: 100%; height: 100%; border: 2px dashed #999; box-sizing: border-box; }
+        .sidebar { width: 300px; padding: 1rem; background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; }
+        .canvas-area { flex: 1; padding: 2rem; background: var(--bg); display: flex; align-items: center; justify-content: center; }
+        .code-area { width: 300px; padding: 1rem; background: var(--panel); color: var(--ink); border-left: 1px solid var(--line); overflow-y: auto; font-family: var(--mono-font); }
+        #container { background: var(--panel2); width: 100%; height: 100%; border: 2px dashed var(--line2); border-radius: 14px; box-sizing: border-box; }
         .item { background: #0066cc; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid rgba(255,255,255,0.5); font-size: 1.5rem; }
-
-        .control-group { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #ddd; }
-        label { display: block; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.9rem; }
-        select, input { width: 100%; padding: 0.25rem; box-sizing: border-box; }
-        button { padding: 0.5rem 1rem; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-bottom: 0.5rem;}
-        button:hover { background: #0052a3; }
-
+        .control-group { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
+        label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.78rem; letter-spacing: .07em; text-transform: uppercase; color: var(--faint); }
+        select, input { width: 100%; padding: 0.45rem 0.6rem; box-sizing: border-box; background: var(--panel2); color: var(--ink); border: 1px solid var(--line); border-radius: 9px; font: inherit; font-size: 14px; }
+        button { padding: 0.55rem 1rem; background: var(--acc); color: var(--acc-ink); border: 1px solid var(--acc); border-radius: 9px; cursor: pointer; width: 100%; margin-bottom: 0.5rem; font: inherit; font-size: 13.5px; font-weight: 600; }
+        button:hover { background: var(--acc-strong); border-color: var(--acc-strong); }
         pre { margin: 0; white-space: pre-wrap; font-size: 0.85rem; }
-
-        @media (prefers-color-scheme: dark) {
-            body { background: #1a1a1a; color: #f0f0f0; }
-            header { background: #222; border-color: #444; }
-            .sidebar { background: #222; border-color: #444; }
-            .canvas-area { background: #111; }
-            .control-group { border-color: #444; }
-            select, input { background: #333; color: white; border: 1px solid #555; }
-            #container { background: #333; border-color: #666; }
-        }
+        :focus-visible { outline: 3px solid var(--acc); outline-offset: 2px; }
     </style>
 </head>
 <body>
@@ -105,7 +116,7 @@
                 <div class="control-group">
                     <label>Grid Template Columns</label>
                     <input type="text" id="grid-cols" value="repeat(auto-fit, minmax(150px, 1fr))">
-                    <small style="color:#666; font-size:0.75rem;">e.g., 1fr 1fr 1fr, or repeat(3, 1fr)</small>
+                    <small style="color:var(--faint); font-size:0.75rem;">e.g., 1fr 1fr 1fr, or repeat(3, 1fr)</small>
                 </div>
                 <div class="control-group">
                     <label>Grid Template Rows</label>

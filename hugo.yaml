@@ -102,6 +102,11 @@ params:
   tools:
     - group: "Running on this site"
       items:
+        - name: "Text Diff Viewer"
+          kind: "App"
+          desc: "A side-by-side text/code diff viewer."
+          url: "text-diff-viewer/"
+          writeup: "library/tools/text-diff-viewer/"
         - name: "QR Code Studio"
           kind: "App"
           desc: "Generate customizable QR codes (text, URL, Wi-Fi, vCard) and decode QR codes from images entirely in the browser."

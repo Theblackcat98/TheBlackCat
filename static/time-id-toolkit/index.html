@@ -16,21 +16,21 @@
   <title>Time & ID Toolkit</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: light dark;
-      --bg: #f4f7f8;
+      --bg: #e9eaed;
       --surface: #ffffff;
-      --surface-2: #edf2f3;
-      --ink: #172225;
-      --muted: #54666b;
-      --line: #d7e0e2;
-      --accent: #067c72;
+      --surface-2: #f7f7f9;
+      --ink: #1d2126;
+      --muted: #5b6068;
+      --line: #d6d7dc;
+      --accent: #2f6db3;
       --accent-ink: #ffffff;
-      --accent-soft: #d8f1ed;
-      --code-bg: #152124;
-      --code-ink: #d9e7e8;
+      --accent-soft: #ececf0;
+      --code-bg: #222329;
+      --code-ink: #eceef2;
 
       --space-1: 4px;
       --space-2: 8px;
@@ -47,18 +47,19 @@
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #11181c;
-        --surface: #192429;
-        --surface-2: #24353c;
-        --ink: #eceded;
-        --muted: #a3abac;
-        --line: #2e434c;
-        --accent: #0bbcae;
-        --accent-ink: #11181c;
-        --accent-soft: #086b62;
-        --code-bg: #090c0e;
-        --code-ink: #eceded;
+        --bg: #121316;
+        --surface: #222329;
+        --surface-2: #1a1b1f;
+        --ink: #eceef2;
+        --muted: #a2a6af;
+        --line: #2d2f36;
+        --accent: #7db0e6;
+        --accent-ink: #0d1724;
+        --accent-soft: #26272e;
+        --code-bg: #222329;
+        --code-ink: #eceef2;
       }
+      .card { box-shadow: 0 1px 2px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.35); }
     }
 
     * {
@@ -71,7 +72,8 @@
       font-family: var(--font-ui);
       background-color: var(--bg);
       color: var(--ink);
-      line-height: 1.5;
+      font-size: 15px;
+      line-height: 1.45;
       padding: var(--space-5);
       max-width: 1200px;
       margin: 0 auto;
@@ -132,10 +134,10 @@
     .card {
       background-color: var(--surface);
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 14px;
       padding: var(--space-5);
       margin-bottom: var(--space-5);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 2px rgba(24,28,38,.05), 0 10px 28px rgba(24,28,38,.07);
     }
 
     .card h2 {
@@ -161,7 +163,7 @@
       font-size: 1rem;
       background-color: var(--surface-2);
       border: 1px solid var(--line);
-      border-radius: 4px;
+      border-radius: 9px;
       color: var(--ink);
     }
 
@@ -182,7 +184,7 @@
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
-      border-radius: 4px;
+      border-radius: 9px;
       border: none;
       transition: background-color 0.15s;
     }
@@ -211,7 +213,7 @@
       background-color: var(--code-bg);
       color: var(--code-ink);
       padding: var(--space-3);
-      border-radius: 4px;
+      border-radius: 9px;
       overflow-x: auto;
       margin-top: var(--space-2);
       font-size: 0.9rem;
@@ -237,7 +239,7 @@
     .result-box {
       background-color: var(--surface-2);
       padding: var(--space-4);
-      border-radius: 4px;
+      border-radius: 9px;
       border: 1px solid var(--line);
     }
 
@@ -263,7 +265,7 @@
       font-size: 0.9rem;
       background-color: var(--surface-2);
       border: 1px solid var(--line);
-      border-radius: 4px;
+      border-radius: 9px;
       color: var(--ink);
       resize: vertical;
     }
@@ -296,25 +298,27 @@
     }
 
     .badge.success {
-      background-color: #d8f1ed;
-      color: #067c72;
-      border-color: #067c72;
+      background-color: #ececf0;
+      color: #2e7d4f;
+      border-color: #2e7d4f;
     }
 
     .badge.error {
-      background-color: #fce8e8;
-      color: #c92a2a;
-      border-color: #c92a2a;
+      background-color: #fdeeee;
+      color: #8f2d23;
+      border-color: #efc2c2;
     }
 
     @media (prefers-color-scheme: dark) {
       .badge.success {
-        background-color: #086b62;
-        color: #d8f1ed;
+        background-color: #26272e;
+        color: #6fce97;
+        border-color: #6fce97;
       }
       .badge.error {
-        background-color: #5c1616;
-        color: #fce8e8;
+        background-color: #3a2120;
+        color: #f0a9a0;
+        border-color: #6e3a36;
       }
     }
   </style>

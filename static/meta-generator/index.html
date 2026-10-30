@@ -15,57 +15,57 @@
   <link rel="icon" href="data:," />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <title>Meta Tag & Web Manifest Generator</title>
   <style>
     :root {
       color-scheme: light dark;
-      --bg: #f4f7f8;
+      --bg: #e9eaed;
       --surface: #ffffff;
-      --surface-2: #edf2f3;
-      --ink: #172225;
-      --muted: #54666b;
-      --line: #d7e0e2;
-      --accent: #067c72;
+      --surface-2: #f7f7f9;
+      --ink: #1d2126;
+      --muted: #5b6068;
+      --line: #d6d7dc;
+      --accent: #2f6db3;
       --accent-ink: #ffffff;
-      --accent-soft: #d8f1ed;
-      --code-bg: #152124;
-      --code-ink: #d9e7e8;
+      --accent-soft: #ececf0;
+      --code-bg: #222329;
+      --code-ink: #eceef2;
 
       --warn: #eab308;
       --warn-text: #854d0e;
       --warn-bg: #fef9c3;
-      --error: #ef4444;
-      --error-text: #991b1b;
-      --error-bg: #fee2e2;
+      --error: #8f2d23;
+      --error-text: #8f2d23;
+      --error-bg: #fdeeee;
 
       font-family: 'Outfit', system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      line-height: 1.5;
+      font-size: 15px;
+      line-height: 1.45;
       color: var(--ink);
       background: var(--bg);
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #0b1112;
-        --surface: #152124;
-        --surface-2: #1c2b30;
-        --ink: #e5edef;
-        --muted: #8fa5aa;
-        --line: #2d4247;
-        --accent: #0ec4b5;
-        --accent-ink: #002d29;
-        --accent-soft: #11423f;
-        --code-bg: #06090a;
-        --code-ink: #b2c9cd;
+        --bg: #121316;
+        --surface: #222329;
+        --surface-2: #1a1b1f;
+        --ink: #eceef2;
+        --muted: #a2a6af;
+        --line: #2d2f36;
+        --accent: #7db0e6;
+        --accent-ink: #0d1724;
+        --accent-soft: #26272e;
+        --code-bg: #222329;
+        --code-ink: #eceef2;
 
         --warn: #eab308;
         --warn-text: #fef08a;
         --warn-bg: #422006;
-        --error: #ef4444;
-        --error-text: #fecaca;
-        --error-bg: #450a0a;
+        --error: #f0a9a0;
+        --error-text: #f0a9a0;
+        --error-bg: #3a2120;
       }
     }
 
@@ -97,7 +97,7 @@
     .panel {
       background: var(--surface);
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 14px;
       padding: 1.5rem;
     }
 
@@ -125,7 +125,7 @@
       background: var(--bg);
       border: 1px solid var(--line);
       color: var(--ink);
-      border-radius: 4px;
+      border-radius: 9px;
       font-family: inherit;
       font-size: 1rem;
     }
@@ -179,7 +179,7 @@
       color: var(--ink);
       border: 1px solid var(--line);
       padding: 0.5rem 1rem;
-      border-radius: 4px;
+      border-radius: 9px;
       font-weight: 500;
       cursor: pointer;
       font-family: inherit;
@@ -220,7 +220,7 @@
       background: var(--code-bg);
       color: var(--code-ink);
       padding: 1.25rem;
-      border-radius: 6px;
+      border-radius: 14px;
       overflow-x: auto;
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.875rem;
@@ -236,7 +236,7 @@
       border: 1px solid rgba(255,255,255,0.2);
       padding: 0.25rem 0.5rem;
       font-size: 0.8125rem;
-      border-radius: 4px;
+      border-radius: 9px;
       cursor: pointer;
       backdrop-filter: blur(4px);
     }

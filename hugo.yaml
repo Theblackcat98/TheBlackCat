@@ -102,6 +102,11 @@ params:
   tools:
     - group: "Running on this site"
       items:
+        - name: "Aspect Ratio & Resize Calculator"
+          kind: "App"
+          desc: "Calculate aspect ratios, megapixels, and interactively crop and resize images directly in the browser without server processing."
+          url: "aspect-ratio-calculator/"
+          writeup: "library/tools/aspect-ratio-calculator/"
         - name: "AETHER atelier"
           kind: "Interactive exhibit"
           desc: "A mathematical and chromatic atelier: a cosine-palette synthesizer driving a Clifford strange-attractor visualizer, Albers simultaneous-contrast studies, and a codex on generative beauty."

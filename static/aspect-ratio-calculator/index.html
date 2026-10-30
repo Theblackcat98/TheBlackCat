@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="An aspect-ratio and image-resize calculator with crop preview, math display, and social presets." />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Aspect Ratio & Resize Calculator</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #f4f7f8;
+      --surface: #ffffff;
+      --surface-2: #edf2f3;
+      --ink: #172225;
+      --muted: #54666b;
+      --faint: #81959a;
+      --line: #d7e0e2;
+      --line-strong: #a4b3b7;
+      --accent: #067c72;
+      --accent-ink: #ffffff;
+      --accent-soft: #d8f1ed;
+      --code: #152124;
+      --code-ink: #d9e7e8;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --focus: #f39c12;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #0f1719;
+        --surface: #162124;
+        --surface-2: #1e2c2f;
+        --ink: #e7eeee;
+        --muted: #adbdc0;
+        --faint: #7a8b8f;
+        --line: #314145;
+        --line-strong: #4a5c61;
+        --accent: #58c8bb;
+        --accent-ink: #082c28;
+        --accent-soft: #173d3a;
+        --code: #091113;
+        --code-ink: #d5e4e5;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        --focus: #ffad66;
+      }
+    }
+    html { box-sizing: border-box; font-family: "Outfit", sans-serif; font-size: 16px; line-height: 1.5; color: var(--ink); background: var(--paper); }
+    *, *::before, *::after { box-sizing: inherit; }
+    body { margin: 0; padding: 2rem; max-width: 900px; margin-inline: auto; }
+    h1, h2, h3 { margin-top: 0; font-weight: 600; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    p.desc { color: var(--muted); margin-bottom: 2rem; font-size: 1.1rem; }
+    .mono { font-family: "JetBrains Mono", monospace; }
+
+    .panel { background: var(--surface); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--line); margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+    .row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: flex-end; }
+    .field { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; min-width: 120px; }
+    label { font-weight: 500; font-size: 0.9rem; color: var(--muted); }
+    input[type="number"], select {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 1rem;
+      padding: 0.5rem;
+      border: 1px solid var(--line-strong);
+      border-radius: 4px;
+      background: var(--surface-2);
+      color: var(--ink);
+      width: 100%;
+    }
+    input:focus, select:focus, button:focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+    button {
+      font-family: inherit;
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 0.5rem 1rem;
+      background: var(--surface-2);
+      border: 1px solid var(--line-strong);
+      color: var(--ink);
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    button:hover { background: var(--line); }
+    button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+    button.primary:hover { filter: brightness(1.1); }
+
+    .result-box { display: flex; gap: 2rem; background: var(--surface-2); padding: 1rem; border-radius: 4px; font-family: "JetBrains Mono", monospace; }
+    .result-item { display: flex; flex-direction: column; }
+    .result-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; font-family: "Outfit", sans-serif; letter-spacing: 0.05em;}
+    .result-value { font-size: 1.25rem; font-weight: 600; }
+
+    .presets { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    .workspace { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+    @media (min-width: 768px) { .workspace { grid-template-columns: 1fr 1fr; } }
+
+    /* Lock toggle */
+    .lock-toggle { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; font-size: 0.9rem; margin-bottom: 1rem;}
+    .lock-toggle input { width: 16px; height: 16px; cursor: pointer; }
+
+    /* Crop area */
+    .crop-container {
+      width: 100%;
+      height: 300px;
+      background: var(--surface-2);
+      border: 1px dashed var(--line-strong);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .crop-container.has-image { border-style: solid; }
+    .upload-prompt { color: var(--muted); text-align: center; }
+    input[type="file"] { display: none; }
+    .upload-btn { margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Aspect Ratio & Resize</h1>
+  <p class="desc">Calculate aspect ratios, scale dimensions, and crop images to target sizes.</p>
+
+  <div class="panel">
+    <h2>Dimensions</h2>
+    <div class="presets" style="margin-bottom: 1rem;">
+      <button type="button" class="preset-btn" data-w="1920" data-h="1080">1920×1080 (HD)</button>
+      <button type="button" class="preset-btn" data-w="1080" data-h="1080">1080×1080 (Square)</button>
+      <button type="button" class="preset-btn" data-w="1200" data-h="630">1200×630 (OG Card)</button>
+      <button type="button" class="preset-btn" data-w="2480" data-h="3508">A4 (300dpi)</button>
+    </div>
+
+    <label class="lock-toggle">
+      <input type="checkbox" id="lock-ratio" /> Lock aspect ratio
+    </label>
+
+    <div class="row">
+      <div class="field">
+        <label for="width">Width (px)</label>
+        <input type="number" id="width" value="1920" min="1" step="1" />
+      </div>
+      <div class="field">
+        <label for="height">Height (px)</label>
+        <input type="number" id="height" value="1080" min="1" step="1" />
+      </div>
+      <div class="field" style="flex: 0 0 auto;">
+        <button id="swap-btn" type="button" aria-label="Swap width and height">Swap ⇄</button>
+      </div>
+    </div>
+
+    <div class="result-box">
+      <div class="result-item">
+        <span class="result-label">Aspect Ratio</span>
+        <span class="result-value" id="ratio-display">16:9</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">Megapixels</span>
+        <span class="result-value" id="mp-display">2.07 MP</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <div class="panel" style="margin-bottom: 0;">
+      <h2>Crop & Export</h2>
+      <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 1rem;">Upload an image to preview crop at the target dimensions. (All processing is local).</p>
+
+      <div class="crop-container" id="crop-area">
+        <div class="upload-prompt" id="upload-prompt">
+          <div>No image loaded</div>
+          <button class="upload-btn" onclick="document.getElementById('file-upload').click()">Choose Image</button>
+        </div>
+        <input type="file" id="file-upload" accept="image/png, image/jpeg, image/webp" />
+      </div>
+
+      <div class="row" style="margin-top: 1rem;">
+        <button class="primary" id="download-btn" disabled>Download Cropped</button>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom: 0;">
+      <h2>The Math</h2>
+      <div id="math-details" class="mono" style="font-size: 0.9rem; color: var(--muted); white-space: pre-wrap; line-height: 1.6;">Upload an image to see scaling and crop calculations.</div>
+    </div>
+  </div>
+
+  <script>
+    const elWidth = document.getElementById("width");
+    const elHeight = document.getElementById("height");
+    const elSwap = document.getElementById("swap-btn");
+    const elRatioDisplay = document.getElementById("ratio-display");
+    const elMpDisplay = document.getElementById("mp-display");
+    const elLockRatio = document.getElementById("lock-ratio");
+    const presetBtns = document.querySelectorAll(".preset-btn");
+
+    let currentRatio = 1920 / 1080;
+
+    // Math utils
+    function gcd(a, b) {
+      return b === 0 ? a : gcd(b, a % b);
+    }
+
+    function simplifyRatio(w, h) {
+      if (w === h) return "1:1";
+      const divisor = gcd(w, h);
+      const simpW = w / divisor;
+      const simpH = h / divisor;
+      if (simpW > 100 || simpH > 100) {
+        // Fallback for messy numbers like 1920x1081
+        if (w > h) return `${(w/h).toFixed(2)}:1`;
+        return `1:${(h/w).toFixed(2)}`;
+      }
+      return `${simpW}:${simpH}`;
+    }
+
+    function calculate() {
+      const w = parseInt(elWidth.value, 10) || 0;
+      const h = parseInt(elHeight.value, 10) || 0;
+      if (w <= 0 || h <= 0) {
+        elRatioDisplay.textContent = "-";
+        elMpDisplay.textContent = "-";
+        return;
+      }
+
+      if (!elLockRatio.checked) {
+        currentRatio = w / h;
+      }
+
+      elRatioDisplay.textContent = simplifyRatio(w, h);
+      elMpDisplay.textContent = ((w * h) / 1000000).toFixed(2) + " MP";
+
+      saveState();
+      // trigger crop update if needed
+      if (typeof updateCrop === 'function') updateCrop();
+    }
+
+    function onDimensionInput(changedField) {
+      const w = parseInt(elWidth.value, 10) || 0;
+      const h = parseInt(elHeight.value, 10) || 0;
+      if (w <= 0 || h <= 0) return calculate();
+
+      if (elLockRatio.checked) {
+        if (changedField === 'w') {
+          elHeight.value = Math.round(w / currentRatio);
+        } else if (changedField === 'h') {
+          elWidth.value = Math.round(h * currentRatio);
+        }
+      }
+      calculate();
+    }
+
+    elWidth.addEventListener("input", () => onDimensionInput('w'));
+    elHeight.addEventListener("input", () => onDimensionInput('h'));
+    elLockRatio.addEventListener("change", () => {
+      if (elLockRatio.checked) {
+        const w = parseInt(elWidth.value, 10) || 1;
+        const h = parseInt(elHeight.value, 10) || 1;
+        currentRatio = w / h;
+      }
+      saveState();
+    });
+
+    elSwap.addEventListener("click", () => {
+      const w = elWidth.value;
+      elWidth.value = elHeight.value;
+      elHeight.value = w;
+      if (elLockRatio.checked) currentRatio = 1 / currentRatio;
+      calculate();
+    });
+
+    presetBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        elWidth.value = btn.dataset.w;
+        elHeight.value = btn.dataset.h;
+        if (elLockRatio.checked) {
+           currentRatio = parseInt(btn.dataset.w, 10) / parseInt(btn.dataset.h, 10);
+        }
+        calculate();
+      });
+    });
+
+    function saveState() {
+      const state = {
+        w: elWidth.value,
+        h: elHeight.value,
+        lock: elLockRatio.checked
+      };
+      localStorage.setItem("arc-state", JSON.stringify(state));
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("arc-state"));
+        if (saved) {
+          if (saved.w) elWidth.value = saved.w;
+          if (saved.h) elHeight.value = saved.h;
+          elLockRatio.checked = !!saved.lock;
+          const w = parseInt(elWidth.value, 10) || 1;
+          const h = parseInt(elHeight.value, 10) || 1;
+          currentRatio = w / h;
+        }
+      } catch (e) {}
+      calculate();
+    }
+
+    window.addEventListener("DOMContentLoaded", loadState);
+
+    // Crop & Download logic
+    const elCropArea = document.getElementById("crop-area");
+    const elUploadPrompt = document.getElementById("upload-prompt");
+    const elFileUpload = document.getElementById("file-upload");
+    const elDownloadBtn = document.getElementById("download-btn");
+    const elMathDetails = document.getElementById("math-details");
+
+    let sourceImage = null; // HTMLImageElement
+    let sourceFileName = "image.png";
+    let cropBox = { x: 0, y: 0, w: 0, h: 0 };
+    let isDragging = false;
+    let dragStart = { x: 0, y: 0 };
+    let boxStart = { x: 0, y: 0 };
+
+    // Canvas elements used for rendering the interactive crop preview
+    const previewCanvas = document.createElement("canvas");
+    previewCanvas.style.width = "100%";
+    previewCanvas.style.height = "100%";
+    previewCanvas.style.position = "absolute";
+    previewCanvas.style.top = "0";
+    previewCanvas.style.left = "0";
+    previewCanvas.style.cursor = "move";
+    previewCanvas.style.display = "none";
+    elCropArea.appendChild(previewCanvas);
+    const ctx = previewCanvas.getContext("2d");
+
+    elFileUpload.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      sourceFileName = file.name;
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        sourceImage = img;
+        elUploadPrompt.style.display = "none";
+        previewCanvas.style.display = "block";
+        elCropArea.classList.add("has-image");
+        elDownloadBtn.disabled = false;
+        initCropBox();
+        updateCrop();
+      };
+      img.src = url;
+    });
+
+    function initCropBox() {
+      if (!sourceImage) return;
+      // Default to centering the crop box based on current ratio
+      const w = parseInt(elWidth.value, 10) || 1920;
+      const h = parseInt(elHeight.value, 10) || 1080;
+      const targetRatio = w / h;
+      const imgRatio = sourceImage.width / sourceImage.height;
+
+      if (imgRatio > targetRatio) {
+        // Image is wider than target ratio
+        cropBox.h = sourceImage.height;
+        cropBox.w = sourceImage.height * targetRatio;
+        cropBox.y = 0;
+        cropBox.x = (sourceImage.width - cropBox.w) / 2;
+      } else {
+        // Image is taller than target ratio
+        cropBox.w = sourceImage.width;
+        cropBox.h = sourceImage.width / targetRatio;
+        cropBox.x = 0;
+        cropBox.y = (sourceImage.height - cropBox.h) / 2;
+      }
+    }
+
+    // Called whenever dimensions change
+    function updateCrop() {
+      if (!sourceImage) return;
+      const targetW = parseInt(elWidth.value, 10) || 1920;
+      const targetH = parseInt(elHeight.value, 10) || 1080;
+      const targetRatio = targetW / targetH;
+      const currentBoxRatio = cropBox.w / cropBox.h;
+
+      // Adjust box width/height to match new ratio while keeping area inside image bounds
+      // To simplify, if ratio changes, just re-init centering for now:
+      if (Math.abs(currentBoxRatio - targetRatio) > 0.01) {
+        initCropBox();
+      }
+
+      drawPreview();
+      updateMath();
+    }
+
+    function drawPreview() {
+      if (!sourceImage) return;
+      const rect = elCropArea.getBoundingClientRect();
+      // Setup preview canvas to match DOM size for high-res drawing
+      const dpr = window.devicePixelRatio || 1;
+      previewCanvas.width = rect.width * dpr;
+      previewCanvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const vw = rect.width;
+      const vh = rect.height;
+      const imgW = sourceImage.width;
+      const imgH = sourceImage.height;
+
+      // Fit image into the view
+      const scale = Math.min(vw / imgW, vh / imgH);
+      const drawW = imgW * scale;
+      const drawH = imgH * scale;
+      const drawX = (vw - drawW) / 2;
+      const drawY = (vh - drawH) / 2;
+
+      // Draw background image
+      ctx.clearRect(0, 0, vw, vh);
+      ctx.drawImage(sourceImage, drawX, drawY, drawW, drawH);
+
+      // Draw shadow over uncropped area
+      ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+      ctx.beginPath();
+      ctx.rect(drawX, drawY, drawW, drawH);
+      const boxDrawX = drawX + (cropBox.x * scale);
+      const boxDrawY = drawY + (cropBox.y * scale);
+      const boxDrawW = cropBox.w * scale;
+      const boxDrawH = cropBox.h * scale;
+      ctx.rect(boxDrawX, boxDrawY, boxDrawW, boxDrawH);
+      ctx.fill("evenodd");
+
+      // Draw crop box border
+      ctx.strokeStyle = "var(--accent)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(boxDrawX, boxDrawY, boxDrawW, boxDrawH);
+    }
+
+    function updateMath() {
+      if (!sourceImage) return;
+      const targetW = parseInt(elWidth.value, 10);
+      const targetH = parseInt(elHeight.value, 10);
+      const scaleFactor = targetW / cropBox.w;
+
+      const origPixels = sourceImage.width * sourceImage.height;
+      const croppedPixels = cropBox.w * cropBox.h;
+      const lostPixels = origPixels - croppedPixels;
+      const lostPct = ((lostPixels / origPixels) * 100).toFixed(1);
+
+      elMathDetails.innerHTML =
+`Source Image:   ${sourceImage.width}×${sourceImage.height}px (${(origPixels/1000000).toFixed(2)} MP)
+Crop Window:    ${Math.round(cropBox.w)}×${Math.round(cropBox.h)}px
+Target Size:    ${targetW}×${targetH}px
+
+Pixels lost:    ${Math.round(lostPixels).toLocaleString()} px (${lostPct}%)
+Scale factor:   ${scaleFactor.toFixed(3)}x
+`;
+    }
+
+    // Drag interactions for preview canvas
+    previewCanvas.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      dragStart = { x: e.clientX, y: e.clientY };
+      boxStart = { x: cropBox.x, y: cropBox.y };
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging || !sourceImage) return;
+      const rect = elCropArea.getBoundingClientRect();
+      const scale = Math.min(rect.width / sourceImage.width, rect.height / sourceImage.height);
+
+      const dx = (e.clientX - dragStart.x) / scale;
+      const dy = (e.clientY - dragStart.y) / scale;
+
+      cropBox.x = boxStart.x + dx;
+      cropBox.y = boxStart.y + dy;
+
+      // clamp to edges
+      cropBox.x = Math.max(0, Math.min(cropBox.x, sourceImage.width - cropBox.w));
+      cropBox.y = Math.max(0, Math.min(cropBox.y, sourceImage.height - cropBox.h));
+
+      drawPreview();
+      updateMath();
+    });
+    window.addEventListener("mouseup", () => {
+      isDragging = false;
+    });
+
+    // Resize on window resize
+    window.addEventListener("resize", () => {
+      if (sourceImage) drawPreview();
+    });
+
+    elDownloadBtn.addEventListener("click", () => {
+      if (!sourceImage) return;
+      const targetW = parseInt(elWidth.value, 10);
+      const targetH = parseInt(elHeight.value, 10);
+
+      const outCanvas = document.createElement("canvas");
+      outCanvas.width = targetW;
+      outCanvas.height = targetH;
+      const outCtx = outCanvas.getContext("2d");
+
+      // Draw image onto target canvas, resizing automatically via drawImage
+      outCtx.drawImage(
+        sourceImage,
+        cropBox.x, cropBox.y, cropBox.w, cropBox.h,
+        0, 0, targetW, targetH
+      );
+
+      const isJpeg = sourceFileName.toLowerCase().endsWith(".jpg") || sourceFileName.toLowerCase().endsWith(".jpeg");
+      const mime = isJpeg ? "image/jpeg" : "image/png";
+      const ext = isJpeg ? "jpg" : "png";
+
+      outCanvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `resized_${targetW}x${targetH}.${ext}`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, mime, 0.95);
+    });
+
+  </script>
+</body>
+</html>

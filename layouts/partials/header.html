@@ -22,8 +22,8 @@
     </nav>
 
     <div class="tools">
-      <button class="search-launch" type="button" data-search-open aria-label="Search the library" aria-keyshortcuts="Control+K Meta+K">
-        {{ partial "icon.html" "search" }}<span>Search</span><kbd>⌘K</kbd>
+      <button class="search-launch" type="button" data-search-open  aria-keyshortcuts="Control+K Meta+K">
+        {{ partial "icon.html" "search" }}<span>Search</span><kbd aria-hidden="true">⌘K</kbd>
       </button>
       <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle colour theme">
         <span class="i-moon">{{ partial "icon.html" "moon" }}</span><span class="i-sun">{{ partial "icon.html" "sun" }}</span>

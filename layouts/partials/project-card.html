@@ -11,6 +11,6 @@
   {{- with partial "description.html" . }}<p class="card__desc">{{ . }}</p>{{ end }}
   <div class="card__foot">
     {{- with first 3 $tags }}{{ partial "tag-list.html" (dict "items" . "tax" "tags") }}{{ else }}<span></span>{{ end }}
-    {{- with .Params.github }}<a class="card__link" href="{{ . }}" target="_blank" rel="noopener noreferrer" aria-label="{{ partial "title.html" $ }} on GitHub">{{ partial "icon.html" "github" }}<span>Repo</span></a>{{ end }}
+    {{- with .Params.github }}<a class="card__link" href="{{ . }}" target="_blank" rel="noopener noreferrer" aria-label="{{ partial "title.html" $ }} repo on GitHub">{{ partial "icon.html" "github" }}<span>Repo</span></a>{{ end }}
   </div>
 </li>

@@ -10,10 +10,10 @@
   <p class="hero__lede">{{ $hero.lede }}</p>
   {{ with $hero.about }}<p class="hero__about">{{ . }}</p>{{ end }}
 
-  <button class="hero-search" type="button" data-search-open aria-label="Search the library">
+  <button class="hero-search" type="button" data-search-open >
     {{ partial "icon.html" "search" }}
     <span>Search {{ len $all }} items<span class="hide-sm">: skills, bookmarks, projects…</span></span>
-    <kbd>⌘K</kbd>
+    <kbd aria-hidden="true">⌘K</kbd>
   </button>
 
   <ul class="stats" role="list" aria-label="Library at a glance">

@@ -3,32 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <title>Cron Expression Tester</title>
     <!-- Use cronstrue from unpkg for parsing/description (standard approach for client-side tool without npm) -->
     <script src="https://unpkg.com/cronstrue@2.47.0/dist/cronstrue.min.js"></script>
     <style>
-        body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.5; }
-        input[type="text"] { width: 100%; padding: 1rem; font-family: monospace; font-size: 1.5rem; margin-bottom: 1rem; text-align: center; box-sizing: border-box; }
-        .description { font-size: 1.5rem; font-weight: bold; text-align: center; color: #0066cc; margin-bottom: 2rem; min-height: 2.5rem; }
-        .parts { display: flex; justify-content: space-between; text-align: center; margin-bottom: 2rem; font-family: monospace; }
-        .part { flex: 1; padding: 0.5rem; border: 1px solid #ccc; background: #f9f9f9; }
-        .part strong { display: block; font-family: system-ui, sans-serif; font-size: 0.8rem; color: #666; margin-top: 0.5rem; }
-        .error { color: #cc0000; text-align: center; font-weight: bold; }
-
-        .examples { margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem; }
-        .example-btn { display: inline-block; background: #eee; padding: 0.25rem 0.5rem; margin: 0.25rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
-        .example-btn:hover { background: #ddd; }
-
-        @media (prefers-color-scheme: dark) {
-            body { background: #1a1a1a; color: #f0f0f0; }
-            input { background: #333; color: white; border: 1px solid #555; }
-            .description { color: #55aaff; }
-            .part { background: #222; border-color: #444; }
-            .part strong { color: #aaa; }
-            .error { color: #ff6666; }
-            .example-btn { background: #333; }
-            .example-btn:hover { background: #444; }
-        }
+    :root {
+      color-scheme: light dark;
+      --bg: #e9eaed; --panel: #f7f7f9; --panel2: #ffffff;
+      --ink: #1d2126; --mut: #5b6068; --faint: #62666e;
+      --line: #d6d7dc; --line2: #bfc2ca; --chip: #ececf0;
+      --acc: #2f6db3; --acc-strong: #26598f; --acc-ink: #ffffff;
+      --ok: #2e7d4f; --err-bg: #fdeeee; --err-line: #efc2c2; --err-ink: #8f2d23;
+      --shadow: 0 1px 2px rgba(24, 28, 38, .05), 0 10px 28px rgba(24, 28, 38, .07);
+      --ui-font: "Outfit", sans-serif; --mono-font: "JetBrains Mono", monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121316; --panel: #1a1b1f; --panel2: #222329;
+        --ink: #eceef2; --mut: #a2a6af; --faint: #9ba0aa;
+        --line: #2d2f36; --line2: #3d404a; --chip: #26272e;
+        --acc: #7db0e6; --acc-strong: #9cc3ee; --acc-ink: #0d1724;
+        --ok: #6fce97; --err-bg: #3a2120; --err-line: #6e3a36; --err-ink: #f0a9a0;
+        --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .35);
+      }
+    }
+        * { box-sizing: border-box; }
+        body { font-family: var(--ui-font); font-size: 15px; line-height: 1.45; max-width: 800px; margin: 0 auto; padding: 2rem; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+        h1 { font-size: 24px; font-weight: 600; }
+        input[type="text"] { width: 100%; padding: 1rem; font-family: var(--mono-font); font-size: 1.5rem; margin-bottom: 1rem; text-align: center; box-sizing: border-box; background: var(--panel2); color: var(--ink); border: 1px solid var(--line); border-radius: 9px; }
+        .description { font-size: 1.5rem; font-weight: 600; text-align: center; color: var(--acc-strong); margin-bottom: 2rem; min-height: 2.5rem; }
+        .parts { display: flex; justify-content: space-between; text-align: center; margin-bottom: 2rem; font-family: var(--mono-font); gap: 8px; }
+        .part { flex: 1; padding: 0.75rem 0.5rem; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); box-shadow: var(--shadow); }
+        .part strong { display: block; font-family: var(--ui-font); font-size: 0.72rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--faint); margin-top: 0.5rem; }
+        .error { color: var(--err-ink); background: var(--err-bg); border: 1px solid var(--err-line); border-radius: 9px; padding: 0.5rem 0.75rem; text-align: center; font-weight: 600; }
+        .error:empty { display: none; }
+        .examples { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+        .example-btn { display: inline-block; background: var(--chip); color: var(--ink); border: 1px solid var(--line); padding: 0.3rem 0.65rem; margin: 0.25rem; border-radius: 999px; cursor: pointer; font-size: 0.9rem; }
+        .example-btn:hover { background: var(--panel2); border-color: var(--line2); }
+        :focus-visible { outline: 3px solid var(--acc); outline-offset: 2px; }
     </style>
 </head>
 <body>

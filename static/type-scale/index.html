@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Type Scale & Font Pairing Playground. Pick a modular scale ratio, choose font pairings, and export CSS." />
+  <meta property="og:site_name" content="The BlackCat" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Type Scale & Font Pairing Playground" />
+  <meta property="og:description" content="Type Scale & Font Pairing Playground. Pick a modular scale ratio, choose font pairings, and export CSS." />
+  <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/type-scale/" />
+  <meta property="og:image" content="../og.png" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Outfit for UI text and JetBrains Mono for code -->
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Type Scale & Font Pairing Playground</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      /* Core Site Tokens Approximation */
+      --paper: #f6f2e9;
+      --paper-2: #fbf9f3;
+      --paper-3: #ece6d8;
+      --code-bg: #efe9db;
+      --ink: #1c1915;
+      --ink-2: #453f36;
+      --ink-3: #655d51;
+      --rule: #ddd5c2;
+      --accent: #9a4707;
+      --focus: #9a4707;
+      --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      --ui-font: "Outfit", system-ui, -apple-system, sans-serif;
+      --radius: 6px;
+      --radius-lg: 10px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --paper: #15120f;
+        --paper-2: #1b1814;
+        --paper-3: #241f19;
+        --code-bg: #1b1814;
+        --ink: #ede7db;
+        --ink-2: #c3baa9;
+        --ink-3: #9d9484;
+        --rule: #2c2620;
+        --accent: #eba74f;
+        --focus: #eba74f;
+      }
+    }
+    :root[data-theme="light"] {
+      --paper: #f6f2e9;
+      --paper-2: #fbf9f3;
+      --paper-3: #ece6d8;
+      --code-bg: #efe9db;
+      --ink: #1c1915;
+      --ink-2: #453f36;
+      --ink-3: #655d51;
+      --rule: #ddd5c2;
+      --accent: #9a4707;
+      --focus: #9a4707;
+    }
+    :root[data-theme="dark"] {
+      --paper: #15120f;
+      --paper-2: #1b1814;
+      --paper-3: #241f19;
+      --code-bg: #1b1814;
+      --ink: #ede7db;
+      --ink-2: #c3baa9;
+      --ink-3: #9d9484;
+      --rule: #2c2620;
+      --accent: #eba74f;
+      --focus: #eba74f;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--ui-font);
+      line-height: 1.5;
+    }
+    header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--paper-2);
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-family: var(--ui-font);
+      font-size: 0.9rem;
+    }
+    .theme-toggle:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      min-height: calc(100vh - 75px);
+    }
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sidebar {
+      padding: 2rem;
+      border-right: 1px solid var(--rule);
+      background: var(--paper-2);
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    label {
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--ink-2);
+    }
+    select, input[type="number"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--ui-font);
+      font-size: 1rem;
+    }
+    select:focus-visible, input:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 1px;
+    }
+    .custom-ratio {
+      display: none;
+      margin-top: 0.5rem;
+    }
+
+    .pairing-note {
+      font-size: 0.85rem;
+      color: var(--ink-3);
+      font-style: italic;
+      margin-top: 0.25rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .btn {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--ui-font);
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .btn.secondary {
+      background: var(--paper-3);
+      color: var(--ink);
+      border: 1px solid var(--rule);
+    }
+    .btn.secondary:hover {
+      background: var(--rule);
+    }
+    .btn:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .main-content {
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .specimen-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .specimen-header h2 {
+      margin: 0 0 0.5rem 0;
+      font-weight: 400;
+    }
+    .specimen-info {
+      color: var(--ink-2);
+      font-size: 0.95rem;
+    }
+
+    .scale-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+    .scale-item {
+      display: flex;
+      align-items: baseline;
+      gap: 2rem;
+    }
+    @media (max-width: 600px) {
+      .scale-item {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+    }
+    .scale-label {
+      width: 140px;
+      flex-shrink: 0;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--ink-3);
+    }
+    .scale-text {
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .code-specimen {
+      font-family: var(--mono);
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      overflow-x: auto;
+    }
+
+    .export-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 100;
+    }
+    .export-modal.active {
+      display: flex;
+    }
+    .export-content {
+      background: var(--paper);
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 1px solid var(--rule);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .export-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .export-header h3 {
+      margin: 0;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--ink);
+    }
+    .export-code {
+      font-family: var(--mono);
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      margin-bottom: 1rem;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--rule);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Type Scale & Font Pairing Playground</h1>
+    <button id="theme-btn" class="theme-toggle" aria-label="Toggle theme">Theme: auto</button>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="control-group">
+        <label for="base-size">Base Size (px)</label>
+        <input type="number" id="base-size" value="16" min="10" max="32" step="1" aria-label="Base Size in pixels">
+      </div>
+
+      <div class="control-group">
+        <label for="scale-ratio">Modular Scale</label>
+        <select id="scale-ratio" aria-label="Select modular scale ratio">
+          <option value="1.125">Major Second (1.125)</option>
+          <option value="1.25">Major Third (1.25)</option>
+          <option value="1.333">Perfect Fourth (1.333)</option>
+          <option value="1.414">Augmented Fourth (1.414)</option>
+          <option value="1.5">Perfect Fifth (1.5)</option>
+          <option value="1.618">Golden Ratio (1.618)</option>
+          <option value="custom">Custom...</option>
+        </select>
+        <input type="number" id="custom-ratio" class="custom-ratio" value="1.2" min="1.05" max="3" step="0.01" aria-label="Custom ratio">
+      </div>
+
+      <div class="control-group">
+        <label for="font-pairing">Curated Pairings</label>
+        <select id="font-pairing" aria-label="Select font pairing">
+          <option value="custom">-- Custom Selection --</option>
+          <option value="inter-roboto">Inter & Roboto (Clean & Neutral)</option>
+          <option value="playfair-source">Playfair Display & Source Sans Pro (Elegant Editorial)</option>
+          <option value="merriweather-oswald">Oswald & Merriweather (Bold & Classic)</option>
+          <option value="lato-merriweather">Lato & Merriweather (Friendly & Readable)</option>
+          <option value="montserrat-opensans">Montserrat & Open Sans (Modern Geometric)</option>
+          <option value="fraunces-inter">Fraunces & Inter (Expressive Serif & Clean Sans)</option>
+        </select>
+        <div id="pairing-note" class="pairing-note">Mix and match any two fonts or pick a preset.</div>
+      </div>
+
+      <div class="control-group">
+        <label for="heading-font">Heading Font</label>
+        <select id="heading-font" aria-label="Select heading font"></select>
+      </div>
+
+      <div class="control-group">
+        <label for="body-font">Body Font</label>
+        <select id="body-font" aria-label="Select body font"></select>
+      </div>
+
+      <div class="actions">
+        <button id="export-btn" class="btn" aria-label="Export CSS">Export CSS</button>
+        <button id="reset-btn" class="btn secondary" aria-label="Reset options">Reset</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="specimen-header">
+        <h2 id="preview-title" class="heading-text">The quick brown fox jumps over the lazy dog</h2>
+        <div class="specimen-info">
+          <span id="heading-font-name">Outfit</span> / <span id="body-font-name">Outfit</span>
+        </div>
+      </div>
+
+      <div id="scale-container" class="scale-preview">
+        <!-- Scale items will be injected here -->
+      </div>
+
+      <div class="scale-item">
+        <div class="scale-label">Code / --step-0<br><span id="code-size-label">16px / 1rem</span></div>
+        <div class="code-specimen">
+function calculateScale(base, ratio, steps) {
+  return base * Math.pow(ratio, steps);
+}</div>
+      </div>
+    </main>
+  </div>
+
+  <div id="export-modal" class="export-modal" aria-hidden="true" role="dialog" aria-labelledby="export-modal-title">
+    <div class="export-content">
+      <div class="export-header">
+        <h3 id="export-modal-title">Export CSS</h3>
+        <button id="close-export" class="close-btn" aria-label="Close export modal">&times;</button>
+      </div>
+      <p>Custom properties for your layout and font-size utility classes.</p>
+      <div id="export-code" class="export-code"></div>
+      <button id="copy-btn" class="btn" aria-label="Copy CSS to clipboard">Copy to Clipboard</button>
+    </div>
+  </div>
+
+  <script>
+    const $ = s => document.querySelector(s);
+
+    const baseSizeInput = $("#base-size");
+    const scaleRatioSelect = $("#scale-ratio");
+    const customRatioInput = $("#custom-ratio");
+    const scaleContainer = $("#scale-container");
+    const codeSizeLabel = $("#code-size-label");
+    const themeBtn = $("#theme-btn");
+
+    const fontPairingSelect = $("#font-pairing");
+    const headingFontSelect = $("#heading-font");
+    const bodyFontSelect = $("#body-font");
+    const headingFontName = $("#heading-font-name");
+    const bodyFontName = $("#body-font-name");
+    const pairingNote = $("#pairing-note");
+    const previewTitle = $("#preview-title");
+
+    const googleFonts = [
+      "Inter", "Roboto", "Playfair Display", "Source Sans Pro", "Source Sans 3",
+      "Oswald", "Merriweather", "Lato", "Montserrat", "Open Sans",
+      "Fraunces", "Lora", "Poppins", "Nunito"
+    ];
+
+    const pairings = {
+      "inter-roboto": { heading: "Inter", body: "Roboto", note: "Clean, neutral, highly legible UI pairing." },
+      "playfair-source": { heading: "Playfair Display", body: "Source Sans 3", note: "Elegant editorial style. High contrast serif with a functional sans." },
+      "merriweather-oswald": { heading: "Oswald", body: "Merriweather", note: "Bold and classic. Strong, narrow sans headings with readable serif body." },
+      "lato-merriweather": { heading: "Lato", body: "Merriweather", note: "Friendly yet professional. Warm sans with a sturdy serif." },
+      "montserrat-opensans": { heading: "Montserrat", body: "Open Sans", note: "Modern geometric headings paired with a neutral, highly readable body." },
+      "fraunces-inter": { heading: "Fraunces", body: "Inter", note: "Expressive, characterful serif headings grounded by a clean sans body." }
+    };
+
+    function loadGoogleFont(fontName) {
+      const id = "gf-" + fontName.replace(/\s+/g, '-').toLowerCase();
+      if (document.getElementById(id)) return;
+      const link = document.createElement("link");
+      link.id = id;
+      link.rel = "stylesheet";
+      link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s+/g, '+')}:ital,wght@0,400;0,700;1,400;1,700&display=swap`;
+      document.head.appendChild(link);
+    }
+
+    function populateFontSelects() {
+      const options = googleFonts.sort().map(f => `<option value="${f}">${f}</option>`).join("");
+      headingFontSelect.innerHTML = options;
+      bodyFontSelect.innerHTML = options;
+    }
+
+    function applyFonts() {
+      const hFont = headingFontSelect.value;
+      const bFont = bodyFontSelect.value;
+
+      loadGoogleFont(hFont);
+      loadGoogleFont(bFont);
+
+      document.documentElement.style.setProperty("--heading-font", `"${hFont}", sans-serif`);
+      document.documentElement.style.setProperty("--body-font", `"${bFont}", sans-serif`);
+
+      headingFontName.textContent = hFont;
+      bodyFontName.textContent = bFont;
+
+      $$(".heading-text").forEach(el => {
+        el.style.fontFamily = `"${hFont}", sans-serif`;
+        el.style.fontWeight = "700";
+      });
+      $$(".body-text").forEach(el => {
+        el.style.fontFamily = `"${bFont}", sans-serif`;
+      });
+    }
+
+    function syncPairing() {
+      const val = fontPairingSelect.value;
+      if (val !== "custom" && pairings[val]) {
+        headingFontSelect.value = pairings[val].heading;
+        bodyFontSelect.value = pairings[val].body;
+        pairingNote.textContent = pairings[val].note;
+      } else {
+        pairingNote.textContent = "Mix and match any two fonts or pick a preset.";
+      }
+      applyFonts();
+    }
+
+    fontPairingSelect.addEventListener("change", syncPairing);
+
+    headingFontSelect.addEventListener("change", () => {
+      fontPairingSelect.value = "custom";
+      syncPairing();
+    });
+
+    bodyFontSelect.addEventListener("change", () => {
+      fontPairingSelect.value = "custom";
+      syncPairing();
+    });
+
+    const exportBtn = $("#export-btn");
+    const exportModal = $("#export-modal");
+    const closeExport = $("#close-export");
+    const exportCode = $("#export-code");
+    const copyBtn = $("#copy-btn");
+    const resetBtn = $("#reset-btn");
+
+    const $$ = s => document.querySelectorAll(s);
+
+    const scaleSteps = [
+      { step: 5, label: "Headline 1", tag: "h1", class: "heading-text" },
+      { step: 4, label: "Headline 2", tag: "h2", class: "heading-text" },
+      { step: 3, label: "Headline 3", tag: "h3", class: "heading-text" },
+      { step: 2, label: "Headline 4", tag: "h4", class: "heading-text" },
+      { step: 1, label: "Headline 5", tag: "h5", class: "heading-text" },
+      { step: 0, label: "Body", tag: "p", class: "body-text" },
+      { step: -1, label: "Small / Caption", tag: "small", class: "body-text" },
+      { step: -2, label: "Tiny", tag: "small", class: "body-text" }
+    ];
+
+    function getRatio() {
+      if (scaleRatioSelect.value === "custom") {
+        return parseFloat(customRatioInput.value) || 1.2;
+      }
+      return parseFloat(scaleRatioSelect.value) || 1.25;
+    }
+
+    function getBaseSize() {
+      return parseInt(baseSizeInput.value) || 16;
+    }
+
+    function renderScale() {
+      const base = getBaseSize();
+      const ratio = getRatio();
+
+      scaleContainer.innerHTML = "";
+
+      scaleSteps.forEach(({ step, label, tag, class: textClass }) => {
+        const sizePx = base * Math.pow(ratio, step);
+        const sizeRem = sizePx / 16;
+
+        const item = document.createElement("div");
+        item.className = "scale-item";
+
+        const labelDiv = document.createElement("div");
+        labelDiv.className = "scale-label";
+        labelDiv.innerHTML = `${label} / --step-${step}<br>${sizePx.toFixed(2)}px / ${sizeRem.toFixed(3)}rem`;
+
+        const textDiv = document.createElement("div");
+        const textEl = document.createElement(tag);
+        textEl.className = `scale-text ${textClass}`;
+        textEl.style.fontSize = `${sizeRem.toFixed(3)}rem`;
+        textEl.textContent = "The quick brown fox jumps over the lazy dog";
+
+        textDiv.appendChild(textEl);
+        item.appendChild(labelDiv);
+        item.appendChild(textDiv);
+
+        scaleContainer.appendChild(item);
+      });
+
+      const codeSizePx = base;
+      const codeSizeRem = base / 16;
+      codeSizeLabel.textContent = `${codeSizePx}px / ${codeSizeRem.toFixed(3)}rem`;
+      $(".code-specimen").style.fontSize = `${codeSizeRem.toFixed(3)}rem`;
+    }
+
+    scaleRatioSelect.addEventListener("change", () => {
+      customRatioInput.style.display = scaleRatioSelect.value === "custom" ? "block" : "none";
+      renderScale();
+    });
+
+    customRatioInput.addEventListener("input", renderScale);
+    baseSizeInput.addEventListener("input", renderScale);
+
+    /* ---------- Theme ---------- */
+    const THEMES = ["auto", "light", "dark"];
+    function applyTheme(theme) {
+      if (theme === "auto") delete document.documentElement.dataset.theme;
+      else document.documentElement.dataset.theme = theme;
+      themeBtn.textContent = "Theme: " + theme;
+    }
+
+    themeBtn.addEventListener("click", () => {
+      const current = document.documentElement.dataset.theme || "auto";
+      const next = THEMES[(THEMES.indexOf(current) + 1) % THEMES.length];
+      applyTheme(next);
+      saveState();
+    });
+
+    function getExportCSS() {
+      const base = getBaseSize();
+      const ratio = getRatio();
+      const hFont = headingFontSelect.value;
+      const bFont = bodyFontSelect.value;
+
+      let css = `:root {\n  /* Typography Scale */\n`;
+      css += `  --font-base-size: ${base}px;\n`;
+      css += `  --font-scale-ratio: ${ratio};\n`;
+      css += `  --heading-font: "${hFont}", sans-serif;\n`;
+      css += `  --body-font: "${bFont}", sans-serif;\n\n`;
+
+      scaleSteps.slice().reverse().forEach(({ step }) => {
+        const sizeRem = (base * Math.pow(ratio, step)) / 16;
+        css += `  --step-${step}: ${sizeRem.toFixed(3)}rem;\n`;
+      });
+
+      css += `}\n\n`;
+
+      css += `/* Utility Classes */\n`;
+      css += `.font-heading {\n  font-family: var(--heading-font);\n  font-weight: 700;\n}\n`;
+      css += `.font-body {\n  font-family: var(--body-font);\n  font-weight: 400;\n}\n\n`;
+
+      scaleSteps.slice().reverse().forEach(({ step }) => {
+        css += `.text-step-${step} { font-size: var(--step-${step}); }\n`;
+      });
+
+      return css;
+    }
+
+    exportBtn.addEventListener("click", () => {
+      exportCode.textContent = getExportCSS();
+      exportModal.classList.add("active");
+      exportModal.setAttribute("aria-hidden", "false");
+    });
+
+    closeExport.addEventListener("click", () => {
+      exportModal.classList.remove("active");
+      exportModal.setAttribute("aria-hidden", "true");
+    });
+
+    exportModal.addEventListener("click", e => {
+      if (e.target === exportModal) closeExport.click();
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(exportCode.textContent);
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => copyBtn.textContent = originalText, 2000);
+      } catch (err) {
+        console.error("Failed to copy:", err);
+      }
+    });
+
+    function saveState() {
+      const state = {
+        baseSize: baseSizeInput.value,
+        ratioSelect: scaleRatioSelect.value,
+        customRatio: customRatioInput.value,
+        fontPairing: fontPairingSelect.value,
+        headingFont: headingFontSelect.value,
+        bodyFont: bodyFontSelect.value,
+        theme: document.documentElement.dataset.theme || "auto"
+      };
+      try {
+        localStorage.setItem("ts-state", JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const stored = localStorage.getItem("ts-state");
+        if (stored) {
+          const state = JSON.parse(stored);
+          if (state.baseSize) baseSizeInput.value = state.baseSize;
+          if (state.ratioSelect) scaleRatioSelect.value = state.ratioSelect;
+          if (state.customRatio) customRatioInput.value = state.customRatio;
+          if (state.fontPairing) fontPairingSelect.value = state.fontPairing;
+          if (state.headingFont) headingFontSelect.value = state.headingFont;
+          if (state.bodyFont) bodyFontSelect.value = state.bodyFont;
+          if (state.theme) applyTheme(state.theme);
+
+          customRatioInput.style.display = scaleRatioSelect.value === "custom" ? "block" : "none";
+          syncPairing();
+          renderScale();
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    resetBtn.addEventListener("click", () => {
+      try { localStorage.removeItem("ts-state"); } catch (e) {}
+      baseSizeInput.value = "16";
+      scaleRatioSelect.value = "1.25";
+      customRatioInput.value = "1.2";
+      fontPairingSelect.value = "inter-roboto";
+      customRatioInput.style.display = "none";
+      applyTheme("auto");
+      syncPairing();
+      renderScale();
+    });
+
+    // Save state on any change
+    document.querySelector(".sidebar").addEventListener("change", saveState);
+    document.querySelector(".sidebar").addEventListener("input", saveState);
+
+    populateFontSelects();
+    if (!loadState()) {
+      headingFontSelect.value = "Inter";
+      bodyFontSelect.value = "Roboto";
+      syncPairing();
+      renderScale();
+    }
+  </script>
+</body>
+</html>

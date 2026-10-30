@@ -11,34 +11,37 @@
   <meta property="og:description" content="Text Studio: Readability metrics and Text Cleanup lab." />
   <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/text-studio/" />
   <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <title>Text Studio</title>
   <style>
     :root {
       color-scheme: light dark;
-      --bg: #f4f7f8;
+      --bg: #e9eaed;
       --surface: #ffffff;
-      --ink: #172225;
-      --muted: #54666b;
-      --line: #d7e0e2;
-      --accent: #067c72;
+      --ink: #1d2126;
+      --muted: #5b6068;
+      --line: #d6d7dc;
+      --accent: #2f6db3;
       --accent-ink: #ffffff;
-      --accent-soft: #d8f1ed;
-      --code-bg: #152124;
-      --code-ink: #d9e7e8;
-      --radius-md: 12px;
+      --accent-soft: #ececf0;
+      --code-bg: #222329;
+      --code-ink: #eceef2;
+      --radius-md: 9px;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #0f1719;
-        --surface: #162124;
-        --ink: #e7eeee;
-        --muted: #adbdc0;
-        --line: #314145;
-        --accent: #58c8bb;
-        --accent-ink: #082c28;
-        --accent-soft: #173d3a;
-        --code-bg: #091113;
-        --code-ink: #d5e4e5;
+        --bg: #121316;
+        --surface: #222329;
+        --ink: #eceef2;
+        --muted: #a2a6af;
+        --line: #2d2f36;
+        --accent: #7db0e6;
+        --accent-ink: #0d1724;
+        --accent-soft: #26272e;
+        --code-bg: #222329;
+        --code-ink: #eceef2;
       }
     }
     body {
@@ -47,7 +50,8 @@
       color: var(--ink);
       margin: 0;
       padding: 24px;
-      line-height: 1.5;
+      font-size: 15px;
+      line-height: 1.45;
     }
     h1 {
       font-size: 1.75rem;
@@ -99,7 +103,7 @@
     .tools-pane {
       background: var(--surface);
       padding: 24px;
-      border-radius: var(--radius-md);
+      border-radius: 14px;
       border: 1px solid var(--line);
     }
     .panel { display: none; }

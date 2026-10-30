@@ -8,45 +8,45 @@
   <link rel="icon" href="data:," />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400..700&family=JetBrains+Mono:wght@100..800&display=swap" />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400..700&family=JetBrains+Mono:wght@100..800&display=swap" rel="stylesheet" />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <title>Hugo Frontmatter Doctor</title>
   <style>
     :root {
       color-scheme: light dark;
-      --bg: #f4f7f8;
-      --surface: #ffffff;
-      --surface-2: #edf2f3;
-      --ink: #172225;
-      --muted: #54666b;
-      --line: #d7e0e2;
-      --accent: #067c72;
+      --bg: #e9eaed;
+      --surface: #f7f7f9;
+      --surface-2: #ffffff;
+      --ink: #1d2126;
+      --muted: #5b6068;
+      --line: #d6d7dc;
+      --accent: #2f6db3;
       --accent-ink: #ffffff;
-      --accent-soft: #d8f1ed;
+      --accent-soft: rgba(47, 109, 179, 0.12);
       --warn: #9a6500;
       --warn-bg: #fff5e0;
-      --error: #c52929;
-      --error-bg: #fde8e8;
-      --code-bg: #152124;
-      --code-ink: #d9e7e8;
+      --error: #8f2d23;
+      --error-bg: #fdeeee;
+      --code-bg: #ffffff;
+      --code-ink: #1d2126;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #111415;
-        --surface: #181d1e;
-        --surface-2: #212729;
-        --ink: #d9e7e8;
-        --muted: #8c9da0;
-        --line: #2d3639;
-        --accent: #11a99d;
-        --accent-ink: #002d29;
-        --accent-soft: #1c3c3a;
+        --bg: #121316;
+        --surface: #1a1b1f;
+        --surface-2: #222329;
+        --ink: #eceef2;
+        --muted: #a2a6af;
+        --line: #2d2f36;
+        --accent: #7db0e6;
+        --accent-ink: #0d1724;
+        --accent-soft: rgba(125, 176, 230, 0.18);
         --warn: #f2a900;
         --warn-bg: #3a2900;
-        --error: #ff5c5c;
-        --error-bg: #4a1313;
-        --code-bg: #152124;
-        --code-ink: #d9e7e8;
+        --error: #f0a9a0;
+        --error-bg: #3a2120;
+        --code-bg: #222329;
+        --code-ink: #eceef2;
       }
     }
     html { box-sizing: border-box; }
@@ -56,8 +56,8 @@
       background: var(--bg);
       color: var(--ink);
       font-family: "Outfit", sans-serif;
-      font-size: 18px;
-      line-height: 1.5;
+      font-size: 15px;
+      line-height: 1.45;
     }
     code, pre, textarea, .mono {
       font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -85,7 +85,7 @@
     .card {
       background: var(--surface);
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 14px;
       padding: 20px;
       margin-bottom: 30px;
     }
@@ -110,7 +110,7 @@
       padding: 12px;
       background: var(--surface-2);
       border: 1px solid var(--line);
-      border-radius: 6px;
+      border-radius: 9px;
       resize: vertical;
       font-size: 14px;
     }
@@ -130,7 +130,7 @@
       padding: 8px 12px;
       background: var(--surface-2);
       border: 1px solid var(--line);
-      border-radius: 4px;
+      border-radius: 9px;
       font-size: 16px;
       font-family: inherit;
     }
@@ -140,7 +140,7 @@
       color: var(--accent-ink);
       border: none;
       padding: 8px 16px;
-      border-radius: 4px;
+      border-radius: 9px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
@@ -170,7 +170,7 @@
     }
     .issue {
       padding: 12px 16px;
-      border-radius: 6px;
+      border-radius: 9px;
       margin-bottom: 10px;
       font-size: 0.95rem;
     }
@@ -201,7 +201,7 @@
       background: var(--code-bg);
       color: var(--code-ink);
       padding: 16px;
-      border-radius: 6px;
+      border-radius: 14px;
       overflow-x: auto;
       font-size: 14px;
       margin: 10px 0;

@@ -132,6 +132,11 @@ params:
           desc: "Timestamp Toolkit for epoch/ISO conversions and relative math, paired with a UUID/ULID Studio for bulk generation and deep inspection of modern IDs."
           url: "time-id-toolkit/"
           writeup: "library/tools/time-id-toolkit/"
+        - name: "Data Format Workbench"
+          kind: "App"
+          desc: "JSON, YAML and TOML format converter and interactive viewer."
+          url: "data-format-workbench/"
+          writeup: "library/tools/data-format-workbench/"
     - group: "Running on Online Tools"
       items:
         - name: "Color Token Workshop"

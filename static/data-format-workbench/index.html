@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Data Format Workbench (JSON + YAML/TOML/JSON converter)." />
+  <link rel="icon" href="data:," />
+  <title>Data Format Workbench</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f7f8;
+      --surface: #ffffff;
+      --surface-2: #edf2f3;
+      --ink: #172225;
+      --muted: #54666b;
+      --line: #d7e0e2;
+      --accent: #067c72;
+      --accent-ink: #ffffff;
+      --danger: #d93025;
+      --warning: #f29900;
+
+      --ui-font: "Outfit", sans-serif;
+      --mono-font: "JetBrains Mono", monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111415;
+        --surface: #1e2528;
+        --surface-2: #283135;
+        --ink: #e8eef0;
+        --muted: #95a3a7;
+        --line: #364448;
+        --accent: #09a396;
+        --accent-ink: #000000;
+        --danger: #f28b82;
+        --warning: #fdd663;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--ui-font);
+      background: var(--bg);
+      color: var(--ink);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 1rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      flex-direction: column;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        flex-direction: row;
+      }
+    }
+
+    .pane {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      background: var(--surface);
+    }
+
+    .pane-header {
+      padding: 0.5rem 1rem;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .resizer {
+      height: 4px;
+      background: var(--line);
+      cursor: row-resize;
+    }
+    @media (min-width: 768px) {
+      .resizer {
+        width: 4px;
+        height: auto;
+        cursor: col-resize;
+      }
+    }
+    .resizer:hover, .resizer:active {
+      background: var(--accent);
+    }
+
+    .pane-content {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100%;
+      border: none;
+      resize: none;
+      padding: 1rem;
+      font-family: var(--mono-font);
+      font-size: 0.875rem;
+      background: transparent;
+      color: var(--ink);
+      outline: none;
+      line-height: 1.5;
+    }
+
+    select, button, input[type="file"] {
+      font-family: var(--ui-font);
+      font-size: 0.875rem;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button {
+      background: var(--surface-2);
+    }
+
+    button:hover {
+      background: var(--line);
+    }
+
+    input[type="text"] {
+      font-family: var(--mono-font);
+      font-size: 0.875rem;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: 4px;
+      width: 100%;
+    }
+
+    .error-bar {
+      padding: 0.5rem 1rem;
+      background: var(--danger);
+      color: white;
+      font-family: var(--mono-font);
+      font-size: 0.875rem;
+      display: none;
+      flex-shrink: 0;
+    }
+    .error-bar.visible {
+      display: block;
+    }
+
+    .tree-view {
+      padding: 1rem;
+      font-family: var(--mono-font);
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    ul.tree-node {
+      list-style-type: none;
+      padding-left: 1.5rem;
+      margin: 0;
+    }
+
+    .tree-node > li {
+      position: relative;
+    }
+
+    .tree-toggle {
+      cursor: pointer;
+      user-select: none;
+      display: inline-block;
+      width: 1rem;
+      text-align: center;
+      margin-left: -1rem;
+    }
+
+    .tree-key {
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .tree-value.string { color: #0a7a3a; }
+    .tree-value.number { color: #d05a00; }
+    .tree-value.boolean { color: #a020f0; }
+    .tree-value.null { color: var(--muted); }
+
+    @media (prefers-color-scheme: dark) {
+      .tree-value.string { color: #4dc27f; }
+      .tree-value.number { color: #f48b3b; }
+      .tree-value.boolean { color: #c476f5; }
+    }
+
+    .tree-node.collapsed > li > ul {
+      display: none;
+    }
+    .tree-node.collapsed > li > .tree-toggle::after {
+      content: "▶";
+      font-size: 0.7em;
+    }
+    .tree-node > li > .tree-toggle::after {
+      content: "▼";
+      font-size: 0.7em;
+    }
+
+    .highlighted {
+      background-color: var(--warning);
+      color: black;
+      border-radius: 2px;
+    }
+
+    .selected-path-bar {
+      padding: 0.5rem 1rem;
+      background: var(--surface-2);
+      border-top: 1px solid var(--line);
+      font-family: var(--mono-font);
+      font-size: 0.75rem;
+      color: var(--muted);
+      flex-shrink: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Data Format Workbench</h1>
+</header>
+
+<div class="container" id="container">
+  <!-- Input Pane -->
+  <div class="pane" id="input-pane" style="flex: 1;">
+    <div class="pane-header">
+      <label for="file-upload" class="sr-only">Upload file</label>
+      <input type="file" id="file-upload" aria-label="Upload file" accept=".json,.yaml,.yml,.toml,text/plain" />
+      <button type="button" id="btn-format">Format</button>
+      <button type="button" id="btn-minify">Minify</button>
+      <span style="margin-left:auto; font-size:0.875rem; color:var(--muted);" id="detected-format">Auto-detecting...</span>
+    </div>
+    <div id="error-bar" class="error-bar"></div>
+    <div class="pane-content">
+      <textarea id="input-editor" aria-label="Input data" placeholder="Paste JSON, YAML, or TOML here..."></textarea>
+    </div>
+  </div>
+
+  <div class="resizer" id="resizer" role="separator" tabindex="0" aria-label="Resize panes"></div>
+
+  <!-- Output Pane -->
+  <div class="pane" id="output-pane" style="flex: 1;">
+    <div class="pane-header">
+      <select id="output-format" aria-label="Output format">
+        <option value="tree">Tree View</option>
+        <option value="json">JSON</option>
+        <option value="yaml">YAML</option>
+        <option value="toml">TOML</option>
+      </select>
+      <input type="text" id="jsonpath-input" placeholder="$.store.book[*].author" aria-label="JSONPath query" style="flex:1; display:none;" />
+      <button type="button" id="btn-copy">Copy</button>
+      <button type="button" id="btn-download">Download</button>
+    </div>
+    <div class="pane-content">
+      <div id="tree-container" class="tree-view"></div>
+      <textarea id="output-editor" aria-label="Output data" readonly style="display:none; background:var(--surface-2);"></textarea>
+    </div>
+    <div id="selected-path" class="selected-path-bar">Select a node to view its JSONPath</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsonpath-plus@10.0.7/dist/index-browser-umd.min.js"></script>
+<script type="module">
+  import * as smolToml from 'https://cdn.jsdelivr.net/npm/smol-toml@1.3.1/dist/index.js';
+  window.smolToml = smolToml;
+</script>
+
+<script>
+  // UI logic to come next
+</script>
+</body>
+</html>

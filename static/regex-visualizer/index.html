@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regex Visualizer and Tester</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.5; }
+        .input-group { margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        input[type="text"] { flex-grow: 1; padding: 0.5rem; font-family: monospace; font-size: 1.1rem; }
+        input[type="text"].flags { flex-grow: 0; width: 60px; }
+        textarea { width: 100%; height: 150px; font-family: monospace; padding: 0.5rem; box-sizing: border-box; }
+        .match-box { background: #f0f0f0; padding: 1rem; border-radius: 4px; font-family: monospace; margin-top: 1rem; white-space: pre-wrap; word-break: break-all; }
+        .highlight { background: #ffff00; color: #000; border-radius: 2px; }
+        .group-highlight { background: #ffcc00; }
+        .error { color: #cc0000; font-weight: bold; margin-top: 0.5rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+        th { background: #eee; }
+        @media (prefers-color-scheme: dark) {
+            body { background: #1a1a1a; color: #f0f0f0; }
+            input, textarea { background: #333; color: white; border: 1px solid #555; }
+            .match-box { background: #222; }
+            th { background: #333; }
+            th, td { border-color: #444; }
+            .highlight { background: #0066cc; color: #fff; }
+            .error { color: #ff6666; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Regex Visualizer and Tester</h1>
+    <p>Test JavaScript regular expressions against target text.</p>
+
+    <div class="input-group">
+        <strong>/</strong>
+        <input type="text" id="regex" value="([a-zA-Z0-9._-]+)@([a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)" placeholder="Expression">
+        <strong>/</strong>
+        <input type="text" id="flags" class="flags" value="g" placeholder="Flags (g,i,m)">
+    </div>
+
+    <label for="test-text"><strong>Test String:</strong></label>
+    <textarea id="test-text">Please contact support@example.com or sales@test-domain.org for help.</textarea>
+
+    <div id="error-msg" class="error"></div>
+
+    <h3>Matches:</h3>
+    <div id="highlighted" class="match-box"></div>
+
+    <table id="match-table" style="display: none;">
+        <thead>
+            <tr>
+                <th>Match #</th>
+                <th>Full Match</th>
+                <th>Groups</th>
+                <th>Index</th>
+            </tr>
+        </thead>
+        <tbody id="match-tbody"></tbody>
+    </table>
+
+    <script>
+        const regexEl = document.getElementById('regex');
+        const flagsEl = document.getElementById('flags');
+        const textEl = document.getElementById('test-text');
+        const highlightEl = document.getElementById('highlighted');
+        const errorEl = document.getElementById('error-msg');
+        const tableEl = document.getElementById('match-table');
+        const tbodyEl = document.getElementById('match-tbody');
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g,
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+
+        function runRegex() {
+            const pattern = regexEl.value;
+            const flags = flagsEl.value;
+            const text = textEl.value;
+
+            errorEl.textContent = '';
+            tableEl.style.display = 'none';
+            tbodyEl.innerHTML = '';
+
+            if (!pattern) {
+                highlightEl.textContent = text;
+                return;
+            }
+
+            let re;
+            try {
+                // Ensure 'g' flag is present if we want to find all matches,
+                // but respect user input if it's there
+                const safeFlags = flags.includes('g') ? flags : flags + 'g';
+                re = new RegExp(pattern, safeFlags);
+            } catch (e) {
+                errorEl.textContent = e.message;
+                highlightEl.textContent = text;
+                return;
+            }
+
+            const matches = [];
+            let match;
+            // Prevent infinite loops with zero-length matches
+            let lastIndex = -1;
+
+            while ((match = re.exec(text)) !== null) {
+                if (match.index === lastIndex) {
+                    re.lastIndex++;
+                } else {
+                    matches.push(match);
+                    lastIndex = match.index;
+                }
+            }
+
+            if (matches.length === 0) {
+                highlightEl.textContent = text;
+                return;
+            }
+
+            // Build highlighted HTML
+            let html = '';
+            let cursor = 0;
+
+            matches.forEach(m => {
+                html += escapeHTML(text.substring(cursor, m.index));
+                html += `<span class="highlight">${escapeHTML(m[0])}</span>`;
+                cursor = m.index + m[0].length;
+            });
+            html += escapeHTML(text.substring(cursor));
+            highlightEl.innerHTML = html;
+
+            // Build table
+            matches.forEach((m, i) => {
+                const tr = document.createElement('tr');
+
+                const tdNum = document.createElement('td');
+                tdNum.textContent = i + 1;
+
+                const tdFull = document.createElement('td');
+                tdFull.innerHTML = `<code>${escapeHTML(m[0])}</code>`;
+
+                const tdGroups = document.createElement('td');
+                if (m.length > 1) {
+                    const groups = Array.from(m).slice(1).map((g, gi) => `<strong>$${gi+1}:</strong> <code>${escapeHTML(g || '')}</code>`);
+                    tdGroups.innerHTML = groups.join('<br>');
+                } else {
+                    tdGroups.textContent = '-';
+                }
+
+                const tdIndex = document.createElement('td');
+                tdIndex.textContent = m.index;
+
+                tr.appendChild(tdNum);
+                tr.appendChild(tdFull);
+                tr.appendChild(tdGroups);
+                tr.appendChild(tdIndex);
+                tbodyEl.appendChild(tr);
+            });
+
+            tableEl.style.display = 'table';
+        }
+
+        regexEl.addEventListener('input', runRegex);
+        flagsEl.addEventListener('input', runRegex);
+        textEl.addEventListener('input', runRegex);
+
+        runRegex();
+    </script>
+</body>
+</html>

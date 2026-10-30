@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Layout Generator</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; flex-direction: column; }
+        header { padding: 1rem 2rem; background: #f0f0f0; border-bottom: 1px solid #ccc; }
+        .main { display: flex; flex: 1; overflow: hidden; }
+
+        .sidebar { width: 300px; padding: 1rem; background: #fafafa; border-right: 1px solid #ccc; overflow-y: auto; }
+        .canvas-area { flex: 1; padding: 2rem; background: #e0e0e0; display: flex; align-items: center; justify-content: center; }
+        .code-area { width: 300px; padding: 1rem; background: #222; color: #fff; overflow-y: auto; font-family: monospace; }
+
+        /* The dynamic container we manipulate */
+        #container { background: white; width: 100%; height: 100%; border: 2px dashed #999; box-sizing: border-box; }
+        .item { background: #0066cc; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid rgba(255,255,255,0.5); font-size: 1.5rem; }
+
+        .control-group { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #ddd; }
+        label { display: block; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        select, input { width: 100%; padding: 0.25rem; box-sizing: border-box; }
+        button { padding: 0.5rem 1rem; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-bottom: 0.5rem;}
+        button:hover { background: #0052a3; }
+
+        pre { margin: 0; white-space: pre-wrap; font-size: 0.85rem; }
+
+        @media (prefers-color-scheme: dark) {
+            body { background: #1a1a1a; color: #f0f0f0; }
+            header { background: #222; border-color: #444; }
+            .sidebar { background: #222; border-color: #444; }
+            .canvas-area { background: #111; }
+            .control-group { border-color: #444; }
+            select, input { background: #333; color: white; border: 1px solid #555; }
+            #container { background: #333; border-color: #666; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 style="margin:0; font-size: 1.5rem;">CSS Grid/Flexbox Generator</h1>
+    </header>
+
+    <div class="main">
+        <div class="sidebar">
+            <div class="control-group">
+                <label>Display Mode</label>
+                <select id="mode">
+                    <option value="flex">Flexbox</option>
+                    <option value="grid">Grid</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Items Count</label>
+                <input type="number" id="items" value="4" min="1" max="20">
+            </div>
+
+            <div class="control-group">
+                <label>Gap</label>
+                <input type="text" id="gap" value="1rem">
+            </div>
+
+            <!-- Flex Controls -->
+            <div id="flex-controls">
+                <div class="control-group">
+                    <label>Flex Direction</label>
+                    <select id="flex-direction">
+                        <option value="row">row</option>
+                        <option value="column">column</option>
+                        <option value="row-reverse">row-reverse</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Flex Wrap</label>
+                    <select id="flex-wrap">
+                        <option value="nowrap">nowrap</option>
+                        <option value="wrap">wrap</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Justify Content</label>
+                    <select id="justify-content">
+                        <option value="flex-start">flex-start</option>
+                        <option value="flex-end">flex-end</option>
+                        <option value="center">center</option>
+                        <option value="space-between">space-between</option>
+                        <option value="space-around">space-around</option>
+                        <option value="space-evenly">space-evenly</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Align Items</label>
+                    <select id="align-items">
+                        <option value="stretch">stretch</option>
+                        <option value="flex-start">flex-start</option>
+                        <option value="flex-end">flex-end</option>
+                        <option value="center">center</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Grid Controls -->
+            <div id="grid-controls" style="display:none;">
+                <div class="control-group">
+                    <label>Grid Template Columns</label>
+                    <input type="text" id="grid-cols" value="repeat(auto-fit, minmax(150px, 1fr))">
+                    <small style="color:#666; font-size:0.75rem;">e.g., 1fr 1fr 1fr, or repeat(3, 1fr)</small>
+                </div>
+                <div class="control-group">
+                    <label>Grid Template Rows</label>
+                    <input type="text" id="grid-rows" value="auto">
+                </div>
+                <div class="control-group">
+                    <label>Align Items</label>
+                    <select id="grid-align-items">
+                        <option value="stretch">stretch</option>
+                        <option value="start">start</option>
+                        <option value="end">end</option>
+                        <option value="center">center</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Justify Items</label>
+                    <select id="grid-justify-items">
+                        <option value="stretch">stretch</option>
+                        <option value="start">start</option>
+                        <option value="end">end</option>
+                        <option value="center">center</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="canvas-area">
+            <div id="container"></div>
+        </div>
+
+        <div class="code-area">
+            <h3>Generated CSS</h3>
+            <pre id="code-output"></pre>
+            <button onclick="copyCode()" style="margin-top:1rem;">Copy Code</button>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const codeOutput = document.getElementById('code-output');
+        const flexControls = document.getElementById('flex-controls');
+        const gridControls = document.getElementById('grid-controls');
+
+        function updateLayout() {
+            const mode = document.getElementById('mode').value;
+            const itemsCount = parseInt(document.getElementById('items').value) || 4;
+            const gap = document.getElementById('gap').value;
+
+            // Rebuild DOM
+            container.innerHTML = '';
+            for(let i=0; i<itemsCount; i++) {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.textContent = i + 1;
+                // Add min-height/width so flex items are visible even if empty
+                if (mode === 'flex') {
+                     div.style.padding = '1rem';
+                }
+                container.appendChild(div);
+            }
+
+            container.style.cssText = ''; // reset
+            container.style.display = mode;
+            container.style.gap = gap;
+
+            let css = `.container {\n  display: ${mode};\n  gap: ${gap};\n`;
+
+            if (mode === 'flex') {
+                flexControls.style.display = 'block';
+                gridControls.style.display = 'none';
+
+                const dir = document.getElementById('flex-direction').value;
+                const wrap = document.getElementById('flex-wrap').value;
+                const jc = document.getElementById('justify-content').value;
+                const ai = document.getElementById('align-items').value;
+
+                container.style.flexDirection = dir;
+                container.style.flexWrap = wrap;
+                container.style.justifyContent = jc;
+                container.style.alignItems = ai;
+
+                if (dir !== 'row') css += `  flex-direction: ${dir};\n`;
+                if (wrap !== 'nowrap') css += `  flex-wrap: ${wrap};\n`;
+                if (jc !== 'flex-start') css += `  justify-content: ${jc};\n`;
+                if (ai !== 'stretch') css += `  align-items: ${ai};\n`;
+
+            } else {
+                flexControls.style.display = 'none';
+                gridControls.style.display = 'block';
+
+                const cols = document.getElementById('grid-cols').value;
+                const rows = document.getElementById('grid-rows').value;
+                const ai = document.getElementById('grid-align-items').value;
+                const ji = document.getElementById('grid-justify-items').value;
+
+                container.style.gridTemplateColumns = cols;
+                container.style.gridTemplateRows = rows;
+                container.style.alignItems = ai;
+                container.style.justifyItems = ji;
+
+                if (cols) css += `  grid-template-columns: ${cols};\n`;
+                if (rows !== 'auto' && rows) css += `  grid-template-rows: ${rows};\n`;
+                if (ai !== 'stretch') css += `  align-items: ${ai};\n`;
+                if (ji !== 'stretch') css += `  justify-items: ${ji};\n`;
+            }
+
+            css += '}\n';
+            codeOutput.textContent = css;
+        }
+
+        // Add listeners to all inputs
+        document.querySelectorAll('input, select').forEach(el => {
+            el.addEventListener('input', updateLayout);
+        });
+
+        updateLayout();
+
+        function copyCode() {
+            navigator.clipboard.writeText(codeOutput.textContent).then(() => alert('CSS Copied!'));
+        }
+    </script>
+</body>
+</html>

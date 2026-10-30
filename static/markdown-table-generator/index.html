@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Table Generator/Formatter</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.5; }
+        textarea { width: 100%; height: 200px; margin-bottom: 1rem; font-family: monospace; padding: 0.5rem; }
+        button { padding: 0.5rem 1rem; cursor: pointer; background: #0066cc; color: white; border: none; border-radius: 4px; margin-right: 0.5rem; }
+        button:hover { background: #0052a3; }
+        .controls { margin-bottom: 1rem; }
+        .output-box { background: #f0f0f0; padding: 1rem; border-radius: 4px; white-space: pre; font-family: monospace; margin-top: 1rem; overflow-x: auto; }
+        @media (prefers-color-scheme: dark) {
+            body { background: #1a1a1a; color: #f0f0f0; }
+            .output-box { background: #333; }
+            textarea { background: #333; color: white; border: 1px solid #555; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Markdown Table Generator/Formatter</h1>
+    <p>Paste CSV or raw Markdown table text below to format it into a clean, aligned Markdown table.</p>
+
+    <textarea id="input" placeholder="Column 1,Column 2,Column 3&#10;Value A,Value B,Value C"></textarea>
+
+    <div class="controls">
+        <button onclick="formatCSV()">Format from CSV (Comma)</button>
+        <button onclick="formatTSV()">Format from TSV (Tab)</button>
+        <button onclick="formatMD()">Re-format Markdown Table</button>
+    </div>
+
+    <h3>Output:</h3>
+    <div id="output" class="output-box"></div>
+    <button onclick="copyOutput()" style="margin-top: 1rem;">Copy to Clipboard</button>
+
+    <script>
+        const inputEl = document.getElementById('input');
+        const outputEl = document.getElementById('output');
+
+        function generateTable(rows) {
+            if (rows.length === 0) return '';
+
+            // Calculate column widths
+            const colWidths = [];
+            rows.forEach(row => {
+                row.forEach((cell, i) => {
+                    const len = (cell || '').trim().length;
+                    colWidths[i] = Math.max(colWidths[i] || 3, len);
+                });
+            });
+
+            let out = '';
+
+            // Header
+            const headerRow = rows[0] || [];
+            out += '| ' + colWidths.map((w, i) => (headerRow[i] || '').trim().padEnd(w)).join(' | ') + ' |\n';
+
+            // Separator
+            out += '| ' + colWidths.map(w => '-'.repeat(w)).join(' | ') + ' |\n';
+
+            // Body
+            for (let r = 1; r < rows.length; r++) {
+                const row = rows[r];
+                // Skip separator row if it was parsed (like in re-format MD)
+                if (row.every(cell => cell.trim().match(/^[-:]+$/))) continue;
+
+                out += '| ' + colWidths.map((w, i) => (row[i] || '').trim().padEnd(w)).join(' | ') + ' |\n';
+            }
+
+            return out;
+        }
+
+        function formatCSV() {
+            const lines = inputEl.value.split('\n').filter(l => l.trim() !== '');
+            const rows = lines.map(l => l.split(','));
+            outputEl.textContent = generateTable(rows);
+        }
+
+        function formatTSV() {
+            const lines = inputEl.value.split('\n').filter(l => l.trim() !== '');
+            const rows = lines.map(l => l.split('\t'));
+            outputEl.textContent = generateTable(rows);
+        }
+
+        function formatMD() {
+            const lines = inputEl.value.split('\n').filter(l => l.trim() !== '');
+            const rows = lines.map(l => {
+                const parts = l.split('|');
+                // Remove first and last empty elements if string starts/ends with |
+                if (parts.length > 0 && parts[0].trim() === '') parts.shift();
+                if (parts.length > 0 && parts[parts.length-1].trim() === '') parts.pop();
+                return parts;
+            });
+            outputEl.textContent = generateTable(rows);
+        }
+
+        function copyOutput() {
+            navigator.clipboard.writeText(outputEl.textContent).then(() => {
+                alert('Copied!');
+            });
+        }
+    </script>
+</body>
+</html>

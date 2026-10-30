@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semantic Token Mapper & Contrast Checker</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.5; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .token-group { border: 1px solid #ccc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .color-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+        input[type="color"] { width: 50px; height: 40px; padding: 0; border: none; }
+        input[type="text"] { padding: 0.5rem; flex-grow: 1; }
+        .preview-box { padding: 1rem; border-radius: 4px; font-weight: bold; text-align: center; margin-top: 1rem; border: 1px solid #ccc; }
+        .result { margin-top: 0.5rem; font-size: 0.9rem; }
+        .pass { color: #008800; font-weight: bold; }
+        .fail { color: #cc0000; font-weight: bold; }
+        button { padding: 0.5rem 1rem; cursor: pointer; background: #0066cc; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #0052a3; }
+        @media (prefers-color-scheme: dark) {
+            body { background: #1a1a1a; color: #f0f0f0; }
+            .token-group { border-color: #444; background: #222; }
+            input[type="text"] { background: #333; color: white; border: 1px solid #555; }
+            .pass { color: #55ff55; }
+            .fail { color: #ff5555; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Semantic Token Mapper</h1>
+    <p>Map text colors to background colors and verify they meet WCAG AA (4.5:1) or AAA (7.1) contrast rules.</p>
+
+    <div id="tokens-container">
+        <!-- Tokens injected here -->
+    </div>
+
+    <button onclick="addPair()">+ Add Color Pair</button>
+
+    <script>
+        const container = document.getElementById('tokens-container');
+        let idCounter = 0;
+
+        // Calculate relative luminance
+        function getLuminance(hex) {
+            const rgb = parseInt(hex.slice(1), 16);
+            const r = (rgb >> 16) & 0xff;
+            const g = (rgb >>  8) & 0xff;
+            const b = (rgb >>  0) & 0xff;
+
+            const a = [r, g, b].map(function (v) {
+                v /= 255;
+                return v <= 0.03928 ? v / 12.92 : Math.pow( (v + 0.055) / 1.055, 2.4 );
+            });
+            return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+        }
+
+        function getContrast(hex1, hex2) {
+            const l1 = getLuminance(hex1);
+            const l2 = getLuminance(hex2);
+            const lightest = Math.max(l1, l2);
+            const darkest = Math.min(l1, l2);
+            return (lightest + 0.05) / (darkest + 0.05);
+        }
+
+        function createPair(bgHex = '#ffffff', textHex = '#000000', name = 'Primary Button') {
+            const id = idCounter++;
+            const div = document.createElement('div');
+            div.className = 'token-group';
+
+            div.innerHTML = `
+                <input type="text" id="name-${id}" value="${name}" placeholder="Token Name">
+                <div class="color-row" style="margin-top: 1rem;">
+                    <label>Background:</label>
+                    <input type="color" id="bg-${id}" value="${bgHex}">
+                    <input type="text" id="bg-txt-${id}" value="${bgHex}">
+                </div>
+                <div class="color-row">
+                    <label>Text / Icon:</label>
+                    <input type="color" id="fg-${id}" value="${textHex}">
+                    <input type="text" id="fg-txt-${id}" value="${textHex}">
+                </div>
+                <div id="preview-${id}" class="preview-box" style="background: ${bgHex}; color: ${textHex}">
+                    Preview Text
+                </div>
+                <div id="result-${id}" class="result"></div>
+            `;
+            container.appendChild(div);
+
+            const bgColor = document.getElementById(`bg-${id}`);
+            const bgTxt = document.getElementById(`bg-txt-${id}`);
+            const fgColor = document.getElementById(`fg-${id}`);
+            const fgTxt = document.getElementById(`fg-txt-${id}`);
+
+            function update() {
+                const bg = bgColor.value;
+                const fg = fgColor.value;
+                bgTxt.value = bg;
+                fgTxt.value = fg;
+
+                const preview = document.getElementById(`preview-${id}`);
+                preview.style.background = bg;
+                preview.style.color = fg;
+
+                const ratio = getContrast(bg, fg).toFixed(2);
+                let text = `Contrast Ratio: ${ratio}:1 &mdash; `;
+                if (ratio >= 7) text += `<span class="pass">AAA Pass</span>`;
+                else if (ratio >= 4.5) text += `<span class="pass">AA Pass</span>`;
+                else if (ratio >= 3) text += `<span class="fail">Large Text Only (AA)</span>`;
+                else text += `<span class="fail">Fail</span>`;
+
+                document.getElementById(`result-${id}`).innerHTML = text;
+            }
+
+            // Sync color picker to text
+            bgColor.addEventListener('input', update);
+            fgColor.addEventListener('input', update);
+
+            // Sync text to color picker
+            bgTxt.addEventListener('input', (e) => {
+                if(/^#[0-9A-F]{6}$/i.test(e.target.value)) { bgColor.value = e.target.value; update(); }
+            });
+            fgTxt.addEventListener('input', (e) => {
+                if(/^#[0-9A-F]{6}$/i.test(e.target.value)) { fgColor.value = e.target.value; update(); }
+            });
+
+            update();
+        }
+
+        function addPair() {
+            createPair();
+        }
+
+        // Initialize with examples
+        createPair('#0066cc', '#ffffff', 'Primary Action');
+        createPair('#f0f0f0', '#333333', 'Secondary Surface');
+        createPair('#ff0000', '#ffffff', 'Destructive (Failing Example)');
+    </script>
+</body>
+</html>

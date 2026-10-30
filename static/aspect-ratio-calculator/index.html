@@ -14,42 +14,42 @@
   <style>
     :root {
       color-scheme: light dark;
-      --paper: #f4f7f8;
-      --surface: #ffffff;
-      --surface-2: #edf2f3;
-      --ink: #172225;
-      --muted: #54666b;
-      --faint: #81959a;
-      --line: #d7e0e2;
-      --line-strong: #a4b3b7;
-      --accent: #067c72;
+      --paper: #e9eaed;
+      --surface: #f7f7f9;
+      --surface-2: #ffffff;
+      --ink: #1d2126;
+      --muted: #5b6068;
+      --faint: #62666e;
+      --line: #d6d7dc;
+      --line-strong: #bfc2ca;
+      --accent: #2f6db3;
       --accent-ink: #ffffff;
-      --accent-soft: #d8f1ed;
-      --code: #152124;
-      --code-ink: #d9e7e8;
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      --focus: #f39c12;
+      --accent-soft: rgba(47, 109, 179, 0.12);
+      --code: #ffffff;
+      --code-ink: #1d2126;
+      --shadow: 0 1px 2px rgba(24, 28, 38, 0.05), 0 10px 28px rgba(24, 28, 38, 0.07);
+      --focus: #2f6db3;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --paper: #0f1719;
-        --surface: #162124;
-        --surface-2: #1e2c2f;
-        --ink: #e7eeee;
-        --muted: #adbdc0;
-        --faint: #7a8b8f;
-        --line: #314145;
-        --line-strong: #4a5c61;
-        --accent: #58c8bb;
-        --accent-ink: #082c28;
-        --accent-soft: #173d3a;
-        --code: #091113;
-        --code-ink: #d5e4e5;
-        --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        --focus: #ffad66;
+        --paper: #121316;
+        --surface: #1a1b1f;
+        --surface-2: #222329;
+        --ink: #eceef2;
+        --muted: #a2a6af;
+        --faint: #9ba0aa;
+        --line: #2d2f36;
+        --line-strong: #3d404a;
+        --accent: #7db0e6;
+        --accent-ink: #0d1724;
+        --accent-soft: rgba(125, 176, 230, 0.18);
+        --code: #222329;
+        --code-ink: #eceef2;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 28px rgba(0, 0, 0, 0.35);
+        --focus: #7db0e6;
       }
     }
-    html { box-sizing: border-box; font-family: "Outfit", sans-serif; font-size: 16px; line-height: 1.5; color: var(--ink); background: var(--paper); }
+    html { box-sizing: border-box; font-family: "Outfit", sans-serif; font-size: 15px; line-height: 1.45; color: var(--ink); background: var(--paper); }
     *, *::before, *::after { box-sizing: inherit; }
     body { margin: 0; padding: 2rem; max-width: 900px; margin-inline: auto; }
     h1, h2, h3 { margin-top: 0; font-weight: 600; }
@@ -57,7 +57,7 @@
     p.desc { color: var(--muted); margin-bottom: 2rem; font-size: 1.1rem; }
     .mono { font-family: "JetBrains Mono", monospace; }
 
-    .panel { background: var(--surface); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--line); margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+    .panel { background: var(--surface); padding: 1.5rem; border-radius: 14px; border: 1px solid var(--line); margin-bottom: 1.5rem; box-shadow: var(--shadow); }
     .row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: flex-end; }
     .field { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; min-width: 120px; }
     label { font-weight: 500; font-size: 0.9rem; color: var(--muted); }
@@ -66,7 +66,7 @@
       font-size: 1rem;
       padding: 0.5rem;
       border: 1px solid var(--line-strong);
-      border-radius: 4px;
+      border-radius: 9px;
       background: var(--surface-2);
       color: var(--ink);
       width: 100%;
@@ -80,7 +80,7 @@
       background: var(--surface-2);
       border: 1px solid var(--line-strong);
       color: var(--ink);
-      border-radius: 4px;
+      border-radius: 9px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -90,7 +90,7 @@
     button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
     button.primary:hover { filter: brightness(1.1); }
 
-    .result-box { display: flex; gap: 2rem; background: var(--surface-2); padding: 1rem; border-radius: 4px; font-family: "JetBrains Mono", monospace; }
+    .result-box { display: flex; gap: 2rem; background: var(--surface-2); padding: 1rem; border-radius: 9px; font-family: "JetBrains Mono", monospace; }
     .result-item { display: flex; flex-direction: column; }
     .result-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; font-family: "Outfit", sans-serif; letter-spacing: 0.05em;}
     .result-value { font-size: 1.25rem; font-weight: 600; }
@@ -110,7 +110,7 @@
       height: 300px;
       background: var(--surface-2);
       border: 1px dashed var(--line-strong);
-      border-radius: 4px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;

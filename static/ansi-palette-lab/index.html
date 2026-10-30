@@ -14,6 +14,9 @@
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="data:," />
   <title>ANSI Palette Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <style>
     @font-face {
@@ -24,26 +27,24 @@
       font-display: swap;
     }
 
-    /* Standard Google Fonts import for Outfit (assuming standard usage without downloading) */
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap');
 
     :root {
       color-scheme: light dark;
-      --bg: #f4f7f8;
-      --surface: #ffffff;
-      --surface-2: #edf2f3;
-      --ink: #172225;
-      --muted: #54666b;
-      --line: #d7e0e2;
-      --accent: #067c72;
+      --bg: #e9eaed;
+      --surface: #f7f7f9;
+      --surface-2: #ffffff;
+      --ink: #1d2126;
+      --muted: #5b6068;
+      --line: #d6d7dc;
+      --accent: #2f6db3;
       --accent-ink: #ffffff;
-      --accent-soft: #d8f1ed;
-      --code-bg: #152124;
-      --code-ink: #d9e7e8;
-      --shadow: 0 18px 48px rgba(28, 49, 52, 0.08);
-      --focus: #e37726;
-      --radius-lg: 20px;
-      --radius-md: 12px;
+      --accent-soft: rgba(47, 109, 179, 0.12);
+      --code-bg: #ffffff;
+      --code-ink: #1d2126;
+      --shadow: 0 1px 2px rgba(24, 28, 38, 0.05), 0 10px 28px rgba(24, 28, 38, 0.07);
+      --focus: #2f6db3;
+      --radius-lg: 14px;
+      --radius-md: 14px;
 
       --ui-font: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       --mono-font: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -51,19 +52,19 @@
 
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
-        --bg: #0f1719;
-        --surface: #162124;
-        --surface-2: #1e2c2f;
-        --ink: #e7eeee;
-        --muted: #adbdc0;
-        --line: #314145;
-        --accent: #58c8bb;
-        --accent-ink: #082c28;
-        --accent-soft: #173d3a;
-        --code-bg: #091113;
-        --code-ink: #d5e4e5;
-        --shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
-        --focus: #ffad66;
+        --bg: #121316;
+        --surface: #1a1b1f;
+        --surface-2: #222329;
+        --ink: #eceef2;
+        --muted: #a2a6af;
+        --line: #2d2f36;
+        --accent: #7db0e6;
+        --accent-ink: #0d1724;
+        --accent-soft: rgba(125, 176, 230, 0.18);
+        --code-bg: #222329;
+        --code-ink: #eceef2;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 28px rgba(0, 0, 0, 0.35);
+        --focus: #7db0e6;
       }
     }
 
@@ -73,8 +74,8 @@
       background: var(--bg);
       color: var(--ink);
       font-family: var(--ui-font);
-      font-size: 16px;
-      line-height: 1.5;
+      font-size: 15px;
+      line-height: 1.45;
     }
 
     button, input, select, textarea { font: inherit; }
@@ -202,7 +203,7 @@
     .text-input {
       padding: 8px 12px;
       border: 1px solid var(--line);
-      border-radius: 6px;
+      border-radius: 9px;
       background: var(--surface);
       color: var(--ink);
     }
@@ -267,7 +268,7 @@
       overflow: hidden;
       font-family: var(--mono-font);
       font-size: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow);
     }
 
     .mock-header {
@@ -324,7 +325,7 @@
     .btn {
       padding: 8px 16px;
       border: 1px solid var(--line);
-      border-radius: 6px;
+      border-radius: 9px;
       background: var(--surface);
       color: var(--ink);
       cursor: pointer;
@@ -400,7 +401,7 @@
       background: var(--code-bg);
       color: var(--code-ink);
       border: 1px solid var(--line);
-      border-radius: 6px;
+      border-radius: 9px;
       resize: vertical;
     }
 

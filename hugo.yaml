@@ -122,6 +122,11 @@ params:
           desc: "Five machines as interactive isometric figures: a quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine and a quadruped robot — each with a dark and a light build."
           url: "anatomy/"
           writeup: "blog/anatomy-machines/"
+        - name: "Hugo Frontmatter Doctor"
+          kind: "Utility"
+          desc: "A tool to validate and auto-fix Hugo Markdown frontmatter against the specific lint rules used by The BlackCat."
+          url: "frontmatter-doctor/"
+          writeup: "library/tools/frontmatter-doctor/"
     - group: "Running on Online Tools"
       items:
         - name: "Color Token Workshop"

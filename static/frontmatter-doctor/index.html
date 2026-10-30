@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Hugo frontmatter doctor. Check your Markdown frontmatter against The BlackCat's lint rules, and auto-fix the results." />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400..700&family=JetBrains+Mono:wght@100..800&display=swap" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400..700&family=JetBrains+Mono:wght@100..800&display=swap" rel="stylesheet" />
+  <title>Hugo Frontmatter Doctor</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f7f8;
+      --surface: #ffffff;
+      --surface-2: #edf2f3;
+      --ink: #172225;
+      --muted: #54666b;
+      --line: #d7e0e2;
+      --accent: #067c72;
+      --accent-ink: #ffffff;
+      --accent-soft: #d8f1ed;
+      --warn: #9a6500;
+      --warn-bg: #fff5e0;
+      --error: #c52929;
+      --error-bg: #fde8e8;
+      --code-bg: #152124;
+      --code-ink: #d9e7e8;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111415;
+        --surface: #181d1e;
+        --surface-2: #212729;
+        --ink: #d9e7e8;
+        --muted: #8c9da0;
+        --line: #2d3639;
+        --accent: #11a99d;
+        --accent-ink: #002d29;
+        --accent-soft: #1c3c3a;
+        --warn: #f2a900;
+        --warn-bg: #3a2900;
+        --error: #ff5c5c;
+        --error-bg: #4a1313;
+        --code-bg: #152124;
+        --code-ink: #d9e7e8;
+      }
+    }
+    html { box-sizing: border-box; }
+    *, *:before, *:after { box-sizing: inherit; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Outfit", sans-serif;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+    code, pre, textarea, .mono {
+      font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    button, input, select, textarea { font: inherit; color: inherit; }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-weight: 600;
+      font-size: clamp(2rem, 5vw, 3rem);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+    p.desc {
+      color: var(--muted);
+      margin: 0 0 30px;
+      font-size: 1.1rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    .card h2 {
+      margin: 0 0 15px;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .field-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      resize: vertical;
+      font-size: 14px;
+    }
+    textarea:focus, select:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    .row {
+      display: flex;
+      gap: 15px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    select {
+      padding: 8px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      font-size: 16px;
+      font-family: inherit;
+    }
+
+    button {
+      background: var(--accent);
+      color: var(--accent-ink);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    button:hover {
+      filter: brightness(1.1);
+    }
+    button.secondary {
+      background: var(--surface-2);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .report {
+      margin-top: 20px;
+      display: none;
+    }
+    .report.active {
+      display: block;
+    }
+    .issue-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px;
+    }
+    .issue {
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+    .issue.error {
+      background: var(--error-bg);
+      color: var(--error);
+      border-left: 4px solid var(--error);
+    }
+    .issue.warn {
+      background: var(--warn-bg);
+      color: var(--warn);
+      border-left: 4px solid var(--warn);
+    }
+    .issue.ok {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-left: 4px solid var(--accent);
+    }
+
+    .fixed-box {
+      margin-top: 20px;
+      display: none;
+    }
+    .fixed-box.active {
+      display: block;
+    }
+    .fixed-box pre {
+      background: var(--code-bg);
+      color: var(--code-ink);
+      padding: 16px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    .action-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Frontmatter Doctor</h1>
+    <p class="desc">Paste a Markdown file or just its frontmatter to check it against the site's rules.</p>
+
+    <div class="card">
+      <div class="field-group">
+        <label for="fm-input">Content or Frontmatter</label>
+        <textarea id="fm-input" spellcheck="false" placeholder="---
+title: ...
+---
+Body text..."></textarea>
+      </div>
+      <div class="row">
+        <button id="btn-check">Check rules</button>
+        <button id="btn-clear" class="secondary">Clear</button>
+      </div>
+    </div>
+
+    <div class="report card" id="report-card">
+      <h2>Report</h2>
+      <ul class="issue-list" id="issue-list"></ul>
+    </div>
+
+    <div class="fixed-box card" id="fixed-card">
+      <h2>Fixed Version</h2>
+      <p style="font-size: 0.9rem; margin-top: 0; color: var(--muted);">Review the suggested changes.</p>
+      <pre id="fixed-output"></pre>
+      <div class="action-bar">
+        <button id="btn-copy">Copy to clipboard</button>
+        <button id="btn-download" class="secondary">Download .md</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Generate starting block</h2>
+      <p style="font-size: 0.9rem; margin-top: 0; color: var(--muted);">Start a new file with valid frontmatter.</p>
+      <div class="row">
+        <div style="flex: 1; max-width: 250px;">
+          <label for="gen-type" class="visually-hidden">Content Type</label>
+          <select id="gen-type" style="width: 100%;">
+            <option value="bookmark">Bookmark</option>
+            <option value="skill">Skill</option>
+            <option value="article">Article</option>
+            <option value="note">Note</option>
+            <option value="project">Project</option>
+            <option value="collection">Collection</option>
+            <option value="reference">Reference</option>
+          </select>
+        </div>
+        <button id="btn-generate" class="secondary">Generate</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+  <script>
+    "use strict";
+
+    // UI Elements
+    const input = document.getElementById("fm-input");
+    const btnCheck = document.getElementById("btn-check");
+    const btnClear = document.getElementById("btn-clear");
+    const reportCard = document.getElementById("report-card");
+    const issueList = document.getElementById("issue-list");
+    const fixedCard = document.getElementById("fixed-card");
+    const fixedOutput = document.getElementById("fixed-output");
+    const btnCopy = document.getElementById("btn-copy");
+    const btnDownload = document.getElementById("btn-download");
+    const genType = document.getElementById("gen-type");
+    const btnGenerate = document.getElementById("btn-generate");
+
+    // Extract frontmatter block and body from raw text
+    function parseDocument(text) {
+      const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+      if (!match) return { rawFm: null, body: text };
+      return { rawFm: match[1], body: match[2] || "" };
+    }
+
+    // Try parsing YAML
+    function getYaml(rawFm) {
+      if (!rawFm) return null;
+      try {
+        return jsyaml.load(rawFm);
+      } catch (e) {
+        return { _yamlError: e.message };
+      }
+    }
+
+    // Load from local storage
+    if (localStorage.getItem("doctor_input")) {
+      input.value = localStorage.getItem("doctor_input");
+    }
+
+    // Save to local storage on change
+    input.addEventListener("input", () => {
+      localStorage.setItem("doctor_input", input.value);
+    });
+
+    btnClear.addEventListener("click", () => {
+      input.value = "";
+      localStorage.removeItem("doctor_input");
+      reportCard.classList.remove("active");
+      fixedCard.classList.remove("active");
+    });
+
+    const TYPES = ["bookmark", "skill", "article", "note", "project", "collection", "reference"];
+    const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+    function validate(fm) {
+      const issues = [];
+
+      if ("url" in fm) issues.push({ type: "error", msg: "`url` is reserved by Hugo; use `source`" });
+      if ("type" in fm) issues.push({ type: "error", msg: "`type` is reserved by Hugo; use `contenttype`" });
+
+      if (fm.source !== undefined && fm.source !== null && fm.source !== "") {
+        if (typeof fm.source !== "string" || (!fm.source.startsWith("http://") && !fm.source.startsWith("https://"))) {
+          issues.push({ type: "error", msg: "`source` must be an absolute http(s) URL" });
+        }
+      }
+
+      if (fm.contenttype !== undefined) {
+        if (!TYPES.includes(fm.contenttype)) {
+          issues.push({ type: "error", msg: `Unknown contenttype '${fm.contenttype}'. Allowed: ${TYPES.join(', ')}` });
+        }
+      } else {
+        issues.push({ type: "error", msg: "Missing `contenttype`" });
+      }
+
+      if (!fm.title) {
+        issues.push({ type: "error", msg: "Missing `title`" });
+      }
+
+      ["tags", "topics", "related"].forEach(k => {
+        if (fm[k] !== undefined && fm[k] !== null) {
+          if (!Array.isArray(fm[k])) issues.push({ type: "error", msg: `\`${k}\` must be a list` });
+        }
+      });
+
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      let cDate = null, uDate = null;
+
+      ["created", "updated"].forEach(k => {
+        if (fm[k] !== undefined && fm[k] !== null) {
+          let str = fm[k];
+          if (str instanceof Date) {
+            str = str.toISOString().split("T")[0];
+          }
+          if (typeof str !== "string" || !dateRegex.test(str)) {
+            issues.push({ type: "error", msg: `\`${k}\` must be a YYYY-MM-DD date` });
+          } else {
+            if (k === "created") cDate = str;
+            if (k === "updated") uDate = str;
+          }
+        }
+      });
+
+      if (cDate && uDate && uDate < cDate) {
+        issues.push({ type: "error", msg: `\`updated\` (${uDate}) is before \`created\` (${cDate})` });
+      }
+
+      if (!fm.description) {
+        issues.push({ type: "warn", msg: "Missing `description` (used on cards, search and by agents)" });
+      }
+      if (!cDate) {
+        issues.push({ type: "warn", msg: "Missing `created` date" });
+      }
+      if (fm.draft === true) {
+        issues.push({ type: "warn", msg: "`draft: true` (hidden from the site)" });
+      }
+
+      ["tags", "topics"].forEach(k => {
+        const arr = fm[k];
+        if (Array.isArray(arr)) {
+          arr.forEach(t => {
+            if (!KEBAB.test(String(t))) {
+              issues.push({ type: "warn", msg: `${k.slice(0, -1)} '${t}' is not lowercase-kebab-case` });
+            }
+          });
+        }
+      });
+
+      return issues;
+    }
+
+    function fixKebab(str) {
+      return String(str).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    }
+
+    function formatDate(val) {
+      if (val instanceof Date) return val.toISOString().split("T")[0];
+      if (typeof val === "string") {
+        const m = val.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (m) return m[1];
+      }
+      return new Date().toISOString().split("T")[0];
+    }
+
+    function generateFix(fm, body) {
+      const fixed = {};
+      const order = ["title", "contenttype", "description", "source", "topics", "tags", "status", "created", "updated", "related", "excludesearch", "draft", "weight", "language", "stars", "github", "pinned", "featured", "collect"];
+
+      // Auto-fix mappings
+      if (fm.url && !fm.source) {
+        fixed.source = fm.url;
+      }
+      if (fm.type && !fm.contenttype) {
+        fixed.contenttype = fm.type;
+      }
+
+      // Copy over and fix
+      Object.keys(fm).forEach(k => {
+        if (k === "url" || k === "type") return;
+
+        let val = fm[k];
+        if (k === "tags" || k === "topics") {
+          if (Array.isArray(val)) {
+            val = val.map(fixKebab);
+          } else if (typeof val === "string") {
+            val = val.split(",").map(s => fixKebab(s.trim()));
+          }
+        }
+        if (k === "created" || k === "updated") {
+           val = formatDate(val);
+        }
+        fixed[k] = val;
+      });
+
+      // Ensure required
+      if (!fixed.title) fixed.title = "Replace Title";
+      if (!fixed.contenttype || !TYPES.includes(fixed.contenttype)) fixed.contenttype = "bookmark";
+      if (!fixed.description) fixed.description = "";
+      if (!fixed.created) fixed.created = new Date().toISOString().split("T")[0];
+      if (!fixed.updated) fixed.updated = fixed.created;
+
+      // Ensure arrays
+      if (fixed.tags && !Array.isArray(fixed.tags)) fixed.tags = [fixed.tags];
+      if (fixed.topics && !Array.isArray(fixed.topics)) fixed.topics = [fixed.topics];
+
+      // Reorder
+      const ordered = {};
+      order.forEach(k => {
+        if (k in fixed) {
+          ordered[k] = fixed[k];
+          delete fixed[k];
+        }
+      });
+      Object.assign(ordered, fixed); // add any remaining custom fields
+
+      let out = "---\n";
+      out += jsyaml.dump(ordered, { quotingType: '"', forceQuotes: false, lineWidth: 100 });
+      out += "---\n";
+      if (body) {
+         out += "\n" + body.trimStart();
+      }
+
+      fixedOutput.textContent = out;
+      fixedCard.classList.add("active");
+    }
+
+    btnCheck.addEventListener("click", () => {
+      const text = input.value.trim();
+      if (!text) return;
+
+      let rawFm = text;
+      let body = "";
+      if (text.startsWith("---")) {
+        const parsed = parseDocument(text);
+        rawFm = parsed.rawFm;
+        body = parsed.body;
+      }
+
+      const fm = getYaml(rawFm);
+      issueList.innerHTML = "";
+      reportCard.classList.add("active");
+      fixedCard.classList.remove("active");
+
+      if (!fm) {
+        issueList.innerHTML = '<li class="issue error">No frontmatter found or empty.</li>';
+        return;
+      }
+
+      if (fm._yamlError) {
+        issueList.innerHTML = `<li class="issue error">Invalid YAML: ${fm._yamlError}</li>`;
+        return;
+      }
+
+      const issues = validate(fm);
+
+      if (issues.length === 0) {
+        issueList.innerHTML = '<li class="issue ok">No issues found. Frontmatter is valid!</li>';
+      } else {
+        issues.forEach(iss => {
+          const li = document.createElement("li");
+          li.className = `issue ${iss.type}`;
+          li.textContent = iss.msg;
+          issueList.appendChild(li);
+        });
+      }
+
+      generateFix(fm, body);
+    });
+
+    // Copy
+    btnCopy.addEventListener("click", () => {
+      navigator.clipboard.writeText(fixedOutput.textContent).then(() => {
+        const old = btnCopy.textContent;
+        btnCopy.textContent = "Copied!";
+        setTimeout(() => btnCopy.textContent = old, 2000);
+      });
+    });
+
+    // Download
+    btnDownload.addEventListener("click", () => {
+      const blob = new Blob([fixedOutput.textContent], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "fixed.md";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Generator
+    btnGenerate.addEventListener("click", () => {
+      const t = genType.value;
+      const today = new Date().toISOString().split("T")[0];
+      const base = {
+        title: "",
+        contenttype: t,
+        description: "",
+        source: t === "note" || t === "project" ? undefined : "",
+        topics: [],
+        tags: [],
+        status: "inbox",
+        created: today,
+        updated: today
+      };
+
+      // Cleanup empty optional
+      if (base.source === undefined) delete base.source;
+
+      let out = "---\n";
+      out += jsyaml.dump(base, { quotingType: '"', forceQuotes: false });
+      out += "---\n\n";
+
+      if (t === "bookmark") {
+        out += "## Why I saved this\n\n## Notes\n";
+      }
+
+      input.value = out;
+      localStorage.setItem("doctor_input", out);
+      btnCheck.click();
+    });
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="An in-browser SVG optimizer and previewer. Remove metadata, fix precision, minify IDs, and preview on multiple backgrounds." />
+  <meta property="og:site_name" content="The BlackCat" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="SVG Optimizer & Previewer" />
+  <meta property="og:description" content="Optimize SVG files directly in your browser. Preview on light, dark, and checkerboard backgrounds." />
+  <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/svg-optimizer/" />
+  <meta property="og:image" content="../og.png" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="data:," />
+  <title>SVG Optimizer & Previewer</title>
+  <style>
+    @font-face {
+      font-family: 'Outfit';
+      src: url('../fonts/Outfit.woff2') format('woff2');
+      font-weight: 100 900;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('../fonts/JetBrainsMono.woff2') format('woff2');
+      font-weight: 100 800;
+      font-display: swap;
+    }
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f7f8;
+      --surface: #ffffff;
+      --surface-2: #edf2f3;
+      --ink: #172225;
+      --muted: #54666b;
+      --line: #d7e0e2;
+      --accent: #9a4707;
+      --accent-ink: #ffffff;
+      --accent-soft: #faebd7;
+      --code-bg: #152124;
+      --code-ink: #d9e7e8;
+      --warning-bg: #fff3d6;
+      --warning-ink: #664800;
+      --shadow: 0 18px 48px rgba(28, 49, 52, 0.08);
+      --focus: #e37726;
+      --radius-lg: 20px;
+      --radius-md: 12px;
+      --font-ui: 'Outfit', system-ui, sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f1719;
+        --surface: #162124;
+        --surface-2: #1e2c2f;
+        --ink: #e7eeee;
+        --muted: #adbdc0;
+        --line: #314145;
+        --accent: #eba74f;
+        --accent-ink: #082c28;
+        --accent-soft: #382410;
+        --code-bg: #091113;
+        --code-ink: #e7eeee;
+        --warning-bg: #4a3c10;
+        --warning-ink: #f2e29f;
+        --shadow: 0 18px 48px rgba(0, 0, 0, 0.4);
+      }
+    }
+    [data-theme="dark"] {
+      --bg: #0f1719;
+      --surface: #162124;
+      --surface-2: #1e2c2f;
+      --ink: #e7eeee;
+      --muted: #adbdc0;
+      --line: #314145;
+      --accent: #eba74f;
+      --accent-ink: #082c28;
+      --accent-soft: #382410;
+      --code-bg: #091113;
+      --code-ink: #e7eeee;
+      --warning-bg: #4a3c10;
+      --warning-ink: #f2e29f;
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.4);
+    }
+    [data-theme="light"] {
+      --bg: #f4f7f8;
+      --surface: #ffffff;
+      --surface-2: #edf2f3;
+      --ink: #172225;
+      --muted: #54666b;
+      --line: #d7e0e2;
+      --accent: #9a4707;
+      --accent-ink: #ffffff;
+      --accent-soft: #faebd7;
+      --code-bg: #152124;
+      --code-ink: #d9e7e8;
+      --warning-bg: #fff3d6;
+      --warning-ink: #664800;
+      --shadow: 0 18px 48px rgba(28, 49, 52, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-ui);
+      line-height: 1.5;
+      padding: 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .theme-toggle {
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      padding: 6px 12px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .theme-toggle:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    textarea {
+      width: 100%;
+      height: 250px;
+      background: var(--code-bg);
+      color: var(--code-ink);
+      font-family: var(--font-code);
+      font-size: 13px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      resize: vertical;
+    }
+    textarea:focus {
+      outline: 2px solid var(--focus);
+      outline-offset: -2px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      background: var(--surface-2);
+      padding: 16px;
+      border-radius: var(--radius-md);
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    input[type="range"] {
+      accent-color: var(--accent);
+    }
+    input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 16px;
+      font-family: var(--font-code);
+      font-size: 14px;
+    }
+    .stat {
+      background: var(--surface-2);
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+    }
+
+    .warnings {
+      display: none;
+      background: var(--warning-bg);
+      color: var(--warning-ink);
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+    }
+    .warnings ul {
+      margin-left: 20px;
+      margin-top: 4px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+    button {
+      background: var(--surface-2);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button.primary {
+      background: var(--accent);
+      color: var(--accent-ink);
+      border-color: var(--accent);
+    }
+    button:hover {
+      background: var(--line);
+    }
+    button.primary:hover {
+      filter: brightness(1.1);
+    }
+    button:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .previews {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .preview-box {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .preview-header {
+      background: var(--surface-2);
+      padding: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      border-bottom: 1px solid var(--line);
+    }
+    .preview-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      min-height: 150px;
+    }
+    .preview-content svg {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .bg-light { background: #ffffff; }
+    .bg-dark { background: #162124; }
+    .bg-check {
+      background-image:
+        linear-gradient(45deg, #ccc 25%, transparent 25%),
+        linear-gradient(-45deg, #ccc 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #ccc 75%),
+        linear-gradient(-45deg, transparent 75%, #ccc 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      background-color: #eee;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    #file-upload {
+      display: none;
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SVG Optimizer & Previewer</h1>
+    <button class="theme-toggle" id="theme-btn">Theme: auto</button>
+  </header>
+
+  <div class="grid">
+    <!-- Input Panel -->
+    <div class="panel">
+      <h2>
+        Input SVG
+        <div class="actions">
+          <label for="file-upload" class="button-like" style="background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); padding: 8px 16px; border-radius: var(--radius-md); font-family: var(--font-ui); font-size: 14px; font-weight: 500; cursor: pointer;">Upload</label>
+          <input type="file" id="file-upload" accept=".svg" />
+        </div>
+      </h2>
+      <textarea id="input-svg" placeholder="Paste SVG code here..."></textarea>
+
+      <div class="controls">
+        <div class="control-group">
+          <label for="precision">Precision:</label>
+          <input type="range" id="precision" min="0" max="5" value="2" />
+          <span id="precision-val" style="font-family: var(--font-code); width: 20px;">2</span>
+        </div>
+        <div class="control-group">
+          <input type="checkbox" id="minify-ids" />
+          <label for="minify-ids">Minify IDs (can break external refs)</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output Panel -->
+    <div class="panel">
+      <h2>
+        Optimized SVG
+        <div class="actions">
+          <button id="copy-btn">Copy</button>
+          <button id="download-btn" class="primary">Download</button>
+        </div>
+      </h2>
+      <textarea id="output-svg" readonly></textarea>
+
+      <div class="stats">
+        <div class="stat">Before: <span id="size-before">0 B</span></div>
+        <div class="stat">After: <span id="size-after">0 B</span></div>
+        <div class="stat" style="color: var(--accent); font-weight: bold;">Saved: <span id="size-saved">0%</span></div>
+      </div>
+
+      <div class="warnings" id="warnings-box">
+        <strong>Warnings:</strong>
+        <ul id="warnings-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top: 24px;">
+    <h2>Previews</h2>
+    <div class="previews">
+      <div class="preview-box">
+        <div class="preview-header">Light</div>
+        <div class="preview-content bg-light" id="preview-light"></div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-header">Dark</div>
+        <div class="preview-content bg-dark" id="preview-dark"></div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-header">Checkerboard</div>
+        <div class="preview-content bg-check" id="preview-check"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const inputSvg = document.getElementById("input-svg");
+    const outputSvg = document.getElementById("output-svg");
+    const precisionSlider = document.getElementById("precision");
+    const precisionVal = document.getElementById("precision-val");
+    const minifyIdsCheck = document.getElementById("minify-ids");
+    const sizeBefore = document.getElementById("size-before");
+    const sizeAfter = document.getElementById("size-after");
+    const sizeSaved = document.getElementById("size-saved");
+    const warningsBox = document.getElementById("warnings-box");
+    const warningsList = document.getElementById("warnings-list");
+    const previews = [
+      document.getElementById("preview-light"),
+      document.getElementById("preview-dark"),
+      document.getElementById("preview-check")
+    ];
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function removeComments(node) {
+      for (let i = node.childNodes.length - 1; i >= 0; i--) {
+        const child = node.childNodes[i];
+        if (child.nodeType === Node.COMMENT_NODE) {
+          node.removeChild(child);
+        } else if (child.nodeType === Node.ELEMENT_NODE) {
+          removeComments(child);
+        }
+      }
+    }
+
+    function removeEmptyGroups(node) {
+      let removed = false;
+      for (let i = node.childNodes.length - 1; i >= 0; i--) {
+        const child = node.childNodes[i];
+        if (child.nodeType === Node.ELEMENT_NODE) {
+          if (removeEmptyGroups(child)) {
+            removed = true;
+          }
+          if (child.nodeName.toLowerCase() === 'g' && child.childNodes.length === 0 && child.attributes.length === 0) {
+            node.removeChild(child);
+            removed = true;
+          }
+        }
+      }
+      return removed;
+    }
+
+    function optimizeSVG(rawSvg, precision, minifyIds) {
+      const warnings = [];
+      const parser = new DOMParser();
+      // Try to parse as XML first to catch namespace errors
+      const xmlDoc = parser.parseFromString(rawSvg, "image/svg+xml");
+      const xmlError = xmlDoc.querySelector("parsererror");
+
+      if (xmlError) {
+        warnings.push("XML parsing error detected (e.g. missing namespace prefix). Optimizing what we can.");
+      }
+
+      // Now parse as HTML to salvage whatever is left despite missing namespaces
+      const doc = parser.parseFromString(rawSvg, "text/html");
+      const svgNode = doc.querySelector("svg");
+      if (!svgNode) {
+        throw new Error("Root element is not <svg>");
+      }
+
+      // Strip <script> and <metadata>
+      const scripts = svgNode.querySelectorAll("script");
+      if (scripts.length > 0) {
+        warnings.push("Removed &lt;script&gt; tags for safety.");
+        scripts.forEach(s => s.remove());
+      }
+
+      const metadataElements = svgNode.querySelectorAll("metadata");
+      metadataElements.forEach(m => m.remove());
+
+      // Strip comments
+      removeComments(svgNode);
+
+      // Strip on* event handlers (XSS protection)
+      const sanitizeEventHandlers = (node) => {
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+        const attrsToDrop = [];
+        for (let i = 0; i < node.attributes.length; i++) {
+          if (node.attributes[i].name.toLowerCase().startsWith('on')) {
+            attrsToDrop.push(node.attributes[i].name);
+          }
+        }
+        if (attrsToDrop.length > 0) {
+            warnings.push("Removed inline event handler(s) for safety.");
+        }
+        attrsToDrop.forEach(a => node.removeAttribute(a));
+        node.childNodes.forEach(sanitizeEventHandlers);
+      };
+      sanitizeEventHandlers(svgNode);
+
+      // Clean Editor Namespaces and Attributes
+      const editorNamespaces = ['inkscape', 'sodipodi', 'serif'];
+      const nsToRemove = [];
+      for (let i = 0; i < svgNode.attributes.length; i++) {
+        const attr = svgNode.attributes[i];
+        if (attr.name.startsWith('xmlns:')) {
+          const ns = attr.name.split(':')[1];
+          if (editorNamespaces.includes(ns)) {
+            nsToRemove.push(attr.name);
+          }
+        }
+      }
+      nsToRemove.forEach(ns => svgNode.removeAttribute(ns));
+
+      const removeEditorAttributes = (node) => {
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+        const attrsToDrop = [];
+        for (let i = 0; i < node.attributes.length; i++) {
+          const name = node.attributes[i].name;
+          if (editorNamespaces.some(ns => name.startsWith(ns + ':'))) {
+            attrsToDrop.push(name);
+          }
+        }
+        attrsToDrop.forEach(a => node.removeAttribute(a));
+
+        // Remove extraneous sodipodi/inkscape tags
+        if (editorNamespaces.some(ns => node.nodeName.startsWith(ns + ':'))) {
+           node.remove();
+           return;
+        }
+
+        node.childNodes.forEach(removeEditorAttributes);
+      };
+      removeEditorAttributes(svgNode);
+
+      // Flag external refs
+      const hasExternalRefs = Array.from(svgNode.querySelectorAll("*")).some(node => {
+        const href = node.getAttribute("href") || node.getAttribute("xlink:href");
+        return href && (href.startsWith("http://") || href.startsWith("https://"));
+      });
+      if (hasExternalRefs) {
+         warnings.push("SVG contains external HTTP/HTTPS references.");
+      }
+
+      // Empty groups
+      while (removeEmptyGroups(svgNode)) {}
+
+      // Minify IDs
+      if (minifyIds) {
+        let idCounter = 1;
+        const idMap = new Map();
+
+        const nodesWithId = svgNode.querySelectorAll("[id]");
+        nodesWithId.forEach(node => {
+           const oldId = node.getAttribute("id");
+           const newId = "a" + (idCounter++).toString(36);
+           idMap.set(oldId, newId);
+           node.setAttribute("id", newId);
+        });
+
+        if (idMap.size > 0) {
+           const walkAndReplaceRefs = (node) => {
+             if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+             // href="#..."
+             const hrefs = ["href", "xlink:href"];
+             hrefs.forEach(attr => {
+               const val = node.getAttribute(attr);
+               if (val && val.startsWith("#")) {
+                 const refId = val.substring(1);
+                 if (idMap.has(refId)) {
+                   node.setAttribute(attr, "#" + idMap.get(refId));
+                 }
+               }
+             });
+
+             // url(#...) in styles or attributes (like clip-path, fill, etc.)
+             for (let i = 0; i < node.attributes.length; i++) {
+                const attr = node.attributes[i];
+                if (attr.value.includes("url(#")) {
+                   let newVal = attr.value.replace(/url\(#([^)]+)\)/g, (match, p1) => {
+                      return idMap.has(p1) ? `url(#${idMap.get(p1)})` : match;
+                   });
+                   node.setAttribute(attr.name, newVal);
+                }
+             }
+             node.childNodes.forEach(walkAndReplaceRefs);
+           };
+           walkAndReplaceRefs(svgNode);
+        }
+      }
+
+      // Optimize precision (serialize and regex)
+      let outStr = new XMLSerializer().serializeToString(svgNode);
+
+      // Cleanup XMLSerializer artifact xmlns=""
+      outStr = outStr.replace(/\sxmlns=""/g, '');
+
+      // Precision formatting
+      if (precision < 5) {
+        // match numbers with decimals, negative signs, etc.
+        const numRegex = /([+-]?\d*\.\d+([eE][+-]?\d+)?)/g;
+        outStr = outStr.replace(numRegex, (match) => {
+          const n = parseFloat(match);
+          if (isNaN(n)) return match;
+          // round to precision
+          const mult = Math.pow(10, precision);
+          return (Math.round(n * mult) / mult).toString();
+        });
+      }
+
+      return { optimizedSvg: outStr, warnings };
+    }
+
+    function render() {
+      const raw = inputSvg.value.trim();
+      if (!raw) {
+        outputSvg.value = "";
+        sizeBefore.textContent = "0 B";
+        sizeAfter.textContent = "0 B";
+        sizeSaved.textContent = "0%";
+        warningsBox.style.display = "none";
+        warningsList.innerHTML = "";
+        previews.forEach(p => p.innerHTML = "");
+        return;
+      }
+
+      const precision = parseInt(precisionSlider.value, 10);
+      const minifyIds = minifyIdsCheck.checked;
+
+      try {
+        const { optimizedSvg, warnings } = optimizeSVG(raw, precision, minifyIds);
+
+        outputSvg.value = optimizedSvg;
+
+        // Update previews safely
+        previews.forEach(p => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(optimizedSvg, "image/svg+xml");
+          p.innerHTML = "";
+          p.appendChild(doc.documentElement);
+        });
+
+        // Stats
+        const beforeBytes = new Blob([raw]).size;
+        const afterBytes = new Blob([optimizedSvg]).size;
+        sizeBefore.textContent = formatBytes(beforeBytes);
+        sizeAfter.textContent = formatBytes(afterBytes);
+
+        if (beforeBytes > 0) {
+          const savings = Math.max(0, ((beforeBytes - afterBytes) / beforeBytes) * 100);
+          sizeSaved.textContent = savings.toFixed(1) + "%";
+        } else {
+          sizeSaved.textContent = "0%";
+        }
+
+        // Warnings
+        if (warnings.length > 0) {
+          warningsBox.style.display = "block";
+          warningsList.innerHTML = warnings.map(w => `<li>${w}</li>`).join('');
+        } else {
+          warningsBox.style.display = "none";
+          warningsList.innerHTML = "";
+        }
+      } catch (err) {
+        outputSvg.value = "Error parsing SVG:\n" + err.message;
+        previews.forEach(p => p.innerHTML = "");
+        warningsBox.style.display = "none";
+      }
+
+      saveState();
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem("svg-opt-input", inputSvg.value);
+        localStorage.setItem("svg-opt-precision", precisionSlider.value);
+        localStorage.setItem("svg-opt-minify", minifyIdsCheck.checked);
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const savedInput = localStorage.getItem("svg-opt-input");
+        if (savedInput) inputSvg.value = savedInput;
+
+        const savedPrec = localStorage.getItem("svg-opt-precision");
+        if (savedPrec) {
+          precisionSlider.value = savedPrec;
+          precisionVal.textContent = savedPrec;
+        }
+
+        const savedMinify = localStorage.getItem("svg-opt-minify");
+        if (savedMinify !== null) {
+          minifyIdsCheck.checked = savedMinify === "true";
+        }
+      } catch (e) {}
+    }
+
+    /* Event Listeners */
+    inputSvg.addEventListener("input", render);
+
+    precisionSlider.addEventListener("input", (e) => {
+      precisionVal.textContent = e.target.value;
+      render();
+    });
+
+    minifyIdsCheck.addEventListener("change", render);
+
+    document.getElementById("copy-btn").addEventListener("click", async (e) => {
+      const btn = e.target;
+      try {
+        await navigator.clipboard.writeText(outputSvg.value);
+        const originalText = btn.textContent;
+        btn.textContent = "Copied!";
+        setTimeout(() => btn.textContent = originalText, 2000);
+      } catch (err) {
+        btn.textContent = "Failed";
+      }
+    });
+
+    document.getElementById("download-btn").addEventListener("click", () => {
+      if (!outputSvg.value) return;
+      const blob = new Blob([outputSvg.value], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "optimized.svg";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById("file-upload").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        inputSvg.value = event.target.result;
+        render();
+      };
+      reader.readAsText(file);
+      e.target.value = ""; // reset
+    });
+
+    /* Theme */
+    const THEMES = ["auto", "light", "dark"];
+    const themeBtn = document.getElementById("theme-btn");
+
+    function applyTheme(theme) {
+      if (theme === "auto") delete document.documentElement.dataset.theme;
+      else document.documentElement.dataset.theme = theme;
+      try { localStorage.setItem("svg-opt-theme", theme); } catch (_) {}
+      themeBtn.textContent = "Theme: " + theme;
+    }
+
+    themeBtn.addEventListener("click", () => {
+      const current = document.documentElement.dataset.theme || "auto";
+      applyTheme(THEMES[(THEMES.indexOf(current) + 1) % THEMES.length]);
+    });
+
+    // Init
+    (function init() {
+      let theme = "auto";
+      try { theme = localStorage.getItem("svg-opt-theme") || "auto"; } catch (_) {}
+      applyTheme(theme);
+
+      loadState();
+      if (inputSvg.value) {
+        render();
+      }
+    })();
+  </script>
+</body>
+</html>

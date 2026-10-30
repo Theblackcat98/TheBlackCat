@@ -102,6 +102,11 @@ params:
   tools:
     - group: "Running on this site"
       items:
+        - name: "CSP Builder"
+          kind: "App"
+          desc: "A directive-by-directive Content-Security-Policy builder with live safety warnings, common presets, and a parser mode to explain existing policies."
+          url: "csp-builder/"
+          writeup: "library/tools/csp-builder/"
         - name: "AETHER atelier"
           kind: "Interactive exhibit"
           desc: "A mathematical and chromatic atelier: a cosine-palette synthesizer driving a Clifford strange-attractor visualizer, Albers simultaneous-contrast studies, and a codex on generative beauty."

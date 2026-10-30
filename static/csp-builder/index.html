@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Content Security Policy Builder — A directive-by-directive CSP builder with presets, warnings, and parser mode." />
+  <meta property="og:site_name" content="The BlackCat" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Content Security Policy Builder" />
+  <meta property="og:description" content="Build or parse a Content-Security-Policy (CSP) with interactive explanations and safety warnings." />
+  <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/csp-builder/" />
+  <meta property="og:image" content="../og.png" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="data:," />
+  <title>CSP Builder</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f7f8;
+      --surface: #ffffff;
+      --surface-2: #edf2f3;
+      --ink: #172225;
+      --muted: #54666b;
+      --line: #d7e0e2;
+      --accent: #067c72;
+      --accent-ink: #ffffff;
+      --code-bg: #152124;
+      --code-ink: #d9e7e8;
+      --warning-bg: #fff3d6;
+      --warning-ink: #664800;
+      --focus: #e37726;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f1719;
+        --surface: #162124;
+        --surface-2: #1e2c2f;
+        --ink: #e7eeee;
+        --muted: #adbdc0;
+        --line: #314145;
+        --accent: #58c8bb;
+        --accent-ink: #082c28;
+        --code-bg: #091113;
+        --code-ink: #d5e4e5;
+        --warning-bg: #3c321b;
+        --warning-ink: #f3d781;
+        --focus: #ffad66;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0f1719;
+      --surface: #162124;
+      --surface-2: #1e2c2f;
+      --ink: #e7eeee;
+      --muted: #adbdc0;
+      --line: #314145;
+      --accent: #58c8bb;
+      --accent-ink: #082c28;
+      --code-bg: #091113;
+      --code-ink: #d5e4e5;
+      --warning-bg: #3c321b;
+      --warning-ink: #f3d781;
+      --focus: #ffad66;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Outfit", "Avenir Next", "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    .page {
+      width: min(1000px, 100%);
+      margin: 0 auto;
+      padding: 24px clamp(16px, 3vw, 32px) 64px;
+    }
+    button, input, select, textarea { font: inherit; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+    /* Header & Toolbar */
+    .intro { border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 24px; }
+    .intro h1 { font-family: Georgia, serif; font-weight: 400; font-size: clamp(2rem, 5vw, 3.5rem); margin: 0 0 12px; }
+    .intro p { color: var(--muted); margin: 0; font-size: 1.1rem; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      background: var(--surface);
+      padding: 12px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 32px;
+    }
+    .mode-switch { display: flex; gap: 16px; }
+    .mode-switch label { cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .preset-selector { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    #presets { padding: 6px; border: 1px solid var(--line); background: var(--bg); border-radius: 4px; color: var(--ink); }
+    .theme-toggle { padding: 6px 12px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; border-radius: 4px; }
+
+    /* Sections */
+    .directive-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .directive-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .directive-name { font-family: "JetBrains Mono", monospace; font-weight: 700; margin: 0; font-size: 1.1rem; }
+    .directive-desc { color: var(--muted); font-size: 0.95rem; margin: 0 0 12px; }
+
+    .source-input-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .source-input-row input { flex: 1; min-width: 200px; padding: 8px; border: 1px solid var(--line); background: var(--bg); border-radius: 4px; color: var(--ink); font-family: "JetBrains Mono", monospace; }
+    .source-input-row button { padding: 8px 16px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; cursor: pointer; color: var(--ink); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .chip { padding: 4px 10px; font-size: 0.85rem; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; cursor: pointer; color: var(--ink); }
+    .chip:hover { background: var(--surface-2); }
+    .chip.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+    .source-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .source-item { padding: 4px 8px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; font-family: "JetBrains Mono", monospace; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
+    .source-item button { background: none; border: none; padding: 0; color: var(--muted); cursor: pointer; font-size: 1.1rem; line-height: 1; }
+    .source-item button:hover { color: var(--ink); }
+
+    /* Parse Mode */
+    .parse-input-group { margin-bottom: 24px; }
+    .parse-input-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+    #csp-input { width: 100%; padding: 12px; font-family: "JetBrains Mono", monospace; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: var(--ink); resize: vertical; margin-bottom: 12px; }
+    #parse-btn { padding: 8px 16px; background: var(--accent); color: var(--accent-ink); border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+    .parse-error { color: #d32f2f; background: #ffebee; padding: 12px; border-radius: 4px; margin-bottom: 16px; }
+
+    /* Output & Warnings */
+    .output-section { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 32px; }
+    .output-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; }
+    .tab-btn { padding: 8px 16px; background: transparent; border: 1px solid var(--line); border-bottom: none; border-radius: 6px 6px 0 0; cursor: pointer; color: var(--muted); }
+    .tab-btn.active { background: var(--code-bg); color: var(--code-ink); border-color: var(--code-bg); }
+    .output-content { position: relative; background: var(--code-bg); border-radius: 0 6px 6px 6px; padding: 16px; margin-bottom: 24px; overflow-x: auto; }
+    #output-code { color: var(--code-ink); font-family: "JetBrains Mono", monospace; font-size: 0.95rem; white-space: pre-wrap; word-break: break-all; }
+    .copy-btn { position: absolute; top: 12px; right: 12px; padding: 6px 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--code-ink); border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+    .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+    .warnings-area { background: var(--warning-bg); border: 1px solid #e0c98f; border-radius: 8px; padding: 16px; }
+    .warnings-area h3 { margin: 0 0 12px; color: var(--warning-ink); font-size: 1.1rem; }
+    .warnings-area ul { margin: 0; padding-left: 20px; color: var(--warning-ink); }
+    .warnings-area li { margin-bottom: 8px; }
+    .warn-high { font-weight: 700; color: #b71c1c; }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Header -->
+    <header class="intro">
+      <div>
+        <h1>CSP Builder</h1>
+        <p>A directive-by-directive builder with presets, warnings, and a parser mode. Paste an existing policy to explain it, or build a new one from scratch.</p>
+      </div>
+    </header>
+
+    <!-- Toolbar (Presets, Themes, Modes) -->
+    <div class="toolbar">
+      <div class="mode-switch">
+        <label><input type="radio" name="mode" value="build" checked> Builder Mode</label>
+        <label><input type="radio" name="mode" value="parse"> Parse Mode</label>
+      </div>
+      <div class="preset-selector builder-only">
+        <label for="presets">Preset:</label>
+        <select id="presets">
+          <option value="">-- Choose preset --</option>
+          <option value="strict">Strict (Default Deny)</option>
+          <option value="balanced">Balanced (Common Needs)</option>
+          <option value="permissive-report">Permissive Report-Only</option>
+        </select>
+      </div>
+      <button class="theme-toggle" id="theme-btn">Theme: auto</button>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Builder Mode Area -->
+      <section id="builder-mode" class="mode-section active">
+        <!-- Directives will be dynamically generated here -->
+        <div id="directives-container"></div>
+      </section>
+
+      <!-- Parse Mode Area -->
+      <section id="parse-mode" class="mode-section" hidden>
+        <div class="parse-input-group">
+          <label for="csp-input">Paste existing Content-Security-Policy:</label>
+          <textarea id="csp-input" rows="4" placeholder="default-src 'self'; script-src 'self' 'unsafe-inline'; ..."></textarea>
+          <button id="parse-btn">Parse Policy</button>
+        </div>
+        <div id="parse-results">
+          <!-- Parsed results will be injected here -->
+        </div>
+      </section>
+
+      <!-- Output Area -->
+      <section class="output-section">
+        <h2>Policy Output</h2>
+        <div class="output-tabs">
+          <button class="tab-btn active" data-tab="meta">HTML Meta</button>
+          <button class="tab-btn" data-tab="generic">HTTP Header</button>
+          <button class="tab-btn" data-tab="nginx">Nginx</button>
+          <button class="tab-btn" data-tab="apache">Apache</button>
+        </div>
+        <div class="output-content">
+          <pre><code id="output-code"></code></pre>
+          <button class="copy-btn" id="copy-output">Copy</button>
+        </div>
+
+        <!-- Live Warnings Area -->
+        <div class="warnings-area" id="warnings-container" hidden>
+          <h3>Warnings</h3>
+          <ul id="warnings-list"></ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const DIRECTIVES = [
+      { id: 'default-src', desc: 'Fallback for most other directives.' },
+      { id: 'script-src', desc: 'Executable scripts (JavaScript).' },
+      { id: 'style-src', desc: 'Stylesheets (CSS).' },
+      { id: 'img-src', desc: 'Images and favicons.' },
+      { id: 'connect-src', desc: 'Fetch, XHR, WebSockets, EventSource.' },
+      { id: 'font-src', desc: 'Web fonts.' },
+      { id: 'media-src', desc: 'Audio and video.' },
+      { id: 'frame-src', desc: 'Iframes and child browsing contexts.' },
+      { id: 'worker-src', desc: 'Web Workers and Service Workers.' },
+      { id: 'object-src', desc: 'Plugins like <object> or <embed> (usually \'none\').' },
+      { id: 'base-uri', desc: 'Restricts URLs in the <base> tag.' },
+      { id: 'form-action', desc: 'Restricts URLs for form submissions.' }
+    ];
+
+    const CHIPS = [
+      { label: "'self'", val: "'self'" },
+      { label: "'none'", val: "'none'" },
+      { label: "*", val: "*" },
+      { label: "data:", val: "data:" },
+      { label: "blob:", val: "blob:" },
+      { label: "'unsafe-inline'", val: "'unsafe-inline'" },
+      { label: "'unsafe-eval'", val: "'unsafe-eval'" },
+      { label: "Google Fonts", val: "https://fonts.googleapis.com https://fonts.gstatic.com" },
+      { label: "YouTube/Vimeo", val: "https://www.youtube.com https://player.vimeo.com" },
+      { label: "Google Analytics", val: "https://www.google-analytics.com https://ssl.google-analytics.com" }
+    ];
+
+    const PRESETS = {
+      'strict': { 'default-src': ["'none'"], 'script-src': ["'self'"], 'style-src': ["'self'"], 'img-src': ["'self'"], 'connect-src': ["'self'"], 'font-src': ["'self'"], 'base-uri': ["'self'"], 'form-action': ["'self'"], 'object-src': ["'none'"] },
+      'balanced': { 'default-src': ["'self'"], 'script-src': ["'self'"], 'style-src': ["'self'", "'unsafe-inline'"], 'img-src': ["'self'", "data:"], 'font-src': ["'self'", "https://fonts.gstatic.com"], 'object-src': ["'none'"] },
+      'permissive-report': { 'default-src': ["*"], 'script-src': ["*", "'unsafe-inline'", "'unsafe-eval'"], 'style-src': ["*", "'unsafe-inline'"], 'img-src': ["*", "data:"], 'font-src': ["*"], 'connect-src': ["*"] }
+    };
+
+    let state = {
+      mode: 'build',
+      directives: {}, // { 'default-src': ['self', 'https://api.example.com'] }
+      outputTab: 'meta',
+      theme: 'auto'
+    };
+
+    const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Initialization
+    function init() {
+      loadState();
+      buildUI();
+      bindEvents();
+      updateOutput();
+      applyTheme(state.theme);
+      switchMode(state.mode);
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('csp-builder-state'));
+        if (saved) state = { ...state, ...saved };
+      } catch (e) {}
+    }
+
+    function saveState() {
+      localStorage.setItem('csp-builder-state', JSON.stringify(state));
+    }
+
+    function buildUI() {
+      const container = $('#directives-container');
+      container.innerHTML = '';
+
+      DIRECTIVES.forEach(dir => {
+        const card = document.createElement('div');
+        card.className = 'directive-card';
+        card.dataset.id = dir.id;
+
+        const vals = state.directives[dir.id] || [];
+
+        let chipsHtml = CHIPS.map(c => {
+          const isActive = vals.some(v => v.includes(c.val.split(' ')[0])); // Simple check
+          return `<button class="chip ${isActive ? 'active' : ''}" data-val="${escapeHtml(c.val)}">${escapeHtml(c.label)}</button>`;
+        }).join('');
+
+        let listHtml = vals.map(v =>
+          `<div class="source-item">${escapeHtml(v)} <button class="remove-src" data-val="${escapeHtml(v)}" aria-label="× ${escapeHtml(v)}">×</button></div>`
+        ).join('');
+
+        card.innerHTML = `
+          <div class="directive-header">
+            <h3 class="directive-name">${dir.id}</h3>
+            <p class="directive-desc">${dir.desc}</p>
+          </div>
+          <div class="chips" data-dir="${dir.id}">${chipsHtml}</div>
+          <div class="source-input-row">
+            <input type="text" class="src-input" placeholder="e.g., https://api.example.com" data-dir="${dir.id}" aria-label="Add source for ${dir.id}">
+            <button class="add-src-btn" data-dir="${dir.id}">Add</button>
+          </div>
+          <div class="source-list" id="list-${dir.id}">${listHtml}</div>
+        `;
+        container.appendChild(card);
+      });
+
+      $(`input[name="mode"][value="${state.mode}"]`).checked = true;
+      $$('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === state.outputTab);
+      });
+    }
+
+    function bindEvents() {
+      $('#directives-container').addEventListener('click', e => {
+        if (e.target.classList.contains('chip')) {
+          const dir = e.target.closest('.chips').dataset.dir;
+          const valsToAdd = e.target.dataset.val.split(' ');
+
+          if (!state.directives[dir]) state.directives[dir] = [];
+
+          const isActive = e.target.classList.contains('active');
+          if (isActive) {
+            state.directives[dir] = state.directives[dir].filter(v => !valsToAdd.includes(v));
+          } else {
+            valsToAdd.forEach(v => {
+              if (!state.directives[dir].includes(v)) state.directives[dir].push(v);
+            });
+            // Handle mutually exclusive
+            if (valsToAdd.includes("'none'")) {
+              state.directives[dir] = ["'none'"];
+            } else if (state.directives[dir].includes("'none'")) {
+              state.directives[dir] = state.directives[dir].filter(v => v !== "'none'");
+            }
+          }
+
+          buildUI();
+          updateOutput();
+        }
+
+        if (e.target.classList.contains('remove-src')) {
+          const dir = e.target.closest('.directive-card').dataset.id;
+          const val = e.target.dataset.val;
+          state.directives[dir] = state.directives[dir].filter(v => v !== val);
+          buildUI();
+          updateOutput();
+        }
+
+        if (e.target.classList.contains('add-src-btn')) {
+          const dir = e.target.dataset.dir;
+          const input = e.target.previousElementSibling;
+          addSource(dir, input.value);
+          input.value = '';
+        }
+      });
+
+      $('#directives-container').addEventListener('keydown', e => {
+        if (e.target.classList.contains('src-input') && e.key === 'Enter') {
+          addSource(e.target.dataset.dir, e.target.value);
+          e.target.value = '';
+        }
+      });
+
+      $$('input[name="mode"]').forEach(radio => {
+        radio.addEventListener('change', e => switchMode(e.target.value));
+      });
+
+      $('#presets').addEventListener('change', e => {
+        if (e.target.value && PRESETS[e.target.value]) {
+          state.directives = JSON.parse(JSON.stringify(PRESETS[e.target.value]));
+          buildUI();
+          updateOutput();
+        }
+      });
+
+      $$('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          state.outputTab = e.target.dataset.tab;
+          $$('.tab-btn').forEach(b => b.classList.toggle('active', b === e.target));
+          if (state.mode === 'parse') {
+            const input = $('#csp-input').value.trim();
+            if (input) updateOutput(input);
+          } else {
+            updateOutput();
+          }
+        });
+      });
+
+      $('#copy-output').addEventListener('click', e => {
+        navigator.clipboard.writeText($('#output-code').textContent);
+        const btn = e.target;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
+
+      $('#theme-btn').addEventListener('click', () => {
+        const themes = ['auto', 'light', 'dark'];
+        state.theme = themes[(themes.indexOf(state.theme) + 1) % themes.length];
+        applyTheme(state.theme);
+        saveState();
+      });
+
+      $('#parse-btn').addEventListener('click', parseInputPolicy);
+    }
+
+    function addSource(dir, val) {
+      val = val.trim();
+      if (!val) return;
+      if (!state.directives[dir]) state.directives[dir] = [];
+      if (!state.directives[dir].includes(val)) {
+        if (val === "'none'") state.directives[dir] = ["'none'"];
+        else {
+          state.directives[dir] = state.directives[dir].filter(v => v !== "'none'");
+          state.directives[dir].push(val);
+        }
+        buildUI();
+        updateOutput();
+      }
+    }
+
+    function switchMode(mode) {
+      state.mode = mode;
+      $('#builder-mode').hidden = mode !== 'build';
+      $('#parse-mode').hidden = mode !== 'parse';
+      $('.preset-selector').hidden = mode !== 'build';
+      saveState();
+      if (mode === 'build') updateOutput();
+    }
+
+    function applyTheme(theme) {
+      if (theme === 'auto') delete document.documentElement.dataset.theme;
+      else document.documentElement.dataset.theme = theme;
+      $('#theme-btn').textContent = 'Theme: ' + theme;
+    }
+
+    function generatePolicyString(directivesObj) {
+      return Object.entries(directivesObj)
+        .filter(([_, vals]) => vals && vals.length > 0)
+        .map(([dir, vals]) => `${dir} ${vals.join(' ')}`)
+        .join('; ');
+    }
+
+    function updateOutput(customPolicy = null) {
+      const policy = customPolicy !== null ? customPolicy : generatePolicyString(state.directives);
+      const outCode = $('#output-code');
+
+      if (!policy) {
+        outCode.textContent = 'No directives configured yet.';
+        checkWarnings({});
+        saveState();
+        return;
+      }
+
+      if (state.outputTab === 'meta') {
+        outCode.textContent = `<meta http-equiv="Content-Security-Policy" content="${policy}">`;
+      } else if (state.outputTab === 'generic') {
+        outCode.textContent = `Content-Security-Policy: ${policy}`;
+      } else if (state.outputTab === 'nginx') {
+        outCode.textContent = `add_header Content-Security-Policy "${policy}" always;`;
+      } else if (state.outputTab === 'apache') {
+        outCode.textContent = `Header set Content-Security-Policy "${policy}"`;
+      }
+
+      if (customPolicy === null) {
+        checkWarnings(state.directives);
+        saveState();
+      }
+    }
+
+    function checkWarnings(directivesObj) {
+      const warns = [];
+
+      const has = (dir, val) => (directivesObj[dir] || []).includes(val);
+      const get = (dir) => directivesObj[dir] || [];
+      const getEff = (dir) => get(dir).length ? get(dir) : get('default-src');
+
+      if (has('script-src', "'unsafe-inline'") || (get('script-src').length === 0 && has('default-src', "'unsafe-inline'"))) {
+        warns.push('<span class="warn-high">High Risk:</span> \'unsafe-inline\' in script-src allows execution of injected scripts (XSS). Consider nonces or hashes.');
+      }
+      if (has('script-src', "'unsafe-eval'") || (get('script-src').length === 0 && has('default-src', "'unsafe-eval'"))) {
+        warns.push('<span class="warn-high">High Risk:</span> \'unsafe-eval\' allows execution of code from strings (e.g., eval(), setTimeout with string).');
+      }
+
+      const effObject = getEff('object-src');
+      if (effObject.length > 0 && !effObject.includes("'none'")) {
+        warns.push('Medium Risk: object-src is not \'none\'. This allows plugins like Flash or Java which are historical XSS vectors.');
+      }
+
+      if (getEff('script-src').some(v => v === '*' || v.startsWith('http:'))) {
+        warns.push('Medium Risk: Wildcards (*) or plain http: in script-src allow loading scripts from any domain or over unencrypted connections.');
+      }
+
+      const container = $('#warnings-container');
+      const list = $('#warnings-list');
+      if (warns.length > 0) {
+        list.innerHTML = warns.map(w => `<li>${w}</li>`).join('');
+        container.hidden = false;
+      } else {
+        container.hidden = true;
+      }
+    }
+
+    function parseInputPolicy() {
+      const input = $('#csp-input').value.trim();
+      const results = $('#parse-results');
+      if (!input) {
+        results.innerHTML = '<div class="parse-error">Please paste a CSP string first.</div>';
+        return;
+      }
+
+      const parsedDirs = {};
+      input.split(';').forEach(part => {
+        part = part.trim();
+        if (!part) return;
+        const tokens = part.split(/\s+/);
+        const dir = tokens[0].toLowerCase();
+        const vals = tokens.slice(1);
+        parsedDirs[dir] = vals;
+      });
+
+      let html = '<h3>Parsed Explanations</h3><div class="parse-list">';
+      Object.entries(parsedDirs).forEach(([dir, vals]) => {
+        const def = DIRECTIVES.find(d => d.id === dir) || { desc: 'Unknown or experimental directive.' };
+        html += `
+          <div class="directive-card" style="margin-bottom:8px">
+            <h4 class="directive-name" style="margin-top:0">${escapeHtml(dir)}</h4>
+            <p class="directive-desc">${escapeHtml(def.desc)}</p>
+            <div class="source-list">${vals.map(v => `<span class="source-item">${escapeHtml(v)}</span>`).join('') || '<span class="source-item"><em>(empty)</em></span>'}</div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      results.innerHTML = html;
+
+      updateOutput(input);
+      checkWarnings(parsedDirs);
+    }
+
+    init();
+  </script>
+</body>
+</html>

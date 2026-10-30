@@ -102,6 +102,11 @@ params:
   tools:
     - group: "Running on this site"
       items:
+        - name: "QR Code Studio"
+          kind: "App"
+          desc: "Generate customizable QR codes (text, URL, Wi-Fi, vCard) and decode QR codes from images entirely in the browser."
+          url: "qr-code-studio/"
+          writeup: "library/tools/qr-code-studio/"
         - name: "AETHER atelier"
           kind: "Interactive exhibit"
           desc: "A mathematical and chromatic atelier: a cosine-palette synthesizer driving a Clifford strange-attractor visualizer, Albers simultaneous-contrast studies, and a codex on generative beauty."

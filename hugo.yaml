@@ -122,6 +122,11 @@ params:
           desc: "Five machines as interactive isometric figures: a quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine and a quadruped robot — each with a dark and a light build."
           url: "anatomy/"
           writeup: "blog/anatomy-machines/"
+        - name: "Meta Tag & Web Manifest Generator"
+          kind: "Utility"
+          desc: "Client-side tool to generate HTML meta tags and Web Manifest JSON with live mock previews and as-you-type validation."
+          url: "meta-generator/"
+          writeup: "library/tools/meta-generator/"
     - group: "Running on Online Tools"
       items:
         - name: "Color Token Workshop"

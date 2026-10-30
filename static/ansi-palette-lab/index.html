@@ -1,0 +1,916 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="A terminal color lab for visualizing xterm 256-color codes, RGB quantization, and building generic terminal themes." />
+  <meta property="og:site_name" content="The BlackCat" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="ANSI Palette Lab" />
+  <meta property="og:description" content="Terminal color lab, xterm 256-color grid, and theme builder." />
+  <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/ansi-palette-lab/" />
+  <meta property="og:image" content="../og.png" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="data:," />
+  <title>ANSI Palette Lab</title>
+
+  <style>
+    @font-face {
+      font-family: "JetBrains Mono";
+      src: url("../fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2");
+      font-weight: 100 800;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* Standard Google Fonts import for Outfit (assuming standard usage without downloading) */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap');
+
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f7f8;
+      --surface: #ffffff;
+      --surface-2: #edf2f3;
+      --ink: #172225;
+      --muted: #54666b;
+      --line: #d7e0e2;
+      --accent: #067c72;
+      --accent-ink: #ffffff;
+      --accent-soft: #d8f1ed;
+      --code-bg: #152124;
+      --code-ink: #d9e7e8;
+      --shadow: 0 18px 48px rgba(28, 49, 52, 0.08);
+      --focus: #e37726;
+      --radius-lg: 20px;
+      --radius-md: 12px;
+
+      --ui-font: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --mono-font: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f1719;
+        --surface: #162124;
+        --surface-2: #1e2c2f;
+        --ink: #e7eeee;
+        --muted: #adbdc0;
+        --line: #314145;
+        --accent: #58c8bb;
+        --accent-ink: #082c28;
+        --accent-soft: #173d3a;
+        --code-bg: #091113;
+        --code-ink: #d5e4e5;
+        --shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
+        --focus: #ffad66;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--ui-font);
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+    .page {
+      width: min(1200px, 100%);
+      margin: 0 auto;
+      padding: 28px clamp(16px, 3vw, 42px) 64px;
+    }
+
+    header {
+      padding: 20px 0 28px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 32px;
+    }
+    header h1 {
+      margin: 0 0 12px;
+      font-weight: 500;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.5vw, 1.15rem);
+      max-width: 800px;
+    }
+
+    .section-title {
+      font-weight: 500;
+      font-size: 1.5rem;
+      margin: 48px 0 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    @media (min-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+
+    code {
+      font-family: var(--mono-font);
+      font-size: 0.9em;
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .cube-container {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 2px;
+    }
+
+    .color-cell {
+      aspect-ratio: 1;
+      border-radius: 2px;
+      cursor: pointer;
+      border: 1px solid rgba(128,128,128,0.2);
+      transition: transform 0.1s;
+    }
+
+    .color-cell:hover, .color-cell:focus-visible {
+      transform: scale(1.2);
+      z-index: 10;
+      box-shadow: 0 0 0 2px var(--focus);
+    }
+
+    .color-cell.selected {
+      box-shadow: 0 0 0 2px var(--focus);
+      z-index: 5;
+    }
+
+    .details-panel {
+      background: var(--surface-2);
+      padding: 24px;
+      border-radius: var(--radius-md);
+      height: 100%;
+    }
+
+    .details-panel h3 { margin-top: 0; }
+
+    .color-swatch-large {
+      width: 100%;
+      height: 80px;
+      border-radius: var(--radius-md);
+      margin-bottom: 24px;
+      border: 1px solid var(--line);
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .detail-label { font-weight: 500; color: var(--muted); }
+
+    .quant-controls {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      align-items: center;
+    }
+
+    .text-input {
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+
+    .quant-display {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .quant-side {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .quant-swatch {
+      width: 100%;
+      max-width: 200px;
+      aspect-ratio: 2/1;
+      border-radius: var(--radius-md);
+      margin: 16px 0;
+      border: 1px solid var(--line);
+    }
+
+    .theme-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    @media (min-width: 1024px) {
+      .theme-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .theme-col h4 { margin-top: 0; margin-bottom: 12px; }
+
+    .theme-row {
+      display: grid;
+      grid-template-columns: 80px 40px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .theme-row input[type="color"] {
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      width: 40px;
+      height: 32px;
+      cursor: pointer;
+    }
+
+    .t-hex { width: 100%; font-family: var(--mono-font); font-size: 0.9em; padding: 4px 8px; }
+
+    .mock-terminal {
+      background: var(--surface-2);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      font-family: var(--mono-font);
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .mock-header {
+      background: rgba(0,0,0,0.1);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .mock-dots {
+      display: flex;
+      gap: 6px;
+      margin-right: 12px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .mock-title {
+      flex: 1;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .mock-body {
+      padding: 16px;
+      background: var(--term-bg, #1a1b26);
+      color: var(--term-fg, #c0caf5);
+      line-height: 1.4;
+      min-height: 300px;
+    }
+
+    .term-line { margin-bottom: 4px; }
+
+    /* Terminal dynamic classes */
+    .t-fg-0 { color: var(--term-0); }
+    .t-fg-1 { color: var(--term-1); }
+    .t-fg-2 { color: var(--term-2); }
+    .t-fg-3 { color: var(--term-3); }
+    .t-fg-4 { color: var(--term-4); }
+    .t-fg-5 { color: var(--term-5); }
+    .t-fg-6 { color: var(--term-6); }
+    .t-fg-7 { color: var(--term-7); }
+    .t-fg-8 { color: var(--term-8); }
+    .t-cursor { background: var(--term-cur); padding: 0 4px; display: inline-block; animation: blink 1s step-end infinite; }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .btn {
+      padding: 8px 16px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.1s;
+    }
+    .btn:hover { background: var(--surface-2); }
+    .btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+    .btn-primary:hover { background: color-mix(in srgb, var(--accent) 80%, black); }
+    .btn-icon { padding: 4px; display: grid; place-items: center; background: transparent; border: none; font-size: 1.2rem; }
+    .btn-icon:hover { background: rgba(128,128,128,0.1); }
+
+    .export-actions {
+      display: flex;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+    }
+    .spacer { flex: 1; }
+
+    .modal {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(2px);
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      max-height: 80vh;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 16px;
+    }
+
+    .tab {
+      padding: 8px 16px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .tab.active {
+      color: var(--ink);
+      border-bottom-color: var(--accent);
+    }
+
+    #export-area {
+      width: 100%;
+      height: 300px;
+      font-family: var(--mono-font);
+      font-size: 13px;
+      padding: 12px;
+      background: var(--code-bg);
+      color: var(--code-ink);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      resize: vertical;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>ANSI Palette Lab</h1>
+      <p>Terminal truecolor / 256-color lab. Explore the xterm 256-color cube, visualize RGB quantization error, and build terminal themes with live preview and export.</p>
+    </header>
+
+    <main>
+      <h2 class="section-title">xterm 256-Color Palette</h2>
+      <div class="panel grid-2" id="palette-section">
+        <div>
+          <div class="cube-container" id="palette-grid">
+            <!-- 256 grid injected by JS -->
+          </div>
+        </div>
+        <div>
+          <div class="details-panel" id="palette-details">
+            <h3>Color Details</h3>
+            <p class="muted">Click any color in the grid to view details.</p>
+            <div id="details-content" style="display: none;">
+              <div class="color-swatch-large" id="detail-swatch"></div>
+              <div class="detail-row">
+                <span class="detail-label">Index:</span>
+                <code id="detail-index"></code>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Hex:</span>
+                <code id="detail-hex"></code>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">RGB:</span>
+                <code id="detail-rgb"></code>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">FG (256):</span>
+                <code id="detail-fg-256"></code>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">BG (256):</span>
+                <code id="detail-bg-256"></code>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">FG (True):</span>
+                <code id="detail-fg-true"></code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="section-title">RGB Quantization Error</h2>
+      <div class="panel" id="quantization-section">
+        <p>Enter any Hex or RGB color to see how it quantizes to the nearest xterm 256-color when truecolor is not available.</p>
+        <div class="quant-controls">
+          <input type="color" id="quant-color-picker" value="#ff8800" aria-label="Choose truecolor to quantize">
+          <input type="text" id="quant-hex-input" class="text-input" value="#ff8800" aria-label="Hex input">
+        </div>
+        <div class="quant-display">
+          <div class="quant-side">
+            <h4>Truecolor Original</h4>
+            <div class="quant-swatch" id="quant-true-swatch"></div>
+            <code id="quant-true-hex">#ff8800</code>
+          </div>
+          <div class="quant-side">
+            <h4>Nearest 256-Color</h4>
+            <div class="quant-swatch" id="quant-nearest-swatch"></div>
+            <code id="quant-nearest-hex">#ff8700 (214)</code>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="section-title">Theme Builder</h2>
+      <div class="panel grid-2" id="theme-builder-section">
+        <div id="theme-inputs">
+          <h3>Colors</h3>
+          <div class="theme-grid">
+            <!-- Normal -->
+            <div class="theme-col">
+              <h4>Normal</h4>
+              <div class="theme-row"><label for="t-c0">Black</label><input type="color" id="t-c0" value="#000000" aria-label="Black (Color 0)"><input type="text" class="text-input t-hex" id="t-h0" value="#000000" aria-label="Black hex"></div>
+              <div class="theme-row"><label for="t-c1">Red</label><input type="color" id="t-c1" value="#cd0000" aria-label="Red (Color 1)"><input type="text" class="text-input t-hex" id="t-h1" value="#cd0000" aria-label="Red hex"></div>
+              <div class="theme-row"><label for="t-c2">Green</label><input type="color" id="t-c2" value="#00cd00" aria-label="Green (Color 2)"><input type="text" class="text-input t-hex" id="t-h2" value="#00cd00" aria-label="Green hex"></div>
+              <div class="theme-row"><label for="t-c3">Yellow</label><input type="color" id="t-c3" value="#cdcd00" aria-label="Yellow (Color 3)"><input type="text" class="text-input t-hex" id="t-h3" value="#cdcd00" aria-label="Yellow hex"></div>
+              <div class="theme-row"><label for="t-c4">Blue</label><input type="color" id="t-c4" value="#0000ee" aria-label="Blue (Color 4)"><input type="text" class="text-input t-hex" id="t-h4" value="#0000ee" aria-label="Blue hex"></div>
+              <div class="theme-row"><label for="t-c5">Magenta</label><input type="color" id="t-c5" value="#cd00cd" aria-label="Magenta (Color 5)"><input type="text" class="text-input t-hex" id="t-h5" value="#cd00cd" aria-label="Magenta hex"></div>
+              <div class="theme-row"><label for="t-c6">Cyan</label><input type="color" id="t-c6" value="#00cdcd" aria-label="Cyan (Color 6)"><input type="text" class="text-input t-hex" id="t-h6" value="#00cdcd" aria-label="Cyan hex"></div>
+              <div class="theme-row"><label for="t-c7">White</label><input type="color" id="t-c7" value="#e5e5e5" aria-label="White (Color 7)"><input type="text" class="text-input t-hex" id="t-h7" value="#e5e5e5" aria-label="White hex"></div>
+            </div>
+            <!-- Bright -->
+            <div class="theme-col">
+              <h4>Bright</h4>
+              <div class="theme-row"><label for="t-c8">Black</label><input type="color" id="t-c8" value="#7f7f7f" aria-label="Bright Black (Color 8)"><input type="text" class="text-input t-hex" id="t-h8" value="#7f7f7f" aria-label="Bright Black hex"></div>
+              <div class="theme-row"><label for="t-c9">Red</label><input type="color" id="t-c9" value="#ff0000" aria-label="Bright Red (Color 9)"><input type="text" class="text-input t-hex" id="t-h9" value="#ff0000" aria-label="Bright Red hex"></div>
+              <div class="theme-row"><label for="t-c10">Green</label><input type="color" id="t-c10" value="#00ff00" aria-label="Bright Green (Color 10)"><input type="text" class="text-input t-hex" id="t-h10" value="#00ff00" aria-label="Bright Green hex"></div>
+              <div class="theme-row"><label for="t-c11">Yellow</label><input type="color" id="t-c11" value="#ffff00" aria-label="Bright Yellow (Color 11)"><input type="text" class="text-input t-hex" id="t-h11" value="#ffff00" aria-label="Bright Yellow hex"></div>
+              <div class="theme-row"><label for="t-c12">Blue</label><input type="color" id="t-c12" value="#5c5cff" aria-label="Bright Blue (Color 12)"><input type="text" class="text-input t-hex" id="t-h12" value="#5c5cff" aria-label="Bright Blue hex"></div>
+              <div class="theme-row"><label for="t-c13">Magenta</label><input type="color" id="t-c13" value="#ff00ff" aria-label="Bright Magenta (Color 13)"><input type="text" class="text-input t-hex" id="t-h13" value="#ff00ff" aria-label="Bright Magenta hex"></div>
+              <div class="theme-row"><label for="t-c14">Cyan</label><input type="color" id="t-c14" value="#00ffff" aria-label="Bright Cyan (Color 14)"><input type="text" class="text-input t-hex" id="t-h14" value="#00ffff" aria-label="Bright Cyan hex"></div>
+              <div class="theme-row"><label for="t-c15">White</label><input type="color" id="t-c15" value="#ffffff" aria-label="Bright White (Color 15)"><input type="text" class="text-input t-hex" id="t-h15" value="#ffffff" aria-label="Bright White hex"></div>
+            </div>
+          </div>
+
+          <h3 style="margin-top: 32px;">Base</h3>
+          <div class="theme-grid">
+            <div class="theme-col">
+              <div class="theme-row"><label for="t-cfg">Foreground</label><input type="color" id="t-cfg" value="#c0caf5" aria-label="Foreground"><input type="text" class="text-input t-hex" id="t-hfg" value="#c0caf5" aria-label="Foreground hex"></div>
+              <div class="theme-row"><label for="t-cbg">Background</label><input type="color" id="t-cbg" value="#1a1b26" aria-label="Background"><input type="text" class="text-input t-hex" id="t-hbg" value="#1a1b26" aria-label="Background hex"></div>
+              <div class="theme-row"><label for="t-ccur">Cursor</label><input type="color" id="t-ccur" value="#c0caf5" aria-label="Cursor"><input type="text" class="text-input t-hex" id="t-hcur" value="#c0caf5" aria-label="Cursor hex"></div>
+            </div>
+          </div>
+
+          <div class="export-actions">
+            <button class="btn" id="btn-reset">Reset</button>
+            <div class="spacer"></div>
+            <button class="btn btn-primary" id="btn-export">Export Theme</button>
+          </div>
+        </div>
+
+        <div id="theme-preview">
+          <div class="mock-terminal">
+            <div class="mock-header">
+              <div class="mock-dots">
+                <span class="dot" style="background:#ff5f56"></span>
+                <span class="dot" style="background:#ffbd2e"></span>
+                <span class="dot" style="background:#27c93f"></span>
+              </div>
+              <div class="mock-title">user@lab: ~/projects</div>
+            </div>
+            <div class="mock-body" id="term-body">
+              <div class="term-line">
+                <span class="t-fg-2">user@lab</span><span class="t-fg-7">:</span><span class="t-fg-4">~/projects</span><span class="t-fg-7">$ ls -la</span>
+              </div>
+              <div class="term-line">
+                <span class="t-fg-4">drwxr-xr-x</span>  <span class="t-fg-7">2 user user 4096 May 24 10:00 </span><span class="t-fg-4">.</span>
+              </div>
+              <div class="term-line">
+                <span class="t-fg-4">drwxr-xr-x</span>  <span class="t-fg-7">3 user user 4096 May 24 09:00 </span><span class="t-fg-4">..</span>
+              </div>
+              <div class="term-line">
+                <span class="t-fg-7">-rw-r--r--</span>  <span class="t-fg-7">1 user user  123 May 24 09:30 </span><span class="t-fg-2">Makefile</span>
+              </div>
+              <div class="term-line">
+                <span class="t-fg-7">-rw-r--r--</span>  <span class="t-fg-7">1 user user 1024 May 24 10:00 </span><span class="t-fg-7">main.rs</span>
+              </div>
+              <div class="term-line">
+                <span class="t-fg-2">user@lab</span><span class="t-fg-7">:</span><span class="t-fg-4">~/projects</span><span class="t-fg-7">$ git status</span>
+              </div>
+              <div class="term-line">
+                <span class="t-fg-7">On branch main</span>
+              </div>
+              <div class="term-line">
+                <span class="t-fg-7">Changes not staged for commit:</span>
+              </div>
+              <div class="term-line">
+                <span class="t-fg-1">  modified:   main.rs</span>
+              </div>
+              <div class="term-line">
+                <span class="t-fg-2">user@lab</span><span class="t-fg-7">:</span><span class="t-fg-4">~/projects</span><span class="t-fg-7">$ </span><span class="t-cursor"> </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Export modal -->
+          <div id="export-modal" style="display:none;" class="modal">
+            <div class="modal-content panel">
+              <div class="modal-header">
+                <h3 style="margin:0;">Export Theme</h3>
+                <button class="btn btn-icon" id="btn-close-modal" aria-label="Close modal">×</button>
+              </div>
+              <div class="modal-tabs">
+                <button class="tab active" data-target="export-json">JSON</button>
+                <button class="tab" data-target="export-alacritty">Alacritty</button>
+                <button class="tab" data-target="export-kitty">Kitty</button>
+              </div>
+              <textarea id="export-area" readonly aria-label="Exported theme code"></textarea>
+              <div class="modal-footer">
+                <button class="btn btn-primary" id="btn-copy">Copy to Clipboard</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // 256 color definitions
+    const xtermColors = [];
+
+    // 0-15: Standard and high-intensity ANSI colors (common defaults)
+    const stdColors = [
+      '#000000', '#cd0000', '#00cd00', '#cdcd00', '#0000ee', '#cd00cd', '#00cdcd', '#e5e5e5',
+      '#7f7f7f', '#ff0000', '#00ff00', '#ffff00', '#5c5cff', '#ff00ff', '#00ffff', '#ffffff'
+    ];
+    xtermColors.push(...stdColors);
+
+    // 16-231: 6x6x6 color cube
+    const cubeSteps = [0x00, 0x5f, 0x87, 0xaf, 0xd7, 0xff];
+    for (let r = 0; r < 6; r++) {
+      for (let g = 0; g < 6; g++) {
+        for (let b = 0; b < 6; b++) {
+          const hex = `#${cubeSteps[r].toString(16).padStart(2,'0')}${cubeSteps[g].toString(16).padStart(2,'0')}${cubeSteps[b].toString(16).padStart(2,'0')}`;
+          xtermColors.push(hex);
+        }
+      }
+    }
+
+    // 232-255: Grayscale steps
+    for (let i = 0; i < 24; i++) {
+      const v = 8 + i * 10;
+      const hex = `#${v.toString(16).padStart(2,'0')}${v.toString(16).padStart(2,'0')}${v.toString(16).padStart(2,'0')}`;
+      xtermColors.push(hex);
+    }
+
+    const grid = document.getElementById('palette-grid');
+    let cells = [];
+
+    function selectColor(index) {
+      cells.forEach(c => c.classList.remove('selected'));
+      cells[index].classList.add('selected');
+
+      const hex = xtermColors[index];
+      const r = parseInt(hex.slice(1,3), 16);
+      const g = parseInt(hex.slice(3,5), 16);
+      const b = parseInt(hex.slice(5,7), 16);
+
+      document.getElementById('details-content').style.display = 'block';
+      document.querySelector('#palette-details > p.muted').style.display = 'none';
+
+      document.getElementById('detail-swatch').style.backgroundColor = hex;
+      document.getElementById('detail-index').textContent = index;
+      document.getElementById('detail-hex').textContent = hex;
+      document.getElementById('detail-rgb').textContent = `${r}, ${g}, ${b}`;
+      document.getElementById('detail-fg-256').textContent = `\\e[38;5;${index}m`;
+      document.getElementById('detail-bg-256').textContent = `\\e[48;5;${index}m`;
+      document.getElementById('detail-fg-true').textContent = `\\e[38;2;${r};${g};${b}m`;
+    }
+
+    // Build Grid
+    xtermColors.forEach((hex, i) => {
+      const cell = document.createElement('div');
+      cell.className = 'color-cell';
+      cell.style.backgroundColor = hex;
+      cell.title = `Index: ${i} | ${hex}`;
+      cell.tabIndex = 0;
+      cell.setAttribute('aria-label', `Color ${i} ${hex}`);
+
+      cell.addEventListener('click', () => selectColor(i));
+      cell.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectColor(i);
+        }
+      });
+
+      grid.appendChild(cell);
+      cells.push(cell);
+    });
+
+    // Quantization Logic
+    function hexToRgb(hex) {
+      let h = hex.replace('#', '');
+      if (h.length === 3) h = h.split('').map(c => c + c).join('');
+      const n = parseInt(h, 16);
+      return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+    }
+
+    function colorDist(c1, c2) {
+      return Math.pow(c1.r - c2.r, 2) + Math.pow(c1.g - c2.g, 2) + Math.pow(c1.b - c2.b, 2);
+    }
+
+    function findNearest256(hexInput) {
+      const target = hexToRgb(hexInput);
+      let nearestIdx = 0;
+      let minDist = Infinity;
+
+      xtermColors.forEach((hex, i) => {
+        const rgb = hexToRgb(hex);
+        const dist = colorDist(target, rgb);
+        if (dist < minDist) {
+          minDist = dist;
+          nearestIdx = i;
+        }
+      });
+
+      return { index: nearestIdx, hex: xtermColors[nearestIdx] };
+    }
+
+    const quantPicker = document.getElementById('quant-color-picker');
+    const quantHex = document.getElementById('quant-hex-input');
+
+    function updateQuant() {
+      let val = quantHex.value;
+      if (!val.startsWith('#')) val = '#' + val;
+      if (!/^#[0-9A-Fa-f]{6}$/.test(val)) return; // basic validation
+
+      quantPicker.value = val;
+
+      const nearest = findNearest256(val);
+
+      document.getElementById('quant-true-swatch').style.backgroundColor = val;
+      document.getElementById('quant-true-hex').textContent = val;
+
+      document.getElementById('quant-nearest-swatch').style.backgroundColor = nearest.hex;
+      document.getElementById('quant-nearest-hex').textContent = `${nearest.hex} (${nearest.index})`;
+    }
+
+    quantPicker.addEventListener('input', (e) => {
+      quantHex.value = e.target.value;
+      updateQuant();
+    });
+
+    quantHex.addEventListener('input', updateQuant);
+
+    // Initialize Quant
+    updateQuant();
+
+    // Theme Builder
+    const termBody = document.getElementById('term-body');
+    const inputs = [
+      'c0','c1','c2','c3','c4','c5','c6','c7',
+      'c8','c9','c10','c11','c12','c13','c14','c15',
+      'cfg','cbg','ccur'
+    ];
+
+    // Default theme (Tokyo Night inspired)
+    const defaults = {
+      c0: '#15161e', c1: '#f7768e', c2: '#9ece6a', c3: '#e0af68',
+      c4: '#7aa2f7', c5: '#bb9af7', c6: '#7dcfff', c7: '#a9b1d6',
+      c8: '#414868', c9: '#f7768e', c10: '#9ece6a', c11: '#e0af68',
+      c12: '#7aa2f7', c13: '#bb9af7', c14: '#7dcfff', c15: '#c0caf5',
+      cfg: '#c0caf5', cbg: '#1a1b26', ccur: '#c0caf5'
+    };
+
+    function loadTheme() {
+      try {
+        const saved = localStorage.getItem('ansiTheme');
+        if (saved) return JSON.parse(saved);
+      } catch (e) {}
+      return { ...defaults };
+    }
+
+    function saveTheme(theme) {
+      localStorage.setItem('ansiTheme', JSON.stringify(theme));
+    }
+
+    let currentTheme = loadTheme();
+
+    function applyTheme() {
+      inputs.forEach(id => {
+        const val = currentTheme[id];
+        document.getElementById('t-' + id).value = val;
+        document.getElementById('t-h' + id.substring(1)).value = val;
+
+        if (id.startsWith('c') && id.length <= 3 && id !== 'cfg' && id !== 'cbg' && id !== 'ccur') {
+          termBody.style.setProperty(`--term-${id.substring(1)}`, val);
+        }
+      });
+
+      termBody.style.setProperty('--term-fg', currentTheme.cfg);
+      termBody.style.setProperty('--term-bg', currentTheme.cbg);
+      termBody.style.setProperty('--term-cur', currentTheme.ccur);
+
+      saveTheme(currentTheme);
+    }
+
+    inputs.forEach(id => {
+      const colorInput = document.getElementById('t-' + id);
+      const hexInput = document.getElementById('t-h' + id.substring(1));
+
+      colorInput.addEventListener('input', (e) => {
+        const v = e.target.value;
+        hexInput.value = v;
+        currentTheme[id] = v;
+        applyTheme();
+      });
+
+      hexInput.addEventListener('input', (e) => {
+        let v = e.target.value;
+        if (!v.startsWith('#')) v = '#' + v;
+        if (/^#[0-9A-Fa-f]{6}$/.test(v)) {
+          colorInput.value = v;
+          currentTheme[id] = v;
+          applyTheme();
+        }
+      });
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      currentTheme = { ...defaults };
+      applyTheme();
+    });
+
+    applyTheme();
+
+    // Export Logic
+    const exportModal = document.getElementById('export-modal');
+    const exportArea = document.getElementById('export-area');
+    const tabs = document.querySelectorAll('.tab');
+
+    function generateJson() {
+      return JSON.stringify(currentTheme, null, 2);
+    }
+
+    function generateAlacritty() {
+      return `[colors.primary]
+background = "${currentTheme.cbg}"
+foreground = "${currentTheme.cfg}"
+
+[colors.cursor]
+text = "${currentTheme.cbg}"
+cursor = "${currentTheme.ccur}"
+
+[colors.normal]
+black   = "${currentTheme.c0}"
+red     = "${currentTheme.c1}"
+green   = "${currentTheme.c2}"
+yellow  = "${currentTheme.c3}"
+blue    = "${currentTheme.c4}"
+magenta = "${currentTheme.c5}"
+cyan    = "${currentTheme.c6}"
+white   = "${currentTheme.c7}"
+
+[colors.bright]
+black   = "${currentTheme.c8}"
+red     = "${currentTheme.c9}"
+green   = "${currentTheme.c10}"
+yellow  = "${currentTheme.c11}"
+blue    = "${currentTheme.c12}"
+magenta = "${currentTheme.c13}"
+cyan    = "${currentTheme.c14}"
+white   = "${currentTheme.c15}"`;
+    }
+
+    function generateKitty() {
+      return `foreground ${currentTheme.cfg}
+background ${currentTheme.cbg}
+cursor ${currentTheme.ccur}
+
+color0 ${currentTheme.c0}
+color1 ${currentTheme.c1}
+color2 ${currentTheme.c2}
+color3 ${currentTheme.c3}
+color4 ${currentTheme.c4}
+color5 ${currentTheme.c5}
+color6 ${currentTheme.c6}
+color7 ${currentTheme.c7}
+
+color8 ${currentTheme.c8}
+color9 ${currentTheme.c9}
+color10 ${currentTheme.c10}
+color11 ${currentTheme.c11}
+color12 ${currentTheme.c12}
+color13 ${currentTheme.c13}
+color14 ${currentTheme.c14}
+color15 ${currentTheme.c15}`;
+    }
+
+    function updateExport(format) {
+      tabs.forEach(t => t.classList.remove('active'));
+      document.querySelector(`[data-target="export-${format}"]`).classList.add('active');
+
+      let text = '';
+      if (format === 'json') text = generateJson();
+      if (format === 'alacritty') text = generateAlacritty();
+      if (format === 'kitty') text = generateKitty();
+
+      exportArea.value = text;
+    }
+
+    document.getElementById('btn-export').addEventListener('click', () => {
+      exportModal.style.display = 'grid';
+      updateExport('json');
+    });
+
+    document.getElementById('btn-close-modal').addEventListener('click', () => {
+      exportModal.style.display = 'none';
+    });
+
+    tabs.forEach(t => {
+      t.addEventListener('click', (e) => {
+        const format = e.target.getAttribute('data-target').replace('export-', '');
+        updateExport(format);
+      });
+    });
+
+    document.getElementById('btn-copy').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(exportArea.value);
+        const btn = document.getElementById('btn-copy');
+        const oldText = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = oldText, 2000);
+      } catch (err) {
+        console.error('Failed to copy', err);
+      }
+    });
+
+  </script>
+</body>
+</html>

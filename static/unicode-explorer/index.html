@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Unicode Explorer: search characters by name, codepoint, or inspect strings." />
+  <title>Unicode Explorer</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #f4f7f8;
+      --ink: #172225;
+      --accent: #067c72;
+      --ui-font: "Outfit", sans-serif;
+      --mono-font: "JetBrains Mono", monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #12181a;
+        --ink: #e3e8e9;
+        --accent: #2dc4b6;
+      }
+    }
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--ui-font);
+      margin: 0;
+      padding: 20px;
+    }
+    code, pre, .mono {
+      font-family: var(--mono-font);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Unicode Explorer</h1>
+    <p>Search by name, codepoint, or paste a string to inspect characters.</p>
+  </header>
+  <main>
+    <section>
+      <h2>Search</h2>
+      <input type="text" id="search-input" aria-label="Search Unicode Characters" placeholder="e.g. smile, U+2603, or paste a char">
+      <button id="search-btn">Search</button>
+    </section>
+    <section>
+      <h2>Results</h2>
+      <div id="results">
+        <!-- Results will be displayed here -->
+      </div>
+    </section>
+    <section>
+      <h2>String Inspector</h2>
+      <textarea id="string-inspector" aria-label="Inspect String" placeholder="Paste a string here..."></textarea>
+      <div id="inspector-results"></div>
+    </section>
+  </main>
+  <script>
+    // Embedded basic dataset would go here
+    const dataset = [
+      { cp: 0x0041, name: 'LATIN CAPITAL LETTER A' },
+      { cp: 0x2603, name: 'SNOWMAN' },
+      // ...
+    ];
+  </script>
+</body>
+</html>

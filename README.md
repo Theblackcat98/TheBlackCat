@@ -218,3 +218,18 @@ The BlackCat is built around a few ideas:
 8. **Git history is part of the memory of the system.**
 
 The long-term goal is a personal knowledge base that can grow for years without becoming difficult to maintain — something closer to a living digital library than a collection of bookmarks.
+
+## Future Tool Ideas
+
+Here are 10 functional utilities planned for the site:
+
+1. **Prompt Templating Sandbox**: A testing ground to run and validate agent system prompts against different variable inputs.
+2. **Markdown Table Generator/Formatter**: A utility to generate, format, and align Markdown tables, including importing from CSV.
+3. **JSON-to-Hugo Frontmatter Converter**: Quickly convert JSON configurations or API responses into valid Hugo YAML front matter.
+4. **Semantic Token Mapper**: A utility for mapping and testing design system colors against WCAG contrast rules in bulk.
+5. **Regex Visualizer and Tester**: A visual debugger and tester for regular expressions, explaining each part of the match.
+6. **JWT (JSON Web Token) Decoder/Debugger**: A secure, client-side tool to decode and inspect JWT payloads without sending them to a server.
+7. **Cron Expression Tester**: Translates cron scheduling expressions into human-readable times and shows upcoming run dates.
+8. **OpenGraph Social Card Previewer**: Previews how a link will look when shared on various social platforms (X, LinkedIn, Slack, etc.) based on its meta tags.
+9. **Git Commit Message Formatter/Linter**: Standardizes commit messages according to conventional commit guidelines.
+10. **CSS Grid/Flexbox Layout Generator**: A visual builder that outputs clean CSS Grid or Flexbox code for complex layouts.

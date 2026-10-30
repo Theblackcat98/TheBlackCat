@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Time & ID Toolkit: Timestamp Toolkit and UUID/ULID Studio." />
+  <meta property="og:site_name" content="The BlackCat" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Time & ID Toolkit" />
+  <meta property="og:description" content="Time & ID Toolkit: Timestamp Toolkit and UUID/ULID Studio." />
+  <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/time-id-toolkit/" />
+  <meta property="og:image" content="../og.png" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="data:," />
+  <title>Time & ID Toolkit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f7f8;
+      --surface: #ffffff;
+      --surface-2: #edf2f3;
+      --ink: #172225;
+      --muted: #54666b;
+      --line: #d7e0e2;
+      --accent: #067c72;
+      --accent-ink: #ffffff;
+      --accent-soft: #d8f1ed;
+      --code-bg: #152124;
+      --code-ink: #d9e7e8;
+
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 24px;
+      --space-6: 32px;
+      --space-7: 48px;
+      --space-8: 64px;
+
+      --font-ui: "Outfit", system-ui, -apple-system, sans-serif;
+      --font-code: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #11181c;
+        --surface: #192429;
+        --surface-2: #24353c;
+        --ink: #eceded;
+        --muted: #a3abac;
+        --line: #2e434c;
+        --accent: #0bbcae;
+        --accent-ink: #11181c;
+        --accent-soft: #086b62;
+        --code-bg: #090c0e;
+        --code-ink: #eceded;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-ui);
+      background-color: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      padding: var(--space-5);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: var(--space-2);
+    }
+
+    p.subtitle {
+      color: var(--muted);
+      margin-bottom: var(--space-6);
+    }
+
+    .tabs {
+      display: flex;
+      gap: var(--space-2);
+      border-bottom: 1px solid var(--line);
+      margin-bottom: var(--space-5);
+    }
+
+    .tab {
+      background: none;
+      border: none;
+      padding: var(--space-3) var(--space-4);
+      font-family: var(--font-ui);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .tab[aria-selected="true"] {
+      color: var(--ink);
+    }
+
+    .tab[aria-selected="true"]::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: var(--accent);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .card {
+      background-color: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: var(--space-5);
+      margin-bottom: var(--space-5);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .card h2 {
+      font-size: 1.25rem;
+      margin-bottom: var(--space-4);
+    }
+
+    .form-group {
+      margin-bottom: var(--space-4);
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+      color: var(--ink);
+    }
+
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: var(--space-3);
+      font-family: var(--font-ui);
+      font-size: 1rem;
+      background-color: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      color: var(--ink);
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus, select:focus {
+      outline: 2px solid var(--accent);
+      border-color: transparent;
+    }
+
+    .button-group {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: var(--space-3) var(--space-4);
+      font-family: var(--font-ui);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 4px;
+      border: none;
+      transition: background-color 0.15s;
+    }
+
+    button.primary {
+      background-color: var(--accent);
+      color: var(--accent-ink);
+    }
+
+    button.primary:hover {
+      opacity: 0.9;
+    }
+
+    button.secondary {
+      background-color: var(--surface-2);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    button.secondary:hover {
+      background-color: var(--line);
+    }
+
+    .code-block {
+      font-family: var(--font-code);
+      background-color: var(--code-bg);
+      color: var(--code-ink);
+      padding: var(--space-3);
+      border-radius: 4px;
+      overflow-x: auto;
+      margin-top: var(--space-2);
+      font-size: 0.9rem;
+    }
+
+    .flex-row {
+      display: flex;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .flex-col {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--space-4);
+    }
+
+    .result-box {
+      background-color: var(--surface-2);
+      padding: var(--space-4);
+      border-radius: 4px;
+      border: 1px solid var(--line);
+    }
+
+    .result-box h3 {
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: var(--space-2);
+    }
+
+    .result-value {
+      font-family: var(--font-code);
+      font-size: 1.1rem;
+      word-break: break-all;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: var(--space-3);
+      font-family: var(--font-code);
+      font-size: 0.9rem;
+      background-color: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      color: var(--ink);
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: 2px solid var(--accent);
+      border-color: transparent;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background-color: var(--surface-2);
+      border: 1px solid var(--line);
+    }
+
+    .badge.success {
+      background-color: #d8f1ed;
+      color: #067c72;
+      border-color: #067c72;
+    }
+
+    .badge.error {
+      background-color: #fce8e8;
+      color: #c92a2a;
+      border-color: #c92a2a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .badge.success {
+        background-color: #086b62;
+        color: #d8f1ed;
+      }
+      .badge.error {
+        background-color: #5c1616;
+        color: #fce8e8;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Time & ID Toolkit</h1>
+    <p class="subtitle">Timestamp processing, relative time math, and ID generation/inspection.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Toolkit tabs">
+    <button class="tab" role="tab" aria-selected="true" aria-controls="panel-time" id="tab-time">Timestamp Toolkit</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-id" id="tab-id">UUID/ULID Studio</button>
+  </div>
+
+  <div id="panel-time" role="tabpanel" aria-labelledby="tab-time" class="tab-panel active">
+    <div class="grid">
+      <div class="card">
+        <h2>Live Clock</h2>
+        <div class="result-box" style="margin-bottom: var(--space-3);">
+          <h3>Unix Epoch (s)</h3>
+          <div class="result-value" id="live-epoch-s">-</div>
+        </div>
+        <div class="result-box" style="margin-bottom: var(--space-3);">
+          <h3>Unix Epoch (ms)</h3>
+          <div class="result-value" id="live-epoch-ms">-</div>
+        </div>
+        <div class="result-box">
+          <h3>ISO 8601 (UTC)</h3>
+          <div class="result-value" id="live-iso">-</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Timestamp Converter</h2>
+        <div class="form-group">
+          <label for="ts-input">Unix Epoch or ISO Date</label>
+          <input type="text" id="ts-input" placeholder="e.g. 1700000000 or 2023-11-14T22:13:20Z" aria-label="Unix Epoch or ISO Date">
+        </div>
+        <div class="form-group">
+          <label for="ts-timezone">Timezone</label>
+          <select id="ts-timezone" aria-label="Timezone"></select>
+        </div>
+        <div class="result-box" style="margin-bottom: var(--space-3);">
+          <h3>Local Time</h3>
+          <div class="result-value" id="ts-local">-</div>
+        </div>
+        <div class="result-box" style="margin-bottom: var(--space-3);">
+          <h3>UTC Time</h3>
+          <div class="result-value" id="ts-utc">-</div>
+        </div>
+        <div class="result-box">
+          <h3>Relative</h3>
+          <div class="result-value" id="ts-relative">-</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Date Math & Relative Time</h2>
+        <div class="form-group">
+          <label for="math-base">Base Date</label>
+          <input type="text" id="math-base" value="now" placeholder="'now' or ISO date" aria-label="Base Date">
+        </div>
+        <div class="form-group">
+          <label for="math-expr">Expression</label>
+          <input type="text" id="math-expr" placeholder="e.g. +3d -12h or 'in 3h 20m'" aria-label="Expression">
+          <p style="font-size: 0.8rem; color: var(--muted); margin-top: var(--space-1);">Use +1d, -2h, +30m, -5s</p>
+        </div>
+        <div class="result-box">
+          <h3>Result</h3>
+          <div class="result-value" id="math-result">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel-id" role="tabpanel" aria-labelledby="tab-id" class="tab-panel">
+    <div class="grid">
+      <div class="card">
+        <h2>Bulk Generator</h2>
+        <div class="flex-row" style="margin-bottom: var(--space-4);">
+          <div class="form-group flex-col">
+            <label for="id-type">Type</label>
+            <select id="id-type" aria-label="Type">
+              <option value="uuid4">UUID v4 (Random)</option>
+              <option value="uuid7">UUID v7 (Time-based)</option>
+              <option value="ulid">ULID</option>
+              <option value="nanoid">NanoID</option>
+            </select>
+          </div>
+          <div class="form-group flex-col">
+            <label for="id-count">Count (1-100)</label>
+            <input type="number" id="id-count" min="1" max="100" value="5" aria-label="Count (1-100)">
+          </div>
+        </div>
+        <div class="button-group" style="margin-bottom: var(--space-4);">
+          <button class="primary" id="btn-generate">Generate</button>
+          <button class="secondary" id="btn-copy-gen">Copy All</button>
+        </div>
+        <textarea id="gen-output" readonly aria-label="Generated IDs"></textarea>
+      </div>
+
+      <div class="card">
+        <h2>ID Inspector</h2>
+        <div class="form-group">
+          <label for="id-inspect">Paste ID to Inspect</label>
+          <input type="text" id="id-inspect" placeholder="Paste UUID, ULID, or NanoID" aria-label="Paste ID to Inspect">
+        </div>
+        <div id="inspect-result" style="display: none;">
+          <div class="result-box" style="margin-bottom: var(--space-3);">
+            <h3>Type & Status</h3>
+            <div style="display: flex; gap: var(--space-2); align-items: center; margin-top: var(--space-1);">
+              <span id="inspect-type" class="badge">Unknown</span>
+              <span id="inspect-status" class="badge">Valid</span>
+            </div>
+          </div>
+          <div class="result-box" style="margin-bottom: var(--space-3);">
+            <h3>Version / Format</h3>
+            <div class="result-value" id="inspect-version">-</div>
+          </div>
+          <div class="result-box" style="margin-bottom: var(--space-3);">
+            <h3>Embedded Timestamp</h3>
+            <div class="result-value" id="inspect-ts">-</div>
+          </div>
+          <div class="result-box">
+            <h3>Notes</h3>
+            <div class="result-value" id="inspect-notes" style="font-size: 0.9rem; font-family: var(--font-ui);">-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching logic
+    const tabs = document.querySelectorAll('.tab');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => {
+          t.setAttribute('aria-selected', 'false');
+        });
+        panels.forEach(p => {
+          p.classList.remove('active');
+        });
+
+        tab.setAttribute('aria-selected', 'true');
+        const panelId = tab.getAttribute('aria-controls');
+        document.getElementById(panelId).classList.add('active');
+
+        localStorage.setItem('time-id-toolkit-last-tab', panelId);
+      });
+    });
+
+    // Restore last tab
+    const lastTab = localStorage.getItem('time-id-toolkit-last-tab');
+    if (lastTab) {
+      const tabToClick = document.querySelector(`[aria-controls="${lastTab}"]`);
+      if (tabToClick) tabToClick.click();
+    }
+
+    // Timestamp Toolkit Logic
+
+    // Live Clock
+    const elLiveEpochS = document.getElementById('live-epoch-s');
+    const elLiveEpochMs = document.getElementById('live-epoch-ms');
+    const elLiveIso = document.getElementById('live-iso');
+
+    function updateLiveClock() {
+      const now = new Date();
+      const ms = now.getTime();
+      const s = Math.floor(ms / 1000);
+
+      elLiveEpochS.textContent = s;
+      elLiveEpochMs.textContent = ms;
+      elLiveIso.textContent = now.toISOString();
+
+      requestAnimationFrame(updateLiveClock);
+    }
+    updateLiveClock();
+
+    // Timezone Selector
+    const elTsTz = document.getElementById('ts-timezone');
+    const timezones = Intl.supportedValuesOf('timeZone');
+
+    timezones.forEach(tz => {
+      const opt = document.createElement('option');
+      opt.value = tz;
+      opt.textContent = tz;
+      elTsTz.appendChild(opt);
+    });
+
+    // Default to user's timezone or UTC
+    let userTz = 'UTC';
+    try {
+      userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch(e) {}
+
+    const savedTz = localStorage.getItem('time-id-toolkit-tz');
+    if (savedTz && timezones.includes(savedTz)) {
+      elTsTz.value = savedTz;
+    } else {
+      elTsTz.value = userTz;
+    }
+
+    elTsTz.addEventListener('change', () => {
+      localStorage.setItem('time-id-toolkit-tz', elTsTz.value);
+      updateConverter();
+    });
+
+    // Converter Logic
+    const elTsInput = document.getElementById('ts-input');
+    const elTsLocal = document.getElementById('ts-local');
+    const elTsUtc = document.getElementById('ts-utc');
+    const elTsRelative = document.getElementById('ts-relative');
+
+    function parseTimestamp(input) {
+      if (!input) return null;
+      input = input.trim();
+
+      // Try epoch (digits only)
+      if (/^-?\d+$/.test(input)) {
+        const num = parseInt(input, 10);
+        if (input.length <= 11) {
+          // Assume seconds
+          return new Date(num * 1000);
+        } else if (input.length <= 14) {
+          // Assume milliseconds
+          return new Date(num);
+        } else {
+          // Assume microseconds or nanoseconds
+          return new Date(Math.floor(num / 1000000)); // fall back to ms approximation for display
+        }
+      }
+
+      // Try ISO
+      const d = new Date(input);
+      if (!isNaN(d.getTime())) return d;
+
+      return null;
+    }
+
+    function formatRelative(date) {
+      const now = new Date();
+      const diffMs = date.getTime() - now.getTime();
+      const diffSec = Math.round(diffMs / 1000);
+
+      const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+
+      const absSec = Math.abs(diffSec);
+      if (absSec < 60) return rtf.format(Math.round(diffSec), 'second');
+      if (absSec < 3600) return rtf.format(Math.round(diffSec / 60), 'minute');
+      if (absSec < 86400) return rtf.format(Math.round(diffSec / 3600), 'hour');
+      if (absSec < 2592000) return rtf.format(Math.round(diffSec / 86400), 'day');
+      if (absSec < 31536000) return rtf.format(Math.round(diffSec / 2592000), 'month');
+      return rtf.format(Math.round(diffSec / 31536000), 'year');
+    }
+
+    function updateConverter() {
+      const d = parseTimestamp(elTsInput.value);
+      if (!d) {
+        elTsLocal.textContent = '-';
+        elTsUtc.textContent = '-';
+        elTsRelative.textContent = '-';
+        return;
+      }
+
+      const tz = elTsTz.value || 'UTC';
+      try {
+        const localStr = d.toLocaleString('en-US', { timeZone: tz, dateStyle: 'full', timeStyle: 'long' });
+        elTsLocal.textContent = localStr;
+      } catch (e) {
+        elTsLocal.textContent = 'Invalid timezone';
+      }
+
+      elTsUtc.textContent = d.toISOString();
+      elTsRelative.textContent = formatRelative(d);
+    }
+
+    elTsInput.addEventListener('input', updateConverter);
+
+    // Date Math Logic
+    const elMathBase = document.getElementById('math-base');
+    const elMathExpr = document.getElementById('math-expr');
+    const elMathResult = document.getElementById('math-result');
+
+    function parseDateMath() {
+      const baseStr = elMathBase.value.trim().toLowerCase();
+      let baseDate = new Date();
+
+      if (baseStr !== 'now' && baseStr !== '') {
+        const pd = parseTimestamp(baseStr);
+        if (!pd) {
+          elMathResult.textContent = 'Invalid base date';
+          return;
+        }
+        baseDate = pd;
+      }
+
+      let expr = elMathExpr.value.trim().toLowerCase();
+      if (!expr) {
+        elMathResult.textContent = baseDate.toISOString();
+        return;
+      }
+
+      // Handle 'in Xy' format
+      if (expr.startsWith('in ')) {
+        expr = expr.substring(3).replace(/\s+/g, '');
+        expr = '+' + expr; // prepends a + if missing, regex will handle it
+      }
+
+      // regex for things like +3d, -2h, +30m, -5s
+      const regex = /([+-])?(\d+)([dhms])/g;
+      let match;
+      let msTotal = baseDate.getTime();
+      let validTokens = 0;
+
+      while ((match = regex.exec(expr)) !== null) {
+        validTokens++;
+        const sign = match[1] === '-' ? -1 : 1;
+        const val = parseInt(match[2], 10);
+        const unit = match[3];
+
+        let ms = 0;
+        if (unit === 'd') ms = val * 86400000;
+        if (unit === 'h') ms = val * 3600000;
+        if (unit === 'm') ms = val * 60000;
+        if (unit === 's') ms = val * 1000;
+
+        msTotal += sign * ms;
+      }
+
+      if (validTokens === 0) {
+        elMathResult.textContent = 'Invalid expression';
+        return;
+      }
+
+      elMathResult.textContent = new Date(msTotal).toISOString();
+    }
+
+    elMathBase.addEventListener('input', parseDateMath);
+    elMathExpr.addEventListener('input', parseDateMath);
+
+    // UUID/ULID Studio Logic
+
+    // Minimal UUID v4
+    function generateUUIDv4() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    // Minimal UUID v7
+    function generateUUIDv7() {
+      const ts = Date.now();
+      const tsHex = ts.toString(16).padStart(12, '0'); // 48 bits
+
+      const r1 = Math.floor(Math.random() * 0x1000).toString(16).padStart(3, '0'); // 12 bits
+
+      // We need 16 hex chars (64 bits, then we take 62 bits by masking the first char).
+      // Generate 8 hex chars (32 bits) twice to avoid 53-bit float precision limit.
+      const randA = Math.floor(Math.random() * 0x100000000).toString(16).padStart(8, '0');
+      const randB = Math.floor(Math.random() * 0x100000000).toString(16).padStart(8, '0');
+      const r2 = randA + randB; // 16 chars long
+
+      // variant is 10xx in binary (8, 9, a, b in hex)
+      const variant = (parseInt(r2[0], 16) & 0x3) | 0x8;
+
+      const uuid = `${tsHex.substring(0,8)}-${tsHex.substring(8,12)}-7${r1}-${variant.toString(16)}${r2.substring(1,4)}-${r2.substring(4, 16)}`;
+      return uuid;
+    }
+
+    // Minimal ULID
+    const ENCODING = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+    const ENCODING_LEN = ENCODING.length;
+
+    function encodeTime(now, len) {
+      let mod;
+      let str = "";
+      for (; len > 0; len--) {
+        mod = now % ENCODING_LEN;
+        str = ENCODING.charAt(mod) + str;
+        now = (now - mod) / ENCODING_LEN;
+      }
+      return str;
+    }
+
+    function encodeRandom(len) {
+      let str = "";
+      for (; len > 0; len--) {
+        str = ENCODING.charAt(Math.floor(Math.random() * ENCODING_LEN)) + str;
+      }
+      return str;
+    }
+
+    function generateULID() {
+      return encodeTime(Date.now(), 10) + encodeRandom(16);
+    }
+
+    // Minimal NanoID (21 chars, roughly same collision prob as UUID)
+    function generateNanoID() {
+      const urlAlphabet = 'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict';
+      let id = '';
+      for (let i = 0; i < 21; i++) {
+        id += urlAlphabet[(Math.random() * 64) | 0];
+      }
+      return id;
+    }
+
+    const elIdType = document.getElementById('id-type');
+    const elIdCount = document.getElementById('id-count');
+    const btnGenerate = document.getElementById('btn-generate');
+    const btnCopyGen = document.getElementById('btn-copy-gen');
+    const elGenOutput = document.getElementById('gen-output');
+
+    btnGenerate.addEventListener('click', () => {
+      const type = elIdType.value;
+      const count = Math.min(100, Math.max(1, parseInt(elIdCount.value, 10) || 1));
+      let out = [];
+
+      for (let i = 0; i < count; i++) {
+        if (type === 'uuid4') out.push(generateUUIDv4());
+        else if (type === 'uuid7') out.push(generateUUIDv7());
+        else if (type === 'ulid') out.push(generateULID());
+        else if (type === 'nanoid') out.push(generateNanoID());
+      }
+
+      elGenOutput.value = out.join('\n');
+    });
+
+    btnCopyGen.addEventListener('click', () => {
+      if (elGenOutput.value) {
+        navigator.clipboard.writeText(elGenOutput.value);
+        const origText = btnCopyGen.textContent;
+        btnCopyGen.textContent = 'Copied!';
+        setTimeout(() => { btnCopyGen.textContent = origText; }, 2000);
+      }
+    });
+
+    // Inspector Logic
+    const elIdInspect = document.getElementById('id-inspect');
+    const elInspectResult = document.getElementById('inspect-result');
+    const elInspectType = document.getElementById('inspect-type');
+    const elInspectStatus = document.getElementById('inspect-status');
+    const elInspectVersion = document.getElementById('inspect-version');
+    const elInspectTs = document.getElementById('inspect-ts');
+    const elInspectNotes = document.getElementById('inspect-notes');
+
+    function decodeULIDTime(id) {
+      if (id.length !== 26) return null;
+      const timeStr = id.substring(0, 10);
+      let time = 0;
+      for (let i = 0; i < 10; i++) {
+        const char = timeStr.charAt(i);
+        const val = ENCODING.indexOf(char);
+        if (val === -1) return null;
+        time = time * ENCODING_LEN + val;
+      }
+      return new Date(time);
+    }
+
+    elIdInspect.addEventListener('input', () => {
+      const id = elIdInspect.value.trim();
+      if (!id) {
+        elInspectResult.style.display = 'none';
+        return;
+      }
+
+      elInspectResult.style.display = 'block';
+      elInspectType.textContent = 'Unknown';
+      elInspectStatus.textContent = 'Invalid';
+      elInspectStatus.className = 'badge error';
+      elInspectVersion.textContent = '-';
+      elInspectTs.textContent = '-';
+      elInspectNotes.textContent = 'Format not recognized.';
+
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const ulidRegex = /^[0-9A-HJKMNP-TV-Z]{26}$/i;
+      const nanoidRegex = /^[A-Za-z0-9_-]{21}$/;
+
+      if (uuidRegex.test(id)) {
+        elInspectType.textContent = 'UUID';
+        elInspectStatus.textContent = 'Valid';
+        elInspectStatus.className = 'badge success';
+
+        const version = id.charAt(14);
+        const variant = parseInt(id.charAt(19), 16);
+        let variantStr = 'Unknown';
+        if (variant >= 8 && variant <= 11) variantStr = 'RFC 4122';
+
+        elInspectVersion.textContent = `v${version} (Variant: ${variantStr})`;
+        elInspectNotes.textContent = 'Valid UUID structure.';
+
+        if (version === '7') {
+          // UUIDv7 timestamp is first 48 bits (first 8 chars + next 4 chars)
+          const tsHex = id.substring(0, 8) + id.substring(9, 13);
+          const tsMs = parseInt(tsHex, 16);
+          elInspectTs.textContent = new Date(tsMs).toISOString();
+        } else if (version === '1') {
+          elInspectNotes.textContent = 'UUIDv1 contains a timestamp, but relies on Gregorian epoch. Time extraction not implemented in this minimal viewer.';
+        }
+      } else if (ulidRegex.test(id)) {
+        elInspectType.textContent = 'ULID';
+        elInspectStatus.textContent = 'Valid';
+        elInspectStatus.className = 'badge success';
+        elInspectVersion.textContent = 'Standard';
+
+        const tsDate = decodeULIDTime(id.toUpperCase());
+        if (tsDate) {
+          elInspectTs.textContent = tsDate.toISOString();
+          elInspectNotes.textContent = 'Valid ULID structure.';
+        } else {
+          elInspectStatus.textContent = 'Invalid';
+          elInspectStatus.className = 'badge error';
+          elInspectNotes.textContent = 'Contains invalid Crockford Base32 characters in timestamp portion.';
+        }
+      } else if (nanoidRegex.test(id)) {
+        elInspectType.textContent = 'NanoID';
+        elInspectStatus.textContent = 'Valid';
+        elInspectStatus.className = 'badge success';
+        elInspectVersion.textContent = 'Standard (21 chars)';
+        elInspectNotes.textContent = 'Valid NanoID structure. No embedded timestamp.';
+      } else {
+        // Provide hints
+        if (id.length === 36 && id.includes('-')) {
+          elInspectNotes.textContent = 'Looks like a UUID, but contains invalid hex characters or wrong structure.';
+        } else if (id.length === 26) {
+          elInspectNotes.textContent = 'Looks like a ULID, but contains invalid characters (I, L, O, U are excluded).';
+        } else if (id.length === 21) {
+          elInspectNotes.textContent = 'Looks like a NanoID, but contains invalid characters.';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

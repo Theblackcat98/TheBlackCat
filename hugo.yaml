@@ -127,6 +127,11 @@ params:
           desc: "Five machines as interactive isometric figures: a quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine and a quadruped robot — each with a dark and a light build."
           url: "anatomy/"
           writeup: "blog/anatomy-machines/"
+        - name: "Time & ID Toolkit"
+          kind: "App"
+          desc: "Timestamp Toolkit for epoch/ISO conversions and relative math, paired with a UUID/ULID Studio for bulk generation and deep inspection of modern IDs."
+          url: "time-id-toolkit/"
+          writeup: "library/tools/time-id-toolkit/"
     - group: "Running on Online Tools"
       items:
         - name: "Color Token Workshop"

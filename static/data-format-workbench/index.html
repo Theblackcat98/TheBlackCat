@@ -1,0 +1,1109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Data Format Workbench: convert between JSON, YAML and TOML, inspect the tree, and run JSONPath queries — entirely in the browser." />
+  <link rel="icon" href="data:," />
+  <title>Data Format Workbench</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f7f8;
+      --surface: #ffffff;
+      --surface-2: #edf2f3;
+      --ink: #172225;
+      --muted: #54666b;
+      --line: #d7e0e2;
+      --accent: #067c72;
+      --accent-ink: #ffffff;
+      --danger: #b3261e;
+      --danger-bg: #fdecea;
+      --warning: #f29900;
+
+      --ui-font: "Outfit", sans-serif;
+      --mono-font: "JetBrains Mono", monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111415;
+        --surface: #1e2528;
+        --surface-2: #283135;
+        --ink: #e8eef0;
+        --muted: #95a3a7;
+        --line: #364448;
+        --accent: #09a396;
+        --accent-ink: #000000;
+        --danger: #f28b82;
+        --danger-bg: #3a2320;
+        --warning: #fdd663;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--ui-font);
+      background: var(--bg);
+      color: var(--ink);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+    header {
+      padding: 1rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .header-note {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      text-align: right;
+    }
+    .header-note.bad { color: var(--danger); }
+
+    .container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      flex-direction: column;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        flex-direction: row;
+      }
+    }
+
+    .pane {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      background: var(--surface);
+    }
+
+    .pane-header {
+      padding: 0.5rem 1rem;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .toolbar, .query-bar {
+      padding: 0.5rem 1rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .lbl {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .spacer { margin-left: auto; }
+
+    .resizer {
+      height: 6px;
+      background: var(--line);
+      cursor: row-resize;
+      flex-shrink: 0;
+      touch-action: none;
+    }
+    @media (min-width: 768px) {
+      .resizer {
+        width: 6px;
+        height: auto;
+        cursor: col-resize;
+      }
+    }
+    .resizer:hover, .resizer:active, .resizer:focus-visible {
+      background: var(--accent);
+    }
+
+    .pane-content {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100%;
+      border: none;
+      resize: none;
+      padding: 1rem;
+      font-family: var(--mono-font);
+      font-size: 0.875rem;
+      background: transparent;
+      color: var(--ink);
+      outline: none;
+      line-height: 1.5;
+      tab-size: 2;
+    }
+
+    select, button, input[type="file"] {
+      font-family: var(--ui-font);
+      font-size: 0.875rem;
+      padding: 0.35rem 0.8rem;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    button {
+      background: var(--surface-2);
+    }
+
+    button:hover {
+      background: var(--line);
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: transparent;
+      color: var(--accent-ink);
+      font-weight: 600;
+    }
+    button.primary:hover {
+      filter: brightness(1.08);
+      background: var(--accent);
+    }
+
+    input[type="text"] {
+      font-family: var(--mono-font);
+      font-size: 0.875rem;
+      padding: 0.35rem 0.6rem;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: 9px;
+      width: 100%;
+    }
+
+    .error-bar {
+      padding: 0.5rem 1rem;
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-bottom: 1px solid var(--line);
+      font-family: var(--mono-font);
+      font-size: 0.8125rem;
+      display: none;
+      flex-shrink: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .error-bar.visible {
+      display: block;
+    }
+
+    .query-status {
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    .tree-view {
+      padding: 1rem;
+      font-family: var(--mono-font);
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .tree-row {
+      display: flex;
+      gap: 0.35rem;
+      align-items: baseline;
+      padding: 0.05rem 0.3rem;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      width: max-content;
+      min-width: 100%;
+    }
+    .tree-row:hover {
+      background: var(--surface-2);
+    }
+
+    .tree-children {
+      margin-left: 0.65rem;
+      border-left: 1px solid var(--line);
+      padding-left: 0.6rem;
+    }
+    .node.collapsed > .tree-children {
+      display: none;
+    }
+
+    .tree-toggle {
+      cursor: pointer;
+      user-select: none;
+      display: inline-block;
+      width: 1rem;
+      flex: none;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.75em;
+    }
+
+    .tree-key {
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .tree-meta {
+      color: var(--muted);
+      font-size: 0.85em;
+    }
+    .tree-value.string { color: #0a7a3a; }
+    .tree-value.number { color: #b35400; }
+    .tree-value.boolean { color: #8a2be2; }
+    .tree-value.null { color: var(--muted); }
+
+    @media (prefers-color-scheme: dark) {
+      .tree-value.string { color: #4dc27f; }
+      .tree-value.number { color: #f48b3b; }
+      .tree-value.boolean { color: #c476f5; }
+    }
+
+    .highlighted {
+      background-color: var(--warning);
+      color: black;
+      border-radius: 2px;
+    }
+    .highlighted .tree-key, .highlighted .tree-meta, .highlighted .tree-toggle {
+      color: black;
+    }
+
+    .selected-path-bar {
+      padding: 0.5rem 1rem;
+      background: var(--surface-2);
+      border-top: 1px solid var(--line);
+      font-family: var(--mono-font);
+      font-size: 0.75rem;
+      color: var(--muted);
+      flex-shrink: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Data Format Workbench</h1>
+  <span class="header-note" id="lib-status">Loading libraries…</span>
+</header>
+
+<div class="container" id="container">
+  <!-- Input Pane -->
+  <div class="pane" id="input-pane" style="flex: 1;">
+    <div class="pane-header">
+      <span class="lbl" id="input-lbl">Input</span>
+      <select id="input-format" aria-label="Input format">
+        <option value="auto">Auto-detect</option>
+        <option value="json">JSON</option>
+        <option value="yaml">YAML</option>
+        <option value="toml">TOML</option>
+      </select>
+      <label for="file-upload" class="sr-only">Upload file</label>
+      <input type="file" id="file-upload" aria-label="Upload file" accept=".json,.yaml,.yml,.toml,text/plain" />
+      <span class="spacer" style="font-size:0.875rem; color:var(--muted);" id="detected-format">Waiting for input…</span>
+    </div>
+    <div class="toolbar">
+      <button type="button" id="btn-convert" class="primary">Convert</button>
+      <button type="button" id="btn-format-input">Format input</button>
+      <button type="button" id="btn-sample">Load sample</button>
+      <button type="button" id="btn-clear">Clear</button>
+    </div>
+    <div id="error-bar" class="error-bar" role="alert"></div>
+    <div class="pane-content">
+      <textarea id="input-editor" aria-label="Input data" placeholder="Paste JSON, YAML, or TOML here..." spellcheck="false"></textarea>
+    </div>
+  </div>
+
+  <div class="resizer" id="resizer" role="separator" tabindex="0" aria-label="Resize panes" aria-valuemin="20" aria-valuemax="80" aria-valuenow="50" aria-orientation="vertical"></div>
+
+  <!-- Output Pane -->
+  <div class="pane" id="output-pane" style="flex: 1;">
+    <div class="pane-header">
+      <span class="lbl">Output</span>
+      <select id="output-format" aria-label="Output format">
+        <option value="tree">Tree View</option>
+        <option value="json">JSON</option>
+        <option value="yaml">YAML</option>
+        <option value="toml">TOML</option>
+      </select>
+      <select id="indent" aria-label="JSON indentation">
+        <option value="2">2 spaces</option>
+        <option value="4">4 spaces</option>
+        <option value="0">Minified</option>
+      </select>
+      <span class="spacer"></span>
+      <button type="button" id="btn-copy">Copy</button>
+      <button type="button" id="btn-download">Download</button>
+    </div>
+    <div class="query-bar">
+      <label class="lbl" for="jsonpath-input">JSONPath</label>
+      <input type="text" id="jsonpath-input" placeholder="$.store.book[*].author" aria-label="JSONPath query" style="flex:1;" spellcheck="false" />
+      <button type="button" id="btn-query">Run query</button>
+      <button type="button" id="btn-query-clear">Clear</button>
+      <span class="query-status" id="query-status" aria-live="polite"></span>
+    </div>
+    <div id="output-error" class="error-bar" role="alert"></div>
+    <div class="pane-content">
+      <div id="tree-container" class="tree-view"></div>
+      <textarea id="output-editor" aria-label="Output data" readonly style="display:none; background:var(--surface-2);" spellcheck="false"></textarea>
+    </div>
+    <div id="selected-path" class="selected-path-bar">Select a node to view its JSONPath</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<!-- JSONPath-Plus 10.x ships no index-browser-umd.min.js (the old shell's URL 404s);
+     its browser build is the ES module below. -->
+<script type="module">
+  import { JSONPath } from 'https://cdn.jsdelivr.net/npm/jsonpath-plus@10.0.7/dist/index-browser-esm.min.js';
+  window.JSONPath = JSONPath;
+</script>
+<script type="module">
+  import * as smolToml from 'https://cdn.jsdelivr.net/npm/smol-toml@1.3.1/dist/index.js';
+  window.smolToml = smolToml;
+</script>
+
+<script>
+(function () {
+  "use strict";
+
+  var $ = function (id) { return document.getElementById(id); };
+  var els = {
+    input: $("input-editor"),
+    inputFormat: $("input-format"),
+    outputFormat: $("output-format"),
+    indent: $("indent"),
+    detected: $("detected-format"),
+    errorBar: $("error-bar"),
+    outputError: $("output-error"),
+    tree: $("tree-container"),
+    output: $("output-editor"),
+    path: $("selected-path"),
+    query: $("jsonpath-input"),
+    queryStatus: $("query-status"),
+    libStatus: $("lib-status"),
+    file: $("file-upload"),
+    inputPane: $("input-pane"),
+    outputPane: $("output-pane"),
+    resizer: $("resizer"),
+    container: $("container")
+  };
+
+  var SAMPLE = {
+    store: {
+      book: [
+        { title: "Sayings of the Century", author: "Nigel Rees", price: 8.95 },
+        { title: "Sword of Honour", author: "Evelyn Waugh", price: 12.99 }
+      ],
+      bicycle: { color: "red", price: 399 }
+    },
+    expensive: 10
+  };
+
+  var LS = {
+    input: "dfw.input",
+    inFmt: "dfw.input-format",
+    outFmt: "dfw.output-format",
+    indent: "dfw.indent",
+    query: "dfw.query"
+  };
+
+  var parsed = undefined;
+  var parsedOk = false;
+  var currentFormat = null;
+  var queryMode = false;
+  var splitPct = 50;
+  var debounceTimer = null;
+
+  /* ---------- persistence ---------- */
+
+  function save() {
+    try {
+      localStorage.setItem(LS.input, els.input.value);
+      localStorage.setItem(LS.inFmt, els.inputFormat.value);
+      localStorage.setItem(LS.outFmt, els.outputFormat.value);
+      localStorage.setItem(LS.indent, els.indent.value);
+      localStorage.setItem(LS.query, els.query.value);
+    } catch (e) { /* storage unavailable: session still works */ }
+  }
+
+  function restore() {
+    try {
+      var i = localStorage.getItem(LS.input);
+      if (i !== null) els.input.value = i;
+      var a = localStorage.getItem(LS.inFmt);
+      if (a) els.inputFormat.value = a;
+      var b = localStorage.getItem(LS.outFmt);
+      if (b) els.outputFormat.value = b;
+      var c = localStorage.getItem(LS.indent);
+      if (c) els.indent.value = c;
+      var q = localStorage.getItem(LS.query);
+      if (q) els.query.value = q;
+    } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- library availability ---------- */
+
+  function libState() {
+    return {
+      yaml: typeof window.jsyaml !== "undefined",
+      jsonpath: typeof window.JSONPath !== "undefined" || typeof window.JSONPathPlus !== "undefined",
+      toml: typeof window.smolToml !== "undefined"
+    };
+  }
+
+  function updateLibStatus() {
+    var s = libState();
+    var missing = [];
+    if (!s.yaml) missing.push("js-yaml");
+    if (!s.jsonpath) missing.push("JSONPath-Plus");
+    if (!s.toml) missing.push("smol-toml");
+    if (missing.length) {
+      els.libStatus.textContent = "Library failed to load: " + missing.join(", ") +
+        " (CDN unreachable) — formats that need it will error until you reload.";
+      els.libStatus.classList.add("bad");
+    } else {
+      els.libStatus.textContent = "Ready — everything runs locally in your browser; nothing is sent to a server.";
+      els.libStatus.classList.remove("bad");
+    }
+    return s;
+  }
+
+  /* ---------- error display ---------- */
+
+  function showError(bar, msg) { bar.textContent = msg; bar.classList.add("visible"); }
+  function hideError(bar) { bar.textContent = ""; bar.classList.remove("visible"); }
+  function showInputError(msg) { showError(els.errorBar, msg); }
+  function showOutputError(msg) { showError(els.outputError, msg); }
+
+  function describeError(fmt, e, text) {
+    var msg = (e && e.message) ? String(e.message) : String(e);
+    // Enrich bare JSON "position N" reports with line/column numbers,
+    // unless the engine's message already carries line info.
+    var pos = /position (\d+)/i.exec(msg);
+    if (fmt === "json" && pos && text && !/line \d+/i.test(msg)) {
+      var n = parseInt(pos[1], 10);
+      var upto = text.slice(0, n);
+      var line = upto.split("\n").length;
+      var col = n - upto.lastIndexOf("\n");
+      msg += " (line " + line + ", column " + col + ")";
+    }
+    msg = msg.split("\n").slice(0, 4).join(" ").replace(/\s+/g, " ").trim();
+    if (msg.length > 400) msg = msg.slice(0, 400) + "…";
+    return "Invalid " + fmt.toUpperCase() + " — " + msg;
+  }
+
+  /* ---------- format detection ---------- */
+
+  function looksLikeToml(t) {
+    var lines = t.split("\n").map(function (l) { return l.trim(); })
+      .filter(function (l) { return l && l.charAt(0) !== "#"; });
+    if (!lines.length) return false;
+    return lines.every(function (l) {
+      return /^\[+\s*[A-Za-z0-9_."'-]+[^\]]*\]+$/.test(l) ||           // [table] / [[array]]
+        /^[A-Za-z0-9_-]+(\s*\.\s*[A-Za-z0-9_-]+)*\s*=/.test(l) ||      // key = / dotted.key =
+        /^"[^"]*"\s*=/.test(l) || /^'[^']*'\s*=/.test(l) ||            // quoted key =
+        /,$/.test(l) ||                                                 // multi-line array item
+        l === "]" || l === "[" || /^["'\d]/.test(l);                    // array continuation
+    });
+  }
+
+  function detectFormat(text) {
+    var t = text.trim();
+    if (t.charAt(0) === "{" || t.charAt(0) === "[") {
+      try { JSON.parse(t); return "json"; } catch (e) { /* fall through */ }
+    }
+    var yamlVal, yamlOk = false;
+    if (typeof window.jsyaml !== "undefined") {
+      try { yamlVal = window.jsyaml.load(t); yamlOk = true; } catch (e) { yamlOk = false; }
+    }
+    if (yamlOk && yamlVal !== null && typeof yamlVal === "object") {
+      // YAML parses almost anything; a doc whose every line is key=value / [table]
+      // is far more likely TOML someone pasted without a .toml name.
+      return looksLikeToml(t) ? "toml" : "yaml";
+    }
+    if (looksLikeToml(t) && typeof window.smolToml !== "undefined") {
+      try { window.smolToml.parse(t); return "toml"; } catch (e) { /* not TOML */ }
+    }
+    if (yamlOk) return "yaml"; // scalar / string YAML doc
+    if (t.indexOf("=") !== -1 && looksLikeToml(t)) return "toml";
+    if (t.charAt(0) === "{" || t.charAt(0) === "[") return "json";
+    return "yaml";
+  }
+
+  /* ---------- parsing / serialising ---------- */
+
+  function normalize(v) {
+    if (v === null || typeof v !== "object") return v;
+    var TD = window.smolToml && window.smolToml.TomlDate;
+    if (TD && v instanceof TD) {
+      try { return new Date(v.toISOString()); } catch (e) { return String(v); }
+    }
+    if (v instanceof Date) return v;
+    if (Array.isArray(v)) return v.map(normalize);
+    var o = {};
+    Object.keys(v).forEach(function (k) { o[k] = normalize(v[k]); });
+    return o;
+  }
+
+  function parseAs(text, fmt) {
+    if (fmt === "json") return JSON.parse(text);
+    if (fmt === "yaml") {
+      if (typeof window.jsyaml === "undefined") {
+        throw new Error("js-yaml did not load (CDN unreachable), so YAML cannot be parsed. Reload the page to retry.");
+      }
+      return window.jsyaml.load(text);
+    }
+    if (fmt === "toml") {
+      if (typeof window.smolToml === "undefined") {
+        throw new Error("smol-toml did not load (CDN unreachable), so TOML cannot be parsed. Reload the page to retry.");
+      }
+      return window.smolToml.parse(text);
+    }
+    throw new Error("Unknown input format: " + fmt);
+  }
+
+  function jsonReplacer(key, val) {
+    return typeof val === "bigint" ? Number(val) : val;
+  }
+
+  function safeStringify(v, indent) {
+    return indent === 0 ? JSON.stringify(v, jsonReplacer)
+                        : JSON.stringify(v, jsonReplacer, indent);
+  }
+
+  function indentVal() { return parseInt(els.indent.value, 10) || 0; }
+
+  function pathSuffix(container, k) {
+    if (Array.isArray(container)) return "[" + k + "]";
+    return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(k) ? "." + k : "[" + JSON.stringify(k) + "]";
+  }
+
+  function findNull(v, path) {
+    if (v === null) return path;
+    if (v && typeof v === "object" && !(v instanceof Date)) {
+      var keys = Object.keys(v);
+      for (var i = 0; i < keys.length; i++) {
+        var r = findNull(v[keys[i]], path + pathSuffix(v, keys[i]));
+        if (r) return r;
+      }
+    }
+    return null;
+  }
+
+  function stringifyAs(value, mode) {
+    if (mode === "json") return safeStringify(value, indentVal());
+    if (mode === "yaml") {
+      if (typeof window.jsyaml === "undefined") {
+        throw new Error("YAML output needs js-yaml, which did not load (CDN unreachable). Reload the page to retry.");
+      }
+      return window.jsyaml.dump(value, { indent: 2, lineWidth: 120, noRefs: true });
+    }
+    if (mode === "toml") {
+      if (typeof window.smolToml === "undefined") {
+        throw new Error("TOML output needs smol-toml, which did not load (CDN unreachable). Reload the page to retry.");
+      }
+      if (value === null || typeof value !== "object" || Array.isArray(value) || value instanceof Date) {
+        var kind = Array.isArray(value) ? "an array"
+          : value === null ? "null"
+          : value instanceof Date ? "a date/time"
+          : "a " + typeof value;
+        throw new Error("TOML cannot represent this document — its root is " + kind +
+          ", and a TOML document must be a top-level table (object). " +
+          "Wrap the value in a key, or use JSON/YAML output instead.");
+      }
+      var nullPath = findNull(value, "$");
+      if (nullPath) {
+        throw new Error("TOML cannot represent null values — found one at " + nullPath +
+          ". Remove it or use JSON/YAML output instead.");
+      }
+      try {
+        return window.smolToml.stringify(value);
+      } catch (e) {
+        throw new Error("TOML conversion failed — " + ((e && e.message) || e) +
+          ". A common cause is a value TOML cannot express (mixed-type arrays become tables, nested arrays of tables, undefined). Try JSON/YAML output to inspect it.");
+      }
+    }
+    throw new Error("Unknown output format: " + mode);
+  }
+
+  /* ---------- tree view ---------- */
+
+  var selectedRow = null;
+
+  function selectRow(row, path) {
+    if (selectedRow) selectedRow.classList.remove("highlighted");
+    selectedRow = row;
+    row.classList.add("highlighted");
+    els.path.textContent = path;
+  }
+
+  function typeOf(v) {
+    if (v === null) return "null";
+    if (Array.isArray(v)) return "array";
+    if (v instanceof Date) return "date";
+    if (typeof v === "object") return "object";
+    return typeof v;
+  }
+
+  function formatScalar(v) {
+    if (v === null) return "null";
+    if (v instanceof Date) return v.toISOString();
+    if (typeof v === "string") return JSON.stringify(v);
+    return String(v);
+  }
+
+  function buildNode(value, keyLabel, path) {
+    var wrap = document.createElement("div");
+    wrap.className = "node";
+    var row = document.createElement("div");
+    row.className = "tree-row";
+    var t = typeOf(value);
+    var collapsible = t === "object" || t === "array";
+    var toggle = document.createElement("span");
+    toggle.className = "tree-toggle";
+    toggle.textContent = collapsible ? "▾" : "";
+    row.appendChild(toggle);
+    var key = document.createElement("span");
+    key.className = "tree-key";
+    key.textContent = keyLabel;
+    row.appendChild(key);
+
+    if (collapsible) {
+      var count = Array.isArray(value) ? value.length : Object.keys(value).length;
+      var meta = document.createElement("span");
+      meta.className = "tree-meta";
+      meta.textContent = Array.isArray(value) ? "[ " + count + " items ]" : "{ " + count + " keys }";
+      row.appendChild(meta);
+      var children = document.createElement("div");
+      children.className = "tree-children";
+      var keys = Array.isArray(value) ? value.map(function (_, i) { return i; }) : Object.keys(value);
+      keys.forEach(function (k) {
+        var childPath = Array.isArray(value) ? path + "[" + k + "]" : path + pathSuffix(value, k);
+        children.appendChild(buildNode(value[k], Array.isArray(value) ? "[" + k + "]" : String(k), childPath));
+      });
+      toggle.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        wrap.classList.toggle("collapsed");
+        toggle.textContent = wrap.classList.contains("collapsed") ? "▸" : "▾";
+      });
+      wrap.appendChild(row);
+      wrap.appendChild(children);
+    } else {
+      var colon = document.createElement("span");
+      colon.textContent = ": ";
+      row.appendChild(colon);
+      var val = document.createElement("span");
+      val.className = "tree-value " + (t === "date" ? "string" : t);
+      val.textContent = formatScalar(value);
+      row.appendChild(val);
+      wrap.appendChild(row);
+    }
+    row.addEventListener("click", function () { selectRow(row, path); });
+    return wrap;
+  }
+
+  /* ---------- rendering / conversion ---------- */
+
+  function updateIndentVisibility() {
+    els.indent.style.display = els.outputFormat.value === "json" ? "" : "none";
+  }
+
+  function renderFormat() {
+    var mode = els.outputFormat.value;
+    updateIndentVisibility();
+    if (mode === "tree") {
+      els.output.style.display = "none";
+      els.tree.style.display = "block";
+      els.tree.innerHTML = "";
+      selectedRow = null;
+      els.tree.appendChild(buildNode(parsed, "$", "$"));
+      els.path.textContent = "$ — click any node to see its JSONPath";
+    } else {
+      els.tree.style.display = "none";
+      els.output.style.display = "block";
+      try {
+        els.output.value = stringifyAs(parsed, mode);
+      } catch (e) {
+        els.output.value = "";
+        showOutputError(e.message);
+      }
+    }
+  }
+
+  // JSONPath-Plus is very lenient — it returns [] (or worse, a value) for most
+  // malformed queries instead of throwing — so sanity-check the syntax first
+  // and give the clear error the library won't.
+  function validateQuery(q) {
+    if (q.charAt(0) !== "$") return "a JSONPath query starts with the root symbol $ (e.g. $.store.book[*].author).";
+    var stack = [];
+    var quote = null;
+    for (var i = 0; i < q.length; i++) {
+      var c = q.charAt(i);
+      if (quote) {
+        if (c === "\\") { i++; continue; }
+        if (c === quote) quote = null;
+        continue;
+      }
+      if (c === "'" || c === '"') { quote = c; continue; }
+      if (c === "[" || c === "(") stack.push(c);
+      else if (c === "]" || c === ")") {
+        var open = stack.pop();
+        if ((c === "]" && open !== "[") || (c === ")" && open !== "(")) return "unbalanced brackets.";
+      }
+    }
+    if (quote) return "an unterminated string literal.";
+    if (stack.length) return "unbalanced brackets — a " + (stack[stack.length - 1] === "[" ? "'[' is never closed." : "'(' is never closed.");
+    if (/\[\s*\]/.test(q)) return "an empty [] subscript selects nothing — use [*] for a wildcard.";
+    if (/\.$/.test(q) || /\.\.$/.test(q)) return "the query ends with a dangling '.' — name the member to select.";
+    return null;
+  }
+
+  function runQuery() {
+    var q = els.query.value.trim();
+    if (!q) { queryMode = false; els.queryStatus.textContent = ""; renderFormat(); return; }
+    if (!parsedOk) {
+      showOutputError("Fix the input first — a JSONPath query needs a successfully parsed document.");
+      return;
+    }
+    var syntaxError = validateQuery(q);
+    if (syntaxError) {
+      queryMode = false;
+      renderFormat();
+      showOutputError("Invalid JSONPath — " + syntaxError);
+      return;
+    }
+    var JP = window.JSONPathPlus || window.JSONPath;
+    if (!JP) {
+      showOutputError("JSONPath-Plus did not load (CDN unreachable), so queries are unavailable. Reload the page to retry.");
+      return;
+    }
+    var fn = typeof JP === "function" ? JP : JP.JSONPath;
+    var result;
+    try {
+      result = fn({ path: q, json: parsed });
+    } catch (e) {
+      queryMode = false;
+      renderFormat();
+      showOutputError("Invalid JSONPath — " + ((e && e.message) || e));
+      return;
+    }
+    queryMode = true;
+    els.tree.style.display = "none";
+    els.output.style.display = "block";
+    updateIndentVisibility();
+    if (result === undefined) {
+      els.output.value = "";
+      els.queryStatus.textContent = "No matches";
+    } else {
+      els.output.value = safeStringify(result, 2);
+      els.queryStatus.textContent = Array.isArray(result)
+        ? result.length + (result.length === 1 ? " match" : " matches")
+        : "1 match";
+    }
+  }
+
+  function convert() {
+    save();
+    var text = els.input.value;
+    hideError(els.errorBar);
+    hideError(els.outputError);
+    if (!text.trim()) {
+      parsed = undefined; parsedOk = false; currentFormat = null;
+      els.detected.textContent = "Waiting for input…";
+      els.tree.innerHTML = "";
+      els.output.value = "";
+      els.path.textContent = "Select a node to view its JSONPath";
+      els.queryStatus.textContent = "";
+      updateIndentVisibility();
+      return;
+    }
+    var override = els.inputFormat.value;
+    var fmt = override === "auto" ? detectFormat(text) : override;
+    currentFormat = fmt;
+    els.detected.textContent = (override === "auto" ? "Detected: " : "Input format: ") + fmt.toUpperCase();
+    var value;
+    try {
+      value = normalize(parseAs(text, fmt));
+    } catch (e) {
+      parsedOk = false;
+      showInputError(describeError(fmt, e, text));
+      els.tree.innerHTML = "";
+      els.output.value = "";
+      els.path.textContent = "Select a node to view its JSONPath";
+      return;
+    }
+    if (value === undefined) {
+      parsedOk = false;
+      showInputError("The document parses to no value (it is empty or only comments).");
+      els.tree.innerHTML = "";
+      els.output.value = "";
+      return;
+    }
+    parsed = value;
+    parsedOk = true;
+    if (queryMode) { runQuery(); } else { renderFormat(); }
+  }
+
+  function scheduleConvert() {
+    save();
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(convert, 300);
+  }
+
+  /* ---------- output text helpers (copy / download) ---------- */
+
+  function currentOutputText() {
+    if (!parsedOk) return "";
+    if (queryMode) return els.output.value;
+    if (els.outputFormat.value === "tree") {
+      try { return safeStringify(parsed, indentVal() === 0 ? 2 : indentVal()); } catch (e) { return ""; }
+    }
+    return els.output.value;
+  }
+
+  function currentExtension() {
+    if (queryMode) return "json";
+    var m = els.outputFormat.value;
+    return m === "tree" ? "json" : m;
+  }
+
+  /* ---------- resizer ---------- */
+
+  function isHorizontal() {
+    return window.matchMedia("(min-width: 768px)").matches;
+  }
+
+  function applySplit() {
+    els.inputPane.style.flex = "0 0 " + splitPct + "%";
+    els.outputPane.style.flex = "1 1 0%";
+    els.resizer.setAttribute("aria-valuenow", String(Math.round(splitPct)));
+    els.resizer.setAttribute("aria-orientation", isHorizontal() ? "vertical" : "horizontal");
+  }
+
+  els.resizer.addEventListener("pointerdown", function (e) {
+    e.preventDefault();
+    try { els.resizer.setPointerCapture(e.pointerId); } catch (err) { /* optional */ }
+    function onMove(ev) {
+      var r = els.container.getBoundingClientRect();
+      var pos = isHorizontal()
+        ? (ev.clientX - r.left) / r.width
+        : (ev.clientY - r.top) / r.height;
+      splitPct = Math.min(80, Math.max(20, pos * 100));
+      applySplit();
+    }
+    function onUp() {
+      els.resizer.removeEventListener("pointermove", onMove);
+      els.resizer.removeEventListener("pointerup", onUp);
+      els.resizer.removeEventListener("pointercancel", onUp);
+    }
+    els.resizer.addEventListener("pointermove", onMove);
+    els.resizer.addEventListener("pointerup", onUp);
+    els.resizer.addEventListener("pointercancel", onUp);
+  });
+
+  els.resizer.addEventListener("keydown", function (e) {
+    var horiz = isHorizontal();
+    var dec = horiz ? "ArrowLeft" : "ArrowUp";
+    var inc = horiz ? "ArrowRight" : "ArrowDown";
+    var step = e.shiftKey ? 10 : 2;
+    if (e.key === dec) { splitPct = Math.max(20, splitPct - step); }
+    else if (e.key === inc) { splitPct = Math.min(80, splitPct + step); }
+    else if (e.key === "Home") { splitPct = 50; }
+    else { return; }
+    e.preventDefault();
+    applySplit();
+  });
+
+  window.addEventListener("resize", applySplit);
+
+  /* ---------- wiring ---------- */
+
+  els.input.addEventListener("input", scheduleConvert);
+  els.input.addEventListener("keydown", function (e) {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      var s = els.input.selectionStart, en = els.input.selectionEnd;
+      els.input.setRangeText("  ", s, en, "end");
+      scheduleConvert();
+    }
+  });
+
+  els.inputFormat.addEventListener("change", convert);
+  els.outputFormat.addEventListener("change", function () { queryMode = false; els.queryStatus.textContent = ""; convert(); });
+  els.indent.addEventListener("change", convert);
+
+  $("btn-convert").addEventListener("click", convert);
+
+  $("btn-format-input").addEventListener("click", function () {
+    if (!parsedOk) { convert(); return; }
+    try {
+      els.input.value = stringifyAs(parsed, currentFormat);
+      convert();
+    } catch (e) {
+      showInputError(e.message);
+    }
+  });
+
+  $("btn-sample").addEventListener("click", function () {
+    els.input.value = JSON.stringify(SAMPLE, null, 2);
+    els.inputFormat.value = "auto";
+    convert();
+    els.input.focus();
+  });
+
+  $("btn-clear").addEventListener("click", function () {
+    els.input.value = "";
+    queryMode = false;
+    els.queryStatus.textContent = "";
+    convert();
+    els.input.focus();
+  });
+
+  els.file.addEventListener("change", function () {
+    var f = els.file.files && els.file.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      els.input.value = String(reader.result || "");
+      var m = /\.([^.]+)$/.exec(f.name || "");
+      var ext = m ? m[1].toLowerCase() : "";
+      els.inputFormat.value = ext === "yml" ? "yaml"
+        : (ext === "json" || ext === "yaml" || ext === "toml") ? ext : "auto";
+      convert();
+    };
+    reader.onerror = function () { showInputError("Could not read that file."); };
+    reader.readAsText(f);
+    els.file.value = "";
+  });
+
+  $("btn-query").addEventListener("click", function () { queryMode = true; runQuery(); save(); });
+  $("btn-query-clear").addEventListener("click", function () {
+    els.query.value = "";
+    queryMode = false;
+    els.queryStatus.textContent = "";
+    hideError(els.outputError);
+    if (parsedOk) renderFormat();
+    save();
+  });
+  els.query.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); queryMode = true; runQuery(); save(); }
+  });
+  els.query.addEventListener("input", save);
+
+  $("btn-copy").addEventListener("click", function () {
+    var btn = this;
+    var text = currentOutputText();
+    if (!text) { showOutputError("Nothing to copy yet — convert some input first."); return; }
+    function done() {
+      var old = btn.textContent;
+      btn.textContent = "Copied!";
+      setTimeout(function () { btn.textContent = old; }, 1500);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(); done(); });
+    } else { fallbackCopy(); done(); }
+    function fallbackCopy() {
+      if (els.output.style.display !== "none") {
+        els.output.removeAttribute("readonly");
+        els.output.select();
+        try { document.execCommand("copy"); } catch (e) { /* ignore */ }
+        els.output.setAttribute("readonly", "");
+      }
+    }
+  });
+
+  $("btn-download").addEventListener("click", function () {
+    var text = currentOutputText();
+    if (!text) { showOutputError("Nothing to download yet — convert some input first."); return; }
+    var ext = currentExtension();
+    var blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "data." + ext;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  });
+
+  /* ---------- init ---------- */
+
+  restore();
+  if (!els.input.value.trim()) {
+    els.input.value = JSON.stringify(SAMPLE, null, 2);
+  }
+  updateLibStatus();
+  applySplit();
+  convert();
+
+  // smol-toml and JSONPath-Plus arrive via module scripts, possibly after this one runs.
+  var hadToml = !!window.smolToml;
+  var waitCount = 0;
+  var waiter = setInterval(function () {
+    waitCount++;
+    var s = updateLibStatus();
+    if (window.smolToml && !hadToml) {
+      hadToml = true;
+      convert();
+    }
+    if ((s.yaml && s.jsonpath && s.toml) || waitCount > 50) clearInterval(waiter);
+  }, 200);
+  window.addEventListener("load", updateLibStatus);
+})();
+</script>
+</body>
+</html>

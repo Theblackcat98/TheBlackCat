@@ -192,6 +192,11 @@ params:
           desc: "Client-side tool to generate HTML meta tags and Web Manifest JSON with live mock previews and as-you-type validation."
           url: "meta-generator/"
           writeup: "library/tools/meta-generator/"
+        - name: "Data Format Workbench"
+          kind: "App"
+          desc: "JSON, YAML and TOML format converter and interactive viewer."
+          url: "data-format-workbench/"
+          writeup: "library/tools/data-format-workbench/"
     - group: "Running on Online Tools"
       items:
         - name: "Color Token Workshop"

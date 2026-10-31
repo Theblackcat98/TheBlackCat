@@ -10,6 +10,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: ansi-palette-lab
 ---
 
 A terminal truecolor / 256-color lab.

@@ -12,6 +12,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: robots-sitemap
 ---
 
 Write crawl rules and a sitemap in one place, and test the rules before shipping them.

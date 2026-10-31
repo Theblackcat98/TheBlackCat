@@ -12,6 +12,7 @@ tags:
   - web
   - creative-coding
   - vector-graphics
+tool: anatomy
 ---
 
 Most diagrams of a mechanism are a picture of a mechanism. They show you the parts and then stop, because a picture cannot answer the question you actually have: what happens when this moves.

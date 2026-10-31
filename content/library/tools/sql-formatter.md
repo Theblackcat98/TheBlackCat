@@ -12,6 +12,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: sql-formatter
 ---
 
 A browser-based SQL formatter and minifier. Paste a query, pick the dialect and house style, and get it back laid out readably — or collapsed to one line for embedding in code and config.

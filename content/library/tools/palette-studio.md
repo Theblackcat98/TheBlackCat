@@ -12,6 +12,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: palette-studio
 ---
 
 A browser-based studio for working with color: pull a palette out of an image, turn colors into a gradient, and check how the result reads to a viewer with a color-vision deficiency.

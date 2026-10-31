@@ -10,6 +10,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: text-studio
 ---
 
 A minimal tool with two tabs: Readability (word and character counts) and Cleanup (basic transforms).

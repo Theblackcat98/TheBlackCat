@@ -12,6 +12,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: easing-playground
 ---
 
 Tune motion by dragging a curve instead of guessing numbers.

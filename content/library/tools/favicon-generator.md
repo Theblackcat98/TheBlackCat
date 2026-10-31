@@ -13,6 +13,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: favicon-generator
 ---
 
 Generate a complete icon set from a single source, then paste the tags into your page head.

@@ -13,6 +13,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: number-base
 ---
 
 Move between bases at a fixed bit width and see exactly which bits are set.

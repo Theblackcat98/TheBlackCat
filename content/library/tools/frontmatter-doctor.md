@@ -11,6 +11,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: frontmatter-doctor
 ---
 
 A client-side tool to validate Markdown frontmatter against The BlackCat's content model and lint rules, explaining why each rule matters and providing a one-click auto-fixed version.

@@ -11,6 +11,7 @@ tags:
 topics:
   - programming
   - tools
+tool: csp-builder
 ---
 
 The CSP Builder is a client-side tool for constructing, parsing, and verifying Content-Security-Policy rules.

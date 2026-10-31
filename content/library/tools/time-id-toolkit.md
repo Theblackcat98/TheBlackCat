@@ -12,6 +12,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: time-id-toolkit
 ---
 
 A completely client-side toolkit that helps decipher time and identity structures commonly encountered when debugging logs, databases, or API responses.

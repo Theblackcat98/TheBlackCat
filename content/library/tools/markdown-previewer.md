@@ -13,6 +13,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: markdown-previewer
 ---
 
 Draft a post and see roughly how it will look on this site before committing it.

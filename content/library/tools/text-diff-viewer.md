@@ -12,6 +12,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: text-diff-viewer
 ---
 
 A browser-based viewer for comparing two versions of a text — code, prose, config, anything line-oriented — without sending either version anywhere.

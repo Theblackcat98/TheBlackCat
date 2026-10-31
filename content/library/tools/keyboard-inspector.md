@@ -12,6 +12,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: keyboard-inspector
 ---
 
 See exactly what the browser reports for a key press.

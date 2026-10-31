@@ -13,6 +13,7 @@ tags:
 status: filed
 created: 2026-10-27
 updated: 2026-10-27
+tool: aether-atelier
 ---
 
 An interactive, self-contained page that treats colour as a mathematical object: synthesise a palette from trigonometry, then watch the same palette run through chaos systems, phyllotaxis and reaction–diffusion. Everything on the page is generated in the browser — no images, no server, no build step.

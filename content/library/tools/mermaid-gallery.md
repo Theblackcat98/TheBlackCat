@@ -12,6 +12,7 @@ tags:
 status: filed
 created: 2026-09-29
 updated: 2026-10-27
+tool: mermaid-gallery
 ---
 
 A single-page gallery of Mermaid diagram types: flowcharts and sequence diagrams through to architecture, Sankey, radar and treemap — each type with a working rendered example and the source that produced it, so a diagram can be lifted straight into a document.

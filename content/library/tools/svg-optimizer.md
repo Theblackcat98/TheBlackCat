@@ -11,6 +11,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: svg-optimizer
 ---
 
 An in-browser SVG optimizer and previewer. It allows you to paste or upload an SVG and see it rendered on light, dark, and checkerboard backgrounds to quickly spot visual issues.

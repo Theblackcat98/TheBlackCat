@@ -157,7 +157,7 @@ Nothing is stored anywhere but the repo. There is no database and no CMS. `publi
 - **Search** (Ctrl/⌘-K, `/`, or the header button): built from `/index.json`. It includes title, description, tags, topics, type, source domain and the first ~300 characters of the body. It **excludes** drafts, `status: inbox` items, and anything with `excludesearch: true`.
 - **Tag, topic and type pages** (`/tags/x/`, `/topics/x/`, `/contenttype/x/`): non-inbox items only.
 - **Projects** (`/projects/`): cards, sortable and filterable by tag.
-- **Tools** (`/tools/`): a section (in the main menu) whose view (`layouts/partials/lists/tools.html`) renders the live interactive exhibits and apps as cards from `params.tools` in `hugo.yaml` — the static pages under `static/` (`aether-atelier/`, `tui-design-study/`, `mermaid-gallery/`) and the Online Tools site. When a new live tool ships, add it to `params.tools` as well as in its write-up.
+- **Tools** (`/tools/`): the workshop hub (`layouts/partials/lists/tools.html`), driven by `data/tools.yaml`. Renders filterable category sections, featured tools, recently used tools, and 16:10 light/dark thumbnails (`static/toolkit/thumbs/`). Every hosted tool under `static/<id>/` loads `static/toolkit/toolkit.css` and `static/toolkit/toolkit.js`, which provide the shared top bar, `⌘K`/`Ctrl+K` tool switcher, prev/next category links, related strip, and `bc-theme` sync. When a new live tool ships, register it in `data/tools.yaml` and add `tool: <id>` to its write-up.
 - **Collections** (`/collections/`): a card per collection. A collection page lists its members automatically.
 - **Blog and docs**: a guide or series (a folder with `_index.md` plus chapter files) gets a chapter list, and previous/next links. Chapters sort by `weight`, then by the first number in the file name (`chapter_2` before `chapter_10`).
 - **Article pages**: breadcrumbs mirroring the folders, a table of contents when there are three or more headings, a facts sidebar for projects, related items, and "Edit this page / History / View source" links.
@@ -183,6 +183,7 @@ Nothing is stored anywhere but the repo. There is no database and no CMS. `publi
 - Fenced code blocks get syntax colours, a language label and a copy button; give every fence a language. A ` ```mermaid ` fence renders as a diagram in the browser.
 - Callout shortcode: `{{< callout type="tip" title="Optional" >}}text{{< /callout >}}` (`type` is `note`, `tip` or `warning`).
 - Anatomy shortcode: `{{< anatomy slug="drone" title="How a quadcopter flies" >}}` embeds one interactive figure from `static/anatomy/<slug>/` in an iframe. `slug` is required; `title` is the caption and the frame's accessible name; `height` is the pre-measurement fallback (default 720). The script in `site.js` picks the dark or light build and sizes the frame, so never write the iframe by hand and never hard-code the `/TheBlackCat/` prefix.
+- Tool shortcode: `{{< tool "palette-studio" >}}` renders an inline tool card from `data/tools.yaml` inside any blog post, note, or doc.
 - Links: external links open in a new tab automatically. Internal links can be written `/library/ai/…` or relatively; the site adds the `/TheBlackCat/` prefix. Do not hard-code the prefix in new content.
 - Headings: start at `##`; the page title is the `h1`. Headings get anchor links and feed the table of contents.
 - Bookmarks: keep the body to `## Why I saved this` and `## Notes`, factual and short.
@@ -247,6 +248,12 @@ The linter needs only Python and PyYAML, so it works on small machines that cann
 **Add a project**: `projects/<slug>/index.md` with `contenttype: project`, `language`, `stars`, `github`, tags, and a short body. Add `pinned: true` only if asked.
 
 **Add a collection**: `collections/<slug>.md` with `contenttype: collection` and a `collect:` block. Point at canonical items; never copy their content.
+
+**Add a tool**:
+1. Create `static/<id>/index.html` loading `<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">` and `<script src="../toolkit/toolkit.js?v=1" defer data-tool="<id>"></script>` in `<head>`, plus a plain `<a class="back" href="../tools/">← All tools</a>` fallback in `<body>`.
+2. Create its write-up at `content/library/tools/<id>.md` with `contenttype: reference` and `tool: <id>`.
+3. Add the tool entry to `data/tools.yaml` under the appropriate category (`color-design`, `text-data`, `web-publishing`, `developer-utilities`, `images-media`, or `exhibits`).
+4. Run `python3 scripts/shoot_tools.py <id>` to generate light/dark thumbnails in `static/toolkit/thumbs/`, and run `make check` (`python3 scripts/check_tools.py`).
 
 **Write a blog post** (draft-flag flow): create `blog/<slug>/index.md` with `title`, `description`, `date` (real time), `tags`, and `draft: true`; push it, then confirm the live URL returns **404**. Set `draft: false` only on an explicit "publish" instruction or in-chat approval, and confirm the live URL returns 200 afterwards. Write in first person, plainly, with real and tested code; never invent facts.
 

@@ -13,6 +13,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: fluid-type
 ---
 
 Work out `clamp()` values so type grows with the viewport instead of jumping at breakpoints.

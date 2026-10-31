@@ -18,6 +18,10 @@
 
 {{- $hasFacts := or (eq $kind "project") .Params.github .Params.stars .Params.language -}}
 {{- $hasAside := or $hasToc $hasFacts -}}
+{{- $toolObj := false -}}
+{{- with .Params.tool -}}
+  {{- range where site.Data.tools.tools "id" . }}{{ $toolObj = . }}{{ end -}}
+{{- end -}}
 
 {{ partial "breadcrumbs.html" . }}
 
@@ -68,6 +72,12 @@
     </dl>
     {{- end }}
 
+    {{- with $toolObj }}
+    <div class="tool-run" aria-label="Run this tool">
+      {{ partial "tool-card.html" (dict "tool" . "inline" true "hideWriteup" true) }}
+    </div>
+    {{- end }}
+
     <div class="prose" data-prose>
       {{ .Content }}
     </div>
@@ -85,6 +95,25 @@
     {{- end }}
 
     <footer class="article-foot">
+      {{- with $toolObj }}
+        {{- $t := . }}
+        {{- $catName := "" }}
+        {{- range site.Data.tools.categories }}{{ if eq .id $t.category }}{{ $catName = .name }}{{ end }}{{ end }}
+        {{- $moreTools := where (where site.Data.tools.tools "category" $t.category) "id" "ne" $t.id | first 3 }}
+        {{- if $moreTools }}
+        <div class="tool-more">
+          <div class="tool-more__head">
+            <span class="label">More in {{ $catName }}</span>
+            <a class="tool-more__all" href="{{ printf "tools/#%s" $t.category | relURL }}">All {{ $catName }} tools →</a>
+          </div>
+          <ul class="tool-grid" role="list">
+            {{- range $moreTools }}
+              {{ partial "tool-card.html" (dict "tool" . "cat" $catName) }}
+            {{- end }}
+          </ul>
+        </div>
+        {{- end }}
+      {{- end }}
       {{- if or .Params.topics .Params.tags }}
       <div>
         {{- with .Params.topics }}<span class="label">Topics</span>{{ partial "tag-list.html" (dict "items" . "tax" "topics") }}{{ end }}

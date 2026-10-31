@@ -1,0 +1,278 @@
+/* ==========================================================================
+   60 · Tools Workshop Hub & Cards
+   Cards borrow the workshop panel geometry (14px corners, soft shadow,
+   16:10 screenshot preview) while keeping the site's warm paper, ink & amber.
+   ========================================================================== */
+
+.hero__tools {
+  margin-top: var(--s-4);
+  font: 500 .8rem/1.4 var(--mono);
+}
+.hero__tools a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  text-underline-offset: .22em;
+}
+.hero__tools a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* ---- Hub toolbar & category sections ----------------------------------- */
+.tools-hub {
+  display: block;
+}
+.tools-toolbar {
+  padding: var(--s-4);
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  margin-bottom: var(--s-6);
+}
+.tools-search {
+  flex: 1 1 18rem;
+  background: var(--paper);
+}
+.tools-filters {
+  display: grid;
+  gap: var(--s-3);
+}
+.tools-filter-group {
+  display: grid;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.tools-recent {
+  margin-top: var(--s-6);
+}
+.tools-cat {
+  scroll-margin-top: calc(var(--header-h) + var(--s-5));
+}
+.tools-cat__blurb {
+  margin-top: 2px;
+  font-size: .92rem;
+  color: var(--ink-3);
+}
+
+/* ---- Tool grids -------------------------------------------------------- */
+.tool-grid {
+  display: grid;
+  gap: var(--s-4);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18.5rem), 1fr));
+  list-style: none;
+  padding: 0;
+}
+.tool-grid--featured {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr));
+}
+
+/* ---- Tool card (workshop panel shape: 14px radius + soft shadow) ------- */
+.tool-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgb(28 25 21 / .05), 0 10px 28px rgb(28 25 21 / .07);
+  transition: border-color .15s, transform .2s var(--ease), box-shadow .2s var(--ease);
+}
+:root[data-theme="dark"] .tool-card {
+  box-shadow: 0 1px 2px rgb(0 0 0 / .35), 0 10px 28px rgb(0 0 0 / .35);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tool-card {
+    box-shadow: 0 1px 2px rgb(0 0 0 / .35), 0 10px 28px rgb(0 0 0 / .35);
+  }
+}
+.tool-card:hover {
+  border-color: var(--rule-2);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -12px rgb(0 0 0 / .32);
+}
+.tool-card--wide .tool-card__title {
+  font-size: 1.3rem;
+}
+.tool-card--inline {
+  margin-block: var(--s-5);
+}
+@media (min-width: 38rem) {
+  .tool-card--inline {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .tool-card--inline .tool-card__thumb {
+    width: 15.5rem;
+    flex: none;
+    border-bottom: 0;
+    border-right: 1px solid var(--rule);
+  }
+}
+
+.tool-card__thumb {
+  display: block;
+  aspect-ratio: 16 / 10;
+  background: var(--paper-3);
+  border-bottom: 1px solid var(--rule);
+  overflow: hidden;
+}
+.tool-card__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  border: 0 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+.tool-card__img--light { display: block; }
+.tool-card__img--dark  { display: none; }
+:root[data-theme="dark"] .tool-card__img--light { display: none; }
+:root[data-theme="dark"] .tool-card__img--dark  { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tool-card__img--light { display: none; }
+  :root:not([data-theme="light"]) .tool-card__img--dark  { display: block; }
+}
+
+.tool-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-4) var(--s-4) var(--s-3);
+  flex: 1;
+  min-width: 0;
+}
+.tool-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-1) var(--s-2);
+  font: 500 .68rem/1.3 var(--mono);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.tool-card__cat {
+  color: var(--accent);
+}
+.tool-card__kind::before {
+  content: "·";
+  margin-right: var(--s-2);
+  color: var(--rule-2);
+}
+.tool-card__new {
+  padding: .12rem .42rem;
+  border-radius: 999px;
+  background: var(--accent-wash);
+  color: var(--accent);
+  font-weight: 600;
+}
+.tool-card__host {
+  margin-left: auto;
+  color: var(--ink-3);
+}
+.tool-card__title {
+  font-size: 1.18rem;
+  font-weight: 600;
+  line-height: 1.22;
+  letter-spacing: -.012em;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+.tool-card__title a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.tool-card__title a:hover {
+  color: var(--accent);
+}
+.tool-card__desc {
+  color: var(--ink-2);
+  font-size: .92rem;
+  line-height: 1.48;
+  flex: 1;
+  margin: 0 !important;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tool-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-top: var(--s-2);
+  padding-top: var(--s-3);
+  border-top: 1px dashed var(--rule);
+}
+.tool-card__open {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
+  padding: .36rem .7rem;
+  border-radius: 9px;
+  background: var(--ink);
+  color: var(--paper) !important;
+  text-decoration: none !important;
+  font: 500 .74rem/1 var(--mono);
+  transition: background-color .15s, color .15s;
+}
+.tool-card__open:hover {
+  background: var(--accent);
+  color: var(--paper) !important;
+}
+.tool-card__open svg {
+  width: .85rem;
+  height: .85rem;
+}
+.tool-card__link {
+  position: relative;
+  z-index: 2;
+  font: 500 .74rem/1 var(--mono);
+  color: var(--ink-3) !important;
+  text-decoration: none !important;
+  padding: .3rem 0;
+}
+.tool-card__link:hover {
+  color: var(--accent) !important;
+}
+
+/* ---- Write-up page integrations ("Run it" + "More in category") -------- */
+.tool-run {
+  margin-bottom: var(--s-6);
+  max-width: var(--measure);
+}
+.tool-more {
+  display: grid;
+  gap: var(--s-3);
+}
+.tool-more__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.tool-more__head .label {
+  margin: 0;
+}
+.tool-more__all {
+  font: 500 .74rem/1.4 var(--mono);
+  color: var(--accent);
+}
+.tool-more__all:hover {
+  text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-card { transition: none; }
+  .tool-card:hover { transform: none; }
+}

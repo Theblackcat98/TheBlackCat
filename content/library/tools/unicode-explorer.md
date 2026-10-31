@@ -11,6 +11,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: unicode-explorer
 ---
 
 A browser-based explorer for the Unicode character set: find a character by name or codepoint, browse a block visually, or paste a whole string to see exactly what is in it — including the invisible and combining characters that plain text hides.

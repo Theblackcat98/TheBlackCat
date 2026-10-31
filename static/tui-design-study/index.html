@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-exhibit>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -13,48 +13,25 @@
   <style>
     :root {
       color-scheme: light dark;
-      --paper:#f5f6f4;
-      --surface:#ffffff;
-      --surface-2:#e9ece8;
-      --ink:#18201d;
-      --muted:#56635e;
-      --faint:#5d6a64;
-      --line:#cbd2ce;
-      --line-strong:#8f9c96;
-      --accent:#087f63;
-      --accent-ink:#065f4a;
-      --accent-soft:#d5eee6;
-      --warn:#a55c00;
-      --danger:#b63838;
-      --good:#087f63;
-      --code:#101815;
+      --paper:light-dark(#f5f6f4,#0c1110);
+      --surface:light-dark(#ffffff,#121917);
+      --surface-2:light-dark(#e9ece8,#19221f);
+      --ink:light-dark(#18201d,#e0e8e4);
+      --muted:light-dark(#56635e,#a4b2ac);
+      --faint:light-dark(#5d6a64,#8b9992);
+      --line:light-dark(#cbd2ce,#293832);
+      --line-strong:light-dark(#8f9c96,#51635b);
+      --accent:light-dark(#087f63,#6fd4b3);
+      --accent-ink:light-dark(#065f4a,#9ae3ca);
+      --accent-soft:light-dark(#d5eee6,#173b31);
+      --warn:light-dark(#a55c00,#e6a65e);
+      --danger:light-dark(#b63838,#ef8989);
+      --good:light-dark(#087f63,#6fd4b3);
+      --code:light-dark(#101815,#080d0b);
       --code-ink:#d8e6df;
-      --code-muted:#83978e;
-      --code-line:#33433c;
-      --shadow:0 14px 40px rgba(20,36,30,.08);
-    }
-    @media (prefers-color-scheme:dark){
-      :root{
-        --paper:#0c1110;
-        --surface:#121917;
-        --surface-2:#19221f;
-        --ink:#e0e8e4;
-        --muted:#a4b2ac;
-        --faint:#8b9992;
-        --line:#293832;
-        --line-strong:#51635b;
-        --accent:#6fd4b3;
-        --accent-ink:#9ae3ca;
-        --accent-soft:#173b31;
-        --warn:#e6a65e;
-        --danger:#ef8989;
-        --good:#6fd4b3;
-        --code:#080d0b;
-        --code-ink:#d8e6df;
-        --code-muted:#81958c;
-        --code-line:#2b3a34;
-        --shadow:0 18px 55px rgba(0,0,0,.28);
-      }
+      --code-muted:light-dark(#83978e,#81958c);
+      --code-line:light-dark(#33433c,#2b3a34);
+      --shadow:light-dark(0 14px 40px rgba(20,36,30,.08),0 18px 55px rgba(0,0,0,.28));
     }
     *{box-sizing:border-box}
     html{scroll-behavior:smooth;scroll-padding-top:24px}
@@ -173,6 +150,16 @@
       .theme-card,.theme-signal{box-shadow:none;border:1px solid #bbb}
     }
   </style>
+
+<meta name="description" content="Ten rules of a convincing terminal interface: a survey of 857 starred repositories, a code-level critique of llama-deck's UI layer, and an ordered change plan.">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/tui-design-study/">
+<meta property="og:title" content="TUI Design Study · The BlackCat">
+<meta property="og:description" content="Ten rules of a convincing terminal interface: a survey of 857 starred repositories, a code-level critique of llama-deck's UI layer, and an ordered change plan.">
+<meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/tui-design-study/">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/tui-design-study-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "TUI Design Study", "description": "Ten rules of a convincing terminal interface: a survey of 857 starred repositories, a code-level critique of llama-deck's UI layer, and an ordered change plan.", "url": "https://theblackcat98.github.io/TheBlackCat/tui-design-study/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/tui-design-study-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="tui-design-study"></script>
 </head>
 <body>
   <a class="skip-link" href="#content">Skip to content</a>

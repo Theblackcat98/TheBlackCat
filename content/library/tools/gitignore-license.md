@@ -13,6 +13,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: gitignore-license
 ---
 
 Start a repository with the right ignore rules and a correctly filled-in license.

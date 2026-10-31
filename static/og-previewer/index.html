@@ -4,31 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <title>OpenGraph Social Card Previewer</title>
     <style>
-        :root {
-            color-scheme: light;
-            --bg: #e9eaed; --panel: #f7f7f9; --panel2: #ffffff;
-            --ink: #1d2126; --mut: #5b6068; --faint: #62666e;
-            --line: #d6d7dc; --line2: #bfc2ca; --chip: #ececf0;
-            --acc: #2f6db3; --acc-strong: #26598f; --acc-ink: #ffffff;
-            --ok: #2e7d4f; --err-bg: #fdeeee; --err-line: #efc2c2; --err-ink: #8f2d23;
-            --shadow: 0 1px 2px rgba(24,28,38,.05), 0 10px 28px rgba(24,28,38,.07);
-        }
-        @media (prefers-color-scheme: dark) {
-            :root {
-                color-scheme: dark;
-                --bg: #121316; --panel: #1a1b1f; --panel2: #222329;
-                --ink: #eceef2; --mut: #a2a6af; --faint: #9ba0aa;
-                --line: #2d2f36; --line2: #3d404a; --chip: #26272e;
-                --acc: #7db0e6; --acc-strong: #9cc3ee; --acc-ink: #0d1724;
-                --ok: #6fce97; --err-bg: #3a2120; --err-line: #6e3a36; --err-ink: #f0a9a0;
-                --shadow: 0 1px 2px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.35);
-            }
-        }
+        
+        
         * { box-sizing: border-box; }
         body { font-family: "Outfit", system-ui, sans-serif; font-size: 15px; line-height: 1.45; background: var(--bg); color: var(--ink); max-width: 1000px; margin: 0 auto; padding: 2rem; }
         h1 { font-size: 1.55rem; line-height: 1.2; margin: 0 0 0.5rem; }
@@ -47,54 +26,50 @@
         /* Previews */
         .preview-label { font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2rem; margin-bottom: 0.5rem; color: var(--faint); }
 
-        /* Twitter / X Style — platform mock, kept as-is (content) */
+        /* Twitter / X Style — platform mock, adapts to active color-scheme */
         .card-x {
-            border: 1px solid #cfd9de;
+            border: 1px solid light-dark(#cfd9de, #2f3336);
             border-radius: 16px;
             overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             max-width: 504px;
-            background: #fff;
+            background: light-dark(#fff, #000);
             cursor: pointer;
         }
-        .card-x:hover { background: #f7f9f9; }
-        .card-x-img { width: 100%; aspect-ratio: 1.91 / 1; background-color: #f7f9f9; background-size: cover; background-position: center; border-bottom: 1px solid #cfd9de; }
-        .card-x-body { padding: 12px; color: #0f1419; }
-        .card-x-domain { color: #536471; font-size: 13px; margin-bottom: 2px; }
+        .card-x:hover { background: light-dark(#f7f9f9, #16181c); }
+        .card-x-img { width: 100%; aspect-ratio: 1.91 / 1; background-color: light-dark(#f7f9f9, #16181c); background-size: cover; background-position: center; border-bottom: 1px solid light-dark(#cfd9de, #2f3336); }
+        .card-x-body { padding: 12px; color: light-dark(#0f1419, #e7e9ea); }
+        .card-x-domain { color: light-dark(#536471, #71767b); font-size: 13px; margin-bottom: 2px; }
         .card-x-title { font-size: 15px; margin: 0; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
-        .card-x-desc { font-size: 15px; color: #536471; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-x-desc { font-size: 15px; color: light-dark(#536471, #71767b); margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* LinkedIn Style — platform mock, kept as-is (content) */
+        /* LinkedIn Style — platform mock, adapts to active color-scheme */
         .card-li {
             border-radius: 8px;
             overflow: hidden;
-            background: #eef3f8;
+            background: light-dark(#eef3f8, #1d2226);
             font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Fira Sans", Ubuntu, Oxygen, "Oxygen Sans", Cantarell, "Droid Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Lucida Grande", Helvetica, Arial, sans-serif;
             max-width: 504px;
             cursor: pointer;
         }
-        .card-li-img { width: 100%; aspect-ratio: 1.91 / 1; background-color: #d9e5eb; background-size: cover; background-position: center; }
-        .card-li-body { padding: 8px 16px 12px; background: #eef3f8; }
-        .card-li-title { font-size: 14px; font-weight: 600; color: rgba(0,0,0,0.9); margin: 0 0 2px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .card-li-domain { font-size: 12px; color: rgba(0,0,0,0.6); }
-
-        @media (prefers-color-scheme: dark) {
-            /* Only the platform mock cards adapt; page chrome comes from the tokens */
-            .card-x { background: #000; border-color: #2f3336; }
-            .card-x:hover { background: #16181c; }
-            .card-x-img { border-color: #2f3336; background-color: #16181c; }
-            .card-x-body { color: #e7e9ea; }
-            .card-x-domain, .card-x-desc { color: #71767b; }
-
-            .card-li { background: #1d2226; }
-            .card-li-img { background-color: #38434f; }
-            .card-li-body { background: #1d2226; }
-            .card-li-title { color: rgba(255,255,255,0.9); }
-            .card-li-domain { color: rgba(255,255,255,0.6); }
-        }
+        .card-li-img { width: 100%; aspect-ratio: 1.91 / 1; background-color: light-dark(#d9e5eb, #38434f); background-size: cover; background-position: center; }
+        .card-li-body { padding: 8px 16px 12px; background: light-dark(#eef3f8, #1d2226); }
+        .card-li-title { font-size: 14px; font-weight: 600; color: light-dark(rgba(0,0,0,0.9), rgba(255,255,255,0.9)); margin: 0 0 2px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-li-domain { font-size: 12px; color: light-dark(rgba(0,0,0,0.6), rgba(255,255,255,0.6)); }
     </style>
+
+<meta name="description" content="Previews how a link will look when shared on various social platforms based on its meta tags.">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/og-previewer/">
+<meta property="og:title" content="OpenGraph Previewer · The BlackCat">
+<meta property="og:description" content="Previews how a link will look when shared on various social platforms based on its meta tags.">
+<meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/og-previewer/">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/og-previewer-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "OpenGraph Previewer", "description": "Previews how a link will look when shared on various social platforms based on its meta tags.", "url": "https://theblackcat98.github.io/TheBlackCat/og-previewer/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/og-previewer-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="og-previewer"></script>
 </head>
 <body>
+<a class="back tk-fallback" href="../tools/">&larr; All tools</a>
     <h1>OpenGraph Social Card Previewer</h1>
     <p>Simulate how a link will look when shared on social platforms based on its meta tags.</p>
 
@@ -103,22 +78,22 @@
             <h3>Meta Tag Data</h3>
 
             <div class="form-group">
-                <label>og:title</label>
+                <label for="i-title">og:title</label>
                 <input type="text" id="i-title" value="The BlackCat: A git-native personal library">
             </div>
 
             <div class="form-group">
-                <label>og:description</label>
+                <label for="i-desc">og:description</label>
                 <input type="text" id="i-desc" value="Bookmarks, AI skills, research and projects. Markdown is the source of truth, git holds the history, and Hugo provides the reading room.">
             </div>
 
             <div class="form-group">
-                <label>og:image (URL)</label>
+                <label for="i-img">og:image (URL)</label>
                 <input type="url" id="i-img" value="https://theblackcat98.github.io/TheBlackCat/og.png">
             </div>
 
             <div class="form-group">
-                <label>og:url (or Domain)</label>
+                <label for="i-domain">og:url (or Domain)</label>
                 <input type="text" id="i-domain" value="theblackcat98.github.io">
             </div>
         </div>

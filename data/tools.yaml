@@ -1,0 +1,536 @@
+categories:
+  - id: color-design
+    name: Color & design
+    blurb: Palettes, contrast, type scales and CSS effects.
+  - id: text-data
+    name: Text & data
+    blurb: Text analysis, diffs, encodings, SQL formatting and structured data.
+  - id: web-publishing
+    name: Web & publishing
+    blurb: Meta tags, social cards, security policies, sitemaps, icons and Hugo tools.
+  - id: developer-utilities
+    name: Developer utilities
+    blurb: Tokens, cron schedules, commit messages, keyboard events, IDs and diagrams.
+  - id: images-media
+    name: Images & media
+    blurb: Compression, format conversion, cropping, SVG optimization and QR codes.
+  - id: exhibits
+    name: Exhibits
+    blurb: Interactive visual essays, mathematical ateliers, diagram galleries and cutaways.
+
+tools:
+  # ── Color & design (9) ─────────────────────────────────────────────────────
+  - id: palette-studio
+    name: Palette Studio
+    url: palette-studio/
+    writeup: library/tools/palette-studio/
+    category: color-design
+    kind: app
+    short: Pull a palette from a photo, build gradients, check color-blind views.
+    desc: Extract a palette from a photo, build multi-stop gradients, and simulate color-vision deficiencies, entirely in the browser.
+    tags: [color, gradients, accessibility, design]
+    related: [color-token-workshop, semantic-token-mapper]
+    added: "2026-09-15"
+    featured: true
+
+  - id: color-token-workshop
+    name: Color Token Workshop
+    url: "https://theblackcat98.github.io/Online-Tools/color-token-workshop.html"
+    writeup: projects/online-tools/
+    category: color-design
+    kind: app
+    host: Online Tools
+    short: OKLCH palette builder with WCAG 2.1 and APCA contrast checks and export.
+    desc: OKLCH palette builder with WCAG 2.1 and APCA contrast checks, auto-fix suggestions, light and dark palettes, and CSS/JSON export.
+    tags: [color, oklch, contrast, accessibility, design]
+    related: [palette-studio, semantic-token-mapper]
+    added: "2026-10-30"
+
+  - id: semantic-token-mapper
+    name: Semantic Token Mapper
+    url: semantic-token-mapper/
+    writeup: library/tools/semantic-token-mapper/
+    category: color-design
+    kind: utility
+    short: Map design tokens and test foreground/background pairs against WCAG rules.
+    desc: A utility for mapping and testing design system colors against WCAG contrast rules in bulk.
+    tags: [color, contrast, accessibility, design]
+    related: [palette-studio, color-token-workshop]
+    added: "2026-10-30"
+
+  - id: ansi-palette-lab
+    name: ANSI Palette Lab
+    url: ansi-palette-lab/
+    writeup: library/tools/ansi-palette-lab/
+    category: color-design
+    kind: app
+    short: Inspect the xterm 256-color cube, quantize RGB, and export terminal themes.
+    desc: An interactive xterm 256-color cube/grid, truecolor to 256-color RGB quantization visualization, and a terminal theme builder with Alacritty, Kitty and JSON export.
+    tags: [terminal, color, ansi, tui]
+    related: [palette-studio, tui-design-study]
+    added: "2026-09-15"
+
+  - id: type-scale
+    name: Type Scale & Font Pairing
+    url: type-scale/
+    writeup: library/tools/type-scale/
+    category: color-design
+    kind: app
+    short: Pick a modular ratio and base size, preview font pairings, and export CSS.
+    desc: "A typography studio: pick a modular scale ratio and base size, see the full scale rendered live; choose from curated font pairings and export CSS custom properties."
+    tags: [typography, css, design, fonts]
+    related: [fluid-type]
+    added: "2026-09-15"
+
+  - id: fluid-type
+    name: Fluid Type Calculator
+    url: fluid-type/
+    writeup: library/tools/fluid-type/
+    category: color-design
+    kind: app
+    short: Generate smooth clamp() font sizes across viewports with WCAG zoom checks.
+    desc: Generate clamp() font sizes that scale smoothly between two viewport widths, plus a modular type scale and WCAG zoom check.
+    tags: [typography, css, calculator, accessibility]
+    related: [type-scale]
+    added: "2026-10-30"
+
+  - id: shadow-shape
+    name: Shadow & Shape Generator
+    url: shadow-shape/
+    writeup: library/tools/shadow-shape/
+    category: color-design
+    kind: utility
+    short: Layered box-shadows, border-radius, organic blobs and glass CSS effects.
+    desc: Layered box-shadows, border-radius and blob shapes, and glass effects, with copy-ready CSS.
+    tags: [css, design, shadows]
+    related: [easing-playground, css-layout-generator]
+    added: "2026-10-30"
+
+  - id: easing-playground
+    name: Easing & Animation Playground
+    url: easing-playground/
+    writeup: library/tools/easing-playground/
+    category: color-design
+    kind: utility
+    short: Edit cubic-bezier curves and springs, preview live, and copy keyframe CSS.
+    desc: Edit cubic-bezier curves or springs, preview them live, and copy transition or keyframe CSS.
+    tags: [css, animation, design]
+    related: [shadow-shape, css-layout-generator]
+    added: "2026-10-30"
+
+  - id: css-layout-generator
+    name: CSS Layout Generator
+    url: css-layout-generator/
+    writeup: library/tools/css-layout-generator/
+    category: color-design
+    kind: utility
+    short: Visual builder that outputs clean CSS Grid and Flexbox layout code.
+    desc: A visual builder that outputs clean CSS Grid or Flexbox code for complex layouts.
+    tags: [css, layout, design]
+    related: [shadow-shape, fluid-type]
+    added: "2026-10-30"
+
+  # ── Text & data (9) ────────────────────────────────────────────────────────
+  - id: text-studio
+    name: Text Studio
+    url: text-studio/
+    writeup: library/tools/text-studio/
+    category: text-data
+    kind: app
+    short: Readability grades, word counts, and a multi-step text cleanup pipeline.
+    desc: Readability metrics and a text cleanup lab for normalizing whitespace, quotes, case, and line breaks.
+    tags: [text, writing, utilities]
+    related: [text-diff-viewer, regex-visualizer]
+    added: "2026-09-15"
+
+  - id: text-diff-viewer
+    name: Text Diff Viewer
+    url: text-diff-viewer/
+    writeup: library/tools/text-diff-viewer/
+    category: text-data
+    kind: app
+    short: Side-by-side and unified text or code diff viewer with inline highlights.
+    desc: A side-by-side and unified text/code diff viewer with whitespace controls and patch export.
+    tags: [text, diff, code]
+    related: [text-studio, regex-visualizer]
+    added: "2026-09-15"
+
+  - id: unicode-explorer
+    name: Unicode Explorer
+    url: unicode-explorer/
+    writeup: library/tools/unicode-explorer/
+    category: text-data
+    kind: app
+    short: Search codepoints by name or inspect strings for hidden and combining chars.
+    desc: Search characters by name or codepoint, or inspect strings to reveal hidden and combining characters.
+    tags: [unicode, text, encoding]
+    related: [text-studio, number-base]
+    added: "2026-09-15"
+
+  - id: sql-formatter
+    name: SQL Formatter
+    url: sql-formatter/
+    writeup: library/tools/sql-formatter/
+    category: text-data
+    kind: app
+    short: Format and minify SQL across eight dialects while preserving comments.
+    desc: Format and minify SQL across eight dialects with keyword-case and indent controls — string literals and comments survive untouched, entirely in the browser.
+    tags: [sql, database, formatting]
+    related: [data-format-workbench, text-diff-viewer]
+    added: "2026-09-15"
+
+  - id: data-format-workbench
+    name: Data Format Workbench
+    url: data-format-workbench/
+    writeup: library/tools/data-format-workbench/
+    category: text-data
+    kind: app
+    short: Convert, validate and inspect JSON, YAML and TOML side by side.
+    desc: JSON, YAML and TOML format converter and interactive tree viewer.
+    tags: [json, yaml, toml, converter]
+    related: [json-to-hugo, markdown-table-generator]
+    added: "2026-09-15"
+
+  - id: markdown-table-generator
+    name: Markdown Table Generator
+    url: markdown-table-generator/
+    writeup: library/tools/markdown-table-generator/
+    category: text-data
+    kind: utility
+    short: Build, align and format Markdown tables or import directly from CSV.
+    desc: A utility to generate, format, and align Markdown tables, including importing from CSV.
+    tags: [markdown, tables, csv]
+    related: [markdown-previewer, data-format-workbench]
+    added: "2026-09-15"
+
+  - id: regex-visualizer
+    name: Regex Visualizer
+    url: regex-visualizer/
+    writeup: library/tools/regex-visualizer/
+    category: text-data
+    kind: utility
+    short: Test regular expressions against live text with token-by-token explanations.
+    desc: A visual debugger and tester for regular expressions, explaining each part of the match.
+    tags: [regex, text, debugging]
+    related: [text-studio, text-diff-viewer]
+    added: "2026-09-15"
+
+  - id: number-base
+    name: Number Base & Bitwise
+    url: number-base/
+    writeup: library/tools/number-base/
+    category: text-data
+    kind: app
+    short: Convert binary, octal, decimal and hex at 8–64 bits, flip bits, calc chmod.
+    desc: Convert between binary, octal, decimal and hex at 8 to 64 bits, try bitwise operations, and work out chmod and umask values.
+    tags: [binary, hex, calculator, bitwise, chmod]
+    related: [unicode-explorer, time-id-toolkit]
+    added: "2026-10-30"
+
+  - id: hashes-encodings
+    name: Hashes & encodings
+    url: "https://theblackcat98.github.io/Online-Tools/"
+    writeup: projects/online-tools/
+    category: text-data
+    kind: utility
+    host: Online Tools
+    short: MD, SHA, Keccak and RIPEMD hashes, Base32/58/64, HTML and URL encoding.
+    desc: "The Online Tools utility belt: MD, SHA, Keccak and RIPEMD hashes and file checksums, Base32/Base58/Base64, HTML and URL encoding, and image converters (ICO, SVG, STL)."
+    tags: [hash, base64, encoding, checksum]
+    related: [jwt-decoder, number-base]
+    added: "2026-09-15"
+
+  # ── Web & publishing (8) ───────────────────────────────────────────────────
+  - id: meta-generator
+    name: Meta Tag & Manifest
+    url: meta-generator/
+    writeup: library/tools/meta-generator/
+    category: web-publishing
+    kind: utility
+    short: Generate HTML meta tags and Web Manifest JSON with live previews.
+    desc: Client-side tool to generate HTML meta tags and Web Manifest JSON with live mock previews and as-you-type validation.
+    tags: [html, seo, pwa, meta]
+    related: [og-previewer, favicon-generator, robots-sitemap]
+    added: "2026-09-15"
+
+  - id: og-previewer
+    name: OpenGraph Previewer
+    url: og-previewer/
+    writeup: library/tools/og-previewer/
+    category: web-publishing
+    kind: utility
+    short: Preview how social cards render across X, LinkedIn, Discord and Slack.
+    desc: Previews how a link will look when shared on various social platforms based on its meta tags.
+    tags: [seo, opengraph, social, html]
+    related: [meta-generator, favicon-generator]
+    added: "2026-09-15"
+
+  - id: robots-sitemap
+    name: Robots.txt & Sitemap
+    url: robots-sitemap/
+    writeup: library/tools/robots-sitemap/
+    category: web-publishing
+    kind: app
+    short: Build robots.txt with crawler presets and generate sitemap.xml from URLs.
+    desc: Build robots.txt with crawler presets and a rule tester, and generate sitemap.xml from a list of URLs.
+    tags: [seo, robots, sitemap, web]
+    related: [meta-generator, csp-builder]
+    added: "2026-09-15"
+
+  - id: csp-builder
+    name: CSP Builder
+    url: csp-builder/
+    writeup: library/tools/csp-builder/
+    category: web-publishing
+    kind: app
+    short: Build and parse Content-Security-Policy headers with live safety warnings.
+    desc: A directive-by-directive Content-Security-Policy builder with live safety warnings, common presets, and a parser mode to explain existing policies.
+    tags: [security, csp, headers, web]
+    related: [meta-generator, robots-sitemap]
+    added: "2026-09-15"
+
+  - id: favicon-generator
+    name: Favicon & App Icon
+    url: favicon-generator/
+    writeup: library/tools/favicon-generator/
+    category: web-publishing
+    kind: app
+    short: Export every favicon and PWA icon size from an image or glyph as a ZIP.
+    desc: Make every favicon and app icon size from one image or a letter, with the web manifest, HTML tags and a zip download.
+    tags: [favicon, icons, pwa, images]
+    related: [meta-generator, image-compressor]
+    added: "2026-10-30"
+
+  - id: markdown-previewer
+    name: Markdown & Shortcode Previewer
+    url: markdown-previewer/
+    writeup: library/tools/markdown-previewer/
+    category: web-publishing
+    kind: app
+    short: Live Markdown preview supporting BlackCat callouts, anatomy and lint rules.
+    desc: Live Markdown preview that understands this site's callout and anatomy shortcodes and checks front matter against the content rules.
+    tags: [markdown, hugo, preview, writing]
+    related: [frontmatter-doctor, json-to-hugo, markdown-table-generator]
+    added: "2026-10-30"
+
+  - id: frontmatter-doctor
+    name: Hugo Frontmatter Doctor
+    url: frontmatter-doctor/
+    writeup: library/tools/frontmatter-doctor/
+    category: web-publishing
+    kind: utility
+    short: Validate and auto-fix Hugo YAML front matter against BlackCat lint rules.
+    desc: A tool to validate and auto-fix Hugo Markdown frontmatter against the specific lint rules used by The BlackCat.
+    tags: [hugo, yaml, frontmatter, linter]
+    related: [markdown-previewer, json-to-hugo]
+    added: "2026-09-15"
+
+  - id: json-to-hugo
+    name: JSON-to-Hugo
+    url: json-to-hugo/
+    writeup: library/tools/json-to-hugo/
+    category: web-publishing
+    kind: utility
+    short: Convert JSON objects or API responses into clean Hugo YAML front matter.
+    desc: Quickly convert JSON configurations or API responses into valid Hugo YAML front matter.
+    tags: [hugo, json, yaml, frontmatter]
+    related: [frontmatter-doctor, data-format-workbench]
+    added: "2026-09-15"
+
+  # ── Developer utilities (8) ────────────────────────────────────────────────
+  - id: jwt-decoder
+    name: JWT Decoder
+    url: jwt-decoder/
+    writeup: library/tools/jwt-decoder/
+    category: developer-utilities
+    kind: utility
+    short: Decode and inspect JWT headers, claims and timestamps locally in the browser.
+    desc: A secure, client-side tool to decode and inspect JWT payloads without sending them to a server.
+    tags: [jwt, auth, security, tokens]
+    related: [time-id-toolkit, hashes-encodings]
+    added: "2026-09-15"
+
+  - id: cron-tester
+    name: Cron Tester
+    url: cron-tester/
+    writeup: library/tools/cron-tester/
+    category: developer-utilities
+    kind: utility
+    short: Translate cron expressions into plain English and list upcoming run times.
+    desc: Translates cron scheduling expressions into human-readable times and shows upcoming run dates.
+    tags: [cron, scheduling, time, devops]
+    related: [time-id-toolkit]
+    added: "2026-09-15"
+
+  - id: commit-formatter
+    name: Commit Formatter
+    url: commit-formatter/
+    writeup: library/tools/commit-formatter/
+    category: developer-utilities
+    kind: utility
+    short: Compose conventional commit messages with scope, breaking changes and width checks.
+    desc: Standardizes commit messages according to conventional commit guidelines.
+    tags: [git, commits, workflow]
+    related: [gitignore-license]
+    added: "2026-09-15"
+
+  - id: gitignore-license
+    name: .gitignore & License
+    url: gitignore-license/
+    writeup: library/tools/gitignore-license/
+    category: developer-utilities
+    kind: utility
+    short: Combine stack .gitignore templates and fill in open-source license files.
+    desc: Combine .gitignore templates and fill in a license, from GitHub's gitignore repo and choosealicense.com.
+    tags: [git, github, license, config]
+    related: [commit-formatter]
+    added: "2026-09-15"
+
+  - id: keyboard-inspector
+    name: Keyboard Inspector
+    url: keyboard-inspector/
+    writeup: library/tools/keyboard-inspector/
+    category: developer-utilities
+    kind: utility
+    short: Press any key combination to inspect event properties and copy handler JS.
+    desc: Press any key to see key, code, keyCode and modifiers, with a ready-to-paste event handler.
+    tags: [keyboard, events, javascript, dom]
+    related: [unicode-explorer]
+    added: "2026-09-15"
+
+  - id: time-id-toolkit
+    name: Time & ID Toolkit
+    url: time-id-toolkit/
+    writeup: library/tools/time-id-toolkit/
+    category: developer-utilities
+    kind: app
+    short: Epoch/ISO timestamp math paired with bulk UUID v4/v7 and ULID inspection.
+    desc: Timestamp Toolkit for epoch/ISO conversions and relative math, paired with a UUID/ULID Studio for bulk generation and deep inspection of modern IDs.
+    tags: [timestamps, uuid, ulid, time]
+    related: [cron-tester, jwt-decoder]
+    added: "2026-09-15"
+
+  - id: prompt-sandbox
+    name: Prompt Sandbox
+    url: prompt-sandbox/
+    writeup: library/tools/prompt-sandbox/
+    category: developer-utilities
+    kind: utility
+    short: Test agent system prompts against variable sets and compare rendered outputs.
+    desc: A testing ground to run and validate agent system prompts against different variable inputs.
+    tags: [prompts, agents, ai, templating]
+    related: [markdown-previewer, data-format-workbench]
+    added: "2026-09-15"
+
+  - id: mermaid-viewer
+    name: Mermaid Viewer
+    url: "https://theblackcat98.github.io/Online-Tools/mermaid-viewer.html"
+    writeup: projects/online-tools/
+    category: developer-utilities
+    kind: app
+    host: Online Tools
+    short: Render Mermaid source with pan and zoom, then export crisp SVG or PNG.
+    desc: Paste Mermaid source and render it with pan and zoom; export the result as SVG or PNG.
+    tags: [mermaid, diagrams, svg]
+    related: [mermaid-gallery, svg-optimizer]
+    added: "2026-09-15"
+
+  # ── Images & media (4) ─────────────────────────────────────────────────────
+  - id: image-compressor
+    name: Image Compressor
+    url: image-compressor/
+    writeup: library/tools/image-compressor/
+    category: images-media
+    kind: app
+    short: Compress and convert images to WebP, AVIF, JPEG or PNG with EXIF stripping.
+    desc: Compress and convert images to WebP, AVIF, JPEG or PNG with a quality slider, before/after comparison and EXIF/GPS stripping, entirely in the browser.
+    tags: [images, compression, webp, avif, privacy]
+    related: [aspect-ratio-calculator, favicon-generator, svg-optimizer]
+    added: "2026-10-30"
+    featured: true
+
+  - id: aspect-ratio-calculator
+    name: Aspect Ratio & Resize
+    url: aspect-ratio-calculator/
+    writeup: library/tools/aspect-ratio-calculator/
+    category: images-media
+    kind: app
+    short: Calculate aspect ratios and megapixels, and interactively crop/resize images.
+    desc: Calculate aspect ratios, megapixels, and interactively crop and resize images directly in the browser without server processing.
+    tags: [images, aspect-ratio, resize, calculator]
+    related: [image-compressor, favicon-generator]
+    added: "2026-09-15"
+
+  - id: svg-optimizer
+    name: SVG Optimizer
+    url: svg-optimizer/
+    writeup: library/tools/svg-optimizer/
+    category: images-media
+    kind: utility
+    short: Strip metadata, clamp numeric precision, minify IDs and preview SVGs live.
+    desc: An in-browser SVG optimizer and previewer. Remove metadata, fix precision, minify IDs, and preview on multiple backgrounds.
+    tags: [svg, vector, optimization, images]
+    related: [image-compressor, qr-code-studio]
+    added: "2026-09-15"
+
+  - id: qr-code-studio
+    name: QR Code Studio
+    url: qr-code-studio/
+    writeup: library/tools/qr-code-studio/
+    category: images-media
+    kind: app
+    short: Generate custom QR codes (URL, Wi-Fi, vCard) and decode QR images locally.
+    desc: Generate customizable QR codes (text, URL, Wi-Fi, vCard) and decode QR codes from images entirely in the browser.
+    tags: [qr-code, svg, generator, decoder]
+    related: [svg-optimizer, favicon-generator]
+    added: "2026-09-15"
+
+  # ── Exhibits (4) ───────────────────────────────────────────────────────────
+  - id: aether-atelier
+    name: AETHER atelier
+    url: aether-atelier/
+    writeup: library/tools/aether-atelier/
+    category: exhibits
+    kind: exhibit
+    short: Cosine palettes driving a Clifford strange attractor and Albers color studies.
+    desc: "A mathematical and chromatic atelier: a cosine-palette synthesizer driving a Clifford strange-attractor visualizer, Albers simultaneous-contrast studies, and a codex on generative beauty."
+    tags: [generative, color, math, creative-coding]
+    related: [palette-studio, anatomy]
+    added: "2026-09-15"
+
+  - id: tui-design-study
+    name: TUI Design Study
+    url: tui-design-study/
+    writeup: library/programming/tui-design-study/
+    category: exhibits
+    kind: exhibit
+    short: Ten rules of a convincing terminal interface from a survey of 857 repos.
+    desc: "Ten rules of a convincing terminal interface: a survey of 857 starred repositories, a code-level critique of llama-deck's UI layer, and an ordered change plan."
+    tags: [tui, terminal, design, cli]
+    related: [ansi-palette-lab, anatomy]
+    added: "2026-09-15"
+
+  - id: mermaid-gallery
+    name: Mermaid.js Gallery
+    url: mermaid-gallery/
+    writeup: library/tools/mermaid-gallery/
+    category: exhibits
+    kind: exhibit
+    short: All 23 Mermaid v11 diagram types on one page with a live scratchpad.
+    desc: "Every Mermaid diagram type on one page: twenty-three Mermaid v11 types, each with a working example, copyable source, and a live scratchpad."
+    tags: [mermaid, diagrams, documentation]
+    related: [mermaid-viewer, markdown-previewer]
+    added: "2026-09-29"
+
+  - id: anatomy
+    name: Anatomy
+    url: anatomy/
+    writeup: blog/anatomy-machines/
+    category: exhibits
+    kind: exhibit
+    short: Five cutaway machines as interactive isometric SVG figures on test rigs.
+    desc: "Five machines as interactive isometric figures: a quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine and a quadruped robot — each with a dark and a light build."
+    tags: [svg, isometric, simulation, creative-coding]
+    related: [aether-atelier, tui-design-study]
+    added: "2026-09-15"
+    featured: true

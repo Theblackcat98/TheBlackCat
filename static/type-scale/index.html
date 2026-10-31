@@ -10,75 +10,15 @@
   <meta property="og:title" content="Type Scale & Font Pairing Playground" />
   <meta property="og:description" content="Type Scale & Font Pairing Playground. Pick a modular scale ratio, choose font pairings, and export CSS." />
   <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/type-scale/" />
-  <meta property="og:image" content="../og.png" />
+  <meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/type-scale-light.webp">
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="data:," />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Outfit for UI text and JetBrains Mono for code -->
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Type Scale & Font Pairing Playground</title>
   <style>
-    :root {
-      color-scheme: light dark;
-      /* Core Site Tokens Approximation */
-      --paper: #e9eaed;
-      --paper-2: #f7f7f9;
-      --paper-3: #ececf0;
-      --code-bg: #ffffff;
-      --ink: #1d2126;
-      --ink-2: #5b6068;
-      --ink-3: #62666e;
-      --rule: #d6d7dc;
-      --accent: #2f6db3;
-      --focus: #2f6db3;
-      --shadow: 0 1px 2px rgba(24, 28, 38, .05), 0 10px 28px rgba(24, 28, 38, .07);
-      --mono: "JetBrains Mono", monospace;
-      --ui-font: "Outfit", sans-serif;
-      --radius: 9px;
-      --radius-lg: 14px;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --paper: #121316;
-        --paper-2: #1a1b1f;
-        --paper-3: #26272e;
-        --code-bg: #222329;
-        --ink: #eceef2;
-        --ink-2: #a2a6af;
-        --ink-3: #9ba0aa;
-        --rule: #2d2f36;
-        --accent: #7db0e6;
-        --focus: #7db0e6;
-        --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .35);
-      }
-    }
-    :root[data-theme="light"] {
-      --paper: #e9eaed;
-      --paper-2: #f7f7f9;
-      --paper-3: #ececf0;
-      --code-bg: #ffffff;
-      --ink: #1d2126;
-      --ink-2: #5b6068;
-      --ink-3: #62666e;
-      --rule: #d6d7dc;
-      --accent: #2f6db3;
-      --focus: #2f6db3;
-      --shadow: 0 1px 2px rgba(24, 28, 38, .05), 0 10px 28px rgba(24, 28, 38, .07);
-    }
-    :root[data-theme="dark"] {
-      --paper: #121316;
-      --paper-2: #1a1b1f;
-      --paper-3: #26272e;
-      --code-bg: #222329;
-      --ink: #eceef2;
-      --ink-2: #a2a6af;
-      --ink-3: #9ba0aa;
-      --rule: #2d2f36;
-      --accent: #7db0e6;
-      --focus: #7db0e6;
-      --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .35);
-    }
+    
+    
+    
+    
 
     * { box-sizing: border-box; }
     body {
@@ -102,20 +42,6 @@
       margin: 0;
       font-size: 1.5rem;
       font-weight: 600;
-    }
-    .theme-toggle {
-      background: none;
-      border: 1px solid var(--rule);
-      color: var(--ink);
-      padding: 0.5rem 1rem;
-      border-radius: var(--radius);
-      cursor: pointer;
-      font-family: var(--ui-font);
-      font-size: 0.9rem;
-    }
-    .theme-toggle:focus-visible {
-      outline: 2px solid var(--focus);
-      outline-offset: 2px;
     }
 
     .layout {
@@ -185,7 +111,7 @@
       border: none;
       border-radius: var(--radius);
       background: var(--accent);
-      color: #fff;
+      color: var(--accent-ink);
       font-family: var(--ui-font);
       font-weight: 600;
       cursor: pointer;
@@ -317,12 +243,17 @@
       border: 1px solid var(--rule);
     }
   </style>
+
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/type-scale/">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Type Scale & Font Pairing", "description": "A typography studio: pick a modular scale ratio and base size, see the full scale rendered live; choose from curated font pairings and export CSS custom properties.", "url": "https://theblackcat98.github.io/TheBlackCat/type-scale/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/type-scale-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="type-scale"></script>
 </head>
 <body>
+<a class="back tk-fallback" href="../tools/">&larr; All tools</a>
 
   <header>
     <h1>Type Scale & Font Pairing Playground</h1>
-    <button id="theme-btn" class="theme-toggle" aria-label="Toggle theme">Theme: auto</button>
   </header>
 
   <div class="layout">
@@ -418,7 +349,6 @@ function calculateScale(base, ratio, steps) {
     const customRatioInput = $("#custom-ratio");
     const scaleContainer = $("#scale-container");
     const codeSizeLabel = $("#code-size-label");
-    const themeBtn = $("#theme-btn");
 
     const fontPairingSelect = $("#font-pairing");
     const headingFontSelect = $("#heading-font");
@@ -581,19 +511,7 @@ function calculateScale(base, ratio, steps) {
     baseSizeInput.addEventListener("input", renderScale);
 
     /* ---------- Theme ---------- */
-    const THEMES = ["auto", "light", "dark"];
-    function applyTheme(theme) {
-      if (theme === "auto") delete document.documentElement.dataset.theme;
-      else document.documentElement.dataset.theme = theme;
-      themeBtn.textContent = "Theme: " + theme;
-    }
-
-    themeBtn.addEventListener("click", () => {
-      const current = document.documentElement.dataset.theme || "auto";
-      const next = THEMES[(THEMES.indexOf(current) + 1) % THEMES.length];
-      applyTheme(next);
-      saveState();
-    });
+    function applyTheme() { /* managed by toolkit.js (bc-theme) */ }
 
     function getExportCSS() {
       const base = getBaseSize();

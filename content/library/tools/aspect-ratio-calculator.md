@@ -10,6 +10,7 @@ tags:
 status: filed
 created: 2026-10-29
 updated: 2026-10-29
+tool: aspect-ratio-calculator
 ---
 
 ## What it is

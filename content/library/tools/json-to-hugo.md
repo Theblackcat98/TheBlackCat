@@ -11,6 +11,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: json-to-hugo
 ---
 
 ## What it is

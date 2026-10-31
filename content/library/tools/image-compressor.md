@@ -12,6 +12,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: image-compressor
 ---
 
 Shrink photos and graphics, switch formats, and drop camera and location metadata without uploading anything.

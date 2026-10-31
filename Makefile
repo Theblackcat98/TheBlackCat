@@ -2,7 +2,7 @@
 HUGO ?= hugo
 PY   ?= python3
 
-.PHONY: help serve build check lint lint-changed css contrast test shots og clean
+.PHONY: help serve build check lint lint-changed css contrast tools test shots og clean
 help:            ## list targets
 	@awk -F':.*## ' '/^[a-z0-9-]+:.*## /{printf "  %-14s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
@@ -25,7 +25,10 @@ css:             ## every class a template/JS emits must exist in the stylesheet
 contrast:        ## WCAG contrast of every colour-token pair, light and dark
 	$(PY) scripts/contrast.py
 
-check: build lint-changed css contrast   ## everything that needs no browser
+tools:           ## verify tools registry, static folders, write-ups, thumbnails and toolkit
+	$(PY) scripts/check_tools.py
+
+check: build lint-changed css contrast tools   ## everything that needs no browser
 	@echo "ok"
 
 test: check      ## + browser behaviour and axe (needs: pip install playwright pyyaml; npm i axe-core)

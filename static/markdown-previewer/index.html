@@ -8,29 +8,8 @@
 <link rel="icon" href="data:,">
 <title>Markdown & Shortcode Previewer</title>
 <style>
-@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:100 800;font-display:swap;src:url("../fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2")}
 
-:root{
-  color-scheme: light dark;
-  --bg:#e9eaed; --surface:#f7f7f9; --surface-2:#ffffff;
-  --ink:#1d2126; --muted:#5b6068; --line:#d6d7dc; --line-2:#bfc2ca; --chip:#ececf0;
-  --accent:#2f6db3; --accent-strong:#26598f; --accent-ink:#ffffff;
-  --ok:#2e7d4f; --danger:#8f2d23; --danger-bg:#fdeeee; --danger-line:#efc2c2;
-  --warn:#7a4b00; --warn-bg:#fff4dc; --warn-line:#e8c98a;
-  --shadow:0 1px 2px rgba(24,28,38,.05),0 10px 28px rgba(24,28,38,.07);
-  --ui-font:"Outfit",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --mono-font:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-}
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#121316; --surface:#1a1b1f; --surface-2:#222329;
-    --ink:#eceef2; --muted:#a2a6af; --line:#2d2f36; --line-2:#3d404a; --chip:#26272e;
-    --accent:#7db0e6; --accent-strong:#9cc3ee; --accent-ink:#0d1724;
-    --ok:#6fce97; --danger:#f0a9a0; --danger-bg:#3a2120; --danger-line:#6e3a36;
-    --warn:#fdd663; --warn-bg:#352c12; --warn-line:#6b5a22;
-    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.35);
-  }
-}
+
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;font-family:var(--ui-font);font-size:15px;line-height:1.45;background:var(--bg);color:var(--ink)}
@@ -92,14 +71,10 @@ kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important}}
 
 
-@font-face{font-family:"Newsreader";src:url("../fonts/newsreader-latin-opsz-normal.woff2") format("woff2");font-weight:200 800;font-style:normal;font-display:swap}
-@font-face{font-family:"Newsreader";src:url("../fonts/newsreader-latin-wght-italic.woff2") format("woff2");font-weight:200 800;font-style:italic;font-display:swap}
 .ed{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));align-items:start}
 #m-src{min-height:34rem;height:70vh;font-size:.8125rem}
-.paper{--paper:#fbf9f3;--paper-2:#f6f2e9;--ink:#1c1915;--ink-2:#453f36;--ink-3:#655d51;--rule:#ddd5c2;--acc:#9a4707;--wash:#f2e2c8;
-  background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:1.4rem 1.5rem;min-height:34rem;max-height:70vh;overflow:auto}
-@media (prefers-color-scheme: dark){.paper{--paper:#15120f;--paper-2:#1b1814;--ink:#ede7db;--ink-2:#c3baa9;--ink-3:#9d9484;--rule:#2c2620;--acc:#eba74f;--wash:#2a2013}}
-.prose{font-family:"Newsreader","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:1.0625rem;line-height:1.65;color:var(--ink-2);overflow-wrap:anywhere}
+.paper{background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:1.4rem 1.5rem;min-height:34rem;max-height:70vh;overflow:auto}
+.prose{font-family:var(--serif-font,"Newsreader","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif);font-size:1.0625rem;line-height:1.65;color:var(--ink-2);overflow-wrap:anywhere}
 .prose>*+*{margin-top:1.05em}.prose>*:first-child{margin-top:0}
 .prose h1,.prose h2,.prose h3,.prose h4,.prose h5,.prose h6{color:var(--ink);line-height:1.2;font-weight:600;letter-spacing:-.01em;position:relative}
 .prose h2{font-size:1.65rem;padding-top:1rem;border-top:1px solid var(--rule)}
@@ -145,6 +120,15 @@ kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:
 .checks li.e{border-color:var(--danger-line);background:var(--danger-bg);color:var(--danger)}
 
 </style>
+
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/markdown-previewer/">
+<meta property="og:title" content="Markdown & Shortcode Previewer · The BlackCat">
+<meta property="og:description" content="Live Markdown preview that understands this site's callout and anatomy shortcodes and checks front matter against the content rules.">
+<meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/markdown-previewer/">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/markdown-previewer-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Markdown & Shortcode Previewer", "description": "Live Markdown preview that understands this site's callout and anatomy shortcodes and checks front matter against the content rules.", "url": "https://theblackcat98.github.io/TheBlackCat/markdown-previewer/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/markdown-previewer-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="markdown-previewer"></script>
 </head>
 <body>
 <header class="site">
@@ -318,7 +302,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button.copy[data
         }
         const body = items.map(buf => {
           let task = '';
-          const tm = buf[0].match(/^\[( |x|X)\][ \t]+/); if (tm) { task = '<input type="checkbox" disabled' + (tm[1] !== ' ' ? ' checked' : '') + '> '; buf[0] = buf[0].slice(tm[0].length); hasTask = true; }
+          const tm = buf[0].match(/^\[( |x|X)\][ \t]+/); if (tm) { task = '<input type="checkbox" disabled aria-label="Task item"' + (tm[1] !== ' ' ? ' checked' : '') + '> '; buf[0] = buf[0].slice(tm[0].length); hasTask = true; }
           let h = blocks(buf.join('\n'), st); if (!loose) h = h.replace(/^<p>([\s\S]*?)<\/p>/, '$1'); else if (task) h = h.replace(/^<p>/, '<p>' + task).replace(task, '') && h;
           return '<li>' + task + h + '</li>';
         }).join('');
@@ -381,9 +365,9 @@ document.addEventListener('click',e=>{const b=e.target.closest('button.copy[data
     // TOC (site shows one with three or more h2/h3 headings)
     const th = st.headings.filter(h => h.lvl === 2 || h.lvl === 3);
     if (th.length >= 3) {
-      let t = '<nav class="toc" aria-label="Table of contents"><b>On this page</b><ul>', depth = 2;
-      th.forEach(h => { if (h.lvl > depth) { t += '<ul>'; depth = 3; } else if (h.lvl < depth) { t += '</ul>'; depth = 2; } t += '<li><a href="#' + h.id + '">' + h.text + '</a></li>'; });
-      if (depth === 3) t += '</ul>'; html = t + '</ul></nav>\n' + html;
+      let t = '<nav class="toc" aria-label="Table of contents"><b>On this page</b><ul>';
+      th.forEach(h => { t += '<li' + (h.lvl === 3 ? ' style="padding-left:1rem"' : '') + '><a href="#' + h.id + '">' + h.text + '</a></li>'; });
+      html = t + '</ul></nav>\n' + html;
     }
     // checks
     st.headings.forEach((h, n) => { if (h.lvl === 1) add('w', 'Body heading "' + h.text + '" is an h1. The page title is the h1; start at ##.'); });

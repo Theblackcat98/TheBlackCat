@@ -1,0 +1,565 @@
+/* ==========================================================================
+   The BlackCat · Workshop Toolkit (static/toolkit/toolkit.css)
+   One house, two rooms: site paper/ink/amber frame + Outfit/Mono workbench.
+   ========================================================================== */
+
+@font-face {
+  font-family: "Newsreader";
+  src: url("../fonts/newsreader-latin-opsz-normal.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Newsreader";
+  src: url("../fonts/newsreader-latin-wght-italic.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Outfit";
+  src: url("../fonts/outfit-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light dark;
+  --tk-bar-h: 2.5rem;
+  --tk-paper:       light-dark(#f6f2e9, #15120f);
+  --tk-paper-2:     light-dark(#fbf9f3, #1b1814);
+  --tk-paper-3:     light-dark(#ece6d8, #241f19);
+  --tk-ink:         light-dark(#1c1915, #ede7db);
+  --tk-ink-2:       light-dark(#453f36, #c3baa9);
+  --tk-ink-3:       light-dark(#655d51, #9d9484);
+  --tk-rule:        light-dark(#ddd5c2, #2c2620);
+  --tk-rule-2:      light-dark(#c6bca4, #443c30);
+  --tk-accent:      light-dark(#9a4707, #eba74f);
+  --tk-accent-2:    light-dark(#7a3704, #f4c184);
+  --tk-accent-ink:  light-dark(#ffffff, #15120f);
+  --tk-accent-wash: light-dark(#f2e2c8, #2a2013);
+  --tk-serif:       "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --tk-sans:        "Outfit", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --tk-mono:        "JetBrains Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"]  { color-scheme: dark; }
+
+/* ---- Merged workshop palette (35 tools; exhibits keep their own art direction) ---- */
+:root:not([data-exhibit]) {
+  /* Surfaces */
+  --paper:          light-dark(#f6f2e9, #15120f);
+  --paper-2:        light-dark(#fbf9f3, #1b1814);
+  --paper-3:        light-dark(#ece6d8, #241f19);
+  --bg:             light-dark(#f6f2e9, #15120f);
+  --surface:        light-dark(#fbf9f3, #1b1814);
+  --surface-2:      light-dark(#ffffff, #241f19);
+  --panel:          light-dark(#fbf9f3, #1b1814);
+  --panel2:         light-dark(#ffffff, #241f19);
+  --editor-bg:      light-dark(#ffffff, #241f19);
+  --empty-bg:       light-dark(#ece6d8, #181410);
+  --chip:           light-dark(#ece6d8, #241f19);
+  --code:           light-dark(#ffffff, #241f19);
+  --code-bg:        light-dark(#efe9db, #1b1814);
+  --code-ink:       light-dark(#1c1915, #ede7db);
+
+  /* Ink */
+  --ink:            light-dark(#1c1915, #ede7db);
+  --ink-2:          light-dark(#453f36, #c3baa9);
+  --ink-3:          light-dark(#655d51, #9d9484);
+  --muted:          light-dark(#655d51, #9d9484);
+  --mut:            light-dark(#655d51, #9d9484);
+  --faint:          light-dark(#655d51, #9d9484);
+
+  /* Lines */
+  --line:           light-dark(#ddd5c2, #2c2620);
+  --rule:           light-dark(#ddd5c2, #2c2620);
+  --line-2:         light-dark(#c6bca4, #443c30);
+  --line2:          light-dark(#c6bca4, #443c30);
+  --line-strong:    light-dark(#c6bca4, #443c30);
+  --rule-2:         light-dark(#c6bca4, #443c30);
+  --checker:        light-dark(#c6bca4, #443c30);
+
+  /* Cat-eye amber accent */
+  --accent:         light-dark(#9a4707, #eba74f);
+  --acc:            light-dark(#9a4707, #eba74f);
+  --accent-strong:  light-dark(#7a3704, #f4c184);
+  --acc-strong:     light-dark(#7a3704, #f4c184);
+  --accent-2:       light-dark(#7a3704, #f4c184);
+  --accent-ink:     light-dark(#ffffff, #15120f);
+  --acc-ink:        light-dark(#ffffff, #15120f);
+  --accent-soft:    light-dark(#ece6d8, #241f19);
+  --accent-wash:    light-dark(#f2e2c8, #2a2013);
+  --wash:           light-dark(#f2e2c8, #2a2013);
+  --focus:          light-dark(#9a4707, #eba74f);
+
+  /* Status tokens (WCAG AA on paper/surface/chip) */
+  --ok:             light-dark(#24693f, #6fce97);
+  --good:           light-dark(#24693f, #6fce97);
+  --good-wash:      light-dark(#e4efe7, #1e2f24);
+  --add-bg:         light-dark(#e4efe7, #1e2f24);
+  --add-ink:        light-dark(#24693f, #6fce97);
+  --add-wash:       light-dark(#c3ddcb, #2d4a37);
+  --danger:         light-dark(#8f2d23, #f0a9a0);
+  --danger-bg:      light-dark(#fdeeee, #3a2120);
+  --danger-line:    light-dark(#efc2c2, #6e3a36);
+  --danger-wash:    light-dark(#fdeeee, #3a2120);
+  --del-bg:         light-dark(#fdeeee, #3a2120);
+  --del-ink:        light-dark(#8f2d23, #f0a9a0);
+  --del-wash:       light-dark(#efc2c2, #6e3a36);
+  --err-ink:        light-dark(#8f2d23, #f0a9a0);
+  --err-bg:         light-dark(#fdeeee, #3a2120);
+  --err-line:       light-dark(#efc2c2, #6e3a36);
+  --error:          light-dark(#8f2d23, #f0a9a0);
+  --error-text:     light-dark(#8f2d23, #f0a9a0);
+  --error-bg:       light-dark(#fdeeee, #3a2120);
+  --warn:           light-dark(#7a4b00, #fdd663);
+  --warn-text:      light-dark(#7a4b00, #fdd663);
+  --warn-bg:        light-dark(#fff4dc, #352c12);
+  --warn-line:      light-dark(#e8c98a, #6b5a22);
+  --warning:        light-dark(#7a4b00, #fdd663);
+  --warning-ink:    light-dark(#7a4b00, #fdd663);
+  --warning-bg:     light-dark(#fff4dc, #352c12);
+
+  /* Typography & shape */
+  --serif-font:     var(--tk-serif);
+  --ui-font:        var(--tk-sans);
+  --font-ui:        var(--tk-sans);
+  --mono-font:      var(--tk-mono);
+  --font-code:      var(--tk-mono);
+  --mono:           var(--tk-mono);
+  --radius:         9px;
+  --radius-md:      9px;
+  --radius-lg:      14px;
+  --space-1:        4px;
+  --space-2:        8px;
+  --space-3:        12px;
+  --space-4:        16px;
+  --space-5:        24px;
+  --space-6:        32px;
+  --space-7:        48px;
+  --space-8:        64px;
+  --shadow:         0 1px 2px rgba(28, 25, 21, .05), 0 10px 28px rgba(28, 25, 21, .07);
+  --shadow-sm:      0 1px 2px rgba(28, 25, 21, .05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-exhibit]):not([data-theme="light"]) {
+    --shadow:    0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .35);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
+  }
+}
+:root:not([data-exhibit])[data-theme="dark"] {
+  --shadow:    0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .35);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
+}
+
+/* Tool titles open in Newsreader (the site's voice) */
+:root:not([data-exhibit]) h1 {
+  font-family: var(--tk-serif);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Hide legacy per-tool theme toggles and no-JS back link once toolkit bar mounts */
+.theme-toggle, #theme-btn {
+  display: none !important;
+}
+:root[data-tk-ready] .back,
+:root[data-tk-ready] .tk-fallback {
+  display: none !important;
+}
+.tk-fallback {
+  display: inline-block;
+  padding: .5rem 1.25rem;
+  font: 500 .78rem/1.4 var(--tk-mono);
+  color: var(--tk-ink-3);
+  text-decoration: none;
+}
+.tk-fallback:hover {
+  color: var(--tk-accent);
+  text-decoration: underline;
+}
+
+/* Full-screen canvas exhibit (AETHER) offset when top bar is present */
+:root[data-tool="aether-atelier"] body > header.fixed.top-0 {
+  top: var(--tk-bar-h) !important;
+}
+:root[data-tool="aether-atelier"] #leftFormulaPlaque,
+:root[data-tool="aether-atelier"] #rightInspectorDrawer {
+  top: calc(4.5rem + var(--tk-bar-h)) !important;
+}
+
+html {
+  overflow-x: clip;
+}
+:root[data-tk-ready]:not([data-tool="aether-atelier"]) body {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* ==========================================================================
+   Shared Top Bar (.tk-bar)
+   ========================================================================== */
+.tk-bar {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  min-height: var(--tk-bar-h);
+  background: color-mix(in srgb, var(--tk-paper) 92%, transparent);
+  -webkit-backdrop-filter: saturate(1.4) blur(12px);
+  backdrop-filter: saturate(1.4) blur(12px);
+  border-bottom: 1px solid var(--tk-rule);
+  color: var(--tk-ink);
+  font: 500 .76rem/1.3 var(--tk-mono);
+}
+.tk-bar:has(+ .tk-fallback) {
+  margin-bottom: 1.5rem;
+}
+:root[data-tool="aether-atelier"] .tk-bar,
+:root[data-tool="tui-design-study"] .tk-bar,
+:root[data-tool="mermaid-gallery"] .tk-bar {
+  margin-bottom: 0;
+}
+.tk-bar__inner {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: .35rem 1.25rem;
+  min-height: var(--tk-bar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem 1rem;
+  flex-wrap: wrap;
+}
+.tk-crumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .35rem .45rem;
+  min-width: 0;
+}
+.tk-crumbs a {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--tk-ink-2);
+  text-decoration: none;
+  transition: color .15s;
+}
+.tk-crumbs a:hover {
+  color: var(--tk-accent);
+}
+.tk-crumbs__brand {
+  font-weight: 600;
+  color: var(--tk-ink) !important;
+}
+.tk-crumbs__brand svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex: none;
+}
+.tk-crumbs__sep {
+  color: var(--tk-rule-2);
+  user-select: none;
+}
+.tk-crumbs__current {
+  color: var(--tk-ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 18rem;
+}
+
+.tk-actions {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  margin-left: auto;
+}
+.tk-pager {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--tk-rule);
+  border-radius: 6px;
+  background: var(--tk-paper-2);
+  overflow: hidden;
+}
+.tk-pager a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.7rem;
+  color: var(--tk-ink-2);
+  text-decoration: none;
+  font-size: .92rem;
+  line-height: 1;
+  transition: background-color .15s, color .15s;
+}
+.tk-pager a + a {
+  border-left: 1px solid var(--tk-rule);
+}
+.tk-pager a:hover {
+  background: var(--tk-paper-3);
+  color: var(--tk-accent);
+}
+
+.tk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  height: 1.8rem;
+  padding: 0 .6rem;
+  border: 1px solid var(--tk-rule);
+  border-radius: 6px;
+  background: var(--tk-paper-2);
+  color: var(--tk-ink-2);
+  font: 500 .74rem/1 var(--tk-mono);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color .15s, color .15s, background-color .15s;
+}
+.tk-btn:hover {
+  border-color: var(--tk-rule-2);
+  color: var(--tk-ink);
+  background: var(--tk-paper-3);
+}
+.tk-btn kbd {
+  font: 500 .66rem/1 var(--tk-mono);
+  color: var(--tk-ink-3);
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--tk-rule);
+  border-radius: 0;
+  padding: 0 0 0 .4rem;
+}
+.tk-btn--icon {
+  width: 1.8rem;
+  padding: 0;
+  justify-content: center;
+}
+.tk-btn svg {
+  width: .9rem;
+  height: .9rem;
+  flex: none;
+}
+
+@media (max-width: 44rem) {
+  .tk-crumbs__current,
+  .tk-btn kbd {
+    display: none;
+  }
+  .tk-bar__inner {
+    padding: .3rem .85rem;
+  }
+}
+
+/* ==========================================================================
+   Related Strip (.tk-foot)
+   ========================================================================== */
+.tk-foot {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  margin-top: 2.5rem;
+  border-top: 1px solid var(--tk-rule);
+  background: var(--tk-paper-2);
+  color: var(--tk-ink);
+  font: 400 .8rem/1.5 var(--tk-sans);
+}
+:root[data-tool="aether-atelier"] .tk-foot {
+  display: none;
+}
+.tk-foot__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .65rem 1.5rem;
+}
+.tk-foot__groups {
+  display: grid;
+  gap: .35rem;
+  min-width: 0;
+}
+.tk-foot__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .25rem .55rem;
+}
+.tk-foot__label {
+  font: 500 .72rem/1.4 var(--tk-mono);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--tk-ink-3);
+  min-width: 10.5rem;
+}
+.tk-foot__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .25rem .45rem;
+}
+.tk-foot__links a {
+  color: var(--tk-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--tk-rule-2);
+  text-underline-offset: .2em;
+  font-weight: 500;
+  transition: color .15s, text-decoration-color .15s;
+}
+.tk-foot__links a:hover {
+  color: var(--tk-accent);
+  text-decoration-color: currentColor;
+}
+.tk-foot__dot {
+  color: var(--tk-rule-2);
+  user-select: none;
+}
+.tk-foot__all {
+  font: 500 .76rem/1.4 var(--tk-mono);
+  color: var(--tk-accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.tk-foot__all:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   Switcher Dialog (.tk-switcher)
+   ========================================================================== */
+.tk-switcher {
+  width: min(40rem, calc(100vw - 2rem));
+  max-height: min(32rem, calc(100dvh - 4rem));
+  margin: max(1rem, 10vh) auto 0;
+  padding: 0;
+  border: 1px solid var(--tk-rule-2);
+  border-radius: 12px;
+  background: var(--tk-paper-2);
+  color: var(--tk-ink);
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, .4);
+  overflow: hidden;
+  font-family: var(--tk-sans);
+}
+.tk-switcher[open] {
+  display: flex;
+  flex-direction: column;
+}
+.tk-switcher::backdrop {
+  background: rgba(12, 9, 6, .52);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+.tk-switcher__bar {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--tk-rule);
+}
+.tk-switcher__bar svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--tk-ink-3);
+  flex: none;
+}
+.tk-switcher__input {
+  flex: 1;
+  min-width: 0;
+  padding: .85rem 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  font: 400 1rem/1.3 var(--tk-sans) !important;
+  color: var(--tk-ink) !important;
+}
+.tk-switcher__input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.tk-switcher__esc {
+  font: 500 .68rem/1 var(--tk-mono);
+  color: var(--tk-ink-3);
+  border: 1px solid var(--tk-rule);
+  border-radius: 4px;
+  padding: .28rem .45rem;
+  background: transparent;
+  cursor: pointer;
+}
+.tk-switcher__list {
+  overflow-y: auto;
+  padding: .4rem;
+  flex: 1;
+}
+.tk-switcher__group {
+  padding: .55rem .6rem .2rem;
+  font: 500 .68rem/1.2 var(--tk-mono);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--tk-ink-3);
+}
+.tk-switcher__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .45rem .65rem;
+  border-radius: 7px;
+  color: var(--tk-ink);
+  text-decoration: none;
+}
+.tk-switcher__item[aria-selected="true"] {
+  background: var(--tk-paper-3);
+  box-shadow: inset 2px 0 0 var(--tk-accent);
+}
+.tk-switcher__name {
+  font-weight: 600;
+  font-size: .92rem;
+  white-space: nowrap;
+}
+.tk-switcher__short {
+  font-size: .82rem;
+  color: var(--tk-ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  text-align: right;
+}
+.tk-switcher__empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--tk-ink-3);
+  font-size: .9rem;
+}
+.tk-switcher__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .45rem 1rem;
+  border-top: 1px solid var(--tk-rule);
+  font: 400 .68rem/1.3 var(--tk-mono);
+  color: var(--tk-ink-3);
+}

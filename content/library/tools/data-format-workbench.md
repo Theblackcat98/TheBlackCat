@@ -12,6 +12,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: data-format-workbench
 ---
 
 A browser-based workbench for formatting, viewing, querying, and converting between JSON, YAML, and TOML.

@@ -13,6 +13,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: type-scale
 ---
 
 A typography studio for exploring modular scales and font pairings, entirely client-side. Allows selection of base sizes, scale ratios, and live previewing with dynamic font loading from Google Fonts.

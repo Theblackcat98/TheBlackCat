@@ -68,6 +68,56 @@ with sync_playwright() as p:
     pg.click('[data-filter="tag"][data-value="python"]')
     check("project tag filter works", 0 < pg.locator("[data-filter-list] > li:visible").count() < 16)
 
+    # tools hub filter + tool toolkit bar + switcher + theme sync + recently used
+    pg.goto(BASE + "/tools/", wait_until="networkidle")
+    total_tools = pg.locator("[data-filter-item]").count()
+    check("tools hub renders all 42 tools", total_tools == 42, total_tools)
+    new_badges = pg.locator("[data-filter-item] .tool-card__new:visible").count()
+    check("tools hub shows New badge only on the 10 newest tools", new_badges == 10, new_badges)
+    pg.click('[data-filter="domain"][data-value="color-design"]')
+    vis_tools = pg.locator("[data-filter-item]:visible").count()
+    check("tools category chip filters to color-design", vis_tools == 9, vis_tools)
+    pg.click("[data-filter-reset]") if pg.locator("[data-filter-reset]").is_visible() else pg.click('[data-filter="domain"][data-value=""]')
+
+    pg.goto(BASE + "/palette-studio/", wait_until="networkidle")
+    check("tool mounts shared .tk-bar", pg.locator(".tk-bar").count() == 1)
+    check("tool mounts related .tk-foot", pg.locator(".tk-foot").count() == 1)
+    pg.click("[data-tk-switch]")
+    check("tool switcher opens", pg.evaluate("document.getElementById('tk-switcher').open"))
+    pg.fill("#tk-switcher-input", "jwt")
+    check("tool switcher filters to JWT Decoder", pg.locator(".tk-switcher__item").count() >= 1)
+    pg.keyboard.press("Escape")
+    pg.click("[data-tk-theme]")
+    check("tool theme toggle writes bc-theme", pg.evaluate("localStorage.getItem('bc-theme')") in ("light", "dark"))
+
+    # Verify prev/next on jwt-decoder stays on-site (does not jump to external Mermaid Viewer)
+    pg.goto(BASE + "/jwt-decoder/", wait_until="networkidle")
+    pager_hrefs = pg.evaluate("Array.from(document.querySelectorAll('.tk-pager a')).map(a => a.getAttribute('href'))")
+    check("jwt-decoder prev/next links stay on-site", len(pager_hrefs) == 2 and all(not h.startswith("http") for h in pager_hrefs), pager_hrefs)
+
+    # Verify Markdown Previewer prose uses Newsreader and OS dark + site light keeps light styles
+    pg.emulate_media(color_scheme="dark")
+    pg.evaluate("localStorage.setItem('bc-theme', 'light')")
+    pg.goto(BASE + "/markdown-previewer/", wait_until="networkidle")
+    prose_font = pg.evaluate("getComputedStyle(document.querySelector('.prose')).fontFamily")
+    check("markdown-previewer prose uses Newsreader in light mode", "Newsreader" in prose_font, prose_font)
+    pg.goto(BASE + "/unicode-explorer/", wait_until="networkidle")
+    btn_color = pg.evaluate("getComputedStyle(document.querySelector('.btn.primary')).color")
+    check("unicode-explorer primary button keeps white text when OS is dark and site is light", btn_color == "rgb(255, 255, 255)", btn_color)
+    pg.goto(BASE + "/og-previewer/", wait_until="networkidle")
+    card_x_bg = pg.evaluate("getComputedStyle(document.querySelector('.card-x')).backgroundColor")
+    check("og-previewer X card stays light when OS is dark and site is light", card_x_bg == "rgb(255, 255, 255)", card_x_bg)
+    pg.emulate_media(color_scheme="light")
+
+    pg.goto(BASE + "/tools/", wait_until="networkidle")
+    check("tools hub shows Recently used after visiting a tool", pg.locator("[data-filter-recent]:visible").count() == 1)
+    pg.evaluate("localStorage.removeItem('bc-theme'); document.documentElement.dataset.theme = 'light';")
+
+    # write-up page has Run it card and More in category
+    pg.goto(BASE + "/library/tools/palette-studio/", wait_until="networkidle")
+    check("write-up shows Run it card", pg.locator(".tool-run .tool-card").count() == 1)
+    check("write-up shows More in category", pg.locator(".tool-more .tool-card").count() == 3)
+
     # code copy + toc spy on a docs chapter
     pg.goto(BASE + "/docs/website-analyzer/02-processing-nodes/", wait_until="networkidle")
     check("code blocks are wrapped", pg.locator(".codeblock").count() >= 1)

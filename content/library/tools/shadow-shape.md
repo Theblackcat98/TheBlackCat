@@ -12,6 +12,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: shadow-shape
 ---
 
 Build soft, natural-looking depth and organic shapes without hand-tuning CSS.

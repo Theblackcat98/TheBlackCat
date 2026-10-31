@@ -11,6 +11,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: qr-code-studio
 ---
 
 A browser-based studio for working with QR codes, supporting both generation and decoding in a completely offline, privacy-respecting client-side environment.

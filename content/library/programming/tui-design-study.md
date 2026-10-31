@@ -13,6 +13,7 @@ tags:
 status: filed
 created: 2026-10-20
 updated: 2026-10-20
+tool: tui-design-study
 ---
 
 A design study for llama-deck, the keyboard-first TUI for discovering and running local llama.cpp models. Its thesis: the strongest TUIs feel dense, calm, and unmistakably native to the character grid — polish comes from hierarchy, alignment, semantic color, and instant response, not from adding more chrome.

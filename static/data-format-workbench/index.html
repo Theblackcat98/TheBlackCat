@@ -7,43 +7,10 @@
   <meta name="description" content="Data Format Workbench: convert between JSON, YAML and TOML, inspect the tree, and run JSONPath queries — entirely in the browser." />
   <link rel="icon" href="data:," />
   <title>Data Format Workbench</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <style>
-    :root {
-      color-scheme: light dark;
-      --bg: #e9eaed;
-      --surface: #f7f7f9;
-      --surface-2: #ffffff;
-      --ink: #1d2126;
-      --muted: #5b6068;
-      --line: #d6d7dc;
-      --accent: #2f6db3;
-      --accent-ink: #ffffff;
-      --danger: #8f2d23;
-      --danger-bg: #fdeeee;
-      --warning: #f29900;
-
-      --ui-font: "Outfit", sans-serif;
-      --mono-font: "JetBrains Mono", monospace;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #121316;
-        --surface: #1a1b1f;
-        --surface-2: #222329;
-        --ink: #eceef2;
-        --muted: #a2a6af;
-        --line: #2d2f36;
-        --accent: #7db0e6;
-        --accent-ink: #0d1724;
-        --danger: #f0a9a0;
-        --danger-bg: #3a2120;
-        --warning: #fdd663;
-      }
-    }
+    
+    
 
     * { box-sizing: border-box; }
     body {
@@ -300,16 +267,10 @@
       color: var(--muted);
       font-size: 0.85em;
     }
-    .tree-value.string { color: #0a7a3a; }
-    .tree-value.number { color: #b35400; }
-    .tree-value.boolean { color: #8a2be2; }
+    .tree-value.string { color: light-dark(#0a7a3a, #4dc27f); }
+    .tree-value.number { color: light-dark(#b35400, #f48b3b); }
+    .tree-value.boolean { color: light-dark(#8a2be2, #c476f5); }
     .tree-value.null { color: var(--muted); }
-
-    @media (prefers-color-scheme: dark) {
-      .tree-value.string { color: #4dc27f; }
-      .tree-value.number { color: #f48b3b; }
-      .tree-value.boolean { color: #c476f5; }
-    }
 
     .highlighted {
       background-color: var(--warning);
@@ -333,8 +294,18 @@
       text-overflow: ellipsis;
     }
   </style>
+
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/data-format-workbench/">
+<meta property="og:title" content="Data Format Workbench · The BlackCat">
+<meta property="og:description" content="JSON, YAML and TOML format converter and interactive tree viewer.">
+<meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/data-format-workbench/">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/data-format-workbench-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Data Format Workbench", "description": "JSON, YAML and TOML format converter and interactive tree viewer.", "url": "https://theblackcat98.github.io/TheBlackCat/data-format-workbench/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/data-format-workbench-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="data-format-workbench"></script>
 </head>
 <body>
+<a class="back tk-fallback" href="../tools/">&larr; All tools</a>
 
 <header>
   <h1>Data Format Workbench</h1>

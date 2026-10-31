@@ -12,6 +12,7 @@ tags:
 status: filed
 created: 2026-10-30
 updated: 2026-10-30
+tool: meta-generator
 ---
 
 A single-page, client-side utility to help author full HTML meta tag blocks and PWA `site.webmanifest` JSON files. It includes length meters for SERP truncations and live mock previews of how a page unfurls on social media platforms.

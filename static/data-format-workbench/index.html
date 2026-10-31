@@ -293,6 +293,19 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+    /* Phones: the fixed 100vh app shell starves the stacked panes (toolkit
+       bar + header + footer siblings shrink the container, and each pane's
+       own wrapped header/toolbar eats its half). Let the page scroll and
+       guarantee each pane's content a usable height instead. */
+    @media (max-width: 767px) {
+      body { height: auto; min-height: 100vh; }
+      .container { overflow: visible; }
+      .pane-content { min-height: 240px; }
+      /* textarea height:100% cannot resolve against a content-sized flex
+         pane, so give the editors their own floor. */
+      .pane-content textarea { min-height: 240px; }
+    }
   </style>
 
 <link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/data-format-workbench/">

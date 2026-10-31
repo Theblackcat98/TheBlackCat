@@ -159,6 +159,13 @@
   }
 
   /* ---- 3 · List filters (library, projects, tools) ------------------- */
+  $$("[data-tool-added]").forEach((el) => {
+    const added = Date.parse(el.dataset.toolAdded);
+    if (Number.isFinite(added)) {
+      const days = (Date.now() - added) / 86400000;
+      el.hidden = !(days >= -2 && days <= 30);
+    }
+  });
   $$("[data-filter-root]").forEach((box) => {
     const list = $("[data-filter-list]", box);
     if (!list) return;

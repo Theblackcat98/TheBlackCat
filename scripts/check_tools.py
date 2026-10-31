@@ -24,6 +24,8 @@ for req in (
 ):
     if not os.path.exists(req):
         err(f"missing required file: {req}")
+if os.path.exists("static/toolkit/registry.json"):
+    err("static/toolkit/registry.json should not exist; Hugo generates /toolkit/registry.json from data/tools.yaml")
 
 reg = yaml.safe_load(open("data/tools.yaml", encoding="utf-8"))
 cats = {c["id"]: c for c in reg.get("categories") or []}
@@ -77,6 +79,14 @@ for t in tools:
                 err(f"{tid}: {html_path} is missing no-JS fallback link to ../tools/")
             if t.get("kind") != "exhibit" and re.search(r'<link[^>]*fonts\.googleapis\.com', txt, re.I):
                 err(f"{tid}: {html_path} still loads fonts from Google Fonts")
+            if re.search(r'id=["\']theme-(?:btn|toggle)["\']|class=["\'][^"\']*\btheme-toggle\b', txt, re.I):
+                err(f"{tid}: {html_path} still contains a duplicate theme-toggle button")
+            for sm in re.finditer(r"<style[^>]*>(.*?)</style>", txt, re.S | re.I):
+                css = re.sub(r"/\*.*?\*/", "", sm.group(1), flags=re.S)
+                if css.count("{") != css.count("}"):
+                    err(f"{tid}: {html_path} has unbalanced CSS braces ({css.count('{')} '{{' vs {css.count('}')} '}}')")
+                if t.get("kind") != "exhibit" and re.search(r"@media\s*\(\s*prefers-color-scheme", css, re.I):
+                    err(f"{tid}: {html_path} uses @media (prefers-color-scheme) instead of light-dark() / toolkit tokens")
             for meta_pat, label in (
                 (r'<meta\s+name=["\']description["\']', "meta description"),
                 (r'<link\s+rel=["\']canonical["\']', "canonical link"),

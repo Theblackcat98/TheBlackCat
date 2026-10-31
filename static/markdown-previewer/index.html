@@ -74,7 +74,7 @@ kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:
 .ed{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));align-items:start}
 #m-src{min-height:34rem;height:70vh;font-size:.8125rem}
 .paper{background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:1.4rem 1.5rem;min-height:34rem;max-height:70vh;overflow:auto}
-@media (prefers-color-scheme: dark){.paper{font-size:1.0625rem;line-height:1.65;color:var(--ink-2);overflow-wrap:anywhere}
+.prose{font-family:var(--serif-font,"Newsreader","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif);font-size:1.0625rem;line-height:1.65;color:var(--ink-2);overflow-wrap:anywhere}
 .prose>*+*{margin-top:1.05em}.prose>*:first-child{margin-top:0}
 .prose h1,.prose h2,.prose h3,.prose h4,.prose h5,.prose h6{color:var(--ink);line-height:1.2;font-weight:600;letter-spacing:-.01em;position:relative}
 .prose h2{font-size:1.65rem;padding-top:1rem;border-top:1px solid var(--rule)}
@@ -302,7 +302,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button.copy[data
         }
         const body = items.map(buf => {
           let task = '';
-          const tm = buf[0].match(/^\[( |x|X)\][ \t]+/); if (tm) { task = '<input type="checkbox" disabled' + (tm[1] !== ' ' ? ' checked' : '') + '> '; buf[0] = buf[0].slice(tm[0].length); hasTask = true; }
+          const tm = buf[0].match(/^\[( |x|X)\][ \t]+/); if (tm) { task = '<input type="checkbox" disabled aria-label="Task item"' + (tm[1] !== ' ' ? ' checked' : '') + '> '; buf[0] = buf[0].slice(tm[0].length); hasTask = true; }
           let h = blocks(buf.join('\n'), st); if (!loose) h = h.replace(/^<p>([\s\S]*?)<\/p>/, '$1'); else if (task) h = h.replace(/^<p>/, '<p>' + task).replace(task, '') && h;
           return '<li>' + task + h + '</li>';
         }).join('');
@@ -365,9 +365,9 @@ document.addEventListener('click',e=>{const b=e.target.closest('button.copy[data
     // TOC (site shows one with three or more h2/h3 headings)
     const th = st.headings.filter(h => h.lvl === 2 || h.lvl === 3);
     if (th.length >= 3) {
-      let t = '<nav class="toc" aria-label="Table of contents"><b>On this page</b><ul>', depth = 2;
-      th.forEach(h => { if (h.lvl > depth) { t += '<ul>'; depth = 3; } else if (h.lvl < depth) { t += '</ul>'; depth = 2; } t += '<li><a href="#' + h.id + '">' + h.text + '</a></li>'; });
-      if (depth === 3) t += '</ul>'; html = t + '</ul></nav>\n' + html;
+      let t = '<nav class="toc" aria-label="Table of contents"><b>On this page</b><ul>';
+      th.forEach(h => { t += '<li' + (h.lvl === 3 ? ' style="padding-left:1rem"' : '') + '><a href="#' + h.id + '">' + h.text + '</a></li>'; });
+      html = t + '</ul></nav>\n' + html;
     }
     // checks
     st.headings.forEach((h, n) => { if (h.lvl === 1) add('w', 'Body heading "' + h.text + '" is an h1. The page title is the h1; start at ##.'); });

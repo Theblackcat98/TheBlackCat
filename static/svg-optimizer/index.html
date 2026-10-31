@@ -42,20 +42,6 @@
       font-size: 24px;
       font-weight: 600;
     }
-    .theme-toggle {
-      background: var(--surface-2);
-      border: 1px solid var(--line);
-      color: var(--ink);
-      padding: 6px 12px;
-      border-radius: var(--radius-md);
-      font-family: var(--font-ui);
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .theme-toggle:focus-visible {
-      outline: 2px solid var(--focus);
-      outline-offset: 2px;
-    }
 
     .grid {
       display: grid;
@@ -261,7 +247,6 @@
 <a class="back tk-fallback" href="../tools/">&larr; All tools</a>
   <header>
     <h1>SVG Optimizer & Previewer</h1>
-    <button class="theme-toggle" id="theme-btn">Theme: auto</button>
   </header>
 
   <div class="grid">
@@ -678,25 +663,8 @@
       e.target.value = ""; // reset
     });
 
-    /* Theme */
-    const THEMES = ["auto", "light", "dark"];
-    const themeBtn = document.getElementById("theme-btn");
-
-    function applyTheme(theme) { /* managed by toolkit.js (bc-theme) */ } catch (_) {}
-      themeBtn.textContent = "Theme: " + theme;
-    }
-
-    themeBtn.addEventListener("click", () => {
-      const current = document.documentElement.dataset.theme || "auto";
-      applyTheme(THEMES[(THEMES.indexOf(current) + 1) % THEMES.length]);
-    });
-
     // Init
     (function init() {
-      let theme = "auto";
-      try { theme = localStorage.getItem("svg-opt-theme") || "auto"; } catch (_) {}
-      applyTheme(theme);
-
       loadState();
       if (inputSvg.value) {
         render();

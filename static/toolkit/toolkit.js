@@ -62,9 +62,10 @@
     const cur = toolMap[toolId] || { id: toolId, name: document.title.split("·")[0].trim() };
     const cat = catMap[cur.category];
     const siblings = cur.category ? tools.filter((t) => t.category === cur.category) : [];
-    const curIdx = siblings.findIndex((t) => t.id === cur.id);
-    const prevTool = siblings.length > 1 && curIdx >= 0 ? siblings[(curIdx - 1 + siblings.length) % siblings.length] : null;
-    const nextTool = siblings.length > 1 && curIdx >= 0 ? siblings[(curIdx + 1) % siblings.length] : null;
+    const hostedSiblings = siblings.filter((t) => !t.external && !/^https?:\/\//i.test(t.url));
+    const curIdx = hostedSiblings.findIndex((t) => t.id === cur.id);
+    const prevTool = hostedSiblings.length > 1 && curIdx >= 0 ? hostedSiblings[(curIdx - 1 + hostedSiblings.length) % hostedSiblings.length] : null;
+    const nextTool = hostedSiblings.length > 1 && curIdx >= 0 ? hostedSiblings[(curIdx + 1) % hostedSiblings.length] : null;
 
     /* -- Top Bar -- */
     const bar = document.createElement("nav");

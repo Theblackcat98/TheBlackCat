@@ -56,7 +56,6 @@
     .mode-switch label { cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .preset-selector { margin-left: auto; display: flex; align-items: center; gap: 8px; }
     #presets { padding: 6px; border: 1px solid var(--line); background: var(--bg); border-radius: 9px; color: var(--ink); }
-    .theme-toggle { padding: 6px 12px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; border-radius: 9px; }
 
     /* Sections */
     .directive-card {
@@ -141,7 +140,6 @@
           <option value="permissive-report">Permissive Report-Only</option>
         </select>
       </div>
-      <button class="theme-toggle" id="theme-btn">Theme: auto</button>
     </div>
 
     <!-- Main Content -->
@@ -383,13 +381,6 @@
         const btn = e.target;
         btn.textContent = 'Copied!';
         setTimeout(() => btn.textContent = 'Copy', 2000);
-      });
-
-      $('#theme-btn').addEventListener('click', () => {
-        const themes = ['auto', 'light', 'dark'];
-        state.theme = themes[(themes.indexOf(state.theme) + 1) % themes.length];
-        applyTheme(state.theme);
-        saveState();
       });
 
       $('#parse-btn').addEventListener('click', parseInputPolicy);

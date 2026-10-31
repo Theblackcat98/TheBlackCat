@@ -267,16 +267,10 @@
       color: var(--muted);
       font-size: 0.85em;
     }
-    .tree-value.string { color: #0a7a3a; }
-    .tree-value.number { color: #b35400; }
-    .tree-value.boolean { color: #8a2be2; }
+    .tree-value.string { color: light-dark(#0a7a3a, #4dc27f); }
+    .tree-value.number { color: light-dark(#b35400, #f48b3b); }
+    .tree-value.boolean { color: light-dark(#8a2be2, #c476f5); }
     .tree-value.null { color: var(--muted); }
-
-    @media (prefers-color-scheme: dark) {
-      .tree-value.string { color: #4dc27f; }
-      .tree-value.number { color: #f48b3b; }
-      .tree-value.boolean { color: #c476f5; }
-    }
 
     .highlighted {
       background-color: var(--warning);

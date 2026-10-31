@@ -43,20 +43,6 @@
       font-size: 1.5rem;
       font-weight: 600;
     }
-    .theme-toggle {
-      background: none;
-      border: 1px solid var(--rule);
-      color: var(--ink);
-      padding: 0.5rem 1rem;
-      border-radius: var(--radius);
-      cursor: pointer;
-      font-family: var(--ui-font);
-      font-size: 0.9rem;
-    }
-    .theme-toggle:focus-visible {
-      outline: 2px solid var(--focus);
-      outline-offset: 2px;
-    }
 
     .layout {
       display: grid;
@@ -268,7 +254,6 @@
 
   <header>
     <h1>Type Scale & Font Pairing Playground</h1>
-    <button id="theme-btn" class="theme-toggle" aria-label="Toggle theme">Theme: auto</button>
   </header>
 
   <div class="layout">
@@ -364,7 +349,6 @@ function calculateScale(base, ratio, steps) {
     const customRatioInput = $("#custom-ratio");
     const scaleContainer = $("#scale-container");
     const codeSizeLabel = $("#code-size-label");
-    const themeBtn = $("#theme-btn");
 
     const fontPairingSelect = $("#font-pairing");
     const headingFontSelect = $("#heading-font");
@@ -527,15 +511,7 @@ function calculateScale(base, ratio, steps) {
     baseSizeInput.addEventListener("input", renderScale);
 
     /* ---------- Theme ---------- */
-    const THEMES = ["auto", "light", "dark"];
-    function applyTheme(theme) { /* managed by toolkit.js (bc-theme) */ }
-
-    themeBtn.addEventListener("click", () => {
-      const current = document.documentElement.dataset.theme || "auto";
-      const next = THEMES[(THEMES.indexOf(current) + 1) % THEMES.length];
-      applyTheme(next);
-      saveState();
-    });
+    function applyTheme() { /* managed by toolkit.js (bc-theme) */ }
 
     function getExportCSS() {
       const base = getBaseSize();

@@ -40,7 +40,7 @@
     <div class="tool-card__meta">
       {{- if $catName }}<span class="tool-card__cat">{{ $catName }}</span>{{ end }}
       <span class="tool-card__kind">{{ $kindLabel }}</span>
-      {{- if $isNew }}<span class="tool-card__new">New</span>{{ end }}
+      {{- with $t.added }}<span class="tool-card__new" data-tool-added="{{ . }}"{{ if not $isNew }} hidden{{ end }}>New</span>{{ end }}
       {{- with $t.host }}<span class="tool-card__host">&#8599; {{ . }}</span>{{ end }}
     </div>
     <h3 class="tool-card__title">

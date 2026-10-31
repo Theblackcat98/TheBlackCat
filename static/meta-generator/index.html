@@ -181,25 +181,15 @@
       position: absolute;
       top: 0.5rem;
       right: 0.5rem;
-      background: rgba(255,255,255,0.1);
-      color: var(--code-ink);
-      border: 1px solid rgba(255,255,255,0.2);
+      background: var(--surface-2);
+      color: var(--ink);
+      border: 1px solid var(--line);
       padding: 0.25rem 0.5rem;
       font-size: 0.8125rem;
       border-radius: 9px;
       cursor: pointer;
-      backdrop-filter: blur(4px);
     }
-    .copy-btn:hover { background: rgba(255,255,255,0.2); }
-
-    @media (prefers-color-scheme: light) {
-      .copy-btn {
-        background: rgba(0,0,0,0.4);
-        color: white;
-        border: none;
-      }
-      .copy-btn:hover { background: rgba(0,0,0,0.6); }
-    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent-strong); }
 
     /* Mock Previews */
     .mock-preview {
@@ -256,8 +246,7 @@
     }
     .serp-url { font-size: 0.875rem; color: var(--ink); margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem;}
     .serp-url span { opacity: 0.7; }
-    .serp-title { color: #1a0dab; font-size: 1.25rem; text-decoration: none; display: inline-block; margin-bottom: 0.25rem; }
-    @media (prefers-color-scheme: dark) { .serp-title { color: #8ab4f8; } }
+    .serp-title { color: light-dark(#1a0dab, #8ab4f8); font-size: 1.25rem; text-decoration: none; display: inline-block; margin-bottom: 0.25rem; }
     .serp-title:hover { text-decoration: underline; }
     .serp-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.58; }
 

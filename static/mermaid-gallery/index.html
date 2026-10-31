@@ -196,19 +196,6 @@
       font: 0.78rem/1.3 "JetBrains Mono", ui-monospace, monospace;
       white-space: nowrap;
     }
-    .theme-toggle {
-      min-height: 40px;
-      padding: 6px 12px;
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      background: var(--surface);
-      color: var(--ink);
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-    .theme-toggle:hover { background: var(--surface-2); }
     .toolbar select {
       display: none;
       width: 100%;
@@ -479,14 +466,10 @@
     .render-error {
       width: min(560px, 100%);
       padding: 16px;
-      border: 1px solid #efc2c2;
+      border: 1px solid light-dark(#efc2c2, #6e3a36);
       border-radius: 9px;
-      background: #fdeeee;
-      color: #8f2d23;
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) .render-error { border-color: #6e3a36; background: #3a2120; color: #f0a9a0; }
-    }
-    :root[data-theme="dark"] .render-error { border-color: #6e3a36; background: #3a2120; color: #f0a9a0; }
+      background: light-dark(#fdeeee, #3a2120);
+      color: light-dark(#8f2d23, #f0a9a0);
       text-align: left;
       cursor: default;
     }
@@ -755,7 +738,6 @@
         <button class="search-clear" type="button" aria-label="Clear search">×</button>
       </div>
       <span class="match-count" id="match-count" aria-live="polite">23 / 23</span>
-      <button class="theme-toggle" type="button" id="theme-toggle" aria-label="Cycle colour theme">Theme: auto</button>
       <div class="filter-list" aria-label="Filter by category">
         <button class="filter active" type="button" data-filter="all">All 23</button>
 <button class="filter" type="button" data-filter="essentials">Essentials</button><button class="filter" type="button" data-filter="planning">Planning &amp; product</button><button class="filter" type="button" data-filter="charts">Charts &amp; data</button><button class="filter" type="button" data-filter="technical">Technical systems</button><button class="filter" type="button" data-filter="utility">Utility</button>
@@ -2096,7 +2078,6 @@ Grid, Loss, 30</code></pre>
     const scratchStatus = $("#scratch-status");
     const overlay = $("#zoom-overlay");
     const zoomScroll = $("#zoom-scroll");
-    const themeBtn = $("#theme-toggle");
     let activeCategory = "all";
     let scratchTimer = null;
     let scratchCycle = 0;
@@ -2475,10 +2456,7 @@ Grid, Loss, 30</code></pre>
     }
 
     /* ---------- theme ---------- */
-    const THEMES = ["auto", "light", "dark"];
-    function applyTheme(theme) { /* managed by toolkit.js (bc-theme) */ } catch (_) {}
-      themeBtn.textContent = "Theme: " + theme;
-    }
+    function applyTheme() { /* managed by toolkit.js (bc-theme) */ }
 
     /* ---------- wiring ---------- */
     document.addEventListener("click", event => {
@@ -2640,12 +2618,6 @@ Grid, Loss, 30</code></pre>
       if (event.target === overlay || event.target === zoomScroll) closeZoom();
     });
 
-    themeBtn.addEventListener("click", () => {
-      const current = document.documentElement.dataset.theme || "auto";
-      applyTheme(THEMES[(THEMES.indexOf(current) + 1) % THEMES.length]);
-      rerenderDiagrams();
-    });
-
     window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
       if (!document.documentElement.dataset.theme) rerenderDiagrams();
     });
@@ -2659,10 +2631,6 @@ Grid, Loss, 30</code></pre>
       const allBtn = $('.filter[data-filter="all"]');
       if (allBtn) allBtn.textContent = `All ${cards.length}`;
       mobileFilter.options[0].textContent = `All ${cards.length} types`;
-
-      let theme = "auto";
-      try { theme = localStorage.getItem("mg-theme") || "auto"; } catch (_) {}
-      applyTheme(theme);
 
       const params = new URLSearchParams(location.search);
       if (params.get("cat")) activeCategory = params.get("cat");

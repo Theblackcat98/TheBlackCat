@@ -30,7 +30,7 @@ tools:
     desc: Extract a palette from a photo, build multi-stop gradients, and simulate color-vision deficiencies, entirely in the browser.
     tags: [color, gradients, accessibility, design]
     related: [color-token-workshop, semantic-token-mapper]
-    added: "2026-10-30"
+    added: "2026-09-15"
     featured: true
 
   - id: color-token-workshop
@@ -44,7 +44,7 @@ tools:
     desc: OKLCH palette builder with WCAG 2.1 and APCA contrast checks, auto-fix suggestions, light and dark palettes, and CSS/JSON export.
     tags: [color, oklch, contrast, accessibility, design]
     related: [palette-studio, semantic-token-mapper]
-    added: "2026-09-15"
+    added: "2026-10-30"
 
   - id: semantic-token-mapper
     name: Semantic Token Mapper
@@ -68,7 +68,7 @@ tools:
     desc: An interactive xterm 256-color cube/grid, truecolor to 256-color RGB quantization visualization, and a terminal theme builder with Alacritty, Kitty and JSON export.
     tags: [terminal, color, ansi, tui]
     related: [palette-studio, tui-design-study]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: type-scale
     name: Type Scale & Font Pairing
@@ -80,7 +80,7 @@ tools:
     desc: "A typography studio: pick a modular scale ratio and base size, see the full scale rendered live; choose from curated font pairings and export CSS custom properties."
     tags: [typography, css, design, fonts]
     related: [fluid-type]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: fluid-type
     name: Fluid Type Calculator
@@ -141,7 +141,7 @@ tools:
     desc: Readability metrics and a text cleanup lab for normalizing whitespace, quotes, case, and line breaks.
     tags: [text, writing, utilities]
     related: [text-diff-viewer, regex-visualizer]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: text-diff-viewer
     name: Text Diff Viewer
@@ -153,7 +153,7 @@ tools:
     desc: A side-by-side and unified text/code diff viewer with whitespace controls and patch export.
     tags: [text, diff, code]
     related: [text-studio, regex-visualizer]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: unicode-explorer
     name: Unicode Explorer
@@ -165,7 +165,7 @@ tools:
     desc: Search characters by name or codepoint, or inspect strings to reveal hidden and combining characters.
     tags: [unicode, text, encoding]
     related: [text-studio, number-base]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: sql-formatter
     name: SQL Formatter
@@ -177,7 +177,7 @@ tools:
     desc: Format and minify SQL across eight dialects with keyword-case and indent controls — string literals and comments survive untouched, entirely in the browser.
     tags: [sql, database, formatting]
     related: [data-format-workbench, text-diff-viewer]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: data-format-workbench
     name: Data Format Workbench
@@ -189,7 +189,7 @@ tools:
     desc: JSON, YAML and TOML format converter and interactive tree viewer.
     tags: [json, yaml, toml, converter]
     related: [json-to-hugo, markdown-table-generator]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: markdown-table-generator
     name: Markdown Table Generator
@@ -201,7 +201,7 @@ tools:
     desc: A utility to generate, format, and align Markdown tables, including importing from CSV.
     tags: [markdown, tables, csv]
     related: [markdown-previewer, data-format-workbench]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: regex-visualizer
     name: Regex Visualizer
@@ -213,7 +213,7 @@ tools:
     desc: A visual debugger and tester for regular expressions, explaining each part of the match.
     tags: [regex, text, debugging]
     related: [text-studio, text-diff-viewer]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: number-base
     name: Number Base & Bitwise
@@ -251,7 +251,7 @@ tools:
     desc: Client-side tool to generate HTML meta tags and Web Manifest JSON with live mock previews and as-you-type validation.
     tags: [html, seo, pwa, meta]
     related: [og-previewer, favicon-generator, robots-sitemap]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: og-previewer
     name: OpenGraph Previewer
@@ -263,7 +263,7 @@ tools:
     desc: Previews how a link will look when shared on various social platforms based on its meta tags.
     tags: [seo, opengraph, social, html]
     related: [meta-generator, favicon-generator]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: robots-sitemap
     name: Robots.txt & Sitemap
@@ -275,7 +275,7 @@ tools:
     desc: Build robots.txt with crawler presets and a rule tester, and generate sitemap.xml from a list of URLs.
     tags: [seo, robots, sitemap, web]
     related: [meta-generator, csp-builder]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: csp-builder
     name: CSP Builder
@@ -287,7 +287,7 @@ tools:
     desc: A directive-by-directive Content-Security-Policy builder with live safety warnings, common presets, and a parser mode to explain existing policies.
     tags: [security, csp, headers, web]
     related: [meta-generator, robots-sitemap]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: favicon-generator
     name: Favicon & App Icon
@@ -323,7 +323,7 @@ tools:
     desc: A tool to validate and auto-fix Hugo Markdown frontmatter against the specific lint rules used by The BlackCat.
     tags: [hugo, yaml, frontmatter, linter]
     related: [markdown-previewer, json-to-hugo]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: json-to-hugo
     name: JSON-to-Hugo
@@ -335,7 +335,7 @@ tools:
     desc: Quickly convert JSON configurations or API responses into valid Hugo YAML front matter.
     tags: [hugo, json, yaml, frontmatter]
     related: [frontmatter-doctor, data-format-workbench]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   # ── Developer utilities (8) ────────────────────────────────────────────────
   - id: jwt-decoder
@@ -348,7 +348,7 @@ tools:
     desc: A secure, client-side tool to decode and inspect JWT payloads without sending them to a server.
     tags: [jwt, auth, security, tokens]
     related: [time-id-toolkit, hashes-encodings]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: cron-tester
     name: Cron Tester
@@ -360,7 +360,7 @@ tools:
     desc: Translates cron scheduling expressions into human-readable times and shows upcoming run dates.
     tags: [cron, scheduling, time, devops]
     related: [time-id-toolkit]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: commit-formatter
     name: Commit Formatter
@@ -372,7 +372,7 @@ tools:
     desc: Standardizes commit messages according to conventional commit guidelines.
     tags: [git, commits, workflow]
     related: [gitignore-license]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: gitignore-license
     name: .gitignore & License
@@ -384,7 +384,7 @@ tools:
     desc: Combine .gitignore templates and fill in a license, from GitHub's gitignore repo and choosealicense.com.
     tags: [git, github, license, config]
     related: [commit-formatter]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: keyboard-inspector
     name: Keyboard Inspector
@@ -396,7 +396,7 @@ tools:
     desc: Press any key to see key, code, keyCode and modifiers, with a ready-to-paste event handler.
     tags: [keyboard, events, javascript, dom]
     related: [unicode-explorer]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: time-id-toolkit
     name: Time & ID Toolkit
@@ -408,7 +408,7 @@ tools:
     desc: Timestamp Toolkit for epoch/ISO conversions and relative math, paired with a UUID/ULID Studio for bulk generation and deep inspection of modern IDs.
     tags: [timestamps, uuid, ulid, time]
     related: [cron-tester, jwt-decoder]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: prompt-sandbox
     name: Prompt Sandbox
@@ -420,7 +420,7 @@ tools:
     desc: A testing ground to run and validate agent system prompts against different variable inputs.
     tags: [prompts, agents, ai, templating]
     related: [markdown-previewer, data-format-workbench]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: mermaid-viewer
     name: Mermaid Viewer
@@ -459,7 +459,7 @@ tools:
     desc: Calculate aspect ratios, megapixels, and interactively crop and resize images directly in the browser without server processing.
     tags: [images, aspect-ratio, resize, calculator]
     related: [image-compressor, favicon-generator]
-    added: "2026-10-29"
+    added: "2026-09-15"
 
   - id: svg-optimizer
     name: SVG Optimizer
@@ -471,7 +471,7 @@ tools:
     desc: An in-browser SVG optimizer and previewer. Remove metadata, fix precision, minify IDs, and preview on multiple backgrounds.
     tags: [svg, vector, optimization, images]
     related: [image-compressor, qr-code-studio]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   - id: qr-code-studio
     name: QR Code Studio
@@ -483,7 +483,7 @@ tools:
     desc: Generate customizable QR codes (text, URL, Wi-Fi, vCard) and decode QR codes from images entirely in the browser.
     tags: [qr-code, svg, generator, decoder]
     related: [svg-optimizer, favicon-generator]
-    added: "2026-10-30"
+    added: "2026-09-15"
 
   # ── Exhibits (4) ───────────────────────────────────────────────────────────
   - id: aether-atelier
@@ -496,7 +496,7 @@ tools:
     desc: "A mathematical and chromatic atelier: a cosine-palette synthesizer driving a Clifford strange-attractor visualizer, Albers simultaneous-contrast studies, and a codex on generative beauty."
     tags: [generative, color, math, creative-coding]
     related: [palette-studio, anatomy]
-    added: "2026-10-27"
+    added: "2026-09-15"
 
   - id: tui-design-study
     name: TUI Design Study
@@ -508,7 +508,7 @@ tools:
     desc: "Ten rules of a convincing terminal interface: a survey of 857 starred repositories, a code-level critique of llama-deck's UI layer, and an ordered change plan."
     tags: [tui, terminal, design, cli]
     related: [ansi-palette-lab, anatomy]
-    added: "2026-10-20"
+    added: "2026-09-15"
 
   - id: mermaid-gallery
     name: Mermaid.js Gallery
@@ -532,5 +532,5 @@ tools:
     desc: "Five machines as interactive isometric figures: a quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine and a quadruped robot — each with a dark and a light build."
     tags: [svg, isometric, simulation, creative-coding]
     related: [aether-atelier, tui-design-study]
-    added: "2026-10-27"
+    added: "2026-09-15"
     featured: true

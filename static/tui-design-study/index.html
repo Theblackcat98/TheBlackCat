@@ -13,48 +13,25 @@
   <style>
     :root {
       color-scheme: light dark;
-      --paper:#f5f6f4;
-      --surface:#ffffff;
-      --surface-2:#e9ece8;
-      --ink:#18201d;
-      --muted:#56635e;
-      --faint:#5d6a64;
-      --line:#cbd2ce;
-      --line-strong:#8f9c96;
-      --accent:#087f63;
-      --accent-ink:#065f4a;
-      --accent-soft:#d5eee6;
-      --warn:#a55c00;
-      --danger:#b63838;
-      --good:#087f63;
-      --code:#101815;
+      --paper:light-dark(#f5f6f4,#0c1110);
+      --surface:light-dark(#ffffff,#121917);
+      --surface-2:light-dark(#e9ece8,#19221f);
+      --ink:light-dark(#18201d,#e0e8e4);
+      --muted:light-dark(#56635e,#a4b2ac);
+      --faint:light-dark(#5d6a64,#8b9992);
+      --line:light-dark(#cbd2ce,#293832);
+      --line-strong:light-dark(#8f9c96,#51635b);
+      --accent:light-dark(#087f63,#6fd4b3);
+      --accent-ink:light-dark(#065f4a,#9ae3ca);
+      --accent-soft:light-dark(#d5eee6,#173b31);
+      --warn:light-dark(#a55c00,#e6a65e);
+      --danger:light-dark(#b63838,#ef8989);
+      --good:light-dark(#087f63,#6fd4b3);
+      --code:light-dark(#101815,#080d0b);
       --code-ink:#d8e6df;
-      --code-muted:#83978e;
-      --code-line:#33433c;
-      --shadow:0 14px 40px rgba(20,36,30,.08);
-    }
-    @media (prefers-color-scheme:dark){
-      :root{
-        --paper:#0c1110;
-        --surface:#121917;
-        --surface-2:#19221f;
-        --ink:#e0e8e4;
-        --muted:#a4b2ac;
-        --faint:#8b9992;
-        --line:#293832;
-        --line-strong:#51635b;
-        --accent:#6fd4b3;
-        --accent-ink:#9ae3ca;
-        --accent-soft:#173b31;
-        --warn:#e6a65e;
-        --danger:#ef8989;
-        --good:#6fd4b3;
-        --code:#080d0b;
-        --code-ink:#d8e6df;
-        --code-muted:#81958c;
-        --code-line:#2b3a34;
-        --shadow:0 18px 55px rgba(0,0,0,.28);
-      }
+      --code-muted:light-dark(#83978e,#81958c);
+      --code-line:light-dark(#33433c,#2b3a34);
+      --shadow:light-dark(0 14px 40px rgba(20,36,30,.08),0 18px 55px rgba(0,0,0,.28));
     }
     *{box-sizing:border-box}
     html{scroll-behavior:smooth;scroll-padding-top:24px}

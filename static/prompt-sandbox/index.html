@@ -24,6 +24,12 @@
         .output-box { background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); padding: 1rem; border-radius: 14px; white-space: pre-wrap; font-family: "JetBrains Mono", monospace; font-size: 0.9rem; margin-top: 1rem; }
         button { font: inherit; font-weight: 600; padding: 0.5rem 1rem; cursor: pointer; background: var(--acc); color: var(--acc-ink); border: none; border-radius: 9px; }
         button:hover { background: var(--acc-strong); }
+
+        /* Phones: one column, tighter page margins */
+        @media (max-width: 720px) {
+            body { padding: 1rem; }
+            .variables { grid-template-columns: minmax(0, 1fr); }
+        }
     </style>
 
 <meta name="description" content="A testing ground to run and validate agent system prompts against different variable inputs.">

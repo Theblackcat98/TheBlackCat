@@ -15,7 +15,7 @@
         p { color: var(--mut); }
         .input-group { margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
         .input-group strong { font-family: "JetBrains Mono", monospace; color: var(--faint); }
-        input[type="text"] { flex-grow: 1; padding: 0.5rem 0.6rem; font-family: "JetBrains Mono", monospace; font-size: 1.05rem; background: var(--panel2); color: var(--ink); border: 1px solid var(--line2); border-radius: 9px; }
+        input[type="text"] { flex-grow: 1; min-width: 0; padding: 0.5rem 0.6rem; font-family: "JetBrains Mono", monospace; font-size: 1.05rem; background: var(--panel2); color: var(--ink); border: 1px solid var(--line2); border-radius: 9px; }
         input[type="text"].flags { flex-grow: 0; width: 60px; }
         input:focus, textarea:focus { border-color: var(--acc); outline: none; }
         textarea { width: 100%; height: 150px; font-family: "JetBrains Mono", monospace; font-size: 0.9rem; padding: 0.6rem; background: var(--panel2); color: var(--ink); border: 1px solid var(--line2); border-radius: 9px; }
@@ -25,6 +25,7 @@
         .group-highlight { background: #ffcc00; }
         .error { color: var(--err-ink); background: var(--err-bg); border: 1px solid var(--err-line); border-radius: 9px; padding: 0.5rem 0.75rem; font-weight: 600; margin-top: 0.5rem; }
         .error:empty { display: none; }
+        .table-scroll { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: var(--panel); border-radius: 14px; }
         th, td { border: 1px solid var(--line); padding: 0.5rem; text-align: left; }
         th { background: var(--chip); color: var(--mut); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
@@ -62,6 +63,7 @@
     <h3>Matches:</h3>
     <div id="highlighted" class="match-box"></div>
 
+    <div class="table-scroll">
     <table id="match-table" style="display: none;">
         <thead>
             <tr>
@@ -73,6 +75,7 @@
         </thead>
         <tbody id="match-tbody"></tbody>
     </table>
+    </div>
 
     <script>
         const regexEl = document.getElementById('regex');

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="light dark" />
-  <meta name="description" content="Generate HTML meta tags and Web Manifest JSON with live previews." />
+  <meta name="description" content="Generate HTML meta tags and Web Manifest JSON with live search, X and LinkedIn previews." />
   <meta property="og:site_name" content="The BlackCat" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Meta Tag & Web Manifest Generator" />
@@ -294,6 +294,53 @@
       border-bottom: 1px solid var(--line);
       overflow: hidden;
     }
+    /* X and LinkedIn cards (folded in from the OpenGraph Social Card Previewer); platform colours are content */
+        .card-x {
+            border: 1px solid #cfd9de;
+            border-radius: 16px;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            max-width: 504px;
+            background: #fff;
+            cursor: pointer;
+        }
+        .card-x:hover { background: #f7f9f9; }
+        .card-x-img { width: 100%; aspect-ratio: 1.91 / 1; background-color: #f7f9f9; background-size: cover; background-position: center; border-bottom: 1px solid #cfd9de; }
+        .card-x-body { padding: 12px; color: #0f1419; }
+        .card-x-domain { color: #536471; font-size: 13px; margin-bottom: 2px; }
+        .card-x-title { font-size: 15px; margin: 0; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+        .card-x-desc { font-size: 15px; color: #536471; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* LinkedIn Style — platform mock, kept as-is (content) */
+        .card-li {
+            border-radius: 8px;
+            overflow: hidden;
+            background: #eef3f8;
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Fira Sans", Ubuntu, Oxygen, "Oxygen Sans", Cantarell, "Droid Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Lucida Grande", Helvetica, Arial, sans-serif;
+            max-width: 504px;
+            cursor: pointer;
+        }
+        .card-li-img { width: 100%; aspect-ratio: 1.91 / 1; background-color: #d9e5eb; background-size: cover; background-position: center; }
+        .card-li-body { padding: 8px 16px 12px; background: #eef3f8; }
+        .card-li-title { font-size: 14px; font-weight: 600; color: rgba(0,0,0,0.9); margin: 0 0 2px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-li-domain { font-size: 12px; color: rgba(0,0,0,0.6); }
+
+        @media (prefers-color-scheme: dark) {
+            /* Only the platform mock cards adapt; page chrome comes from the tokens */
+            .card-x { background: #000; border-color: #2f3336; }
+            .card-x:hover { background: #16181c; }
+            .card-x-img { border-color: #2f3336; background-color: #16181c; }
+            .card-x-body { color: #e7e9ea; }
+            .card-x-domain, .card-x-desc { color: #71767b; }
+
+            .card-li { background: #1d2226; }
+            .card-li-img { background-color: #38434f; }
+            .card-li-body { background: #1d2226; }
+            .card-li-title { color: rgba(255,255,255,0.9); }
+            .card-li-domain { color: rgba(255,255,255,0.6); }
+        }
+    .preview-label { font-size: 0.8125rem; color: var(--muted); margin: 0.75rem 0 0.35rem; }
+    .card-x, .card-li { margin-bottom: 0.5rem; }
     .mock-image img { width: 100%; height: 100%; object-fit: cover; display: none; }
     .mock-content { padding: 0.75rem 1rem; }
     .mock-site { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.25rem; text-transform: lowercase; }
@@ -546,6 +593,31 @@
           </div>
         </div>
       </div>
+
+      <div class="mock-preview">
+        <div class="mock-header">
+          <span>X / Twitter and LinkedIn (Approximation)</span>
+        </div>
+        <div style="padding: 0.75rem 1rem;">
+          <div class="preview-label">X / Twitter (summary card with large image)</div>
+          <div class="card-x">
+            <div class="card-x-img" id="x-img"></div>
+            <div class="card-x-body">
+              <div class="card-x-domain" id="x-domain">example.com</div>
+              <div class="card-x-title" id="x-title">Page Title</div>
+              <div class="card-x-desc" id="x-desc">Page description...</div>
+            </div>
+          </div>
+          <div class="preview-label">LinkedIn</div>
+          <div class="card-li">
+            <div class="card-li-img" id="li-img"></div>
+            <div class="card-li-body">
+              <div class="card-li-title" id="li-title">Page Title</div>
+              <div class="card-li-domain" id="li-domain">example.com</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -648,6 +720,16 @@
         prev.ogImg.style.display = "none";
         prev.ogImgPh.style.display = "block";
       }
+
+      // X and LinkedIn crop long text in different places; both use the og: values.
+      const img = f.image.value ? `url("${f.image.value.replace(/"/g, "%22")}")` : "none";
+      get("x-title").textContent = title;
+      get("x-desc").textContent = desc;
+      get("x-domain").textContent = domain;
+      get("x-img").style.backgroundImage = img;
+      get("li-title").textContent = title;
+      get("li-domain").textContent = domain;
+      get("li-img").style.backgroundImage = img;
     };
 
     // Missing Recommendations

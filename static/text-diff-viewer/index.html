@@ -4,12 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="light dark" />
-  <meta name="description" content="Text Diff Viewer: compare two texts line by line with word-level highlighting, side-by-side or unified, entirely in the browser." />
+  <meta name="description" content="Text Workbench: compare two texts with word-level highlighting, count characters, words and sentences, and clean up text, entirely in the browser." />
   <link rel="icon" href="data:," />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <title>Text Diff Viewer</title>
+  <title>Text Workbench</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -204,18 +204,145 @@
     .row-changed .cell.line.add-line { background: var(--add-bg); }
     .w-add { background: var(--add-wash); border-radius: 3px; padding: 0 1px; }
     .w-del { background: var(--del-wash); border-radius: 3px; padding: 0 1px; }
+    [hidden] { display: none !important; }
+    .wb-tabs { display: flex; gap: 4px; padding: 0 24px; border-bottom: 1px solid var(--rule); max-width: 1240px; margin: 0 auto; }
+    .wb-tab { background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 12px 14px; font: 500 15px var(--ui-font); color: var(--ink-2); cursor: pointer; }
+    .wb-tab:hover { color: var(--ink); }
+    .wb-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+    .wb-tab:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
     .empty-state { padding: 28px 18px; text-align: center; color: var(--ink-3); font-family: var(--ui-font); font-size: 14px; }
+  
+/* ---- Count &amp; clean (folded in from text-studio/) ---- */
+#panel-text {
+      color-scheme: light dark;
+      --bg: #e9eaed;
+      --surface: #ffffff;
+      --ink: #1d2126;
+      --muted: #5b6068;
+      --line: #d6d7dc;
+      --accent: #2f6db3;
+      --accent-ink: #ffffff;
+      --accent-soft: #ececf0;
+      --code-bg: #222329;
+      --code-ink: #eceef2;
+      --radius-md: 9px;
+    }
+@media (prefers-color-scheme: dark) {
+#panel-text {
+        --bg: #121316;
+        --surface: #222329;
+        --ink: #eceef2;
+        --muted: #a2a6af;
+        --line: #2d2f36;
+        --accent: #7db0e6;
+        --accent-ink: #0d1724;
+        --accent-soft: #26272e;
+        --code-bg: #222329;
+        --code-ink: #eceef2;
+      }
+}
+#panel-text {
+      font-family: "Outfit", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+#panel-text h1 {
+      font-size: 1.75rem;
+      margin: 0 0 16px;
+    }
+#panel-text .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+#panel-text .tab {
+      padding: 8px 16px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-family: inherit;
+    }
+#panel-text .tab.active {
+      background: var(--accent);
+      color: var(--accent-ink);
+      border-color: var(--accent);
+    }
+#panel-text .layout {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+@media (min-width: 768px) {
+#panel-text .layout { flex-direction: row; }
+#panel-text .input-pane, #panel-text .tools-pane { flex: 1; }
+}
+#panel-text textarea {
+      width: 100%;
+      height: 400px;
+      padding: 12px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.9rem;
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      resize: vertical;
+      box-sizing: border-box;
+    }
+#panel-text .tools-pane {
+      background: var(--surface);
+      padding: 24px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+    }
+#panel-text .panel { display: none; }
+#panel-text .panel.active { display: block; }
+#panel-text .metric {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+    }
+#panel-text .metric:last-child { border-bottom: none; }
+#panel-text .metric-val { font-family: "JetBrains Mono", monospace; }
+#panel-text button {
+      padding: 8px 16px;
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-family: inherit;
+      margin: 4px;
+    }
+#panel-text button:hover { background: var(--accent-soft); }
+#panel-text .actions { margin-top: 16px; }
+#panel-text { max-width: none; margin: 0; padding: 0; background: transparent; min-height: 0; }
+  #panel-text.container { padding: 24px 24px 64px; }
   </style>
 </head>
 <body>
   <header class="header">
     <div>
-      <h1>Text Diff Viewer</h1>
-      <p>Compare two texts line by line, with word-level highlighting inside changed lines. Everything runs locally in your browser.</p>
+      <h1>Text Workbench</h1>
+      <p>Compare two texts with word-level highlighting, or count and clean up a single text. Everything runs locally in your browser.</p>
     </div>
   </header>
 
-  <main class="container">
+  <div class="wb-tabs" role="tablist" aria-label="Workbench tools">
+    <button type="button" class="wb-tab" role="tab" id="tab-diff" aria-controls="panel-diff" aria-selected="true">Diff</button>
+    <button type="button" class="wb-tab" role="tab" id="tab-text" aria-controls="panel-text" aria-selected="false">Count &amp; clean</button>
+  </div>
+
+  <main class="container" id="panel-diff" role="tabpanel" aria-labelledby="tab-diff">
     <section class="card" aria-label="Texts to compare">
       <div class="panes">
         <div>
@@ -269,6 +396,44 @@
         <div class="diff" id="diff-result" aria-label="Diff result"></div>
       </div>
     </section>
+  </main>
+
+  <main class="container" id="panel-text" role="tabpanel" aria-labelledby="tab-text" hidden>
+<div class="layout">
+    <div class="input-pane">
+      
+      <textarea id="text-input" aria-label="Text to analyze or transform" placeholder="Paste or type text here..."></textarea>
+      <div class="actions">
+        <button id="btn-undo" aria-label="Undo last change" disabled>Undo</button>
+        <button id="btn-copy" aria-label="Copy text">Copy</button>
+        <span id="panel-text-copy-status" style="margin-left:8px;font-size:0.9rem;color:var(--muted);"></span>
+      </div>
+    </div>
+
+    <div class="tools-pane">
+      <div class="tabs">
+        <button class="tab active" data-target="readability" aria-label="Readability tab">Readability</button>
+        <button class="tab" data-target="cleanup" aria-label="Cleanup tab">Cleanup</button>
+      </div>
+
+      <div id="readability" class="panel active">
+        <h2>Metrics</h2>
+        <div class="metric"><span>Characters</span><span class="metric-val" id="m-chars">0</span></div>
+        <div class="metric"><span>Characters (no spaces)</span><span class="metric-val" id="m-chars-nospace">0</span></div>
+        <div class="metric"><span>Words</span><span class="metric-val" id="m-words">0</span></div>
+        <div class="metric"><span>Sentences</span><span class="metric-val" id="m-sentences">0</span></div>
+      </div>
+
+      <div id="cleanup" class="panel">
+        <h2>Transforms</h2>
+        <button data-action="upper" aria-label="Convert to Uppercase">UPPERCASE</button>
+        <button data-action="lower" aria-label="Convert to Lowercase">lowercase</button>
+        <button data-action="title" aria-label="Convert to Title Case">Title Case</button>
+        <button data-action="trim" aria-label="Trim whitespace">Trim Whitespace</button>
+        <button data-action="remove-blank" aria-label="Remove blank lines">Remove Blank Lines</button>
+      </div>
+    </div>
+  </div>
   </main>
 
   <script>
@@ -613,6 +778,143 @@
 
     loadState();
     update();
+  </script>
+  <script>
+  /* Count &amp; clean */
+(function () {
+const __root = document.querySelector('#panel-text');
+
+    const input = document.getElementById("text-input");
+    const undoBtn = document.getElementById("btn-undo");
+    const copyBtn = document.getElementById("btn-copy");
+    const copyStatus = document.getElementById("panel-text-copy-status");
+    const tabs = __root.querySelectorAll(".tab");
+    const panels = __root.querySelectorAll(".panel");
+
+    let history = [];
+
+    function saveState() {
+      const val = input.value;
+      if (history.length === 0 || history[history.length - 1] !== val) {
+        history.push(val);
+        if (history.length > 20) history.shift();
+        undoBtn.disabled = history.length <= 1;
+        try { localStorage.setItem("ts-text", val); } catch(e){}
+      }
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem("ts-text");
+        if (saved !== null) {
+          input.value = saved;
+          saveState();
+        }
+      } catch(e){}
+    }
+
+    function updateMetrics() {
+      const text = input.value;
+      document.getElementById("m-chars").textContent = text.length;
+      document.getElementById("m-chars-nospace").textContent = text.replace(/\s/g, '').length;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      document.getElementById("m-words").textContent = words;
+      const sentences = text.trim() ? text.split(/[.!?]+/).filter(s => s.trim().length > 0).length : 0;
+      document.getElementById("m-sentences").textContent = sentences;
+    }
+
+    input.addEventListener("input", () => {
+      updateMetrics();
+      saveState();
+    });
+
+    undoBtn.addEventListener("click", () => {
+      if (history.length > 1) {
+        history.pop();
+        input.value = history[history.length - 1];
+        try { localStorage.setItem("ts-text", input.value); } catch(e){}
+        updateMetrics();
+        undoBtn.disabled = history.length <= 1;
+      }
+    });
+
+    copyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(input.value).then(() => {
+        copyStatus.textContent = "Copied!";
+        setTimeout(() => copyStatus.textContent = "", 2000);
+      });
+    });
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("active"));
+        panels.forEach(p => p.classList.remove("active"));
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.target).classList.add("active");
+      });
+    });
+
+    document.getElementById("cleanup").addEventListener("click", (e) => {
+      const action = e.target.dataset.action;
+      if (!action) return;
+      let val = input.value;
+      if (!val) return;
+
+      if (action === "upper") val = val.toUpperCase();
+      if (action === "lower") val = val.toLowerCase();
+      if (action === "title") {
+        val = val.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      }
+      if (action === "trim") val = val.trim();
+      if (action === "remove-blank") val = val.split('\n').filter(l => l.trim().length > 0).join('\n');
+
+      input.value = val;
+      updateMetrics();
+      saveState();
+    });
+
+    loadState();
+    updateMetrics();
+    saveState();
+  
+})();
+  </script>
+
+  <script>
+    // Workbench tabs
+    (function () {
+      var tabs = Array.prototype.slice.call(document.querySelectorAll(".wb-tab"));
+      function show(tab) {
+        tabs.forEach(function (t) {
+          var on = t === tab;
+          t.setAttribute("aria-selected", on ? "true" : "false");
+          t.tabIndex = on ? 0 : -1;
+          document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+        });
+        try { localStorage.setItem("text-workbench:tab", tab.id); } catch (e) {}
+      }
+      tabs.forEach(function (t, i) {
+        t.addEventListener("click", function () { show(t); });
+        t.addEventListener("keydown", function (e) {
+          var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+          if (!d) return;
+          var n = tabs[(i + d + tabs.length) % tabs.length];
+          n.focus(); show(n);
+        });
+      });
+      var last = null;
+      try { last = document.getElementById(localStorage.getItem("text-workbench:tab")); } catch (e) {}
+      show(last && tabs.indexOf(last) >= 0 ? last : tabs[0]);
+    })();
+  </script>
+  <script>
+    // Deep links: /tool/#<tab> opens that tab (old tool URLs redirect here).
+    (function () {
+      var h = decodeURIComponent(location.hash.slice(1));
+      if (!h) return;
+      var t = document.getElementById("tab-" + h) || document.querySelector('[data-tab="' + h + '"]');
+      if (t) t.click();
+    })();
   </script>
 </body>
 </html>

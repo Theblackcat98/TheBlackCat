@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="light dark" />
-  <meta name="description" content="Data Format Workbench: convert between JSON, YAML and TOML, inspect the tree, and run JSONPath queries — entirely in the browser." />
+  <meta name="description" content="Data Format Workbench: convert between JSON, YAML, TOML, CSV/TSV and Markdown tables, inspect the tree, and run JSONPath queries — entirely in the browser." />
   <link rel="icon" href="data:," />
   <title>Data Format Workbench</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -351,9 +351,12 @@
         <option value="json">JSON</option>
         <option value="yaml">YAML</option>
         <option value="toml">TOML</option>
+        <option value="csv">CSV</option>
+        <option value="tsv">TSV</option>
+        <option value="mdtable">Markdown table</option>
       </select>
       <label for="file-upload" class="sr-only">Upload file</label>
-      <input type="file" id="file-upload" aria-label="Upload file" accept=".json,.yaml,.yml,.toml,text/plain" />
+      <input type="file" id="file-upload" aria-label="Upload file" accept=".json,.yaml,.yml,.toml,.csv,.tsv,.md,text/plain,text/csv" />
       <span class="spacer" style="font-size:0.875rem; color:var(--muted);" id="detected-format">Waiting for input…</span>
     </div>
     <div class="toolbar">
@@ -364,7 +367,7 @@
     </div>
     <div id="error-bar" class="error-bar" role="alert"></div>
     <div class="pane-content">
-      <textarea id="input-editor" aria-label="Input data" placeholder="Paste JSON, YAML, or TOML here..." spellcheck="false"></textarea>
+      <textarea id="input-editor" aria-label="Input data" placeholder="Paste JSON, YAML, TOML, CSV, TSV or a Markdown table here..." spellcheck="false"></textarea>
     </div>
   </div>
 
@@ -379,6 +382,8 @@
         <option value="json">JSON</option>
         <option value="yaml">YAML</option>
         <option value="toml">TOML</option>
+        <option value="markdown">Markdown table</option>
+        <option value="csv">CSV</option>
       </select>
       <select id="indent" aria-label="JSON indentation">
         <option value="2">2 spaces</option>
@@ -544,7 +549,7 @@
     }
     msg = msg.split("\n").slice(0, 4).join(" ").replace(/\s+/g, " ").trim();
     if (msg.length > 400) msg = msg.slice(0, 400) + "…";
-    return "Invalid " + fmt.toUpperCase() + " — " + msg;
+    return "Invalid " + (fmt === "mdtable" ? "Markdown table" : fmt.toUpperCase()) + " — " + msg;
   }
 
   /* ---------- format detection ---------- */
@@ -562,11 +567,123 @@
     });
   }
 
+  /* ---------- tables: CSV / TSV / Markdown (was the Markdown Table Generator) ---------- */
+
+  function parseDelimited(text, delim) {
+    var rows = [], row = [], cell = "", q = false, i = 0, c;
+    for (; i < text.length; i++) {
+      c = text.charAt(i);
+      if (q) {
+        if (c === '"') {
+          if (text.charAt(i + 1) === '"') { cell += '"'; i++; } else { q = false; }
+        } else { cell += c; }
+      } else if (c === '"' && cell === "") { q = true; }
+      else if (c === delim) { row.push(cell); cell = ""; }
+      else if (c === "\n" || c === "\r") {
+        if (c === "\r" && text.charAt(i + 1) === "\n") i++;
+        row.push(cell); cell = "";
+        if (row.length > 1 || row[0].trim() !== "") rows.push(row);
+        row = [];
+      } else { cell += c; }
+    }
+    if (q) throw new Error("A quoted field is never closed (unbalanced \" quote).");
+    row.push(cell);
+    if (row.length > 1 || row[0].trim() !== "") rows.push(row);
+    return rows;
+  }
+
+  function parseMdTable(text) {
+    var rows = [];
+    text.split(/\r?\n/).forEach(function (l) {
+      if (!l.trim()) return;
+      var parts = l.replace(/\\\|/g, "\u0000").split("|").map(function (p) { return p.replace(/\u0000/g, "|"); });
+      if (parts.length && parts[0].trim() === "") parts.shift();
+      if (parts.length && parts[parts.length - 1].trim() === "") parts.pop();
+      if (parts.length && parts.every(function (p) { return /^\s*:?-+:?\s*$/.test(p); })) return; // separator row
+      rows.push(parts);
+    });
+    return rows;
+  }
+
+  // First row is the header; each later row becomes an object keyed by it.
+  function rowsToObjects(rows) {
+    if (!rows.length) return [];
+    var head = rows[0].map(function (h, i) { h = h.trim(); return h || "column_" + (i + 1); });
+    var seen = {};
+    head = head.map(function (h) { if (seen[h]) { seen[h]++; return h + "_" + seen[h]; } seen[h] = 1; return h; });
+    return rows.slice(1).map(function (r) {
+      var o = {};
+      head.forEach(function (h, i) { o[h] = (r[i] === undefined ? "" : r[i].trim()); });
+      return o;
+    });
+  }
+
+  function cellText(v) {
+    if (v === null || v === undefined) return "";
+    if (v instanceof Date) return v.toISOString();
+    if (typeof v === "object") return JSON.stringify(v, jsonReplacer);
+    return String(v);
+  }
+
+  // value -> [header, ...rows] of strings, or throw if it is not table-shaped
+  function toGrid(value) {
+    if (Array.isArray(value)) {
+      if (!value.length) throw new Error("The array is empty, so there is no table to make.");
+      if (value.every(Array.isArray)) return value.map(function (r) { return r.map(cellText); });
+      if (value.every(function (r) { return r && typeof r === "object" && !(r instanceof Date); })) {
+        var keys = [];
+        value.forEach(function (r) { Object.keys(r).forEach(function (k) { if (keys.indexOf(k) < 0) keys.push(k); }); });
+        return [keys].concat(value.map(function (r) { return keys.map(function (k) { return cellText(r[k]); }); }));
+      }
+      return [["value"]].concat(value.map(function (v) { return [cellText(v)]; }));
+    }
+    if (value && typeof value === "object" && !(value instanceof Date)) {
+      return [["key", "value"]].concat(Object.keys(value).map(function (k) { return [k, cellText(value[k])]; }));
+    }
+    throw new Error("A table needs an array or an object at the root; this document is a single " + typeof value + ".");
+  }
+
+  function gridToMarkdown(grid) {
+    var cols = grid.reduce(function (n, r) { return Math.max(n, r.length); }, 0);
+    var cells = grid.map(function (r) {
+      var out = [];
+      for (var i = 0; i < cols; i++) out.push((r[i] || "").replace(/\r?\n/g, " ").replace(/\|/g, "\\|").trim());
+      return out;
+    });
+    var w = [];
+    cells.forEach(function (r) { r.forEach(function (c, i) { w[i] = Math.max(w[i] || 3, c.length); }); });
+    function line(r) { return "| " + r.map(function (c, i) { return c + " ".repeat(w[i] - c.length); }).join(" | ") + " |"; }
+    var out = [line(cells[0]), "| " + w.map(function (n) { return "-".repeat(n); }).join(" | ") + " |"];
+    for (var r = 1; r < cells.length; r++) out.push(line(cells[r]));
+    return out.join("\n") + "\n";
+  }
+
+  function gridToCsv(grid) {
+    return grid.map(function (r) {
+      return r.map(function (c) { return /[",\r\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }).join(",");
+    }).join("\n") + "\n";
+  }
+
+  function looksLikeMdTable(t) {
+    var lines = t.split(/\r?\n/).filter(function (l) { return l.trim(); });
+    return lines.length >= 2 && lines.every(function (l) { return /^\s*\|.*\|\s*$/.test(l); });
+  }
+
+  function looksDelimited(t, d) {
+    var rows;
+    try { rows = parseDelimited(t, d); } catch (e) { return false; }
+    if (rows.length < 2) return false;
+    var n = rows[0].length;
+    return n > 1 && rows.every(function (r) { return r.length === n; });
+  }
+
   function detectFormat(text) {
     var t = text.trim();
     if (t.charAt(0) === "{" || t.charAt(0) === "[") {
       try { JSON.parse(t); return "json"; } catch (e) { /* fall through */ }
     }
+    if (looksLikeMdTable(t)) return "mdtable";
+    if (looksDelimited(t, "\t")) return "tsv";
     var yamlVal, yamlOk = false;
     if (typeof window.jsyaml !== "undefined") {
       try { yamlVal = window.jsyaml.load(t); yamlOk = true; } catch (e) { yamlOk = false; }
@@ -579,6 +696,7 @@
     if (looksLikeToml(t) && typeof window.smolToml !== "undefined") {
       try { window.smolToml.parse(t); return "toml"; } catch (e) { /* not TOML */ }
     }
+    if (looksDelimited(t, ",") && (!yamlOk || typeof yamlVal === "string")) return "csv";
     if (yamlOk) return "yaml"; // scalar / string YAML doc
     if (t.indexOf("=") !== -1 && looksLikeToml(t)) return "toml";
     if (t.charAt(0) === "{" || t.charAt(0) === "[") return "json";
@@ -614,6 +732,9 @@
       }
       return window.smolToml.parse(text);
     }
+    if (fmt === "csv") return rowsToObjects(parseDelimited(text, ","));
+    if (fmt === "tsv") return rowsToObjects(parseDelimited(text, "\t"));
+    if (fmt === "mdtable") return rowsToObjects(parseMdTable(text));
     throw new Error("Unknown input format: " + fmt);
   }
 
@@ -678,6 +799,8 @@
           ". A common cause is a value TOML cannot express (mixed-type arrays become tables, nested arrays of tables, undefined). Try JSON/YAML output to inspect it.");
       }
     }
+    if (mode === "markdown") return gridToMarkdown(toGrid(value));
+    if (mode === "csv") return gridToCsv(toGrid(value));
     throw new Error("Unknown output format: " + mode);
   }
 
@@ -875,7 +998,7 @@
     var override = els.inputFormat.value;
     var fmt = override === "auto" ? detectFormat(text) : override;
     currentFormat = fmt;
-    els.detected.textContent = (override === "auto" ? "Detected: " : "Input format: ") + fmt.toUpperCase();
+    els.detected.textContent = (override === "auto" ? "Detected: " : "Input format: ") + (fmt === "mdtable" ? "MARKDOWN TABLE" : fmt.toUpperCase());
     var value;
     try {
       value = normalize(parseAs(text, fmt));
@@ -919,7 +1042,7 @@
   function currentExtension() {
     if (queryMode) return "json";
     var m = els.outputFormat.value;
-    return m === "tree" ? "json" : m;
+    return m === "tree" ? "json" : m === "markdown" ? "md" : m;
   }
 
   /* ---------- resizer ---------- */
@@ -1023,7 +1146,8 @@
       var m = /\.([^.]+)$/.exec(f.name || "");
       var ext = m ? m[1].toLowerCase() : "";
       els.inputFormat.value = ext === "yml" ? "yaml"
-        : (ext === "json" || ext === "yaml" || ext === "toml") ? ext : "auto";
+        : ext === "md" ? "mdtable"
+        : (ext === "json" || ext === "yaml" || ext === "toml" || ext === "csv" || ext === "tsv") ? ext : "auto";
       convert();
     };
     reader.onerror = function () { showInputError("Could not read that file."); };

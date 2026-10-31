@@ -244,6 +244,19 @@ Body text..."></textarea>
       </div>
     </div>
 
+    <div class="card">
+      <h2>Import from JSON</h2>
+      <p style="font-size: 0.9rem; margin-top: 0; color: var(--muted);">Paste a JSON object (an API response, a CMS export) to turn it into YAML front matter. It replaces the front matter above, keeps any body text, and runs the check.</p>
+      <div class="field-group">
+        <label for="json-import" class="visually-hidden">JSON object</label>
+        <textarea id="json-import" spellcheck="false" style="min-height: 120px;" placeholder='{ "title": "My page", "tags": ["hugo", "notes"] }'></textarea>
+      </div>
+      <p id="json-import-error" role="alert" style="color: var(--error); font-size: 0.9rem; margin: 0 0 0.5rem;"></p>
+      <div class="row">
+        <button id="btn-json-import">Convert to front matter</button>
+      </div>
+    </div>
+
     <div class="report card" id="report-card">
       <h2>Report</h2>
       <ul class="issue-list" id="issue-list"></ul>
@@ -329,6 +342,32 @@ Body text..."></textarea>
       localStorage.removeItem("doctor_input");
       reportCard.classList.remove("active");
       fixedCard.classList.remove("active");
+    });
+
+    // Import from JSON (was the JSON-to-Hugo Frontmatter Converter)
+    const jsonImport = document.getElementById("json-import");
+    const jsonImportError = document.getElementById("json-import-error");
+    document.getElementById("btn-json-import").addEventListener("click", () => {
+      jsonImportError.textContent = "";
+      const raw = jsonImport.value.trim();
+      if (!raw) { jsonImportError.textContent = "Paste a JSON object first."; return; }
+      let obj;
+      try {
+        obj = JSON.parse(raw);
+      } catch (e) {
+        jsonImportError.textContent = "That is not valid JSON: " + e.message;
+        return;
+      }
+      if (obj === null || typeof obj !== "object" || Array.isArray(obj)) {
+        jsonImportError.textContent = "Front matter needs a JSON object at the root, not " + (Array.isArray(obj) ? "an array" : String(obj === null ? "null" : typeof obj)) + ".";
+        return;
+      }
+      const yaml = jsyaml.dump(obj, { lineWidth: -1, noRefs: true });
+      const { body } = parseDocument(input.value);
+      input.value = "---\n" + yaml + "---\n" + (body ? "\n" + body.replace(/^\n+/, "") : "");
+      localStorage.setItem("doctor_input", input.value);
+      btnCheck.click();
+      input.scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
 
     const TYPES = ["bookmark", "skill", "article", "note", "project", "collection", "reference"];

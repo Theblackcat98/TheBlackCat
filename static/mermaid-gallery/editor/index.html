@@ -1,0 +1,2451 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Mermaid Editor · Mermaid.js Gallery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #e9eaed;
+        --panel: #f7f7f9;
+        --panel2: #ffffff;
+        --ink: #1d2126;
+        --mut: #5b6068;
+        --faint: #62666e;
+        --line: #d6d7dc;
+        --line2: #bfc2ca;
+        --chip: #ececf0;
+        --acc: #2f6db3;
+        --acc-strong: #26598f;
+        --acc-ink: #ffffff;
+        --ok: #2e7d4f;
+        --err-bg: #fdeeee;
+        --err-line: #efc2c2;
+        --err-ink: #8f2d23;
+        --dot: #cfcfd6;
+        --shadow: 0 1px 2px rgba(24, 28, 38, .05), 0 10px 28px rgba(24, 28, 38, .07);
+        --radius: 14px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          color-scheme: dark;
+          --bg: #121316;
+          --panel: #1a1b1f;
+          --panel2: #222329;
+          --ink: #eceef2;
+          --mut: #a2a6af;
+          --faint: #9ba0aa;
+          --line: #2d2f36;
+          --line2: #3d404a;
+          --chip: #26272e;
+          --acc: #7db0e6;
+          --acc-strong: #9cc3ee;
+          --acc-ink: #0d1724;
+          --ok: #6fce97;
+          --err-bg: #3a2120;
+          --err-line: #6e3a36;
+          --err-ink: #f0a9a0;
+          --dot: #2c2e35;
+          --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .35);
+        }
+      }
+
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        font-family: "Outfit", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        font-size: 15px;
+        line-height: 1.45;
+        display: flex;
+        flex-direction: column;
+        height: 100dvh;
+        overflow: hidden;
+      }
+      button, select, textarea { font: inherit; color: inherit; }
+      button { cursor: pointer; }
+      :focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+      /* ---------- toolbar ---------- */
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding: 10px 12px;
+        background: var(--panel);
+        border-bottom: 1px solid var(--line);
+        z-index: 30;
+      }
+      .toolbar .spacer { flex: 1; }
+      .tb-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+        color: var(--faint);
+        margin-right: -2px;
+      }
+      .select-wrap { position: relative; display: inline-flex; }
+      .select-wrap select {
+        appearance: none;
+        -webkit-appearance: none;
+        background: var(--panel2);
+        border: 1px solid var(--line2);
+        border-radius: 9px;
+        padding: 7px 28px 7px 11px;
+        font-size: 13.5px;
+        font-weight: 500;
+        max-width: 46vw;
+      }
+      .select-wrap::after {
+        content: "";
+        position: absolute;
+        right: 10px; top: 50%;
+        width: 7px; height: 7px;
+        border-right: 1.8px solid var(--mut);
+        border-bottom: 1.8px solid var(--mut);
+        transform: translateY(-70%) rotate(45deg);
+        pointer-events: none;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--panel2);
+        border: 1px solid var(--line2);
+        border-radius: 9px;
+        padding: 7px 12px;
+        font-size: 13.5px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .btn:hover { border-color: var(--faint); }
+      .btn:active { transform: translateY(1px); }
+      .btn svg { width: 15px; height: 15px; flex: none; }
+      .btn.primary { background: var(--acc); border-color: var(--acc); color: var(--acc-ink); }
+      .btn.primary:hover { background: var(--acc-strong); border-color: var(--acc-strong); }
+      .btn.icon-only { padding: 7px 9px; }
+      .docs-link {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--acc);
+        text-decoration: none;
+        padding: 7px 4px;
+        white-space: nowrap;
+      }
+      .docs-link:hover { text-decoration: underline; }
+
+      /* mobile pane tabs */
+      .tabs {
+        display: none;
+        background: var(--chip);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 3px;
+        gap: 2px;
+      }
+      .tabs button {
+        border: 0;
+        background: transparent;
+        border-radius: 999px;
+        padding: 5px 16px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--mut);
+      }
+      .tabs button.on { background: var(--panel2); color: var(--ink); box-shadow: 0 1px 3px rgba(20, 24, 34, .14); }
+
+      /* export menu */
+      .menu-wrap { position: relative; }
+      .menu {
+        position: absolute;
+        right: 0; top: calc(100% + 6px);
+        min-width: 208px;
+        background: var(--panel2);
+        border: 1px solid var(--line2);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        padding: 5px;
+        display: none;
+        z-index: 60;
+      }
+      .menu.open { display: block; }
+      .menu button {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        gap: 9px;
+        background: transparent;
+        border: 0;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 13.5px;
+        font-weight: 500;
+        text-align: left;
+      }
+      .menu button:hover { background: var(--chip); }
+      .menu button svg { width: 15px; height: 15px; color: var(--mut); flex: none; }
+      .menu .menu-note {
+        font-size: 11.5px;
+        color: var(--faint);
+        padding: 6px 10px 4px;
+        border-top: 1px solid var(--line);
+        margin-top: 4px;
+      }
+      .menu-warn {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--err-ink);
+        background: var(--err-bg);
+        border: 1px solid var(--err-line);
+        border-radius: 8px;
+        padding: 7px 10px;
+        margin: 2px 2px 6px;
+      }
+      .menu-warn[hidden] { display: none; }
+      .menu-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 10px;
+      }
+      .menu-row-label { font-size: 13.5px; font-weight: 500; }
+      .menu .seg { display: inline-flex; background: var(--chip); border: 1px solid var(--line); border-radius: 999px; padding: 2px; gap: 2px; }
+      .menu .seg button {
+        width: auto;
+        border: 0;
+        background: transparent;
+        border-radius: 999px;
+        padding: 3px 10px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--mut);
+        display: inline-flex;
+      }
+      .menu .seg button:hover { background: transparent; }
+      .menu .seg button.on { background: var(--panel2); color: var(--ink); box-shadow: 0 1px 3px rgba(20, 24, 34, .14); }
+      .menu-check { width: 15px; flex: none; color: var(--acc); font-weight: 700; text-align: center; }
+
+      /* ---------- layout ---------- */
+      main {
+        --split: 41.66;
+        flex: 1;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: minmax(240px, calc(var(--split) * 1%)) 12px minmax(240px, 1fr);
+        gap: 6px;
+        padding: 12px;
+      }
+      .splitter {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: col-resize;
+        touch-action: none;
+        border-radius: 6px;
+      }
+      .splitter::after {
+        content: "";
+        width: 4px;
+        height: 48px;
+        border-radius: 2px;
+        background: var(--line2);
+        transition: background .12s ease;
+      }
+      .splitter:hover::after, .splitter:focus-visible::after, .splitter.dragging::after { background: var(--acc); }
+      .pane {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        min-width: 0;
+        overflow: hidden;
+      }
+      .pane-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--line);
+        min-height: 45px;
+        flex-wrap: wrap;
+      }
+      .pane-title {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+        color: var(--faint);
+        margin-right: 2px;
+      }
+      .pane-head .spacer { flex: 1; }
+
+      /* ---------- editor ---------- */
+      .editor-wrap {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        background: var(--panel2);
+      }
+      .gutter {
+        flex: none;
+        width: 46px;
+        overflow: hidden;
+        background: var(--panel);
+        border-right: 1px solid var(--line);
+        position: relative;
+      }
+      .gutter-inner {
+        padding: 14px 10px 14px 0;
+        text-align: right;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 13px;
+        line-height: 1.55;
+        color: var(--faint);
+        will-change: transform;
+      }
+      .gutter-inner span { display: block; }
+      .gutter-inner span.err-line {
+        background: var(--err-bg);
+        color: var(--err-ink);
+        font-weight: 700;
+        border-radius: 0 4px 4px 0;
+        box-shadow: inset 2px 0 0 var(--err-ink);
+      }
+      .err-strip {
+        display: block;
+        width: calc(100% - 24px);
+        margin: 10px 12px 0;
+        background: var(--err-bg);
+        border: 1px solid var(--err-line);
+        color: var(--err-ink);
+        border-radius: 10px;
+        padding: 7px 12px;
+        font-size: 12.5px;
+        font-weight: 600;
+        text-align: left;
+        cursor: pointer;
+        flex: none;
+      }
+      .err-strip[hidden] { display: none; }
+      .tab-badge {
+        display: none;
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: #d64541;
+        margin-left: 6px;
+        vertical-align: 1px;
+      }
+      .tab-badge.show { display: inline-block; }
+      #editor {
+        flex: 1;
+        min-width: 0;
+        border: 0;
+        resize: none;
+        background: transparent;
+        padding: 14px 14px 14px 12px;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 13px;
+        line-height: 1.55;
+        white-space: pre;
+        overflow: auto;
+        tab-size: 2;
+        caret-color: var(--acc);
+      }
+      #editor:focus { outline: none; }
+      #editor.wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
+      .editor-wrap:focus-within { box-shadow: inset 0 0 0 2px var(--acc); }
+      .zoom-group button.font-btn { width: auto; padding: 0 8px; font-size: 12px; }
+      .zoom-group button.zoom-pct { width: auto; min-width: 48px; background: transparent; border: 0; cursor: pointer; padding: 0; }
+      .zoom-group button.zoom-pct:hover { background: var(--panel2); }
+
+      /* ---------- preview ---------- */
+      .zoom-group { display: inline-flex; align-items: center; gap: 2px; background: var(--chip); border: 1px solid var(--line); border-radius: 999px; padding: 2px; }
+      .zoom-group button {
+        border: 0; background: transparent; border-radius: 999px;
+        width: 30px; height: 26px;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-weight: 600; color: var(--ink);
+      }
+      .zoom-group button:hover { background: var(--panel2); }
+      .zoom-group button svg { width: 14px; height: 14px; }
+      .zoom-group .zoom-pct {
+        min-width: 48px; text-align: center;
+        font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--mut);
+      }
+      .pill-toggle {
+        border: 1px solid var(--line2);
+        background: var(--panel2);
+        border-radius: 999px;
+        padding: 5px 11px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--mut);
+        display: inline-flex; align-items: center; gap: 6px;
+      }
+      .pill-toggle .dot-sw { width: 8px; height: 8px; border-radius: 50%; background: var(--line2); }
+      .pill-toggle.on { color: var(--ink); border-color: var(--acc); }
+      .pill-toggle.on .dot-sw { background: var(--acc); }
+      .small-btn {
+        border: 1px solid var(--line2); background: var(--panel2);
+        border-radius: 9px; padding: 5px 9px;
+        display: inline-flex; align-items: center; gap: 5px;
+        font-size: 12.5px; font-weight: 600;
+      }
+      .small-btn svg { width: 14px; height: 14px; }
+
+      .error-bar {
+        display: none;
+        margin: 10px 12px 0;
+        background: var(--err-bg);
+        border: 1px solid var(--err-line);
+        color: var(--err-ink);
+        border-radius: 10px;
+        padding: 9px 12px;
+        font-size: 13px;
+      }
+      .error-bar.show { display: block; }
+      .error-bar .err-title { font-weight: 700; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 2px; }
+      .error-bar pre {
+        margin: 0;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 110px;
+        overflow: auto;
+      }
+
+      .stage {
+        flex: 1;
+        min-height: 0;
+        position: relative;
+        overflow: hidden;
+        margin: 12px;
+        margin-top: 10px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background-color: var(--panel2);
+        background-image: radial-gradient(circle, var(--dot) 1px, transparent 1.1px);
+        background-size: 22px 22px;
+        touch-action: none;
+        cursor: grab;
+      }
+      .stage:active { cursor: grabbing; }
+      .stage:fullscreen { margin: 0; border: 0; border-radius: 0; }
+      .canvas {
+        position: absolute;
+        left: 0; top: 0;
+        transform-origin: 0 0;
+        will-change: transform;
+      }
+      .canvas svg { display: block; }
+      .stage-empty {
+        position: absolute; inset: 0;
+        display: none;
+        align-items: center; justify-content: center;
+        text-align: center;
+        color: var(--faint);
+        font-size: 14px;
+        padding: 24px;
+        pointer-events: none;
+      }
+      .stage-empty.show { display: flex; }
+
+      /* ---------- status bar ---------- */
+      .statusbar {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 6px 14px;
+        background: var(--panel);
+        border-top: 1px solid var(--line);
+        font-size: 12.5px;
+        color: var(--mut);
+        flex-wrap: wrap;
+      }
+      .status-item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+      .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex: none; }
+      .status-dot.ok { background: var(--ok); }
+      .status-dot.err { background: #d64541; }
+      .statusbar .spacer { flex: 1; }
+      .statusbar .mono { font-family: "JetBrains Mono", monospace; font-size: 12px; }
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: calc(18px + env(safe-area-inset-bottom));
+        transform: translate(-50%, 16px);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--ink);
+        color: var(--bg);
+        font-size: 13.5px;
+        font-weight: 600;
+        padding: 9px 16px;
+        border-radius: 999px;
+        box-shadow: var(--shadow);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .18s ease, transform .18s ease;
+        z-index: 100;
+      }
+      .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+      .toast-action {
+        background: transparent;
+        border: 1px solid currentColor;
+        color: inherit;
+        border-radius: 999px;
+        padding: 2px 11px;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+        flex: none;
+      }
+      .toast-action:hover { opacity: .8; }
+
+      /* ---------- confirm dialog ---------- */
+      .modal-overlay {
+        position: fixed; inset: 0;
+        background: rgba(10, 12, 16, .48);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        z-index: 120;
+      }
+      .modal-overlay[hidden] { display: none; }
+      .modal-card {
+        background: var(--panel2);
+        border: 1px solid var(--line2);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        max-width: 430px;
+        width: 100%;
+        padding: 18px;
+      }
+      .modal-title { margin: 0 0 6px; font-size: 16.5px; font-weight: 700; }
+      .modal-msg { margin: 0; color: var(--mut); font-size: 14px; }
+      .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+
+      /* ---------- syntax help ---------- */
+      .help-overlay {
+        position: fixed; inset: 0;
+        background: rgba(10, 12, 16, .48);
+        z-index: 110;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 24px 14px;
+        overflow-y: auto;
+      }
+      .help-overlay[hidden] { display: none; }
+      .help-card {
+        background: var(--panel2);
+        border: 1px solid var(--line2);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        max-width: 760px;
+        width: 100%;
+        padding: 18px 20px;
+      }
+      .help-head { display: flex; align-items: center; gap: 10px; }
+      .help-head h2 { margin: 0; font-size: 17px; font-weight: 700; flex: 1; }
+      .help-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
+      @media (max-width: 640px) { .help-grid { grid-template-columns: 1fr; } }
+      .help-card h3 {
+        font-size: 11.5px; font-weight: 600;
+        letter-spacing: .07em; text-transform: uppercase;
+        color: var(--faint);
+        margin: 16px 0 6px;
+      }
+      .help-card ul { margin: 0; padding-left: 18px; color: var(--mut); font-size: 13.5px; }
+      .help-card li { margin: 3px 0; }
+      .hc {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        background: var(--chip);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 0 5px;
+        color: var(--ink);
+        white-space: nowrap;
+      }
+      .help-foot { margin: 16px 0 0; font-size: 13px; color: var(--mut); }
+      .help-foot .docs-link { display: inline; padding: 0; font-size: 13px; }
+
+      /* ---------- gallery overlay (Every Mermaid diagram) ---------- */
+      .gallery-overlay {
+        position: fixed; inset: 0;
+        background: var(--bg);
+        z-index: 80;
+        display: none;
+        flex-direction: column;
+      }
+      .gallery-overlay.open { display: flex; }
+      .gallery-head {
+        background: var(--panel);
+        border-bottom: 1px solid var(--line);
+        padding: 12px 14px 12px;
+        flex: none;
+      }
+      .gallery-head-top { display: flex; align-items: center; gap: 10px; }
+      .gallery-head-top .g-spacer { flex: 1; }
+      .gallery-title { font-size: 19px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
+      .gallery-count {
+        font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--acc);
+        border: 1px solid var(--line2); border-radius: 999px; padding: 3px 9px;
+        background: var(--panel2); white-space: nowrap;
+      }
+      .gallery-sub { margin: 5px 0 0; color: var(--mut); font-size: 13.5px; max-width: 720px; }
+      .gallery-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 11px; }
+      .gallery-search {
+        flex: 1 1 210px; min-width: 0;
+        background: var(--panel2); border: 1px solid var(--line2); border-radius: 9px;
+        padding: 8px 11px; font-size: 13.5px; color: var(--ink);
+      }
+      .gallery-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+      .g-chip {
+        border: 1px solid var(--line2); background: var(--panel2); border-radius: 999px;
+        padding: 5px 11px; font-size: 12.5px; font-weight: 600; color: var(--mut);
+      }
+      .g-chip.on { background: var(--acc); border-color: var(--acc); color: var(--acc-ink); }
+      .gallery-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 14px; }
+      .gallery-grid {
+        display: grid; gap: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(min(400px, 100%), 1fr));
+        max-width: 1440px; margin: 0 auto; align-items: start;
+      }
+      .g-card {
+        background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+        box-shadow: var(--shadow); padding: 14px;
+        display: flex; flex-direction: column; gap: 8px; min-width: 0;
+      }
+      .g-card-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+      .g-num { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 600; color: var(--acc); }
+      .g-name { font-size: 16.5px; font-weight: 700; }
+      .g-cat {
+        font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase;
+        color: var(--faint); margin-left: auto; text-align: right;
+      }
+      .g-blurb { margin: 0; color: var(--mut); font-size: 13.5px; }
+      .g-uses { margin: 0; font-size: 12.5px; color: var(--faint); }
+      .g-uses strong { color: var(--mut); font-weight: 600; }
+      .g-stage {
+        background-color: var(--panel2);
+        background-image: radial-gradient(circle, var(--dot) 1px, transparent 1.1px);
+        background-size: 22px 22px;
+        border: 1px solid var(--line); border-radius: 10px;
+        padding: 14px; overflow: auto; max-height: 340px;
+        display: flex; align-items: flex-start; justify-content: center;
+      }
+      .g-stage svg { max-width: 100%; height: auto; }
+      .g-stage .g-rendering { color: var(--faint); font-size: 13px; }
+      .g-stage .g-render-err { color: var(--err-ink); font-size: 13px; }
+      .g-note { font-size: 12.5px; color: var(--mut); background: var(--chip); border-radius: 8px; padding: 7px 10px; }
+      .g-source {
+        display: none; margin: 0; background: var(--chip); border-radius: 10px;
+        padding: 10px 12px; font-family: "JetBrains Mono", monospace; font-size: 12px;
+        line-height: 1.55; white-space: pre-wrap; word-break: break-word;
+        max-height: 220px; overflow: auto;
+      }
+      .g-source.open { display: block; }
+      .g-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; }
+      .small-btn.primary { background: var(--acc); border-color: var(--acc); color: var(--acc-ink); }
+      .small-btn.primary:hover { background: var(--acc-strong); border-color: var(--acc-strong); }
+      .gallery-empty { display: none; text-align: center; color: var(--mut); padding: 44px 16px; font-size: 14px; }
+      .gallery-empty strong { color: var(--ink); font-size: 16px; }
+      .gallery-empty.show { display: block; }
+
+      /* ---------- responsive ---------- */
+      @media (max-width: 900px) {
+        main { grid-template-columns: 1fr; padding: 10px; gap: 10px; }
+        .splitter { display: none; }
+        .tabs { display: inline-flex; }
+        .pane { display: none; }
+        .pane.active { display: flex; }
+        .tb-label { display: none; }
+        .btn .btn-text { display: none; }
+        .btn { padding: 7px 9px; }
+        .docs-link { display: none; }
+        .toolbar { gap: 6px; padding: 8px 10px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .toast { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="toolbar">
+      <span class="tb-label" id="ex-label">Example</span>
+      <span class="select-wrap">
+        <select id="example-select" aria-labelledby="ex-label"></select>
+      </span>
+      <span class="tb-label" id="th-label">Theme</span>
+      <span class="select-wrap">
+        <select id="theme-select" aria-labelledby="th-label">
+          <option value="default">Default</option>
+          <option value="neutral">Neutral</option>
+          <option value="dark">Dark</option>
+          <option value="forest">Forest</option>
+          <option value="base">Base</option>
+        </select>
+      </span>
+
+      <button class="btn" id="gallery-btn" type="button" title="Show every Mermaid diagram type — the full gallery">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span class="btn-text">All diagrams</span>
+      </button>
+
+      <div class="tabs" role="tablist" aria-label="Pane">
+        <button id="tab-code" class="on" role="tab" aria-selected="true">Code</button>
+        <button id="tab-preview" role="tab" aria-selected="false">Preview<span class="tab-badge" id="tab-badge"></span></button>
+      </div>
+
+      <span class="spacer"></span>
+
+      <button class="btn" id="copy-code-btn" type="button" title="Copy diagram code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span class="btn-text">Copy code</span>
+      </button>
+      <button class="btn" id="copy-link-btn" type="button" title="Copy a link that opens this exact diagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <span class="btn-text">Copy link</span>
+      </button>
+
+      <div class="menu-wrap">
+        <button class="btn primary" id="export-btn" type="button" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span class="btn-text">Export</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="width:12px;height:12px"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="menu" id="export-menu" role="menu">
+          <div class="menu-warn" id="menu-warn" hidden>Your current code hasn't rendered — these exports are the last good diagram, not your latest code.</div>
+          <button type="button" id="dl-svg" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download SVG
+          </button>
+          <button type="button" id="dl-png" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
+            Download PNG
+          </button>
+          <button type="button" id="copy-png" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy PNG image
+          </button>
+          <div class="menu-row">
+            <span class="menu-row-label">PNG scale</span>
+            <span class="seg" id="png-scale-seg" role="group" aria-label="PNG export scale">
+              <button type="button" data-scale="1">1×</button>
+              <button type="button" data-scale="2">2×</button>
+              <button type="button" data-scale="3">3×</button>
+            </span>
+          </div>
+          <button type="button" id="png-bg-toggle" role="menuitem" aria-pressed="false">
+            <span class="menu-check" id="png-bg-check"></span>
+            Transparent PNG background
+          </button>
+          <button type="button" id="dl-mmd" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Download .mmd source
+          </button>
+          <button type="button" id="copy-svg" role="menuitem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy SVG markup
+          </button>
+          <div class="menu-note" id="menu-note">PNG exports at 3× resolution.</div>
+        </div>
+      </div>
+
+      <button class="btn" id="help-btn" type="button" title="Quick Mermaid syntax reference">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.4 9.2A2.7 2.7 0 1 1 12 12.6V13.2"/><line x1="12" y1="17" x2="12" y2="17.01"/></svg>
+        <span class="btn-text">Syntax</span>
+      </button>
+
+      <a class="docs-link" href="../">&#8592; Gallery</a>
+      <a class="docs-link" href="https://mermaid.js.org/intro/" target="_blank" rel="noopener">Syntax docs &#8599;</a>
+    </div>
+
+    <main>
+      <section class="pane active" id="pane-code" aria-label="Diagram code editor">
+        <div class="pane-head">
+          <span class="pane-title">Code</span>
+          <span class="spacer"></span>
+          <button class="pill-toggle" id="wrap-toggle" type="button" aria-pressed="false"><span class="dot-sw"></span>Wrap</button>
+          <div class="zoom-group" role="group" aria-label="Editor font size">
+            <button type="button" class="font-btn" id="font-dec" aria-label="Decrease editor font size">A−</button>
+            <button type="button" class="font-btn" id="font-inc" aria-label="Increase editor font size">A+</button>
+          </div>
+          <button class="small-btn" id="clear-btn" type="button">Clear</button>
+          <button class="small-btn" id="render-btn" type="button" title="Render now (Ctrl/⌘ + Enter)">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            Render
+          </button>
+        </div>
+        <button class="err-strip" id="err-strip" type="button" hidden></button>
+        <div class="editor-wrap">
+          <div class="gutter" aria-hidden="true"><div class="gutter-inner" id="gutter-inner"></div></div>
+          <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Mermaid diagram code" placeholder="Type Mermaid code here — e.g. flowchart TD"></textarea>
+        </div>
+      </section>
+
+      <div class="splitter" id="splitter" role="separator" aria-orientation="vertical" aria-label="Resize code and preview panes" aria-valuemin="15" aria-valuemax="80" tabindex="0" title="Drag to resize panes — double-click to reset"></div>
+
+      <section class="pane" id="pane-preview" aria-label="Rendered diagram preview">
+        <div class="pane-head">
+          <span class="pane-title">Preview</span>
+          <div class="zoom-group" role="group" aria-label="Zoom">
+            <button type="button" id="zoom-out" aria-label="Zoom out">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <button type="button" class="zoom-pct" id="zoom-pct" title="Reset zoom to 100%">100%</button>
+            <button type="button" id="zoom-in" aria-label="Zoom in">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+          <button class="small-btn" id="zoom-fit" type="button">Fit</button>
+          <span class="spacer"></span>
+          <button class="pill-toggle on" id="autofit-toggle" type="button" aria-pressed="true"><span class="dot-sw"></span>Auto-fit</button>
+          <button class="small-btn" id="fs-btn" type="button" aria-label="Fullscreen preview">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+            <span class="btn-text">Fullscreen</span>
+          </button>
+        </div>
+        <div class="error-bar" id="error-bar" aria-live="polite">
+          <div class="err-title">Syntax error</div>
+          <pre id="error-text"></pre>
+        </div>
+        <div class="stage" id="stage" tabindex="0" aria-label="Diagram stage — arrow keys pan, plus and minus zoom, 0 or F fits the diagram" title="Drag to pan · Scroll to zoom · Double-click to fit">
+          <div class="canvas" id="canvas"></div>
+          <div class="stage-empty" id="stage-empty">Your diagram will appear here.<br />Write some Mermaid code, or pick an example above.</div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="statusbar">
+      <span class="status-item"><span class="status-dot" id="status-dot"></span><span id="status-text">Loading Mermaid…</span></span>
+      <span class="spacer"></span>
+      <span class="status-item mono" id="doc-stats">0 lines · 0 chars</span>
+      <span class="status-item mono" id="version-label">Mermaid —</span>
+    </footer>
+
+    <div class="gallery-overlay" id="gallery-overlay" role="dialog" aria-modal="true" aria-labelledby="gallery-title">
+      <div class="gallery-head">
+        <div class="gallery-head-top">
+          <h2 class="gallery-title" id="gallery-title">Every Mermaid diagram</h2>
+          <span class="gallery-count">23 types</span>
+          <span class="g-spacer"></span>
+          <button class="btn" id="gallery-close" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span class="btn-text">Close</span>
+          </button>
+        </div>
+        <p class="gallery-sub">The full gallery — every diagram type Mermaid supports, each with a working example rendered live. Open any one in the editor to start from it, or copy its source.</p>
+        <div class="gallery-tools">
+          <input class="gallery-search" id="gallery-search" type="search" placeholder="Search diagrams or use cases…" aria-label="Search diagram types" autocomplete="off" />
+          <div class="gallery-chips" id="gallery-chips" role="group" aria-label="Filter by category"></div>
+        </div>
+      </div>
+      <div class="gallery-scroll" id="gallery-scroll">
+        <div class="gallery-grid" id="gallery-grid"></div>
+        <div class="gallery-empty" id="gallery-empty"><strong>No matching diagrams</strong><br />Try a different term or choose another category.</div>
+      </div>
+    </div>
+
+    <div class="help-overlay" id="help-overlay" hidden>
+      <div class="help-card" role="dialog" aria-modal="true" aria-labelledby="help-title">
+        <div class="help-head">
+          <h2 id="help-title">Mermaid syntax — quick reference</h2>
+          <button class="btn" id="help-close" type="button">Close</button>
+        </div>
+        <h3>Start a diagram</h3>
+        <ul>
+          <li>The first line picks the type: <span class="hc">flowchart TD</span>, <span class="hc">sequenceDiagram</span>, <span class="hc">classDiagram</span>, <span class="hc">gantt</span>, <span class="hc">pie</span>… — every type has a working example under <strong>All diagrams</strong>.</li>
+          <li>Directions: <span class="hc">TD</span> top-down, <span class="hc">LR</span> left-right, <span class="hc">BT</span>, <span class="hc">RL</span>.</li>
+        </ul>
+        <div class="help-grid">
+          <div>
+            <h3>Flowchart nodes</h3>
+            <ul>
+              <li><span class="hc">A[Rectangle]</span> · <span class="hc">A(Rounded)</span> · <span class="hc">A{Decision}</span></li>
+              <li><span class="hc">A([Stadium])</span> · <span class="hc">A((Circle))</span> · <span class="hc">A[[Subroutine]]</span></li>
+              <li><span class="hc">A[(Database)]</span> · <span class="hc">A&gt;Flag]</span></li>
+            </ul>
+            <h3>Arrows &amp; labels</h3>
+            <ul>
+              <li><span class="hc">A --&gt; B</span> arrow · <span class="hc">A --- B</span> plain line · <span class="hc">A -.-&gt; B</span> dotted</li>
+              <li><span class="hc">A ==&gt; B</span> thick · <span class="hc">A &lt;--&gt; B</span> both ways</li>
+              <li>Label an edge: <span class="hc">A --&gt;|yes| B</span> or <span class="hc">A -- text --&gt; B</span></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Sequence essentials</h3>
+            <ul>
+              <li><span class="hc">A-&gt;&gt;B: message</span> call · <span class="hc">B--&gt;&gt;A: reply</span> dashed reply</li>
+              <li><span class="hc">Note over A,B: text</span> · blocks: <span class="hc">alt</span> / <span class="hc">else</span> / <span class="hc">end</span></li>
+            </ul>
+            <h3>Good habits</h3>
+            <ul>
+              <li>Quote labels containing spaces or symbols: <span class="hc">A["Cost (est.)"]</span></li>
+              <li>Comments start with <span class="hc">%%</span> and run to the end of the line</li>
+              <li>One statement per line; indent with two spaces</li>
+              <li>Stuck? The error bar names the line — it's highlighted in the margin</li>
+            </ul>
+          </div>
+        </div>
+        <p class="help-foot">Full reference: <a class="docs-link" href="https://mermaid.js.org/intro/" target="_blank" rel="noopener">mermaid.js.org &#8599;</a></p>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="confirm-overlay" hidden>
+      <div class="modal-card" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-msg">
+        <h2 class="modal-title" id="confirm-title">Replace current code?</h2>
+        <p class="modal-msg" id="confirm-msg"></p>
+        <div class="modal-actions">
+          <button class="btn" id="confirm-cancel" type="button">Cancel</button>
+          <button class="btn primary" id="confirm-ok" type="button">Replace</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="../vendor/mermaid.min.js"></script>
+    <script>
+      "use strict";
+
+      var PINNED_VERSION = "11.17.2";
+
+      var SAMPLES = [
+        { name: "Flowchart", code:
+"flowchart TD\n" +
+"    A[Start] --> B{Is it working?}\n" +
+"    B -->|Yes| C[Ship it]\n" +
+"    B -->|No| D[Debug it]\n" +
+"    D --> B\n" +
+"    C --> E([Done])" },
+        { name: "Sequence diagram", code:
+"sequenceDiagram\n" +
+"    autonumber\n" +
+"    actor User\n" +
+"    participant App\n" +
+"    participant API\n" +
+"    User->>App: Open dashboard\n" +
+"    App->>API: GET /metrics\n" +
+"    API-->>App: 200 OK\n" +
+"    App-->>User: Render charts" },
+        { name: "Class diagram", code:
+"classDiagram\n" +
+"    class Animal {\n" +
+"        +String name\n" +
+"        +int age\n" +
+"        +makeSound()\n" +
+"    }\n" +
+"    class Dog {\n" +
+"        +String breed\n" +
+"        +fetch()\n" +
+"    }\n" +
+"    Animal <|-- Dog" },
+        { name: "State diagram", code:
+"stateDiagram-v2\n" +
+"    [*] --> Idle\n" +
+"    Idle --> Loading: fetch\n" +
+"    Loading --> Success: 200 OK\n" +
+"    Loading --> Error: timeout\n" +
+"    Error --> Loading: retry\n" +
+"    Success --> [*]" },
+        { name: "ER diagram", code:
+"erDiagram\n" +
+"    CUSTOMER ||--o{ ORDER : places\n" +
+"    ORDER ||--|{ LINE_ITEM : contains\n" +
+"    CUSTOMER {\n" +
+"        string name\n" +
+"        string email\n" +
+"    }\n" +
+"    ORDER {\n" +
+"        int id\n" +
+"        date placed\n" +
+"    }" },
+        { name: "Gantt chart", code:
+"gantt\n" +
+"    title Product Launch\n" +
+"    dateFormat YYYY-MM-DD\n" +
+"    section Build\n" +
+"    Design       :a1, 2026-10-01, 10d\n" +
+"    Development  :after a1, 20d\n" +
+"    section Release\n" +
+"    Testing      :2026-11-01, 12d\n" +
+"    Launch       :milestone, 2026-11-15, 0d" },
+        { name: "Pie chart", code:
+"pie title Time spent this week\n" +
+"    \"Teaching\" : 35\n" +
+"    \"Coursework\" : 25\n" +
+"    \"Coding\" : 25\n" +
+"    \"Everything else\" : 15" },
+        { name: "Git graph", code:
+"gitGraph\n" +
+"    commit\n" +
+"    commit\n" +
+"    branch develop\n" +
+"    checkout develop\n" +
+"    commit\n" +
+"    commit\n" +
+"    checkout main\n" +
+"    merge develop\n" +
+"    commit" },
+        { name: "User journey", code:
+"journey\n" +
+"    title My working day\n" +
+"    section Morning\n" +
+"      Coffee: 5: Me\n" +
+"      Commute: 3: Me\n" +
+"    section Work\n" +
+"      Teach class: 5: Me, Students\n" +
+"      Grade papers: 2: Me" },
+        { name: "Mindmap", code:
+"mindmap\n" +
+"  root((Mermaid))\n" +
+"    Diagrams\n" +
+"      Flowchart\n" +
+"      Sequence\n" +
+"      Gantt\n" +
+"    Features\n" +
+"      Themes\n" +
+"      PNG export" },
+        { name: "Timeline", code:
+"timeline\n" +
+"    title Mermaid releases\n" +
+"    2019 : First public release\n" +
+"    2023 : Version 10\n" +
+"    2024 : Version 11\n" +
+"    2026 : Version 12" },
+        { name: "Quadrant chart", code:
+"quadrantChart\n" +
+"    title Effort vs. impact\n" +
+"    x-axis Low effort --> High effort\n" +
+"    y-axis Low impact --> High impact\n" +
+"    quadrant-1 Do later\n" +
+"    quadrant-2 Plan carefully\n" +
+"    quadrant-3 Skip it\n" +
+"    quadrant-4 Do first\n" +
+"    Quick fix: [0.2, 0.82]\n" +
+"    Big rewrite: [0.85, 0.9]\n" +
+"    Busywork: [0.72, 0.14]" },
+        { name: "XY chart", code:
+"xychart-beta\n" +
+"    title \"Weekly study hours\"\n" +
+"    x-axis [Mon, Tue, Wed, Thu, Fri, Sat, Sun]\n" +
+"    y-axis \"Hours\" 0 --> 8\n" +
+"    bar [2, 3, 5, 4, 6, 7, 3]\n" +
+"    line [2, 3, 5, 4, 6, 7, 3]" }
+      ];
+
+      /* ---- Every Mermaid diagram: the full gallery (23 types) ---- */
+      var GALLERY_CATS = [
+        { id: "essentials", label: "Essentials" },
+        { id: "planning", label: "Planning & product" },
+        { id: "charts", label: "Charts & data" },
+        { id: "technical", label: "Technical systems" },
+        { id: "utility", label: "Utility" }
+      ];
+
+      var GALLERY = [
+        { id: "flowchart", name: "Flowchart", category: "essentials",
+          blurb: "Nodes and edges for processes, decisions, and flows—the workhorse of the Mermaid family.",
+          uses: ["CI/CD pipelines", "Decision trees", "Algorithms and business processes"],
+          code: `flowchart TD
+    A[Push to main] --> B{CI checks pass?}
+    B -->|Yes| C[Build container image]
+    B -->|No| D[Notify author]
+    D --> E[Fix and re-push]
+    E --> B
+    C --> F[Push to registry]
+    F --> G{Deploy approved?}
+    G -->|Yes| H[Rolling deploy to prod]
+    G -->|No| I[Hold for review]
+    H --> J[Smoke tests]
+    J --> K{Healthy?}
+    K -->|Yes| L[Done]
+    K -->|No| M[Rollback]` },
+        { id: "sequence-diagram", name: "Sequence Diagram", category: "essentials",
+          blurb: "How actors and systems exchange messages over time—the classic for API and protocol docs.",
+          uses: ["API request flows", "Auth handshakes (OAuth, SAML)", "Debugging distributed interactions"],
+          code: `sequenceDiagram
+    autonumber
+    participant U as User
+    participant C as Client App
+    participant A as Auth Server
+    participant R as Resource API
+
+    U->>C: Click "Sign in"
+    C->>A: GET /authorize (client_id, scope)
+    A->>U: Login page
+    U->>A: Enter credentials
+    A->>C: Redirect with auth code
+    C->>A: POST /token (code, client_secret)
+    A-->>C: access_token + refresh_token
+    C->>R: GET /profile (Bearer token)
+    R-->>C: User profile JSON
+    C-->>U: Signed-in dashboard
+    Note over C,R: Tokens expire in 1h - the refresh_token renews them` },
+        { id: "class-diagram", name: "Class Diagram", category: "essentials",
+          blurb: "UML classes, members, and relationships for object-oriented designs.",
+          uses: ["Domain modeling", "Codebase documentation", "Planning refactors"],
+          code: `classDiagram
+    class Vehicle {
+        +String make
+        +String model
+        +int year
+        +start() void
+        +stop() void
+    }
+    class Car {
+        +int doors
+        +openTrunk() void
+    }
+    class Engine {
+        +int horsepower
+        +ignite() void
+    }
+    class Driver {
+        +String name
+        +drive(Vehicle v) void
+    }
+    Vehicle <|-- Car
+    Car *-- Engine : contains
+    Driver --> Vehicle : drives` },
+        { id: "state-diagram", name: "State Diagram", category: "essentials",
+          blurb: "States and the transitions between them—perfect for anything with a lifecycle.",
+          uses: ["Order or ticket lifecycles", "UI component states", "Protocol state machines"],
+          code: `stateDiagram-v2
+    [*] --> Created
+    Created --> Paid : payment received
+    Created --> Cancelled : timeout
+    Paid --> Shipped : packed
+    Paid --> Refunded : chargeback
+    Shipped --> Delivered : signed
+    Shipped --> Returned : customer return
+    Delivered --> [*]
+    Cancelled --> [*]
+    Refunded --> [*]
+    Returned --> Refunded : refund issued` },
+        { id: "entity-relationship", name: "Entity Relationship Diagram", category: "essentials",
+          blurb: "Database tables, attributes, and cardinalities without opening a schema tool.",
+          uses: ["Database schema design", "Onboarding to an existing database", "Data-model reviews"],
+          code: `erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ LINE_ITEM : contains
+    PRODUCT ||--o{ LINE_ITEM : "listed in"
+    CUSTOMER {
+        string id PK
+        string name
+        string email
+    }
+    ORDER {
+        string id PK
+        string customer_id FK
+        date placed_at
+        string status
+    }
+    LINE_ITEM {
+        string order_id FK
+        string product_id FK
+        int quantity
+    }
+    PRODUCT {
+        string id PK
+        string name
+        float price
+    }` },
+        { id: "user-journey", name: "User Journey", category: "planning",
+          blurb: "A user's experience across steps, scored for satisfaction—UX's favorite one-pager.",
+          uses: ["UX research synthesis", "Customer experience mapping", "Pain-point spotting"],
+          code: `journey
+    title Morning coffee run
+    section Leave home
+      Grab keys: 5: Me
+      Walk to car: 4: Me
+    section Buy coffee
+      Queue up: 3: Me, Barista
+      Order oat latte: 5: Me
+      Wait for drink: 2: Me
+      Pay: 4: Me
+    section Head to work
+      Drive to office: 5: Me` },
+        { id: "gantt-chart", name: "Gantt Chart", category: "planning",
+          blurb: "Tasks on a timeline with dependencies—a project plan that fits in a Markdown file.",
+          uses: ["Release planning", "Sprint or milestone tracking", "Dependency visualization"],
+          code: `gantt
+    title Website relaunch plan
+    dateFormat YYYY-MM-DD
+    section Design
+    Wireframes      :done,   des1, 2026-10-01, 2026-10-07
+    Visual design   :active, des2, 2026-10-08, 2026-10-14
+    section Build
+    Frontend        :        dev1, after des2, 10d
+    Backend API     :        dev2, after des2, 12d
+    section Launch
+    QA pass         :        qa1, after dev1, 5d
+    Deploy to prod  :crit,   dep1, after qa1, 2d` },
+        { id: "requirement-diagram", name: "Requirement Diagram", category: "planning",
+          blurb: "Requirements, system elements, and how they satisfy, trace, and verify each other.",
+          uses: ["Systems engineering docs", "Compliance traceability", "Acceptance criteria mapping"],
+          code: `requirementDiagram
+    requirement login_req {
+        id: 1
+        text: "Users can sign in with email and password."
+        risk: high
+        verifymethod: test
+    }
+    requirement sso_req {
+        id: 2
+        text: "Users can sign in with Google SSO."
+        risk: medium
+        verifymethod: inspection
+    }
+    element web_app {
+        type: "web application"
+    }
+    web_app - satisfies -> login_req
+    web_app - satisfies -> sso_req
+    sso_req - traces -> login_req` },
+        { id: "mindmap", name: "Mindmap", category: "planning",
+          blurb: "Ideas radiating from a central topic—brainstorming that can live directly in the doc.",
+          uses: ["Brainstorming sessions", "Topic outlines", "Knowledge mapping"],
+          code: `mindmap
+  root((Mermaid))
+    Diagrams
+      Flowchart
+      Sequence
+      Class
+      State
+      ER
+    Charts
+      Gantt
+      Pie
+      Quadrant
+      XY
+      Radar
+    Extras
+      Idea maps
+      Roadmaps
+      Gitgraph
+      Kanban` },
+        { id: "timeline", name: "Timeline", category: "planning",
+          blurb: "Events laid out chronologically—history lessons and roadmaps in plain text.",
+          uses: ["Project roadmaps", "Company history", "Incident timelines"],
+          code: `timeline
+    title History of the web
+    1990 : Tim Berners-Lee proposes the World Wide Web
+    1993 : Mosaic browser launches
+    1998 : Google founded
+    2004 : Web 2.0 and social media take off
+    2007 : iPhone launches the mobile era
+    2022 : ChatGPT sparks the AI wave` },
+        { id: "kanban-board", name: "Kanban Board", category: "planning",
+          blurb: "Columns of cards for work in progress—a board that can live in your repo.",
+          uses: ["Lightweight task tracking", "Sprint boards in docs", "Personal to-do walls"],
+          code: `kanban
+  Backlog
+    setup[Set up repo]
+    design[Draft UI mockups]
+  In Progress
+    auth[Implement auth flow]
+  Review
+    api[REST API endpoints]
+  Done
+    ci[CI pipeline]` },
+        { id: "pie-chart", name: "Pie Chart", category: "charts",
+          blurb: "Part-of-a-whole proportions in a few lines, with no separate charting library required.",
+          uses: ["Survey results", "Market or traffic share", "Budget breakdowns"],
+          code: `pie title Browser share, Sept 2026
+    "Chrome" : 62
+    "Safari" : 19
+    "Edge" : 6
+    "Firefox" : 5
+    "Other" : 8` },
+        { id: "quadrant-chart", name: "Quadrant Chart", category: "charts",
+          blurb: "Two axes, four boxes—the classic 2×2 matrix for prioritization.",
+          uses: ["Feature prioritization", "Risk matrices", "Market positioning"],
+          code: `quadrantChart
+    title Prioritize features
+    x-axis "Low effort" --> "High effort"
+    y-axis "Low value" --> "High value"
+    quadrant-1 "Do later"
+    quadrant-2 "Quick wins"
+    quadrant-3 "Skip"
+    quadrant-4 "Big bets"
+    Dark mode: [0.3, 0.8]
+    SSO login: [0.2, 0.9]
+    Rewrite in Rust: [0.9, 0.5]
+    New logo: [0.2, 0.2]` },
+        { id: "xy-chart", name: "XY Chart", category: "charts",
+          blurb: "Bar and line charts on x/y axes—the spreadsheet chart you can version-control.",
+          uses: ["Metrics dashboards in docs", "Trend reporting", "A/B test results"],
+          code: `xychart-beta
+    title "Signups per month"
+    x-axis [Jan, Feb, Mar, Apr, May, Jun]
+    y-axis "Signups" 0 --> 500
+    bar [120, 200, 180, 320, 410, 480]
+    line [100, 150, 220, 260, 380, 450]` },
+        { id: "sankey-diagram", name: "Sankey Diagram", category: "charts",
+          blurb: "Flows with widths proportional to quantity—see where energy, money, or users go.",
+          uses: ["Energy or budget flows", "User funnels", "Resource allocation"],
+          code: `sankey-beta
+Solar, Grid, 120
+Wind, Grid, 80
+Grid, Homes, 110
+Grid, Industry, 60
+Grid, Loss, 30` },
+        { id: "radar-chart", name: "Radar Chart", category: "charts",
+          blurb: "A multi-axis comparison on a spider web, ideal for compact spec-sheet showdowns.",
+          uses: ["Product comparisons", "Skill assessments", "Benchmark summaries"],
+          code: `radar-beta
+  title "Phone comparison"
+  axis b["Battery"], c["Camera"], s["Screen"], p["Price"], w["Weight"]
+  curve i["Phone A"]{80, 90, 85, 40, 70}
+  curve j["Phone B"]{70, 75, 90, 80, 60}
+  max 100
+  min 0` },
+        { id: "treemap", name: "Treemap", category: "charts",
+          blurb: "Nested rectangles sized by value—a hierarchy whose weight is visible at a glance.",
+          uses: ["Budget breakdowns", "Disk or resource usage", "Portfolio composition"],
+          code: `treemap-beta
+"Q3 Revenue"
+    "Hardware": 420
+    "Software": 310
+    "Services"
+        "Consulting": 120
+        "Support": 90` },
+        { id: "git-graph", name: "Git Graph", category: "technical",
+          blurb: "Branches, commits, merges, and tags as a picture—worth a thousand git log commands.",
+          uses: ["Explaining branching strategy", "Release-note visuals", "Git tutorials"],
+          code: `gitGraph
+    commit id: "init"
+    branch feature
+    checkout feature
+    commit id: "add parser"
+    commit id: "add tests"
+    checkout main
+    commit id: "hotfix"
+    checkout feature
+    merge main
+    checkout main
+    merge feature
+    commit id: "release v1.0" tag: "v1.0"` },
+        { id: "c4-diagram", name: "C4 Diagram", category: "technical",
+          blurb: "Experimental C4-model syntax for context, container, and component views of software architecture.",
+          uses: ["System context docs", "Architecture reviews", "Onboarding engineers"],
+          code: `C4Context
+    title Online bookstore - system context
+    Person(customer, "Customer", "Buys books online")
+    System(shop, "Bookstore", "Lets customers browse and order books")
+    System_Ext(payments, "Payment gateway", "Processes card payments")
+    SystemDb(warehouse, "Warehouse DB", "Tracks stock and shipments")
+
+    Rel(customer, shop, "Browses and orders")
+    Rel(shop, payments, "Charges cards via")
+    Rel(shop, warehouse, "Reads and writes")` },
+        { id: "packet-diagram", name: "Packet Diagram", category: "technical",
+          blurb: "Bit-level layouts of network packets and binary formats.",
+          uses: ["Protocol documentation", "Binary format specifications", "Networking tutorials"],
+          code: `packet-beta
+0-15: "Source Port"
+16-31: "Destination Port"
+32-63: "Sequence Number"
+64-95: "Acknowledgment Number"
+96-99: "Data Offset"
+100-105: "Reserved"
+106-111: "Flags"
+112-127: "Window Size"
+128-143: "Checksum"
+144-159: "Urgent Pointer"` },
+        { id: "block-diagram", name: "Block Diagram", category: "technical",
+          blurb: "Composable blocks with columns and nesting for quick infrastructure sketches.",
+          uses: ["Infrastructure sketches", "System block layouts", "Hardware diagrams"],
+          code: `block-beta
+    columns 3
+    db["Database"] app["App Server"] cache["Cache"]
+    block:net:3
+        columns 1
+        lb["Load Balancer"]
+    end
+    web1["Web 1"] web2["Web 2"] web3["Web 3"]
+    lb --> web1
+    lb --> web2
+    lb --> web3
+    web1 --> app
+    app --> db
+    app --> cache` },
+        { id: "architecture-diagram", name: "Architecture Diagram", category: "technical",
+          blurb: "Cloud-style architecture with icons, groups, and directional edges.",
+          uses: ["Cloud topology docs", "Deployment overviews", "Network diagrams"],
+          code: `architecture-beta
+    group cloud(cloud)[Cloud VPC]
+
+    service lb(server)[Load Balancer] in cloud
+    service api(server)[API Servers] in cloud
+    service db(database)[Postgres] in cloud
+    service cache(disk)[Redis] in cloud
+
+    lb:R -- L:api
+    api:B -- T:db
+    api:B -- T:cache` },
+        { id: "info", name: "Info", category: "utility",
+          blurb: "A diagnostic box showing the running Mermaid version—meta, but it counts as a type.",
+          uses: ["Debugging render issues", "Confirming the Mermaid version in a document pipeline"],
+          note: "The Info diagram is intentionally minimal: its entire source is the word “info.”",
+          code: `info` }
+      ];
+
+      function $(id) { return document.getElementById(id); }
+      var editor = $("editor"), gutterInner = $("gutter-inner");
+      var stage = $("stage"), canvas = $("canvas"), stageEmpty = $("stage-empty");
+      var errorBar = $("error-bar"), errorText = $("error-text");
+      var statusDot = $("status-dot"), statusText = $("status-text");
+      var docStats = $("doc-stats"), zoomPct = $("zoom-pct");
+      var paneCode = $("pane-code"), panePreview = $("pane-preview");
+      var tabCode = $("tab-code"), tabPreview = $("tab-preview");
+      var errStrip = $("err-strip"), tabBadge = $("tab-badge");
+      var exportMenu = $("export-menu"), exportBtn = $("export-btn");
+      var toastEl = $("toast");
+      var confirmOverlay = $("confirm-overlay");
+
+      /* ---------------- persistence ---------------- */
+      var PREFS_KEY = "mermaid-viewer:prefs:v1";
+      var DRAFT_KEY = "mermaid-viewer:draft:v1";
+      var store = {
+        get: function (k) {
+          try { var v = window.localStorage.getItem(k); return v ? JSON.parse(v) : null; }
+          catch (e) { return null; }
+        },
+        set: function (k, v) {
+          try { window.localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+        }
+      };
+      var THEME_NAMES = ["default", "neutral", "dark", "forest", "base"];
+      var prefs = Object.assign({
+        theme: "default", autoFit: true, split: null,
+        wrap: false, fontSize: 13, pngScale: 3, pngTransparent: false
+      }, store.get(PREFS_KEY) || {});
+      if (THEME_NAMES.indexOf(prefs.theme) === -1) prefs.theme = "default";
+      function savePrefs() { store.set(PREFS_KEY, prefs); }
+
+      var state = {
+        theme: prefs.theme,
+        scale: 1, tx: 0, ty: 0,
+        natW: 0, natH: 0,
+        autoFit: prefs.autoFit !== false,
+        lastSvg: "",
+        renderedCode: "",
+        pristineCode: null,
+        errorLine: 0,
+        viewTouched: false,
+        renderSeq: 0,
+        debounce: null
+      };
+
+      var draftTimer = null;
+      function persistDraft() {
+        if (draftTimer) clearTimeout(draftTimer);
+        draftTimer = setTimeout(function () {
+          store.set(DRAFT_KEY, {
+            code: editor.value,
+            pristine: editor.value === state.pristineCode
+          });
+        }, 250);
+      }
+
+      var toastTimer = null;
+      function hideToast() {
+        toastEl.classList.remove("show");
+        if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+      }
+      function toast(msg, actionLabel, onAction) {
+        toastEl.innerHTML = "";
+        var span = document.createElement("span");
+        span.textContent = msg;
+        toastEl.appendChild(span);
+        if (actionLabel && onAction) {
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "toast-action";
+          b.textContent = actionLabel;
+          b.addEventListener("click", function () { hideToast(); onAction(); });
+          toastEl.appendChild(b);
+        }
+        toastEl.classList.add("show");
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, actionLabel ? 6000 : 2200);
+      }
+
+      /* ---------------- confirm dialog ---------------- */
+      var confirmResolve = null, confirmLastFocus = null;
+      function confirmDialog(title, msg, okLabel) {
+        return new Promise(function (resolve) {
+          confirmResolve = resolve;
+          $("confirm-title").textContent = title;
+          $("confirm-msg").textContent = msg;
+          $("confirm-ok").textContent = okLabel || "Replace";
+          confirmLastFocus = document.activeElement;
+          confirmOverlay.hidden = false;
+          $("confirm-cancel").focus();
+        });
+      }
+      function settleConfirm(v) {
+        if (!confirmResolve) return;
+        var r = confirmResolve;
+        confirmResolve = null;
+        confirmOverlay.hidden = true;
+        if (confirmLastFocus && confirmLastFocus.focus) confirmLastFocus.focus();
+        r(v);
+      }
+      $("confirm-ok").addEventListener("click", function () { settleConfirm(true); });
+      $("confirm-cancel").addEventListener("click", function () { settleConfirm(false); });
+      confirmOverlay.addEventListener("click", function (e) {
+        if (e.target === confirmOverlay) settleConfirm(false);
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && !confirmOverlay.hidden) settleConfirm(false);
+      });
+
+      function setStatus(mode, text) {
+        statusDot.className = "status-dot" + (mode ? " " + mode : "");
+        statusText.textContent = text;
+      }
+
+      /* ---------------- mermaid ---------------- */
+      var mermaidReady = typeof window.mermaid !== "undefined";
+      function initMermaid() {
+        window.mermaid.initialize({
+          startOnLoad: false,
+          theme: state.theme,
+          securityLevel: "loose",
+          suppressErrorRendering: true,
+          fontFamily: "'Outfit', 'Segoe UI', sans-serif"
+        });
+      }
+
+      function parseErrorLine(msg) {
+        var m = /line\s+(\d+)/i.exec(msg || "");
+        return m ? parseInt(m[1], 10) : 0;
+      }
+      function scrollToErrorLine(n) {
+        if (!n) return;
+        var cs = getComputedStyle(editor);
+        var lh = parseFloat(cs.lineHeight);
+        if (!lh || isNaN(lh)) lh = (parseFloat(cs.fontSize) || 13) * 1.55;
+        editor.scrollTop = Math.max(0, (n - 1) * lh - editor.clientHeight / 3);
+      }
+      function clearErrorUI() {
+        state.errorLine = 0;
+        errorBar.classList.remove("show");
+        errStrip.hidden = true;
+        tabBadge.classList.remove("show");
+      }
+      errStrip.addEventListener("click", function () {
+        if (window.matchMedia("(max-width: 900px)").matches) showPane("preview");
+        else { scrollToErrorLine(state.errorLine); editor.focus(); }
+      });
+
+      function render() {
+        if (!mermaidReady) {
+          setStatus("err", "Mermaid failed to load — check your connection and reload.");
+          return;
+        }
+        var code = editor.value;
+        if (!code.trim()) {
+          canvas.innerHTML = "";
+          state.lastSvg = ""; state.natW = 0; state.natH = 0;
+          state.renderedCode = "";
+          stageEmpty.classList.add("show");
+          clearErrorUI();
+          setStatus("", "Empty — write some Mermaid code");
+          return;
+        }
+        var seq = ++state.renderSeq;
+        window.mermaid.render("mmd-graph-" + seq, code).then(function (res) {
+          if (seq !== state.renderSeq) return;
+          canvas.innerHTML = res.svg;
+          if (typeof res.bindFunctions === "function") res.bindFunctions(canvas);
+          state.lastSvg = res.svg;
+          var svg = canvas.querySelector("svg");
+          if (svg) {
+            var vb = (svg.getAttribute("viewBox") || "").split(/\s+/).map(Number);
+            state.natW = vb[2] || svg.getBoundingClientRect().width;
+            state.natH = vb[3] || svg.getBoundingClientRect().height;
+            svg.setAttribute("width", state.natW);
+            svg.setAttribute("height", state.natH);
+            svg.setAttribute("role", "img");
+            svg.setAttribute("aria-label", "Rendered Mermaid diagram");
+            svg.style.width = state.natW + "px";
+            svg.style.height = state.natH + "px";
+            svg.style.maxWidth = "none";
+          }
+          stageEmpty.classList.remove("show");
+          state.renderedCode = code;
+          clearErrorUI();
+          updateMeta();
+          setStatus("ok", "Rendered");
+          if (state.autoFit && !state.viewTouched) fit();
+          else applyTransform();
+        }).catch(function (err) {
+          if (seq !== state.renderSeq) return;
+          var msg = (err && err.message) ? err.message : String(err);
+          errorText.textContent = msg.length > 900 ? msg.slice(0, 900) + "…" : msg;
+          errorBar.classList.add("show");
+          state.errorLine = parseErrorLine(msg);
+          errStrip.textContent = state.errorLine
+            ? "Syntax error on line " + state.errorLine + " — full message in the Preview pane"
+            : "Syntax error — full message in the Preview pane";
+          errStrip.hidden = false;
+          if (!panePreview.classList.contains("active")) tabBadge.classList.add("show");
+          updateMeta();
+          scrollToErrorLine(state.errorLine);
+          setStatus("err", "Syntax error — last good diagram kept");
+        });
+      }
+
+      function scheduleRender() {
+        setStatus("", "Editing…");
+        if (state.debounce) clearTimeout(state.debounce);
+        state.debounce = setTimeout(render, 350);
+      }
+
+      /* ---------------- pan & zoom ---------------- */
+      function clampScale(s) { return Math.min(8, Math.max(0.05, s)); }
+      function applyTransform() {
+        canvas.style.transform = "translate(" + state.tx + "px," + state.ty + "px) scale(" + state.scale + ")";
+        zoomPct.textContent = Math.round(state.scale * 100) + "%";
+      }
+      function fit() {
+        if (!state.natW || !state.natH) return;
+        var r = stage.getBoundingClientRect();
+        if (r.width < 10 || r.height < 10) return;
+        var s = Math.min((r.width - 32) / state.natW, (r.height - 32) / state.natH);
+        state.scale = clampScale(s);
+        state.tx = (r.width - state.natW * state.scale) / 2;
+        state.ty = (r.height - state.natH * state.scale) / 2;
+        state.viewTouched = false;
+        applyTransform();
+      }
+      function zoomAt(mx, my, factor) {
+        var s0 = state.scale;
+        var s1 = clampScale(s0 * factor);
+        if (s1 === s0) return;
+        state.viewTouched = true;
+        var px = (mx - state.tx) / s0, py = (my - state.ty) / s0;
+        state.scale = s1;
+        state.tx = mx - px * s1;
+        state.ty = my - py * s1;
+        applyTransform();
+      }
+      function zoomCenter(factor) {
+        var r = stage.getBoundingClientRect();
+        zoomAt(r.width / 2, r.height / 2, factor);
+      }
+
+      var pointers = new Map();
+      var pinch = null;
+      stage.addEventListener("pointerdown", function (e) {
+        stage.setPointerCapture(e.pointerId);
+        pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (pointers.size === 2) {
+          var pts = Array.from(pointers.values());
+          var r = stage.getBoundingClientRect();
+          var mx = (pts[0].x + pts[1].x) / 2 - r.left, my = (pts[0].y + pts[1].y) / 2 - r.top;
+          pinch = {
+            d: Math.max(10, Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y)),
+            s: state.scale,
+            px: (mx - state.tx) / state.scale,
+            py: (my - state.ty) / state.scale
+          };
+        }
+      });
+      stage.addEventListener("pointermove", function (e) {
+        if (!pointers.has(e.pointerId)) return;
+        var prev = pointers.get(e.pointerId);
+        var dx = e.clientX - prev.x, dy = e.clientY - prev.y;
+        pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (pointers.size === 1) {
+          state.tx += dx; state.ty += dy;
+          state.viewTouched = true;
+          applyTransform();
+        } else if (pointers.size === 2 && pinch) {
+          state.viewTouched = true;
+          var pts = Array.from(pointers.values());
+          var r = stage.getBoundingClientRect();
+          var mx = (pts[0].x + pts[1].x) / 2 - r.left, my = (pts[0].y + pts[1].y) / 2 - r.top;
+          var d = Math.max(10, Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y));
+          state.scale = clampScale(pinch.s * d / pinch.d);
+          state.tx = mx - pinch.px * state.scale;
+          state.ty = my - pinch.py * state.scale;
+          applyTransform();
+        }
+      });
+      function endPointer(e) {
+        pointers.delete(e.pointerId);
+        if (pointers.size < 2) pinch = null;
+      }
+      stage.addEventListener("pointerup", endPointer);
+      stage.addEventListener("pointercancel", endPointer);
+      stage.addEventListener("wheel", function (e) {
+        e.preventDefault();
+        var r = stage.getBoundingClientRect();
+        var dy = Math.max(-120, Math.min(120, e.deltaY));
+        zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-dy * 0.0016));
+      }, { passive: false });
+      stage.addEventListener("dblclick", function () { fit(); });
+      stage.addEventListener("keydown", function (e) {
+        var step = e.shiftKey ? 120 : 40, handled = true;
+        if (e.key === "ArrowLeft") { state.tx += step; state.viewTouched = true; applyTransform(); }
+        else if (e.key === "ArrowRight") { state.tx -= step; state.viewTouched = true; applyTransform(); }
+        else if (e.key === "ArrowUp") { state.ty += step; state.viewTouched = true; applyTransform(); }
+        else if (e.key === "ArrowDown") { state.ty -= step; state.viewTouched = true; applyTransform(); }
+        else if (e.key === "+" || e.key === "=") zoomCenter(1.2);
+        else if (e.key === "-" || e.key === "_") zoomCenter(1 / 1.2);
+        else if (e.key === "0" || e.key === "f" || e.key === "F") fit();
+        else handled = false;
+        if (handled) e.preventDefault();
+      });
+
+      $("zoom-in").addEventListener("click", function () { zoomCenter(1.25); });
+      $("zoom-out").addEventListener("click", function () { zoomCenter(0.8); });
+      $("zoom-fit").addEventListener("click", fit);
+      zoomPct.addEventListener("click", function () {
+        if (state.scale !== 1) zoomCenter(1 / state.scale);
+      });
+      var autofitToggle = $("autofit-toggle");
+      autofitToggle.addEventListener("click", function () {
+        state.autoFit = !state.autoFit;
+        prefs.autoFit = state.autoFit;
+        savePrefs();
+        autofitToggle.classList.toggle("on", state.autoFit);
+        autofitToggle.setAttribute("aria-pressed", String(state.autoFit));
+        if (state.autoFit) { state.viewTouched = false; fit(); }
+      });
+      $("fs-btn").addEventListener("click", function () {
+        if (document.fullscreenElement) { document.exitFullscreen(); return; }
+        if (stage.requestFullscreen) {
+          stage.requestFullscreen().catch(function () { toast("Fullscreen isn't available here"); });
+        } else { toast("Fullscreen isn't available here"); }
+      });
+      document.addEventListener("fullscreenchange", function () {
+        setTimeout(function () { if (state.autoFit && !state.viewTouched) fit(); }, 60);
+      });
+      var resizeTimer = null;
+      window.addEventListener("resize", function () {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () { if (state.autoFit && !state.viewTouched) fit(); }, 150);
+      });
+
+      /* ---------------- pane splitter ---------------- */
+      var mainEl = document.querySelector("main");
+      var splitter = $("splitter");
+      state.splitPct = prefs.split || 41.66;
+      if (prefs.split) mainEl.style.setProperty("--split", state.splitPct);
+      splitter.setAttribute("aria-valuenow", String(Math.round(state.splitPct)));
+      function setSplit(pct) {
+        pct = Math.min(80, Math.max(15, pct));
+        state.splitPct = Math.round(pct * 10) / 10;
+        mainEl.style.setProperty("--split", state.splitPct);
+        splitter.setAttribute("aria-valuenow", String(Math.round(state.splitPct)));
+        if (state.autoFit && !state.viewTouched) fit();
+      }
+      var splitDragId = null;
+      splitter.addEventListener("pointerdown", function (e) {
+        splitDragId = e.pointerId;
+        splitter.setPointerCapture(e.pointerId);
+        splitter.classList.add("dragging");
+        e.preventDefault();
+      });
+      splitter.addEventListener("pointermove", function (e) {
+        if (splitDragId === null || e.pointerId !== splitDragId) return;
+        var r = mainEl.getBoundingClientRect();
+        setSplit((e.clientX - r.left) / r.width * 100);
+      });
+      function endSplitDrag() {
+        if (splitDragId === null) return;
+        splitDragId = null;
+        splitter.classList.remove("dragging");
+        prefs.split = state.splitPct;
+        savePrefs();
+      }
+      splitter.addEventListener("pointerup", endSplitDrag);
+      splitter.addEventListener("pointercancel", endSplitDrag);
+      splitter.addEventListener("keydown", function (e) {
+        var step = e.shiftKey ? 6 : 2, handled = true;
+        if (e.key === "ArrowLeft") setSplit(state.splitPct - step);
+        else if (e.key === "ArrowRight") setSplit(state.splitPct + step);
+        else if (e.key === "Home") setSplit(41.66);
+        else handled = false;
+        if (handled) {
+          e.preventDefault();
+          prefs.split = state.splitPct;
+          savePrefs();
+        }
+      });
+      splitter.addEventListener("dblclick", function () {
+        setSplit(41.66);
+        prefs.split = state.splitPct;
+        savePrefs();
+      });
+
+      /* ---------------- editor ---------------- */
+      function isUserWork() {
+        return editor.value.trim() !== "" && editor.value !== state.pristineCode;
+      }
+      function syncSampleSelect() {
+        for (var i = 0; i < SAMPLES.length; i++) {
+          if (editor.value === SAMPLES[i].code) { exampleSelect.value = String(i); return; }
+        }
+        exampleSelect.value = "-1";
+      }
+      function loadCode(code, pristine, opts) {
+        opts = opts || {};
+        var prev = { code: editor.value, pristine: state.pristineCode };
+        editor.value = code;
+        state.pristineCode = pristine ? code : null;
+        state.viewTouched = false;
+        updateMeta();
+        render();
+        persistDraft();
+        scheduleHash();
+        if (opts.msg && prev.code && prev.code !== code) {
+          toast(opts.msg, "Undo", function () {
+            editor.value = prev.code;
+            state.pristineCode = prev.pristine;
+            updateMeta();
+            render();
+            persistDraft();
+            scheduleHash();
+            editor.focus();
+          });
+        } else if (opts.msg) {
+          toast(opts.msg);
+        }
+      }
+      function guardReplace(what) {
+        if (!isUserWork()) return Promise.resolve(true);
+        return confirmDialog(
+          "Replace your code?",
+          "Loading " + what + " will replace the code you've been editing — it isn't saved anywhere else.",
+          "Replace"
+        );
+      }
+
+      function updateMeta() {
+        var v = editor.value;
+        var lines = v ? v.split("\n").length : 0;
+        docStats.textContent = lines + (lines === 1 ? " line" : " lines") + " · " + v.length + " chars";
+        var html = "";
+        for (var i = 1; i <= Math.max(lines, 1); i++) {
+          html += "<span" + (i === state.errorLine ? ' class="err-line"' : "") + ">" + i + "</span>";
+        }
+        gutterInner.innerHTML = html;
+        gutterInner.style.transform = "translateY(" + (-editor.scrollTop) + "px)";
+        syncSampleSelect();
+      }
+      editor.addEventListener("scroll", function () {
+        gutterInner.style.transform = "translateY(" + (-editor.scrollTop) + "px)";
+      });
+
+      var wrapToggle = $("wrap-toggle");
+      function applyEditorPrefs() {
+        editor.classList.toggle("wrap", !!prefs.wrap);
+        editor.style.fontSize = prefs.fontSize + "px";
+        gutterInner.style.fontSize = prefs.fontSize + "px";
+        wrapToggle.classList.toggle("on", !!prefs.wrap);
+        wrapToggle.setAttribute("aria-pressed", String(!!prefs.wrap));
+      }
+      wrapToggle.addEventListener("click", function () {
+        prefs.wrap = !prefs.wrap;
+        savePrefs();
+        applyEditorPrefs();
+        editor.focus();
+      });
+      function setFontSize(px) {
+        prefs.fontSize = Math.min(18, Math.max(11, px));
+        savePrefs();
+        applyEditorPrefs();
+      }
+      $("font-dec").addEventListener("click", function () { setFontSize(prefs.fontSize - 1); });
+      $("font-inc").addEventListener("click", function () { setFontSize(prefs.fontSize + 1); });
+      applyEditorPrefs();
+      editor.addEventListener("input", function () { updateMeta(); scheduleRender(); persistDraft(); scheduleHash(); });
+      editor.addEventListener("keydown", function (e) {
+        if (e.key === "Tab") {
+          e.preventDefault();
+          var s = editor.selectionStart, en = editor.selectionEnd;
+          editor.setRangeText("  ", s, en, "end");
+          updateMeta(); scheduleRender();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+          e.preventDefault();
+          render();
+          if (window.matchMedia("(max-width: 900px)").matches) showPane("preview");
+        }
+      });
+      $("render-btn").addEventListener("click", function () {
+        render();
+        if (window.matchMedia("(max-width: 900px)").matches) showPane("preview");
+      });
+      $("clear-btn").addEventListener("click", function () {
+        if (!editor.value) { toast("Editor is already empty"); return; }
+        function clearNow() {
+          loadCode("", true, { msg: "Editor cleared" });
+          editor.focus();
+        }
+        if (isUserWork()) {
+          confirmDialog("Clear your code?", "This clears the code you've been editing — it isn't saved anywhere else.", "Clear")
+            .then(function (ok) { if (ok) clearNow(); else editor.focus(); });
+        } else {
+          clearNow();
+        }
+      });
+
+      /* ---------------- mobile tabs ---------------- */
+      function showPane(which) {
+        var code = which === "code";
+        paneCode.classList.toggle("active", code);
+        panePreview.classList.toggle("active", !code);
+        tabCode.classList.toggle("on", code);
+        tabPreview.classList.toggle("on", !code);
+        tabCode.setAttribute("aria-selected", String(code));
+        tabPreview.setAttribute("aria-selected", String(!code));
+        if (!code) {
+          tabBadge.classList.remove("show");
+          requestAnimationFrame(function () { if (state.autoFit && !state.viewTouched) fit(); else applyTransform(); });
+        }
+      }
+      tabCode.addEventListener("click", function () { showPane("code"); });
+      tabPreview.addEventListener("click", function () { showPane("preview"); });
+
+      /* ---------------- toolbar ---------------- */
+      var exampleSelect = $("example-select");
+      var customOpt = document.createElement("option");
+      customOpt.value = "-1";
+      customOpt.textContent = "Custom / edited";
+      customOpt.disabled = true;
+      exampleSelect.appendChild(customOpt);
+      SAMPLES.forEach(function (s, i) {
+        var opt = document.createElement("option");
+        opt.value = String(i); opt.textContent = s.name;
+        exampleSelect.appendChild(opt);
+      });
+      exampleSelect.addEventListener("change", function () {
+        var s = SAMPLES[Number(exampleSelect.value)];
+        if (!s) return;
+        guardReplace("the “" + s.name + "” example").then(function (ok) {
+          if (!ok) { syncSampleSelect(); return; }
+          loadCode(s.code, true, { msg: "Loaded " + s.name });
+        });
+      });
+      $("theme-select").addEventListener("change", function (e) {
+        state.theme = e.target.value;
+        prefs.theme = state.theme;
+        savePrefs();
+        initMermaid();
+        render();
+        rerenderGallery();
+      });
+
+      /* ---------------- syntax help ---------------- */
+      var helpOverlay = $("help-overlay"), helpLastFocus = null;
+      function openHelp() {
+        helpLastFocus = document.activeElement;
+        helpOverlay.hidden = false;
+        $("help-close").focus();
+      }
+      function closeHelp() {
+        helpOverlay.hidden = true;
+        if (helpLastFocus && helpLastFocus.focus) helpLastFocus.focus();
+      }
+      $("help-btn").addEventListener("click", openHelp);
+      $("help-close").addEventListener("click", closeHelp);
+      helpOverlay.addEventListener("click", function (e) {
+        if (e.target === helpOverlay) closeHelp();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && !helpOverlay.hidden) closeHelp();
+      });
+
+      /* ---------------- gallery overlay ---------------- */
+      var galleryOverlay = $("gallery-overlay"), galleryGrid = $("gallery-grid");
+      var gallerySearch = $("gallery-search"), galleryChips = $("gallery-chips");
+      var galleryEmpty = $("gallery-empty"), galleryBtn = $("gallery-btn");
+      var galleryBuilt = false, gallerySeq = 0, galleryCat = "all";
+      var galleryRendered = {}, galleryChain = Promise.resolve(), galleryObserver = null;
+
+      function findGalleryItem(id) {
+        for (var i = 0; i < GALLERY.length; i++) if (GALLERY[i].id === id) return GALLERY[i];
+        return null;
+      }
+
+      function catLabel(id) {
+        for (var i = 0; i < GALLERY_CATS.length; i++) if (GALLERY_CATS[i].id === id) return GALLERY_CATS[i].label;
+        return id;
+      }
+      function escHtml(s) {
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
+      function buildGalleryChips() {
+        var html = '<button class="g-chip on" type="button" data-gcat="all">All 23</button>';
+        GALLERY_CATS.forEach(function (c) {
+          html += '<button class="g-chip" type="button" data-gcat="' + c.id + '">' + escHtml(c.label) + "</button>";
+        });
+        galleryChips.innerHTML = html;
+      }
+
+      function buildGalleryCards() {
+        galleryGrid.innerHTML = GALLERY.map(function (item, i) {
+          var search = (item.name + " " + item.blurb + " " + item.uses.join(" ")).toLowerCase();
+          return '<article class="g-card" data-gid="' + item.id + '" data-gsearch="' + escHtml(search) + '" data-gcat="' + item.category + '">' +
+            '<div class="g-card-head"><span class="g-num">' + String(i + 1).padStart(2, "0") + '</span>' +
+            '<span class="g-name">' + escHtml(item.name) + '</span>' +
+            '<span class="g-cat">' + escHtml(catLabel(item.category)) + "</span></div>" +
+            '<p class="g-blurb">' + escHtml(item.blurb) + "</p>" +
+            '<p class="g-uses"><strong>Good for:</strong> ' + escHtml(item.uses.join(" · ")) + "</p>" +
+            (item.note ? '<div class="g-note">' + escHtml(item.note) + "</div>" : "") +
+            '<div class="g-stage" id="g-stage-' + item.id + '"><span class="g-rendering">Rendering…</span></div>' +
+            '<pre class="g-source" id="g-source-' + item.id + '">' + escHtml(item.code) + "</pre>" +
+            '<div class="g-actions">' +
+              '<button class="small-btn primary" type="button" data-gopen="' + item.id + '">Open in editor</button>' +
+              '<button class="small-btn" type="button" data-gcopy="' + item.id + '">Copy source</button>' +
+              '<button class="small-btn" type="button" data-gsrc="' + item.id + '" aria-expanded="false">View source</button>' +
+            "</div></article>";
+        }).join("");
+      }
+
+      function queueGalleryRender(item) {
+        if (galleryRendered[item.id]) return;
+        galleryRendered[item.id] = true;
+        var seq = gallerySeq;
+        galleryChain = galleryChain.then(function () {
+          if (seq !== gallerySeq) return;
+          var el = $("g-stage-" + item.id);
+          if (!el) return;
+          return window.mermaid.render("gal-" + seq + "-" + item.id, item.code).then(function (res) {
+            if (seq !== gallerySeq) return;
+            el.innerHTML = res.svg;
+            if (typeof res.bindFunctions === "function") res.bindFunctions(el);
+            var svg = el.querySelector("svg");
+            if (svg) {
+              svg.removeAttribute("height");
+              svg.style.maxWidth = "100%";
+              svg.style.height = "auto";
+              svg.setAttribute("role", "img");
+              svg.setAttribute("aria-label", item.name + " example");
+            }
+          }).catch(function (err) {
+            if (seq !== gallerySeq) return;
+            el.innerHTML = '<span class="g-render-err">This example didn\'t render under Mermaid ' + PINNED_VERSION + " — open it in the editor to inspect the source.</span>";
+          });
+        });
+      }
+
+      function renderGalleryDiagrams() {
+        if (!mermaidReady) {
+          GALLERY.forEach(function (item) {
+            var el = $("g-stage-" + item.id);
+            if (el) el.innerHTML = '<span class="g-render-err">Preview unavailable — Mermaid didn\'t load. You can still open the source in the editor.</span>';
+          });
+          return;
+        }
+        if ("IntersectionObserver" in window) {
+          galleryObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (en) {
+              if (!en.isIntersecting) return;
+              var item = findGalleryItem(en.target.getAttribute("data-gid"));
+              if (item) queueGalleryRender(item);
+              galleryObserver.unobserve(en.target);
+            });
+          }, { root: $("gallery-scroll"), rootMargin: "600px" });
+          galleryGrid.querySelectorAll(".g-card").forEach(function (card) {
+            galleryObserver.observe(card);
+          });
+        } else {
+          GALLERY.forEach(queueGalleryRender);
+        }
+      }
+
+      function rerenderGallery() {
+        if (!galleryBuilt || !mermaidReady) return;
+        gallerySeq++;
+        Object.keys(galleryRendered).forEach(function (id) {
+          var item = findGalleryItem(id);
+          delete galleryRendered[id];
+          if (item) queueGalleryRender(item);
+        });
+      }
+
+      function applyGalleryFilter() {
+        var q = gallerySearch.value.trim().toLowerCase();
+        var shown = 0;
+        galleryGrid.querySelectorAll(".g-card").forEach(function (card) {
+          var okCat = galleryCat === "all" || card.getAttribute("data-gcat") === galleryCat;
+          var okQ = !q || card.getAttribute("data-gsearch").indexOf(q) !== -1;
+          var vis = okCat && okQ;
+          card.style.display = vis ? "" : "none";
+          if (vis) shown++;
+        });
+        galleryEmpty.classList.toggle("show", shown === 0);
+      }
+
+      function openGallery() {
+        if (!galleryBuilt) {
+          buildGalleryChips();
+          buildGalleryCards();
+          galleryBuilt = true;
+          renderGalleryDiagrams();
+        }
+        galleryOverlay.classList.add("open");
+        $("gallery-scroll").scrollTop = 0;
+        applyGalleryFilter();
+        $("gallery-close").focus();
+      }
+      function closeGallery() {
+        galleryOverlay.classList.remove("open");
+        galleryBtn.focus();
+      }
+      galleryBtn.addEventListener("click", openGallery);
+      $("gallery-close").addEventListener("click", closeGallery);
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && galleryOverlay.classList.contains("open")) closeGallery();
+      });
+      gallerySearch.addEventListener("input", applyGalleryFilter);
+      galleryChips.addEventListener("click", function (e) {
+        var chip = e.target.closest(".g-chip");
+        if (!chip) return;
+        galleryCat = chip.getAttribute("data-gcat");
+        galleryChips.querySelectorAll(".g-chip").forEach(function (c) { c.classList.toggle("on", c === chip); });
+        applyGalleryFilter();
+      });
+      galleryGrid.addEventListener("click", function (e) {
+        var openBtn = e.target.closest("[data-gopen]");
+        var copyBtn = e.target.closest("[data-gcopy]");
+        var srcBtn = e.target.closest("[data-gsrc]");
+        function findItem(id) {
+          for (var i = 0; i < GALLERY.length; i++) if (GALLERY[i].id === id) return GALLERY[i];
+          return null;
+        }
+        if (openBtn) {
+          var item = findItem(openBtn.getAttribute("data-gopen"));
+          if (!item) return;
+          guardReplace("“" + item.name + "” from the gallery").then(function (ok) {
+            if (!ok) return;
+            closeGallery();
+            loadCode(item.code, true, { msg: "Loaded " + item.name + " in the editor" });
+          });
+        } else if (copyBtn) {
+          var item2 = findItem(copyBtn.getAttribute("data-gcopy"));
+          if (item2) copyText(item2.code, "Source copied — " + item2.name);
+        } else if (srcBtn) {
+          var panel = $("g-source-" + srcBtn.getAttribute("data-gsrc"));
+          if (!panel) return;
+          var open = panel.classList.toggle("open");
+          srcBtn.setAttribute("aria-expanded", String(open));
+          srcBtn.textContent = open ? "Hide source" : "View source";
+        }
+      });
+
+      /* ---------------- copy & export ---------------- */
+      function copyText(text, msg) {
+        function fallback() {
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand("copy"); toast(msg); }
+          catch (e) { toast("Copy failed — select and copy manually"); }
+          document.body.removeChild(ta);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () { toast(msg); }, fallback);
+        } else fallback();
+      }
+      function download(name, blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url; a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      }
+      function sizedSvgString() {
+        if (!state.lastSvg) return "";
+        var doc = new DOMParser().parseFromString(state.lastSvg, "image/svg+xml");
+        var svg = doc.querySelector("svg");
+        if (!svg) return state.lastSvg;
+        svg.setAttribute("width", state.natW);
+        svg.setAttribute("height", state.natH);
+        svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        return new XMLSerializer().serializeToString(svg);
+      }
+      function needDiagram() {
+        if (!state.lastSvg) { toast("Nothing rendered yet — fix the code first"); return false; }
+        return true;
+      }
+      function isStale() {
+        return !!state.lastSvg && editor.value !== state.renderedCode;
+      }
+      function guardExport() {
+        if (!needDiagram()) return Promise.resolve(false);
+        if (isStale()) {
+          return confirmDialog(
+            "Export the last good diagram?",
+            "Your current code hasn't rendered successfully, so this export will be the previous diagram — not your latest code.",
+            "Export anyway"
+          );
+        }
+        return Promise.resolve(true);
+      }
+      function pngBlob(callback) {
+        var xml = sizedSvgString();
+        var url = URL.createObjectURL(new Blob([xml], { type: "image/svg+xml;charset=utf-8" }));
+        var img = new Image();
+        img.onload = function () {
+          var factor = prefs.pngScale || 3;
+          var c = document.createElement("canvas");
+          c.width = Math.max(1, Math.round(state.natW * factor));
+          c.height = Math.max(1, Math.round(state.natH * factor));
+          var ctx = c.getContext("2d");
+          if (!prefs.pngTransparent) {
+            ctx.fillStyle = getComputedStyle(stage).backgroundColor;
+            ctx.fillRect(0, 0, c.width, c.height);
+          }
+          ctx.drawImage(img, 0, 0, c.width, c.height);
+          URL.revokeObjectURL(url);
+          if (c.toBlob) c.toBlob(function (blob) { callback(blob); }, "image/png");
+          else callback(null);
+        };
+        img.onerror = function () { URL.revokeObjectURL(url); callback(null); };
+        img.src = url;
+      }
+
+      var menuWarn = $("menu-warn"), menuNote = $("menu-note");
+      var pngScaleSeg = $("png-scale-seg"), pngBgToggle = $("png-bg-toggle"), pngBgCheck = $("png-bg-check");
+      function syncPngUI() {
+        pngScaleSeg.querySelectorAll("[data-scale]").forEach(function (b) {
+          b.classList.toggle("on", Number(b.getAttribute("data-scale")) === prefs.pngScale);
+        });
+        pngBgToggle.setAttribute("aria-pressed", String(!!prefs.pngTransparent));
+        pngBgCheck.textContent = prefs.pngTransparent ? "✓" : "";
+        menuNote.textContent = "PNG exports at " + prefs.pngScale + "× resolution" +
+          (prefs.pngTransparent ? ", transparent background." : ".");
+      }
+      function refreshMenu() {
+        menuWarn.hidden = !isStale();
+        syncPngUI();
+      }
+      pngScaleSeg.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-scale]");
+        if (!b) return;
+        prefs.pngScale = Number(b.getAttribute("data-scale"));
+        savePrefs();
+        syncPngUI();
+      });
+      pngBgToggle.addEventListener("click", function () {
+        prefs.pngTransparent = !prefs.pngTransparent;
+        savePrefs();
+        syncPngUI();
+      });
+
+      $("copy-code-btn").addEventListener("click", function () {
+        if (!editor.value) { toast("Editor is empty"); return; }
+        copyText(editor.value, "Code copied");
+      });
+      exportBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        refreshMenu();
+        var open = exportMenu.classList.toggle("open");
+        exportBtn.setAttribute("aria-expanded", String(open));
+      });
+      document.addEventListener("click", function (e) {
+        if (!exportMenu.contains(e.target)) {
+          exportMenu.classList.remove("open");
+          exportBtn.setAttribute("aria-expanded", "false");
+        }
+      });
+      function closeMenu() { exportMenu.classList.remove("open"); exportBtn.setAttribute("aria-expanded", "false"); }
+
+      $("dl-svg").addEventListener("click", function () {
+        closeMenu();
+        guardExport().then(function (ok) {
+          if (!ok) return;
+          download("diagram.svg", new Blob([sizedSvgString()], { type: "image/svg+xml;charset=utf-8" }));
+          toast("SVG downloaded");
+        });
+      });
+      $("dl-mmd").addEventListener("click", function () {
+        closeMenu();
+        if (!editor.value) { toast("Editor is empty"); return; }
+        download("diagram.mmd", new Blob([editor.value], { type: "text/plain;charset=utf-8" }));
+        toast("Source downloaded");
+      });
+      $("copy-svg").addEventListener("click", function () {
+        closeMenu();
+        guardExport().then(function (ok) {
+          if (!ok) return;
+          copyText(sizedSvgString(), "SVG markup copied");
+        });
+      });
+      $("dl-png").addEventListener("click", function () {
+        closeMenu();
+        guardExport().then(function (ok) {
+          if (!ok) return;
+          pngBlob(function (blob) {
+            if (blob) { download("diagram.png", blob); toast("PNG downloaded"); }
+            else toast("PNG export failed");
+          });
+        });
+      });
+      $("copy-png").addEventListener("click", function () {
+        closeMenu();
+        guardExport().then(function (ok) {
+          if (!ok) return;
+          if (!(navigator.clipboard && window.ClipboardItem)) {
+            toast("Copy PNG isn't supported in this browser");
+            return;
+          }
+          pngBlob(function (blob) {
+            if (!blob) { toast("PNG export failed"); return; }
+            try {
+              var item = {};
+              item["image/png"] = blob;
+              navigator.clipboard.write([new ClipboardItem(item)]).then(
+                function () { toast("PNG copied"); },
+                function () { toast("Copy PNG failed"); }
+              );
+            } catch (e) { toast("Copy PNG isn't supported in this browser"); }
+          });
+        });
+      });
+
+      /* ---------------- share links ---------------- */
+      function b64EncodeBytes(bytes) {
+        var s = "";
+        for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+        return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      }
+      function b64DecodeBytes(str) {
+        str = str.replace(/-/g, "+").replace(/_/g, "/");
+        while (str.length % 4) str += "=";
+        var s = atob(str);
+        var u = new Uint8Array(s.length);
+        for (var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
+        return u;
+      }
+      function encodeShare(code) {
+        var bytes = new TextEncoder().encode(code);
+        if (typeof CompressionStream !== "undefined") {
+          try {
+            return new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream("deflate")))
+              .arrayBuffer()
+              .then(function (buf) { return "c=" + b64EncodeBytes(new Uint8Array(buf)); })
+              .catch(function () { return "p=" + b64EncodeBytes(bytes); });
+          } catch (e) { /* fall through to plain */ }
+        }
+        return Promise.resolve("p=" + b64EncodeBytes(bytes));
+      }
+      function decodeShare(frag) {
+        var bytes;
+        try { bytes = b64DecodeBytes(frag.slice(2)); } catch (e) { return Promise.resolve(null); }
+        if (frag.indexOf("c=") !== 0) {
+          try { return Promise.resolve(new TextDecoder().decode(bytes)); }
+          catch (e) { return Promise.resolve(null); }
+        }
+        if (typeof DecompressionStream === "undefined") return Promise.resolve(null);
+        try {
+          return new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate")))
+            .text()
+            .catch(function () { return null; });
+        } catch (e) { return Promise.resolve(null); }
+      }
+      var hashTimer = null, hashSeq = 0;
+      function syncHash() {
+        var code = editor.value;
+        var my = ++hashSeq;
+        if (!code.trim()) {
+          if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+          return;
+        }
+        encodeShare(code).then(function (frag) {
+          if (my !== hashSeq) return;
+          var want = "#" + frag;
+          if (location.hash !== want) history.replaceState(null, "", want);
+        });
+      }
+      function scheduleHash() {
+        if (hashTimer) clearTimeout(hashTimer);
+        hashTimer = setTimeout(syncHash, 700);
+      }
+      $("copy-link-btn").addEventListener("click", function () {
+        if (!editor.value.trim()) { toast("Nothing to share yet — write some code first"); return; }
+        encodeShare(editor.value).then(function (frag) {
+          hashSeq++;
+          history.replaceState(null, "", "#" + frag);
+          copyText(location.href, "Link copied — it opens this exact diagram");
+        });
+      });
+
+      /* ---------------- boot ---------------- */
+      $("theme-select").value = state.theme;
+      if (!state.autoFit) {
+        autofitToggle.classList.remove("on");
+        autofitToggle.setAttribute("aria-pressed", "false");
+      }
+      function draftOrSample() {
+        var draft = store.get(DRAFT_KEY);
+        if (draft && typeof draft.code === "string" && draft.code.trim()) {
+          return { code: draft.code, pristine: !!draft.pristine };
+        }
+        return { code: SAMPLES[0].code, pristine: true };
+      }
+      function startWith(code, pristine) {
+        editor.value = code;
+        state.pristineCode = pristine ? code : null;
+        updateMeta();
+        if (mermaidReady) {
+          initMermaid();
+          var v = (window.mermaid && window.mermaid.version) ? window.mermaid.version : PINNED_VERSION;
+          $("version-label").textContent = "Mermaid " + v;
+          render();
+          requestAnimationFrame(fit);
+        } else {
+          $("version-label").textContent = "Mermaid " + PINNED_VERSION;
+          setStatus("err", "Mermaid failed to load — check your connection and reload.");
+          stageEmpty.classList.add("show");
+        }
+      }
+      var bootHash = location.hash;
+      if (bootHash.length > 3 && (bootHash.indexOf("#c=") === 0 || bootHash.indexOf("#p=") === 0)) {
+        decodeShare(bootHash.slice(1)).then(function (code) {
+          if (code && code.trim()) { startWith(code, false); return; }
+          var d = draftOrSample();
+          startWith(d.code, d.pristine);
+          toast("Couldn't read the diagram in that link — loaded your draft instead");
+        });
+      } else {
+        var d0 = draftOrSample();
+        startWith(d0.code, d0.pristine);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Encode & Hash: 40+ hashes (MD, SHA-1/2/3, Keccak, SHAKE, cSHAKE, KMAC, RIPEMD, CRC) with HMAC and file checksums, plus Base64, Base32, Base58, hex, URL and HTML encoding — all in the browser." />
+  <meta property="og:title" content="Encode & Hash" />
+  <meta property="og:description" content="Hashes, HMAC, file checksums and Base64/32/58, hex, URL and HTML encoding, entirely in the browser." />
+  <meta property="og:image" content="../og.png" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="data:," />
+  <title>Encode &amp; Hash</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #e9eaed;
+      --surface: #ffffff;
+      --surface-2: #f7f7f9;
+      --ink: #1d2126;
+      --muted: #5b6068;
+      --line: #d6d7dc;
+      --line-2: #bfc2ca;
+      --accent: #2f6db3;
+      --accent-strong: #26598f;
+      --accent-ink: #ffffff;
+      --accent-soft: #ececf0;
+      --ok: #2e7d4f;
+      --err: #8f2d23;
+      --err-bg: #fdeeee;
+      --err-line: #efc2c2;
+      --shadow: 0 1px 2px rgba(24,28,38,.05), 0 10px 28px rgba(24,28,38,.07);
+      --font-ui: "Outfit", system-ui, -apple-system, sans-serif;
+      --font-code: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121316;
+        --surface: #222329;
+        --surface-2: #1a1b1f;
+        --ink: #eceef2;
+        --muted: #a2a6af;
+        --line: #2d2f36;
+        --line-2: #3d404a;
+        --accent: #7db0e6;
+        --accent-strong: #9cc3ee;
+        --accent-ink: #0d1724;
+        --accent-soft: #26272e;
+        --ok: #6fce97;
+        --err: #f0a9a0;
+        --err-bg: #3a2120;
+        --err-line: #6e3a36;
+        --shadow: 0 1px 2px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.35);
+      }
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      font-family: var(--font-ui); font-size: 15px; line-height: 1.45;
+      background: var(--bg); color: var(--ink);
+      max-width: 1100px; margin: 0 auto; padding: 24px;
+    }
+    h1 { font-size: 2rem; font-weight: 700; margin: 0 0 6px; }
+    .subtitle { color: var(--muted); margin: 0 0 24px; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+    .tab { background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 10px 14px; font: 500 15px var(--font-ui); color: var(--muted); cursor: pointer; }
+    .tab:hover { color: var(--ink); }
+    .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 18px; margin-bottom: 16px; }
+    .row { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; }
+    .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .field.grow { flex: 1 1 220px; }
+    label, .lbl { font-size: 0.78rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+    .check { display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--ink); cursor: pointer; }
+    select, input[type="text"], input[type="number"], textarea {
+      font: inherit; color: var(--ink); background: var(--surface-2);
+      border: 1px solid var(--line-2); border-radius: 9px; padding: 8px 10px;
+    }
+    input[type="number"] { width: 110px; }
+    textarea { width: 100%; min-height: 140px; resize: vertical; font-family: var(--font-code); font-size: 0.9rem; line-height: 1.5; }
+    textarea[readonly] { background: var(--bg); }
+    select:focus, input:focus, textarea:focus { border-color: var(--accent); outline: none; }
+    button.btn {
+      font: 500 0.95rem var(--font-ui); padding: 8px 14px; border-radius: 9px; cursor: pointer;
+      border: 1px solid var(--line-2); background: var(--surface-2); color: var(--ink);
+    }
+    button.btn:hover { border-color: var(--accent); }
+    button.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+    button.btn.primary:hover { background: var(--accent-strong); }
+    .seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 9px; overflow: hidden; }
+    .seg button { font: 500 0.9rem var(--font-ui); padding: 7px 12px; border: none; background: var(--surface-2); color: var(--muted); cursor: pointer; }
+    .seg button + button { border-left: 1px solid var(--line-2); }
+    .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+    .stack > * + * { margin-top: 14px; }
+    .hint { color: var(--muted); font-size: 0.85rem; }
+    .error { color: var(--err); background: var(--err-bg); border: 1px solid var(--err-line); border-radius: 9px; padding: 8px 12px; font-weight: 500; }
+    .error:empty { display: none; }
+    .drop { border: 1.5px dashed var(--line-2); border-radius: 12px; padding: 22px; text-align: center; color: var(--muted); cursor: pointer; }
+    .drop.over { border-color: var(--accent); color: var(--ink); }
+    .drop strong { color: var(--ink); }
+    .out-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .out-head .grow { flex: 1; }
+    .status { color: var(--ok); font-size: 0.85rem; min-height: 1.2em; }
+    table.all { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    table.all th { text-align: left; font-weight: 600; color: var(--muted); padding: 6px 10px 6px 0; white-space: nowrap; vertical-align: top; width: 1%; }
+    table.all td { font-family: var(--font-code); padding: 6px 0; word-break: break-all; border-top: 1px solid var(--line); }
+    table.all tr:first-child td { border-top: none; }
+    table.all td button { margin-left: 8px; font-size: 0.75rem; padding: 2px 8px; }
+    @media (max-width: 640px) { body { padding: 16px; } h1 { font-size: 1.6rem; } }
+  </style>
+</head>
+<body>
+  <h1>Encode &amp; Hash</h1>
+  <p class="subtitle">Hashes, HMAC and file checksums, plus Base64, Base32, Base58, hex, URL and HTML encoding. Everything runs in your browser; nothing is uploaded.</p>
+
+  <div class="tabs" role="tablist" aria-label="Encode and hash modes">
+    <button class="tab" role="tab" id="tab-hash" aria-controls="panel-hash" aria-selected="true">Hash</button>
+    <button class="tab" role="tab" id="tab-encode" aria-controls="panel-encode" aria-selected="false">Encode &amp; decode</button>
+  </div>
+
+  <!-- ===================== HASH ===================== -->
+  <section id="panel-hash" role="tabpanel" aria-labelledby="tab-hash">
+    <div class="card stack">
+      <div class="row">
+        <div class="field">
+          <label for="h-alg">Algorithm</label>
+          <select id="h-alg">
+            <optgroup label="SHA-2">
+              <option value="sha224">SHA-224</option>
+              <option value="sha256" selected>SHA-256</option>
+              <option value="sha384">SHA-384</option>
+              <option value="sha512">SHA-512</option>
+              <option value="sha512_224">SHA-512/224</option>
+              <option value="sha512_256">SHA-512/256</option>
+              <option value="double_sha256">Double SHA-256</option>
+            </optgroup>
+            <optgroup label="SHA-3">
+              <option value="sha3_224">SHA3-224</option>
+              <option value="sha3_256">SHA3-256</option>
+              <option value="sha3_384">SHA3-384</option>
+              <option value="sha3_512">SHA3-512</option>
+            </optgroup>
+            <optgroup label="Keccak">
+              <option value="keccak_224">Keccak-224</option>
+              <option value="keccak_256">Keccak-256</option>
+              <option value="keccak_384">Keccak-384</option>
+              <option value="keccak_512">Keccak-512</option>
+            </optgroup>
+            <optgroup label="SHAKE · cSHAKE · KMAC">
+              <option value="shake128">SHAKE128</option>
+              <option value="shake256">SHAKE256</option>
+              <option value="cshake128">cSHAKE128</option>
+              <option value="cshake256">cSHAKE256</option>
+              <option value="kmac128">KMAC128</option>
+              <option value="kmac256">KMAC256</option>
+            </optgroup>
+            <optgroup label="SHA-1 · MD">
+              <option value="sha1">SHA-1</option>
+              <option value="md5">MD5</option>
+              <option value="md4">MD4</option>
+              <option value="md2">MD2</option>
+            </optgroup>
+            <optgroup label="RIPEMD">
+              <option value="ripemd128">RIPEMD-128</option>
+              <option value="ripemd160">RIPEMD-160</option>
+              <option value="ripemd256">RIPEMD-256</option>
+              <option value="ripemd320">RIPEMD-320</option>
+            </optgroup>
+            <optgroup label="Checksums">
+              <option value="crc16">CRC-16 (ARC)</option>
+              <option value="crc32">CRC-32</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="field">
+          <span class="lbl" id="h-src-lbl">Input</span>
+          <div class="seg" role="group" aria-labelledby="h-src-lbl">
+            <button type="button" data-hsrc="text" aria-pressed="true">Text</button>
+            <button type="button" data-hsrc="file" aria-pressed="false">File</button>
+          </div>
+        </div>
+        <div class="field" id="h-type-wrap">
+          <label for="h-type">Text is</label>
+          <select id="h-type">
+            <option value="utf-8">UTF-8</option>
+            <option value="utf-16le">UTF-16LE</option>
+            <option value="utf-16be">UTF-16BE</option>
+            <option value="hex">Hex bytes</option>
+            <option value="base64">Base64 bytes</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="h-text-wrap">
+        <textarea id="h-input" spellcheck="false" aria-label="Text to hash" placeholder="Type or paste text to hash…"></textarea>
+      </div>
+      <div id="h-file-wrap" hidden>
+        <input type="file" id="h-file" hidden />
+        <div class="drop" id="h-drop" tabindex="0" role="button" aria-label="Choose a file to hash">
+          <strong>Drop a file here</strong> or click to choose one.<br /><span class="hint" id="h-file-name">The file is read in your browser and never uploaded.</span>
+        </div>
+      </div>
+
+      <div class="row" id="h-xof" hidden>
+        <div class="field">
+          <label for="h-bits">Output bits</label>
+          <input type="number" id="h-bits" min="8" max="8192" step="8" value="256" />
+        </div>
+        <div class="field grow" id="h-fn-wrap">
+          <label for="h-fn">Function name (N)</label>
+          <input type="text" id="h-fn" spellcheck="false" placeholder="Usually empty" />
+        </div>
+        <div class="field grow" id="h-cust-wrap">
+          <label for="h-cust">Customization (S)</label>
+          <input type="text" id="h-cust" spellcheck="false" placeholder="Optional" />
+        </div>
+      </div>
+
+      <div id="h-key-block">
+        <label class="check" id="h-hmac-wrap"><input type="checkbox" id="h-hmac" /> <span id="h-key-title">HMAC</span></label>
+        <div class="row" id="h-key-row" hidden style="margin-top: 10px;">
+          <div class="field">
+            <label for="h-key-type">Key is</label>
+            <select id="h-key-type">
+              <option value="utf-8">UTF-8</option>
+              <option value="hex">Hex bytes</option>
+              <option value="base64">Base64 bytes</option>
+            </select>
+          </div>
+          <div class="field grow">
+            <label for="h-key">Key</label>
+            <input type="text" id="h-key" spellcheck="false" autocomplete="off" />
+          </div>
+        </div>
+      </div>
+      <div class="error" id="h-error" role="alert"></div>
+    </div>
+
+    <div class="card stack">
+      <div class="out-head">
+        <span class="lbl" id="h-out-lbl">Hash</span>
+        <span class="grow"></span>
+        <div class="seg" role="group" aria-label="Output format">
+          <button type="button" data-hfmt="hex" aria-pressed="true">hex</button>
+          <button type="button" data-hfmt="HEX" aria-pressed="false">HEX</button>
+          <button type="button" data-hfmt="base64" aria-pressed="false">Base64</button>
+        </div>
+        <button type="button" class="btn" id="h-copy">Copy</button>
+      </div>
+      <textarea id="h-output" readonly aria-labelledby="h-out-lbl" style="min-height: 70px;"></textarea>
+      <div class="status" id="h-status" aria-live="polite"></div>
+      <label class="check"><input type="checkbox" id="h-all" /> Show every algorithm for this input</label>
+      <table class="all" id="h-all-table" hidden></table>
+    </div>
+  </section>
+
+  <!-- ===================== ENCODE ===================== -->
+  <section id="panel-encode" role="tabpanel" aria-labelledby="tab-encode" hidden>
+    <div class="card stack">
+      <div class="row">
+        <div class="field">
+          <label for="e-scheme">Scheme</label>
+          <select id="e-scheme">
+            <option value="base64">Base64</option>
+            <option value="base64url">Base64URL</option>
+            <option value="base32">Base32 (RFC 4648)</option>
+            <option value="base58">Base58 (Bitcoin)</option>
+            <option value="hex">Hex</option>
+            <option value="url">URL (percent-encoding)</option>
+            <option value="html">HTML entities</option>
+          </select>
+        </div>
+        <div class="field">
+          <span class="lbl" id="e-dir-lbl">Direction</span>
+          <div class="seg" role="group" aria-labelledby="e-dir-lbl">
+            <button type="button" data-edir="encode" aria-pressed="true">Encode</button>
+            <button type="button" data-edir="decode" aria-pressed="false">Decode</button>
+          </div>
+        </div>
+        <div class="field" id="e-src-field">
+          <span class="lbl" id="e-src-lbl">Input</span>
+          <div class="seg" role="group" aria-labelledby="e-src-lbl">
+            <button type="button" data-esrc="text" aria-pressed="true">Text</button>
+            <button type="button" data-esrc="file" aria-pressed="false">File</button>
+          </div>
+        </div>
+        <button type="button" class="btn" id="e-swap" title="Move the output into the input and flip the direction">Swap ⇅</button>
+      </div>
+      <div id="e-text-wrap">
+        <textarea id="e-input" spellcheck="false" aria-label="Input" placeholder="Type or paste text…"></textarea>
+      </div>
+      <div id="e-file-wrap" hidden>
+        <input type="file" id="e-file" hidden />
+        <div class="drop" id="e-drop" tabindex="0" role="button" aria-label="Choose a file to encode">
+          <strong>Drop a file here</strong> or click to choose one.<br /><span class="hint" id="e-file-name">Its bytes are encoded in your browser.</span>
+        </div>
+      </div>
+      <div class="error" id="e-error" role="alert"></div>
+    </div>
+
+    <div class="card stack">
+      <div class="out-head">
+        <span class="lbl" id="e-out-lbl">Output</span>
+        <span class="grow"></span>
+        <button type="button" class="btn" id="e-download" hidden>Download bytes</button>
+        <button type="button" class="btn" id="e-copy">Copy</button>
+      </div>
+      <textarea id="e-output" readonly aria-labelledby="e-out-lbl"></textarea>
+      <div class="status" id="e-status" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <script src="hashes.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    var $ = function (id) { return document.getElementById(id); };
+    var te = new TextEncoder();
+    var LS = "encode-hash:v1";
+
+    /* ---------------- bytes helpers ---------------- */
+    function hexToBytes(s) {
+      s = s.replace(/^0x/i, "").replace(/[\s:,-]/g, "");
+      if (s.length % 2) throw new Error("Hex input has an odd number of digits.");
+      if (/[^0-9a-f]/i.test(s)) throw new Error("Hex input contains a character that is not 0-9 or a-f.");
+      var out = new Uint8Array(s.length / 2);
+      for (var i = 0; i < out.length; i++) out[i] = parseInt(s.substr(i * 2, 2), 16);
+      return out;
+    }
+    function bytesToHex(b) {
+      var s = "";
+      for (var i = 0; i < b.length; i++) s += (b[i] < 16 ? "0" : "") + b[i].toString(16);
+      return s;
+    }
+    function bytesToB64(b) {
+      var s = "";
+      for (var i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
+      return btoa(s);
+    }
+    function b64ToBytes(s, url) {
+      s = s.replace(/\s+/g, "");
+      if (url) s = s.replace(/-/g, "+").replace(/_/g, "/");
+      if (/[^A-Za-z0-9+/=]/.test(s)) throw new Error("Base64 input contains a character outside the Base64 alphabet.");
+      while (s.length % 4) s += "=";
+      var bin;
+      try { bin = atob(s); } catch (e) { throw new Error("That is not valid Base64."); }
+      var out = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
+    }
+    function utf16(s, be) {
+      var out = new Uint8Array(s.length * 2);
+      for (var i = 0; i < s.length; i++) {
+        var c = s.charCodeAt(i);
+        out[i * 2 + (be ? 1 : 0)] = c & 0xff;
+        out[i * 2 + (be ? 0 : 1)] = c >>> 8;
+      }
+      return out;
+    }
+    function textToBytes(s, type) {
+      if (type === "hex") return hexToBytes(s);
+      if (type === "base64") return b64ToBytes(s, true);
+      if (type === "utf-16le") return utf16(s, false);
+      if (type === "utf-16be") return utf16(s, true);
+      return te.encode(s);
+    }
+    function decodeUtf8(b) {
+      try { return { text: new TextDecoder("utf-8", { fatal: true }).decode(b), binary: false }; }
+      catch (e) { return { text: new TextDecoder("utf-8").decode(b), binary: true }; }
+    }
+
+    /* Base32, RFC 4648 */
+    var B32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+    function base32Encode(b) {
+      var out = "", bits = 0, val = 0;
+      for (var i = 0; i < b.length; i++) {
+        val = (val << 8) | b[i]; bits += 8;
+        while (bits >= 5) { out += B32[(val >>> (bits - 5)) & 31]; bits -= 5; }
+      }
+      if (bits > 0) out += B32[(val << (5 - bits)) & 31];
+      while (out.length % 8) out += "=";
+      return out;
+    }
+    function base32Decode(s) {
+      s = s.replace(/\s+/g, "").replace(/=+$/, "").toUpperCase();
+      var out = [], bits = 0, val = 0;
+      for (var i = 0; i < s.length; i++) {
+        var idx = B32.indexOf(s[i]);
+        if (idx < 0) throw new Error("“" + s[i] + "” is not a Base32 character (A–Z, 2–7).");
+        val = (val << 5) | idx; bits += 5;
+        if (bits >= 8) { out.push((val >>> (bits - 8)) & 255); bits -= 8; }
+      }
+      return new Uint8Array(out);
+    }
+
+    /* Base58, Bitcoin alphabet */
+    var B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    function base58Encode(b) {
+      var digits = [0];
+      for (var i = 0; i < b.length; i++) {
+        var carry = b[i];
+        for (var j = 0; j < digits.length; j++) { carry += digits[j] << 8; digits[j] = carry % 58; carry = (carry / 58) | 0; }
+        while (carry) { digits.push(carry % 58); carry = (carry / 58) | 0; }
+      }
+      var out = "";
+      for (var k = 0; k < b.length && b[k] === 0; k++) out += "1";
+      if (b.length && !(digits.length === 1 && digits[0] === 0)) for (var q = digits.length - 1; q >= 0; q--) out += B58[digits[q]];
+      return out;
+    }
+    function base58Decode(s) {
+      s = s.replace(/\s+/g, "");
+      var bytes = [0];
+      for (var i = 0; i < s.length; i++) {
+        var v = B58.indexOf(s[i]);
+        if (v < 0) throw new Error("“" + s[i] + "” is not a Base58 character (0, O, I and l are not used).");
+        var carry = v;
+        for (var j = 0; j < bytes.length; j++) { carry += bytes[j] * 58; bytes[j] = carry & 255; carry >>= 8; }
+        while (carry) { bytes.push(carry & 255); carry >>= 8; }
+      }
+      var zeros = 0;
+      while (zeros < s.length && s[zeros] === "1") zeros++;
+      var body = (s.length === zeros) ? [] : bytes.reverse();
+      var out = new Uint8Array(zeros + body.length);
+      out.set(body, zeros);
+      return out;
+    }
+
+    function htmlEncode(s) {
+      return s.replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; })
+        .replace(/[ -￿]/g, function (c) { return "&#" + c.charCodeAt(0) + ";"; });
+    }
+    function htmlDecode(s) {
+      var t = document.createElement("textarea");
+      t.innerHTML = s;
+      return t.value;
+    }
+
+    /* ---------------- tabs ---------------- */
+    var tabs = [$("tab-hash"), $("tab-encode")];
+    function showTab(t) {
+      tabs.forEach(function (x) {
+        var on = x === t;
+        x.setAttribute("aria-selected", on ? "true" : "false");
+        x.tabIndex = on ? 0 : -1;
+        $(x.getAttribute("aria-controls")).hidden = !on;
+      });
+      save();
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener("click", function () { showTab(t); });
+      t.addEventListener("keydown", function (e) {
+        var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (!d) return;
+        var n = tabs[(i + d + tabs.length) % tabs.length]; n.focus(); showTab(n);
+      });
+    });
+
+    function segValue(attr) {
+      var b = document.querySelector("[data-" + attr + '][aria-pressed="true"]');
+      return b ? b.getAttribute("data-" + attr) : null;
+    }
+    function bindSeg(attr, onChange) {
+      document.querySelectorAll("[data-" + attr + "]").forEach(function (btn) {
+        btn.addEventListener("click", function () { setSeg(attr, btn.getAttribute("data-" + attr)); onChange(); });
+      });
+    }
+    function setSeg(attr, val) {
+      document.querySelectorAll("[data-" + attr + "]").forEach(function (b) {
+        b.setAttribute("aria-pressed", b.getAttribute("data-" + attr) === val ? "true" : "false");
+      });
+    }
+    function flash(el, msg) { el.textContent = msg; clearTimeout(el._t); el._t = setTimeout(function () { el.textContent = ""; }, 1800); }
+    function copy(text, status) {
+      if (!text) return;
+      (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(
+        function () { flash(status, "Copied."); },
+        function () { flash(status, "Copy failed — select the text and copy it yourself."); });
+    }
+    function wireDrop(drop, input, onFile) {
+      drop.addEventListener("click", function () { input.click(); });
+      drop.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); } });
+      ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("over"); }); });
+      ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function () { drop.classList.remove("over"); }); });
+      drop.addEventListener("drop", function (e) { e.preventDefault(); if (e.dataTransfer.files[0]) onFile(e.dataTransfer.files[0]); });
+      input.addEventListener("change", function () { if (input.files[0]) onFile(input.files[0]); input.value = ""; });
+    }
+    function fmtSize(n) { return n < 1024 ? n + " B" : n < 1048576 ? (n / 1024).toFixed(1) + " KB" : (n / 1048576).toFixed(1) + " MB"; }
+
+    /* ---------------- hash ---------------- */
+    var NO_HMAC = { crc16: 1, crc32: 1, double_sha256: 1, shake128: 1, shake256: 1, cshake128: 1, cshake256: 1, kmac128: 1, kmac256: 1 };
+    var XOF = { shake128: 256, shake256: 512, cshake128: 256, cshake256: 512, kmac128: 256, kmac256: 512 };
+    var hashFile = null; // { name, bytes }
+
+    function algName(v) { var o = $("h-alg").querySelector('option[value="' + v + '"]'); return o ? o.textContent : v; }
+
+    function syncHashOptions() {
+      var alg = $("h-alg").value;
+      var isKmac = /^kmac/.test(alg), isCshake = /^cshake/.test(alg);
+      $("h-xof").hidden = !XOF[alg];
+      $("h-fn-wrap").hidden = !isCshake;
+      $("h-cust-wrap").hidden = !(isCshake || isKmac);
+      $("h-key-block").hidden = !!NO_HMAC[alg] && !isKmac;
+      $("h-hmac-wrap").hidden = isKmac;
+      $("h-key-title").textContent = "HMAC";
+      $("h-key-row").hidden = !(isKmac || ($("h-hmac").checked && !NO_HMAC[alg]));
+      $("h-out-lbl").textContent = algName(alg) + (isKmac || ($("h-hmac").checked && !NO_HMAC[alg]) ? (isKmac ? "" : " HMAC") : "");
+      var src = segValue("hsrc");
+      $("h-text-wrap").hidden = src !== "text";
+      $("h-type-wrap").hidden = src !== "text";
+      $("h-file-wrap").hidden = src !== "file";
+    }
+
+    function hashInput() {
+      if (segValue("hsrc") === "file") {
+        if (!hashFile) return null;
+        return hashFile.bytes;
+      }
+      return textToBytes($("h-input").value, $("h-type").value);
+    }
+
+    function hashOpts(alg) {
+      var o = {};
+      if (XOF[alg]) {
+        var bits = parseInt($("h-bits").value, 10);
+        if (!(bits >= 8 && bits <= 8192)) throw new Error("Output bits must be between 8 and 8192.");
+        if (bits % 8) throw new Error("Output bits must be a multiple of 8.");
+        o.bits = bits;
+      }
+      if (/^cshake/.test(alg)) { o.functionName = $("h-fn").value; o.customization = $("h-cust").value; }
+      if (/^kmac/.test(alg)) { o.customization = $("h-cust").value; o.kmacKey = textToBytes($("h-key").value, $("h-key-type").value); }
+      else if (!NO_HMAC[alg] && $("h-hmac").checked) o.hmacKey = textToBytes($("h-key").value, $("h-key-type").value);
+      return o;
+    }
+
+    function fmtHash(b) {
+      var f = segValue("hfmt");
+      if (f === "base64") return bytesToB64(b);
+      var h = bytesToHex(b);
+      return f === "HEX" ? h.toUpperCase() : h;
+    }
+
+    var lastHash = null;
+    function runHash() {
+      syncHashOptions();
+      $("h-error").textContent = "";
+      var alg = $("h-alg").value, data;
+      try {
+        data = hashInput();
+        if (data === null) { $("h-output").value = ""; lastHash = null; renderAll(null); return; }
+        lastHash = window.EncodeHash.hash(alg, data, hashOpts(alg));
+        $("h-output").value = fmtHash(lastHash);
+      } catch (e) {
+        $("h-output").value = ""; lastHash = null;
+        $("h-error").textContent = e.message || String(e);
+      }
+      renderAll(data);
+      save();
+    }
+
+    function renderAll(data) {
+      var table = $("h-all-table");
+      table.hidden = !$("h-all").checked;
+      if (table.hidden) return;
+      table.innerHTML = "";
+      if (!data) return;
+      var key = null;
+      try { key = $("h-hmac").checked ? textToBytes($("h-key").value, $("h-key-type").value) : null; } catch (e) { key = null; }
+      $("h-alg").querySelectorAll("option").forEach(function (o) {
+        var alg = o.value, val;
+        if (/^kmac|^cshake/.test(alg)) return; // these need their own parameters
+        try {
+          var opts = XOF[alg] ? { bits: XOF[alg] } : {};
+          if (key && !NO_HMAC[alg]) opts.hmacKey = key;
+          val = fmtHash(window.EncodeHash.hash(alg, data, opts));
+        } catch (e) { val = "—"; }
+        var tr = document.createElement("tr");
+        var th = document.createElement("th");
+        th.textContent = o.textContent + (key && !NO_HMAC[alg] ? " HMAC" : "") + (XOF[alg] ? " (" + XOF[alg] + " bits)" : "");
+        var td = document.createElement("td");
+        td.textContent = val;
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "btn"; b.textContent = "Copy";
+        b.addEventListener("click", function () { copy(val, $("h-status")); });
+        td.appendChild(b);
+        tr.appendChild(th); tr.appendChild(td);
+        table.appendChild(tr);
+      });
+    }
+
+    var hashTimer = null;
+    function scheduleHash() { clearTimeout(hashTimer); hashTimer = setTimeout(runHash, 120); }
+    ["h-input", "h-key", "h-fn", "h-cust", "h-bits"].forEach(function (id) { $(id).addEventListener("input", scheduleHash); });
+    ["h-alg", "h-type", "h-key-type", "h-hmac", "h-all"].forEach(function (id) { $(id).addEventListener("change", function () {
+      if (id === "h-alg" && XOF[$("h-alg").value]) $("h-bits").value = XOF[$("h-alg").value];
+      runHash();
+    }); });
+    bindSeg("hsrc", runHash);
+    bindSeg("hfmt", function () { if (lastHash) $("h-output").value = fmtHash(lastHash); runHash(); });
+    $("h-copy").addEventListener("click", function () { copy($("h-output").value, $("h-status")); });
+    wireDrop($("h-drop"), $("h-file"), function (f) {
+      $("h-file-name").textContent = "Reading " + f.name + "…";
+      f.arrayBuffer().then(function (buf) {
+        hashFile = { name: f.name, bytes: new Uint8Array(buf) };
+        $("h-file-name").textContent = f.name + " · " + fmtSize(f.size);
+        runHash();
+      }, function () { $("h-error").textContent = "Could not read that file."; });
+    });
+
+    /* ---------------- encode / decode ---------------- */
+    var encFile = null, lastBytes = null;
+    var BYTE_SCHEMES = { base64: 1, base64url: 1, base32: 1, base58: 1, hex: 1 };
+
+    function syncEncOptions() {
+      var scheme = $("e-scheme").value, dir = segValue("edir");
+      var fileOk = BYTE_SCHEMES[scheme] && dir === "encode";
+      $("e-src-field").hidden = !fileOk;
+      if (!fileOk) setSeg("esrc", "text");
+      var src = segValue("esrc");
+      $("e-text-wrap").hidden = src !== "text";
+      $("e-file-wrap").hidden = src !== "file";
+      $("e-input").placeholder = dir === "encode" ? "Type or paste text to encode…" : "Paste " + $("e-scheme").selectedOptions[0].textContent + " to decode…";
+    }
+
+    function encodeBytes(scheme, b) {
+      switch (scheme) {
+        case "base64": return bytesToB64(b);
+        case "base64url": return bytesToB64(b).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+        case "base32": return base32Encode(b);
+        case "base58": return base58Encode(b);
+        case "hex": return bytesToHex(b);
+      }
+    }
+    function decodeToBytes(scheme, s) {
+      switch (scheme) {
+        case "base64": return b64ToBytes(s, false);
+        case "base64url": return b64ToBytes(s, true);
+        case "base32": return base32Decode(s);
+        case "base58": return base58Decode(s);
+        case "hex": return hexToBytes(s);
+      }
+    }
+
+    function runEncode() {
+      syncEncOptions();
+      $("e-error").textContent = "";
+      $("e-download").hidden = true;
+      lastBytes = null;
+      var scheme = $("e-scheme").value, dir = segValue("edir"), src = segValue("esrc");
+      var input = $("e-input").value, out = "";
+      try {
+        if (scheme === "url") {
+          if (dir === "encode") out = encodeURIComponent(input);
+          else { try { out = decodeURIComponent(input.replace(/\+/g, " ")); } catch (e) { throw new Error("That text has a malformed %-escape, so it cannot be URL-decoded."); } }
+        } else if (scheme === "html") {
+          out = dir === "encode" ? htmlEncode(input) : htmlDecode(input);
+        } else if (dir === "encode") {
+          var bytes = src === "file" ? (encFile ? encFile.bytes : null) : te.encode(input);
+          out = bytes ? encodeBytes(scheme, bytes) : "";
+        } else if (input.trim()) {
+          lastBytes = decodeToBytes(scheme, input);
+          var d = decodeUtf8(lastBytes);
+          out = d.binary
+            ? "(" + lastBytes.length + " bytes that are not UTF-8 text. Shown as hex; use Download bytes to save them.)\n" + bytesToHex(lastBytes)
+            : d.text;
+          $("e-download").hidden = false;
+        }
+      } catch (e) {
+        out = "";
+        $("e-error").textContent = e.message || String(e);
+      }
+      $("e-output").value = out;
+      save();
+    }
+
+    var encTimer = null;
+    $("e-input").addEventListener("input", function () { clearTimeout(encTimer); encTimer = setTimeout(runEncode, 80); });
+    $("e-scheme").addEventListener("change", runEncode);
+    bindSeg("edir", runEncode);
+    bindSeg("esrc", runEncode);
+    $("e-copy").addEventListener("click", function () { copy($("e-output").value, $("e-status")); });
+    $("e-swap").addEventListener("click", function () {
+      if (lastBytes && decodeUtf8(lastBytes).binary) { flash($("e-status"), "The decoded bytes are not text, so they cannot be swapped back in."); return; }
+      $("e-input").value = $("e-output").value;
+      setSeg("edir", segValue("edir") === "encode" ? "decode" : "encode");
+      setSeg("esrc", "text");
+      runEncode();
+    });
+    $("e-download").addEventListener("click", function () {
+      if (!lastBytes) return;
+      var url = URL.createObjectURL(new Blob([lastBytes], { type: "application/octet-stream" }));
+      var a = document.createElement("a");
+      a.href = url; a.download = "decoded.bin";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    });
+    wireDrop($("e-drop"), $("e-file"), function (f) {
+      $("e-file-name").textContent = "Reading " + f.name + "…";
+      f.arrayBuffer().then(function (buf) {
+        encFile = { name: f.name, bytes: new Uint8Array(buf) };
+        $("e-file-name").textContent = f.name + " · " + fmtSize(f.size);
+        runEncode();
+      }, function () { $("e-error").textContent = "Could not read that file."; });
+    });
+
+    /* ---------------- persistence (settings only; never text, keys or files) ---------------- */
+    function save() {
+      try {
+        localStorage.setItem(LS, JSON.stringify({
+          tab: tabs.filter(function (t) { return t.getAttribute("aria-selected") === "true"; })[0].id,
+          alg: $("h-alg").value, type: $("h-type").value, fmt: segValue("hfmt"), all: $("h-all").checked,
+          scheme: $("e-scheme").value, dir: segValue("edir")
+        }));
+      } catch (e) {}
+    }
+    var st = null;
+    try { st = JSON.parse(localStorage.getItem(LS) || "null"); } catch (e) {}
+    if (st) {
+      if (st.alg && $("h-alg").querySelector('option[value="' + st.alg + '"]')) $("h-alg").value = st.alg;
+      if (st.type) $("h-type").value = st.type;
+      if (st.fmt) setSeg("hfmt", st.fmt);
+      $("h-all").checked = !!st.all;
+      if (st.scheme) $("e-scheme").value = st.scheme;
+      if (st.dir) setSeg("edir", st.dir);
+    }
+    if (XOF[$("h-alg").value]) $("h-bits").value = XOF[$("h-alg").value];
+
+    // Deep links: #md5, #sha3_256, #base64, #base58-decode … pick a tool directly.
+    var h = decodeURIComponent(location.hash.slice(1)).toLowerCase().replace(/-/g, "_");
+    var hashOpt = h && $("h-alg").querySelector('option[value="' + h + '"]');
+    var m = /^(base64url|base64|base32|base58|hex|url|html)(?:_(encode|decode))?$/.exec(h);
+    if (hashOpt) { $("h-alg").value = h; if (XOF[h]) $("h-bits").value = XOF[h]; showTab($("tab-hash")); }
+    else if (m) { $("e-scheme").value = m[1]; if (m[2]) setSeg("edir", m[2]); showTab($("tab-encode")); }
+    else if (h === "encode") showTab($("tab-encode"));
+    else if (h === "hash") showTab($("tab-hash"));
+    else showTab((st && st.tab && $(st.tab)) || tabs[0]);
+
+    runHash();
+    runEncode();
+  })();
+  </script>
+</body>
+</html>

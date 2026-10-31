@@ -1,0 +1,2617 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Color Studio</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #e9eaed;
+      --paper-2: #f7f7f9;
+      --paper-3: #ececf0;
+      --ink: #1d2126;
+      --ink-2: #5b6068;
+      --ink-3: #62666e;
+      --rule: #d6d7dc;
+      --accent: #2f6db3;
+      --accent-ink: #26598f;
+      --accent-wash: rgba(47, 109, 179, .10);
+      --good: #2e7d4f;
+      --danger: #8f2d23;
+      --focus: #2f6db3;
+      --ui-font: "Outfit", sans-serif;
+      --mono-font: "JetBrains Mono", monospace;
+      --checker: #bfc2ca;
+      --shadow: 0 1px 2px rgba(24, 28, 38, .05), 0 10px 28px rgba(24, 28, 38, .07);
+      --shadow-sm: 0 1px 2px rgba(24, 28, 38, .05);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #121316;
+        --paper-2: #1a1b1f;
+        --paper-3: #26272e;
+        --ink: #eceef2;
+        --ink-2: #a2a6af;
+        --ink-3: #9ba0aa;
+        --rule: #2d2f36;
+        --accent: #7db0e6;
+        --accent-ink: #9cc3ee;
+        --accent-wash: rgba(125, 176, 230, .14);
+        --good: #6fce97;
+        --danger: #f0a9a0;
+        --focus: #7db0e6;
+        --checker: #3d404a;
+        --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .35);
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--ui-font);
+      font-size: 15px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, select, textarea { font: inherit; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+    code, .mono { font-family: var(--mono-font); }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--paper);
+      border-bottom: 1px solid var(--rule);
+      padding: 14px 24px;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    }
+    .topbar h1 { margin: 0; font-size: 21px; font-weight: 600; letter-spacing: -.01em; }
+    .topbar .sub { color: var(--ink-3); font-size: 13px; }
+
+    .container { max-width: 1060px; margin: 0 auto; padding: 24px 24px 64px; }
+
+    .label {
+      font-size: 11.5px; font-weight: 600; letter-spacing: .07em;
+      text-transform: uppercase; color: var(--ink-3); margin: 0 0 8px;
+    }
+
+    /* pill segmented control */
+    .seg {
+      display: inline-flex; gap: 2px; padding: 3px;
+      background: var(--paper-3); border: 1px solid var(--rule); border-radius: 999px;
+    }
+    .seg button {
+      border: 0; background: transparent; color: var(--ink-2);
+      padding: 6px 14px; border-radius: 999px; font-size: 13.5px; font-weight: 600;
+      cursor: pointer;
+    }
+    .seg button[aria-pressed="true"] {
+      background: var(--paper-2); color: var(--accent-ink);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card {
+      background: var(--paper-2); border: 1px solid var(--rule); border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .stack { display: grid; gap: 16px; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .row-between { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+
+    .btn {
+      border: 1px solid var(--rule); background: var(--paper-2); color: var(--ink);
+      border-radius: 9px; padding: 7px 13px; font-size: 13.5px; font-weight: 600; cursor: pointer;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent-ink); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover { color: #fff; filter: brightness(1.08); }
+    .btn.small { padding: 4px 9px; font-size: 12.5px; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    input[type="range"] { accent-color: var(--accent); }
+    input[type="number"], select {
+      border: 1px solid var(--rule); background: var(--paper-2); color: var(--ink);
+      border-radius: 9px; padding: 6px 9px; font-size: 13.5px;
+    }
+    input[type="number"] { width: 74px; font-family: var(--mono-font); }
+    input[type="color"] {
+      width: 42px; height: 32px; padding: 2px; border: 1px solid var(--rule);
+      border-radius: 9px; background: var(--paper-2); cursor: pointer;
+    }
+
+    .checker {
+      background-image: conic-gradient(var(--checker) 25%, transparent 0 50%, var(--checker) 0 75%, transparent 0);
+      background-size: 16px 16px;
+      background-color: var(--paper-3);
+    }
+
+    /* photo mode */
+    .dropzone {
+      border: 1px dashed var(--ink-3); border-radius: 14px; padding: 14px;
+      background: var(--paper); text-align: center;
+    }
+    .dropzone.dragover { border-color: var(--accent); background: var(--accent-wash); }
+    .dropzone canvas {
+      max-width: 100%; height: auto; border-radius: 9px; display: block; margin: 0 auto;
+    }
+    .drop-hint { color: var(--ink-3); font-size: 13px; margin: 10px 0 0; }
+
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 10px; }
+    .swatch {
+      border: 1px solid var(--rule); border-radius: 14px; overflow: hidden;
+      background: var(--paper-2); cursor: pointer; text-align: left; padding: 0; width: 100%;
+    }
+    .swatch .chip { height: 64px; }
+    .swatch .meta { padding: 8px 10px 10px; display: grid; gap: 2px; }
+    .swatch .hex { font-family: var(--mono-font); font-weight: 600; font-size: 14px; color: var(--ink); }
+    .swatch .detail { font-family: var(--mono-font); font-size: 11px; color: var(--ink-3); }
+    .swatch .share { font-size: 12px; color: var(--ink-2); font-weight: 600; }
+
+    /* gradient mode */
+    .grad-preview {
+      height: 220px; border-radius: 14px; border: 1px solid var(--rule);
+    }
+    .grad-text-preview {
+      border-radius: 14px; border: 1px solid var(--rule); padding: 22px;
+      display: grid; gap: 6px;
+    }
+    .grad-text-preview .big { font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
+    .stop-row {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      border: 1px solid var(--rule); border-radius: 14px; padding: 10px 12px; background: var(--paper);
+    }
+    .stop-row .grow { flex: 1 1 140px; display: flex; align-items: center; gap: 8px; }
+    .stop-row input[type="range"] { flex: 1; }
+    .stop-hex { font-family: var(--mono-font); font-size: 12.5px; color: var(--ink-2); min-width: 62px; }
+
+    textarea.output, pre.output {
+      width: 100%; min-height: 92px; margin: 0;
+      border: 1px solid var(--rule); border-radius: 14px; background: var(--paper);
+      color: var(--ink); padding: 12px; font-family: var(--mono-font); font-size: 12.5px;
+      white-space: pre-wrap; word-break: break-word;
+    }
+
+    /* simulator mode */
+    .sim-list { display: grid; gap: 8px; }
+    .sim-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: stretch;
+    }
+    .sim-cell {
+      border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; background: var(--paper-2);
+    }
+    .sim-cell .chip { height: 44px; }
+    .sim-cell .cap {
+      padding: 6px 10px; font-family: var(--mono-font); font-size: 11.5px; color: var(--ink-2);
+      display: flex; justify-content: space-between; gap: 8px;
+    }
+    .sim-images { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .sim-images figure { margin: 0; }
+    .sim-images canvas { max-width: 100%; height: auto; border-radius: 9px; border: 1px solid var(--rule); display: block; }
+    .sim-images figcaption { font-size: 12px; color: var(--ink-3); margin-top: 6px; }
+    @media (max-width: 640px) {
+      .sim-images, .sim-row { grid-template-columns: 1fr; }
+      .topbar { padding: 12px 16px; }
+      .container { padding: 18px 14px 48px; }
+    }
+
+    .status { min-height: 20px; font-size: 13px; color: var(--good); font-weight: 600; }
+    .note { font-size: 13px; color: var(--ink-3); }
+  
+/* ---- Token Workshop (folded in from online-tools/) ---- */
+#panel-tokens {
+        color-scheme: light dark;
+        --chrome-bg:#e9eaed;
+        --chrome-panel:#f7f7f9;
+        --chrome-panel2:#ffffff;
+        --chrome-ink:#1d2126;
+        --chrome-mut:#5b6068;
+        --chrome-faint:#62666e;
+        --chrome-line:#d6d7dc;
+        --chrome-line2:#bfc2ca;
+        --chrome-acc:#2f6db3;
+        --chrome-acc-strong:#26598f;
+        --chrome-acc-ink:#ffffff;
+        --chrome-good:#2e7d4f;
+        --chrome-warn:#9a6206;
+        --chrome-bad:#8f2d23;
+        --chrome-chip:#ececf0;
+        --shadow:0 1px 2px rgba(24,28,38,.05),0 10px 28px rgba(24,28,38,.07);
+      }
+@media (prefers-color-scheme: dark) {
+#panel-tokens {
+          --chrome-bg:#121316;
+          --chrome-panel:#1a1b1f;
+          --chrome-panel2:#222329;
+          --chrome-ink:#eceef2;
+          --chrome-mut:#a2a6af;
+          --chrome-faint:#9ba0aa;
+          --chrome-line:#2d2f36;
+          --chrome-line2:#3d404a;
+          --chrome-acc:#7db0e6;
+          --chrome-acc-strong:#9cc3ee;
+          --chrome-acc-ink:#0d1724;
+          --chrome-good:#6fce97;
+          --chrome-warn:#e0a83e;
+          --chrome-bad:#f0a9a0;
+          --chrome-chip:#26272e;
+          --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.35);
+        }
+}
+#panel-tokens * {box-sizing:border-box}
+#panel-tokens [hidden] {display:none !important}
+#panel-tokens, #panel-tokens {margin:0;padding:0}
+#panel-tokens {
+        font-family:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
+        background:var(--chrome-bg);
+        color:var(--chrome-ink);
+        font-size:15px;
+        line-height:1.45;
+        -webkit-font-smoothing:antialiased;
+      }
+#panel-tokens .mono {font-family:"JetBrains Mono",ui-monospace,monospace}
+#panel-tokens button {font-family:inherit;cursor:pointer}
+#panel-tokens input {font-family:inherit}
+#panel-tokens :focus-visible {outline:2px solid var(--chrome-acc);outline-offset:2px}
+#panel-tokens .topbar {
+        position:sticky;top:0;z-index:40;
+        display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+        padding:10px 18px;
+        background:var(--chrome-panel);
+        border-bottom:1px solid var(--chrome-line);
+      }
+#panel-tokens .topbar .wordmark {display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:.01em}
+#panel-tokens .wordmark .swatches {display:flex;border-radius:6px;overflow:hidden;border:1px solid var(--chrome-line2)}
+#panel-tokens .wordmark .swatches span {width:11px;height:22px;display:block}
+#panel-tokens .topbar .spacer {flex:1}
+#panel-tokens .seg {display:inline-flex;background:var(--chrome-chip);border:1px solid var(--chrome-line);border-radius:9px;padding:3px;gap:2px}
+#panel-tokens .seg button {
+        border:0;background:transparent;color:var(--chrome-mut);
+        padding:5px 14px;border-radius:6px;font-size:13.5px;font-weight:600;
+      }
+#panel-tokens .seg button[aria-pressed="true"] {background:var(--chrome-acc);color:var(--chrome-acc-ink);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+#panel-tokens .editing-label {font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--chrome-faint)}
+#panel-tokens .btn {
+        border:1px solid var(--chrome-line2);background:var(--chrome-panel2);color:var(--chrome-ink);
+        border-radius:9px;padding:7px 14px;font-size:13.5px;font-weight:600;
+        display:inline-flex;align-items:center;gap:7px;
+      }
+#panel-tokens .btn:hover {border-color:var(--chrome-faint)}
+#panel-tokens .btn.primary {background:var(--chrome-acc);border-color:var(--chrome-acc);color:var(--chrome-acc-ink)}
+#panel-tokens .btn.primary:hover {background:var(--chrome-acc-strong);border-color:var(--chrome-acc-strong)}
+#panel-tokens .btn.small {padding:4px 10px;font-size:12.5px;border-radius:7px}
+#panel-tokens .btn:disabled {opacity:.45;cursor:default}
+#panel-tokens .stepper {
+        display:flex;gap:4px;flex-wrap:wrap;
+        padding:12px 18px 0;
+        max-width:1560px;margin:0 auto;
+      }
+#panel-tokens .step {
+        display:flex;align-items:center;gap:9px;
+        border:1px solid var(--chrome-line);background:var(--chrome-panel);
+        border-radius:10px;padding:8px 14px 8px 9px;font-size:13.5px;font-weight:600;color:var(--chrome-mut);
+      }
+#panel-tokens .step .n {
+        width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+        background:var(--chrome-chip);color:var(--chrome-mut);font-size:12px;font-weight:700;flex:none;
+      }
+#panel-tokens .step[aria-current="step"] {color:var(--chrome-ink);border-color:var(--chrome-acc)}
+#panel-tokens .step[aria-current="step"] .n {background:var(--chrome-acc);color:var(--chrome-acc-ink)}
+#panel-tokens .step .flag {font-size:11px;font-weight:700;color:var(--chrome-bad)}
+#panel-tokens .step .flag.ok {color:var(--chrome-good)}
+#panel-tokens .layout {
+        display:grid;grid-template-columns:430px minmax(0,1fr);gap:16px;
+        padding:14px 18px 30px;max-width:1560px;margin:0 auto;align-items:start;
+      }
+@media (max-width:1020px) {
+#panel-tokens .layout {grid-template-columns:1fr}
+}
+#panel-tokens .card {
+        background:var(--chrome-panel);border:1px solid var(--chrome-line);
+        border-radius:14px;box-shadow:var(--shadow);
+      }
+#panel-tokens .card .card-head {padding:14px 18px 0}
+#panel-tokens .card .card-body {padding:12px 18px 18px}
+#panel-tokens h2.card-title {margin:0;font-size:17px;font-weight:700}
+#panel-tokens .guidance {color:var(--chrome-mut);font-size:13.5px;margin:6px 0 0}
+#panel-tokens .guidance strong {color:var(--chrome-ink)}
+#panel-tokens .seed-grid {display:grid;gap:14px}
+#panel-tokens .seed-row label {display:block;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--chrome-faint);margin-bottom:6px}
+#panel-tokens .hue-track {
+        -webkit-appearance:none;appearance:none;width:100%;height:16px;border-radius:8px;border:1px solid var(--chrome-line2);
+        background:linear-gradient(90deg,oklch(.62 .17 0),oklch(.62 .17 40),oklch(.62 .17 80),oklch(.62 .17 120),oklch(.62 .17 160),oklch(.62 .17 200),oklch(.62 .17 240),oklch(.62 .17 280),oklch(.62 .17 320),oklch(.62 .17 360));
+        outline-offset:2px;
+      }
+#panel-tokens .hue-track::-webkit-slider-thumb {-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid #22252b;box-shadow:0 1px 4px rgba(0,0,0,.35);cursor:pointer}
+#panel-tokens .hue-track::-moz-range-thumb {width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid #22252b;cursor:pointer}
+#panel-tokens .seed-val {font-size:13px;color:var(--chrome-mut)}
+#panel-tokens .preset-row {display:flex;flex-wrap:wrap;gap:7px}
+#panel-tokens .preset {
+        border:1px solid var(--chrome-line2);background:var(--chrome-panel2);border-radius:999px;
+        padding:5px 12px 5px 6px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:8px;color:var(--chrome-ink);
+      }
+#panel-tokens .preset .dots {display:inline-flex;border-radius:99px;overflow:hidden;border:1px solid var(--chrome-line2)}
+#panel-tokens .preset .dots i {width:10px;height:14px;display:block}
+#panel-tokens .preset:hover {border-color:var(--chrome-faint)}
+#panel-tokens select.harmony {
+        width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--chrome-line2);
+        background:var(--chrome-panel2);color:var(--chrome-ink);font-size:14px;font-weight:500;
+      }
+#panel-tokens .seed-actions {display:flex;gap:8px;flex-wrap:wrap}
+#panel-tokens .token-list {display:grid;gap:10px}
+#panel-tokens .token {
+        border:1px solid var(--chrome-line);border-radius:12px;background:var(--chrome-panel2);
+        padding:11px 12px 12px;
+      }
+#panel-tokens .token.hl {border-color:var(--chrome-acc)}
+#panel-tokens .token-top {display:flex;align-items:center;gap:10px}
+#panel-tokens .swatch {
+        position:relative;width:40px;height:40px;border-radius:10px;flex:none;overflow:hidden;
+        border:1px solid var(--chrome-line2);cursor:pointer;
+        background-image:linear-gradient(45deg,#c9c9c9 25%,transparent 25%),linear-gradient(-45deg,#c9c9c9 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#c9c9c9 75%),linear-gradient(-45deg,transparent 75%,#c9c9c9 75%);
+        background-size:12px 12px;background-position:0 0,0 6px,6px -6px,-6px 0;background-color:#fff;
+      }
+#panel-tokens .swatch .fill {position:absolute;inset:0}
+#panel-tokens .swatch input[type="color"] {position:absolute;inset:-8px;width:60px;height:60px;opacity:0;cursor:pointer;border:0;padding:0}
+#panel-tokens .token-names {min-width:0;flex:1}
+#panel-tokens .token-name {font-weight:600;font-size:14.5px;line-height:1.2}
+#panel-tokens .token-var {font-size:11.5px;color:var(--chrome-faint)}
+#panel-tokens .token-desc {font-size:12px;color:var(--chrome-mut);margin-top:2px;line-height:1.35}
+#panel-tokens .hexin {
+        width:86px;flex:none;text-align:center;font-size:12.5px;padding:6px 4px;
+        border:1px solid var(--chrome-line2);border-radius:8px;background:var(--chrome-panel);color:var(--chrome-ink);
+        text-transform:uppercase;
+      }
+#panel-tokens .hexin.invalid {border-color:var(--chrome-bad);color:var(--chrome-bad)}
+#panel-tokens .sliders {margin-top:10px;display:grid;gap:7px}
+#panel-tokens .slider-row {display:grid;grid-template-columns:14px 1fr 52px;align-items:center;gap:9px}
+#panel-tokens .slider-row .lab {font-size:11px;font-weight:700;color:var(--chrome-faint)}
+#panel-tokens .slider-row .val {font-size:11.5px;color:var(--chrome-mut);text-align:right}
+#panel-tokens input[type="range"].tok {
+        -webkit-appearance:none;appearance:none;width:100%;height:12px;border-radius:6px;border:1px solid var(--chrome-line2);outline-offset:2px;background:var(--chrome-chip);
+      }
+#panel-tokens input[type="range"].tok::-webkit-slider-thumb {-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid #22252b;box-shadow:0 1px 3px rgba(0,0,0,.3);cursor:pointer}
+#panel-tokens input[type="range"].tok::-moz-range-thumb {width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid #22252b;cursor:pointer}
+#panel-tokens .gamut-note {font-size:11px;color:var(--chrome-warn);font-weight:600;display:none}
+#panel-tokens .gamut-note.show {display:block}
+#panel-tokens .right-col {display:grid;gap:16px;min-width:0}
+#panel-tokens .preview-frame {border-radius:12px;overflow:hidden;border:1px solid var(--chrome-line2)}
+#panel-tokens .preview-chrome {
+        display:flex;align-items:center;gap:8px;padding:8px 12px;
+        background:var(--chrome-chip);border-bottom:1px solid var(--chrome-line);
+      }
+#panel-tokens .preview-chrome .dot {width:10px;height:10px;border-radius:50%}
+#panel-tokens .preview-chrome .url {
+        flex:1;max-width:340px;margin:0 auto;text-align:center;font-size:11.5px;color:var(--chrome-mut);
+        background:var(--chrome-panel2);border:1px solid var(--chrome-line);border-radius:6px;padding:3px 10px;
+      }
+#panel-tokens .pv {font-family:"Outfit",system-ui,sans-serif}
+#panel-tokens .pv [data-tok] {transition:outline-color .12s}
+#panel-tokens .pv .is-hl {outline:2.5px solid #ff4d2e;outline-offset:2px;border-radius:4px}
+#panel-tokens .audit-table {display:grid;gap:0}
+#panel-tokens .audit-row {
+        display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:10px;align-items:center;
+        padding:9px 2px;border-bottom:1px solid var(--chrome-line);
+      }
+#panel-tokens .audit-row:last-child {border-bottom:0}
+#panel-tokens .pair-vis {display:flex;align-items:center;gap:9px;min-width:0}
+#panel-tokens .pair-chip {
+        width:44px;height:30px;border-radius:7px;flex:none;display:grid;place-items:center;
+        font-weight:700;font-size:13px;border:1px solid var(--chrome-line2);
+      }
+#panel-tokens .pair-names {font-size:13px;font-weight:600;line-height:1.25;min-width:0}
+#panel-tokens .pair-names small {display:block;font-weight:500;color:var(--chrome-faint);font-size:11.5px}
+#panel-tokens .ratio {font-size:13px;font-weight:600;text-align:right;white-space:nowrap}
+#panel-tokens .ratio small {display:block;font-weight:500;color:var(--chrome-faint);font-size:11px}
+#panel-tokens .badge {
+        font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;white-space:nowrap;text-align:center;min-width:52px;
+      }
+#panel-tokens .badge.pass {background:color-mix(in srgb,var(--chrome-good) 16%,transparent);color:var(--chrome-good)}
+#panel-tokens .badge.fail {background:color-mix(in srgb,var(--chrome-bad) 14%,transparent);color:var(--chrome-bad)}
+#panel-tokens .badge.mid {background:color-mix(in srgb,var(--chrome-warn) 16%,transparent);color:var(--chrome-warn)}
+@media (max-width:560px) {
+#panel-tokens .audit-row {grid-template-columns:minmax(0,1fr) auto}
+#panel-tokens .audit-row .fixcell {grid-column:1/-1}
+}
+#panel-tokens .export-tabs {display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+#panel-tokens .codebox {
+        margin:12px 0 0;background:#141519;color:#e8eaf0;border-radius:10px;padding:14px 16px;
+        font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;line-height:1.65;
+        overflow:auto;max-height:420px;white-space:pre;
+      }
+@media (prefers-color-scheme: dark) {
+#panel-tokens .codebox {background:#0c0d10}
+}
+#panel-tokens .export-actions {display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center}
+#panel-tokens .toast {
+        position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(16px);
+        background:#1d2126;color:#f2f3f5;padding:9px 18px;border-radius:99px;font-size:13.5px;font-weight:600;
+        opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:99;box-shadow:0 8px 30px rgba(0,0,0,.3);
+      }
+#panel-tokens .toast.show {opacity:1;transform:translateX(-50%) translateY(0)}
+#panel-tokens .stat-row {display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+#panel-tokens .stat {
+        flex:1;min-width:110px;border:1px solid var(--chrome-line);border-radius:10px;background:var(--chrome-panel2);
+        padding:10px 12px;text-align:center;
+      }
+#panel-tokens .stat .big {font-size:22px;font-weight:700;line-height:1.1}
+#panel-tokens .stat .lbl {font-size:11.5px;color:var(--chrome-faint);font-weight:600}
+#panel-tokens .foot-note {color:var(--chrome-faint);font-size:12px;margin-top:10px}
+#panel-tokens .card {scroll-margin-top:72px}
+#panel-tokens #previewModeLabel, #panel-tokens #auditModeLabel {font-weight:700;color:var(--chrome-ink)}
+#panel-tokens .pv-mode-pill {
+        font-size:10.5px;font-weight:800;letter-spacing:.07em;padding:2.5px 9px;border-radius:99px;flex:none;
+        background:var(--pv-bg);color:var(--pv-text);border:1.5px solid var(--pv-border-strong);
+      }
+#panel-tokens .mobile-bar {display:none}
+#panel-tokens .mini-pv {
+        flex:1;min-width:0;display:flex;align-items:center;gap:8px;text-align:left;overflow:hidden;
+        border:1px solid var(--chrome-line2);border-radius:10px;padding:5px 9px;
+        background:var(--pv-bg);
+      }
+#panel-tokens .mini-card {display:inline-flex;align-items:center;gap:7px;flex:none;background:var(--pv-surface);border:1px solid var(--pv-border);border-radius:7px;padding:3px 8px}
+#panel-tokens .mini-aa {font-weight:700;font-size:13px;line-height:1;color:var(--pv-text)}
+#panel-tokens .mini-btn {background:var(--pv-primary);color:var(--pv-on-primary);font-size:11px;font-weight:700;padding:2.5px 8px;border-radius:99px;line-height:1.2}
+#panel-tokens .mini-dot {width:11px;height:11px;border-radius:50%;background:var(--pv-accent);flex:none}
+#panel-tokens .mini-cap {font-size:11px;color:var(--pv-text-muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#panel-tokens .mini-mode {
+        flex:none;border-radius:10px;padding:5px 12px;font-size:12px;font-weight:800;letter-spacing:.05em;
+        background:var(--pv-surface);color:var(--pv-text);border:1.5px solid var(--pv-border-strong);
+      }
+@media (max-width:1020px) {
+#panel-tokens .mobile-bar {display:flex;flex-basis:100%;min-width:0;align-items:stretch;gap:9px}
+#panel-tokens .card {scroll-margin-top:150px}
+#panel-tokens .topbar {padding:8px 12px;gap:8px}
+#panel-tokens .stepper {flex-wrap:nowrap;overflow-x:auto;padding:10px 12px 4px;scrollbar-width:none}
+#panel-tokens .stepper::-webkit-scrollbar {display:none}
+#panel-tokens .step {flex:none;padding:6px 11px 6px 7px;font-size:12.5px}
+#panel-tokens .layout {padding:12px 12px 24px}
+}
+@media (max-width:560px) {
+#panel-tokens .mini-cap {display:none}
+#panel-tokens .mini-mode {padding:5px 10px}
+}
+#panel-tokens .save-note {font-size:12px;color:var(--chrome-faint);font-weight:600}
+#panel-tokens .seed-lab {display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px}
+#panel-tokens .seed-lab label {margin-bottom:0}
+#panel-tokens .seed-valwrap {display:inline-flex;align-items:baseline;gap:2px;color:var(--chrome-mut);font-size:13px}
+#panel-tokens input.numin-seed {
+        background:transparent;border:1px solid transparent;border-radius:6px;color:var(--chrome-ink);
+        font-size:13px;padding:2px 3px;text-align:right;width:56px;
+      }
+#panel-tokens input.numin-seed:hover {border-color:var(--chrome-line2)}
+#panel-tokens input.numin-seed:focus {border-color:var(--chrome-acc);background:var(--chrome-panel);outline:none}
+#panel-tokens .preset[aria-pressed="true"] {border-color:var(--chrome-acc);box-shadow:inset 0 0 0 1px var(--chrome-acc)}
+#panel-tokens input.numin {
+        background:transparent;border:1px solid transparent;border-radius:6px;
+        padding:2px 3px;width:100%;min-width:0;
+      }
+#panel-tokens input.numin:hover {border-color:var(--chrome-line2)}
+#panel-tokens input.numin:focus {border-color:var(--chrome-acc);background:var(--chrome-panel);color:var(--chrome-ink);outline:none}
+#panel-tokens .oklchin {
+        width:100%;margin-top:8px;font-size:12px;padding:6px 8px;
+        border:1px solid var(--chrome-line2);border-radius:8px;background:var(--chrome-panel);color:var(--chrome-ink);
+      }
+#panel-tokens .oklchin.invalid {border-color:var(--chrome-bad);color:var(--chrome-bad)}
+#panel-tokens .field-err {font-size:11.5px;color:var(--chrome-bad);font-weight:600;display:none;margin-top:6px}
+#panel-tokens .field-err.show {display:block}
+#panel-tokens #fixLog {margin:6px 0 0;padding-left:18px;color:var(--chrome-mut);font-size:12.5px;display:grid;gap:3px}
+#panel-tokens .step-nav {display:flex;justify-content:space-between;gap:10px;margin-top:16px}
+#panel-tokens .step-nav .spacer {flex:1}
+#panel-tokens .compare-strip {display:grid;gap:6px;margin-bottom:12px}
+#panel-tokens .cmp-row {
+        display:flex;align-items:center;gap:7px;width:100%;text-align:left;
+        border:1px solid var(--chrome-line);border-radius:10px;background:var(--chrome-panel2);
+        padding:6px 10px;color:var(--chrome-ink);
+      }
+#panel-tokens .cmp-row[aria-pressed="true"] {border-color:var(--chrome-acc)}
+#panel-tokens .cmp-mode {font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--chrome-mut);width:44px;flex:none}
+#panel-tokens .cmp-sw {width:20px;height:20px;border-radius:6px;border:1px solid var(--chrome-line2);flex:none}
+#panel-tokens .cmp-edit {margin-left:auto;font-size:11px;font-weight:700;color:var(--chrome-faint);flex:none}
+#panel-tokens .cmp-row[aria-pressed="true"] .cmp-edit {color:var(--chrome-acc)}
+#panel-tokens .bm-row {display:flex;align-items:center;gap:10px;border:1px solid var(--chrome-line);border-radius:10px;background:var(--chrome-panel2);padding:9px 12px;margin-top:8px;font-size:13px}
+#panel-tokens .bm-row .grow {flex:1;min-width:0}
+@media (max-width:1020px) {
+#panel-tokens .stepper {position:sticky;top:var(--topbar-h,57px);z-index:35;background:var(--chrome-bg);padding-bottom:8px}
+}
+@media (pointer:coarse) {
+#panel-tokens .btn.small {min-height:40px;padding:8px 13px}
+#panel-tokens .seg button {min-height:40px;padding:9px 14px}
+#panel-tokens .preset {min-height:40px}
+#panel-tokens .step {min-height:40px}
+#panel-tokens input[type="range"].tok::-webkit-slider-thumb {width:26px;height:26px}
+#panel-tokens input[type="range"].tok::-moz-range-thumb {width:24px;height:24px}
+#panel-tokens .hue-track::-webkit-slider-thumb {width:28px;height:28px}
+#panel-tokens .hue-track::-moz-range-thumb {width:26px;height:26px}
+}
+#panel-tokens { max-width: none; margin: 0; padding: 0; background: transparent; min-height: 0; }
+/* ---- Contrast Pairs (folded in from semantic-token-mapper/) ---- */
+#panel-contrast {
+            color-scheme: light;
+            --bg: #e9eaed; --panel: #f7f7f9; --panel2: #ffffff;
+            --ink: #1d2126; --mut: #5b6068; --faint: #62666e;
+            --line: #d6d7dc; --line2: #bfc2ca; --chip: #ececf0;
+            --acc: #2f6db3; --acc-strong: #26598f; --acc-ink: #ffffff;
+            --ok: #2e7d4f; --err-bg: #fdeeee; --err-line: #efc2c2; --err-ink: #8f2d23;
+            --shadow: 0 1px 2px rgba(24,28,38,.05), 0 10px 28px rgba(24,28,38,.07);
+        }
+@media (prefers-color-scheme: dark) {
+#panel-contrast {
+                color-scheme: dark;
+                --bg: #121316; --panel: #1a1b1f; --panel2: #222329;
+                --ink: #eceef2; --mut: #a2a6af; --faint: #9ba0aa;
+                --line: #2d2f36; --line2: #3d404a; --chip: #26272e;
+                --acc: #7db0e6; --acc-strong: #9cc3ee; --acc-ink: #0d1724;
+                --ok: #6fce97; --err-bg: #3a2120; --err-line: #6e3a36; --err-ink: #f0a9a0;
+                --shadow: 0 1px 2px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.35);
+            }
+}
+#panel-contrast * { box-sizing: border-box; }
+#panel-contrast { font-family: "Outfit", system-ui, sans-serif; font-size: 15px; line-height: 1.45; background: var(--bg); color: var(--ink); max-width: 900px; margin: 0 auto; padding: 2rem; }
+#panel-contrast h1 { font-size: 1.55rem; line-height: 1.2; margin: 0 0 0.5rem; }
+#panel-contrast :focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+#panel-contrast p { color: var(--mut); }
+#panel-contrast .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+#panel-contrast .token-group { background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); padding: 1rem; border-radius: 14px; margin-bottom: 1rem; }
+#panel-contrast .color-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+#panel-contrast .color-row label { font-weight: 600; font-size: 0.9rem; }
+#panel-contrast input[type="color"] { width: 50px; height: 40px; padding: 2px; background: var(--panel2); border: 1px solid var(--line2); border-radius: 9px; cursor: pointer; }
+#panel-contrast input[type="text"] { padding: 0.5rem 0.6rem; flex-grow: 1; background: var(--panel2); color: var(--ink); border: 1px solid var(--line2); border-radius: 9px; font-family: "JetBrains Mono", monospace; font-size: 0.9rem; }
+#panel-contrast input:focus { border-color: var(--acc); outline: none; }
+#panel-contrast .preview-box { padding: 1rem; border-radius: 9px; font-weight: bold; text-align: center; margin-top: 1rem; border: 1px solid var(--line2); }
+#panel-contrast .result { margin-top: 0.5rem; font-size: 0.9rem; color: var(--mut); }
+#panel-contrast .pass { color: var(--ok); font-weight: bold; }
+#panel-contrast .fail { color: var(--err-ink); font-weight: bold; }
+#panel-contrast button { font: inherit; font-weight: 600; padding: 0.5rem 1rem; cursor: pointer; background: var(--acc); color: var(--acc-ink); border: none; border-radius: 9px; }
+#panel-contrast button:hover { background: var(--acc-strong); }
+#panel-contrast { max-width: none; margin: 0; padding: 0; background: transparent; min-height: 0; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Color Studio</h1>
+    <span class="sub">Photo palettes · gradients · color-blindness simulation · OKLCH tokens · contrast pairs — all in your browser</span>
+  </header>
+
+  <main class="container stack">
+    <div class="row-between">
+      <nav class="seg" aria-label="Color Studio modes">
+        <button type="button" data-tab="photo" aria-pressed="true">Photo Palette</button>
+        <button type="button" data-tab="gradient" aria-pressed="false">Gradient Studio</button>
+        <button type="button" data-tab="sim" aria-pressed="false">Blindness Simulator</button>
+        <button type="button" data-tab="tokens" aria-pressed="false">Token Workshop</button>
+        <button type="button" data-tab="contrast" aria-pressed="false">Contrast Pairs</button>
+      </nav>
+      <span class="status" id="status" role="status" aria-live="polite"></span>
+    </div>
+
+    <!-- ============ PHOTO PALETTE ============ -->
+    <section class="panel active" id="panel-photo">
+      <div class="stack">
+        <div class="card stack">
+          <div>
+            <p class="label">Source image</p>
+            <div class="dropzone checker" id="dropZone">
+              <canvas id="imageCanvas" width="640" height="400" aria-label="Source image preview"></canvas>
+              <p class="drop-hint">Drop an image anywhere on this card, or use the buttons below. Nothing leaves your browser.</p>
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn primary" type="button" id="uploadBtn">Upload image</button>
+            <input type="file" id="fileInput" accept="image/*" hidden />
+            <button class="btn" type="button" id="sampleBtn">Use built-in sample</button>
+            <label class="row" style="gap:6px;">
+              <span class="label" style="margin:0;">Colors</span>
+              <select id="colorCount" aria-label="Number of palette colors">
+                <option>3</option><option>4</option><option selected>5</option><option>6</option>
+                <option>7</option><option>8</option><option>9</option><option>10</option>
+              </select>
+            </label>
+            <button class="btn" type="button" id="extractBtn">Extract palette</button>
+          </div>
+        </div>
+
+        <div class="card stack">
+          <div class="row-between">
+            <p class="label" style="margin:0;">Palette — click a swatch to copy its hex</p>
+            <span class="note" id="extractStatus"></span>
+          </div>
+          <div class="swatches" id="paletteGrid"></div>
+          <div>
+            <p class="label">Export palette</p>
+            <div class="row">
+              <button class="btn small" type="button" id="copyCssBtn">Copy CSS variables</button>
+              <button class="btn small" type="button" id="copyJsonBtn">Copy JSON</button>
+              <button class="btn small" type="button" id="copyTokensBtn">Copy Workshop tokens JSON</button>
+              <button class="btn small" type="button" id="downloadCssBtn">Download .css</button>
+              <button class="btn small" type="button" id="downloadJsonBtn">Download .json</button>
+            </div>
+          </div>
+          <pre class="output" id="exportOut" aria-label="Palette export preview"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ GRADIENT STUDIO ============ -->
+    <section class="panel" id="panel-gradient">
+      <div class="stack">
+        <div class="card stack">
+          <div class="row-between">
+            <p class="label" style="margin:0;">Preview</p>
+            <div class="seg" aria-label="Gradient type">
+              <button type="button" id="gradTypeLinear" aria-pressed="true">Linear</button>
+              <button type="button" id="gradTypeRadial" aria-pressed="false">Radial</button>
+            </div>
+          </div>
+          <div class="grad-preview checker" aria-label="Gradient preview"><div class="grad-preview" id="gradPreview" style="border:0;"></div></div>
+          <div class="grad-text-preview" id="gradTextPreview">
+            <span class="big">Color Studio</span>
+            <span>Gradient text-sample preview — headings and body copy over the current gradient.</span>
+          </div>
+          <div class="row">
+            <label class="row" style="gap:6px;">
+              <span class="label" style="margin:0;">Angle</span>
+              <input type="range" id="gradAngle" min="0" max="360" step="1" value="90" aria-label="Gradient angle in degrees" />
+              <input type="number" id="gradAngleNum" min="0" max="360" step="1" value="90" aria-label="Gradient angle value" />
+              <span class="note">deg</span>
+            </label>
+            <button class="btn" type="button" id="fromPaletteBtn">Stops from palette</button>
+          </div>
+        </div>
+
+        <div class="card stack">
+          <div class="row-between">
+            <p class="label" style="margin:0;">Stops</p>
+            <button class="btn primary" type="button" id="addStopBtn">Add stop</button>
+          </div>
+          <div class="stack" id="stopsList" style="gap:8px;"></div>
+          <div>
+            <p class="label">CSS</p>
+            <textarea class="output" id="gradCss" readonly aria-label="Gradient CSS"></textarea>
+            <div class="row" style="margin-top:8px;">
+              <button class="btn small" type="button" id="copyGradCssBtn">Copy CSS</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ COLOR BLINDNESS SIMULATOR ============ -->
+    <section class="panel" id="panel-sim">
+      <div class="stack">
+        <div class="card stack">
+          <div class="row-between">
+            <p class="label" style="margin:0;">Deficiency (matrix approximation)</p>
+            <div class="seg" aria-label="Deficiency type" id="simSeg">
+              <button type="button" data-sim="protanopia" aria-pressed="true">Protanopia</button>
+              <button type="button" data-sim="deuteranopia" aria-pressed="false">Deuteranopia</button>
+              <button type="button" data-sim="tritanopia" aria-pressed="false">Tritanopia</button>
+              <button type="button" data-sim="achromatopsia" aria-pressed="false">Achromatopsia</button>
+            </div>
+          </div>
+          <p class="note" style="margin:0;">Left: original palette color. Right: the same color run through a standard
+            3&times;3 simulation matrix (Machado-style; achromatopsia uses ITU-R BT.601 luminance).
+            These are approximations of how the palette reads to a viewer with that deficiency — not a medical model.</p>
+          <div class="sim-list" id="simGrid"></div>
+        </div>
+
+        <div class="card stack">
+          <p class="label">Image simulation</p>
+          <div class="sim-images">
+            <figure>
+              <canvas id="simOrigCanvas" width="320" height="200"></canvas>
+              <figcaption>Original (source image from Photo Palette)</figcaption>
+            </figure>
+            <figure>
+              <canvas id="simCanvas" width="320" height="200"></canvas>
+              <figcaption>Simulated — <span id="simName">Protanopia</span></figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ============ TOKEN WORKSHOP ============ -->
+    <section class="panel" id="panel-tokens">
+<header class="topbar">
+      <div class="wordmark">
+        <span class="swatches" aria-hidden="true"><span style="background:#b3402a"></span><span style="background:#2a7ab3"></span><span style="background:#3f9e57"></span><span style="background:#e0a83e"></span></span>
+        Color Token Workshop
+      </div>
+      <div class="spacer"></div>
+      <span class="editing-label" aria-hidden="true">Editing</span>
+      <div class="seg" role="group" aria-label="Palette being edited">
+        <button id="modeLight" aria-pressed="true">Light</button>
+        <button id="modeDark" aria-pressed="false">Dark</button>
+      </div>
+      <button class="btn small" id="undoBtn" disabled title="Undo the last change (Ctrl+Z)">Undo</button>
+      <button class="btn small" id="redoBtn" disabled title="Redo (Ctrl+Shift+Z)">Redo</button>
+      <span class="save-note" id="saveNote" role="status">Autosaved in this browser</span>
+      <button class="btn small" id="resetBtn" title="Clear the saved work and restore the default palettes">Reset defaults</button>
+      <button class="btn" id="diceBtn" title="Random seed palette">Random seed</button>
+      <button class="btn primary" id="exportJump">Export CSS</button>
+      <div class="mobile-bar" id="mobileBar">
+        <button class="mini-pv" id="miniPreview" title="Jump to the full live preview" aria-label="Live preview sample — jump to the full preview">
+          <span class="mini-card"><span class="mini-aa">Aa</span><span class="mini-btn">Button</span><span class="mini-dot"></span></span>
+          <span class="mini-cap">Live preview — tap for full view</span>
+        </button>
+        <button class="mini-mode" id="miniMode" title="Tap to switch the palette you are editing">LIGHT PALETTE</button>
+      </div>
+    </header>
+
+    <nav class="stepper" id="stepper" aria-label="Workshop steps"></nav>
+
+    <div class="layout">
+      <!-- ===== left: guided editor ===== -->
+      <section class="card" aria-label="Token editor">
+        <div class="card-head">
+          <h2 class="card-title" id="stepTitle">Step</h2>
+          <p class="guidance" id="stepGuidance"></p>
+        </div>
+        <div class="card-body">
+          <!-- seed controls -->
+          <div id="seedPanel" class="seed-grid" hidden>
+            <div class="seed-row">
+              <div class="seed-lab"><label for="seedHue">Brand hue</label><span class="seed-valwrap"><input class="mono numin-seed" id="seedHueVal" inputmode="numeric" aria-label="Brand hue in degrees" /><span aria-hidden="true">°</span></span></div>
+              <input type="range" class="hue-track" id="seedHue" min="0" max="360" step="1" value="18" />
+            </div>
+            <div class="seed-row">
+              <div class="seed-lab"><label for="seedSat">Color intensity</label><span class="seed-valwrap"><input class="mono numin-seed" id="seedSatVal" inputmode="numeric" aria-label="Color intensity in percent" /><span aria-hidden="true">%</span></span></div>
+              <input type="range" class="tok" id="seedSat" min="0" max="100" step="1" value="62" style="background:linear-gradient(90deg,#9a9a9e,#d84f2f)" />
+            </div>
+            <div class="seed-row">
+              <label for="seedHarmony">Accent harmony</label>
+              <select class="harmony" id="seedHarmony">
+                <option value="180">Complementary — accent opposite the brand hue (bold, high energy)</option>
+                <option value="150">Split-complementary — softer contrast, easier to balance</option>
+                <option value="120">Triadic — three evenly spaced hues (playful, colorful)</option>
+                <option value="32">Analogous — accent sits next to the brand hue (calm, cohesive)</option>
+                <option value="0">Monochrome — accent is a shade of the brand hue itself</option>
+              </select>
+            </div>
+            <div class="seed-row">
+              <label>Starting points</label>
+              <div class="preset-row" id="presetRow"></div>
+            </div>
+            <div class="seed-actions">
+              <button class="btn primary" id="generateBtn">Generate both palettes</button>
+              <button class="btn" id="deriveDarkBtn" title="Build the dark palette by inverting the lightness of your light palette">Derive dark from light</button>
+              <button class="btn" id="copySeedLinkBtn" title="Copy a link that recreates this seed from scratch">Copy seed link</button>
+            </div>
+            <p class="foot-note mono" id="seedSummary" style="margin-top:10px"></p>
+            <p class="foot-note">Generating rebuilds every token in <strong>both</strong> modes from the seed, using OKLCH so steps stay perceptually even. Fine-tune individual tokens in the steps that follow — nothing here is locked in. Every rebuild can be undone (Ctrl+Z), and your work autosaves to this browser as you go.</p>
+          </div>
+
+          <!-- token editor -->
+          <div id="tokenPanel" class="token-list"></div>
+
+          <!-- review panel -->
+          <div id="reviewPanel" hidden>
+            <p class="guidance" id="statModeLbl" style="margin:0 0 8px"></p>
+            <div class="stat-row">
+              <div class="stat"><div class="big" id="statAA">–</div><div class="lbl">pairs pass WCAG AA</div></div>
+              <div class="stat"><div class="big" id="statAAA">–</div><div class="lbl">pairs pass WCAG AAA</div></div>
+              <div class="stat"><div class="big" id="statFix">–</div><div class="lbl">pairs need a fix</div></div>
+            </div>
+            <div id="bothModes"></div>
+            <p class="guidance" style="margin-top:12px">The audit on the right checks the palette you are editing (light or dark) pair by pair. <strong>Fix</strong> adjusts OKLCH lightness only — hue and chroma stay yours. It moves the foreground first; if that would break a sibling pair (button text must pass on the hover fill too), it moves the fill instead. When everything passes, export the tokens below the audit.</p>
+            <div class="seed-actions" style="margin-top:12px">
+              <button class="btn" id="fixAllBtn">Fix all failing pairs</button>
+            </div>
+            <div id="fixLogWrap" hidden>
+              <p class="guidance" style="margin:14px 0 0"><strong>Recent fixes</strong> — what actually moved, and whether it worked.</p>
+              <ul id="fixLog"></ul>
+            </div>
+          </div>
+
+          <!-- step navigation -->
+          <div class="step-nav">
+            <button class="btn" id="prevStepBtn" type="button"></button>
+            <span class="spacer"></span>
+            <button class="btn primary" id="nextStepBtn" type="button"></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== right: preview + audit + export ===== -->
+      <div class="right-col">
+        <section class="card" id="previewCard" aria-label="Live preview">
+          <div class="card-head" style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+            <h2 class="card-title">Live preview</h2>
+            <span class="guidance" style="margin:0" id="previewModeLabel"></span>
+            <span style="flex:1"></span>
+            <span class="guidance" style="margin:0">Hover a token to spotlight where it is used.</span>
+          </div>
+          <div class="card-body">
+            <div class="compare-strip" id="compareStrip" aria-label="Key colors of both palettes — activate a row to edit that palette"></div>
+            <div class="preview-frame" id="previewFrame">
+              <div class="preview-chrome">
+                <span class="dot" style="background:#e0654a" aria-hidden="true"></span>
+                <span class="dot" style="background:#e0a83e" aria-hidden="true"></span>
+                <span class="dot" style="background:#4cc084" aria-hidden="true"></span>
+                <span class="url mono" aria-hidden="true">yourbrand.example</span>
+                <span class="pv-mode-pill" id="pvModePill">LIGHT</span>
+              </div>
+              <div class="pv" id="preview"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" aria-label="Contrast audit">
+          <div class="card-head" style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+            <h2 class="card-title">Contrast audit</h2>
+            <span class="guidance" style="margin:0" id="auditModeLabel"></span>
+            <span style="flex:1"></span>
+            <div class="seg" role="group" aria-label="Palette shown in the audit">
+              <button id="auditLight" aria-pressed="true">Light</button>
+              <button id="auditDark" aria-pressed="false">Dark</button>
+            </div>
+            <button class="btn small" id="fixAllBtn2">Fix all</button>
+          </div>
+          <div class="card-body">
+            <div class="audit-table" id="auditTable"></div>
+            <p class="foot-note">Ratios are WCAG 2.1 contrast; Lc is the signed APCA (WCAG 3 draft) lightness-contrast score — positive for dark text on a light fill, negative for light text on a dark fill. Roughly, |Lc| 60+ suits body text, 45+ suits large text, headlines and UI components. A pair flagged <strong>APCA low</strong> passes WCAG but sits under the APCA level suggested for its use. Fixes target the WCAG AA threshold for each pair.</p>
+          </div>
+        </section>
+
+        <section class="card" id="exportCard" aria-label="Export">
+          <div class="card-head">
+            <h2 class="card-title">Export tokens</h2>
+            <p class="guidance">Both palettes, ready to paste into a stylesheet. Dark values sit behind <span class="mono">[data-theme="dark"]</span> — or flip the format to use a <span class="mono">prefers-color-scheme</span> media query instead.</p>
+          </div>
+          <div class="card-body">
+            <div class="export-tabs">
+              <div class="seg" role="group" aria-label="Export format">
+                <button id="fmtCss" aria-pressed="true">CSS variables</button>
+                <button id="fmtJson" aria-pressed="false">JSON</button>
+              </div>
+              <div class="seg" role="group" aria-label="Color notation" id="notationSeg">
+                <button id="notOklch" aria-pressed="true">OKLCH</button>
+                <button id="notHex" aria-pressed="false">Hex</button>
+              </div>
+              <div class="seg" role="group" aria-label="Dark mode selector" id="darkSeg">
+                <button id="darkAttr" aria-pressed="true">[data-theme]</button>
+                <button id="darkMedia" aria-pressed="false">Media query</button>
+              </div>
+            </div>
+            <pre class="codebox" id="exportBox" tabindex="0"></pre>
+            <div class="export-actions">
+              <button class="btn primary" id="copyBtn">Copy to clipboard</button>
+              <button class="btn" id="downloadBtn">Download file</button>
+              <span class="guidance" style="margin:0" id="exportMeta"></span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    
+
+    
+</body>
+</html>
+    </section>
+
+    <!-- ============ CONTRAST PAIRS ============ -->
+    <section class="panel" id="panel-contrast">
+<p>Map text colors to background colors and verify they meet WCAG AA (4.5:1) or AAA (7.1) contrast rules.</p>
+
+    <div id="tokens-container">
+        <!-- Tokens injected here -->
+    </div>
+
+    <button onclick="addPair()">+ Add Color Pair</button>
+    </section>
+
+  </main>
+
+  <script>
+    "use strict";
+    const $ = (id) => document.getElementById(id);
+    const clamp255 = (v) => Math.max(0, Math.min(255, Math.round(v)));
+
+    /* ---------- color helpers ---------- */
+    function rgbToHex(r, g, b) {
+      return "#" + [r, g, b].map((v) => clamp255(v).toString(16).padStart(2, "0")).join("");
+    }
+    function hexToRgb(hex) {
+      const n = parseInt(hex.slice(1), 16);
+      return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+    }
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      const l = (max + min) / 2;
+      if (max === min) return { h: 0, s: 0, l: Math.round(l * 100) };
+      const d = max - min;
+      const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      let h;
+      if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      return { h: Math.round(h * 60), s: Math.round(s * 100), l: Math.round(l * 100) };
+    }
+    function colorObj(r, g, b, share) {
+      const hsl = rgbToHsl(r, g, b);
+      return {
+        r: clamp255(r), g: clamp255(g), b: clamp255(b),
+        hex: rgbToHex(r, g, b),
+        rgb: `rgb(${clamp255(r)}, ${clamp255(g)}, ${clamp255(b)})`,
+        hsl: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`,
+        share: share
+      };
+    }
+
+    function setStatus(msg) {
+      const el = $("status");
+      el.textContent = msg;
+      if (msg) setTimeout(() => { if (el.textContent === msg) el.textContent = ""; }, 2600);
+    }
+    async function copyText(text, label) {
+      try { await navigator.clipboard.writeText(text); setStatus(`Copied ${label}`); }
+      catch (e) {
+        const ta = document.createElement("textarea");
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); setStatus(`Copied ${label}`); }
+        catch (err) { setStatus("Copy failed — select the export text manually"); }
+        ta.remove();
+      }
+    }
+    function download(name, text, type) {
+      const blob = new Blob([text], { type });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      setStatus(`Downloaded ${name}`);
+    }
+
+    /* ---------- state ---------- */
+    const LS_PALETTE = "palette-studio:palette";
+    const LS_GRADIENT = "palette-studio:gradient";
+    let palette = [];
+    let simType = "protanopia";
+
+    function savePalette() {
+      try { localStorage.setItem(LS_PALETTE, JSON.stringify(palette)); } catch (e) {}
+    }
+    function loadPalette() {
+      try {
+        const raw = localStorage.getItem(LS_PALETTE);
+        if (!raw) return null;
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) && arr.length ? arr : null;
+      } catch (e) { return null; }
+    }
+
+    /* ---------- source image ---------- */
+    const imgCanvas = $("imageCanvas");
+    const imgCtx = imgCanvas.getContext("2d", { willReadFrequently: true });
+    let hasImage = false;
+
+    function drawSample() {
+      const w = imgCanvas.width, h = imgCanvas.height;
+      const sky = imgCtx.createLinearGradient(0, 0, 0, h * 0.7);
+      sky.addColorStop(0, "#7fb0dd"); sky.addColorStop(0.6, "#c8ddef"); sky.addColorStop(1, "#eef3e2");
+      imgCtx.fillStyle = sky; imgCtx.fillRect(0, 0, w, h * 0.7);
+      imgCtx.fillStyle = "#f2c14e";
+      imgCtx.beginPath(); imgCtx.arc(w * 0.78, h * 0.22, 34, 0, Math.PI * 2); imgCtx.fill();
+      imgCtx.fillStyle = "#46617e";
+      imgCtx.beginPath(); imgCtx.moveTo(0, h * 0.7); imgCtx.lineTo(w * 0.3, h * 0.34);
+      imgCtx.lineTo(w * 0.52, h * 0.7); imgCtx.closePath(); imgCtx.fill();
+      imgCtx.fillStyle = "#5d7d99";
+      imgCtx.beginPath(); imgCtx.moveTo(w * 0.34, h * 0.7); imgCtx.lineTo(w * 0.62, h * 0.42);
+      imgCtx.lineTo(w * 0.86, h * 0.7); imgCtx.closePath(); imgCtx.fill();
+      imgCtx.fillStyle = "#dcebf5";
+      imgCtx.beginPath(); imgCtx.moveTo(w * 0.545, h * 0.475); imgCtx.lineTo(w * 0.62, h * 0.42);
+      imgCtx.lineTo(w * 0.695, h * 0.475); imgCtx.lineTo(w * 0.645, h * 0.5); imgCtx.lineTo(w * 0.6, h * 0.485);
+      imgCtx.lineTo(w * 0.565, h * 0.505); imgCtx.closePath(); imgCtx.fill();
+      imgCtx.fillStyle = "#4d7c59"; imgCtx.fillRect(0, h * 0.7, w, h * 0.1);
+      const water = imgCtx.createLinearGradient(0, h * 0.8, 0, h);
+      water.addColorStop(0, "#2e6da4"); water.addColorStop(1, "#173f63");
+      imgCtx.fillStyle = water; imgCtx.fillRect(0, h * 0.8, w, h * 0.2);
+      imgCtx.fillStyle = "rgba(242, 193, 78, 0.5)"; imgCtx.fillRect(w * 0.72, h * 0.82, w * 0.12, 5);
+      hasImage = true;
+    }
+
+    function loadImageFile(file) {
+      if (!file || !file.type.startsWith("image/")) { setStatus("That file is not an image"); return; }
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const max = 640;
+        const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+        imgCanvas.width = Math.max(2, Math.round(img.naturalWidth * scale));
+        imgCanvas.height = Math.max(2, Math.round(img.naturalHeight * scale));
+        imgCtx.drawImage(img, 0, 0, imgCanvas.width, imgCanvas.height);
+        URL.revokeObjectURL(url);
+        hasImage = true;
+        extractPalette();
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); setStatus("Could not load that image"); };
+      img.src = url;
+    }
+
+    /* ---------- median-cut extraction ---------- */
+    function samplePixels() {
+      const maxDim = 144;
+      const scale = Math.min(1, maxDim / Math.max(imgCanvas.width, imgCanvas.height));
+      const w = Math.max(2, Math.round(imgCanvas.width * scale));
+      const h = Math.max(2, Math.round(imgCanvas.height * scale));
+      const off = document.createElement("canvas");
+      off.width = w; off.height = h;
+      const ctx = off.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(imgCanvas, 0, 0, w, h);
+      const data = ctx.getImageData(0, 0, w, h).data;
+      /* Quantize to 5-bit-per-channel histogram bins (MMCQ-style): each bin
+         keeps the true average of its pixels plus a population count. */
+      const bins = new Map();
+      let total = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] < 125) continue;
+        const r = data[i], g = data[i + 1], b = data[i + 2];
+        const key = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
+        let bin = bins.get(key);
+        if (!bin) { bin = { r: 0, g: 0, b: 0, n: 0 }; bins.set(key, bin); }
+        bin.r += r; bin.g += g; bin.b += b; bin.n++;
+        total++;
+      }
+      return { bins: [...bins.values()], total };
+    }
+
+    function medianCut(bins, total, count) {
+      const avg = (bin) => [bin.r / bin.n, bin.g / bin.n, bin.b / bin.n];
+      const stats = (box) => {
+        let mins = [255, 255, 255], maxs = [0, 0, 0], n = 0;
+        for (const bin of box) {
+          const a = avg(bin);
+          for (let c = 0; c < 3; c++) {
+            if (a[c] < mins[c]) mins[c] = a[c];
+            if (a[c] > maxs[c]) maxs[c] = a[c];
+          }
+          n += bin.n;
+        }
+        const ranges = [maxs[0] - mins[0], maxs[1] - mins[1], maxs[2] - mins[2]];
+        return { ranges, rangeSum: ranges[0] + ranges[1] + ranges[2], n };
+      };
+      let boxes = [bins];
+      while (boxes.length < count) {
+        /* Split the box with the greatest color volume (population x range),
+           so big flat areas do not swallow small saturated regions. */
+        let idx = -1, best = -1, bestStats = null;
+        for (let i = 0; i < boxes.length; i++) {
+          if (boxes[i].length < 2) continue;
+          const s = stats(boxes[i]);
+          const score = s.n * s.rangeSum;
+          if (score > best) { best = score; idx = i; bestStats = s; }
+        }
+        if (idx < 0 || bestStats.rangeSum === 0) break;
+        const ch = bestStats.ranges.indexOf(Math.max(...bestStats.ranges));
+        const box = [...boxes[idx]].sort((a, b) => avg(a)[ch] - avg(b)[ch]);
+        const half = bestStats.n / 2;
+        let cum = 0, cut = 0;
+        for (let i = 0; i < box.length; i++) {
+          cum += box[i].n; cut = i + 1;
+          if (cum >= half) break;
+        }
+        if (cut >= box.length) cut = box.length - 1;
+        boxes.splice(idx, 1, box.slice(0, cut), box.slice(cut));
+      }
+      return boxes.filter((b) => b.length).map((box) => {
+        let r = 0, g = 0, b = 0, n = 0;
+        for (const bin of box) { r += bin.r; g += bin.g; b += bin.b; n += bin.n; }
+        return colorObj(r / n, g / n, b / n, n / (total || 1));
+      }).sort((a, b) => b.share - a.share);
+    }
+
+    function extractPalette() {
+      if (!hasImage) drawSample();
+      const n = parseInt($("colorCount").value, 10) || 5;
+      const { bins, total } = samplePixels();
+      if (!bins.length || !total) { setStatus("No readable pixels in that image"); return; }
+      palette = medianCut(bins, total, n);
+      savePalette();
+      renderPalette();
+      renderSim();
+      setStatus(`Extracted ${palette.length} colors`);
+    }
+
+    /* ---------- palette rendering + export ---------- */
+    function renderPalette() {
+      const grid = $("paletteGrid");
+      grid.innerHTML = "";
+      for (const c of palette) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "swatch";
+        btn.dataset.hex = c.hex;
+        btn.setAttribute("aria-label", `Copy ${c.hex}`);
+        const chip = document.createElement("div");
+        chip.className = "chip checker";
+        const fill = document.createElement("div");
+        fill.style.cssText = `height:100%;background:${c.hex}`;
+        chip.appendChild(fill);
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.innerHTML = `<span class="hex">${c.hex}</span>` +
+          `<span class="detail">${c.rgb}</span><span class="detail">${c.hsl}</span>` +
+          `<span class="share">${(c.share * 100).toFixed(1)}% of image</span>`;
+        btn.appendChild(chip); btn.appendChild(meta);
+        btn.addEventListener("click", () => copyText(c.hex, c.hex));
+        grid.appendChild(btn);
+      }
+      $("extractStatus").textContent = palette.length
+        ? `${palette.length} colors · median-cut on sampled pixels` : "";
+      renderExport();
+    }
+
+    function paletteCss() {
+      const lines = palette.map((c, i) => `  --palette-${i + 1}: ${c.hex};`);
+      return `/* Palette — generated with Color Studio */\n:root {\n${lines.join("\n")}\n}\n`;
+    }
+    function paletteJson() {
+      return JSON.stringify({
+        source: "Color Studio",
+        colors: palette.map((c, i) => ({
+          name: `palette-${i + 1}`, hex: c.hex, rgb: c.rgb, hsl: c.hsl,
+          share: +(c.share * 100).toFixed(1)
+        }))
+      }, null, 2);
+    }
+    function paletteTokensJson() {
+      /* Mirrors the Color Token Workshop JSON export shape: a group object
+         whose entries are { value, hex } per token name. */
+      const group = {};
+      palette.forEach((c, i) => { group[`palette-${i + 1}`] = { value: c.hex, hex: c.hex }; });
+      return JSON.stringify({ palette: group }, null, 2);
+    }
+    function renderExport() { $("exportOut").textContent = paletteCss(); }
+
+    /* ---------- gradient ---------- */
+    let gradType = "linear";
+    let gradAngle = 90;
+    let gradStops = [
+      { color: "#2b6cb0", pos: 0 },
+      { color: "#7fb0dd", pos: 55 },
+      { color: "#dcebf5", pos: 100 }
+    ];
+
+    function saveGradient() {
+      try {
+        localStorage.setItem(LS_GRADIENT, JSON.stringify({ type: gradType, angle: gradAngle, stops: gradStops }));
+      } catch (e) {}
+    }
+    function loadGradient() {
+      try {
+        const raw = localStorage.getItem(LS_GRADIENT);
+        if (!raw) return;
+        const g = JSON.parse(raw);
+        if (g && Array.isArray(g.stops) && g.stops.length >= 2) {
+          gradStops = g.stops;
+          if (g.type === "radial" || g.type === "linear") gradType = g.type;
+          if (typeof g.angle === "number") gradAngle = g.angle;
+        }
+      } catch (e) {}
+    }
+
+    function gradientCssValue() {
+      const stops = [...gradStops]
+        .sort((a, b) => a.pos - b.pos)
+        .map((s) => `${s.color} ${s.pos}%`).join(", ");
+      return gradType === "radial"
+        ? `radial-gradient(circle, ${stops})`
+        : `linear-gradient(${gradAngle}deg, ${stops})`;
+    }
+
+    function updateGradPreview() {
+      const value = gradientCssValue();
+      $("gradPreview").style.background = value;
+      const tp = $("gradTextPreview");
+      tp.style.background = value;
+      tp.style.color = "#10151b";
+      $("gradCss").value = `background: ${value};`;
+      if (document.activeElement !== $("gradAngle")) $("gradAngle").value = gradAngle;
+      if (document.activeElement !== $("gradAngleNum")) $("gradAngleNum").value = gradAngle;
+      $("gradAngle").disabled = gradType === "radial";
+      $("gradAngleNum").disabled = gradType === "radial";
+      $("gradTypeLinear").setAttribute("aria-pressed", String(gradType === "linear"));
+      $("gradTypeRadial").setAttribute("aria-pressed", String(gradType === "radial"));
+    }
+
+    function renderGradient() {
+      updateGradPreview();
+      const list = $("stopsList");
+      list.innerHTML = "";
+      gradStops.forEach((s, i) => {
+        const row = document.createElement("div");
+        row.className = "stop-row";
+        row.dataset.index = i;
+        const color = document.createElement("input");
+        color.type = "color"; color.value = s.color;
+        color.setAttribute("aria-label", `Stop ${i + 1} color`);
+        const hex = document.createElement("span");
+        hex.className = "stop-hex"; hex.textContent = s.color;
+        color.addEventListener("input", () => {
+          s.color = color.value; hex.textContent = s.color;
+          saveGradient(); updateGradPreview();
+        });
+        const grow = document.createElement("div");
+        grow.className = "grow";
+        const range = document.createElement("input");
+        range.type = "range"; range.min = 0; range.max = 100; range.step = 1; range.value = s.pos;
+        range.setAttribute("aria-label", `Stop ${i + 1} position`);
+        const num = document.createElement("input");
+        num.type = "number"; num.min = 0; num.max = 100; num.step = 1; num.value = s.pos;
+        num.setAttribute("aria-label", `Stop ${i + 1} position value`);
+        range.addEventListener("input", () => {
+          s.pos = +range.value; num.value = s.pos;
+          saveGradient(); updateGradPreview();
+        });
+        num.addEventListener("input", () => {
+          const v = Math.max(0, Math.min(100, +num.value || 0));
+          s.pos = v; range.value = v;
+          saveGradient(); updateGradPreview();
+        });
+        grow.appendChild(range); grow.appendChild(num);
+        const up = document.createElement("button");
+        up.type = "button"; up.className = "btn small"; up.textContent = "↑";
+        up.setAttribute("aria-label", `Move stop ${i + 1} earlier`);
+        up.disabled = i === 0;
+        up.addEventListener("click", () => {
+          [gradStops[i - 1], gradStops[i]] = [gradStops[i], gradStops[i - 1]];
+          saveGradient(); renderGradient();
+        });
+        const down = document.createElement("button");
+        down.type = "button"; down.className = "btn small"; down.textContent = "↓";
+        down.setAttribute("aria-label", `Move stop ${i + 1} later`);
+        down.disabled = i === gradStops.length - 1;
+        down.addEventListener("click", () => {
+          [gradStops[i + 1], gradStops[i]] = [gradStops[i], gradStops[i + 1]];
+          saveGradient(); renderGradient();
+        });
+        const del = document.createElement("button");
+        del.type = "button"; del.className = "btn small"; del.textContent = "Remove";
+        del.disabled = gradStops.length <= 2;
+        del.addEventListener("click", () => {
+          gradStops.splice(i, 1); saveGradient(); renderGradient();
+        });
+        row.append(color, hex, grow, up, down, del);
+        list.appendChild(row);
+      });
+    }
+
+    /* ---------- color blindness simulation ---------- */
+    const SIM_MATRICES = {
+      protanopia:     [0.567, 0.433, 0.000,  0.558, 0.442, 0.000,  0.000, 0.242, 0.758],
+      deuteranopia:   [0.625, 0.375, 0.000,  0.700, 0.300, 0.000,  0.000, 0.300, 0.700],
+      tritanopia:     [0.950, 0.050, 0.000,  0.000, 0.433, 0.567,  0.000, 0.475, 0.525],
+      achromatopsia:  [0.299, 0.587, 0.114,  0.299, 0.587, 0.114,  0.299, 0.587, 0.114]
+    };
+    const SIM_NAMES = {
+      protanopia: "Protanopia", deuteranopia: "Deuteranopia",
+      tritanopia: "Tritanopia", achromatopsia: "Achromatopsia"
+    };
+    function simulate(r, g, b, type) {
+      const m = SIM_MATRICES[type];
+      return {
+        r: clamp255(m[0] * r + m[1] * g + m[2] * b),
+        g: clamp255(m[3] * r + m[4] * g + m[5] * b),
+        b: clamp255(m[6] * r + m[7] * g + m[8] * b)
+      };
+    }
+
+    function renderSim() {
+      document.querySelectorAll("#simSeg button").forEach((b) =>
+        b.setAttribute("aria-pressed", String(b.dataset.sim === simType)));
+      $("simName").textContent = SIM_NAMES[simType];
+      const grid = $("simGrid");
+      grid.innerHTML = "";
+      for (const c of palette) {
+        const s = simulate(c.r, c.g, c.b, simType);
+        const sHex = rgbToHex(s.r, s.g, s.b);
+        const row = document.createElement("div");
+        row.className = "sim-row";
+        row.innerHTML =
+          `<div class="sim-cell"><div class="chip" style="background:${c.hex}"></div>` +
+          `<div class="cap"><span>original</span><span>${c.hex}</span></div></div>` +
+          `<div class="sim-cell"><div class="chip sim-chip" data-orig="${c.hex}" data-sim="${sHex}" style="background:${sHex}"></div>` +
+          `<div class="cap"><span>${SIM_NAMES[simType].toLowerCase()}</span><span>${sHex}</span></div></div>`;
+        grid.appendChild(row);
+      }
+      renderSimImage();
+    }
+
+    function renderSimImage() {
+      if (!hasImage) return;
+      const maxDim = 320;
+      const scale = Math.min(1, maxDim / Math.max(imgCanvas.width, imgCanvas.height));
+      const w = Math.max(2, Math.round(imgCanvas.width * scale));
+      const h = Math.max(2, Math.round(imgCanvas.height * scale));
+      const orig = $("simOrigCanvas"), sim = $("simCanvas");
+      orig.width = w; orig.height = h; sim.width = w; sim.height = h;
+      const oCtx = orig.getContext("2d");
+      oCtx.drawImage(imgCanvas, 0, 0, w, h);
+      const sCtx = sim.getContext("2d", { willReadFrequently: true });
+      sCtx.drawImage(imgCanvas, 0, 0, w, h);
+      const imgData = sCtx.getImageData(0, 0, w, h);
+      const d = imgData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const s = simulate(d[i], d[i + 1], d[i + 2], simType);
+        d[i] = s.r; d[i + 1] = s.g; d[i + 2] = s.b;
+      }
+      sCtx.putImageData(imgData, 0, 0);
+    }
+
+    /* ---------- tabs ---------- */
+    document.querySelectorAll("[data-tab]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("[data-tab]").forEach((b) =>
+          b.setAttribute("aria-pressed", String(b === btn)));
+        document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+        $("panel-" + btn.dataset.tab).classList.add("active");
+        if (btn.dataset.tab === "sim") renderSim();
+      });
+    });
+
+    /* ---------- wiring ---------- */
+    $("uploadBtn").addEventListener("click", () => $("fileInput").click());
+    $("fileInput").addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) loadImageFile(e.target.files[0]);
+      e.target.value = "";
+    });
+    const dz = $("dropZone");
+    ["dragenter", "dragover"].forEach((ev) => dz.addEventListener(ev, (e) => {
+      e.preventDefault(); dz.classList.add("dragover");
+    }));
+    ["dragleave", "drop"].forEach((ev) => dz.addEventListener(ev, (e) => {
+      e.preventDefault(); dz.classList.remove("dragover");
+    }));
+    dz.addEventListener("drop", (e) => {
+      const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) loadImageFile(f);
+    });
+    $("sampleBtn").addEventListener("click", () => {
+      imgCanvas.width = 640; imgCanvas.height = 400;
+      drawSample(); extractPalette();
+    });
+    $("colorCount").addEventListener("change", extractPalette);
+    $("extractBtn").addEventListener("click", extractPalette);
+
+    $("copyCssBtn").addEventListener("click", () => copyText(paletteCss(), "CSS variables"));
+    $("copyJsonBtn").addEventListener("click", () => copyText(paletteJson(), "palette JSON"));
+    $("copyTokensBtn").addEventListener("click", () => copyText(paletteTokensJson(), "Workshop tokens JSON"));
+    $("downloadCssBtn").addEventListener("click", () => download("palette.css", paletteCss(), "text/css"));
+    $("downloadJsonBtn").addEventListener("click", () => download("palette.json", paletteJson(), "application/json"));
+
+    $("gradTypeLinear").addEventListener("click", () => { gradType = "linear"; saveGradient(); renderGradient(); });
+    $("gradTypeRadial").addEventListener("click", () => { gradType = "radial"; saveGradient(); renderGradient(); });
+    $("gradAngle").addEventListener("input", () => { gradAngle = +$("gradAngle").value; saveGradient(); updateGradPreview(); });
+    $("gradAngleNum").addEventListener("input", () => {
+      gradAngle = Math.max(0, Math.min(360, +$("gradAngleNum").value || 0)); saveGradient(); updateGradPreview();
+    });
+    $("addStopBtn").addEventListener("click", () => {
+      const mid = palette.length ? palette[gradStops.length % palette.length].hex : "#5d7d99";
+      gradStops.push({ color: mid, pos: 50 });
+      saveGradient(); renderGradient();
+      setStatus("Stop added");
+    });
+    $("fromPaletteBtn").addEventListener("click", () => {
+      if (palette.length < 2) { setStatus("Extract a palette first"); return; }
+      const cols = palette.slice(0, 5);
+      gradStops = cols.map((c, i) => ({ color: c.hex, pos: Math.round((i / (cols.length - 1)) * 100) }));
+      saveGradient(); renderGradient();
+      setStatus("Gradient stops set from palette");
+    });
+    $("copyGradCssBtn").addEventListener("click", () => copyText($("gradCss").value, "gradient CSS"));
+
+    document.querySelectorAll("#simSeg button").forEach((b) => {
+      b.addEventListener("click", () => { simType = b.dataset.sim; renderSim(); });
+    });
+
+    /* ---------- init ---------- */
+    drawSample();
+    loadGradient();
+    const saved = loadPalette();
+    if (saved) {
+      palette = saved.map((c) => colorObj(c.r, c.g, c.b, c.share || 0));
+      renderPalette();
+      renderSim();
+    } else {
+      extractPalette();
+    }
+    renderGradient();
+  </script>
+  <script>
+  /* Token Workshop */
+(function () {
+const __root = document.querySelector('#panel-tokens');
+
+    "use strict";
+    /* ================= color math (OKLCH / sRGB / WCAG / APCA) ================= */
+    const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+    const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+    function oklchToLinear(l, c, hDeg) {
+      const hr = hDeg * D2R, a = c * Math.cos(hr), b = c * Math.sin(hr);
+      const L = l + 0.3963377774 * a + 0.2158037573 * b;
+      const M = l - 0.1055613458 * a - 0.0638541728 * b;
+      const S = l - 0.0894841775 * a - 1.2914855480 * b;
+      const l3 = L * L * L, m3 = M * M * M, s3 = S * S * S;
+      return [
+        +4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3,
+        -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3,
+        -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3
+      ];
+    }
+    function linearToSrgb255(lin) {
+      return lin.map(v => {
+        const c = clamp(v, 0, 1);
+        const s = c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+        return Math.round(clamp(s, 0, 1) * 255);
+      });
+    }
+    function oklchToRgb255(col) { return linearToSrgb255(oklchToLinear(col.l, col.c, col.h)); }
+    function rgb255ToHex(rgb) { return "#" + rgb.map(v => v.toString(16).padStart(2, "0")).join("").toUpperCase(); }
+    function oklchToHex(col) { return rgb255ToHex(oklchToRgb255(col)); }
+    function inGamut(l, c, h) {
+      return oklchToLinear(l, c, h).every(v => v >= -0.0005 && v <= 1.0005);
+    }
+    function gamutC(l, c, h) {
+      if (inGamut(l, c, h)) return c;
+      let lo = 0, hi = c;
+      for (let i = 0; i < 24; i++) { const mid = (lo + hi) / 2; if (inGamut(l, mid, h)) lo = mid; else hi = mid; }
+      return lo;
+    }
+    function displayCol(col) { return { l: col.l, c: gamutC(col.l, col.c, col.h), h: col.h }; }
+    function oklchCss(col) {
+      const d = displayCol(col);
+      return "oklch(" + d.l.toFixed(3) + " " + d.c.toFixed(3) + " " + d.h.toFixed(1) + ")";
+    }
+    function hexToRgb255(hex) {
+      let s = hex.trim().replace(/^#/, "");
+      if (/^[0-9a-fA-F]{3}$/.test(s)) s = s.split("").map(ch => ch + ch).join("");
+      if (!/^[0-9a-fA-F]{6}$/.test(s)) return null;
+      return [parseInt(s.slice(0, 2), 16), parseInt(s.slice(2, 4), 16), parseInt(s.slice(4, 6), 16)];
+    }
+    function srgb255ToLinear(rgb) {
+      return rgb.map(v => { const s = v / 255; return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4); });
+    }
+    function rgb255ToOklch(rgb) {
+      const [r, g, b] = srgb255ToLinear(rgb);
+      const L = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+      const M = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+      const S = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+      const labL = 0.2104542553 * L + 0.7936177850 * M - 0.0040720468 * S;
+      const a = 1.9779984951 * L - 2.4285922050 * M + 0.4505937099 * S;
+      const bb = 0.0259040371 * L + 0.7827717662 * M - 0.8086757660 * S;
+      let h = Math.atan2(bb, a) * R2D; if (h < 0) h += 360;
+      return { l: clamp(labL, 0, 1), c: Math.hypot(a, bb), h };
+    }
+    function relLum(rgb) { const [r, g, b] = srgb255ToLinear(rgb); return 0.2126 * r + 0.7152 * g + 0.0722 * b; }
+    function wcagRatio(fg, bg) {
+      const l1 = relLum(fg), l2 = relLum(bg);
+      return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    }
+    function apcaLc(fg, bg) {
+      const soft = y => y <= 0.022 ? y + Math.pow(0.022 - y, 1.414) : y;
+      const Yt = soft(relLum(fg)), Yb = soft(relLum(bg));
+      if (Math.abs(Yb - Yt) < 0.0005) return 0;
+      let s;
+      if (Yb > Yt) { s = (Math.pow(Yb, 0.56) - Math.pow(Yt, 0.57)) * 1.14; return (s <= 0.1 ? 0 : s - 0.027) * 100; }
+      s = (Math.pow(Yb, 0.65) - Math.pow(Yt, 0.62)) * 1.14; return (s >= -0.1 ? 0 : s + 0.027) * 100;
+    }
+    /* Solve: nudge a token's OKLCH lightness until its WCAG ratio vs a fixed bg hits target. */
+    function solveLightness(fg, bgRgb, target) {
+      const ratioAt = l => wcagRatio(oklchToRgb255({ l, c: fg.c, h: fg.h }), bgRgb);
+      if (ratioAt(fg.l) >= target) return fg.l;
+      const darker = relLum(oklchToRgb255(fg)) < relLum(bgRgb);
+      const dir = darker ? -1 : 1;
+      let edge = dir < 0 ? 0 : 1;
+      if (ratioAt(edge) < target) edge = dir < 0 ? 1 : 0;      // opposite direction is the only hope
+      if (ratioAt(edge) < target) return edge;                  // unreachable: return best effort
+      let lo = fg.l, hi = edge;
+      for (let i = 0; i < 28; i++) { const mid = (lo + hi) / 2; if (ratioAt(mid) >= target) hi = mid; else lo = mid; }
+      return hi;
+    }
+
+    /* ================= token model ================= */
+    const GROUPS = {
+      foundation: { step: "Foundation", tokens: ["bg", "surface", "surfaceRaised", "border", "borderStrong"] },
+      text:       { step: "Text & links", tokens: ["text", "textMuted", "textFaint", "textInverse", "link"] },
+      brand:      { step: "Brand & actions", tokens: ["primary", "primaryHover", "primaryActive", "onPrimary", "secondary", "onSecondary", "accent", "onAccent", "focus"] },
+      semantic:   { step: "Semantic", tokens: ["success", "onSuccess", "warning", "onWarning", "danger", "onDanger", "info", "onInfo"] }
+    };
+    const TOKEN_DEFS = {
+      bg:            { name: "Background", desc: "The page canvas. Everything else is judged against this first." },
+      surface:       { name: "Surface", desc: "Cards, panels and menus that sit on the background." },
+      surfaceRaised: { name: "Surface raised", desc: "Popovers, modals and hover states — one step above surface." },
+      border:        { name: "Border", desc: "Hairline dividers and card outlines. Quiet, but visible on purpose." },
+      borderStrong:  { name: "Border strong", desc: "Input outlines and emphasized separators that must read as interactive edges." },
+      text:          { name: "Text", desc: "Headings and body copy. Your highest-contrast obligation." },
+      textMuted:     { name: "Text muted", desc: "Secondary copy: descriptions, captions, table cells." },
+      textFaint:     { name: "Text faint", desc: "Timestamps, placeholders, footnotes. Still text — it still needs contrast." },
+      textInverse:   { name: "Text inverse", desc: "Text placed on dark or saturated fills (toasts, dark footers)." },
+      link:          { name: "Link", desc: "Inline links. Must stand apart from body text by more than color alone in real use." },
+      primary:       { name: "Primary", desc: "The main action: primary buttons, active states, key highlights." },
+      primaryHover:  { name: "Primary hover", desc: "Primary action while hovered — usually a small lightness step." },
+      primaryActive: { name: "Primary active", desc: "Primary action while pressed — one step further than hover." },
+      onPrimary:     { name: "On primary", desc: "Text and icons sitting on the primary fill." },
+      secondary:     { name: "Secondary", desc: "The quieter action next to primary: cancel, back, alternative paths." },
+      onSecondary:   { name: "On secondary", desc: "Text and icons sitting on the secondary fill." },
+      accent:        { name: "Accent", desc: "Sparingly used highlight: badges, charts, the one thing you want noticed." },
+      onAccent:      { name: "On accent", desc: "Text and icons sitting on the accent fill." },
+      focus:         { name: "Focus ring", desc: "Keyboard focus outline. Needs 3:1 against whatever it lands on." },
+      success:       { name: "Success", desc: "Confirmations and positive status. Fill for banners, text for inline messages." },
+      onSuccess:     { name: "On success", desc: "Text on a solid success fill." },
+      warning:       { name: "Warning", desc: "Caution states — needs attention, not alarm." },
+      onWarning:     { name: "On warning", desc: "Text on a solid warning fill (often near-black, not white)." },
+      danger:        { name: "Danger", desc: "Errors and destructive actions." },
+      onDanger:      { name: "On danger", desc: "Text on a solid danger fill." },
+      info:          { name: "Info", desc: "Neutral notices and helpful asides." },
+      onInfo:        { name: "On info", desc: "Text on a solid info fill." }
+    };
+    const ALL_KEYS = Object.keys(TOKEN_DEFS);
+    const kebab = k => k.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+
+    /* fg/bg pairs checked by the audit. min = WCAG AA threshold for that use. */
+    const PAIRS = [
+      { fg: "text",       bg: "bg",           label: "Body text on background",    min: 4.5, aaa: 7 },
+      { fg: "text",       bg: "surface",      label: "Body text on cards",         min: 4.5, aaa: 7 },
+      { fg: "textMuted",  bg: "bg",           label: "Muted text on background",   min: 4.5, aaa: 7 },
+      { fg: "textMuted",  bg: "surface",      label: "Muted text on cards",        min: 4.5, aaa: 7 },
+      { fg: "textFaint",  bg: "bg",           label: "Faint text on background",   min: 4.5, aaa: 7 },
+      { fg: "link",       bg: "bg",           label: "Links on background",        min: 4.5, aaa: 7 },
+      { fg: "link",       bg: "surface",      label: "Links on cards",             min: 4.5, aaa: 7 },
+      { fg: "onPrimary",  bg: "primary",      label: "Text on primary button",     min: 4.5, aaa: 7 },
+      { fg: "onPrimary",  bg: "primaryHover", label: "Text on primary (hover)",    min: 4.5, aaa: 7 },
+      { fg: "onSecondary",bg: "secondary",    label: "Text on secondary button",   min: 4.5, aaa: 7 },
+      { fg: "onAccent",   bg: "accent",       label: "Text on accent badge",       min: 4.5, aaa: 7 },
+      { fg: "onSuccess",  bg: "success",      label: "Text on success fill",       min: 4.5, aaa: 7 },
+      { fg: "onWarning",  bg: "warning",      label: "Text on warning fill",       min: 4.5, aaa: 7 },
+      { fg: "onDanger",   bg: "danger",       label: "Text on danger fill",        min: 4.5, aaa: 7 },
+      { fg: "onInfo",     bg: "info",         label: "Text on info fill",          min: 4.5, aaa: 7 },
+      { fg: "success",    bg: "bg",           label: "Success text on background", min: 4.5, aaa: 7 },
+      { fg: "danger",     bg: "bg",           label: "Error text on background",   min: 4.5, aaa: 7 },
+      { fg: "warning",    bg: "bg",           label: "Warning text on background", min: 4.5, aaa: 7 },
+      { fg: "textInverse",bg: "primary",      label: "Inverse text on brand fill", min: 4.5, aaa: 7 },
+      { fg: "primary",    bg: "bg",           label: "Primary UI on background",   min: 3,   aaa: 4.5, graphic: true },
+      { fg: "focus",      bg: "bg",           label: "Focus ring on background",   min: 3,   aaa: 4.5, graphic: true },
+      { fg: "focus",      bg: "surface",      label: "Focus ring on cards",        min: 3,   aaa: 4.5, graphic: true },
+      { fg: "borderStrong",bg: "bg",          label: "Strong border / inputs",     min: 3,   aaa: 4.5, graphic: true }
+    ];
+
+    const STEPS = [
+      { id: "seed", title: "Seed & harmony", guidance: "Start from one decision: your <strong>brand hue</strong>. Neutrals get a whisper of that hue so grays feel related instead of pasted on, the accent is placed by the <strong>harmony</strong> you pick, and every lightness step is computed in OKLCH so the scale stays perceptually even." },
+      { id: "foundation", title: "Foundation", guidance: "Surfaces first, because every contrast judgment depends on them. Keep <strong>background → surface → raised</strong> as small, even steps: if two layers blur together, content grouping disappears. Borders should be findable, not loud." },
+      { id: "text", title: "Text & links", guidance: "Three tiers of text, each a deliberate step down — but <strong>even faint text must clear 4.5:1</strong> if it carries information. Links need contrast against the page <em>and</em> a visible difference from body text." },
+      { id: "brand", title: "Brand & actions", guidance: "Primary is the color your brand is remembered by. Hover and active are small lightness moves in the same hue — the audit checks button text on <strong>all three</strong>. The focus ring is a separate token because it must survive on every surface." },
+      { id: "semantic", title: "Semantic colors", guidance: "Status colors carry meaning before words are read, so keep their hues conventional (green/amber/red/blue) even when the brand hue is exotic. Each one needs a legible <strong>on-</strong> partner for solid fills — on warning, that's usually near-black, not white." },
+      { id: "review", title: "Audit & export", guidance: "Every foreground/background pairing your UI actually produces, checked against WCAG AA and AAA plus APCA. Fix what fails, then export both palettes." }
+    ];
+
+    const PRESETS = [
+      { name: "Ember",      hue: 18,  sat: 62, harmony: 180 },
+      { name: "Harbor",     hue: 232, sat: 58, harmony: 32 },
+      { name: "Meadow",     hue: 148, sat: 48, harmony: 120 },
+      { name: "Orchid",     hue: 322, sat: 55, harmony: 150 },
+      { name: "Solar",      hue: 78,  sat: 66, harmony: 180 },
+      { name: "Slate mono", hue: 258, sat: 16, harmony: 0 }
+    ];
+
+    /* Fix one pair inside a palette object. Moves the foreground's lightness first;
+       if that would break another pair sharing the same foreground (e.g. on-primary
+       must satisfy both primary and primary-hover fills), revert and move the
+       background fill away from the foreground instead. Returns true if it changed anything. */
+    function resolvePairIn(pal, p) {
+      const fg = pal[p.fg];
+      const ratio = q => wcagRatio(oklchToRgb255(pal[q.fg]), oklchToRgb255(pal[q.bg]));
+      if (ratio(p) >= p.min) return false;
+      const sibs = PAIRS.filter(q => q.fg === p.fg);
+      const before = sibs.map(q => ratio(q) >= q.min);
+      const oldL = fg.l;
+      fg.l = solveLightness(fg, oklchToRgb255(pal[p.bg]), p.min);
+      const broke = sibs.some((q, i) => before[i] && ratio(q) < q.min);
+      if (broke) {
+        fg.l = oldL;
+        const bgT = pal[p.bg];
+        bgT.l = solveLightness(bgT, oklchToRgb255(fg), p.min);
+      }
+      return true;
+    }
+
+    /* ================= palette generation ================= */
+    function onColorFor(fill) {
+      const rgb = oklchToRgb255(fill);
+      const light = { l: 0.985, c: 0.004, h: fill.h }, dark = { l: 0.16, c: 0.012, h: fill.h };
+      return wcagRatio(oklchToRgb255(dark), rgb) > wcagRatio(oklchToRgb255(light), rgb) ? dark : light;
+    }
+    function generatePalettes(hue, sat, harmonyDeg) {
+      const s = sat / 100;
+      const brandC = 0.055 + s * 0.125;
+      const accH = (hue + harmonyDeg) % 360;
+      const mk = dark => {
+        const nC = 0.006 + s * 0.016;                       // neutral tint chroma
+        const P = (l, c, h) => ({ l, c, h: ((h % 360) + 360) % 360 });
+        const pal = {};
+        if (!dark) {
+          pal.bg = P(0.972, nC, hue); pal.surface = P(0.995, nC * 0.7, hue); pal.surfaceRaised = P(1.0, 0, hue);
+          pal.border = P(0.885, nC * 1.2, hue); pal.borderStrong = P(0.72, nC * 1.6, hue);
+          pal.text = P(0.235, nC * 2.2, hue); pal.textMuted = P(0.46, nC * 2, hue); pal.textFaint = P(0.585, nC * 1.8, hue);
+          pal.textInverse = P(0.985, nC * 0.5, hue); pal.link = P(0.47, brandC * 0.92, hue);
+          pal.primary = P(0.545, brandC, hue); pal.primaryHover = P(0.485, brandC, hue); pal.primaryActive = P(0.425, brandC * 1.02, hue);
+          pal.secondary = P(0.925, 0.014 + s * 0.02, hue); pal.onSecondary = P(0.32, brandC * 0.55, hue);
+          pal.accent = P(0.56, 0.05 + s * 0.11, accH);
+          pal.success = P(0.52, 0.125, 152); pal.warning = P(0.66, 0.135, 76); pal.danger = P(0.535, 0.165, 27); pal.info = P(0.55, 0.115, 243);
+          pal.focus = P(0.55, brandC, accH === hue ? hue : accH);
+        } else {
+          pal.bg = P(0.185, nC, hue); pal.surface = P(0.225, nC, hue); pal.surfaceRaised = P(0.275, nC, hue);
+          pal.border = P(0.335, nC * 1.2, hue); pal.borderStrong = P(0.47, nC * 1.6, hue);
+          pal.text = P(0.93, nC * 1.4, hue); pal.textMuted = P(0.74, nC * 1.5, hue); pal.textFaint = P(0.615, nC * 1.6, hue);
+          pal.textInverse = P(0.2, nC * 1.5, hue); pal.link = P(0.76, brandC * 0.9, hue);
+          pal.primary = P(0.70, brandC * 0.94, hue); pal.primaryHover = P(0.755, brandC * 0.94, hue); pal.primaryActive = P(0.64, brandC * 0.97, hue);
+          pal.secondary = P(0.30, 0.014 + s * 0.02, hue); pal.onSecondary = P(0.88, brandC * 0.4, hue);
+          pal.accent = P(0.72, 0.05 + s * 0.105, accH);
+          pal.success = P(0.70, 0.125, 152); pal.warning = P(0.76, 0.13, 78); pal.danger = P(0.665, 0.155, 25); pal.info = P(0.71, 0.11, 243);
+          pal.focus = P(0.72, brandC * 0.94, accH === hue ? hue : accH);
+        }
+        pal.onPrimary = onColorFor(pal.primary);
+        pal.onAccent = onColorFor(pal.accent);
+        pal.onSuccess = onColorFor(pal.success);
+        pal.onWarning = onColorFor(pal.warning);
+        pal.onDanger = onColorFor(pal.danger);
+        pal.onInfo = onColorFor(pal.info);
+        /* guarantee the generated palette starts AA-clean: auto-solve any offender */
+        for (let pass = 0; pass < 4; pass++) {
+          let dirty = false;
+          for (const p of PAIRS) if (resolvePairIn(pal, p)) dirty = true;
+          if (!dirty) break;
+        }
+        return pal;
+      };
+      return { light: mk(false), dark: mk(true) };
+    }
+    
+
+    "use strict";
+    /* ================= preview markup (every element tagged with the tokens it uses) ================= */
+    function buildPreview() {
+      return `
+      <div data-tok="bg" style="background:var(--pv-bg);color:var(--pv-text);padding:0 0 18px;font-size:14px">
+        <div data-tok="surface border" style="background:var(--pv-surface);border-bottom:1px solid var(--pv-border);display:flex;align-items:center;gap:14px;padding:11px 18px;flex-wrap:wrap">
+          <span data-tok="primary" style="width:24px;height:24px;border-radius:7px;background:var(--pv-primary);display:inline-block;flex:none"></span>
+          <strong style="font-size:15.5px">Brand</strong>
+          <span data-tok="link" style="color:var(--pv-link);font-weight:600">Products</span>
+          <span style="color:var(--pv-text-muted)">Pricing</span>
+          <span style="color:var(--pv-text-muted)">Docs</span>
+          <span style="flex:1"></span>
+          <span data-tok="secondary onSecondary" style="background:var(--pv-secondary);color:var(--pv-on-secondary);padding:6px 13px;border-radius:8px;font-weight:600">Sign in</span>
+          <span data-tok="primary onPrimary" style="background:var(--pv-primary);color:var(--pv-on-primary);padding:6px 13px;border-radius:8px;font-weight:600">Get started</span>
+        </div>
+
+        <div style="padding:26px 22px 6px;max-width:560px">
+          <span data-tok="accent onAccent" style="background:var(--pv-accent);color:var(--pv-on-accent);font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:99px">NEW · v2.0 is live</span>
+          <h3 style="margin:13px 0 7px;font-size:27px;line-height:1.15;font-weight:700">Ship the thing your users actually asked for.</h3>
+          <p data-tok="textMuted" style="margin:0;color:var(--pv-text-muted);line-height:1.55">The platform that turns a messy roadmap into a calm, focused product — without another dashboard to babysit.</p>
+          <div style="display:flex;gap:9px;margin-top:16px;flex-wrap:wrap">
+            <span data-tok="primaryHover onPrimary" style="background:var(--pv-primary-hover);color:var(--pv-on-primary);padding:9px 17px;border-radius:9px;font-weight:600">Start free trial</span>
+            <span data-tok="borderStrong" style="border:1.5px solid var(--pv-border-strong);padding:9px 17px;border-radius:9px;font-weight:600">Watch demo</span>
+          </div>
+          <p data-tok="textFaint" style="margin:11px 0 0;color:var(--pv-text-faint);font-size:12px">No credit card required · Cancel anytime</p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;padding:16px 18px 0">
+          <div data-tok="surface border" style="background:var(--pv-surface);border:1px solid var(--pv-border);border-radius:13px;padding:15px 16px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <strong>Weekly report</strong>
+              <span data-tok="success" style="color:var(--pv-success);font-weight:700;font-size:12.5px">▲ 12.4%</span>
+            </div>
+            <p data-tok="textMuted" style="color:var(--pv-text-muted);margin:5px 0 12px;font-size:13px">Active workspaces this week</p>
+            <div style="display:flex;align-items:flex-end;gap:5px;height:52px">
+              <span data-tok="primary" style="flex:1;height:38%;background:var(--pv-primary);opacity:.45;border-radius:3px 3px 0 0"></span>
+              <span data-tok="primary" style="flex:1;height:55%;background:var(--pv-primary);opacity:.6;border-radius:3px 3px 0 0"></span>
+              <span data-tok="primary" style="flex:1;height:47%;background:var(--pv-primary);opacity:.6;border-radius:3px 3px 0 0"></span>
+              <span data-tok="primary" style="flex:1;height:72%;background:var(--pv-primary);opacity:.85;border-radius:3px 3px 0 0"></span>
+              <span data-tok="accent" style="flex:1;height:92%;background:var(--pv-accent);border-radius:3px 3px 0 0"></span>
+            </div>
+            <div data-tok="border" style="border-top:1px solid var(--pv-border);margin-top:12px;padding-top:9px;display:flex;justify-content:space-between;font-size:12px">
+              <span data-tok="textFaint" style="color:var(--pv-text-faint)">Progress to goal</span><strong>68%</strong>
+            </div>
+            <div data-tok="border" style="height:7px;border-radius:99px;background:var(--pv-border);margin-top:7px;overflow:hidden">
+              <div data-tok="primary" style="width:68%;height:100%;background:var(--pv-primary)"></div>
+            </div>
+          </div>
+
+          <div data-tok="surfaceRaised border" style="background:var(--pv-surface-raised);border:1px solid var(--pv-border);border-radius:13px;padding:15px 16px">
+            <strong>Create account</strong>
+            <label style="display:block;margin:11px 0 4px;font-size:12.5px;font-weight:600">Email</label>
+            <div data-tok="borderStrong bg" style="border:1.5px solid var(--pv-border-strong);background:var(--pv-bg);border-radius:8px;padding:7px 10px;font-size:13px">you@company.com</div>
+            <label style="display:block;margin:11px 0 4px;font-size:12.5px;font-weight:600">Password</label>
+            <div data-tok="focus" style="border:1.5px solid var(--pv-border-strong);outline:2.5px solid var(--pv-focus);outline-offset:1.5px;border-radius:8px;padding:7px 10px;font-size:13px">••••••••••</div>
+            <p data-tok="danger" style="color:var(--pv-danger);margin:6px 0 0;font-size:12px;font-weight:600">Password must be at least 12 characters.</p>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:11px">
+              <span data-tok="primary onPrimary" style="width:34px;height:19px;border-radius:99px;background:var(--pv-primary);position:relative;display:inline-block;flex:none"><span data-tok="onPrimary" style="position:absolute;right:2.5px;top:2.5px;width:14px;height:14px;border-radius:50%;background:var(--pv-on-primary)"></span></span>
+              <span style="font-size:13px">Email me product updates</span>
+            </div>
+            <span data-tok="primary onPrimary" style="display:block;text-align:center;background:var(--pv-primary);color:var(--pv-on-primary);padding:8px;border-radius:9px;font-weight:600;margin-top:13px">Create account</span>
+            <p style="text-align:center;margin:9px 0 0;font-size:12.5px;color:var(--pv-text-muted)">Already have an account? <span data-tok="link" style="color:var(--pv-link);font-weight:600">Log in</span></p>
+          </div>
+        </div>
+
+        <div style="display:grid;gap:8px;padding:14px 18px 0">
+          <div data-tok="success onSuccess" style="border:1px solid var(--pv-success);color:var(--pv-success);border-radius:10px;padding:8px 13px;font-size:13px;display:flex;gap:9px;align-items:center;flex-wrap:wrap"><strong>✓ Saved.</strong><span>Your changes are live.</span><span style="flex:1"></span><span data-tok="success" style="background:var(--pv-success);color:var(--pv-on-success);font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px">SOLID</span></div>
+          <div data-tok="warning onWarning" style="border:1px solid var(--pv-warning);color:var(--pv-warning);border-radius:10px;padding:8px 13px;font-size:13px;display:flex;gap:9px;align-items:center;flex-wrap:wrap"><strong>Heads up.</strong><span>Your trial ends in 3 days.</span><span style="flex:1"></span><span data-tok="warning" style="background:var(--pv-warning);color:var(--pv-on-warning);font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px">SOLID</span></div>
+          <div data-tok="danger onDanger" style="border:1px solid var(--pv-danger);color:var(--pv-danger);border-radius:10px;padding:8px 13px;font-size:13px;display:flex;gap:9px;align-items:center;flex-wrap:wrap"><strong>Payment failed.</strong><span>Update your card to keep service.</span><span style="flex:1"></span><span data-tok="danger" style="background:var(--pv-danger);color:var(--pv-on-danger);font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px">SOLID</span></div>
+          <div data-tok="info onInfo" style="border:1px solid var(--pv-info);color:var(--pv-info);border-radius:10px;padding:8px 13px;font-size:13px;display:flex;gap:9px;align-items:center;flex-wrap:wrap"><strong>Tip.</strong><span>Keyboard shortcuts are under Settings.</span><span style="flex:1"></span><span data-tok="info" style="background:var(--pv-info);color:var(--pv-on-info);font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px">SOLID</span></div>
+        </div>
+
+        <div data-tok="surface border" style="margin:14px 18px 0;background:var(--pv-surface);border:1px solid var(--pv-border);border-radius:13px;overflow:hidden">
+          <div style="display:grid;grid-template-columns:1.4fr 1fr .7fr;gap:10px;padding:9px 15px;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--pv-text-muted);border-bottom:1px solid var(--pv-border)"><span>PLAN</span><span>STATUS</span><span style="text-align:right">PRICE</span></div>
+          <div style="display:grid;grid-template-columns:1.4fr 1fr .7fr;gap:10px;padding:10px 15px;align-items:center;border-bottom:1px solid var(--pv-border)"><strong>Starter</strong><span style="color:var(--pv-text-muted);font-size:13px">Current plan</span><span style="text-align:right" class="mono">$0</span></div>
+          <div style="display:grid;grid-template-columns:1.4fr 1fr .7fr;gap:10px;padding:10px 15px;align-items:center"><strong>Growth</strong><span data-tok="accent onAccent" style="background:var(--pv-accent);color:var(--pv-on-accent);font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;justify-self:start">RECOMMENDED</span><span style="text-align:right" class="mono">$24</span></div>
+        </div>
+
+        <div data-tok="primary textInverse" style="margin:14px 18px 0;background:var(--pv-primary);color:var(--pv-text-inverse);border-radius:13px;padding:13px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <strong>Dark band on primary</strong>
+          <span style="opacity:.85;font-size:13px">Inverse text carries announcements on saturated fills.</span>
+          <span style="flex:1"></span>
+          <span data-tok="danger onDanger" style="background:var(--pv-danger);color:var(--pv-on-danger);padding:6px 13px;border-radius:8px;font-weight:600;font-size:13px">Delete workspace</span>
+        </div>
+      </div>`;
+    }
+
+    /* ================= state ================= */
+    let mode = "light";
+    let step = "seed";
+    let exportState = { format: "css", notation: "oklch", darkVia: "attr" };
+    let palettes = generatePalettes(18, 62, 180);
+    const $ = id => document.getElementById(id);
+    const seedEls = { hue: $("seedHue"), sat: $("seedSat"), harmony: $("seedHarmony") };
+
+    /* ================= persistence + undo =================
+       State (palettes, seed, mode, step, export options) autosaves to
+       localStorage on every change and is restored on load. A shareable
+       ?seed=hue,sat,harmony URL parameter recreates a seed from scratch —
+       but only when it differs from the saved session's seed, so the
+       ?seed= that saveState keeps in the URL never wipes edits on reload.
+       Undo is a snapshot stack
+       of {palettes, seed}; discrete actions push before mutating, and
+       continuous controls (sliders, color picker, text fields) capture a
+       snapshot when a gesture/focus session begins and push it when the
+       gesture commits a different value. */
+    const STORE_KEY = "ctw-state-v1";
+    let undoStack = [], redoStack = [];
+    let auditView = "light";
+    const auditMode = () => auditView;
+    function currentSeed() { return { hue: +seedEls.hue.value, sat: +seedEls.sat.value, harmony: +seedEls.harmony.value }; }
+    function snapshot() { return JSON.stringify({ palettes, seed: currentSeed() }); }
+    function updateUndoUI() { $("undoBtn").disabled = !undoStack.length; $("redoBtn").disabled = !redoStack.length; }
+    function pushUndo() {
+      const s = snapshot();
+      if (undoStack[undoStack.length - 1] === s) return;
+      undoStack.push(s); if (undoStack.length > 60) undoStack.shift();
+      redoStack = []; updateUndoUI();
+    }
+    let gestureSnap = null;
+    function gestureBegin() { if (!gestureSnap) gestureSnap = snapshot(); }
+    function gestureEnd() {
+      if (!gestureSnap) return;
+      if (gestureSnap !== snapshot()) {
+        undoStack.push(gestureSnap); if (undoStack.length > 60) undoStack.shift();
+        redoStack = []; updateUndoUI();
+      }
+      gestureSnap = null;
+    }
+    function applySnapshot(s) {
+      const d = JSON.parse(s);
+      palettes = d.palettes;
+      seedEls.hue.value = d.seed.hue; seedEls.sat.value = d.seed.sat; seedEls.harmony.value = String(d.seed.harmony);
+      updateSeedLabels(); renderEditor(); refreshDerived(); renderStepper();
+    }
+    function undo() { if (!undoStack.length) return; redoStack.push(snapshot()); applySnapshot(undoStack.pop()); updateUndoUI(); toast("Undone"); }
+    function redo() { if (!redoStack.length) return; undoStack.push(snapshot()); applySnapshot(redoStack.pop()); updateUndoUI(); toast("Redone"); }
+
+    let savedTimer = null;
+    function flashSaved() {
+      const el = $("saveNote"); if (!el) return;
+      el.textContent = "Saved ✓";
+      clearTimeout(savedTimer);
+      savedTimer = setTimeout(() => { el.textContent = "Autosaved in this browser"; }, 1800);
+    }
+    let lastSeedQs = null;
+    function saveState() {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify({ v: 1, palettes, mode, step, exportState, seed: currentSeed() })); flashSaved(); } catch (e) {}
+      const s = currentSeed(), qs = s.hue + "," + s.sat + "," + s.harmony;
+      if (qs !== lastSeedQs) {
+        lastSeedQs = qs;
+        try { const u = new URL(location.href); u.searchParams.set("seed", qs); history.replaceState(null, "", u); } catch (e) {}
+      }
+    }
+    function sanitizePalettes(raw) {
+      const fallback = generatePalettes(18, 62, 180);
+      const out = {};
+      for (const m of ["light", "dark"]) {
+        out[m] = {};
+        for (const k of ALL_KEYS) {
+          const c = raw && raw[m] && raw[m][k];
+          out[m][k] = c && isFinite(c.l) && isFinite(c.c) && isFinite(c.h)
+            ? { l: clamp(+c.l, 0, 1), c: clamp(+c.c, 0, 0.4), h: ((+c.h % 360) + 360) % 360 }
+            : { ...fallback[m][k] };
+        }
+      }
+      return out;
+    }
+    function seedFromUrl() {
+      try {
+        const s = new URLSearchParams(location.search).get("seed");
+        if (!s) return null;
+        const parts = s.split(",").map(Number);
+        if (parts.length !== 3 || parts.some(isNaN)) return null;
+        return { hue: clamp(Math.round(parts[0]), 0, 360), sat: clamp(Math.round(parts[1]), 0, 100), harmony: [0, 32, 120, 150, 180].includes(parts[2]) ? parts[2] : 180 };
+      } catch (e) { return null; }
+    }
+    function syncExportSegs() {
+      $("fmtCss").setAttribute("aria-pressed", exportState.format === "css");
+      $("fmtJson").setAttribute("aria-pressed", exportState.format === "json");
+      $("notOklch").setAttribute("aria-pressed", exportState.notation === "oklch");
+      $("notHex").setAttribute("aria-pressed", exportState.notation === "hex");
+      $("darkAttr").setAttribute("aria-pressed", exportState.darkVia === "attr");
+      $("darkMedia").setAttribute("aria-pressed", exportState.darkVia === "media");
+    }
+    function restoreState() {
+      let fromUrl = false, data = null;
+      try {
+        data = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+        if (data) {
+          if (data.palettes) palettes = sanitizePalettes(data.palettes);
+          if (data.mode === "dark" || data.mode === "light") { mode = data.mode; auditView = data.mode; }
+          if (data.step && STEPS.some(s => s.id === data.step)) step = data.step;
+          if (data.exportState) for (const k of ["format", "notation", "darkVia"]) if (data.exportState[k]) exportState[k] = data.exportState[k];
+          if (data.seed) {
+            seedEls.hue.value = clamp(+data.seed.hue || 18, 0, 360);
+            seedEls.sat.value = clamp(+data.seed.sat || 62, 0, 100);
+            seedEls.harmony.value = String(data.seed.harmony ?? 180);
+          }
+        }
+      } catch (e) {}
+      const us = seedFromUrl();
+      if (us) {
+        /* A seed link only (re)generates when it brings a DIFFERENT seed
+           than the saved session. saveState keeps ?seed= in the URL, so a
+           plain reload also carries the parameter — with an equal seed it
+           is the same session continuing, and the saved palettes win. */
+        const savedSeed = data && data.seed;
+        const sameSeed = savedSeed && +savedSeed.hue === us.hue && +savedSeed.sat === us.sat && +savedSeed.harmony === us.harmony;
+        if (!sameSeed) {
+          fromUrl = true;
+          seedEls.hue.value = us.hue; seedEls.sat.value = us.sat; seedEls.harmony.value = String(us.harmony);
+          palettes = generatePalettes(us.hue, us.sat, us.harmony);
+        }
+      }
+      $("modeLight").setAttribute("aria-pressed", mode === "light");
+      $("modeDark").setAttribute("aria-pressed", mode === "dark");
+      syncExportSegs();
+      return fromUrl;
+    }
+
+    function toast(msg) {
+      const t = $("toast"); t.textContent = msg; t.classList.add("show");
+      clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2200);
+    }
+
+    /* ================= stepper ================= */
+    function pairStats(m = mode) {
+      const pal = palettes[m]; let aa = 0, aaa = 0;
+      for (const p of PAIRS) {
+        const r = wcagRatio(oklchToRgb255(pal[p.fg]), oklchToRgb255(pal[p.bg]));
+        if (r >= p.min) aa++; if (r >= p.aaa) aaa++;
+      }
+      return { aa, aaa, fail: PAIRS.length - aa, total: PAIRS.length };
+    }
+    function groupFails(groupId, m = mode) {
+      const pal = palettes[m], keys = new Set(GROUPS[groupId].tokens); let n = 0;
+      for (const p of PAIRS) if ((keys.has(p.fg) || keys.has(p.bg)) && wcagRatio(oklchToRgb255(pal[p.fg]), oklchToRgb255(pal[p.bg])) < p.min) n++;
+      return n;
+    }
+    function renderStepper() {
+      const nav = $("stepper"); nav.innerHTML = "";
+      STEPS.forEach((s, i) => {
+        const b = document.createElement("button");
+        b.className = "step"; b.setAttribute("aria-current", step === s.id ? "step" : "false");
+        let flag = "";
+        if (s.id === "review") {
+          const lf = pairStats("light").fail, df = pairStats("dark").fail;
+          flag = (lf + df) === 0 ? `<span class="flag ok">all pass</span>` : `<span class="flag">${[lf ? "Light " + lf : "", df ? "Dark " + df : ""].filter(Boolean).join(" · ")} failing</span>`;
+        }
+        else if (GROUPS[s.id]) { const f = groupFails(s.id); if (f) flag = `<span class="flag">${f} issue${f > 1 ? "s" : ""}</span>`; }
+        b.innerHTML = `<span class="n">${i + 1}</span>${s.title} ${flag}`;
+        b.addEventListener("click", () => { step = s.id; renderEditor(); renderStepper(); saveState(); });
+        nav.appendChild(b);
+      });
+    }
+
+    /* ================= token editor ================= */
+    function trackGradient(kind, col) {
+      const g = (l, c, h) => oklchCss({ l, c, h });
+      if (kind === "l") return `linear-gradient(90deg, ${g(0, col.c, col.h)}, ${g(0.5, col.c, col.h)}, ${g(1, col.c, col.h)})`;
+      if (kind === "c") return `linear-gradient(90deg, ${g(col.l, 0, col.h)}, ${g(col.l, 0.37, col.h)})`;
+      return "linear-gradient(90deg,oklch(.62 .17 0),oklch(.62 .17 60),oklch(.62 .17 120),oklch(.62 .17 180),oklch(.62 .17 240),oklch(.62 .17 300),oklch(.62 .17 360))";
+    }
+    function parseOklchText(text) {
+      const m = /^\s*oklch\(\s*([\d.]+)(%?)\s+([\d.]+)\s+(-?[\d.]+)(?:deg)?\s*\)\s*$/i.exec(text);
+      if (!m) return null;
+      let l = parseFloat(m[1]); if (m[2] === "%") l = l / 100;
+      const c = parseFloat(m[3]), h = parseFloat(m[4]);
+      if ([l, c, h].some(isNaN)) return null;
+      return { l: clamp(l, 0, 1), c: clamp(c, 0, 0.4), h: ((h % 360) + 360) % 360 };
+    }
+    function buildTokenRow(key) {
+      const def = TOKEN_DEFS[key];
+      const row = document.createElement("div");
+      row.className = "token"; row.dataset.key = key;
+      row.innerHTML = `
+        <div class="token-top">
+          <label class="swatch" title="Open system color picker"><span class="fill"></span><input type="color" aria-label="Pick ${def.name} color"></label>
+          <div class="token-names">
+            <div class="token-name">${def.name}</div>
+            <div class="token-var mono">--${kebab(key)}</div>
+            <div class="token-desc">${def.desc}</div>
+          </div>
+          <input class="hexin mono" spellcheck="false" aria-label="${def.name} hex value">
+          <button class="btn small token-reset" type="button" title="Reset ${def.name} to the value generated from the current seed">Reset</button>
+        </div>
+        <div class="sliders">
+          ${["l", "c", "h"].map(ch => `
+          <div class="slider-row">
+            <span class="lab">${ch.toUpperCase()}</span>
+            <input type="range" class="tok" data-ch="${ch}" min="0" max="${ch === "l" ? 1000 : ch === "c" ? 370 : 360}" step="1" aria-label="${def.name} ${ch === "l" ? "lightness" : ch === "c" ? "chroma" : "hue"}">
+            <input class="val mono numin" data-val="${ch}" inputmode="decimal" aria-label="${def.name} ${ch === "l" ? "lightness" : ch === "c" ? "chroma" : "hue"} — type an exact value">
+          </div>`).join("")}
+          <input class="oklchin mono" spellcheck="false" placeholder="oklch(0.650 0.150 25.0)" aria-label="${def.name} OKLCH value — paste an oklch() color to set it exactly, including colors outside the sRGB gamut">
+          <div class="field-err" role="alert"></div>
+          <div class="gamut-note">Outside the sRGB gamut — displayed and exported with chroma reduced to the closest displayable color.</div>
+        </div>`;
+      const col = () => palettes[mode][key];
+      const errEl = row.querySelector(".field-err");
+      const showErr = msg => { errEl.textContent = msg || ""; errEl.classList.toggle("show", !!msg); };
+      const colorIn = row.querySelector('input[type="color"]');
+      colorIn.addEventListener("pointerdown", gestureBegin);
+      colorIn.addEventListener("focus", gestureBegin);
+      colorIn.addEventListener("change", gestureEnd);
+      colorIn.addEventListener("input", e => {
+        const rgb = hexToRgb255(e.target.value); if (!rgb) return;
+        palettes[mode][key] = rgb255ToOklch(rgb); syncRow(row, key); refreshDerived();
+      });
+      const hexIn = row.querySelector(".hexin");
+      hexIn.addEventListener("focus", gestureBegin);
+      hexIn.addEventListener("blur", gestureEnd);
+      hexIn.addEventListener("input", () => {
+        const raw = hexIn.value.trim(), digits = raw.replace(/^#/, "");
+        const rgb = hexToRgb255(raw);
+        if (rgb && digits.length === 6) {
+          /* complete hex commits live; a 3-digit shorthand still commits on blur/Enter so mid-typing states don't hijack the token */
+          hexIn.classList.remove("invalid"); showErr("");
+          palettes[mode][key] = rgb255ToOklch(rgb); syncRow(row, key); refreshDerived();
+        } else if (/[^0-9a-fA-F#]/.test(raw) || digits.length > 6) {
+          hexIn.classList.add("invalid");
+          showErr("Not a valid hex color — use #RGB or #RRGGBB.");
+        } else { hexIn.classList.remove("invalid"); showErr(""); }
+      });
+      hexIn.addEventListener("change", () => {
+        const rgb = hexToRgb255(hexIn.value);
+        if (!rgb) { hexIn.classList.add("invalid"); showErr("That is not a valid hex color — use #RGB or #RRGGBB. The token was not changed."); }
+        else { hexIn.classList.remove("invalid"); showErr(""); palettes[mode][key] = rgb255ToOklch(rgb); syncRow(row, key); refreshDerived(); }
+        gestureEnd();
+      });
+      const okIn = row.querySelector(".oklchin");
+      okIn.addEventListener("focus", gestureBegin);
+      okIn.addEventListener("blur", gestureEnd);
+      okIn.addEventListener("input", () => { okIn.classList.remove("invalid"); });
+      okIn.addEventListener("change", () => {
+        const parsed = parseOklchText(okIn.value);
+        if (!parsed) { okIn.classList.add("invalid"); showErr("Could not parse that — expected a form like oklch(0.650 0.150 25.0). The token was not changed."); }
+        else { okIn.classList.remove("invalid"); showErr(""); palettes[mode][key] = parsed; syncRow(row, key); refreshDerived(); }
+        gestureEnd();
+      });
+      row.querySelector(".token-reset").addEventListener("click", () => {
+        pushUndo();
+        const fresh = generatePalettes(currentSeed().hue, currentSeed().sat, currentSeed().harmony)[mode][key];
+        palettes[mode][key] = { ...fresh };
+        syncRow(row, key); refreshDerived();
+        toast("Reset " + def.name + " to the generated value");
+      });
+      row.querySelectorAll('input[type="range"]').forEach(sl => {
+        sl.addEventListener("pointerdown", gestureBegin);
+        sl.addEventListener("focus", gestureBegin);
+        sl.addEventListener("change", gestureEnd);
+        sl.addEventListener("input", () => {
+          const ch = sl.dataset.ch, v = parseFloat(sl.value);
+          if (ch === "l") col().l = v / 1000; else if (ch === "c") col().c = v / 1000; else col().h = v;
+          syncRow(row, key, ch); refreshDerived();
+        });
+      });
+      row.querySelectorAll(".numin").forEach(inp => {
+        const ch = inp.dataset.val;
+        function commitNum() {
+          const v = parseFloat(inp.value);
+          if (isNaN(v)) { syncRow(row, key); return; }
+          if (ch === "l") col().l = clamp(v > 1 ? v / 100 : v, 0, 1);
+          else if (ch === "c") col().c = clamp(v, 0, 0.4);
+          else col().h = ((v % 360) + 360) % 360;
+          syncRow(row, key); refreshDerived();
+        }
+        inp.addEventListener("focus", gestureBegin);
+        inp.addEventListener("blur", gestureEnd);
+        inp.addEventListener("change", commitNum);
+        inp.addEventListener("change", gestureEnd);
+        inp.addEventListener("keydown", e => {
+          if (e.key === "Enter") { e.preventDefault(); inp.blur(); }
+          else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+            e.preventDefault();
+            const stepBy = (ch === "h" ? 1 : 0.005) * (e.shiftKey ? 10 : 1) * (e.key === "ArrowUp" ? 1 : -1);
+            if (ch === "l") col().l = clamp(col().l + stepBy, 0, 1);
+            else if (ch === "c") col().c = clamp(col().c + stepBy, 0, 0.4);
+            else col().h = ((col().h + stepBy) % 360 + 360) % 360;
+            syncRow(row, key); refreshDerived();
+          }
+        });
+      });
+      row.addEventListener("mouseenter", () => setHighlight(key, true));
+      row.addEventListener("mouseleave", () => setHighlight(key, false));
+      row.addEventListener("focusin", () => setHighlight(key, true));
+      row.addEventListener("focusout", () => setHighlight(key, false));
+      return row;
+    }
+    function syncRow(row, key) {
+      const col = palettes[mode][key];
+      row.querySelector(".fill").style.background = oklchCss(col);
+      row.querySelector('input[type="color"]').value = oklchToHex(displayCol(col));
+      const hexIn = row.querySelector(".hexin");
+      if (document.activeElement !== hexIn) hexIn.value = oklchToHex(displayCol(col));
+      row.querySelectorAll('input[type="range"]').forEach(sl => {
+        const ch = sl.dataset.ch;
+        sl.value = ch === "l" ? Math.round(col.l * 1000) : ch === "c" ? Math.round(col.c * 1000) : Math.round(col.h);
+        sl.style.background = trackGradient(ch, col);
+      });
+      row.querySelectorAll(".numin").forEach(inp => {
+        if (document.activeElement === inp) return;
+        const ch = inp.dataset.val;
+        inp.value = ch === "l" ? col.l.toFixed(3) : ch === "c" ? col.c.toFixed(3) : String(Math.round(col.h));
+      });
+      const okIn = row.querySelector(".oklchin");
+      if (document.activeElement !== okIn) okIn.value = `oklch(${col.l.toFixed(3)} ${col.c.toFixed(3)} ${col.h.toFixed(1)})`;
+      row.querySelector(".gamut-note").classList.toggle("show", Math.abs(displayCol(col).c - col.c) > 0.01);
+    }
+    function renderEditor() {
+      const s = STEPS.find(x => x.id === step);
+      $("stepTitle").textContent = s.title;
+      $("stepGuidance").innerHTML = s.guidance;
+      $("seedPanel").hidden = step !== "seed";
+      $("reviewPanel").hidden = step !== "review";
+      const panel = $("tokenPanel");
+      panel.hidden = !(step in GROUPS);
+      panel.innerHTML = "";
+      if (step in GROUPS) for (const key of GROUPS[step].tokens) { const r = buildTokenRow(key); panel.appendChild(r); syncRow(r, key); }
+      if (step === "review") {
+        const st = pairStats();
+        $("statAA").textContent = st.aa + "/" + st.total; $("statAAA").textContent = st.aaa + "/" + st.total; $("statFix").textContent = st.fail;
+        $("statModeLbl").innerHTML = `The stats above are for the <strong>${mode}</strong> palette you are editing. The export always ships <strong>both</strong> palettes — so here is the other one too:`;
+        const bm = $("bothModes"); bm.innerHTML = "";
+        for (const m of ["light", "dark"]) {
+          const s2 = pairStats(m);
+          const row = document.createElement("div"); row.className = "bm-row";
+          row.innerHTML = `<span class="grow"><strong>${m === "light" ? "Light" : "Dark"} palette</strong> · ${s2.aa}/${s2.total} pass AA · ${s2.aaa}/${s2.total} AAA${s2.fail ? ` · <span style="color:var(--chrome-bad);font-weight:700">${s2.fail} failing</span>` : ` · <span style="color:var(--chrome-good);font-weight:700">all pass</span>`}</span>`;
+          if (m !== mode) {
+            const b = document.createElement("button"); b.className = "btn small"; b.textContent = "Edit " + m;
+            b.addEventListener("click", () => setMode(m));
+            row.appendChild(b);
+          } else {
+            const tag = document.createElement("span"); tag.className = "cmp-edit"; tag.textContent = "editing";
+            row.appendChild(tag);
+          }
+          bm.appendChild(row);
+        }
+      }
+      updateStepNav();
+    }
+    function updateStepNav() {
+      const idx = STEPS.findIndex(x => x.id === step);
+      const prev = STEPS[idx - 1], next = STEPS[idx + 1];
+      const pb = $("prevStepBtn"), nb = $("nextStepBtn");
+      pb.style.visibility = prev ? "visible" : "hidden";
+      nb.style.visibility = next ? "visible" : "hidden";
+      if (prev) pb.textContent = "← " + prev.title;
+      if (next) {
+        let extra = "";
+        if (GROUPS[next.id]) { const f = groupFails(next.id); if (f) extra = ` · ${f} issue${f > 1 ? "s" : ""}`; }
+        if (next.id === "review") { const f = pairStats("light").fail + pairStats("dark").fail; if (f) extra = ` · ${f} failing`; }
+        nb.textContent = next.title + extra + " →";
+      }
+    }
+    function gotoStep(d) {
+      const idx = STEPS.findIndex(x => x.id === step);
+      const t = STEPS[idx + d]; if (!t) return;
+      step = t.id; renderEditor(); renderStepper(); saveState();
+      __root.querySelector('section[aria-label="Token editor"]').scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    function setHighlight(key, on) {
+      __root.querySelectorAll("#preview [data-tok]").forEach(el => {
+        if (el.dataset.tok.split(" ").includes(key)) el.classList.toggle("is-hl", on);
+      });
+      __root.querySelectorAll(".token").forEach(r => { if (r.dataset.key === key) r.classList.toggle("hl", on); });
+    }
+
+    /* ================= preview + audit ================= */
+    function applyPreview() {
+      const pal = palettes[mode];
+      for (const host of [$("previewFrame"), $("mobileBar")])
+        for (const k of ALL_KEYS) host.style.setProperty("--pv-" + kebab(k), oklchCss(pal[k]));
+      const label = (mode === "light" ? "Light" : "Dark") + " palette";
+      $("previewModeLabel").textContent = "· showing the " + label.toLowerCase();
+      $("pvModePill").textContent = mode.toUpperCase() + " PALETTE";
+      $("miniMode").textContent = mode.toUpperCase() + " PALETTE";
+    }
+    function renderCompare() {
+      const host = $("compareStrip"); if (!host) return;
+      host.innerHTML = "";
+      for (const m of ["light", "dark"]) {
+        const row = document.createElement("button");
+        row.type = "button"; row.className = "cmp-row";
+        row.setAttribute("aria-pressed", m === mode);
+        row.setAttribute("aria-label", (m === "light" ? "Light" : "Dark") + " palette key colors" + (m === mode ? " — being edited" : " — activate to edit it"));
+        row.innerHTML = `<span class="cmp-mode">${m === "light" ? "Light" : "Dark"}</span>` +
+          ["bg", "surface", "text", "primary", "accent"].map(k => `<span class="cmp-sw" style="background:${oklchCss(palettes[m][k])}" title="${TOKEN_DEFS[k].name}"></span>`).join("") +
+          `<span class="cmp-edit">${m === mode ? "editing" : "tap to edit"}</span>`;
+        row.addEventListener("click", () => setMode(m));
+        host.appendChild(row);
+      }
+    }
+    function renderAudit() {
+      const vm = auditMode();
+      const pal = palettes[vm], table = $("auditTable"); table.innerHTML = "";
+      $("auditModeLabel").textContent = "· " + (vm === "light" ? "Light" : "Dark") + " palette" + (vm !== mode ? " (viewing — Fix edits this palette)" : "");
+      $("auditLight").setAttribute("aria-pressed", vm === "light");
+      $("auditDark").setAttribute("aria-pressed", vm === "dark");
+      PAIRS.forEach((p, i) => {
+        const fgC = pal[p.fg], bgC = pal[p.bg];
+        const fgRgb = oklchToRgb255(fgC), bgRgb = oklchToRgb255(bgC);
+        const r = wcagRatio(fgRgb, bgRgb), lc = apcaLc(fgRgb, bgRgb);
+        const pass = r >= p.min, aaa = r >= p.aaa;
+        const apcaLow = pass && Math.abs(lc) < (p.graphic ? 45 : 60);
+        const row = document.createElement("div"); row.className = "audit-row";
+        row.innerHTML = `
+          <div class="pair-vis">
+            <span class="pair-chip" style="background:${oklchCss(bgC)};color:${oklchCss(fgC)}">Ag</span>
+            <span class="pair-names">${p.label}<small class="mono">--${kebab(p.fg)} on --${kebab(p.bg)} · needs ${p.min}:1${p.graphic ? " (UI)" : ""}</small></span>
+          </div>
+          <div class="ratio mono">${r.toFixed(2)}:1<small>APCA Lc ${lc.toFixed(0)}${apcaLow ? ` · <span style="color:var(--chrome-warn);font-weight:700">APCA low for ${p.graphic ? "UI" : "text"}</span>` : ""}</small></div>
+          <span class="badge ${pass ? (aaa ? "pass" : "mid") : "fail"}">${pass ? (aaa ? "AAA" : "AA") : "Fail"}</span>
+          <span class="fixcell">${pass ? "" : `<button class="btn small" data-fix="${i}">Fix</button>`}</span>`;
+        table.appendChild(row);
+      });
+    }
+    const ratioIn = (pal, q) => wcagRatio(oklchToRgb255(pal[q.fg]), oklchToRgb255(pal[q.bg]));
+    /* Cross-pair safe fix: run the standard resolve, then check EVERY pair —
+       not just same-foreground siblings. Moving a shared background token
+       (surface backs four pairs, bg backs nine) can silently break a pair
+       that was passing. If it did, retry with a foreground-only move and
+       keep whichever outcome solves the target with fewer breakages.
+       Returns the list of pairs that were passing before and fail now. */
+    function safeResolve(pal, p) {
+      const snap = JSON.parse(JSON.stringify(pal));
+      const before = PAIRS.map(q => ratioIn(pal, q));
+      const brokeIn = state => PAIRS.filter((q, i) => before[i] >= q.min && ratioIn(state, q) < q.min);
+      resolvePairIn(pal, p);
+      let broke = brokeIn(pal);
+      if (broke.length) {
+        const alt = JSON.parse(JSON.stringify(snap));
+        alt[p.fg].l = solveLightness(alt[p.fg], oklchToRgb255(alt[p.bg]), p.min);
+        const altBroke = brokeIn(alt);
+        if (altBroke.length < broke.length || (ratioIn(alt, p) >= p.min && ratioIn(pal, p) < p.min)) {
+          for (const k of ALL_KEYS) pal[k] = alt[k];
+          broke = altBroke;
+        }
+      }
+      return broke;
+    }
+    function fixPair(i, palObj) { safeResolve(palObj || palettes[mode], PAIRS[i]); }
+    /* Fix one pair and report the truth: whether it actually passes now,
+       which token's lightness moved (it is not always the one in the row —
+       the resolver may move the fill), and any collateral breakage. */
+    function fixPairDetailed(pal, p) {
+      const snap = JSON.parse(JSON.stringify(pal));
+      const broke = safeResolve(pal, p);
+      const rAfter = ratioIn(pal, p);
+      let moved = null;
+      for (const k of [p.fg, p.bg]) if (Math.abs(snap[k].l - pal[k].l) > 0.0005) moved = { key: k, from: snap[k].l, to: pal[k].l };
+      const solved = rAfter >= p.min;
+      let msg;
+      if (!solved && !moved) msg = `Could not fix “${p.label}” by lightness alone — still ${rAfter.toFixed(2)}:1 (needs ${p.min}:1). Try a hue or chroma change.`;
+      else if (!solved) msg = `Improved “${p.label}” to ${rAfter.toFixed(2)}:1, but it still needs ${p.min}:1 — lightness alone cannot get there. Try a hue or chroma change.`;
+      else {
+        msg = `Fixed “${p.label}” — ${moved ? TOKEN_DEFS[moved.key].name + " lightness " + moved.from.toFixed(3) + " → " + moved.to.toFixed(3) + " · " : ""}now ${rAfter.toFixed(2)}:1 ✓`;
+        if (broke.length) msg += ` — but ${broke.map(q => "“" + q.label + "”").join(", ")} now fail${broke.length > 1 ? "" : "s"}; fix ${broke.length > 1 ? "those" : "that"} next.`;
+      }
+      return { solved, msg };
+    }
+    function logFix(msg) {
+      const wrap = $("fixLogWrap"); if (!wrap) return;
+      wrap.hidden = false;
+      const li = document.createElement("li");
+      li.textContent = msg;
+      const list = $("fixLog");
+      list.prepend(li);
+      while (list.children.length > 8) list.lastElementChild.remove();
+    }
+    function fixAll() {
+      const before = pairStats().fail;
+      if (!before) { toast("Nothing to fix — every pair already passes WCAG AA"); return; }
+      pushUndo();
+      for (let pass = 0; pass < 4; pass++) {
+        let dirty = false;
+        PAIRS.forEach((p, i) => {
+          const pal = palettes[mode];
+          if (ratioIn(pal, p) < p.min) { fixPair(i); dirty = true; }
+        });
+        if (!dirty) break;
+      }
+      refreshDerived(); renderEditor(); renderStepper();
+      const st = pairStats();
+      const msg = st.fail === 0
+        ? `Fix all: repaired ${before} pair${before > 1 ? "s" : ""} — every pair now passes WCAG AA`
+        : `Fix all: repaired ${before - st.fail} of ${before} — ${st.fail} still failing; those need a hue or chroma change, not just lightness`;
+      toast(msg); logFix(msg);
+    }
+
+    /* ================= export ================= */
+    function tokenValue(col) {
+      return exportState.notation === "oklch" ? oklchCss(col) : oklchToHex(displayCol(col));
+    }
+    function buildExport() {
+      if (exportState.format === "json") {
+        const obj = { light: {}, dark: {} };
+        for (const m of ["light", "dark"]) for (const k of ALL_KEYS) {
+          /* value, oklch and hex must all describe the SAME color: the
+             gamut-mapped display color. (Previously the nested oklch held
+             the raw palette values while value/hex were clamped, so one
+             entry contained two different colors.) All three fields are
+             derived from the one rounded triple that is printed in the
+             entry, so they agree exactly — no rounding drift between
+             representations. Out-of-gamut tokens are flagged with
+             gamutClamped instead of silently diverging. */
+          const raw = palettes[m][k], d = displayCol(raw);
+          const triple = { l: +d.l.toFixed(3), c: +d.c.toFixed(3), h: +d.h.toFixed(1) };
+          const entry = {
+            value: exportState.notation === "oklch" ? `oklch(${triple.l.toFixed(3)} ${triple.c.toFixed(3)} ${triple.h.toFixed(1)})` : oklchToHex(triple),
+            oklch: triple,
+            hex: oklchToHex(triple)
+          };
+          if (Math.abs(d.c - raw.c) > 0.001) entry.gamutClamped = true;
+          obj[m][k] = entry;
+        }
+        return JSON.stringify(obj, null, 2);
+      }
+      const lines = m => ALL_KEYS.map(k => "  --" + kebab(k) + ": " + tokenValue(palettes[m][k]) + ";").join("\n");
+      const head = "/* Color tokens — generated with Color Token Workshop */\n:root {\n" + lines("light") + "\n}\n";
+      if (exportState.darkVia === "media") return head + "\n@media (prefers-color-scheme: dark) {\n  :root {\n" + lines("dark").split("\n").map(l => "  " + l).join("\n") + "\n  }\n}\n";
+      return head + "\n[data-theme=\"dark\"] {\n" + lines("dark") + "\n}\n";
+    }
+    function renderExport() {
+      $("exportBox").textContent = buildExport();
+      let clamped = 0;
+      for (const m of ["light", "dark"]) for (const k of ALL_KEYS) if (Math.abs(displayCol(palettes[m][k]).c - palettes[m][k].c) > 0.005) clamped++;
+      $("exportMeta").textContent = ALL_KEYS.length * 2 + " tokens · light + dark" + (clamped ? ` · ⚠ ${clamped} token${clamped > 1 ? "s" : ""} outside the sRGB gamut — exported with chroma reduced` : "");
+      $("notationSeg").style.display = exportState.format === "json" ? "none" : "";
+      $("darkSeg").style.display = exportState.format === "json" ? "none" : "";
+    }
+    function refreshDerived() { applyPreview(); renderAudit(); renderExport(); renderStepper(); renderCompare(); saveState(); }
+
+    /* ================= wiring ================= */
+    function setMode(m) {
+      mode = m;
+      auditView = m;
+      $("modeLight").setAttribute("aria-pressed", m === "light");
+      $("modeDark").setAttribute("aria-pressed", m === "dark");
+      renderEditor(); refreshDerived(); renderStepper();
+    }
+    $("modeLight").addEventListener("click", () => setMode("light"));
+    $("modeDark").addEventListener("click", () => setMode("dark"));
+    $("miniMode").addEventListener("click", () => setMode(mode === "light" ? "dark" : "light"));
+    $("miniPreview").addEventListener("click", () => $("previewCard").scrollIntoView({ behavior: "smooth", block: "start" }));
+    $("exportJump").addEventListener("click", () => { step = "review"; renderEditor(); renderStepper(); saveState(); $("exportCard").scrollIntoView({ behavior: "smooth", block: "start" }); });
+
+    function updateSeedLabels() {
+      const hueIn = $("seedHueVal"), satIn = $("seedSatVal");
+      if (document.activeElement !== hueIn) hueIn.value = seedEls.hue.value;
+      if (document.activeElement !== satIn) satIn.value = seedEls.sat.value;
+      seedEls.sat.style.background = `linear-gradient(90deg, oklch(.6 .01 ${seedEls.hue.value}), oklch(.58 .19 ${seedEls.hue.value}))`;
+      const harmName = seedEls.harmony.selectedOptions[0] ? seedEls.harmony.selectedOptions[0].textContent.split(" — ")[0] : seedEls.harmony.value + "°";
+      $("seedSummary").textContent = `Seed — hue ${seedEls.hue.value}° · intensity ${seedEls.sat.value}% · ${harmName} (${seedEls.harmony.value}°)`;
+      __root.querySelectorAll("#presetRow .preset").forEach(b => {
+        const on = +b.dataset.hue === +seedEls.hue.value && +b.dataset.sat === +seedEls.sat.value && +b.dataset.harmony === +seedEls.harmony.value;
+        b.setAttribute("aria-pressed", on);
+      });
+      saveState();
+    }
+    [seedEls.hue, seedEls.sat].forEach(el => el.addEventListener("input", updateSeedLabels));
+    seedEls.harmony.addEventListener("change", updateSeedLabels);
+    function seedNumWire(inputId, slider, min, max) {
+      const inp = $(inputId);
+      inp.addEventListener("change", () => {
+        const v = parseFloat(inp.value);
+        if (isNaN(v)) { updateSeedLabels(); return; }
+        slider.value = clamp(Math.round(v), min, max);
+        updateSeedLabels();
+      });
+      inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); inp.blur(); } });
+    }
+    seedNumWire("seedHueVal", seedEls.hue, 0, 360);
+    seedNumWire("seedSatVal", seedEls.sat, 0, 100);
+    $("generateBtn").addEventListener("click", () => {
+      pushUndo();
+      palettes = generatePalettes(+seedEls.hue.value, +seedEls.sat.value, +seedEls.harmony.value);
+      renderEditor(); refreshDerived(); renderStepper();
+      toast("Palettes generated — every pair starts AA-clean");
+    });
+    $("deriveDarkBtn").addEventListener("click", () => {
+      pushUndo();
+      const inv = {}; for (const k of ALL_KEYS) { const c = palettes.light[k]; inv[k] = { l: clamp(1.04 - c.l, 0.03, 0.97), c: c.c, h: c.h }; }
+      palettes.dark = inv;
+      if (mode === "dark") renderEditor();
+      refreshDerived(); renderStepper();
+      toast("Dark palette derived from light — check its audit before exporting");
+    });
+    $("diceBtn").addEventListener("click", () => {
+      pushUndo();
+      seedEls.hue.value = Math.floor(Math.random() * 360);
+      seedEls.sat.value = 35 + Math.floor(Math.random() * 60);
+      seedEls.harmony.value = ["180", "150", "120", "32", "0"][Math.floor(Math.random() * 5)];
+      updateSeedLabels();
+      palettes = generatePalettes(+seedEls.hue.value, +seedEls.sat.value, +seedEls.harmony.value);
+      renderEditor(); refreshDerived(); renderStepper();
+      toast("Random seed applied");
+    });
+    PRESETS.forEach(p => {
+      const b = document.createElement("button"); b.className = "preset";
+      b.dataset.hue = p.hue; b.dataset.sat = p.sat; b.dataset.harmony = p.harmony;
+      b.setAttribute("aria-pressed", "false");
+      const dots = [0, 1, 2].map(i => {
+        const col = i === 1 ? { l: 0.56, c: 0.13, h: (p.hue + p.harmony) % 360 } : i === 2 ? { l: 0.52, c: 0.125, h: 152 } : { l: 0.545, c: 0.05 + (p.sat / 100) * 0.125, h: p.hue };
+        return `<i style="background:${oklchCss(col)}"></i>`;
+      }).join("");
+      b.innerHTML = `<span class="dots">${dots}</span>${p.name}`;
+      b.addEventListener("click", () => {
+        pushUndo();
+        seedEls.hue.value = p.hue; seedEls.sat.value = p.sat; seedEls.harmony.value = String(p.harmony);
+        updateSeedLabels();
+        palettes = generatePalettes(p.hue, p.sat, p.harmony);
+        renderEditor(); refreshDerived(); renderStepper();
+        toast(p.name + " seed applied");
+      });
+      $("presetRow").appendChild(b);
+    });
+
+    $("auditTable").addEventListener("click", e => {
+      const btn = e.target.closest("[data-fix]"); if (!btn) return;
+      const i = +btn.dataset.fix;
+      pushUndo();
+      const rep = fixPairDetailed(palettes[auditMode()], PAIRS[i]);
+      __root.querySelectorAll(".token").forEach(r => syncRow(r, r.dataset.key));
+      refreshDerived(); renderStepper();
+      if (step === "review") renderEditor();
+      /* the re-render destroyed the clicked button — put focus back on the
+         same pair's new Fix button, or on its row if the pair now passes */
+      const newBtn = __root.querySelector(`[data-fix="${i}"]`);
+      if (newBtn) newBtn.focus();
+      else { const row = $("auditTable").children[i]; if (row) { row.tabIndex = -1; row.focus(); } }
+      toast(rep.msg); logFix(rep.msg);
+    });
+    $("fixAllBtn").addEventListener("click", fixAll);
+    $("fixAllBtn2").addEventListener("click", fixAll);
+
+    function segWire(btnId, fn) { $(btnId).addEventListener("click", () => { fn(); renderExport(); saveState(); }); }
+    segWire("fmtCss", () => { exportState.format = "css"; $("fmtCss").setAttribute("aria-pressed", "true"); $("fmtJson").setAttribute("aria-pressed", "false"); });
+    segWire("fmtJson", () => { exportState.format = "json"; $("fmtJson").setAttribute("aria-pressed", "true"); $("fmtCss").setAttribute("aria-pressed", "false"); });
+    segWire("notOklch", () => { exportState.notation = "oklch"; $("notOklch").setAttribute("aria-pressed", "true"); $("notHex").setAttribute("aria-pressed", "false"); });
+    segWire("notHex", () => { exportState.notation = "hex"; $("notHex").setAttribute("aria-pressed", "true"); $("notOklch").setAttribute("aria-pressed", "false"); });
+    segWire("darkAttr", () => { exportState.darkVia = "attr"; $("darkAttr").setAttribute("aria-pressed", "true"); $("darkMedia").setAttribute("aria-pressed", "false"); });
+    segWire("darkMedia", () => { exportState.darkVia = "media"; $("darkMedia").setAttribute("aria-pressed", "true"); $("darkAttr").setAttribute("aria-pressed", "false"); });
+
+    $("copyBtn").addEventListener("click", async () => {
+      const text = buildExport();
+      try { await navigator.clipboard.writeText(text); toast("Copied " + (exportState.format === "json" ? "JSON tokens" : "CSS variables") + " to clipboard"); }
+      catch (e) {
+        const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); toast("Copied to clipboard"); } catch (err) { toast("Copy failed — select the code and copy manually"); }
+        ta.remove();
+      }
+    });
+    $("downloadBtn").addEventListener("click", () => {
+      const isJson = exportState.format === "json";
+      const blob = new Blob([buildExport()], { type: isJson ? "application/json" : "text/css" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = isJson ? "color-tokens.json" : "color-tokens.css";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      toast("Downloaded " + a.download);
+    });
+
+    /* ================= session controls ================= */
+    $("undoBtn").addEventListener("click", undo);
+    $("redoBtn").addEventListener("click", redo);
+    $("auditLight").addEventListener("click", () => { auditView = "light"; renderAudit(); });
+    $("auditDark").addEventListener("click", () => { auditView = "dark"; renderAudit(); });
+    $("prevStepBtn").addEventListener("click", () => gotoStep(-1));
+    $("nextStepBtn").addEventListener("click", () => gotoStep(1));
+    function setTopbarVar() { const tb = __root.querySelector(".topbar"); if (tb) document.documentElement.style.setProperty("--topbar-h", tb.offsetHeight + "px"); }
+    window.addEventListener("resize", setTopbarVar);
+    $("resetBtn").addEventListener("click", () => {
+      pushUndo();
+      try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+      seedEls.hue.value = 18; seedEls.sat.value = 62; seedEls.harmony.value = "180";
+      palettes = generatePalettes(18, 62, 180);
+      mode = "light"; step = "seed"; auditView = "light";
+      $("modeLight").setAttribute("aria-pressed", "true");
+      $("modeDark").setAttribute("aria-pressed", "false");
+      updateSeedLabels(); renderEditor(); refreshDerived(); renderStepper();
+      toast("Reset to the default palettes — Ctrl+Z brings your work back");
+    });
+    $("copySeedLinkBtn").addEventListener("click", async () => {
+      const s = currentSeed();
+      const u = new URL(location.href);
+      u.searchParams.set("seed", s.hue + "," + s.sat + "," + s.harmony);
+      try { await navigator.clipboard.writeText(u.toString()); toast("Seed link copied — opening it recreates this seed"); }
+      catch (e) { toast("Seed: hue " + s.hue + "° · intensity " + s.sat + "% · harmony " + s.harmony + "°"); }
+    });
+    document.addEventListener("keydown", e => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if (k !== "z" && k !== "y") return;
+      const t = e.target;
+      /* leave native text undo alone inside text fields; their palette commits are covered by the gesture history */
+      if (t && (t.tagName === "TEXTAREA" || t.isContentEditable || (t.tagName === "INPUT" && ["text", "search", "url", "tel", "password"].includes(t.type)))) return;
+      e.preventDefault();
+      if (k === "y" || e.shiftKey) redo(); else undo();
+    });
+
+    /* ================= init ================= */
+    $("preview").innerHTML = buildPreview();
+    const loadedFromLink = restoreState();
+    updateSeedLabels();
+    setTopbarVar();
+    renderStepper();
+    renderEditor();
+    refreshDerived();
+    updateUndoUI();
+    if (loadedFromLink) toast("Loaded the shared seed — palettes generated from it");
+    
+})();
+  </script>
+  <script>
+  /* Contrast Pairs */
+(function () {
+const __root = document.querySelector('#panel-contrast');
+
+        const container = document.getElementById('tokens-container');
+        let idCounter = 0;
+
+        // Calculate relative luminance
+        function getLuminance(hex) {
+            const rgb = parseInt(hex.slice(1), 16);
+            const r = (rgb >> 16) & 0xff;
+            const g = (rgb >>  8) & 0xff;
+            const b = (rgb >>  0) & 0xff;
+
+            const a = [r, g, b].map(function (v) {
+                v /= 255;
+                return v <= 0.03928 ? v / 12.92 : Math.pow( (v + 0.055) / 1.055, 2.4 );
+            });
+            return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+        }
+
+        function getContrast(hex1, hex2) {
+            const l1 = getLuminance(hex1);
+            const l2 = getLuminance(hex2);
+            const lightest = Math.max(l1, l2);
+            const darkest = Math.min(l1, l2);
+            return (lightest + 0.05) / (darkest + 0.05);
+        }
+
+        function createPair(bgHex = '#ffffff', textHex = '#000000', name = 'Primary Button') {
+            const id = idCounter++;
+            const div = document.createElement('div');
+            div.className = 'token-group';
+
+            div.innerHTML = `
+                <input type="text" id="name-${id}" value="${name}" placeholder="Token Name">
+                <div class="color-row" style="margin-top: 1rem;">
+                    <label>Background:</label>
+                    <input type="color" id="bg-${id}" value="${bgHex}">
+                    <input type="text" id="bg-txt-${id}" value="${bgHex}">
+                </div>
+                <div class="color-row">
+                    <label>Text / Icon:</label>
+                    <input type="color" id="fg-${id}" value="${textHex}">
+                    <input type="text" id="fg-txt-${id}" value="${textHex}">
+                </div>
+                <div id="preview-${id}" class="preview-box" style="background: ${bgHex}; color: ${textHex}">
+                    Preview Text
+                </div>
+                <div id="result-${id}" class="result"></div>
+            `;
+            container.appendChild(div);
+
+            const bgColor = document.getElementById(`bg-${id}`);
+            const bgTxt = document.getElementById(`bg-txt-${id}`);
+            const fgColor = document.getElementById(`fg-${id}`);
+            const fgTxt = document.getElementById(`fg-txt-${id}`);
+
+            function update() {
+                const bg = bgColor.value;
+                const fg = fgColor.value;
+                bgTxt.value = bg;
+                fgTxt.value = fg;
+
+                const preview = document.getElementById(`preview-${id}`);
+                preview.style.background = bg;
+                preview.style.color = fg;
+
+                const ratio = getContrast(bg, fg).toFixed(2);
+                let text = `Contrast Ratio: ${ratio}:1 &mdash; `;
+                if (ratio >= 7) text += `<span class="pass">AAA Pass</span>`;
+                else if (ratio >= 4.5) text += `<span class="pass">AA Pass</span>`;
+                else if (ratio >= 3) text += `<span class="fail">Large Text Only (AA)</span>`;
+                else text += `<span class="fail">Fail</span>`;
+
+                document.getElementById(`result-${id}`).innerHTML = text;
+            }
+
+            // Sync color picker to text
+            bgColor.addEventListener('input', update);
+            fgColor.addEventListener('input', update);
+
+            // Sync text to color picker
+            bgTxt.addEventListener('input', (e) => {
+                if(/^#[0-9A-F]{6}$/i.test(e.target.value)) { bgColor.value = e.target.value; update(); }
+            });
+            fgTxt.addEventListener('input', (e) => {
+                if(/^#[0-9A-F]{6}$/i.test(e.target.value)) { fgColor.value = e.target.value; update(); }
+            });
+
+            update();
+        }
+
+        function addPair() {
+            createPair();
+        }
+
+        // Initialize with examples
+        createPair('#0066cc', '#ffffff', 'Primary Action');
+        createPair('#f0f0f0', '#333333', 'Secondary Surface');
+        createPair('#ff0000', '#ffffff', 'Destructive (Failing Example)');
+    
+window.addPair = addPair;
+})();
+  </script>
+
+  <script>
+    // Deep links: /tool/#<tab> opens that tab (old tool URLs redirect here).
+    (function () {
+      var h = decodeURIComponent(location.hash.slice(1));
+      if (!h) return;
+      var t = document.getElementById("tab-" + h) || document.querySelector('[data-tab="' + h + '"]');
+      if (t) t.click();
+    })();
+  </script>
+</body>
+</html>

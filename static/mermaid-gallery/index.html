@@ -789,6 +789,7 @@
         <span id="scratch-status" role="status"></span>
         <span class="scratch-hint">Drag the editor's corner to resize</span>
         <span class="grow"></span>
+        <button type="button" id="scratch-editor">Open in editor</button>
         <button type="button" id="scratch-copy">Copy code</button>
         <button type="button" id="scratch-clear">Clear</button>
       </div>
@@ -835,6 +836,7 @@
                 <button class="mini-btn" type="button" data-copy="flowchart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="flowchart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="flowchart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="flowchart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>CI/CD pipelines</li><li>Decision trees</li><li>Algorithms and business processes</li></ul>
@@ -896,6 +898,7 @@
                 <button class="mini-btn" type="button" data-copy="sequence-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="sequence-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="sequence-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="sequence-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>API request flows</li><li>Auth handshakes (OAuth, SAML)</li><li>Debugging distributed interactions</li></ul>
@@ -966,6 +969,7 @@
                 <button class="mini-btn" type="button" data-copy="class-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="class-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="class-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="class-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Domain modeling</li><li>Codebase documentation</li><li>Planning refactors</li></ul>
@@ -1030,6 +1034,7 @@
                 <button class="mini-btn" type="button" data-copy="state-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="state-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="state-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="state-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Order or ticket lifecycles</li><li>UI component states</li><li>Protocol state machines</li></ul>
@@ -1096,6 +1101,7 @@
                 <button class="mini-btn" type="button" data-copy="entity-relationship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="entity-relationship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="entity-relationship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="entity-relationship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Database schema design</li><li>Onboarding to an existing database</li><li>Data-model reviews</li></ul>
@@ -1165,6 +1171,7 @@
                 <button class="mini-btn" type="button" data-copy="user-journey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="user-journey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="user-journey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="user-journey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>UX research synthesis</li><li>Customer experience mapping</li><li>Pain-point spotting</li></ul>
@@ -1218,6 +1225,7 @@
                 <button class="mini-btn" type="button" data-copy="gantt-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="gantt-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="gantt-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="gantt-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Release planning</li><li>Sprint or milestone tracking</li><li>Dependency visualization</li></ul>
@@ -1278,6 +1286,7 @@
                 <button class="mini-btn" type="button" data-copy="requirement-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="requirement-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="requirement-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="requirement-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Systems engineering docs</li><li>Compliance traceability</li><li>Acceptance criteria mapping</li></ul>
@@ -1345,6 +1354,7 @@
                 <button class="mini-btn" type="button" data-copy="mindmap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="mindmap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="mindmap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="mindmap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Brainstorming sessions</li><li>Topic outlines</li><li>Knowledge mapping</li></ul>
@@ -1401,6 +1411,7 @@
                 <button class="mini-btn" type="button" data-copy="timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Project roadmaps</li><li>Company history</li><li>Incident timelines</li></ul>
@@ -1448,6 +1459,7 @@
                 <button class="mini-btn" type="button" data-copy="kanban-board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="kanban-board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="kanban-board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="kanban-board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Lightweight task tracking</li><li>Sprint boards in docs</li><li>Personal to-do walls</li></ul>
@@ -1496,6 +1508,7 @@
                 <button class="mini-btn" type="button" data-copy="pie-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="pie-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="pie-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="pie-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Survey results</li><li>Market or traffic share</li><li>Budget breakdowns</li></ul>
@@ -1543,6 +1556,7 @@
                 <button class="mini-btn" type="button" data-copy="quadrant-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="quadrant-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="quadrant-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="quadrant-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Feature prioritization</li><li>Risk matrices</li><li>Market positioning</li></ul>
@@ -1590,6 +1604,7 @@
                 <button class="mini-btn" type="button" data-copy="xy-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="xy-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="xy-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="xy-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Metrics dashboards in docs</li><li>Trend reporting</li><li>A/B test results</li></ul>
@@ -1631,6 +1646,7 @@ grid, loss, 30">
                 <button class="mini-btn" type="button" data-copy="sankey-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="sankey-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="sankey-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="sankey-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Energy or budget flows</li><li>User funnels</li><li>Resource allocation</li></ul>
@@ -1673,6 +1689,7 @@ Grid, Loss, 30</code></pre>
                 <button class="mini-btn" type="button" data-copy="radar-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="radar-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="radar-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="radar-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Product comparisons</li><li>Skill assessments</li><li>Benchmark summaries</li></ul>
@@ -1716,6 +1733,7 @@ Grid, Loss, 30</code></pre>
                 <button class="mini-btn" type="button" data-copy="treemap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="treemap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="treemap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="treemap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Budget breakdowns</li><li>Disk or resource usage</li><li>Portfolio composition</li></ul>
@@ -1768,6 +1786,7 @@ Grid, Loss, 30</code></pre>
                 <button class="mini-btn" type="button" data-copy="git-graph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="git-graph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="git-graph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="git-graph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Explaining branching strategy</li><li>Release-note visuals</li><li>Git tutorials</li></ul>
@@ -1820,6 +1839,7 @@ Grid, Loss, 30</code></pre>
                 <button class="mini-btn" type="button" data-copy="c4-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="c4-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="c4-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="c4-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>System context docs</li><li>Architecture reviews</li><li>Onboarding engineers</li></ul>
@@ -1870,6 +1890,7 @@ Grid, Loss, 30</code></pre>
                 <button class="mini-btn" type="button" data-copy="packet-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="packet-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="packet-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="packet-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Protocol documentation</li><li>Binary format specifications</li><li>Networking tutorials</li></ul>
@@ -1924,6 +1945,7 @@ Grid, Loss, 30</code></pre>
                 <button class="mini-btn" type="button" data-copy="block-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="block-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="block-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="block-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Infrastructure sketches</li><li>System block layouts</li><li>Hardware diagrams</li></ul>
@@ -1978,6 +2000,7 @@ Grid, Loss, 30</code></pre>
                 <button class="mini-btn" type="button" data-copy="architecture-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="architecture-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="architecture-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="architecture-diagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Cloud topology docs</li><li>Deployment overviews</li><li>Network diagrams</li></ul>
@@ -2022,6 +2045,7 @@ Grid, Loss, 30</code></pre>
                 <button class="mini-btn" type="button" data-copy="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copy</span></button>
                 <button class="mini-btn" type="button" data-link="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg><span>Link</span></button>
                 <button class="mini-btn" type="button" data-template="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg><span>Use as template</span></button>
+                <button class="mini-btn" type="button" data-editor="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span>Open in editor</span></button>
               </div>
             </header>
             <ul class="good-for"><li>Debugging render issues</li><li>Confirming the Mermaid version in a document pipeline</li></ul>
@@ -2283,6 +2307,16 @@ Grid, Loss, 30</code></pre>
       scratch.focus({ preventScroll: true });
     }
 
+    /* ---------- full-screen editor (was the Mermaid Viewer) ---------- */
+    // The editor reads a "#p=<base64url of UTF-8>" fragment, the same format as its share links.
+    function openInEditor(code) {
+      const bytes = new TextEncoder().encode(code || "");
+      let bin = "";
+      bytes.forEach((b) => { bin += String.fromCharCode(b); });
+      const frag = btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      location.href = "editor/#p=" + frag;
+    }
+
     /* ---------- clipboard & export ---------- */
     async function copyText(text, button) {
       let copied = false;
@@ -2503,6 +2537,17 @@ Grid, Loss, 30</code></pre>
       }
       if (event.target.closest("#scratch-copy")) {
         copyText(scratch.value, $("#scratch-copy"));
+        return;
+      }
+
+      const toEditor = event.target.closest("[data-editor]");
+      if (toEditor) {
+        const card = cardById(toEditor.dataset.editor);
+        if (card) openInEditor(codeOf(card));
+        return;
+      }
+      if (event.target.closest("#scratch-editor")) {
+        openInEditor(scratch.value);
         return;
       }
 

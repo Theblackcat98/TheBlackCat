@@ -6,58 +6,10 @@
   <meta name="color-scheme" content="light dark" />
   <meta name="description" content="Text Diff Viewer: compare two texts line by line with word-level highlighting, side-by-side or unified, entirely in the browser." />
   <link rel="icon" href="data:," />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <title>Text Diff Viewer</title>
   <style>
-    :root {
-      color-scheme: light dark;
-      --paper: #e9eaed;
-      --paper-2: #ffffff;
-      --paper-3: #ececf0;
-      --surface-2: #f7f7f9;
-      --ink: #1d2126;
-      --ink-2: #5b6068;
-      --ink-3: #62666e;
-      --rule: #d6d7dc;
-      --accent: #2f6db3;
-      --accent-ink: #26598f;
-      --accent-wash: #ececf0;
-      --focus: #2f6db3;
-      --add-bg: #e4efe7;
-      --add-wash: #c3ddcb;
-      --add-ink: #2e7d4f;
-      --del-bg: #fdeeee;
-      --del-wash: #efc2c2;
-      --del-ink: #8f2d23;
-      --empty-bg: #e2e3e7;
-      --ui-font: "Outfit", sans-serif;
-      --mono-font: "JetBrains Mono", monospace;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --paper: #121316;
-        --paper-2: #222329;
-        --paper-3: #26272e;
-        --surface-2: #1a1b1f;
-        --ink: #eceef2;
-        --ink-2: #a2a6af;
-        --ink-3: #9ba0aa;
-        --rule: #2d2f36;
-        --accent: #7db0e6;
-        --accent-ink: #9cc3ee;
-        --accent-wash: #26272e;
-        --focus: #7db0e6;
-        --add-bg: #1e2f24;
-        --add-wash: #2d4a37;
-        --add-ink: #6fce97;
-        --del-bg: #3a2120;
-        --del-wash: #6e3a36;
-        --del-ink: #f0a9a0;
-        --empty-bg: #17181c;
-      }
-    }
+    
+    
 
     * { box-sizing: border-box; }
     body {
@@ -161,8 +113,8 @@
       cursor: pointer;
     }
     .btn:hover { border-color: var(--ink-3); }
-    .btn.primary { background: var(--accent); border-color: var(--accent); color: #ffffff; }
-    .btn.primary:hover { background: var(--accent-ink); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+    .btn.primary:hover { background: var(--accent-strong); }
     @media (prefers-color-scheme: dark) {
       .btn.primary { color: #0d1724; }
       .card { box-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .35); }
@@ -206,8 +158,18 @@
     .w-del { background: var(--del-wash); border-radius: 3px; padding: 0 1px; }
     .empty-state { padding: 28px 18px; text-align: center; color: var(--ink-3); font-family: var(--ui-font); font-size: 14px; }
   </style>
+
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/text-diff-viewer/">
+<meta property="og:title" content="Text Diff Viewer · The BlackCat">
+<meta property="og:description" content="A side-by-side and unified text/code diff viewer with whitespace controls and patch export.">
+<meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/text-diff-viewer/">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/text-diff-viewer-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Text Diff Viewer", "description": "A side-by-side and unified text/code diff viewer with whitespace controls and patch export.", "url": "https://theblackcat98.github.io/TheBlackCat/text-diff-viewer/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/text-diff-viewer-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="text-diff-viewer"></script>
 </head>
 <body>
+<a class="back tk-fallback" href="../tools/">&larr; All tools</a>
   <header class="header">
     <div>
       <h1>Text Diff Viewer</h1>

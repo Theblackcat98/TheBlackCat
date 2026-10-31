@@ -68,6 +68,35 @@ with sync_playwright() as p:
     pg.click('[data-filter="tag"][data-value="python"]')
     check("project tag filter works", 0 < pg.locator("[data-filter-list] > li:visible").count() < 16)
 
+    # tools hub filter + tool toolkit bar + switcher + theme sync + recently used
+    pg.goto(BASE + "/tools/", wait_until="networkidle")
+    total_tools = pg.locator("[data-filter-item]").count()
+    check("tools hub renders all 42 tools", total_tools == 42, total_tools)
+    pg.click('[data-filter="domain"][data-value="color-design"]')
+    vis_tools = pg.locator("[data-filter-item]:visible").count()
+    check("tools category chip filters to color-design", vis_tools == 9, vis_tools)
+    pg.click("[data-filter-reset]") if pg.locator("[data-filter-reset]").is_visible() else pg.click('[data-filter="domain"][data-value=""]')
+
+    pg.goto(BASE + "/palette-studio/", wait_until="networkidle")
+    check("tool mounts shared .tk-bar", pg.locator(".tk-bar").count() == 1)
+    check("tool mounts related .tk-foot", pg.locator(".tk-foot").count() == 1)
+    pg.click("[data-tk-switch]")
+    check("tool switcher opens", pg.evaluate("document.getElementById('tk-switcher').open"))
+    pg.fill("#tk-switcher-input", "jwt")
+    check("tool switcher filters to JWT Decoder", pg.locator(".tk-switcher__item").count() >= 1)
+    pg.keyboard.press("Escape")
+    pg.click("[data-tk-theme]")
+    check("tool theme toggle writes bc-theme", pg.evaluate("localStorage.getItem('bc-theme')") in ("light", "dark"))
+
+    pg.goto(BASE + "/tools/", wait_until="networkidle")
+    check("tools hub shows Recently used after visiting a tool", pg.locator("[data-filter-recent]:visible").count() == 1)
+    pg.evaluate("localStorage.removeItem('bc-theme'); document.documentElement.dataset.theme = 'light';")
+
+    # write-up page has Run it card and More in category
+    pg.goto(BASE + "/library/tools/palette-studio/", wait_until="networkidle")
+    check("write-up shows Run it card", pg.locator(".tool-run .tool-card").count() == 1)
+    check("write-up shows More in category", pg.locator(".tool-more .tool-card").count() == 3)
+
     # code copy + toc spy on a docs chapter
     pg.goto(BASE + "/docs/website-analyzer/02-processing-nodes/", wait_until="networkidle")
     check("code blocks are wrapped", pg.locator(".codeblock").count() >= 1)

@@ -1,30 +1,97 @@
+{{- $reg := site.Data.tools -}}
+{{- $cats := $reg.categories -}}
+{{- $tools := $reg.tools -}}
+{{- $featured := where $tools "featured" true -}}
+{{- $res := resources.FromString "toolkit/registry.json" ($reg | jsonify) -}}
+
 {{ partial "breadcrumbs.html" . }}
-<header class="page-head">
-  <span class="kicker">Live</span>
+<header class="page-head" data-registry="{{ $res.RelPermalink }}">
+  <span class="kicker">Live · {{ len $tools }} tools · {{ len $cats }} categories</span>
   <h1 class="h-page">{{ partial "title.html" . }}</h1>
   {{ with .Content }}<div class="lede prose" style="max-width: 38rem">{{ . }}</div>{{ end }}
 </header>
 
-{{- range site.Params.tools }}
-<section class="section" aria-label="{{ .group }}">
-  <div class="section__head">
-    <h2 class="h-section">{{ .group }}</h2>
-    <span class="count">{{ len .items }} tools</span>
-  </div>
-  <ul class="grid" role="list">
-    {{- range .items }}
-    {{- $ext := hasPrefix .url "http" }}
-    {{- $href := cond $ext .url (.url | relURL) }}
-    <li class="card">
-      <div class="meta"><span class="type">{{ .kind }}</span></div>
-      <h3 class="card__title"><a href="{{ $href }}"{{ if $ext }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .name }}</a></h3>
-      <p class="card__desc">{{ .desc }}</p>
-      <div class="card__foot">
-        <a class="card__link" href="{{ $href }}"{{ if $ext }} target="_blank" rel="noopener noreferrer"{{ end }}>Open {{ partial "icon.html" "arrow-ur" }}</a>
-        {{- with .writeup }}<a class="card__link" href="{{ . | relURL }}">Write-up</a>{{ end }}
+<div class="tools-hub" data-filter-root data-filter-noun="tools">
+  <div class="toolbar tools-toolbar" role="region" aria-label="Filter tools">
+    <div class="toolbar__row">
+      <label class="field tools-search">
+        {{ partial "icon.html" "search" }}
+        <span class="visually-hidden">Filter tools</span>
+        <input type="search" placeholder="Filter tools…" autocomplete="off" spellcheck="false" data-filter-q>
+      </label>
+      <p class="count" aria-live="polite" data-filter-count>{{ len $tools }} tools</p>
+    </div>
+
+    <div class="tools-filters">
+      <div class="tools-filter-group">
+        <span class="label">Category</span>
+        <div class="chips" role="group" aria-label="Filter by category">
+          <button class="chip" type="button" data-filter="domain" data-value="" aria-pressed="true">All <small>{{ len $tools }}</small></button>
+          {{- range $cats }}
+            {{- $n := len (where $tools "category" .id) }}
+            <button class="chip" type="button" data-filter="domain" data-value="{{ .id }}" aria-pressed="false">{{ .name }} <small>{{ $n }}</small></button>
+          {{- end }}
+        </div>
       </div>
-    </li>
+
+      <div class="tools-filter-group">
+        <span class="label">Kind</span>
+        <div class="chips" role="group" aria-label="Filter by kind">
+          <button class="chip" type="button" data-filter="type" data-value="" aria-pressed="true">All</button>
+          {{- range $k := slice (dict "id" "app" "label" "App") (dict "id" "utility" "label" "Utility") (dict "id" "exhibit" "label" "Exhibit") }}
+            {{- $n := len (where $tools "kind" $k.id) }}
+            <button class="chip" type="button" data-filter="type" data-value="{{ $k.id }}" aria-pressed="false">{{ $k.label }} <small>{{ $n }}</small></button>
+          {{- end }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="section tools-recent" aria-labelledby="tools-recent-h" data-filter-recent hidden>
+    <div class="section__head">
+      <h2 id="tools-recent-h" class="h-section">Recently used</h2>
+      <span class="count" data-recent-count></span>
+    </div>
+    <ul class="tool-grid" role="list" data-recent-list></ul>
+  </section>
+
+  {{- if $featured }}
+  <section class="section" aria-labelledby="tools-featured-h" data-filter-featured>
+    <div class="section__head">
+      <h2 id="tools-featured-h" class="h-section">Featured</h2>
+      <span class="count">{{ len $featured }} flagship tools</span>
+    </div>
+    <ul class="tool-grid tool-grid--featured" role="list">
+      {{- range $featured }}
+        {{ partial "tool-card.html" (dict "tool" . "wide" true) }}
+      {{- end }}
+    </ul>
+  </section>
+  {{- end }}
+
+  <div data-filter-list>
+    {{- range $cat := $cats }}
+      {{- $catTools := where $tools "category" $cat.id }}
+      <section class="section tools-cat" id="{{ $cat.id }}" aria-labelledby="cat-{{ $cat.id }}" data-filter-section>
+        <div class="section__head">
+          <div>
+            <h2 id="cat-{{ $cat.id }}" class="h-section">{{ $cat.name }}</h2>
+            {{- with $cat.blurb }}<p class="tools-cat__blurb">{{ . }}</p>{{ end }}
+          </div>
+          <span class="count" data-section-count>{{ len $catTools }} tools</span>
+        </div>
+        <ul class="tool-grid" role="list">
+          {{- range $catTools }}
+            {{ partial "tool-card.html" (dict "tool" . "cat" $cat.name "filter" true) }}
+          {{- end }}
+        </ul>
+      </section>
     {{- end }}
-  </ul>
-</section>
-{{- end }}
+  </div>
+
+  <div class="empty" data-filter-empty hidden>
+    {{ partial "icon.html" "search" }}
+    <h2>No matching tools</h2>
+    <p>Nothing in the workshop fits those filters. <button class="chip" type="button" data-filter-reset>Clear filters</button></p>
+  </div>
+</div>

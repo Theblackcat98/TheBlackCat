@@ -6,44 +6,10 @@
   <meta name="color-scheme" content="light dark" />
   <meta name="description" content="Unicode Explorer: search characters by name or codepoint, browse Unicode blocks, and inspect strings character by character." />
   <link rel="icon" href="data:," />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <title>Unicode Explorer</title>
   <style>
-    :root {
-      color-scheme: light dark;
-      --paper: #e9eaed;
-      --paper-2: #ffffff;
-      --paper-3: #ececf0;
-      --ink: #1d2126;
-      --ink-2: #5b6068;
-      --ink-3: #62666e;
-      --rule: #d6d7dc;
-      --accent: #2f6db3;
-      --accent-ink: #26598f;
-      --accent-wash: #ececf0;
-      --good: #2e7d4f;
-      --focus: #2f6db3;
-      --ui-font: "Outfit", sans-serif;
-      --mono-font: "JetBrains Mono", monospace;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --paper: #121316;
-        --paper-2: #222329;
-        --paper-3: #26272e;
-        --ink: #eceef2;
-        --ink-2: #a2a6af;
-        --ink-3: #9ba0aa;
-        --rule: #2d2f36;
-        --accent: #7db0e6;
-        --accent-ink: #9cc3ee;
-        --accent-wash: #26272e;
-        --good: #6fce97;
-        --focus: #7db0e6;
-      }
-    }
+    
+    
 
     * { box-sizing: border-box; }
     body {
@@ -55,7 +21,7 @@
       line-height: 1.45;
       -webkit-font-smoothing: antialiased;
     }
-    a { color: var(--accent-ink); }
+    a { color: var(--accent-strong); }
     button, input, select, textarea { font: inherit; }
     :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
     .mono, code { font-family: var(--mono-font); }
@@ -75,7 +41,7 @@
     .header h1 { margin: 0; font-size: 23px; font-weight: 600; }
     .header p { margin: 2px 0 0; color: var(--ink-2); font-size: 13.5px; }
     .header-links a { font-size: 14px; color: var(--ink-2); text-decoration: none; white-space: nowrap; }
-    .header-links a:hover { color: var(--accent-ink); text-decoration: underline; }
+    .header-links a:hover { color: var(--accent-strong); text-decoration: underline; }
 
     .container { max-width: 1060px; margin: 0 auto; padding: 28px 24px 64px; }
 
@@ -120,9 +86,9 @@
       font-weight: 600;
       cursor: pointer;
     }
-    .btn:hover { border-color: var(--accent); color: var(--accent-ink); }
-    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .btn.primary:hover { background: var(--accent-ink); color: #fff; }
+    .btn:hover { border-color: var(--accent); color: var(--accent-strong); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+    .btn.primary:hover { background: var(--accent-strong); color: var(--accent-ink); }
     @media (prefers-color-scheme: dark) {
       .btn.primary { color: #0d1724; }
       .btn.primary:hover { color: #0d1724; }
@@ -217,8 +183,18 @@
     .empty-note { color: var(--ink-3); font-size: 14px; margin: 0; }
     .footer-note { color: var(--ink-3); font-size: 13px; margin-top: 4px; }
   </style>
+
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/unicode-explorer/">
+<meta property="og:title" content="Unicode Explorer · The BlackCat">
+<meta property="og:description" content="Search characters by name or codepoint, or inspect strings to reveal hidden and combining characters.">
+<meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/unicode-explorer/">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/unicode-explorer-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Unicode Explorer", "description": "Search characters by name or codepoint, or inspect strings to reveal hidden and combining characters.", "url": "https://theblackcat98.github.io/TheBlackCat/unicode-explorer/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/unicode-explorer-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="unicode-explorer"></script>
 </head>
 <body>
+<a class="back tk-fallback" href="../tools/">&larr; All tools</a>
   <div class="header">
     <div>
       <h1>Unicode Explorer</h1>

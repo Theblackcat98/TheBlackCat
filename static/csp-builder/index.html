@@ -10,68 +10,14 @@
   <meta property="og:title" content="Content Security Policy Builder" />
   <meta property="og:description" content="Build or parse a Content-Security-Policy (CSP) with interactive explanations and safety warnings." />
   <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/csp-builder/" />
-  <meta property="og:image" content="../og.png" />
+  <meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/csp-builder-light.webp">
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="data:," />
   <title>CSP Builder</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    :root {
-      color-scheme: light dark;
-      --bg: #e9eaed;
-      --surface: #f7f7f9;
-      --surface-2: #ffffff;
-      --ink: #1d2126;
-      --muted: #5b6068;
-      --line: #d6d7dc;
-      --accent: #2f6db3;
-      --accent-ink: #ffffff;
-      --code-bg: #ffffff;
-      --code-ink: #1d2126;
-      --err-bg: #fdeeee;
-      --err-ink: #8f2d23;
-      --warning-bg: #fff3d6;
-      --warning-ink: #664800;
-      --focus: #2f6db3;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --bg: #121316;
-        --surface: #1a1b1f;
-        --surface-2: #222329;
-        --ink: #eceef2;
-        --muted: #a2a6af;
-        --line: #2d2f36;
-        --accent: #7db0e6;
-        --accent-ink: #0d1724;
-        --code-bg: #222329;
-        --code-ink: #eceef2;
-        --err-bg: #3a2120;
-        --err-ink: #f0a9a0;
-        --warning-bg: #3c321b;
-        --warning-ink: #f3d781;
-        --focus: #7db0e6;
-      }
-    }
-    :root[data-theme="dark"] {
-      --bg: #121316;
-      --surface: #1a1b1f;
-      --surface-2: #222329;
-      --ink: #eceef2;
-      --muted: #a2a6af;
-      --line: #2d2f36;
-      --accent: #7db0e6;
-      --accent-ink: #0d1724;
-      --code-bg: #222329;
-      --code-ink: #eceef2;
-      --err-bg: #3a2120;
-      --err-ink: #f0a9a0;
-      --warning-bg: #3c321b;
-      --warning-ink: #f3d781;
-      --focus: #7db0e6;
-    }
+    
+    
+    
 
     * { box-sizing: border-box; }
     body {
@@ -163,8 +109,14 @@
 
     [hidden] { display: none !important; }
   </style>
+
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/csp-builder/">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "CSP Builder", "description": "A directive-by-directive Content-Security-Policy builder with live safety warnings, common presets, and a parser mode to explain existing policies.", "url": "https://theblackcat98.github.io/TheBlackCat/csp-builder/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/csp-builder-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="csp-builder"></script>
 </head>
 <body>
+<a class="back tk-fallback" href="../tools/">&larr; All tools</a>
   <div class="page">
     <!-- Header -->
     <header class="intro">
@@ -467,11 +419,7 @@
       if (mode === 'build') updateOutput();
     }
 
-    function applyTheme(theme) {
-      if (theme === 'auto') delete document.documentElement.dataset.theme;
-      else document.documentElement.dataset.theme = theme;
-      $('#theme-btn').textContent = 'Theme: ' + theme;
-    }
+    function applyTheme(theme) { /* managed by toolkit.js (bc-theme) */ }
 
     function generatePolicyString(directivesObj) {
       return Object.entries(directivesObj)

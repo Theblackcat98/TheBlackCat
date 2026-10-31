@@ -1,5 +1,25 @@
-{{- /* Client-side search index (served at /index.json). Titles, descriptions, tags and a short excerpt only. */ -}}
+{{- /* Client-side search index (served at /index.json). Titles, descriptions, tags, short excerpts, and live tools. */ -}}
 {{- $idx := slice -}}
+{{- $cats := site.Data.tools.categories -}}
+{{- range site.Data.tools.tools -}}
+  {{- $t := . -}}
+  {{- $catName := "" -}}
+  {{- range $cats }}{{ if eq .id $t.category }}{{ $catName = .name }}{{ end }}{{ end -}}
+  {{- $ext := hasPrefix $t.url "http" -}}
+  {{- $idx = $idx | append (dict
+    "t" $t.name
+    "u" (cond $ext $t.url ($t.url | relURL))
+    "k" "tool"
+    "l" "Tool"
+    "s" "tools"
+    "d" ($t.short | default $t.desc)
+    "g" ($t.tags | default slice)
+    "o" (cond (ne $catName "") (slice $catName) slice)
+    "h" ($t.host | default "")
+    "y" ($t.added | default "")
+    "x" ($t.desc | default "")
+  ) -}}
+{{- end -}}
 {{- range site.RegularPages -}}
   {{- if and (not .Params.excludesearch) (ne .Params.status "inbox") (ne .Section "inbox") -}}
     {{- $kind := partial "type-of.html" . -}}

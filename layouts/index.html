@@ -9,6 +9,7 @@
   <h1 id="hero-title" class="h-display">{{ $hero.title }}</h1>
   <p class="hero__lede">{{ $hero.lede }}</p>
   {{ with $hero.about }}<p class="hero__about">{{ . }}</p>{{ end }}
+  <p class="hero__tools"><a href="{{ "tools/" | relURL }}">Open a tool in the workshop →</a></p>
 
   <button class="hero-search" type="button" data-search-open >
     {{ partial "icon.html" "search" }}
@@ -54,6 +55,24 @@
     {{- end }}
   </ul>
 </section>
+
+{{- $tools := site.Data.tools.tools }}
+{{- if $tools }}
+{{- $featTools := where $tools "featured" true }}
+{{- $restTools := where $tools "featured" "ne" true }}
+{{- $pickTools := $featTools | append $restTools | first 6 }}
+<section class="section" aria-labelledby="workshop-h">
+  <div class="section__head">
+    <h2 id="workshop-h" class="h-section">Workshop</h2>
+    <a href="{{ "tools/" | relURL }}">All {{ len $tools }} tools →</a>
+  </div>
+  <ul class="tool-grid" role="list">
+    {{- range $pickTools }}
+      {{ partial "tool-card.html" (dict "tool" .) }}
+    {{- end }}
+  </ul>
+</section>
+{{- end }}
 
 <section class="section" aria-labelledby="recent-h">
   <div class="section__head">

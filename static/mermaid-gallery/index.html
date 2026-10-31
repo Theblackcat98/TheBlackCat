@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-exhibit>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -10,12 +10,9 @@
   <meta property="og:title" content="Mermaid.js Gallery — every diagram type, with a live scratchpad" />
   <meta property="og:description" content="23 Mermaid v11 diagram types with working examples and copyable source, plus a scratchpad that renders your own code as you type." />
   <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/mermaid-gallery/" />
-  <meta property="og:image" content="../og.png" />
+  <meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/mermaid-gallery-light.webp">
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="data:," />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <title>Mermaid.js Gallery</title>
   <style>
     :root {
@@ -730,8 +727,14 @@
       .diagram-stage { cursor: default; min-height: 60px; }
     </style>
   </noscript>
+
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/mermaid-gallery/">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Mermaid.js Gallery", "description": "Every Mermaid diagram type on one page: twenty-three Mermaid v11 types, each with a working example, copyable source, and a live scratchpad.", "url": "https://theblackcat98.github.io/TheBlackCat/mermaid-gallery/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/mermaid-gallery-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="mermaid-gallery"></script>
 </head>
 <body>
+<a class="back tk-fallback" href="../tools/">&larr; All tools</a>
   <main class="page">
     <section class="intro" aria-labelledby="page-title">
       <div>
@@ -2473,10 +2476,7 @@ Grid, Loss, 30</code></pre>
 
     /* ---------- theme ---------- */
     const THEMES = ["auto", "light", "dark"];
-    function applyTheme(theme) {
-      if (theme === "auto") delete document.documentElement.dataset.theme;
-      else document.documentElement.dataset.theme = theme;
-      try { localStorage.setItem("mg-theme", theme); } catch (_) {}
+    function applyTheme(theme) { /* managed by toolkit.js (bc-theme) */ } catch (_) {}
       themeBtn.textContent = "Theme: " + theme;
     }
 
@@ -2650,6 +2650,7 @@ Grid, Loss, 30</code></pre>
       if (!document.documentElement.dataset.theme) rerenderDiagrams();
     });
 
+    window.addEventListener("themechange", rerenderDiagrams);
     window.addEventListener("hashchange", revealHashTarget);
 
     /* ---------- init ---------- */

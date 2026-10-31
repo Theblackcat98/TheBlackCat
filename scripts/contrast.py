@@ -2,7 +2,7 @@
 Fails (exit 1) if a text pairing drops below its threshold. Usage: python3 scripts/contrast.py"""
 import re, sys
 
-src = open("assets/css/00-tokens.css").read() + open("assets/css/40-code.css").read()
+src = open("assets/css/00-tokens.css").read() + open("assets/css/40-code.css").read() + open("static/toolkit/toolkit.css").read()
 tok = {}
 for name, a, b in re.findall(r"--([\w-]+):\s*light-dark\((#[0-9a-fA-F]{6}),\s*(#[0-9a-fA-F]{6})\)", src):
     tok[name] = (a, b)
@@ -28,6 +28,11 @@ PAIRS = [
     ("t-str", "code-bg", 4.5, "code: strings"), ("t-num", "code-bg", 4.5, "code: numbers"),
     ("t-cmt", "code-bg", 4.5, "code: comments"), ("t-ty", "code-bg", 4.5, "code: types"),
     ("paper", "ink", 7, "button text (light: paper on ink)"), ("paper", "accent", 4.5, "button hover text"),
+    ("ink", "surface", 7, "workshop: text on panel"), ("ink", "surface-2", 7, "workshop: text on input"),
+    ("muted", "surface", 4.5, "workshop: muted on panel"), ("muted", "chip", 4.5, "workshop: muted on chip"),
+    ("accent-ink", "accent", 4.5, "workshop: text on accent"), ("accent-ink", "accent-strong", 4.5, "workshop: text on strong accent"),
+    ("ok", "surface", 4.5, "workshop: ok on panel"), ("danger", "danger-bg", 4.5, "workshop: danger on danger-bg"),
+    ("warn", "warn-bg", 4.5, "workshop: warn on warn-bg"),
 ]
 bad = 0
 print(f"{'pair':<44}{'light':>8}{'dark':>8}   min")

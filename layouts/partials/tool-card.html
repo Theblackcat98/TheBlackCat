@@ -1,0 +1,63 @@
+{{- /* Render a tool card from data/tools.yaml.
+       Context: dict with "tool" (required), optional "cat", "wide", "inline", "filter", "hideWriteup". */ -}}
+{{- $t := .tool -}}
+{{- $cats := site.Data.tools.categories -}}
+{{- $catName := .cat | default "" -}}
+{{- if not $catName -}}
+  {{- range $cats }}{{ if eq .id $t.category }}{{ $catName = .name }}{{ end }}{{ end -}}
+{{- end -}}
+{{- $kinds := dict "app" "App" "utility" "Utility" "exhibit" "Exhibit" -}}
+{{- $kindLabel := index $kinds $t.kind | default ($t.kind | title) -}}
+{{- $ext := hasPrefix $t.url "http" -}}
+{{- $href := cond $ext $t.url ($t.url | relURL) -}}
+{{- $isNew := false -}}
+{{- with $t.added -}}
+  {{- $days := div (sub now.Unix (time.AsTime .).Unix) 86400 -}}
+  {{- if and (ge $days -2) (le $days 30) }}{{ $isNew = true }}{{ end -}}
+{{- end -}}
+{{- $q := lower (printf "%s %s %s %s %s" $t.name ($t.short | default "") ($t.desc | default "") $catName (delimit ($t.tags | default slice) " ")) -}}
+
+{{- if .inline -}}
+<div class="tool-card tool-card--inline{{ if .wide }} tool-card--wide{{ end }}">
+{{- else -}}
+<li class="tool-card{{ if .wide }} tool-card--wide{{ end }}"
+  {{- if .filter }}
+  data-filter-item
+  data-id="{{ $t.id }}"
+  data-type="{{ $t.kind }}"
+  data-domain="{{ $t.category }}"
+  data-tags="{{ delimit ($t.tags | default slice) " " }}"
+  data-title="{{ lower $t.name }}"
+  data-date="{{ $t.added | default "" }}"
+  data-q="{{ $q }}"
+  {{- end }}>
+{{- end -}}
+  <a class="tool-card__thumb" href="{{ $href }}"{{ if $ext }} target="_blank" rel="noopener noreferrer"{{ end }} tabindex="-1" aria-hidden="true">
+    <img class="tool-card__img tool-card__img--light" src="{{ printf "toolkit/thumbs/%s-light.webp" $t.id | relURL }}" width="640" height="400" alt="" loading="lazy" decoding="async">
+    <img class="tool-card__img tool-card__img--dark" src="{{ printf "toolkit/thumbs/%s-dark.webp" $t.id | relURL }}" width="640" height="400" alt="" loading="lazy" decoding="async">
+  </a>
+  <div class="tool-card__body">
+    <div class="tool-card__meta">
+      {{- if $catName }}<span class="tool-card__cat">{{ $catName }}</span>{{ end }}
+      <span class="tool-card__kind">{{ $kindLabel }}</span>
+      {{- if $isNew }}<span class="tool-card__new">New</span>{{ end }}
+      {{- with $t.host }}<span class="tool-card__host">&#8599; {{ . }}</span>{{ end }}
+    </div>
+    <h3 class="tool-card__title">
+      <a href="{{ $href }}"{{ if $ext }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ $t.name }}</a>
+    </h3>
+    <p class="tool-card__desc">{{ $t.short | default $t.desc }}</p>
+    <div class="tool-card__foot">
+      <a class="tool-card__open" href="{{ $href }}"{{ if $ext }} target="_blank" rel="noopener noreferrer"{{ end }}>
+        Open {{ if $ext }}{{ partial "icon.html" "arrow-ur" }}{{ else }}{{ partial "icon.html" "arrow-r" }}{{ end }}
+      </a>
+      {{- if and $t.writeup (not .hideWriteup) }}
+      <a class="tool-card__link" href="{{ $t.writeup | relURL }}">Write-up</a>
+      {{- end }}
+    </div>
+  </div>
+{{- if .inline -}}
+</div>
+{{- else -}}
+</li>
+{{- end -}}

@@ -74,7 +74,7 @@
     return s;
   };
 
-  const ORDER = ["Skill", "Bookmark", "Article", "Project", "Collection", "Note", "Reference", "Post", "Doc"];
+  const ORDER = ["Tool", "Skill", "Bookmark", "Article", "Project", "Collection", "Note", "Reference", "Post", "Doc"];
   const rank = (l) => { const i = ORDER.indexOf(l); return i < 0 ? 99 : i; };
 
   const row = (e, toks, i) => {
@@ -158,16 +158,42 @@
     out.addEventListener("mousemove", (ev) => { const a = ev.target.closest(".search__hit"); if (a && +a.dataset.i !== sel) select(+a.dataset.i); });
   }
 
-  /* ---- 3 · List filters (library, projects) -------------------------- */
+  /* ---- 3 · List filters (library, projects, tools) ------------------- */
   $$("[data-filter-root]").forEach((box) => {
     const list = $("[data-filter-list]", box);
     if (!list) return;
-    const items = Array.from(list.children);
+    const descItems = $$("[data-filter-item]", list);
+    const items = descItems.length ? descItems : Array.from(list.children);
+    const sections = $$("[data-filter-section]", list);
+    const featured = $("[data-filter-featured]", box);
+    const recentSec = $("[data-filter-recent]", box);
+    let hasRecent = false;
+    if (recentSec) {
+      try {
+        const recentIds = JSON.parse(localStorage.getItem("bc:recent-tools") || "[]");
+        const recentList = $("[data-recent-list]", recentSec);
+        const recentCount = $("[data-recent-count]", recentSec);
+        if (Array.isArray(recentIds) && recentList) {
+          const byId = new Map(items.map((el) => [el.dataset.id, el]));
+          const clones = recentIds.map((id) => byId.get(id)).filter(Boolean).slice(0, 6).map((el) => {
+            const c = el.cloneNode(true);
+            c.removeAttribute("data-filter-item");
+            return c;
+          });
+          if (clones.length) {
+            clones.forEach((c) => recentList.appendChild(c));
+            if (recentCount) recentCount.textContent = `${clones.length} recent`;
+            hasRecent = true;
+            recentSec.hidden = false;
+          }
+        }
+      } catch (_) {}
+    }
     const q = $("[data-filter-q]", box);
     const sortSel = $("[data-filter-sort]", box);
     const count = $("[data-filter-count]", box);
     const empty = $("[data-filter-empty]", box);
-    const noun = list.classList.contains("grid") ? "projects" : "items";
+    const noun = box.dataset.filterNoun || (list.classList.contains("grid") ? "projects" : "items");
     const state = { type: "", domain: "", tag: "", q: "" };
     const keys = ["type", "domain", "tag"];
 
@@ -189,6 +215,7 @@
 
     const apply = () => {
       const words = state.q.toLowerCase().split(/\s+/).filter(Boolean);
+      const activeFilter = Boolean(state.type || state.domain || state.tag || words.length);
       let shown = 0;
       items.forEach((li) => {
         const d = li.dataset;
@@ -200,6 +227,14 @@
         li.hidden = !ok;
         if (ok) shown++;
       });
+      sections.forEach((sec) => {
+        const secVis = $$("[data-filter-item]", sec).filter((el) => !el.hidden).length;
+        sec.hidden = secVis === 0;
+        const sc = $("[data-section-count]", sec);
+        if (sc) sc.textContent = `${secVis} ${secVis === 1 ? "tool" : "tools"}`;
+      });
+      if (featured) featured.hidden = activeFilter;
+      if (recentSec) recentSec.hidden = activeFilter || !hasRecent;
       $$("[data-filter]", box).forEach((b) => b.setAttribute("aria-pressed", String((state[b.dataset.filter] || "") === b.dataset.value)));
       if (count) count.textContent = shown === items.length ? `${items.length} ${noun}` : `${shown} of ${items.length} ${noun}`;
       if (empty) empty.hidden = shown !== 0;

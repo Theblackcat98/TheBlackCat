@@ -5,52 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="light dark" />
   <link rel="icon" href="data:," />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <title>Palette Studio</title>
   <style>
-    :root {
-      color-scheme: light dark;
-      --paper: #e9eaed;
-      --paper-2: #f7f7f9;
-      --paper-3: #ececf0;
-      --ink: #1d2126;
-      --ink-2: #5b6068;
-      --ink-3: #62666e;
-      --rule: #d6d7dc;
-      --accent: #2f6db3;
-      --accent-ink: #26598f;
-      --accent-wash: rgba(47, 109, 179, .10);
-      --good: #2e7d4f;
-      --danger: #8f2d23;
-      --focus: #2f6db3;
-      --ui-font: "Outfit", sans-serif;
-      --mono-font: "JetBrains Mono", monospace;
-      --checker: #bfc2ca;
-      --shadow: 0 1px 2px rgba(24, 28, 38, .05), 0 10px 28px rgba(24, 28, 38, .07);
-      --shadow-sm: 0 1px 2px rgba(24, 28, 38, .05);
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --paper: #121316;
-        --paper-2: #1a1b1f;
-        --paper-3: #26272e;
-        --ink: #eceef2;
-        --ink-2: #a2a6af;
-        --ink-3: #9ba0aa;
-        --rule: #2d2f36;
-        --accent: #7db0e6;
-        --accent-ink: #9cc3ee;
-        --accent-wash: rgba(125, 176, 230, .14);
-        --good: #6fce97;
-        --danger: #f0a9a0;
-        --focus: #7db0e6;
-        --checker: #3d404a;
-        --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .35);
-        --shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
-      }
-    }
+    
+    
 
     * { box-sizing: border-box; }
     body {
@@ -94,7 +52,7 @@
       cursor: pointer;
     }
     .seg button[aria-pressed="true"] {
-      background: var(--paper-2); color: var(--accent-ink);
+      background: var(--paper-2); color: var(--accent-strong);
       box-shadow: var(--shadow-sm);
     }
 
@@ -113,9 +71,9 @@
       border: 1px solid var(--rule); background: var(--paper-2); color: var(--ink);
       border-radius: 9px; padding: 7px 13px; font-size: 13.5px; font-weight: 600; cursor: pointer;
     }
-    .btn:hover { border-color: var(--accent); color: var(--accent-ink); }
-    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .btn.primary:hover { color: #fff; filter: brightness(1.08); }
+    .btn:hover { border-color: var(--accent); color: var(--accent-strong); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+    .btn.primary:hover { color: var(--accent-ink); filter: brightness(1.08); }
     .btn.small { padding: 4px 9px; font-size: 12.5px; }
     .btn:disabled { opacity: .45; cursor: not-allowed; }
 
@@ -208,8 +166,19 @@
     .status { min-height: 20px; font-size: 13px; color: var(--good); font-weight: 600; }
     .note { font-size: 13px; color: var(--ink-3); }
   </style>
+
+<meta name="description" content="Extract a palette from a photo, build multi-stop gradients, and simulate color-vision deficiencies, entirely in the browser.">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/palette-studio/">
+<meta property="og:title" content="Palette Studio · The BlackCat">
+<meta property="og:description" content="Extract a palette from a photo, build multi-stop gradients, and simulate color-vision deficiencies, entirely in the browser.">
+<meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/palette-studio/">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/palette-studio-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Palette Studio", "description": "Extract a palette from a photo, build multi-stop gradients, and simulate color-vision deficiencies, entirely in the browser.", "url": "https://theblackcat98.github.io/TheBlackCat/palette-studio/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/palette-studio-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="palette-studio"></script>
 </head>
 <body>
+<a class="back tk-fallback" href="../tools/">&larr; All tools</a>
   <header class="topbar">
     <h1>Palette Studio</h1>
     <span class="sub">Photo palettes · gradients · color-blindness simulation — all in your browser</span>

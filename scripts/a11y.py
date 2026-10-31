@@ -4,6 +4,7 @@ from playwright.sync_api import sync_playwright
 AXE = sys.argv[1]
 BASE = (sys.argv[2] if len(sys.argv) > 2 else "http://127.0.0.1:8123/TheBlackCat").rstrip("/")
 PAGES = ["/", "/library/", "/library/ai/opencontext/", "/library/ai/skills/grill-me/", "/projects/", "/projects/quickdash/",
+         "/tools/", "/library/tools/palette-studio/",
          "/blog/", "/blog/anatomy-machines/", "/docs/", "/docs/website-analyzer/02-processing-nodes/", "/collections/", "/tags/", "/contenttype/skill/", "/404.html"]
 total = 0
 with sync_playwright() as p:

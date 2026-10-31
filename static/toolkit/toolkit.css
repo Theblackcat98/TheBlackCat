@@ -563,3 +563,19 @@ html {
   font: 400 .68rem/1.3 var(--tk-mono);
   color: var(--tk-ink-3);
 }
+
+/* iOS input zoom guard */
+/* iPhone Safari auto-zooms (and the page then slides sideways) when a focused
+   field's font-size is under 16px. Most tool fields are 13-15px, so on phones
+   force form fields to 16px. Desktop is untouched.
+   One designed-large field is excluded so the guard never shrinks it:
+   - #cron-input: cron-tester's hero expression input (24px by design)
+   Audited and deliberately NOT excluded: number-base's .big declares 1.4rem
+   for its octal input, but the page's base input[type=text] rule (specificity
+   0,1,1) beats .big (0,1,0), so that field actually computes 14px at every
+   width (browser-verified) — the guard correctly lifts it to 16px on phones. */
+@media (max-width: 700px) {
+  input:not(#cron-input), textarea, select {
+    font-size: 16px !important;
+  }
+}

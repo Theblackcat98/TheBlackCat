@@ -158,6 +158,11 @@
     td.glyph-cell { font-size: 20px; line-height: 1; text-align: center; min-width: 44px; }
     td.mono, th.mono { font-family: var(--mono-font); white-space: nowrap; }
     td.name-cell { text-transform: capitalize; color: var(--ink-2); min-width: 150px; }
+    @media (max-width: 720px) {
+      .table-wrap table { font-size: 12px; }
+      .table-wrap th, .table-wrap td { padding: 5px 6px; }
+      td.name-cell { min-width: 7rem; }
+    }
 
     .detail { display: flex; gap: 22px; flex-wrap: wrap; }
     .detail-glyph {

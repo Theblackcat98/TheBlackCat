@@ -51,7 +51,7 @@
 .tags--topics { text-transform: uppercase; letter-spacing: .05em; }
 
 /* ---- Chips (filters) ---------------------------------------------------- */
-.chips { display: flex; gap: var(--s-2); overflow-x: auto; scrollbar-width: none; padding-block: 2px; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); min-width: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: var(--s-2); overflow-x: auto; scrollbar-width: none; padding-block: 2px; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); min-width: 0; }
 .chips::-webkit-scrollbar { display: none; }
 @media (min-width: 62rem) { .chips { flex-wrap: wrap; overflow: visible; margin-inline: 0; padding-inline: 0; } }
 .chip {

@@ -92,8 +92,8 @@
 
     /* Output & Warnings */
     .output-section { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 32px; }
-    .output-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; }
-    .tab-btn { padding: 8px 16px; background: transparent; border: 1px solid var(--line); border-bottom: none; border-radius: 9px 9px 0 0; cursor: pointer; color: var(--muted); }
+    .output-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; overflow-x: auto; }
+    .tab-btn { flex: none; padding: 8px 16px; background: transparent; border: 1px solid var(--line); border-bottom: none; border-radius: 9px 9px 0 0; cursor: pointer; color: var(--muted); }
     .tab-btn.active { background: var(--code-bg); color: var(--code-ink); border-color: var(--code-bg); }
     .output-content { position: relative; background: var(--code-bg); border: 1px solid var(--line); border-radius: 0 14px 14px 14px; padding: 16px; margin-bottom: 24px; overflow-x: auto; }
     #output-code { color: var(--code-ink); font-family: "JetBrains Mono", monospace; font-size: 0.95rem; white-space: pre-wrap; word-break: break-all; }

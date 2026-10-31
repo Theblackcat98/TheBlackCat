@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Convert between binary, octal, decimal and hex at 8 to 64 bits, flip bits, run bitwise operations, and work out chmod and umask permissions, all in the browser.">
+<link rel="icon" href="data:,">
+<title>Number Base & Bitwise Converter</title>
+<style>
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:100 800;font-display:swap;src:url("../fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2")}
+
+:root{
+  color-scheme: light dark;
+  --bg:#e9eaed; --surface:#f7f7f9; --surface-2:#ffffff;
+  --ink:#1d2126; --muted:#5b6068; --line:#d6d7dc; --line-2:#bfc2ca; --chip:#ececf0;
+  --accent:#2f6db3; --accent-strong:#26598f; --accent-ink:#ffffff;
+  --ok:#2e7d4f; --danger:#8f2d23; --danger-bg:#fdeeee; --danger-line:#efc2c2;
+  --warn:#7a4b00; --warn-bg:#fff4dc; --warn-line:#e8c98a;
+  --shadow:0 1px 2px rgba(24,28,38,.05),0 10px 28px rgba(24,28,38,.07);
+  --ui-font:"Outfit",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono-font:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#222329;
+    --ink:#eceef2; --muted:#a2a6af; --line:#2d2f36; --line-2:#3d404a; --chip:#26272e;
+    --accent:#7db0e6; --accent-strong:#9cc3ee; --accent-ink:#0d1724;
+    --ok:#6fce97; --danger:#f0a9a0; --danger-bg:#3a2120; --danger-line:#6e3a36;
+    --warn:#fdd663; --warn-bg:#352c12; --warn-line:#6b5a22;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--ui-font);font-size:15px;line-height:1.45;background:var(--bg);color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+a{color:var(--accent-strong)}
+header.site{padding:1rem 1.25rem;background:var(--surface);border-bottom:1px solid var(--line)}
+header.site .top{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+header.site h1{margin:0;font-size:1.35rem;font-weight:600;line-height:1.2}
+header.site .back{font-size:.8125rem;color:var(--muted);text-decoration:none}
+header.site .back:hover{color:var(--accent-strong);text-decoration:underline}
+header.site p{margin:.35rem 0 0;color:var(--muted);max-width:60rem}
+main.wrap{max-width:1180px;margin:0 auto;padding:1rem 1.25rem 3rem;display:grid;gap:1rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:1rem}
+.card>h2,.lbl{margin:0 0 .6rem;font-size:.6875rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.lbl{display:block;margin:0 0 .25rem}
+.cols{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end}
+.row.center{align-items:center}
+.field{display:flex;flex-direction:column;gap:.15rem;min-width:0}
+.field.grow{flex:1 1 180px}
+input[type=text],input[type=number],input[type=search],input[type=url],input[type=date],select,textarea{
+  font:inherit;font-size:.875rem;color:var(--ink);background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:.4rem .6rem;min-width:0;width:100%}
+input[type=number]{font-family:var(--mono-font);font-size:.8125rem}
+textarea{font-family:var(--mono-font);font-size:.8125rem;line-height:1.5;resize:vertical;tab-size:2}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+input[type=color]{width:2.4rem;height:2rem;padding:0;border:1px solid var(--line-2);border-radius:8px;background:none;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:1rem;height:1rem;margin:0}
+label.chk{display:inline-flex;gap:.4rem;align-items:center;font-size:.875rem;cursor:pointer}
+button,.btn{font:inherit;font-size:.875rem;padding:.4rem .85rem;border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink);border-radius:999px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;line-height:1.2}
+button:hover,.btn:hover{border-color:var(--accent)}
+button.primary,.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+button.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.sm{padding:.2rem .6rem;font-size:.75rem}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden;background:var(--surface-2)}
+.seg button{border:0;border-radius:0;background:transparent;padding:.35rem .8rem}
+.seg button[aria-pressed=true],.seg button[aria-selected=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.out{position:relative;margin:0;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:.75rem 3.6rem .75rem .85rem;font-family:var(--mono-font);font-size:.8125rem;line-height:1.55;white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:26rem}
+.out>button.copy{position:absolute;top:.4rem;right:.4rem}
+.note{font-size:.8125rem;color:var(--muted);margin:.5rem 0 0}
+.msg{border-radius:9px;padding:.5rem .75rem;font-size:.8125rem;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--warn)}
+.msg.bad{border-color:var(--danger-line);background:var(--danger-bg);color:var(--danger)}
+.msg:empty{display:none}
+.pill{display:inline-block;font-size:.6875rem;font-weight:600;padding:.1rem .5rem;border-radius:999px;background:var(--chip);color:var(--muted);border:1px solid var(--line)}
+.pill.ok{color:var(--ok)} .pill.bad{color:var(--danger)}
+table.t{width:100%;border-collapse:collapse;font-size:.8125rem}
+table.t th,table.t td{text-align:left;padding:.35rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+table.t th{font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+table.t td.m,.mono{font-family:var(--mono-font)}
+.scroll{overflow:auto}
+.toast{position:fixed;left:50%;bottom:1.25rem;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.45rem .9rem;border-radius:999px;font-size:.8125rem;opacity:0;pointer-events:none;transition:opacity .15s;z-index:50}
+.toast.show{opacity:1}
+.drop{border:2px dashed var(--line-2);border-radius:12px;padding:1.4rem;text-align:center;color:var(--muted);background:var(--surface-2);cursor:pointer}
+.drop.over,.drop:hover{border-color:var(--accent);color:var(--ink)}
+kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:6px;padding:.05rem .4rem}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important}}
+
+
+.bits{display:flex;flex-wrap:wrap;gap:.9rem .6rem}
+.bytegrp{display:flex;gap:.2rem}
+.bit{min-width:1.9rem;padding:.25rem 0;border-radius:7px;font-family:var(--mono-font);font-size:.8125rem;line-height:1.1;flex-direction:column;justify-content:center;gap:.1rem}
+.bit small{font-size:.5625rem;color:var(--muted);font-weight:400}
+.bit[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.bit[aria-pressed=true] small{color:var(--accent-ink)}
+.opgrid{display:grid;grid-template-columns:auto 1fr;gap:.2rem .8rem;font-family:var(--mono-font);font-size:.8125rem;align-items:center}
+.opgrid .k{color:var(--muted);font-family:var(--ui-font);font-size:.75rem}
+.opgrid .res{font-weight:600}
+.perm{display:grid;grid-template-columns:auto repeat(3,auto);gap:.4rem 1.2rem;align-items:center;justify-items:start}
+.perm .h{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.big{font-family:var(--mono-font);font-size:1.4rem;font-weight:600}
+
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="top"><h1>Number Base & Bitwise Converter</h1><a class="back" href="../tools/">&larr; All tools</a></div>
+  <p>Convert integers between bases at a fixed bit width, flip individual bits, try bitwise operations and shifts, and translate chmod and umask values. Everything runs in your browser.</p>
+</header>
+<main class="wrap">
+
+<section class="card" aria-labelledby="h-conv">
+  <h2 id="h-conv">Convert</h2>
+  <div class="row">
+    <div class="field grow"><label class="lbl" for="n-in">Value</label>
+      <input id="n-in" type="text" class="mono" autocomplete="off" spellcheck="false" placeholder="e.g. 255, ff, 11111111"></div>
+    <div class="field"><label class="lbl" for="n-base">Input base</label>
+      <select id="n-base">
+        <option value="2">Binary (2)</option><option value="8">Octal (8)</option>
+        <option value="10" selected>Decimal (10)</option><option value="16">Hex (16)</option>
+        <option value="custom">Other…</option>
+      </select></div>
+    <div class="field" id="n-cwrap" hidden><label class="lbl" for="n-custom">Base (2–36)</label>
+      <input id="n-custom" type="number" min="2" max="36" value="7" style="width:5rem"></div>
+    <div class="field"><label class="lbl" for="n-width">Bit width</label>
+      <select id="n-width"><option>8</option><option>16</option><option selected>32</option><option>64</option></select></div>
+  </div>
+  <div id="n-msg" class="msg" role="status" style="margin-top:.6rem"></div>
+  <div class="scroll" style="margin-top:.6rem"><table class="t" id="n-table"></table></div>
+  <div class="row center" style="margin-top:.6rem">
+    <label class="lbl" for="n-out" style="margin:0">Also show in base</label>
+    <input id="n-out" type="number" min="2" max="36" value="36" style="width:5rem">
+  </div>
+</section>
+
+<section class="card" aria-labelledby="h-bits">
+  <h2 id="h-bits">Bits</h2>
+  <div id="n-bits" class="bits"></div>
+  <p class="note">Click a bit to flip it. Bit 0 is the least significant.</p>
+</section>
+
+<section class="card" aria-labelledby="h-ops">
+  <h2 id="h-ops">Bitwise operations</h2>
+  <div class="row">
+    <div class="field grow"><label class="lbl" for="b-a">A</label><input id="b-a" type="text" class="mono" value="0xF0" autocomplete="off" spellcheck="false"></div>
+    <div class="field"><label class="lbl" for="b-op">Operation</label>
+      <select id="b-op">
+        <option value="and">A &amp; B (AND)</option><option value="or">A | B (OR)</option><option value="xor">A ^ B (XOR)</option>
+        <option value="not">~A (NOT)</option><option value="shl">A &lt;&lt; B</option>
+        <option value="sar">A &gt;&gt; B (arithmetic)</option><option value="shr">A &gt;&gt;&gt; B (logical)</option>
+        <option value="rol">Rotate left by B</option><option value="ror">Rotate right by B</option>
+      </select></div>
+    <div class="field grow"><label class="lbl" for="b-b">B</label><input id="b-b" type="text" class="mono" value="0x3C" autocomplete="off" spellcheck="false"></div>
+  </div>
+  <p class="note">Use <code>0x</code>, <code>0b</code> or <code>0o</code> prefixes, or plain decimal. Uses the bit width chosen above; negative values use two's complement.</p>
+  <div id="b-msg" class="msg" role="status" style="margin-top:.6rem"></div>
+  <div id="b-out" class="opgrid" style="margin-top:.6rem"></div>
+</section>
+
+<section class="card" aria-labelledby="h-chmod">
+  <h2 id="h-chmod">chmod and umask</h2>
+  <div class="cols">
+    <div>
+      <div class="perm" id="c-grid">
+        <span></span><span class="h">Owner</span><span class="h">Group</span><span class="h">Other</span>
+        <span class="h">Read</span>
+        <input type="checkbox" id="c-ur" aria-label="Owner read"><input type="checkbox" id="c-gr" aria-label="Group read"><input type="checkbox" id="c-or" aria-label="Other read">
+        <span class="h">Write</span>
+        <input type="checkbox" id="c-uw" aria-label="Owner write"><input type="checkbox" id="c-gw" aria-label="Group write"><input type="checkbox" id="c-ow" aria-label="Other write">
+        <span class="h">Execute</span>
+        <input type="checkbox" id="c-ux" aria-label="Owner execute"><input type="checkbox" id="c-gx" aria-label="Group execute"><input type="checkbox" id="c-ox" aria-label="Other execute">
+      </div>
+      <div class="row center" style="margin-top:.8rem">
+        <label class="chk"><input type="checkbox" id="c-suid"> setuid</label>
+        <label class="chk"><input type="checkbox" id="c-sgid"> setgid</label>
+        <label class="chk"><input type="checkbox" id="c-sticky"> sticky</label>
+      </div>
+      <div class="row center" style="margin-top:.8rem" id="c-presets"></div>
+    </div>
+    <div>
+      <div class="row center">
+        <div class="field"><label class="lbl" for="c-oct">Octal</label><input id="c-oct" type="text" class="mono big" maxlength="4" style="width:7rem" autocomplete="off" spellcheck="false"></div>
+        <div class="field grow"><span class="lbl">Symbolic</span><span class="big" id="c-sym"></span></div>
+      </div>
+      <div class="out" style="margin-top:.8rem"><span id="c-cmdtxt"></span><button class="copy sm" data-copy-from="c-cmdtxt">Copy</button></div>
+      <div id="c-warn" class="msg" style="margin-top:.6rem"></div>
+      <span class="lbl" style="margin-top:1.1rem">umask</span>
+      <div class="row center">
+        <div class="field"><label class="lbl" for="u-in">umask</label><input id="u-in" type="text" class="mono" value="022" maxlength="4" style="width:6rem" autocomplete="off" spellcheck="false"></div>
+        <div id="u-out" class="mono" style="font-size:.8125rem"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+</main>
+<script>
+const TOOL="number-base";
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
+const store={
+  get(k,d){try{const v=localStorage.getItem('bc:'+TOOL+':'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('bc:'+TOOL+':'+k,JSON.stringify(v))}catch(e){}}
+};
+let _toastT;
+function toast(msg){let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}
+  t.textContent=msg;t.classList.add('show');clearTimeout(_toastT);_toastT=setTimeout(()=>t.classList.remove('show'),1400)}
+async function copyText(text,label){
+  try{await navigator.clipboard.writeText(text)}catch(e){
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy')}catch(_){}ta.remove()}
+  toast((label||'Copied')+' to clipboard')}
+function download(name,data,type){
+  const blob=data instanceof Blob?data:new Blob([data],{type:type||'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+document.addEventListener('click',e=>{const b=e.target.closest('button.copy[data-copy-from]');
+  if(b){const el=document.getElementById(b.dataset.copyFrom);if(el)copyText(el.value!==undefined&&el.tagName==='TEXTAREA'?el.value:el.textContent)}});
+
+
+</script>
+<script>
+
+(() => {
+  const DIG = '0123456789abcdefghijklmnopqrstuvwxyz';
+  const els = {
+    inp: $('#n-in'), base: $('#n-base'), cwrap: $('#n-cwrap'), custom: $('#n-custom'), width: $('#n-width'),
+    msg: $('#n-msg'), table: $('#n-table'), bits: $('#n-bits'), out: $('#n-out')
+  };
+  let cur = 255n; // unsigned value, masked to width
+
+  const W = () => BigInt(els.width.value);
+  const MASK = () => (1n << W()) - 1n;
+  const inBase = () => els.base.value === 'custom' ? clamp(parseInt(els.custom.value, 10) || 10, 2, 36) : parseInt(els.base.value, 10);
+
+  function parseBase(str, base) {
+    let s = str.trim().replace(/[\s_,]/g, '').toLowerCase();
+    let neg = false;
+    if (s[0] === '-') { neg = true; s = s.slice(1); } else if (s[0] === '+') s = s.slice(1);
+    const pre = { 2: '0b', 8: '0o', 16: '0x' }[base];
+    if (pre && s.startsWith(pre)) s = s.slice(pre.length);
+    if (!s) return null;
+    let v = 0n; const B = BigInt(base);
+    for (const ch of s) {
+      const d = DIG.indexOf(ch);
+      if (d < 0 || d >= base) throw new Error('"' + ch + '" is not a base-' + base + ' digit');
+      v = v * B + BigInt(d);
+    }
+    return neg ? -v : v;
+  }
+  function parseAny(str) {
+    const s = str.trim().replace(/[\s_,]/g, '').toLowerCase();
+    if (!s) return null;
+    const neg = s[0] === '-', t = neg ? s.slice(1) : s;
+    let v;
+    if (t.startsWith('0x')) v = parseBase(t.slice(2), 16);
+    else if (t.startsWith('0b')) v = parseBase(t.slice(2), 2);
+    else if (t.startsWith('0o')) v = parseBase(t.slice(2), 8);
+    else v = parseBase(t, 10);
+    if (v === null) throw new Error('Nothing after the prefix');
+    return neg ? -v : v;
+  }
+  const norm = v => v & MASK();
+  const signed = u => (u >= (1n << (W() - 1n))) ? u - (1n << W()) : u;
+  const group = (s, n) => s.replace(new RegExp('(?=(?:.{' + n + '})+$)', 'g'), ' ').trim();
+  const bin = u => group(u.toString(2).padStart(Number(W()), '0'), 4);
+  const hex = u => group(u.toString(16).toUpperCase().padStart(Number(W()) / 4, '0'), 2);
+  const fmtSigned = v => (v < 0n ? '-' : '') + (v < 0n ? -v : v).toString(10);
+
+  function setFromInput() {
+    els.msg.textContent = ''; els.msg.classList.remove('bad');
+    let v;
+    try { v = parseBase(els.inp.value, inBase()); }
+    catch (e) { els.msg.textContent = e.message; els.msg.classList.add('bad'); render(); return; }
+    if (v === null) { cur = 0n; render(); return; }
+    const w = W();
+    const lo = -(1n << (w - 1n)), hi = (1n << w) - 1n;
+    if (v < lo || v > hi) els.msg.textContent = 'Value does not fit in ' + w + ' bits; showing the low ' + w + ' bits.';
+    cur = norm(v);
+    render();
+  }
+
+  function row(label, val) {
+    return '<tr><th scope="row">' + label + '</th><td class="m">' + esc(val) + '</td><td><button class="sm" data-val="' + esc(val.replace(/ /g, '')) + '">Copy</button></td></tr>';
+  }
+  function render() {
+    const outBase = clamp(parseInt(els.out.value, 10) || 36, 2, 36);
+    els.table.innerHTML =
+      row('Binary', bin(cur)) + row('Octal', cur.toString(8)) + row('Decimal (unsigned)', cur.toString(10)) +
+      row('Decimal (signed, two’s complement)', fmtSigned(signed(cur))) + row('Hex', hex(cur)) +
+      row('Base ' + outBase, cur.toString(outBase).toUpperCase());
+    // bit grid
+    const w = Number(W()); let html = '';
+    for (let byte = w / 8 - 1; byte >= 0; byte--) {
+      html += '<div class="bytegrp" role="group" aria-label="Byte ' + byte + '">';
+      for (let b = 7; b >= 0; b--) {
+        const i = byte * 8 + b, on = (cur >> BigInt(i)) & 1n;
+        html += '<button class="bit" data-i="' + i + '" aria-pressed="' + (on === 1n) + '" aria-label="Bit ' + i + '"><span>' + on + '</span><small>' + i + '</small></button>';
+      }
+      html += '</div>';
+    }
+    els.bits.innerHTML = html;
+    runOps();
+    persist();
+  }
+  function writeInput() { els.inp.value = cur.toString(inBase()).toUpperCase(); setFromInput(); }
+  function persist() { store.set('s', { v: els.inp.value, b: els.base.value, c: els.custom.value, w: els.width.value, o: els.out.value }); }
+
+  els.inp.addEventListener('input', setFromInput);
+  els.custom.addEventListener('input', setFromInput);
+  els.out.addEventListener('input', render);
+  els.base.addEventListener('change', () => {
+    els.cwrap.hidden = els.base.value !== 'custom';
+    writeInput();
+  });
+  els.width.addEventListener('change', () => { cur = norm(cur); writeInput(); });
+  els.bits.addEventListener('click', e => {
+    const b = e.target.closest('.bit'); if (!b) return;
+    cur = cur ^ (1n << BigInt(b.dataset.i)); writeInput();
+  });
+  els.table.addEventListener('click', e => {
+    const b = e.target.closest('button[data-val]'); if (b) copyText(b.dataset.val);
+  });
+
+  /* ---- bitwise ops ---- */
+  const ba = $('#b-a'), bb = $('#b-b'), bop = $('#b-op'), bmsg = $('#b-msg'), bout = $('#b-out');
+  function runOps() {
+    bmsg.textContent = ''; bmsg.classList.remove('bad'); bout.innerHTML = '';
+    let a, b;
+    try { a = parseAny(ba.value); b = parseAny(bb.value); } catch (e) { bmsg.textContent = e.message; bmsg.classList.add('bad'); return; }
+    const op = bop.value, w = W(), M = MASK();
+    if (a === null || (b === null && op !== 'not')) { return; }
+    const ua = norm(a), ub = b === null ? 0n : norm(b);
+    const n = Number(ub & 0xFFFFn);
+    let r;
+    switch (op) {
+      case 'and': r = ua & ub; break;
+      case 'or': r = ua | ub; break;
+      case 'xor': r = ua ^ ub; break;
+      case 'not': r = ~ua & M; break;
+      case 'shl': r = n >= Number(w) ? 0n : (ua << BigInt(n)) & M; break;
+      case 'shr': r = n >= Number(w) ? 0n : ua >> BigInt(n); break;
+      case 'sar': r = norm(signed(ua) >> BigInt(Math.min(n, Number(w)))); break;
+      case 'rol': { const k = BigInt(n % Number(w)); r = ((ua << k) | (ua >> (w - k))) & M; break; }
+      case 'ror': { const k = BigInt(n % Number(w)); r = ((ua >> k) | (ua << (w - k))) & M; break; }
+    }
+    const line = (k, u, cls) => '<span class="k">' + k + '</span><span class="' + (cls || '') + '">' + bin(u) + '</span>';
+    let html = line('A', ua);
+    if (op !== 'not') html += line('B', ub);
+    html += line('Result', r, 'res');
+    html += '<span class="k">Hex</span><span>0x' + hex(r).replace(/ /g, '') + '</span>';
+    html += '<span class="k">Decimal</span><span>' + r.toString(10) + ' (signed ' + fmtSigned(signed(r)) + ')</span>';
+    bout.innerHTML = html;
+  }
+  [ba, bb, bop].forEach(el => el.addEventListener('input', () => { runOps(); persist(); }));
+
+  /* ---- chmod / umask ---- */
+  const cb = id => $('#' + id);
+  const P = ['ur', 'uw', 'ux', 'gr', 'gw', 'gx', 'or', 'ow', 'ox'];
+  const octInp = $('#c-oct'), symEl = $('#c-sym'), cmdEl = $('#c-cmdtxt'), cwarn = $('#c-warn');
+  function chmodFromBoxes(skipOct) {
+    const d = c => (cb('c-' + c + 'r').checked ? 4 : 0) + (cb('c-' + c + 'w').checked ? 2 : 0) + (cb('c-' + c + 'x').checked ? 1 : 0);
+    const sp = (cb('c-suid').checked ? 4 : 0) + (cb('c-sgid').checked ? 2 : 0) + (cb('c-sticky').checked ? 1 : 0);
+    const u = d('u'), g = d('g'), o = d('o');
+    const oct = (sp ? String(sp) : '') + u + '' + g + o;
+    const ch = (bits, i) => (bits & [4, 2, 1][i]) ? 'rwx'[i] : '-';
+    const triple = bits => [0, 1, 2].map(i => ch(bits, i)).join('');
+    let su = triple(u).split(''), sg = triple(g).split(''), so = triple(o).split('');
+    if (sp & 4) su[2] = (u & 1) ? 's' : 'S';
+    if (sp & 2) sg[2] = (g & 1) ? 's' : 'S';
+    if (sp & 1) so[2] = (o & 1) ? 't' : 'T';
+    if (!skipOct) octInp.value = oct;
+    symEl.textContent = su.join('') + sg.join('') + so.join('');
+    cmdEl.textContent = 'chmod ' + oct + ' file';
+    const w = [];
+    if (o & 2) w.push('World-writable: any user on the system can modify this.');
+    if (sp & 4) w.push('setuid runs the file as its owner; be sure that is intended.');
+    if (oct === '777' || oct === '0777') w.push('777 is rarely the right answer; grant only what is needed.');
+    cwarn.textContent = w.join(' ');
+  }
+  function boxesFromOct() {
+    const s = octInp.value.trim();
+    if (!/^[0-7]{3,4}$/.test(s)) { octInp.setAttribute('aria-invalid', 'true'); return; }
+    octInp.removeAttribute('aria-invalid');
+    const p = s.padStart(4, '0').split('').map(Number);
+    cb('c-suid').checked = !!(p[0] & 4); cb('c-sgid').checked = !!(p[0] & 2); cb('c-sticky').checked = !!(p[0] & 1);
+    ['u', 'g', 'o'].forEach((c, i) => { const d = p[i + 1]; cb('c-' + c + 'r').checked = !!(d & 4); cb('c-' + c + 'w').checked = !!(d & 2); cb('c-' + c + 'x').checked = !!(d & 1); });
+    chmodFromBoxes(true);
+  }
+  $('#c-grid').addEventListener('change', () => chmodFromBoxes());
+  ['c-suid', 'c-sgid', 'c-sticky'].forEach(id => cb(id).addEventListener('change', () => chmodFromBoxes()));
+  octInp.addEventListener('input', boxesFromOct);
+  $('#c-presets').innerHTML = ['644', '755', '600', '700', '400', '777'].map(p => '<button class="sm" data-p="' + p + '">' + p + '</button>').join('');
+  $('#c-presets').addEventListener('click', e => { const b = e.target.closest('button[data-p]'); if (b) { octInp.value = b.dataset.p; boxesFromOct(); } });
+  const uin = $('#u-in'), uout = $('#u-out');
+  function umask() {
+    const s = uin.value.trim();
+    if (!/^[0-7]{3,4}$/.test(s)) { uout.textContent = 'Enter 3 or 4 octal digits'; return; }
+    const m = parseInt(s, 8);
+    uout.innerHTML = 'New files: <b>' + (0o666 & ~m).toString(8).padStart(3, '0') + '</b> &nbsp; New directories: <b>' + (0o777 & ~m).toString(8).padStart(3, '0') + '</b>';
+  }
+  uin.addEventListener('input', umask);
+
+  /* ---- boot ---- */
+  const s = store.get('s', null);
+  if (s) { els.base.value = s.b || '10'; els.custom.value = s.c || '7'; els.width.value = s.w || '32'; els.out.value = s.o || '36'; els.inp.value = s.v || ''; }
+  if (!els.inp.value) els.inp.value = '255';
+  els.cwrap.hidden = els.base.value !== 'custom';
+  octInp.value = '755'; boxesFromOct(); umask();
+  setFromInput();
+})();
+
+</script>
+</body>
+</html>

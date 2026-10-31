@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Build a robots.txt with crawler presets and a rule tester, and generate a valid sitemap.xml from a list of URLs. Runs entirely in the browser.">
+<link rel="icon" href="data:,">
+<title>Robots.txt & Sitemap Builder</title>
+<style>
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:100 800;font-display:swap;src:url("../fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2")}
+
+:root{
+  color-scheme: light dark;
+  --bg:#e9eaed; --surface:#f7f7f9; --surface-2:#ffffff;
+  --ink:#1d2126; --muted:#5b6068; --line:#d6d7dc; --line-2:#bfc2ca; --chip:#ececf0;
+  --accent:#2f6db3; --accent-strong:#26598f; --accent-ink:#ffffff;
+  --ok:#2e7d4f; --danger:#8f2d23; --danger-bg:#fdeeee; --danger-line:#efc2c2;
+  --warn:#7a4b00; --warn-bg:#fff4dc; --warn-line:#e8c98a;
+  --shadow:0 1px 2px rgba(24,28,38,.05),0 10px 28px rgba(24,28,38,.07);
+  --ui-font:"Outfit",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono-font:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#222329;
+    --ink:#eceef2; --muted:#a2a6af; --line:#2d2f36; --line-2:#3d404a; --chip:#26272e;
+    --accent:#7db0e6; --accent-strong:#9cc3ee; --accent-ink:#0d1724;
+    --ok:#6fce97; --danger:#f0a9a0; --danger-bg:#3a2120; --danger-line:#6e3a36;
+    --warn:#fdd663; --warn-bg:#352c12; --warn-line:#6b5a22;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--ui-font);font-size:15px;line-height:1.45;background:var(--bg);color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+a{color:var(--accent-strong)}
+header.site{padding:1rem 1.25rem;background:var(--surface);border-bottom:1px solid var(--line)}
+header.site .top{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+header.site h1{margin:0;font-size:1.35rem;font-weight:600;line-height:1.2}
+header.site .back{font-size:.8125rem;color:var(--muted);text-decoration:none}
+header.site .back:hover{color:var(--accent-strong);text-decoration:underline}
+header.site p{margin:.35rem 0 0;color:var(--muted);max-width:60rem}
+main.wrap{max-width:1180px;margin:0 auto;padding:1rem 1.25rem 3rem;display:grid;gap:1rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:1rem}
+.card>h2,.lbl{margin:0 0 .6rem;font-size:.6875rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.lbl{display:block;margin:0 0 .25rem}
+.cols{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end}
+.row.center{align-items:center}
+.field{display:flex;flex-direction:column;gap:.15rem;min-width:0}
+.field.grow{flex:1 1 180px}
+input[type=text],input[type=number],input[type=search],input[type=url],input[type=date],select,textarea{
+  font:inherit;font-size:.875rem;color:var(--ink);background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:.4rem .6rem;min-width:0;width:100%}
+input[type=number]{font-family:var(--mono-font);font-size:.8125rem}
+textarea{font-family:var(--mono-font);font-size:.8125rem;line-height:1.5;resize:vertical;tab-size:2}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+input[type=color]{width:2.4rem;height:2rem;padding:0;border:1px solid var(--line-2);border-radius:8px;background:none;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:1rem;height:1rem;margin:0}
+label.chk{display:inline-flex;gap:.4rem;align-items:center;font-size:.875rem;cursor:pointer}
+button,.btn{font:inherit;font-size:.875rem;padding:.4rem .85rem;border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink);border-radius:999px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;line-height:1.2}
+button:hover,.btn:hover{border-color:var(--accent)}
+button.primary,.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+button.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.sm{padding:.2rem .6rem;font-size:.75rem}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden;background:var(--surface-2)}
+.seg button{border:0;border-radius:0;background:transparent;padding:.35rem .8rem}
+.seg button[aria-pressed=true],.seg button[aria-selected=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.out{position:relative;margin:0;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:.75rem 3.6rem .75rem .85rem;font-family:var(--mono-font);font-size:.8125rem;line-height:1.55;white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:26rem}
+.out>button.copy{position:absolute;top:.4rem;right:.4rem}
+.note{font-size:.8125rem;color:var(--muted);margin:.5rem 0 0}
+.msg{border-radius:9px;padding:.5rem .75rem;font-size:.8125rem;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--warn)}
+.msg.bad{border-color:var(--danger-line);background:var(--danger-bg);color:var(--danger)}
+.msg:empty{display:none}
+.pill{display:inline-block;font-size:.6875rem;font-weight:600;padding:.1rem .5rem;border-radius:999px;background:var(--chip);color:var(--muted);border:1px solid var(--line)}
+.pill.ok{color:var(--ok)} .pill.bad{color:var(--danger)}
+table.t{width:100%;border-collapse:collapse;font-size:.8125rem}
+table.t th,table.t td{text-align:left;padding:.35rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+table.t th{font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+table.t td.m,.mono{font-family:var(--mono-font)}
+.scroll{overflow:auto}
+.toast{position:fixed;left:50%;bottom:1.25rem;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.45rem .9rem;border-radius:999px;font-size:.8125rem;opacity:0;pointer-events:none;transition:opacity .15s;z-index:50}
+.toast.show{opacity:1}
+.drop{border:2px dashed var(--line-2);border-radius:12px;padding:1.4rem;text-align:center;color:var(--muted);background:var(--surface-2);cursor:pointer}
+.drop.over,.drop:hover{border-color:var(--accent);color:var(--ink)}
+kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:6px;padding:.05rem .4rem}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important}}
+
+
+.grp{border:1px solid var(--line);border-radius:12px;background:var(--surface-2);padding:.75rem;display:grid;gap:.5rem}
+.grp textarea{min-height:5.2rem}
+.lint{margin:.6rem 0 0;padding:0;list-style:none;display:grid;gap:.35rem}
+.lint li{font-size:.8125rem;border-radius:8px;padding:.35rem .6rem;border:1px solid var(--line);background:var(--surface-2);color:var(--muted)}
+.lint li.w{border-color:var(--warn-line);background:var(--warn-bg);color:var(--warn)}
+.verdict{font-weight:600}
+.verdict.ok{color:var(--ok)} .verdict.no{color:var(--danger)}
+
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="top"><h1>Robots.txt & Sitemap Builder</h1><a class="back" href="../tools/">&larr; All tools</a></div>
+  <p>Compose robots.txt rules per crawler, test whether a path is allowed for a given user agent, and generate a sitemap.xml from a list of URLs. Nothing is uploaded.</p>
+</header>
+<main class="wrap">
+
+<section class="card" aria-labelledby="h-robots">
+  <h2 id="h-robots">robots.txt</h2>
+  <div class="row center">
+    <span class="lbl" style="margin:0">Start from</span>
+    <button class="sm" data-preset="allow">Allow everything</button>
+    <button class="sm" data-preset="static">Static site</button>
+    <button class="sm" data-preset="ai">Block AI crawlers</button>
+    <button class="sm" data-preset="block">Block everything</button>
+  </div>
+  <div id="r-groups" style="display:grid;gap:.7rem;margin-top:.8rem"></div>
+  <div class="row center" style="margin-top:.7rem">
+    <button id="r-add">Add group</button>
+    <details style="flex:1 1 100%">
+      <summary style="cursor:pointer;font-size:.875rem">Import an existing robots.txt</summary>
+      <div class="field" style="margin-top:.5rem"><label class="lbl" for="r-import">Paste it here</label><textarea id="r-import" rows="6" spellcheck="false"></textarea></div>
+      <button id="r-parse" style="margin-top:.5rem">Replace groups with this</button>
+    </details>
+  </div>
+  <div class="field" style="margin-top:.8rem"><label class="lbl" for="r-sm">Sitemap URLs (one per line)</label>
+    <textarea id="r-sm" rows="2" spellcheck="false" placeholder="https://example.com/sitemap.xml"></textarea></div>
+  <ul class="lint" id="r-lint"></ul>
+  <h2 style="margin:1rem 0 .5rem">Output</h2>
+  <pre class="out"><button class="copy sm" data-copy-from="r-out">Copy</button><span id="r-out"></span></pre>
+  <div class="row" style="margin-top:.6rem"><button id="r-dl" class="primary">Download robots.txt</button></div>
+  <p class="note">robots.txt asks well-behaved crawlers to stay away. It is not access control, and a blocked URL can still appear in search results if other sites link to it. Use authentication for anything private. Crawler names change; check each vendor's documentation.</p>
+</section>
+
+<section class="card" aria-labelledby="h-test">
+  <h2 id="h-test">Test a path</h2>
+  <div class="row">
+    <div class="field grow"><label class="lbl" for="t-ua">User agent</label><input id="t-ua" type="text" value="Googlebot" spellcheck="false"></div>
+    <div class="field grow"><label class="lbl" for="t-path">Path (with query if any)</label><input id="t-path" type="text" value="/" spellcheck="false"></div>
+  </div>
+  <p id="t-res" style="margin:.7rem 0 0" aria-live="polite"></p>
+  <p class="note">Uses the longest matching rule, with Allow winning ties, and supports <code>*</code> and <code>$</code> as in RFC 9309. It tests the groups above, not a live site.</p>
+</section>
+
+<section class="card" aria-labelledby="h-sitemap">
+  <h2 id="h-sitemap">sitemap.xml</h2>
+  <div class="cols">
+    <div style="display:grid;gap:.7rem;align-content:start">
+      <div class="field"><label class="lbl" for="s-base">Site URL</label><input id="s-base" type="url" value="https://example.com" spellcheck="false"></div>
+      <div class="field"><label class="lbl" for="s-urls">Pages: one per line, a path or full URL. Optional <code>| 2026-10-30</code> sets lastmod for that line.</label>
+        <textarea id="s-urls" rows="9" spellcheck="false">/
+/about/
+/blog/
+/blog/first-post/ | 2026-10-01
+/contact/</textarea></div>
+      <div class="row center">
+        <div class="field"><label class="lbl" for="s-lm">Default lastmod</label><input id="s-lm" type="date"></div>
+        <label class="chk"><input type="checkbox" id="s-cf"> changefreq</label>
+        <select id="s-cfv" aria-label="changefreq value" style="width:auto"><option>always</option><option>hourly</option><option>daily</option><option selected>weekly</option><option>monthly</option><option>yearly</option><option>never</option></select>
+        <label class="chk"><input type="checkbox" id="s-pr"> priority</label>
+        <input id="s-prv" type="number" min="0" max="1" step="0.1" value="0.5" aria-label="priority value" style="width:5rem">
+      </div>
+      <p class="note" style="margin:0">Search engines largely ignore changefreq and priority. An accurate lastmod is the useful one; leave it off if you cannot keep it truthful.</p>
+    </div>
+    <div>
+      <div id="s-msg" class="msg" style="margin-bottom:.6rem"></div>
+      <pre class="out" style="max-height:20rem"><button class="copy sm" data-copy-from="s-out">Copy</button><span id="s-out"></span></pre>
+      <div class="row center" style="margin-top:.6rem">
+        <button id="s-dl" class="primary">Download sitemap.xml</button>
+        <button id="s-addrobots">Add to robots.txt</button>
+        <span class="pill" id="s-count"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+</main>
+<script>
+const TOOL="robots-sitemap";
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
+const store={
+  get(k,d){try{const v=localStorage.getItem('bc:'+TOOL+':'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('bc:'+TOOL+':'+k,JSON.stringify(v))}catch(e){}}
+};
+let _toastT;
+function toast(msg){let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}
+  t.textContent=msg;t.classList.add('show');clearTimeout(_toastT);_toastT=setTimeout(()=>t.classList.remove('show'),1400)}
+async function copyText(text,label){
+  try{await navigator.clipboard.writeText(text)}catch(e){
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy')}catch(_){}ta.remove()}
+  toast((label||'Copied')+' to clipboard')}
+function download(name,data,type){
+  const blob=data instanceof Blob?data:new Blob([data],{type:type||'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+document.addEventListener('click',e=>{const b=e.target.closest('button.copy[data-copy-from]');
+  if(b){const el=document.getElementById(b.dataset.copyFrom);if(el)copyText(el.value!==undefined&&el.tagName==='TEXTAREA'?el.value:el.textContent)}});
+
+
+</script>
+<script>
+
+(() => {
+  const AI = ['GPTBot', 'ChatGPT-User', 'OAI-SearchBot', 'ClaudeBot', 'Claude-Web', 'anthropic-ai', 'CCBot', 'Google-Extended', 'PerplexityBot', 'Bytespider', 'Amazonbot', 'Applebot-Extended', 'meta-externalagent', 'cohere-ai', 'Diffbot'];
+  const PRESETS = {
+    allow: () => [{ ua: '*', rules: 'Allow: /', delay: '' }],
+    static: () => [{ ua: '*', rules: 'Disallow: /404.html\nDisallow: /search/', delay: '' }],
+    ai: () => [{ ua: AI.join(', '), rules: 'Disallow: /', delay: '' }, { ua: '*', rules: 'Allow: /', delay: '' }],
+    block: () => [{ ua: '*', rules: 'Disallow: /', delay: '' }]
+  };
+  let groups = store.get('groups', null) || PRESETS.static();
+  $('#r-sm').value = store.get('sm', '');
+  const gEl = $('#r-groups');
+
+  function renderGroups() {
+    gEl.innerHTML = groups.map((g, i) =>
+      '<div class="grp" data-i="' + i + '">' +
+      '<div class="row"><div class="field grow"><label class="lbl" for="g' + i + 'u">User-agent (comma separated)</label><input id="g' + i + 'u" data-k="ua" type="text" value="' + esc(g.ua) + '" spellcheck="false"></div>' +
+      '<div class="field"><label class="lbl" for="g' + i + 'd">Crawl-delay</label><input id="g' + i + 'd" data-k="delay" type="number" min="0" value="' + esc(g.delay) + '" style="width:6rem"></div>' +
+      '<button class="sm" data-rm aria-label="Remove group ' + (i + 1) + '">Remove</button></div>' +
+      '<div class="field"><label class="lbl" for="g' + i + 'r">Rules (Allow: or Disallow:, one per line)</label><textarea id="g' + i + 'r" data-k="rules" spellcheck="false">' + esc(g.rules) + '</textarea></div></div>').join('');
+    update();
+  }
+  const uasOf = g => g.ua.split(',').map(s => s.trim()).filter(Boolean);
+  const rulesOf = g => g.rules.split('\n').map(s => s.trim()).filter(Boolean);
+  const smOf = () => $('#r-sm').value.split('\n').map(s => s.trim()).filter(Boolean);
+
+  function gen() {
+    const out = [];
+    groups.forEach(g => {
+      const u = uasOf(g); if (!u.length && !rulesOf(g).length) return;
+      u.forEach(x => out.push('User-agent: ' + x));
+      rulesOf(g).forEach(r => out.push(r));
+      if (String(g.delay).trim() !== '') out.push('Crawl-delay: ' + g.delay);
+      out.push('');
+    });
+    smOf().forEach(s => out.push('Sitemap: ' + s));
+    return out.join('\n').replace(/\n+$/, '') + '\n';
+  }
+  function lint() {
+    const L = [];
+    const add = (t, w) => L.push('<li' + (w ? ' class="w"' : '') + '>' + esc(t) + '</li>');
+    groups.forEach((g, i) => {
+      const n = 'Group ' + (i + 1);
+      if (!uasOf(g).length) add(n + ' has no User-agent line, so crawlers ignore its rules.', true);
+      rulesOf(g).forEach(r => {
+        const m = r.match(/^(allow|disallow)\s*:\s*(.*)$/i);
+        if (!m) { add(n + ': "' + r + '" is not an Allow or Disallow rule.', true); return; }
+        const p = m[2];
+        if (p && p[0] !== '/' && p[0] !== '*') add(n + ': path "' + p + '" should start with / or *.', true);
+        if (/^disallow$/i.test(m[1]) && p === '/' && uasOf(g).includes('*')) add(n + ' blocks every compliant crawler from the whole site.', false);
+      });
+      if (String(g.delay).trim() !== '') add(n + ': Crawl-delay is honoured by some crawlers (such as Bing) but ignored by Google.', false);
+    });
+    smOf().forEach(s => { if (!/^https?:\/\/\S+$/i.test(s)) add('Sitemap "' + s + '" must be a full http(s) URL.', true); });
+    $('#r-lint').innerHTML = L.join('');
+  }
+  function update() {
+    $('#r-out').textContent = gen(); lint(); test();
+    store.set('groups', groups); store.set('sm', $('#r-sm').value);
+  }
+
+  /* ---- matching (RFC 9309) ---- */
+  function toRe(p) {
+    const end = p.endsWith('$'); if (end) p = p.slice(0, -1);
+    return new RegExp('^' + p.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + (end ? '$' : ''));
+  }
+  function test() {
+    const ua = $('#t-ua').value.trim().toLowerCase(), path = $('#t-path').value.trim() || '/';
+    const res = $('#t-res');
+    let bestTok = '', hit = [];
+    groups.forEach(g => uasOf(g).forEach(u => { const t = u.toLowerCase(); if (t !== '*' && ua.includes(t) && t.length > bestTok.length) bestTok = t; }));
+    const sel = groups.filter(g => uasOf(g).some(u => bestTok ? u.toLowerCase() === bestTok : u === '*'));
+    if (!sel.length) { res.innerHTML = '<span class="verdict ok">Allowed</span> – no group applies to this user agent.'; return; }
+    let best = null;
+    sel.forEach(g => rulesOf(g).forEach(r => {
+      const m = r.match(/^(allow|disallow)\s*:\s*(.*)$/i); if (!m) return;
+      const type = m[1].toLowerCase(), pat = m[2].trim();
+      if (type === 'disallow' && !pat) return;
+      if (!pat) return;
+      let re; try { re = toRe(pat); } catch (_) { return; }
+      if (re.test(path)) {
+        const len = pat.replace(/\$$/, '').length;
+        if (!best || len > best.len || (len === best.len && type === 'allow' && best.type !== 'allow')) best = { type, pat, len };
+      }
+    }));
+    const who = bestTok ? 'the group for "' + esc(bestTok) + '"' : 'the * group';
+    if (!best) res.innerHTML = '<span class="verdict ok">Allowed</span> – no rule in ' + who + ' matches.';
+    else if (best.type === 'allow') res.innerHTML = '<span class="verdict ok">Allowed</span> by <code>Allow: ' + esc(best.pat) + '</code> in ' + who + '.';
+    else res.innerHTML = '<span class="verdict no">Blocked</span> by <code>Disallow: ' + esc(best.pat) + '</code> in ' + who + '.';
+  }
+
+  /* ---- events ---- */
+  gEl.addEventListener('input', e => { const k = e.target.dataset.k; if (!k) return; groups[+e.target.closest('.grp').dataset.i][k] = e.target.value; update(); });
+  gEl.addEventListener('click', e => { if (e.target.closest('[data-rm]')) { groups.splice(+e.target.closest('.grp').dataset.i, 1); renderGroups(); } });
+  $('#r-add').addEventListener('click', () => { groups.push({ ua: '', rules: 'Disallow: ', delay: '' }); renderGroups(); });
+  $$('[data-preset]').forEach(b => b.addEventListener('click', () => { groups = PRESETS[b.dataset.preset](); renderGroups(); }));
+  $('#r-sm').addEventListener('input', update); $('#t-ua').addEventListener('input', test); $('#t-path').addEventListener('input', test);
+  $('#r-dl').addEventListener('click', () => download('robots.txt', gen(), 'text/plain'));
+  $('#r-parse').addEventListener('click', () => {
+    const lines = $('#r-import').value.split(/\r?\n/).map(l => l.replace(/#.*$/, '').trim()).filter(Boolean);
+    const gs = [], sms = []; let cur = null, lastWasUA = false;
+    lines.forEach(l => {
+      const m = l.match(/^([A-Za-z-]+)\s*:\s*(.*)$/); if (!m) return;
+      const d = m[1].toLowerCase(), v = m[2].trim();
+      if (d === 'user-agent') { if (cur && lastWasUA) cur.ua += ', ' + v; else { cur = { ua: v, rules: '', delay: '' }; gs.push(cur); } lastWasUA = true; return; }
+      lastWasUA = false;
+      if (d === 'sitemap') sms.push(v);
+      else if (cur && (d === 'allow' || d === 'disallow')) cur.rules += (cur.rules ? '\n' : '') + m[1] + ': ' + v;
+      else if (cur && d === 'crawl-delay') cur.delay = v;
+    });
+    if (!gs.length) { toast('No User-agent lines found'); return; }
+    groups = gs; if (sms.length) $('#r-sm').value = sms.join('\n'); renderGroups(); toast('Imported ' + gs.length + ' group(s)');
+  });
+
+  /* ---- sitemap ---- */
+  const X = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+  function sitemap() {
+    const msg = $('#s-msg'); msg.classList.remove('bad'); const warn = [];
+    let base = $('#s-base').value.trim(); if (base && !/^https?:\/\//i.test(base)) base = 'https://' + base; base = base.replace(/\/+$/, '');
+    let baseHost = ''; try { baseHost = new URL(base).host; } catch (_) { msg.textContent = 'Enter a valid site URL.'; msg.classList.add('bad'); $('#s-out').textContent = ''; $('#s-count').textContent = ''; return ''; }
+    const def = $('#s-lm').value, seen = new Set(), items = [];
+    $('#s-urls').value.split('\n').forEach(raw => {
+      const line = raw.trim(); if (!line || line[0] === '#') return;
+      const [loc0, lm0] = line.split('|').map(s => s.trim());
+      let url = /^https?:\/\//i.test(loc0) ? loc0 : base + (loc0[0] === '/' ? '' : '/') + loc0;
+      let u; try { u = new URL(url); } catch (_) { warn.push('Skipped invalid URL: ' + loc0); return; }
+      if (u.host !== baseHost) warn.push(u.host + ' differs from ' + baseHost + '; sitemaps may only list URLs on the same host.');
+      if (seen.has(url)) { warn.push('Duplicate removed: ' + url); return; } seen.add(url);
+      const lm = lm0 || def; if (lm && !/^\d{4}-\d{2}-\d{2}$/.test(lm)) warn.push('lastmod "' + lm + '" should be YYYY-MM-DD.');
+      items.push({ url, lm });
+    });
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    items.forEach(it => {
+      xml += '  <url>\n    <loc>' + X(it.url) + '</loc>\n';
+      if (it.lm) xml += '    <lastmod>' + X(it.lm) + '</lastmod>\n';
+      if ($('#s-cf').checked) xml += '    <changefreq>' + $('#s-cfv').value + '</changefreq>\n';
+      if ($('#s-pr').checked) xml += '    <priority>' + (clamp(parseFloat($('#s-prv').value) || 0.5, 0, 1)).toFixed(1) + '</priority>\n';
+      xml += '  </url>\n';
+    });
+    xml += '</urlset>\n';
+    const bytes = new Blob([xml]).size;
+    if (items.length > 50000) warn.push('A sitemap may hold at most 50,000 URLs; split it and add a sitemap index.');
+    if (bytes > 52428800) warn.push('The file is over 50 MB uncompressed; split it.');
+    $('#s-out').textContent = xml;
+    $('#s-count').textContent = items.length + ' URL' + (items.length === 1 ? '' : 's') + ' · ' + (bytes / 1024).toFixed(1) + ' KB';
+    msg.textContent = warn.slice(0, 4).join(' ') + (warn.length > 4 ? ' (+' + (warn.length - 4) + ' more)' : '');
+    store.set('sitemap', { b: $('#s-base').value, u: $('#s-urls').value, l: def, cf: $('#s-cf').checked, cfv: $('#s-cfv').value, pr: $('#s-pr').checked, prv: $('#s-prv').value });
+    return xml;
+  }
+  const sv = store.get('sitemap', null);
+  if (sv) { $('#s-base').value = sv.b; $('#s-urls').value = sv.u; $('#s-lm').value = sv.l || ''; $('#s-cf').checked = sv.cf; $('#s-cfv').value = sv.cfv; $('#s-pr').checked = sv.pr; $('#s-prv').value = sv.prv; }
+  ['#s-base', '#s-urls', '#s-lm', '#s-cf', '#s-cfv', '#s-pr', '#s-prv'].forEach(id => $(id).addEventListener('input', sitemap));
+  $('#s-dl').addEventListener('click', () => { const x = sitemap(); if (x) download('sitemap.xml', x, 'application/xml'); });
+  $('#s-addrobots').addEventListener('click', () => {
+    let base = $('#s-base').value.trim().replace(/\/+$/, ''); if (!/^https?:\/\//i.test(base)) base = 'https://' + base;
+    const url = base + '/sitemap.xml', ta = $('#r-sm'); if (smOf().includes(url)) { toast('Already listed'); return; }
+    ta.value = (ta.value.trim() ? ta.value.trim() + '\n' : '') + url; update(); toast('Added to robots.txt');
+  });
+  renderGroups(); sitemap();
+})();
+
+</script>
+</body>
+</html>

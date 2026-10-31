@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Make every favicon and app icon size from one image or a letter: favicon.ico, PNGs, Apple touch icon, Android and maskable icons, a web manifest and the HTML tags. Runs in the browser.">
+<link rel="icon" href="data:,">
+<title>Favicon & App Icon Generator</title>
+<style>
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:100 800;font-display:swap;src:url("../fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2")}
+
+:root{
+  color-scheme: light dark;
+  --bg:#e9eaed; --surface:#f7f7f9; --surface-2:#ffffff;
+  --ink:#1d2126; --muted:#5b6068; --line:#d6d7dc; --line-2:#bfc2ca; --chip:#ececf0;
+  --accent:#2f6db3; --accent-strong:#26598f; --accent-ink:#ffffff;
+  --ok:#2e7d4f; --danger:#8f2d23; --danger-bg:#fdeeee; --danger-line:#efc2c2;
+  --warn:#7a4b00; --warn-bg:#fff4dc; --warn-line:#e8c98a;
+  --shadow:0 1px 2px rgba(24,28,38,.05),0 10px 28px rgba(24,28,38,.07);
+  --ui-font:"Outfit",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono-font:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#222329;
+    --ink:#eceef2; --muted:#a2a6af; --line:#2d2f36; --line-2:#3d404a; --chip:#26272e;
+    --accent:#7db0e6; --accent-strong:#9cc3ee; --accent-ink:#0d1724;
+    --ok:#6fce97; --danger:#f0a9a0; --danger-bg:#3a2120; --danger-line:#6e3a36;
+    --warn:#fdd663; --warn-bg:#352c12; --warn-line:#6b5a22;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--ui-font);font-size:15px;line-height:1.45;background:var(--bg);color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+a{color:var(--accent-strong)}
+header.site{padding:1rem 1.25rem;background:var(--surface);border-bottom:1px solid var(--line)}
+header.site .top{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+header.site h1{margin:0;font-size:1.35rem;font-weight:600;line-height:1.2}
+header.site .back{font-size:.8125rem;color:var(--muted);text-decoration:none}
+header.site .back:hover{color:var(--accent-strong);text-decoration:underline}
+header.site p{margin:.35rem 0 0;color:var(--muted);max-width:60rem}
+main.wrap{max-width:1180px;margin:0 auto;padding:1rem 1.25rem 3rem;display:grid;gap:1rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:1rem}
+.card>h2,.lbl{margin:0 0 .6rem;font-size:.6875rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.lbl{display:block;margin:0 0 .25rem}
+.cols{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end}
+.row.center{align-items:center}
+.field{display:flex;flex-direction:column;gap:.15rem;min-width:0}
+.field.grow{flex:1 1 180px}
+input[type=text],input[type=number],input[type=search],input[type=url],input[type=date],select,textarea{
+  font:inherit;font-size:.875rem;color:var(--ink);background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:.4rem .6rem;min-width:0;width:100%}
+input[type=number]{font-family:var(--mono-font);font-size:.8125rem}
+textarea{font-family:var(--mono-font);font-size:.8125rem;line-height:1.5;resize:vertical;tab-size:2}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+input[type=color]{width:2.4rem;height:2rem;padding:0;border:1px solid var(--line-2);border-radius:8px;background:none;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:1rem;height:1rem;margin:0}
+label.chk{display:inline-flex;gap:.4rem;align-items:center;font-size:.875rem;cursor:pointer}
+button,.btn{font:inherit;font-size:.875rem;padding:.4rem .85rem;border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink);border-radius:999px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;line-height:1.2}
+button:hover,.btn:hover{border-color:var(--accent)}
+button.primary,.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+button.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.sm{padding:.2rem .6rem;font-size:.75rem}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden;background:var(--surface-2)}
+.seg button{border:0;border-radius:0;background:transparent;padding:.35rem .8rem}
+.seg button[aria-pressed=true],.seg button[aria-selected=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.out{position:relative;margin:0;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:.75rem 3.6rem .75rem .85rem;font-family:var(--mono-font);font-size:.8125rem;line-height:1.55;white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:26rem}
+.out>button.copy{position:absolute;top:.4rem;right:.4rem}
+.note{font-size:.8125rem;color:var(--muted);margin:.5rem 0 0}
+.msg{border-radius:9px;padding:.5rem .75rem;font-size:.8125rem;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--warn)}
+.msg.bad{border-color:var(--danger-line);background:var(--danger-bg);color:var(--danger)}
+.msg:empty{display:none}
+.pill{display:inline-block;font-size:.6875rem;font-weight:600;padding:.1rem .5rem;border-radius:999px;background:var(--chip);color:var(--muted);border:1px solid var(--line)}
+.pill.ok{color:var(--ok)} .pill.bad{color:var(--danger)}
+table.t{width:100%;border-collapse:collapse;font-size:.8125rem}
+table.t th,table.t td{text-align:left;padding:.35rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+table.t th{font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+table.t td.m,.mono{font-family:var(--mono-font)}
+.scroll{overflow:auto}
+.toast{position:fixed;left:50%;bottom:1.25rem;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.45rem .9rem;border-radius:999px;font-size:.8125rem;opacity:0;pointer-events:none;transition:opacity .15s;z-index:50}
+.toast.show{opacity:1}
+.drop{border:2px dashed var(--line-2);border-radius:12px;padding:1.4rem;text-align:center;color:var(--muted);background:var(--surface-2);cursor:pointer}
+.drop.over,.drop:hover{border-color:var(--accent);color:var(--ink)}
+kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:6px;padding:.05rem .4rem}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important}}
+
+
+.srcrow{display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-start}
+.drop{border:2px dashed var(--line-2);border-radius:12px;padding:1rem;text-align:center;background:var(--surface-2);color:var(--muted);cursor:pointer;min-width:220px;flex:1 1 220px}
+.drop.over,.drop:focus-visible{border-color:var(--accent);color:var(--ink);outline:none}
+.drop b{color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.8rem}
+.ic{border:1px solid var(--line);border-radius:12px;padding:.7rem;background:var(--surface-2);display:grid;gap:.4rem;justify-items:center;text-align:center;font-size:.75rem}
+.ic canvas{max-width:100%;image-rendering:auto;background:repeating-conic-gradient(var(--line) 0 25%,transparent 0 50%) 0 0/10px 10px;border-radius:6px}
+.ic b{font-size:.8125rem;overflow-wrap:anywhere}
+.ic span{color:var(--muted)}
+.tab{display:flex;align-items:center;gap:.5rem;border:1px solid var(--line-2);border-radius:10px 10px 0 0;padding:.4rem .8rem;width:240px;background:var(--surface);font-size:.8125rem}
+.tab canvas{width:16px;height:16px;flex:none}
+.sw{display:flex;gap:.6rem;align-items:center}
+.mask{position:relative}
+.mask::after{content:"";position:absolute;inset:10%;border:1px dashed color-mix(in srgb,var(--accent) 70%,transparent);border-radius:50%;pointer-events:none}
+.pill:empty{display:none}
+
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="top"><h1>Favicon & App Icon Generator</h1><a class="back" href="../tools/">&larr; All tools</a></div>
+  <p>Start from an image, an SVG or a single letter, tune the background and padding, and download the full icon set with the manifest and link tags. Nothing is uploaded.</p>
+</header>
+<main class="wrap">
+
+<section class="card" aria-labelledby="h-src">
+  <h2 id="h-src">Source</h2>
+  <div class="srcrow">
+    <div class="field"><span class="lbl">Start from</span>
+      <div class="seg" id="mode" role="group" aria-label="Source type"><button data-m="text" aria-pressed="true">Letter or emoji</button><button data-m="img" aria-pressed="false">Image</button></div></div>
+    <div id="m-text" class="row">
+      <div class="field" style="width:6rem"><label class="lbl" for="t">Text</label><input type="text" id="t" maxlength="3" value="B"></div>
+      <div class="field"><label class="lbl" for="tc">Text color</label><input type="color" id="tc" value="#ffffff"></div>
+      <div class="field"><label class="lbl" for="tf">Font</label><select id="tf"><option value="sans">Sans</option><option value="serif">Serif</option><option value="mono">Mono</option></select></div>
+    </div>
+    <div id="m-img" class="drop" tabindex="0" role="button" aria-label="Choose an image" hidden><b>Drop an image</b> or click to choose<br><span id="fname">PNG, JPG, WebP or SVG. Square works best, 512px or larger.</span></div>
+    <input type="file" id="file" accept="image/*" hidden>
+  </div>
+</section>
+<section class="card" aria-labelledby="h-set">
+  <h2 id="h-set">Style</h2>
+  <div class="row">
+    <div class="field"><label class="lbl" for="bg">Background</label><div class="sw"><input type="color" id="bg" value="#1f4eb4"><label class="chk"><input type="checkbox" id="bgon" checked> Fill</label></div></div>
+    <div class="field grow"><label class="lbl" for="pad">Padding <span class="sz" id="padv"></span></label><input type="range" id="pad" min="0" max="40" value="12"></div>
+    <div class="field grow"><label class="lbl" for="rad">Corner radius <span class="sz" id="radv"></span></label><input type="range" id="rad" min="0" max="50" value="22"></div>
+  </div>
+  <div class="row" style="margin-top:.8rem">
+    <div class="field grow"><label class="lbl" for="name">App name</label><input type="text" id="name" value="My Site"></div>
+    <div class="field"><label class="lbl" for="theme">Theme color</label><input type="color" id="theme" value="#1f4eb4"></div>
+    <div class="field grow"><label class="lbl" for="pre">Path prefix in tags</label><input type="text" id="pre" value="/" spellcheck="false"></div>
+  </div>
+  <p class="note" style="margin:.7rem 0 0">The Apple touch icon and the maskable icon are always filled, because iOS and Android crop and fill transparent areas on their own. The maskable icon keeps your artwork inside the safe zone, the dashed circle.</p>
+</section>
+<section class="card" aria-labelledby="h-pv">
+  <h2 id="h-pv">Icons <span class="pill" id="cnt" style="margin-left:.4rem"></span></h2>
+  <div class="row center" style="margin-bottom:.8rem"><div class="tab" aria-label="Browser tab preview"><canvas id="tabc" width="16" height="16"></canvas><span id="tabt">My Site</span></div></div>
+  <div class="grid" id="grid"></div>
+  <div class="row" style="margin-top:.8rem"><button class="primary" id="zip">Download all (.zip)</button></div>
+</section>
+<section class="card" aria-labelledby="h-code">
+  <h2 id="h-code">Add to your site</h2>
+  <label class="lbl" for="tags">Put in &lt;head&gt;</label>
+  <textarea id="tags" rows="8" readonly spellcheck="false"></textarea>
+  <div class="row" style="margin:.5rem 0 .9rem"><button class="copy" data-copy-from="tags">Copy tags</button></div>
+  <label class="lbl" for="mf">site.webmanifest</label>
+  <textarea id="mf" rows="14" readonly spellcheck="false"></textarea>
+  <div class="row" style="margin-top:.5rem"><button class="copy" data-copy-from="mf">Copy manifest</button></div>
+  <p class="note">Place the files at the site root, or in a folder and set the path prefix to match. On a GitHub project site, the prefix is your repository name, for example /my-repo/.</p>
+</section>
+
+
+</main>
+<script>
+const TOOL="favicon-generator";
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
+const store={
+  get(k,d){try{const v=localStorage.getItem('bc:'+TOOL+':'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('bc:'+TOOL+':'+k,JSON.stringify(v))}catch(e){}}
+};
+let _toastT;
+function toast(msg){let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}
+  t.textContent=msg;t.classList.add('show');clearTimeout(_toastT);_toastT=setTimeout(()=>t.classList.remove('show'),1400)}
+async function copyText(text,label){
+  try{await navigator.clipboard.writeText(text)}catch(e){
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy')}catch(_){}ta.remove()}
+  toast((label||'Copied')+' to clipboard')}
+function download(name,data,type){
+  const blob=data instanceof Blob?data:new Blob([data],{type:type||'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+document.addEventListener('click',e=>{const b=e.target.closest('button.copy[data-copy-from]');
+  if(b){const el=document.getElementById(b.dataset.copyFrom);if(el)copyText(el.value!==undefined&&el.tagName==='TEXTAREA'?el.value:el.textContent)}});
+
+
+const _crcT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=_crcT[(c^u8[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+/* Minimal ZIP writer (stored, no compression). files: [{name, data:Uint8Array}] */
+function makeZip(files){
+  const enc=new TextEncoder(),parts=[],central=[];let offset=0;
+  const d=new Date(),dt=((d.getFullYear()-1980)<<9|(d.getMonth()+1)<<5|d.getDate())&0xFFFF,tm=(d.getHours()<<11|d.getMinutes()<<5|(d.getSeconds()>>1))&0xFFFF;
+  for(const f of files){
+    const name=enc.encode(f.name),crc=crc32(f.data),size=f.data.length;
+    const lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(8,0,true);
+    lh.setUint16(10,tm,true);lh.setUint16(12,dt,true);lh.setUint32(14,crc,true);lh.setUint32(18,size,true);lh.setUint32(22,size,true);
+    lh.setUint16(26,name.length,true);lh.setUint16(28,0,true);
+    parts.push(new Uint8Array(lh.buffer),name,f.data);
+    const ch=new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(10,0,true);
+    ch.setUint16(12,tm,true);ch.setUint16(14,dt,true);ch.setUint32(16,crc,true);ch.setUint32(20,size,true);ch.setUint32(24,size,true);
+    ch.setUint16(28,name.length,true);ch.setUint32(42,offset,true);
+    central.push(new Uint8Array(ch.buffer),name);
+    offset+=30+name.length+size}
+  const cdSize=central.reduce((n,p)=>n+p.length,0);
+  const end=new DataView(new ArrayBuffer(22));
+  end.setUint32(0,0x06054b50,true);end.setUint16(8,files.length,true);end.setUint16(10,files.length,true);end.setUint32(12,cdSize,true);end.setUint32(16,offset,true);
+  return new Blob([...parts,...central,new Uint8Array(end.buffer)],{type:'application/zip'})}
+
+</script>
+<script>
+
+(() => {
+  const $v = id => $('#' + id).value;
+  const S = { mode: store.get('mode', 'text'), svgText: null };
+  let img = null, svgBlob = null;
+  const FONTS = { sans: '"Helvetica Neue",Helvetica,Arial,sans-serif', serif: 'Georgia,"Times New Roman",serif', mono: '"JetBrains Mono",ui-monospace,Menlo,monospace' };
+  const SPEC = [
+    { f: 'favicon-16x16.png', s: 16, d: 'Browser tab, legacy', t: 'png' },
+    { f: 'favicon-32x32.png', s: 32, d: 'Browser tab, retina', t: 'png' },
+    { f: 'favicon.ico', s: 48, d: 'ICO with 16, 32, 48', t: 'ico' },
+    { f: 'apple-touch-icon.png', s: 180, d: 'iOS home screen', t: 'png', fill: true },
+    { f: 'android-chrome-192x192.png', s: 192, d: 'Android, PWA', t: 'png' },
+    { f: 'android-chrome-512x512.png', s: 512, d: 'Android splash, PWA', t: 'png' },
+    { f: 'maskable-512x512.png', s: 512, d: 'Maskable PWA icon', t: 'png', mask: true, fill: true }
+  ];
+
+  function paint(size, o = {}) {
+    const c = document.createElement('canvas'); c.width = c.height = size; const x = c.getContext('2d');
+    const fill = $('#bgon').checked || o.fill, bg = $v('bg');
+    const pad = o.mask ? 0.2 : (+$v('pad') / 100);            // safe zone: 80% circle -> keep content in the inner 60-ish percent
+    const rad = (o.mask || o.fill && o.sq) ? 0 : (+$v('rad') / 100) * size;
+    const r = o.apple ? 0 : rad;
+    if (fill) {
+      x.fillStyle = bg; x.beginPath();
+      if (r > 0) x.roundRect(0, 0, size, size, r); else x.rect(0, 0, size, size);
+      x.fill();
+    }
+    const inner = size * (1 - 2 * pad), off = size * pad;
+    if (S.mode === 'img' && img) {
+      const iw = img.naturalWidth || 512, ih = img.naturalHeight || 512, k = Math.min(inner / iw, inner / ih), w = iw * k, h = ih * k;
+      x.imageSmoothingQuality = 'high'; x.drawImage(img, off + (inner - w) / 2, off + (inner - h) / 2, w, h);
+    } else {
+      const t = $v('t') || 'B'; const fs = inner * (t.length > 1 ? (/\p{Extended_Pictographic}/u.test(t) ? 0.8 : 0.72 / Math.max(1, t.length * 0.62)) : 0.82);
+      x.fillStyle = $v('tc'); x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+      x.font = (/\p{Extended_Pictographic}/u.test(t) ? '' : '700 ') + fs + 'px ' + FONTS[$v('tf')];
+      const m = x.measureText(t), asc = m.actualBoundingBoxAscent || fs * .7, desc = m.actualBoundingBoxDescent || 0;
+      x.fillText(t, size / 2, size / 2 + (asc - desc) / 2);
+    }
+    return c;
+  }
+  const spec = s => paint(s.s, { fill: s.fill, mask: s.mask, apple: s.f.startsWith('apple') });
+  const toBlob = c => new Promise(r => c.toBlob(r, 'image/png'));
+
+  async function makeIco() {
+    const sizes = [16, 32, 48], pngs = [];
+    for (const s of sizes) pngs.push(new Uint8Array(await (await toBlob(paint(s))).arrayBuffer()));
+    const hdr = 6 + 16 * sizes.length, total = hdr + pngs.reduce((a, p) => a + p.length, 0), buf = new Uint8Array(total), dv = new DataView(buf.buffer);
+    dv.setUint16(2, 1, true); dv.setUint16(4, sizes.length, true);
+    let off = hdr;
+    sizes.forEach((s, i) => { const e = 6 + i * 16; buf[e] = s; buf[e + 1] = s; dv.setUint16(e + 4, 1, true); dv.setUint16(e + 6, 32, true); dv.setUint32(e + 8, pngs[i].length, true); dv.setUint32(e + 12, off, true); buf.set(pngs[i], off); off += pngs[i].length; });
+    return buf;
+  }
+
+  async function files() {
+    const out = [];
+    for (const s of SPEC) {
+      if (s.t === 'ico') out.push({ name: s.f, data: await makeIco() });
+      else out.push({ name: s.f, data: new Uint8Array(await (await toBlob(spec(s))).arrayBuffer()) });
+    }
+    const enc = new TextEncoder();
+    if (svgBlob) out.push({ name: 'favicon.svg', data: new Uint8Array(await svgBlob.arrayBuffer()) });
+    out.push({ name: 'site.webmanifest', data: enc.encode($('#mf').value + '\n') });
+    return out;
+  }
+
+  function prefix() { let p = ($v('pre') || '/').trim(); if (!p.startsWith('/')) p = '/' + p; if (!p.endsWith('/')) p += '/'; return p; }
+  function code() {
+    const p = prefix(), L = [];
+    L.push('<link rel="icon" href="' + p + 'favicon.ico" sizes="48x48">');
+    if (svgBlob) L.push('<link rel="icon" href="' + p + 'favicon.svg" type="image/svg+xml">');
+    L.push('<link rel="icon" type="image/png" sizes="32x32" href="' + p + 'favicon-32x32.png">');
+    L.push('<link rel="icon" type="image/png" sizes="16x16" href="' + p + 'favicon-16x16.png">');
+    L.push('<link rel="apple-touch-icon" sizes="180x180" href="' + p + 'apple-touch-icon.png">');
+    L.push('<link rel="manifest" href="' + p + 'site.webmanifest">');
+    L.push('<meta name="theme-color" content="' + $v('theme') + '">');
+    $('#tags').value = L.join('\n');
+    const nm = $v('name') || 'My Site';
+    $('#mf').value = JSON.stringify({
+      name: nm, short_name: nm.length > 12 ? nm.slice(0, 12).trim() : nm,
+      icons: [
+        { src: p + 'android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+        { src: p + 'android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
+        { src: p + 'maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }],
+      theme_color: $v('theme'), background_color: $('#bgon').checked ? $v('bg') : '#ffffff', display: 'standalone', start_url: p
+    }, null, 2);
+  }
+
+  let tick = 0;
+  function render() {
+    const my = ++tick, g = $('#grid'); g.innerHTML = '';
+    SPEC.forEach(s => {
+      const c = s.t === 'ico' ? paint(48) : spec(s), cell = document.createElement('div'); cell.className = 'ic' + (s.mask ? ' mask-cell' : '');
+      const show = document.createElement('div'); show.className = s.mask ? 'mask' : ''; const shown = document.createElement('canvas'); const d = Math.min(96, Math.max(s.s, 32)); shown.width = shown.height = d; shown.getContext('2d').drawImage(c, 0, 0, d, d); show.appendChild(shown); cell.appendChild(show);
+      cell.insertAdjacentHTML('beforeend', '<b>' + esc(s.f) + '</b><span>' + s.s + '×' + s.s + ' · ' + esc(s.d) + '</span>'); g.appendChild(cell);
+    });
+    if (svgBlob) g.insertAdjacentHTML('beforeend', '<div class="ic"><b>favicon.svg</b><span>Your SVG, unchanged</span></div>');
+    const t = $('#tabc').getContext('2d'); t.clearRect(0, 0, 16, 16); t.drawImage(paint(16), 0, 0);
+    $('#tabt').textContent = $v('name') || 'My Site';
+    $('#padv').textContent = $v('pad') + '%'; $('#radv').textContent = $v('rad') + '%';
+    $('#cnt').textContent = (SPEC.length + (svgBlob ? 1 : 0) + 1) + ' files';
+    code();
+  }
+  const ids = ['t', 'tc', 'tf', 'bg', 'bgon', 'pad', 'rad', 'name', 'theme', 'pre'];
+  ids.forEach(id => { const el = $('#' + id); const v = store.get(id, null); if (v !== null) { if (el.type === 'checkbox') el.checked = v; else el.value = v; } });
+  ids.forEach(id => $('#' + id).addEventListener('input', e => { const el = e.target; store.set(id, el.type === 'checkbox' ? el.checked : el.value); render(); }));
+
+  function setMode(m) {
+    S.mode = m; store.set('mode', m);
+    $$('#mode button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === m)));
+    $('#m-text').hidden = m !== 'text'; $('#m-img').hidden = m !== 'img'; render();
+  }
+  $('#mode').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.m); });
+
+  function loadFile(f) {
+    if (!f || !f.type.startsWith('image/')) return;
+    const url = URL.createObjectURL(f), im = new Image();
+    im.onload = () => { img = im; svgBlob = f.type === 'image/svg+xml' ? f : null; $('#fname').textContent = f.name; setMode('img'); };
+    im.onerror = () => toast('Could not read that image');
+    im.src = url;
+  }
+  const dz = $('#m-img'), fi = $('#file');
+  dz.addEventListener('click', () => fi.click());
+  dz.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fi.click(); } });
+  fi.addEventListener('change', () => { loadFile(fi.files[0]); fi.value = ''; });
+  ['dragenter', 'dragover'].forEach(n => dz.addEventListener(n, e => { e.preventDefault(); dz.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(n => dz.addEventListener(n, e => { e.preventDefault(); dz.classList.remove('over'); }));
+  dz.addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
+  document.addEventListener('paste', e => { const f = e.clipboardData?.files?.[0]; if (f) loadFile(f); });
+  $('#zip').addEventListener('click', async () => download('favicons.zip', makeZip(await files())));
+
+  setMode(S.mode === 'img' ? 'text' : S.mode);   // an uploaded image is not persisted
+})();
+
+</script>
+</body>
+</html>

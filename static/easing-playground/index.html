@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Edit cubic-bezier easing curves by dragging handles, design spring easings as CSS linear() functions, preview the motion live, and copy transition or keyframe CSS. Runs in the browser.">
+<link rel="icon" href="data:,">
+<title>Easing & Animation Playground</title>
+<style>
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:100 800;font-display:swap;src:url("../fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2")}
+
+:root{
+  color-scheme: light dark;
+  --bg:#e9eaed; --surface:#f7f7f9; --surface-2:#ffffff;
+  --ink:#1d2126; --muted:#5b6068; --line:#d6d7dc; --line-2:#bfc2ca; --chip:#ececf0;
+  --accent:#2f6db3; --accent-strong:#26598f; --accent-ink:#ffffff;
+  --ok:#2e7d4f; --danger:#8f2d23; --danger-bg:#fdeeee; --danger-line:#efc2c2;
+  --warn:#7a4b00; --warn-bg:#fff4dc; --warn-line:#e8c98a;
+  --shadow:0 1px 2px rgba(24,28,38,.05),0 10px 28px rgba(24,28,38,.07);
+  --ui-font:"Outfit",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono-font:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#222329;
+    --ink:#eceef2; --muted:#a2a6af; --line:#2d2f36; --line-2:#3d404a; --chip:#26272e;
+    --accent:#7db0e6; --accent-strong:#9cc3ee; --accent-ink:#0d1724;
+    --ok:#6fce97; --danger:#f0a9a0; --danger-bg:#3a2120; --danger-line:#6e3a36;
+    --warn:#fdd663; --warn-bg:#352c12; --warn-line:#6b5a22;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--ui-font);font-size:15px;line-height:1.45;background:var(--bg);color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+a{color:var(--accent-strong)}
+header.site{padding:1rem 1.25rem;background:var(--surface);border-bottom:1px solid var(--line)}
+header.site .top{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+header.site h1{margin:0;font-size:1.35rem;font-weight:600;line-height:1.2}
+header.site .back{font-size:.8125rem;color:var(--muted);text-decoration:none}
+header.site .back:hover{color:var(--accent-strong);text-decoration:underline}
+header.site p{margin:.35rem 0 0;color:var(--muted);max-width:60rem}
+main.wrap{max-width:1180px;margin:0 auto;padding:1rem 1.25rem 3rem;display:grid;gap:1rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:1rem}
+.card>h2,.lbl{margin:0 0 .6rem;font-size:.6875rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.lbl{display:block;margin:0 0 .25rem}
+.cols{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end}
+.row.center{align-items:center}
+.field{display:flex;flex-direction:column;gap:.15rem;min-width:0}
+.field.grow{flex:1 1 180px}
+input[type=text],input[type=number],input[type=search],input[type=url],input[type=date],select,textarea{
+  font:inherit;font-size:.875rem;color:var(--ink);background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:.4rem .6rem;min-width:0;width:100%}
+input[type=number]{font-family:var(--mono-font);font-size:.8125rem}
+textarea{font-family:var(--mono-font);font-size:.8125rem;line-height:1.5;resize:vertical;tab-size:2}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+input[type=color]{width:2.4rem;height:2rem;padding:0;border:1px solid var(--line-2);border-radius:8px;background:none;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:1rem;height:1rem;margin:0}
+label.chk{display:inline-flex;gap:.4rem;align-items:center;font-size:.875rem;cursor:pointer}
+button,.btn{font:inherit;font-size:.875rem;padding:.4rem .85rem;border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink);border-radius:999px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;line-height:1.2}
+button:hover,.btn:hover{border-color:var(--accent)}
+button.primary,.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+button.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.sm{padding:.2rem .6rem;font-size:.75rem}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden;background:var(--surface-2)}
+.seg button{border:0;border-radius:0;background:transparent;padding:.35rem .8rem}
+.seg button[aria-pressed=true],.seg button[aria-selected=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.out{position:relative;margin:0;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:.75rem 3.6rem .75rem .85rem;font-family:var(--mono-font);font-size:.8125rem;line-height:1.55;white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:26rem}
+.out>button.copy{position:absolute;top:.4rem;right:.4rem}
+.note{font-size:.8125rem;color:var(--muted);margin:.5rem 0 0}
+.msg{border-radius:9px;padding:.5rem .75rem;font-size:.8125rem;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--warn)}
+.msg.bad{border-color:var(--danger-line);background:var(--danger-bg);color:var(--danger)}
+.msg:empty{display:none}
+.pill{display:inline-block;font-size:.6875rem;font-weight:600;padding:.1rem .5rem;border-radius:999px;background:var(--chip);color:var(--muted);border:1px solid var(--line)}
+.pill.ok{color:var(--ok)} .pill.bad{color:var(--danger)}
+table.t{width:100%;border-collapse:collapse;font-size:.8125rem}
+table.t th,table.t td{text-align:left;padding:.35rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+table.t th{font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+table.t td.m,.mono{font-family:var(--mono-font)}
+.scroll{overflow:auto}
+.toast{position:fixed;left:50%;bottom:1.25rem;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.45rem .9rem;border-radius:999px;font-size:.8125rem;opacity:0;pointer-events:none;transition:opacity .15s;z-index:50}
+.toast.show{opacity:1}
+.drop{border:2px dashed var(--line-2);border-radius:12px;padding:1.4rem;text-align:center;color:var(--muted);background:var(--surface-2);cursor:pointer}
+.drop.over,.drop:hover{border-color:var(--accent);color:var(--ink)}
+kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:6px;padding:.05rem .4rem}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important}}
+
+
+#e-svg{width:100%;max-width:420px;height:auto;display:block;touch-action:none;user-select:none}
+#e-svg text{font-family:var(--mono-font);font-size:10px;fill:var(--muted)}
+.hd{cursor:grab;stroke:var(--surface);stroke-width:2}
+.hd:focus-visible{outline:none;stroke:var(--ink);stroke-width:3}
+.hd:active{cursor:grabbing}
+.track{position:relative;height:3.2rem;border-radius:12px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.track .lab{position:absolute;left:.6rem;top:.2rem;font-size:.6875rem;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.track .ball{position:absolute;left:8px;top:1.25rem;width:1.6rem;height:1.6rem;border-radius:50%}
+.track .ball.a{background:var(--accent)} .track .ball.b{background:var(--line-2)}
+.track.box .ball{border-radius:8px}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem}
+.chips button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="top"><h1>Easing & Animation Playground</h1><a class="back" href="../tools/">&larr; All tools</a></div>
+  <p>Drag the curve handles (or type the numbers), compare the motion against a linear baseline, and copy a ready-to-use easing, transition or keyframe animation.</p>
+</header>
+<main class="wrap">
+
+<div class="cols" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr))">
+  <section class="card" aria-labelledby="h-curve">
+    <h2 id="h-curve">Curve</h2>
+    <div class="seg" role="group" aria-label="Easing type" style="margin-bottom:.7rem">
+      <button id="m-bez" aria-pressed="true">Cubic B&eacute;zier</button>
+      <button id="m-spr" aria-pressed="false">Spring (linear())</button>
+    </div>
+    <svg id="e-svg" viewBox="0 0 340 340" role="group" aria-label="Easing curve editor"></svg>
+    <div id="bez-ui">
+      <div class="nums" style="margin-top:.6rem">
+        <div class="field"><label class="lbl" for="n-x1">x1</label><input id="n-x1" type="number" step="0.01" min="0" max="1"></div>
+        <div class="field"><label class="lbl" for="n-y1">y1</label><input id="n-y1" type="number" step="0.01"></div>
+        <div class="field"><label class="lbl" for="n-x2">x2</label><input id="n-x2" type="number" step="0.01" min="0" max="1"></div>
+        <div class="field"><label class="lbl" for="n-y2">y2</label><input id="n-y2" type="number" step="0.01"></div>
+      </div>
+      <span class="lbl" style="margin-top:.8rem">Presets</span>
+      <div class="chips" id="presets"></div>
+      <p class="note">With a handle focused, arrow keys nudge by 0.01 (hold Shift for 0.1). x must stay between 0 and 1; y may overshoot.</p>
+    </div>
+    <div id="spr-ui" hidden style="display:grid;gap:.4rem;margin-top:.8rem">
+      <div class="row center"><label class="lbl" for="s-z" style="margin:0;width:8rem">Damping ratio: <span id="s-zv"></span></label><input id="s-z" type="range" min="0.05" max="1" step="0.01" value="0.4" style="flex:1"></div>
+      <div class="row center"><label class="lbl" for="s-f" style="margin:0;width:8rem">Frequency: <span id="s-fv"></span></label><input id="s-f" type="range" min="0.5" max="4" step="0.05" value="1.6" style="flex:1"></div>
+      <p class="note">Lower damping gives more bounce. 1 is critically damped (no overshoot). The suggested duration is when the motion has settled to within 0.1%.</p>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="h-prev">
+    <h2 id="h-prev">Preview</h2>
+    <div class="row center">
+      <button id="p-play" class="primary">Pause</button>
+      <div class="field"><label class="lbl" for="p-prop">Animate</label>
+        <select id="p-prop"><option value="move">Move</option><option value="scale">Scale</option><option value="rotate">Rotate</option><option value="fade">Fade</option></select></div>
+      <div class="field grow"><label class="lbl" for="p-dur">Duration: <span id="p-durv"></span></label><input id="p-dur" type="range" min="150" max="3000" step="50" value="900"></div>
+    </div>
+    <div id="p-msg" class="msg" style="margin-top:.6rem"></div>
+    <div style="display:grid;gap:.6rem;margin-top:.8rem">
+      <div class="track"><span class="lab">Your easing</span><div class="ball a" id="b-a"></div></div>
+      <div class="track"><span class="lab">linear</span><div class="ball b" id="b-b"></div></div>
+    </div>
+    <p class="note">Easings and springs that overshoot move the box slightly past the ends of the track. That is expected.</p>
+  </section>
+</div>
+
+<section class="card" aria-labelledby="h-out">
+  <h2 id="h-out">CSS</h2>
+  <pre class="out"><button class="copy sm" data-copy-from="o-txt">Copy</button><span id="o-txt"></span></pre>
+</section>
+
+
+</main>
+<script>
+const TOOL="easing-playground";
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
+const store={
+  get(k,d){try{const v=localStorage.getItem('bc:'+TOOL+':'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('bc:'+TOOL+':'+k,JSON.stringify(v))}catch(e){}}
+};
+let _toastT;
+function toast(msg){let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}
+  t.textContent=msg;t.classList.add('show');clearTimeout(_toastT);_toastT=setTimeout(()=>t.classList.remove('show'),1400)}
+async function copyText(text,label){
+  try{await navigator.clipboard.writeText(text)}catch(e){
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy')}catch(_){}ta.remove()}
+  toast((label||'Copied')+' to clipboard')}
+function download(name,data,type){
+  const blob=data instanceof Blob?data:new Blob([data],{type:type||'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+document.addEventListener('click',e=>{const b=e.target.closest('button.copy[data-copy-from]');
+  if(b){const el=document.getElementById(b.dataset.copyFrom);if(el)copyText(el.value!==undefined&&el.tagName==='TEXTAREA'?el.value:el.textContent)}});
+
+
+</script>
+<script>
+
+(() => {
+  const NS = 'http://www.w3.org/2000/svg';
+  const NAMED = [
+    ['linear', 0, 0, 1, 1], ['ease', .25, .1, .25, 1], ['ease-in', .42, 0, 1, 1], ['ease-out', 0, 0, .58, 1], ['ease-in-out', .42, 0, .58, 1],
+    ['easeInSine', .12, 0, .39, 0], ['easeOutSine', .61, 1, .88, 1], ['easeInOutSine', .37, 0, .63, 1],
+    ['easeInQuad', .11, 0, .5, 0], ['easeOutQuad', .5, 1, .89, 1], ['easeInOutQuad', .45, 0, .55, 1],
+    ['easeInCubic', .32, 0, .67, 0], ['easeOutCubic', .33, 1, .68, 1], ['easeInOutCubic', .65, 0, .35, 1],
+    ['easeInQuart', .5, 0, .75, 0], ['easeOutQuart', .25, 1, .5, 1], ['easeInOutQuart', .76, 0, .24, 1],
+    ['easeInQuint', .64, 0, .78, 0], ['easeOutQuint', .22, 1, .36, 1], ['easeInOutQuint', .83, 0, .17, 1],
+    ['easeInExpo', .7, 0, .84, 0], ['easeOutExpo', .16, 1, .3, 1], ['easeInOutExpo', .87, 0, .13, 1],
+    ['easeInCirc', .55, 0, 1, .45], ['easeOutCirc', 0, .55, .45, 1], ['easeInOutCirc', .85, 0, .15, 1],
+    ['easeInBack', .36, 0, .66, -.56], ['easeOutBack', .34, 1.56, .64, 1], ['easeInOutBack', .68, -.6, .32, 1.6]
+  ];
+  const st = store.get('st', null) || { mode: 'bez', p: [0.34, 1.56, 0.64, 1], z: 0.4, f: 1.6, dur: 900, prop: 'move', play: true };
+  const PAD = 40, SZ = 260, YMIN = -0.5, YMAX = 1.5;
+  const X = v => PAD + v * SZ, Y = v => PAD + (YMAX - v) / (YMAX - YMIN) * SZ;
+  const svg = $('#e-svg');
+  const r2 = n => Math.round(n * 100) / 100;
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) st.play = false;
+
+  /* ---- spring samples -> linear() ---- */
+  function spring() {
+    const z = st.z, w = 2 * Math.PI * st.f;
+    const f = t => z >= 1 ? 1 - Math.exp(-w * t) * (1 + w * t)
+      : (wd => 1 - Math.exp(-z * w * t) * (Math.cos(wd * t) + (z * w / wd) * Math.sin(wd * t)))(w * Math.sqrt(1 - z * z));
+    const T = Math.min(4, Math.log(1000) / (z * w) * (z >= 1 ? 1.6 : 1)); // settle time (s)
+    const N = 40, pts = [];
+    for (let i = 0; i <= N; i++) pts.push(i === N ? 1 : Math.round(f(T * i / N) * 1000) / 1000);
+    pts[0] = 0;
+    return { T, pts, css: 'linear(' + pts.join(', ') + ')' };
+  }
+  const cur = () => st.mode === 'bez' ? 'cubic-bezier(' + st.p.map(r2).join(', ') + ')' : spring().css;
+
+  /* ---- editor drawing ---- */
+  function el(n, a, parent) { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); (parent || svg).appendChild(e); return e; }
+  function draw() {
+    svg.innerHTML = '';
+    const line = (x1, y1, x2, y2, c, w, dash) => el('line', { x1, y1, x2, y2, stroke: c, 'stroke-width': w || 1, 'stroke-dasharray': dash || '' });
+    el('rect', { x: PAD, y: PAD, width: SZ, height: SZ, fill: 'var(--surface-2)', stroke: 'var(--line)' });
+    [0, 0.25, 0.5, 0.75, 1].forEach(v => { line(X(v), PAD, X(v), PAD + SZ, 'var(--line)', 1); });
+    [-0.5, 0, 0.5, 1, 1.5].forEach(v => { line(PAD, Y(v), PAD + SZ, Y(v), v === 0 || v === 1 ? 'var(--line-2)' : 'var(--line)', 1); });
+    el('text', { x: PAD - 6, y: Y(0) + 3, 'text-anchor': 'end' }).textContent = '0';
+    el('text', { x: PAD - 6, y: Y(1) + 3, 'text-anchor': 'end' }).textContent = '1';
+    el('text', { x: X(0), y: PAD + SZ + 14, 'text-anchor': 'middle' }).textContent = 'time 0';
+    el('text', { x: X(1), y: PAD + SZ + 14, 'text-anchor': 'middle' }).textContent = '1';
+    line(X(0), Y(0), X(1), Y(1), 'var(--line-2)', 1, '4 4');
+    if (st.mode === 'bez') {
+      const [x1, y1, x2, y2] = st.p;
+      line(X(0), Y(0), X(x1), Y(y1), 'var(--muted)', 1.5); line(X(1), Y(1), X(x2), Y(y2), 'var(--muted)', 1.5);
+      el('path', { d: 'M' + X(0) + ' ' + Y(0) + ' C' + X(x1) + ' ' + Y(y1) + ' ' + X(x2) + ' ' + Y(y2) + ' ' + X(1) + ' ' + Y(1), fill: 'none', stroke: 'var(--accent)', 'stroke-width': 3, 'stroke-linecap': 'round' });
+      [[0, 'Control point 1'], [1, 'Control point 2']].forEach(([i, lab]) => {
+        const h = el('circle', { class: 'hd', cx: X(st.p[i * 2]), cy: Y(st.p[i * 2 + 1]), r: 9, fill: i ? '#c0392b' : '#8b5cf6', tabindex: 0, role: 'slider', 'aria-label': lab + ' (use the number fields for exact values)', 'data-i': i });
+      });
+    } else {
+      const s = spring(); let d = '';
+      s.pts.forEach((v, i) => { d += (i ? 'L' : 'M') + X(i / (s.pts.length - 1)) + ' ' + Y(clamp(v, YMIN, YMAX)) + ' '; });
+      el('path', { d, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 3, 'stroke-linejoin': 'round' });
+    }
+  }
+  function drag(e) {
+    const h = e.target.closest('.hd'); if (!h) return; e.preventDefault();
+    const i = +h.dataset.i;
+    const mv = ev => {
+      const r = svg.getBoundingClientRect(), sx = 340 / r.width;
+      const px = (ev.clientX - r.left) * sx, py = (ev.clientY - r.top) * sx;
+      st.p[i * 2] = clamp(r2((px - PAD) / SZ), 0, 1);
+      st.p[i * 2 + 1] = clamp(r2(YMAX - (py - PAD) / SZ * (YMAX - YMIN)), -1.5, 2.5);
+      sync(true);
+    };
+    const up = () => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', up); document.removeEventListener('pointercancel', up); };
+    document.addEventListener('pointermove', mv); document.addEventListener('pointerup', up); document.addEventListener('pointercancel', up);
+  }
+  svg.addEventListener('pointerdown', drag);
+  svg.addEventListener('keydown', e => {
+    const h = e.target.closest('.hd'); if (!h) return; const i = +h.dataset.i, step = e.shiftKey ? 0.1 : 0.01;
+    const m = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] }[e.key]; if (!m) return; e.preventDefault();
+    st.p[i * 2] = clamp(r2(st.p[i * 2] + m[0]), 0, 1); st.p[i * 2 + 1] = clamp(r2(st.p[i * 2 + 1] + m[1]), -1.5, 2.5);
+    sync(true); const nh = $$('.hd')[i]; if (nh) nh.focus();
+  });
+
+  /* ---- numbers / presets ---- */
+  const nIds = ['#n-x1', '#n-y1', '#n-x2', '#n-y2'];
+  nIds.forEach((id, k) => $(id).addEventListener('input', e => {
+    let v = parseFloat(e.target.value); if (isNaN(v)) return;
+    st.p[k] = (k % 2 === 0) ? clamp(v, 0, 1) : clamp(v, -3, 4); sync(true, true);
+  }));
+  $('#presets').innerHTML = NAMED.map((n, i) => '<button class="sm" data-n="' + i + '" aria-pressed="false">' + n[0] + '</button>').join('');
+  $('#presets').addEventListener('click', e => { const b = e.target.closest('[data-n]'); if (!b) return; st.p = NAMED[+b.dataset.n].slice(1); sync(); });
+
+  /* ---- mode ---- */
+  function setMode(m) { st.mode = m; $('#m-bez').setAttribute('aria-pressed', m === 'bez'); $('#m-spr').setAttribute('aria-pressed', m === 'spr'); $('#bez-ui').hidden = m !== 'bez'; $('#spr-ui').hidden = m !== 'spr'; sync(); }
+  $('#m-bez').addEventListener('click', () => setMode('bez')); $('#m-spr').addEventListener('click', () => setMode('spr'));
+  $('#s-z').addEventListener('input', e => { st.z = +e.target.value; sync(); });
+  $('#s-f').addEventListener('input', e => { st.f = +e.target.value; sync(); });
+
+  /* ---- preview animation ---- */
+  let anims = [];
+  const duration = () => st.mode === 'spr' ? Math.round(spring().T * 1000) : st.dur;
+  function frames() {
+    const track = $('#b-a').parentElement.clientWidth - 8 - 26 - 8;
+    switch (st.prop) {
+      case 'move': return [{ transform: 'translateX(0px)' }, { transform: 'translateX(' + Math.max(40, track) + 'px)' }];
+      case 'scale': return [{ transform: 'scale(0.6)' }, { transform: 'scale(1.5)' }];
+      case 'rotate': return [{ transform: 'rotate(0deg)' }, { transform: 'rotate(270deg)' }];
+      default: return [{ opacity: 1 }, { opacity: 0.12 }];
+    }
+  }
+  function startAnim() {
+    anims.forEach(a => a.cancel()); anims = [];
+    const f = frames(), base = { duration: duration(), iterations: Infinity, direction: 'alternate', endDelay: 350, fill: 'both' };
+    $$('.track').forEach(t => t.classList.toggle('box', st.prop === 'rotate' || st.prop === 'scale'));
+    anims.push($('#b-a').animate(f, { ...base, easing: cur() }));
+    anims.push($('#b-b').animate(f, { ...base, easing: 'linear' }));
+    if (!st.play) anims.forEach(a => a.pause());
+    $('#p-play').textContent = st.play ? 'Pause' : 'Play';
+  }
+  $('#p-play').addEventListener('click', () => { st.play = !st.play; anims.forEach(a => st.play ? a.play() : a.pause()); $('#p-play').textContent = st.play ? 'Pause' : 'Play'; store.set('st', st); });
+  $('#p-prop').addEventListener('change', e => { st.prop = e.target.value; startAnim(); out(); store.set('st', st); });
+  $('#p-dur').addEventListener('input', e => { st.dur = +e.target.value; $('#p-durv').textContent = st.dur + 'ms'; startAnim(); out(); store.set('st', st); });
+  window.addEventListener('resize', () => { if (st.prop === 'move') startAnim(); });
+
+  /* ---- output ---- */
+  function out() {
+    const e = cur(), dur = duration();
+    const KF = { move: ['transform: translateX(0);', 'transform: translateX(240px);'], scale: ['transform: scale(0.6);', 'transform: scale(1.5);'], rotate: ['transform: rotate(0deg);', 'transform: rotate(270deg);'], fade: ['opacity: 1;', 'opacity: 0.12;'] }[st.prop];
+    let t = '/* easing */\n--ease: ' + e + ';\n\n/* transition */\ntransition: ' + (st.prop === 'fade' ? 'opacity' : 'transform') + ' ' + dur + 'ms ' + e + ';\n\n/* keyframes */\n@keyframes demo {\n  from { ' + KF[0] + ' }\n  to   { ' + KF[1] + ' }\n}\n.demo {\n  animation: demo ' + dur + 'ms ' + e + ' infinite alternate;\n}';
+    if (st.mode === 'spr') t += '\n\n/* linear() works in current Chrome, Firefox and Safari. Older browsers ignore the whole declaration, so put a cubic-bezier fallback first. */';
+    $('#o-txt').textContent = t;
+    $('#p-msg').textContent = st.mode === 'spr' ? 'Spring duration is set by the physics (' + dur + 'ms); the slider is used for Bézier curves.' : '';
+  }
+  function sync(fromDrag, fromNum) {
+    if (st.mode === 'bez' && !fromNum) nIds.forEach((id, k) => { $(id).value = r2(st.p[k]); });
+    if (st.mode === 'bez') $$('#presets button').forEach((b, i) => b.setAttribute('aria-pressed', NAMED[i].slice(1).every((v, k) => Math.abs(v - st.p[k]) < 0.001)));
+    $('#s-zv').textContent = st.z.toFixed(2); $('#s-fv').textContent = st.f.toFixed(2) + ' Hz';
+    draw();
+    if ((fromDrag || fromNum) && anims.length) anims[0].effect.updateTiming({ easing: cur() }); else startAnim();
+    out(); store.set('st', st);
+  }
+  $('#s-z').value = st.z; $('#s-f').value = st.f; $('#p-dur').value = st.dur; $('#p-durv').textContent = st.dur + 'ms'; $('#p-prop').value = st.prop;
+  setMode(st.mode);
+})();
+
+</script>
+</body>
+</html>

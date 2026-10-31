@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Turn minimum and maximum font sizes and viewport widths into CSS clamp() values, generate a fluid type scale, and preview sizes across viewport widths. Runs in the browser.">
+<link rel="icon" href="data:,">
+<title>Fluid Type & clamp() Calculator</title>
+<style>
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:100 800;font-display:swap;src:url("../fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2")}
+
+:root{
+  color-scheme: light dark;
+  --bg:#e9eaed; --surface:#f7f7f9; --surface-2:#ffffff;
+  --ink:#1d2126; --muted:#5b6068; --line:#d6d7dc; --line-2:#bfc2ca; --chip:#ececf0;
+  --accent:#2f6db3; --accent-strong:#26598f; --accent-ink:#ffffff;
+  --ok:#2e7d4f; --danger:#8f2d23; --danger-bg:#fdeeee; --danger-line:#efc2c2;
+  --warn:#7a4b00; --warn-bg:#fff4dc; --warn-line:#e8c98a;
+  --shadow:0 1px 2px rgba(24,28,38,.05),0 10px 28px rgba(24,28,38,.07);
+  --ui-font:"Outfit",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono-font:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#222329;
+    --ink:#eceef2; --muted:#a2a6af; --line:#2d2f36; --line-2:#3d404a; --chip:#26272e;
+    --accent:#7db0e6; --accent-strong:#9cc3ee; --accent-ink:#0d1724;
+    --ok:#6fce97; --danger:#f0a9a0; --danger-bg:#3a2120; --danger-line:#6e3a36;
+    --warn:#fdd663; --warn-bg:#352c12; --warn-line:#6b5a22;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--ui-font);font-size:15px;line-height:1.45;background:var(--bg);color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+a{color:var(--accent-strong)}
+header.site{padding:1rem 1.25rem;background:var(--surface);border-bottom:1px solid var(--line)}
+header.site .top{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+header.site h1{margin:0;font-size:1.35rem;font-weight:600;line-height:1.2}
+header.site .back{font-size:.8125rem;color:var(--muted);text-decoration:none}
+header.site .back:hover{color:var(--accent-strong);text-decoration:underline}
+header.site p{margin:.35rem 0 0;color:var(--muted);max-width:60rem}
+main.wrap{max-width:1180px;margin:0 auto;padding:1rem 1.25rem 3rem;display:grid;gap:1rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:1rem}
+.card>h2,.lbl{margin:0 0 .6rem;font-size:.6875rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.lbl{display:block;margin:0 0 .25rem}
+.cols{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end}
+.row.center{align-items:center}
+.field{display:flex;flex-direction:column;gap:.15rem;min-width:0}
+.field.grow{flex:1 1 180px}
+input[type=text],input[type=number],input[type=search],input[type=url],input[type=date],select,textarea{
+  font:inherit;font-size:.875rem;color:var(--ink);background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:.4rem .6rem;min-width:0;width:100%}
+input[type=number]{font-family:var(--mono-font);font-size:.8125rem}
+textarea{font-family:var(--mono-font);font-size:.8125rem;line-height:1.5;resize:vertical;tab-size:2}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+input[type=color]{width:2.4rem;height:2rem;padding:0;border:1px solid var(--line-2);border-radius:8px;background:none;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:1rem;height:1rem;margin:0}
+label.chk{display:inline-flex;gap:.4rem;align-items:center;font-size:.875rem;cursor:pointer}
+button,.btn{font:inherit;font-size:.875rem;padding:.4rem .85rem;border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink);border-radius:999px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;line-height:1.2}
+button:hover,.btn:hover{border-color:var(--accent)}
+button.primary,.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+button.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.sm{padding:.2rem .6rem;font-size:.75rem}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden;background:var(--surface-2)}
+.seg button{border:0;border-radius:0;background:transparent;padding:.35rem .8rem}
+.seg button[aria-pressed=true],.seg button[aria-selected=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.out{position:relative;margin:0;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:.75rem 3.6rem .75rem .85rem;font-family:var(--mono-font);font-size:.8125rem;line-height:1.55;white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:26rem}
+.out>button.copy{position:absolute;top:.4rem;right:.4rem}
+.note{font-size:.8125rem;color:var(--muted);margin:.5rem 0 0}
+.msg{border-radius:9px;padding:.5rem .75rem;font-size:.8125rem;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--warn)}
+.msg.bad{border-color:var(--danger-line);background:var(--danger-bg);color:var(--danger)}
+.msg:empty{display:none}
+.pill{display:inline-block;font-size:.6875rem;font-weight:600;padding:.1rem .5rem;border-radius:999px;background:var(--chip);color:var(--muted);border:1px solid var(--line)}
+.pill.ok{color:var(--ok)} .pill.bad{color:var(--danger)}
+table.t{width:100%;border-collapse:collapse;font-size:.8125rem}
+table.t th,table.t td{text-align:left;padding:.35rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+table.t th{font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+table.t td.m,.mono{font-family:var(--mono-font)}
+.scroll{overflow:auto}
+.toast{position:fixed;left:50%;bottom:1.25rem;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.45rem .9rem;border-radius:999px;font-size:.8125rem;opacity:0;pointer-events:none;transition:opacity .15s;z-index:50}
+.toast.show{opacity:1}
+.drop{border:2px dashed var(--line-2);border-radius:12px;padding:1.4rem;text-align:center;color:var(--muted);background:var(--surface-2);cursor:pointer}
+.drop.over,.drop:hover{border-color:var(--accent);color:var(--ink)}
+kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:6px;padding:.05rem .4rem}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important}}
+
+
+.steps input[type=number]{width:100%}
+.steps td{vertical-align:middle}
+.steps td:first-child{white-space:nowrap}
+.prev{border-bottom:1px solid var(--line);padding:.5rem 0;display:grid;grid-template-columns:7rem 1fr;gap:.2rem .8rem;align-items:baseline}
+.prev .meta{font-family:var(--mono-font);font-size:.75rem;color:var(--muted)}
+.prev .txt{line-height:1.2;overflow-wrap:anywhere}
+#f-vw-val{font-family:var(--mono-font);font-weight:600}
+
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="top"><h1>Fluid Type & clamp() Calculator</h1><a class="back" href="../tools/">&larr; All tools</a></div>
+  <p>Set a size range and the viewport range it should scale across, and get a clamp() value that uses rem plus vw so browser zoom and text-size preferences still work.</p>
+</header>
+<main class="wrap">
+
+<section class="card" aria-labelledby="h-set">
+  <h2 id="h-set">Range</h2>
+  <div class="row">
+    <div class="field"><label class="lbl" for="f-minvw">Min viewport (px)</label><input id="f-minvw" type="number" min="1" value="320" style="width:8rem"></div>
+    <div class="field"><label class="lbl" for="f-maxvw">Max viewport (px)</label><input id="f-maxvw" type="number" min="1" value="1280" style="width:8rem"></div>
+    <div class="field"><label class="lbl" for="f-root">Root font size (px)</label><input id="f-root" type="number" min="1" value="16" style="width:7rem"></div>
+    <div class="field"><label class="lbl" for="f-prefix">Variable prefix</label><input id="f-prefix" type="text" value="step" style="width:8rem" spellcheck="false"></div>
+  </div>
+  <div id="f-msg" class="msg" role="status" style="margin-top:.6rem"></div>
+</section>
+
+<section class="card" aria-labelledby="h-steps">
+  <h2 id="h-steps">Sizes</h2>
+  <div class="scroll"><table class="t steps" id="f-steps">
+    <thead><tr><th>Name</th><th>Min (px)</th><th>Max (px)</th><th>clamp()</th><th><span class="sr-only">Remove</span></th></tr></thead>
+    <tbody></tbody></table></div>
+  <div class="row center" style="margin-top:.7rem">
+    <button id="f-add">Add size</button>
+    <details style="flex:1 1 100%">
+      <summary style="cursor:pointer;font-size:.875rem">Generate a modular scale instead</summary>
+      <div class="row" style="margin-top:.6rem">
+        <div class="field"><label class="lbl" for="g-bmin">Base min (px)</label><input id="g-bmin" type="number" value="16" step="0.5" style="width:6.5rem"></div>
+        <div class="field"><label class="lbl" for="g-bmax">Base max (px)</label><input id="g-bmax" type="number" value="20" step="0.5" style="width:6.5rem"></div>
+        <div class="field"><label class="lbl" for="g-rmin">Min ratio</label><input id="g-rmin" type="number" value="1.2" step="0.005" style="width:6.5rem"></div>
+        <div class="field"><label class="lbl" for="g-rmax">Max ratio</label><input id="g-rmax" type="number" value="1.25" step="0.005" style="width:6.5rem"></div>
+        <div class="field"><label class="lbl" for="g-lo">Steps below</label><input id="g-lo" type="number" value="2" min="0" max="6" style="width:5.5rem"></div>
+        <div class="field"><label class="lbl" for="g-hi">Steps above</label><input id="g-hi" type="number" value="5" min="0" max="10" style="width:5.5rem"></div>
+        <button id="g-go" class="primary">Replace sizes with scale</button>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="card" aria-labelledby="h-css">
+  <h2 id="h-css">CSS</h2>
+  <div class="row center" style="margin-bottom:.6rem">
+    <label class="chk"><input type="checkbox" id="f-util"> Also output utility classes</label>
+    <label class="chk"><input type="checkbox" id="f-unitless" checked> Round to 4 decimals</label>
+  </div>
+  <pre class="out" id="f-css"><button class="copy sm" data-copy-from="f-csstxt">Copy</button><span id="f-csstxt"></span></pre>
+  <p class="note">The preferred value is <code>rem + vw</code>, so zooming and a changed browser font size still scale the text. The result is only fluid between the two viewport widths; outside them it stays at the min or max.</p>
+</section>
+
+<section class="card" aria-labelledby="h-prev">
+  <h2 id="h-prev">Preview</h2>
+  <div class="row center">
+    <div class="field grow"><label class="lbl" for="f-vw">Simulated viewport: <span id="f-vw-val"></span></label><input id="f-vw" type="range" min="240" max="1920" value="640"></div>
+    <div class="field grow"><label class="lbl" for="f-sample">Sample text</label><input id="f-sample" type="text" value="The quick brown fox jumps over the lazy dog"></div>
+  </div>
+  <div id="f-prev" style="margin-top:.6rem"></div>
+  <p class="note">The preview computes each size for the simulated width with the same formula; it does not resize the page itself.</p>
+</section>
+
+
+</main>
+<script>
+const TOOL="fluid-type";
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
+const store={
+  get(k,d){try{const v=localStorage.getItem('bc:'+TOOL+':'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('bc:'+TOOL+':'+k,JSON.stringify(v))}catch(e){}}
+};
+let _toastT;
+function toast(msg){let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}
+  t.textContent=msg;t.classList.add('show');clearTimeout(_toastT);_toastT=setTimeout(()=>t.classList.remove('show'),1400)}
+async function copyText(text,label){
+  try{await navigator.clipboard.writeText(text)}catch(e){
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy')}catch(_){}ta.remove()}
+  toast((label||'Copied')+' to clipboard')}
+function download(name,data,type){
+  const blob=data instanceof Blob?data:new Blob([data],{type:type||'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+document.addEventListener('click',e=>{const b=e.target.closest('button.copy[data-copy-from]');
+  if(b){const el=document.getElementById(b.dataset.copyFrom);if(el)copyText(el.value!==undefined&&el.tagName==='TEXTAREA'?el.value:el.textContent)}});
+
+
+</script>
+<script>
+
+(() => {
+  const tbody = $('#f-steps tbody'), msg = $('#f-msg'), out = $('#f-csstxt');
+  let steps = store.get('steps', null) || [
+    { n: '-1', min: 14, max: 16 }, { n: '0', min: 16, max: 20 }, { n: '1', min: 20, max: 25 },
+    { n: '2', min: 25, max: 31.25 }, { n: '3', min: 31.25, max: 39 }, { n: '4', min: 39, max: 48.8 }
+  ];
+  const num = id => parseFloat($(id).value);
+  const r4 = x => ($('#f-unitless').checked ? Math.round(x * 10000) / 10000 : x);
+  const fmt = x => String(r4(x));
+
+  function calc(s) {
+    const minVw = num('#f-minvw'), maxVw = num('#f-maxvw'), root = num('#f-root');
+    const slope = (s.max - s.min) / (maxVw - minVw);         // px per px
+    const inter = s.min - slope * minVw;                       // px
+    const lo = Math.min(s.min, s.max), hi = Math.max(s.min, s.max);
+    const css = 'clamp(' + fmt(lo / root) + 'rem, ' + fmt(inter / root) + 'rem + ' + fmt(slope * 100) + 'vw, ' + fmt(hi / root) + 'rem)';
+    return { slope, inter, lo, hi, css };
+  }
+  function sizeAt(s, w) { const c = calc(s); return clamp(c.inter + c.slope * w, c.lo, c.hi); }
+  const valid = () => num('#f-maxvw') > num('#f-minvw') && num('#f-minvw') > 0 && num('#f-root') > 0;
+
+  function renderRows() {
+    tbody.innerHTML = steps.map((s, i) =>
+      '<tr data-i="' + i + '"><td><input type="text" data-k="n" value="' + esc(s.n) + '" aria-label="Name" style="width:5rem"></td>' +
+      '<td><input type="number" data-k="min" step="0.25" value="' + s.min + '" aria-label="Min px" style="width:6rem"></td>' +
+      '<td><input type="number" data-k="max" step="0.25" value="' + s.max + '" aria-label="Max px" style="width:6rem"></td>' +
+      '<td class="m" data-c></td><td><button class="sm" data-rm aria-label="Remove ' + esc(s.n) + '">×</button></td></tr>').join('');
+    update();
+  }
+  function update() {
+    const bad = [];
+    msg.classList.remove('bad');
+    if (!valid()) { msg.textContent = 'Max viewport must be larger than min viewport, and both must be positive.'; msg.classList.add('bad'); out.textContent = ''; $('#f-prev').innerHTML = ''; return; }
+    const prefix = ($('#f-prefix').value.trim() || 'step').replace(/[^a-zA-Z0-9_-]/g, '');
+    let css = ':root {\n', util = '';
+    $$('#f-steps tbody tr').forEach((tr, i) => {
+      const s = steps[i], c = calc(s);
+      $('[data-c]', tr).textContent = c.css;
+      const nm = '--' + prefix + '-' + String(s.n).replace(/[^a-zA-Z0-9_-]/g, '');
+      css += '  ' + nm + ': ' + c.css + ';\n';
+      util += '.' + prefix + '-' + String(s.n).replace(/[^a-zA-Z0-9_-]/g, '') + ' { font-size: var(' + nm + '); }\n';
+      if (c.hi / c.lo > 2.5) bad.push('"' + s.n + '" grows more than 2.5× (' + fmt(c.lo) + 'px to ' + fmt(c.hi) + 'px); text may not reach 200% when users zoom (WCAG 1.4.4).');
+    });
+    css += '}\n' + ($('#f-util').checked ? '\n' + util : '');
+    out.textContent = css.trim();
+    msg.textContent = bad.join(' ');
+    preview();
+    store.set('steps', steps);
+    store.set('cfg', { a: $('#f-minvw').value, b: $('#f-maxvw').value, r: $('#f-root').value, p: $('#f-prefix').value });
+  }
+  function preview() {
+    if (!valid()) return;
+    const w = num('#f-vw'); $('#f-vw-val').textContent = w + 'px';
+    const text = $('#f-sample').value || 'Sample';
+    $('#f-prev').innerHTML = steps.map(s => {
+      const px = sizeAt(s, w);
+      return '<div class="prev"><div class="meta">' + esc(s.n) + ' · ' + (Math.round(px * 100) / 100) + 'px</div><div class="txt" style="font-size:' + px + 'px">' + esc(text) + '</div></div>';
+    }).join('');
+  }
+  tbody.addEventListener('input', e => {
+    const tr = e.target.closest('tr'); if (!tr) return; const s = steps[+tr.dataset.i], k = e.target.dataset.k;
+    s[k] = k === 'n' ? e.target.value : (parseFloat(e.target.value) || 0); update();
+  });
+  tbody.addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (!b) return; steps.splice(+b.closest('tr').dataset.i, 1); renderRows(); });
+  $('#f-add').addEventListener('click', () => { const l = steps[steps.length - 1] || { min: 16, max: 20 }; steps.push({ n: String(steps.length), min: l.min, max: l.max }); renderRows(); });
+  ['#f-minvw', '#f-maxvw', '#f-root', '#f-prefix', '#f-util', '#f-unitless'].forEach(id => $(id).addEventListener('input', update));
+  $('#f-vw').addEventListener('input', preview); $('#f-sample').addEventListener('input', preview);
+  $('#g-go').addEventListener('click', () => {
+    const bmin = num('#g-bmin'), bmax = num('#g-bmax'), rmin = num('#g-rmin'), rmax = num('#g-rmax');
+    const lo = clamp(parseInt($('#g-lo').value, 10) || 0, 0, 6), hi = clamp(parseInt($('#g-hi').value, 10) || 0, 0, 10);
+    if (!(bmin > 0 && bmax > 0 && rmin > 0 && rmax > 0)) { toast('Enter positive numbers'); return; }
+    steps = [];
+    for (let i = -lo; i <= hi; i++) steps.push({ n: String(i), min: Math.round(bmin * Math.pow(rmin, i) * 100) / 100, max: Math.round(bmax * Math.pow(rmax, i) * 100) / 100 });
+    renderRows();
+  });
+  const cfg = store.get('cfg', null);
+  if (cfg) { $('#f-minvw').value = cfg.a; $('#f-maxvw').value = cfg.b; $('#f-root').value = cfg.r; $('#f-prefix').value = cfg.p; }
+  renderRows();
+})();
+
+</script>
+</body>
+</html>

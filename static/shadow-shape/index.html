@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Design layered box-shadows, custom border-radius blobs, clip-path shapes and glassmorphism effects with a live preview and copy-ready CSS. Runs in the browser.">
+<link rel="icon" href="data:,">
+<title>Shadow & Shape Generator</title>
+<style>
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:100 800;font-display:swap;src:url("../fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2")}
+
+:root{
+  color-scheme: light dark;
+  --bg:#e9eaed; --surface:#f7f7f9; --surface-2:#ffffff;
+  --ink:#1d2126; --muted:#5b6068; --line:#d6d7dc; --line-2:#bfc2ca; --chip:#ececf0;
+  --accent:#2f6db3; --accent-strong:#26598f; --accent-ink:#ffffff;
+  --ok:#2e7d4f; --danger:#8f2d23; --danger-bg:#fdeeee; --danger-line:#efc2c2;
+  --warn:#7a4b00; --warn-bg:#fff4dc; --warn-line:#e8c98a;
+  --shadow:0 1px 2px rgba(24,28,38,.05),0 10px 28px rgba(24,28,38,.07);
+  --ui-font:"Outfit",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono-font:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#121316; --surface:#1a1b1f; --surface-2:#222329;
+    --ink:#eceef2; --muted:#a2a6af; --line:#2d2f36; --line-2:#3d404a; --chip:#26272e;
+    --accent:#7db0e6; --accent-strong:#9cc3ee; --accent-ink:#0d1724;
+    --ok:#6fce97; --danger:#f0a9a0; --danger-bg:#3a2120; --danger-line:#6e3a36;
+    --warn:#fdd663; --warn-bg:#352c12; --warn-line:#6b5a22;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--ui-font);font-size:15px;line-height:1.45;background:var(--bg);color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+a{color:var(--accent-strong)}
+header.site{padding:1rem 1.25rem;background:var(--surface);border-bottom:1px solid var(--line)}
+header.site .top{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+header.site h1{margin:0;font-size:1.35rem;font-weight:600;line-height:1.2}
+header.site .back{font-size:.8125rem;color:var(--muted);text-decoration:none}
+header.site .back:hover{color:var(--accent-strong);text-decoration:underline}
+header.site p{margin:.35rem 0 0;color:var(--muted);max-width:60rem}
+main.wrap{max-width:1180px;margin:0 auto;padding:1rem 1.25rem 3rem;display:grid;gap:1rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:1rem}
+.card>h2,.lbl{margin:0 0 .6rem;font-size:.6875rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.lbl{display:block;margin:0 0 .25rem}
+.cols{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end}
+.row.center{align-items:center}
+.field{display:flex;flex-direction:column;gap:.15rem;min-width:0}
+.field.grow{flex:1 1 180px}
+input[type=text],input[type=number],input[type=search],input[type=url],input[type=date],select,textarea{
+  font:inherit;font-size:.875rem;color:var(--ink);background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:.4rem .6rem;min-width:0;width:100%}
+input[type=number]{font-family:var(--mono-font);font-size:.8125rem}
+textarea{font-family:var(--mono-font);font-size:.8125rem;line-height:1.5;resize:vertical;tab-size:2}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+input[type=color]{width:2.4rem;height:2rem;padding:0;border:1px solid var(--line-2);border-radius:8px;background:none;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:1rem;height:1rem;margin:0}
+label.chk{display:inline-flex;gap:.4rem;align-items:center;font-size:.875rem;cursor:pointer}
+button,.btn{font:inherit;font-size:.875rem;padding:.4rem .85rem;border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink);border-radius:999px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;line-height:1.2}
+button:hover,.btn:hover{border-color:var(--accent)}
+button.primary,.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+button.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.sm{padding:.2rem .6rem;font-size:.75rem}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden;background:var(--surface-2)}
+.seg button{border:0;border-radius:0;background:transparent;padding:.35rem .8rem}
+.seg button[aria-pressed=true],.seg button[aria-selected=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.out{position:relative;margin:0;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:.75rem 3.6rem .75rem .85rem;font-family:var(--mono-font);font-size:.8125rem;line-height:1.55;white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:26rem}
+.out>button.copy{position:absolute;top:.4rem;right:.4rem}
+.note{font-size:.8125rem;color:var(--muted);margin:.5rem 0 0}
+.msg{border-radius:9px;padding:.5rem .75rem;font-size:.8125rem;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--warn)}
+.msg.bad{border-color:var(--danger-line);background:var(--danger-bg);color:var(--danger)}
+.msg:empty{display:none}
+.pill{display:inline-block;font-size:.6875rem;font-weight:600;padding:.1rem .5rem;border-radius:999px;background:var(--chip);color:var(--muted);border:1px solid var(--line)}
+.pill.ok{color:var(--ok)} .pill.bad{color:var(--danger)}
+table.t{width:100%;border-collapse:collapse;font-size:.8125rem}
+table.t th,table.t td{text-align:left;padding:.35rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+table.t th{font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+table.t td.m,.mono{font-family:var(--mono-font)}
+.scroll{overflow:auto}
+.toast{position:fixed;left:50%;bottom:1.25rem;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.45rem .9rem;border-radius:999px;font-size:.8125rem;opacity:0;pointer-events:none;transition:opacity .15s;z-index:50}
+.toast.show{opacity:1}
+.drop{border:2px dashed var(--line-2);border-radius:12px;padding:1.4rem;text-align:center;color:var(--muted);background:var(--surface-2);cursor:pointer}
+.drop.over,.drop:hover{border-color:var(--accent);color:var(--ink)}
+kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:6px;padding:.05rem .4rem}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important}}
+
+
+.stage{border:1px solid var(--line);border-radius:12px;min-height:20rem;display:grid;place-items:center;padding:2rem;position:relative;overflow:hidden}
+.stage .pv{transition:none}
+.layer{border:1px solid var(--line);border-radius:12px;background:var(--surface-2);padding:.7rem;display:grid;gap:.5rem}
+.layer .sl{display:grid;grid-template-columns:4.2rem 1fr 3.4rem;gap:.5rem;align-items:center;font-size:.8125rem}
+.layer .sl span:last-child,.sl2 span:last-child{font-family:var(--mono-font);text-align:right;color:var(--muted)}
+.sl2{display:grid;grid-template-columns:7rem 1fr 4rem;gap:.5rem;align-items:center;font-size:.8125rem;margin-bottom:.3rem}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem}
+.glassbg{position:absolute;inset:0;background:linear-gradient(135deg,#ff6a88,#ffa24c 35%,#3b82f6 70%,#8b5cf6)}
+.glassbg i{position:absolute;border-radius:50%;display:block}
+
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="top"><h1>Shadow & Shape Generator</h1><a class="back" href="../tools/">&larr; All tools</a></div>
+  <p>Build layered box-shadows, organic border-radius shapes, clip-path polygons and frosted-glass panels, watch the result live, and copy the CSS. Nothing leaves your browser.</p>
+</header>
+<main class="wrap">
+
+<div class="cols" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))">
+  <section class="card" aria-labelledby="h-ctl">
+    <div class="seg" role="tablist" aria-label="Generator" style="margin-bottom:.8rem">
+      <button role="tab" id="tab-shadow" aria-selected="true" aria-controls="p-shadow">Shadow</button>
+      <button role="tab" id="tab-shape" aria-selected="false" aria-controls="p-shape">Shape</button>
+      <button role="tab" id="tab-glass" aria-selected="false" aria-controls="p-glass">Glass</button>
+    </div>
+    <h2 id="h-ctl" class="sr-only">Controls</h2>
+
+    <div id="p-shadow" role="tabpanel" aria-labelledby="tab-shadow">
+      <div class="row center"><span class="lbl" style="margin:0">Presets</span><div class="chips" id="sh-presets"></div></div>
+      <div id="sh-layers" style="display:grid;gap:.6rem;margin-top:.8rem"></div>
+      <div class="row center" style="margin-top:.7rem"><button id="sh-add">Add layer</button></div>
+      <div class="row" style="margin-top:.8rem">
+        <div class="field"><label class="lbl" for="sh-box">Box</label><input id="sh-box" type="color" value="#ffffff"></div>
+        <div class="field"><label class="lbl" for="sh-bg">Background</label><input id="sh-bg" type="color" value="#e9eaed"></div>
+        <div class="field grow"><label class="lbl" for="sh-rad">Corner radius: <span id="sh-radv"></span></label><input id="sh-rad" type="range" min="0" max="100" value="16"></div>
+      </div>
+    </div>
+
+    <div id="p-shape" role="tabpanel" aria-labelledby="tab-shape" hidden>
+      <div class="row center">
+        <div class="seg" id="sp-unit" role="group" aria-label="Unit"><button aria-pressed="true" data-u="%">%</button><button aria-pressed="false" data-u="px">px</button></div>
+        <label class="chk"><input type="checkbox" id="sp-link" checked> Same on every corner</label>
+        <button id="sp-blob" class="primary">Random blob</button>
+      </div>
+      <div id="sp-sliders" style="margin-top:.8rem"></div>
+      <span class="lbl" style="margin-top:1rem">Clip-path shape</span>
+      <div class="chips" id="sp-clips"></div>
+    </div>
+
+    <div id="p-glass" role="tabpanel" aria-labelledby="tab-glass" hidden>
+      <div class="sl2"><label for="gl-blur">Blur</label><input id="gl-blur" type="range" min="0" max="40" value="16"><span></span></div>
+      <div class="sl2"><label for="gl-alpha">Tint opacity</label><input id="gl-alpha" type="range" min="0" max="100" value="22"><span></span></div>
+      <div class="sl2"><label for="gl-sat">Saturation</label><input id="gl-sat" type="range" min="100" max="220" value="140"><span></span></div>
+      <div class="sl2"><label for="gl-bd">Border opacity</label><input id="gl-bd" type="range" min="0" max="100" value="35"><span></span></div>
+      <div class="sl2"><label for="gl-rad">Radius</label><input id="gl-rad" type="range" min="0" max="60" value="20"><span></span></div>
+      <div class="row center"><div class="field"><label class="lbl" for="gl-tint">Tint</label><input id="gl-tint" type="color" value="#ffffff"></div></div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="h-pv">
+    <h2 id="h-pv">Preview</h2>
+    <div class="stage" id="stage"><div class="pv" id="pv" role="img" aria-label="Preview of the generated CSS"></div></div>
+  </section>
+</div>
+
+<section class="card" aria-labelledby="h-css">
+  <h2 id="h-css">CSS</h2>
+  <pre class="out"><button class="copy sm" data-copy-from="css-out">Copy</button><span id="css-out"></span></pre>
+  <p class="note" id="css-note"></p>
+</section>
+
+
+</main>
+<script>
+const TOOL="shadow-shape";
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
+const store={
+  get(k,d){try{const v=localStorage.getItem('bc:'+TOOL+':'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('bc:'+TOOL+':'+k,JSON.stringify(v))}catch(e){}}
+};
+let _toastT;
+function toast(msg){let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}
+  t.textContent=msg;t.classList.add('show');clearTimeout(_toastT);_toastT=setTimeout(()=>t.classList.remove('show'),1400)}
+async function copyText(text,label){
+  try{await navigator.clipboard.writeText(text)}catch(e){
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy')}catch(_){}ta.remove()}
+  toast((label||'Copied')+' to clipboard')}
+function download(name,data,type){
+  const blob=data instanceof Blob?data:new Blob([data],{type:type||'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+document.addEventListener('click',e=>{const b=e.target.closest('button.copy[data-copy-from]');
+  if(b){const el=document.getElementById(b.dataset.copyFrom);if(el)copyText(el.value!==undefined&&el.tagName==='TEXTAREA'?el.value:el.textContent)}});
+
+
+</script>
+<script>
+
+(() => {
+  const hex2rgb = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const rgba = (h, a) => { const [r, g, b] = hex2rgb(h); return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + (Math.round(a * 1000) / 1000) + ')'; };
+  const L = (x, y, blur, spread, color, alpha, inset) => ({ x, y, blur, spread, color: color || '#000000', alpha, inset: !!inset });
+  const PRES = {
+    Soft: { l: [L(0, 4, 12, 0, 0, 10)] },
+    Layered: { l: [L(0, 1, 1, 0, 0, 7.5), L(0, 2, 2, 0, 0, 7.5), L(0, 4, 4, 0, 0, 7.5), L(0, 8, 8, 0, 0, 7.5), L(0, 16, 16, 0, 0, 7.5)] },
+    Floating: { l: [L(0, 20, 25, -5, 0, 10), L(0, 8, 10, -6, 0, 10)] },
+    Hard: { l: [L(6, 6, 0, 0, 0, 100)] },
+    Inset: { l: [L(0, 2, 6, 0, 0, 25, true)] },
+    Glow: { l: [L(0, 0, 24, 4, '#2f6db3', 60)] },
+    Neumorphic: { l: [L(-8, -8, 16, 0, '#ffffff', 80), L(8, 8, 16, 0, '#000000', 15)], box: '#e0e5ec', bg: '#e0e5ec' }
+  };
+  const S = store.get('s', null) || { layers: PRES.Layered.l, box: '#ffffff', bg: '#e9eaed', rad: 16 };
+  const SP = store.get('sp', null) || { unit: '%', link: true, r: [[16, 16], [16, 16], [16, 16], [16, 16]], clip: 'none' };
+  const GL = store.get('gl', null) || { blur: 16, alpha: 22, sat: 140, bd: 35, rad: 20, tint: '#ffffff' };
+  let tab = 'shadow';
+  const pv = $('#pv'), stage = $('#stage'), out = $('#css-out'), note = $('#css-note');
+
+  /* ---------- shadow ---------- */
+  const SL = [['x', 'X offset', -100, 100], ['y', 'Y offset', -100, 100], ['blur', 'Blur', 0, 200], ['spread', 'Spread', -100, 100], ['alpha', 'Opacity %', 0, 100]];
+  function shadowCss() { return S.layers.map(l => (l.inset ? 'inset ' : '') + l.x + 'px ' + l.y + 'px ' + l.blur + 'px ' + l.spread + 'px ' + rgba(l.color, l.alpha / 100)).join(',\n    '); }
+  function renderLayers() {
+    $('#sh-layers').innerHTML = S.layers.map((l, i) =>
+      '<div class="layer" data-i="' + i + '"><div class="row center"><strong style="font-size:.8125rem">Layer ' + (i + 1) + '</strong>' +
+      '<input type="color" data-k="color" value="' + l.color + '" aria-label="Layer ' + (i + 1) + ' color">' +
+      '<label class="chk"><input type="checkbox" data-k="inset"' + (l.inset ? ' checked' : '') + '> inset</label><span style="margin-left:auto"></span>' +
+      '<button class="sm" data-rm aria-label="Remove layer ' + (i + 1) + '"' + (S.layers.length < 2 ? ' disabled' : '') + '>Remove</button></div>' +
+      SL.map(([k, n, a, b]) => '<div class="sl"><label for="l' + i + k + '">' + n + '</label><input id="l' + i + k + '" type="range" data-k="' + k + '" min="' + a + '" max="' + b + '" step="' + (k === 'alpha' ? 0.5 : 1) + '" value="' + l[k] + '"><span>' + l[k] + '</span></div>').join('') + '</div>').join('');
+  }
+  $('#sh-presets').innerHTML = Object.keys(PRES).map(n => '<button class="sm" data-p="' + n + '">' + n + '</button>').join('');
+  $('#sh-presets').addEventListener('click', e => {
+    const b = e.target.closest('[data-p]'); if (!b) return; const p = PRES[b.dataset.p];
+    S.layers = p.l.map(x => ({ ...x })); if (p.box) { S.box = p.box; S.bg = p.bg; $('#sh-box').value = p.box; $('#sh-bg').value = p.bg; } renderLayers(); draw();
+  });
+  $('#sh-layers').addEventListener('input', e => {
+    const row = e.target.closest('.layer'); if (!row) return; const l = S.layers[+row.dataset.i], k = e.target.dataset.k; if (!k) return;
+    l[k] = e.target.type === 'checkbox' ? e.target.checked : (e.target.type === 'range' ? parseFloat(e.target.value) : e.target.value);
+    if (e.target.type === 'range') e.target.nextElementSibling.textContent = l[k]; draw();
+  });
+  $('#sh-layers').addEventListener('click', e => { if (e.target.closest('[data-rm]') && S.layers.length > 1) { S.layers.splice(+e.target.closest('.layer').dataset.i, 1); renderLayers(); draw(); } });
+  $('#sh-add').addEventListener('click', () => { if (S.layers.length >= 8) { toast('Eight layers is plenty'); return; } S.layers.push(L(0, 8, 16, 0, 0, 15)); renderLayers(); draw(); });
+  ['#sh-box', '#sh-bg', '#sh-rad'].forEach(id => $(id).addEventListener('input', () => { S.box = $('#sh-box').value; S.bg = $('#sh-bg').value; S.rad = +$('#sh-rad').value; draw(); }));
+
+  /* ---------- shape ---------- */
+  const CORN = ['Top left', 'Top right', 'Bottom right', 'Bottom left'];
+  const CLIPS = {
+    none: '', circle: 'circle(50% at 50% 50%)', ellipse: 'ellipse(50% 38% at 50% 50%)',
+    triangle: 'polygon(50% 0, 100% 100%, 0 100%)', diamond: 'polygon(50% 0, 100% 50%, 50% 100%, 0 50%)',
+    pentagon: 'polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%)', hexagon: 'polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%)',
+    octagon: 'polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%)',
+    star: 'polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
+    chevron: 'polygon(75% 0, 100% 50%, 75% 100%, 0 100%, 25% 50%, 0 0)'
+  };
+  $('#sp-clips').innerHTML = Object.keys(CLIPS).map(n => '<button class="sm" data-c="' + n + '">' + n + '</button>').join('');
+  const maxV = () => SP.unit === '%' ? 100 : 200;
+  function renderShape() {
+    const ml = SP.link ? 1 : 4; let h = '';
+    for (let i = 0; i < ml; i++) {
+      const name = SP.link ? 'All corners' : CORN[i];
+      h += '<div class="sl2"><label for="sp' + i + 'h">' + name + ' ↔</label><input id="sp' + i + 'h" type="range" data-i="' + i + '" data-a="0" min="0" max="' + maxV() + '" value="' + SP.r[i][0] + '"><span>' + SP.r[i][0] + SP.unit + '</span></div>' +
+           '<div class="sl2"><label for="sp' + i + 'v">' + name + ' ↕</label><input id="sp' + i + 'v" type="range" data-i="' + i + '" data-a="1" min="0" max="' + maxV() + '" value="' + SP.r[i][1] + '"><span>' + SP.r[i][1] + SP.unit + '</span></div>';
+    }
+    $('#sp-sliders').innerHTML = h;
+    $$('#sp-unit button').forEach(b => b.setAttribute('aria-pressed', b.dataset.u === SP.unit));
+    $$('#sp-clips button').forEach(b => b.setAttribute('aria-pressed', b.dataset.c === SP.clip));
+  }
+  $('#sp-sliders').addEventListener('input', e => {
+    const i = +e.target.dataset.i, a = +e.target.dataset.a, v = +e.target.value;
+    if (SP.link) for (let k = 0; k < 4; k++) SP.r[k][a] = v; else SP.r[i][a] = v;
+    e.target.nextElementSibling.textContent = v + SP.unit; draw();
+  });
+  $('#sp-link').addEventListener('change', e => { SP.link = e.target.checked; if (SP.link) for (let k = 1; k < 4; k++) SP.r[k] = SP.r[0].slice(); renderShape(); draw(); });
+  $('#sp-unit').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b || b.dataset.u === SP.unit) return;
+    const f = b.dataset.u === 'px' ? 2 : 0.5; SP.unit = b.dataset.u; SP.r = SP.r.map(p => p.map(v => clamp(Math.round(v * f), 0, maxV()))); renderShape(); draw();
+  });
+  $('#sp-blob').addEventListener('click', () => {
+    const r = () => 30 + Math.floor(Math.random() * 41), a = r(), b = r(), c = r(), d = r();
+    SP.unit = '%'; SP.link = false; $('#sp-link').checked = false;
+    SP.r = [[a, c], [100 - a, d], [b, 100 - d], [100 - b, 100 - c]]; renderShape(); draw();
+  });
+  $('#sp-clips').addEventListener('click', e => { const b = e.target.closest('[data-c]'); if (b) { SP.clip = b.dataset.c; renderShape(); draw(); } });
+  function radiusCss() {
+    const u = SP.unit, hs = SP.r.map(p => p[0] + u), vs = SP.r.map(p => p[1] + u);
+    const same = a => a.every(x => x === a[0]);
+    if (same(hs) && same(vs) && hs[0] === vs[0]) return hs[0];
+    if (same(hs) && same(vs)) return hs[0] + ' / ' + vs[0];
+    return hs.join(' ') + ' / ' + vs.join(' ');
+  }
+
+  /* ---------- glass ---------- */
+  const GS = [['blur', 'gl-blur', 'px'], ['alpha', 'gl-alpha', '%'], ['sat', 'gl-sat', '%'], ['bd', 'gl-bd', '%'], ['rad', 'gl-rad', 'px']];
+  GS.forEach(([k, id, u]) => { const el = $('#' + id); el.value = GL[k]; el.nextElementSibling.textContent = GL[k] + u; el.addEventListener('input', () => { GL[k] = +el.value; el.nextElementSibling.textContent = GL[k] + u; draw(); }); });
+  $('#gl-tint').value = GL.tint; $('#gl-tint').addEventListener('input', e => { GL.tint = e.target.value; draw(); });
+
+  /* ---------- draw ---------- */
+  function draw() {
+    pv.removeAttribute('style'); stage.style.background = ''; stage.innerHTML = ''; stage.appendChild(pv);
+    if (tab === 'shadow') {
+      stage.style.background = S.bg;
+      pv.style.cssText = 'width:180px;height:180px;background:' + S.box + ';border-radius:' + S.rad + 'px;box-shadow:' + shadowCss().replace(/\n\s*/g, ' ');
+      out.textContent = 'box-shadow:\n    ' + shadowCss() + ';' + (S.rad ? '\nborder-radius: ' + S.rad + 'px;' : '');
+      note.textContent = 'Several soft layers usually look more natural than one large blur. Keep opacity low, and test on your real background color.';
+    } else if (tab === 'shape') {
+      stage.style.background = 'var(--surface-2)';
+      const clip = CLIPS[SP.clip];
+      pv.style.cssText = 'width:200px;height:200px;background:linear-gradient(135deg,var(--accent),#8b5cf6);border-radius:' + radiusCss() + (clip ? ';clip-path:' + clip : '');
+      out.textContent = 'border-radius: ' + radiusCss() + ';' + (clip ? '\nclip-path: ' + clip + ';' : '');
+      note.textContent = clip ? 'clip-path cuts away everything outside the shape, including borders and box-shadow. Use filter: drop-shadow() on a wrapper if you need a shadow.' : 'The slash syntax sets horizontal radii before it and vertical radii after it, in the order top-left, top-right, bottom-right, bottom-left.';
+    } else {
+      stage.innerHTML = '<div class="glassbg"><i style="width:140px;height:140px;left:12%;top:14%;background:#fde047"></i><i style="width:110px;height:110px;right:14%;bottom:12%;background:#22d3ee"></i><i style="width:80px;height:80px;right:30%;top:10%;background:#34d399"></i></div>';
+      stage.appendChild(pv);
+      const bg = rgba(GL.tint, GL.alpha / 100), bd = rgba('#ffffff', GL.bd / 100), f = 'blur(' + GL.blur + 'px) saturate(' + GL.sat + '%)';
+      pv.style.cssText = 'position:relative;width:240px;height:150px;background:' + bg + ';backdrop-filter:' + f + ';-webkit-backdrop-filter:' + f + ';border:1px solid ' + bd + ';border-radius:' + GL.rad + 'px;box-shadow:0 8px 32px rgba(0,0,0,0.18)';
+      out.textContent = 'background: ' + bg + ';\nbackdrop-filter: ' + f + ';\n-webkit-backdrop-filter: ' + f + ';\nborder: 1px solid ' + bd + ';\nborder-radius: ' + GL.rad + 'px;\nbox-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);\n\n/* Fallback where backdrop-filter is unsupported */\n@supports not (backdrop-filter: blur(1px)) {\n  .glass { background: ' + rgba(GL.tint, Math.min(1, GL.alpha / 100 + 0.5)) + '; }\n}';
+      note.textContent = 'backdrop-filter only shows through if the element has a translucent background and something behind it. Heavy blur can be costly on large areas.';
+    }
+    $('#sh-radv').textContent = S.rad + 'px';
+    store.set('s', S); store.set('sp', SP); store.set('gl', GL);
+  }
+
+  /* ---------- tabs ---------- */
+  function setTab(t) {
+    tab = t;
+    ['shadow', 'shape', 'glass'].forEach(n => { $('#tab-' + n).setAttribute('aria-selected', n === t); $('#p-' + n).hidden = n !== t; });
+    draw();
+  }
+  ['shadow', 'shape', 'glass'].forEach(n => $('#tab-' + n).addEventListener('click', () => setTab(n)));
+  $('#sh-box').value = S.box; $('#sh-bg').value = S.bg; $('#sh-rad').value = S.rad; $('#sp-link').checked = SP.link;
+  renderLayers(); renderShape(); draw();
+})();
+
+</script>
+</body>
+</html>

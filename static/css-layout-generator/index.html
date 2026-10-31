@@ -24,6 +24,14 @@
         button:hover { background: var(--acc-strong); border-color: var(--acc-strong); }
         pre { margin: 0; white-space: pre-wrap; font-size: 0.85rem; }
         :focus-visible { outline: 3px solid var(--acc); outline-offset: 2px; }
+        @media (max-width: 720px) {
+            body { height: auto; min-height: 100vh; }
+            .main { flex-direction: column; overflow: visible; }
+            .sidebar { width: auto; border-right: none; border-bottom: 1px solid var(--line); overflow-y: visible; }
+            .canvas-area { min-height: 320px; padding: 1rem; }
+            #container { min-height: 280px; }
+            .code-area { width: auto; border-left: none; border-top: 1px solid var(--line); overflow-y: visible; }
+        }
     </style>
 
 <meta name="description" content="A visual builder that outputs clean CSS Grid or Flexbox code for complex layouts.">

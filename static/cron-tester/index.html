@@ -24,6 +24,10 @@
         .example-btn { display: inline-block; background: var(--chip); color: var(--ink); border: 1px solid var(--line); padding: 0.3rem 0.65rem; margin: 0.25rem; border-radius: 999px; cursor: pointer; font-size: 0.9rem; }
         .example-btn:hover { background: var(--panel2); border-color: var(--line2); }
         :focus-visible { outline: 3px solid var(--acc); outline-offset: 2px; }
+        @media (max-width: 480px) {
+            .parts { flex-wrap: wrap; }
+            .part { flex: 1 1 28%; }
+        }
     </style>
 
 <meta name="description" content="Translates cron scheduling expressions into human-readable times and shows upcoming run dates.">

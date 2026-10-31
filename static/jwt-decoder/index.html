@@ -17,7 +17,10 @@
         textarea { width: 100%; height: 150px; font-family: "JetBrains Mono", monospace; font-size: 0.9rem; padding: 0.6rem; background: var(--panel2); color: var(--ink); border: 1px solid var(--line2); border-radius: 9px; word-break: break-all; }
         textarea:focus { border-color: var(--acc); outline: none; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
-        .box { background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); padding: 1rem; border-radius: 14px; overflow-x: auto; font-family: "JetBrains Mono", monospace; font-size: 0.9rem; white-space: pre-wrap; }
+        .box { background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); padding: 1rem; border-radius: 14px; overflow-x: auto; font-family: "JetBrains Mono", monospace; font-size: 0.9rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+        @media (max-width: 720px) {
+            .grid { grid-template-columns: 1fr; }
+        }
         /* Subject-matter colors: jwt.io header/payload/signature convention — kept deliberately */
         .header-box { border-top: 4px solid #cc0000; }
         .payload-box { border-top: 4px solid #a335ee; }

@@ -1,7 +1,7 @@
 ---
 name: theblackcat-site
 description: "Operate Nik's TheBlackCat site: save bookmarks, write blog posts (draft-flag flow), weekly triage, and maintain the Hugo repo safely."
-version: 1.5.0
+version: 1.6.0
 author: Hermes Agent
 license: MIT
 platforms: [linux]
@@ -137,7 +137,42 @@ current, full version. So:
 - **Drift check**: this skill can be edited outside a BlackCat session (skills
   reviews, curator). At the start of any BlackCat task, compare md5s of the
   skill files against the in-repo bundle; if they differ, refresh the mirror
-  first — same verify loop (commit, push, CI-gate, live-check).
+  first — same verify loop (commit, push, CI-gate, live-check). Run this exact
+  shape, from inside the skill dir:
+
+  ```bash
+  SK=~/.hermes/skills/theblackcat-site
+  REPO=~/hermes/repos/Theblackcat98/TheBlackCat/content/library/ai/skills/theblackcat-site
+  cd "$SK" && for f in SKILL.md references/*.md; do
+    if [ -f "$REPO/$f" ]; then
+      [ "$(md5sum <"$f")" = "$(md5sum <"$REPO/$f")" ] || echo "DRIFT: $f"
+    else echo "MISSING: $f"; fi
+  done
+  ```
+
+  Two traps, both hit for real: the glob `references/*.md` expands against the
+  **current** directory, so running the loop from the repo reports a bogus
+  `MISSING: references/*.md` while silently checking nothing — `cd` into the
+  skill dir first. And a `MISSING` line means the reference is newer than the
+  bundle (a version gap, not a corrupt file), so copy with
+  `cp "$SK"/references/*.md "$REPO/references/"` — the whole directory, then
+  re-run the loop and require zero output before committing. Cheapest tripwire
+  when you only want a yes/no: the `version:` line in each SKILL.md — a gap
+  there means the whole bundle is stale, so mirror before writing any content,
+  otherwise the refresh forces a second verify loop after your content commit.
+
+- **Refreshing the mirror is a three-file-class change, not a one-file copy**:
+  every new or renamed reference needs a row in the bundle's `index.md` table
+  plus a dated version line in its `## Notes` changelog, and the bundle's own
+  `updated:` bumped. A reference that ships without an `index.md` row is
+  invisible to a reader browsing the catalog — the same silent-loss shape the
+  whole-directory copy rule exists to prevent.
+
+- **Commit the mirror separately from content work** (`skill mirror: refresh …`
+  vs `bookmark: …`) even when both land in one push. The mirror is
+  pre-authorized; a mixed commit makes that claim harder to audit, and rule 6
+  already forbids mixing kinds. One push for both is fine — gate CI on the
+  final `headSha`, which covers every commit in it.
 - **Hugo page bundles do not serve non-index `.md`** (verified 2026-09-05 —
   see hugo-site-maintenance `references/page-bundle-markdown-not-served.md`):
   the mirror's SKILL.md/references are browsable on GitHub only. Never

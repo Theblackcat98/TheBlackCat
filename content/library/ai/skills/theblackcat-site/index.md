@@ -61,7 +61,7 @@ so the links below point at the repo copies. The gist is inline here.
 | File | Purpose |
 |---|---|
 | [SKILL.md](https://github.com/Theblackcat98/TheBlackCat/blob/main/content/library/ai/skills/theblackcat-site/SKILL.md) | Router, hard rules, repo facts at a glance (defers to the repo's `AGENTS.md`) |
-| [bookmark-workflow.md](https://github.com/Theblackcat98/TheBlackCat/blob/main/content/library/ai/skills/theblackcat-site/references/bookmark-workflow.md) | 11-step bookmark pipeline: dedupe by URL, real metadata, inbox placement, CI-gated verify |
+| [bookmark-workflow.md](https://github.com/Theblackcat98/TheBlackCat/blob/main/content/library/ai/skills/theblackcat-site/references/bookmark-workflow.md) | 11-step bookmark pipeline: dedupe by URL, real metadata, inbox placement, CI-gated verify, render-proof live check |
 | [blog-workflow.md](https://github.com/Theblackcat98/TheBlackCat/blob/main/content/library/ai/skills/theblackcat-site/references/blog-workflow.md) | Draft-flag publishing (`draft: true` on push, "publish X" flips live) + Willison-voice style guide |
 | [content-model.md](https://github.com/Theblackcat98/TheBlackCat/blob/main/content/library/ai/skills/theblackcat-site/references/content-model.md) | Front matter recipes, reserved-key table, statuses and dates, taxonomy rules, weekly triage procedure |
 | [site-model.md](https://github.com/Theblackcat98/TheBlackCat/blob/main/content/library/ai/skills/theblackcat-site/references/site-model.md) | Custom layouts, styles, config, what is visible where, deploy pipeline and checks (verified 2026-09-29) |
@@ -75,7 +75,7 @@ so the links below point at the repo copies. The gist is inline here.
 ## Notes
 
 The live copy of this skill is maintained in the agent's skill store; this
-mirror is refreshed whenever the skill changes. **2026-11-01 (v1.5.0):** rule
+mirror is refreshed whenever the skill changes. **2026-11-01 (v1.6.0):** the mirror drift-check is now written out as a runnable procedure in `SKILL.md` (exact md5 loop, `cd` into the skill dir first, whole-directory copy, version-line tripwire, and the mirror refreshed as its own commit), and `bookmark-workflow.md` now polls CI with `-L 8` while treating `queued`/`in_progress` as pending rather than failure, and requires a render-proof live check instead of a bare 200. **2026-11-01 (v1.5.0):** rule
 14 added (a standalone HTML artifact ships as `static/<slug>/index.html` plus an
 `article` entry in one commit) and the `live-artifact-pages.md` and
 `static-tool-pages.md` references joined the bundle; `link-check.md` re-synced.

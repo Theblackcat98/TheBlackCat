@@ -40,16 +40,24 @@ private notes — BlackCat is public.
 8. **Verify**: commit on `origin/main`
    (`git log origin/main -1 --oneline`) + file exists on origin
    (`gh api repos/Theblackcat98/TheBlackCat/contents/<path> --jq .path`).
-9. **CI**: poll `gh run list -L 1 --json headSha,status,conclusion,databaseId`
-   until the run whose `headSha` matches YOUR pushed commit is `completed`
-   (~3 min). Never gate on `-L 1` alone: right after a push the newest visible
-   run can still be the previous commit's green one — a false pass (hit
-   2026-10-07).
+9. **CI**: poll `gh run list -L 8 --json headSha,status,conclusion,databaseId`
+   until the run whose `headSha` matches YOUR pushed commit (compare by
+   prefix — `jq` gives the full sha) is `completed` (~3 min). Never gate on
+   `-L 1` alone: right after a push the newest visible run can still be the
+   previous commit's green one — a false pass (hit 2026-10-07).
+   Treat `queued`/`in_progress` as *pending*, never as failure: a poll loop
+   that breaks on "conclusion != success" exits on the first empty conclusion
+   before CI has even started, and reads as a red build that never existed.
    `failure` → `gh run view <id> --log-failed`,
    diagnose, fix (with approval for anything beyond the new file), re-verify.
    Never report success with a red build.
-10. **Live check**: `curl -s -o /dev/null -w '%{http_code}'` on the item's
-    page (inbox items appear at `/TheBlackCat/inbox/<slug>/`).
+10. **Live check — prove it rendered, not just that it returned 200**:
+    `curl -s -o /dev/null -w '%{http_code}'` on the item's page (inbox items at
+    `/TheBlackCat/inbox/<slug>/`), then grep the HTML body for a distinctive
+    string from your Notes (`curl -s <url> | grep -c 'frame-capture'`) and for
+    the rendered `<title>`. A page can be 200 and still be the previous build,
+    a bare shell, or emptied by a front-matter key Hugo ate — the status code
+    cannot tell those apart.
 11. **Report**: file path, GitHub blob URL, CI status.
 
 ## Pitfalls

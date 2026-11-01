@@ -1,7 +1,7 @@
 ---
 name: theblackcat-site
 description: "Operate Nik's TheBlackCat site: save bookmarks, write blog posts (draft-flag flow), weekly triage, and maintain the Hugo repo safely."
-version: 1.3.0
+version: 1.5.0
 author: Hermes Agent
 license: MIT
 platforms: [linux]
@@ -24,6 +24,8 @@ includes personal/private context, confirm before writing it into the repo.
 ## Triggers
 
 - "bookmark this" / "add to my bookmarks/library/BlackCat" → bookmark workflow
+- "add this to my website" / "put this on the site" **with an HTML file** →
+  live artifact page (static page + library entry), see router below
 - "write a blog post about X" / "blog this" → blog workflow (draft)
 - "publish X" / "publish <slug>" → blog workflow (publish step)
 - Editing this skill itself (SKILL.md or any reference) → do the edit in the
@@ -43,6 +45,8 @@ includes personal/private context, confirm before writing it into the repo.
 | Front matter recipes, reserved keys, placement rules | `references/content-model.md` |
 | Dead links, the weekly link-check issue, lychee/CI link checking | `references/link-check.md` |
 | Projects section, GitHub-repo sync, generated project pages | `references/projects-sync.md` |
+| Publish an HTML artifact as a live page (sent file → `static/<slug>/`) | `references/live-artifact-pages.md` |
+| Build or rework a static tool page we own (generator, vendoring, local test loop) | `references/static-tool-pages.md` |
 | Past build/rendering incidents (context for debugging) | `references/theblackcat-*.md` |
 | Generic Hugo debugging on any site (local builds, bisect) | `hugo-site-maintenance` skill |
 
@@ -94,6 +98,13 @@ includes personal/private context, confirm before writing it into the repo.
    `stars` refreshed. Never hand-add a page for a public repo (the sync will
    make one), and never rewrite a curated `language` with GitHub's value.
    Rules, manifest and verification ladder: `references/projects-sync.md`.
+14. **A standalone HTML artifact becomes `static/<slug>/index.html` plus a
+   `contenttype: article` entry in one commit** — the asset is the content, so
+   the content/non-content split (rule 6) does not apply to that pair, and
+   two commits would ship a live page whose link 404s. Copy it byte-identical,
+   keep the md5 to prove what Pages serves, and never tidy the artifact itself.
+   Recipe, browser-render checks and the unquoted-attribute grep trap:
+   `references/live-artifact-pages.md`.
 
 ## Repo facts at a glance
 

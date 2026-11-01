@@ -12,9 +12,11 @@ tags:
   - web
   - javascript
   - open-source
-status: inbox
+status: filed
 created: 2026-10-30
-updated: 2026-10-30
+updated: 2026-11-01
+related:
+  - /library/ai/open-3d-skills
 ---
 
 ## Why I saved this
@@ -39,3 +41,7 @@ The twelve repos, as listed in the post:
 - [LYGIA](https://github.com/patriciogonzalezvivo/lygia) — shader library (noise, liquid-chrome style effects)
 
 The post embeds the author's earlier Oct 20 post pointing to a full motion-design guide ("Motion Design with Opus 5.5: Direct It Like a Studio, Check It Like an Engineer"). The attached video wasn't playable when this was read, so it isn't described here.
+
+All twelve repos were reachable on 2026-11-01. For the agent-workflow layer on
+top of these libraries — scene building, scroll films, capture and browser
+checks — see [Open 3D Skills](/library/ai/open-3d-skills).

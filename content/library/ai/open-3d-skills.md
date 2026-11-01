@@ -14,9 +14,11 @@ tags:
   - web
   - motion-graphics
   - video
-status: inbox
+status: filed
 created: 2026-11-01
 updated: 2026-11-01
+related:
+  - /library/programming/twelve-free-open-source-motion-effects-repos
 ---
 
 ## Why I saved this
@@ -69,8 +71,8 @@ image or video generation service for `motion-assets`, `alpha-cutout`,
 and `frame-capture` need no generation service at all. No API keys are stored by
 the skills.
 
-MIT licensed, ~115 stars, active (last push 2026-10-31), and it names the
-services its observations came from (Higgsfield, MiniMax, Kling, Seedance,
+MIT licensed, 117 stars (checked 2026-11-01), active (last push 2026-10-31), and
+it names the services its observations came from (Higgsfield, MiniMax, Kling, Seedance,
 Nano Banana) without depending on any of them. Same territory as the
-free motion-effects repo list already in the inbox, but this one is the
-workflow layer rather than a library list.
+[free motion-effects repo list](/library/programming/twelve-free-open-source-motion-effects-repos),
+but this one is the workflow layer rather than a library list.

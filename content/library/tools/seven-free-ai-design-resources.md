@@ -10,9 +10,9 @@ tags:
   - design
   - web
   - ai
-status: inbox
+status: filed
 created: 2026-10-30
-updated: 2026-10-30
+updated: 2026-11-01
 ---
 
 ## Why I saved this
@@ -32,3 +32,7 @@ The seven resources, as listed in the post:
 - [60fps.design](https://60fps.design) — mobile UI animation references
 
 The post also carried a short video collage of website and animation examples.
+
+Checked 2026-11-01: every destination loads, but `godly.website` now
+301-redirects to `recent.design/?ref=godly`, so those two entries are one
+gallery today — six distinct destinations, not seven.

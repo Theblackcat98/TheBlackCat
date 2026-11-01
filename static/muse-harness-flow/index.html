@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="en" data-exhibit>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:,">
+<title>Muse Harness Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+html,body{margin:0}
+/* Layout: control-room HMI. Caption bar, one straight numbered path (loop under the model, injected/on-demand lanes above, write-back lane and self-improvement band below), then journey log, explainer and alarms. */
+:root{
+  --bg:#e2e6e1; --panel:#f0f2ee; --panel2:#e9ece7; --band:#dde2dc; --ink:#1b231f; --muted:#59645e; --rule:#c3cac4;
+  --line:#b3bbb5; --steel-d:#7f8a83;
+  --msg:#2a66a6; --tok:#b4770a; --tool:#167a6c; --store:#6c4f98; --bgw:#8a5a2b;
+  --ok:#2c8a3d; --warn:#c08c00; --crit:#c12e29;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --fdur:.7s;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141a1c; --panel:#1c2326; --panel2:#20282b; --band:#182024; --ink:#dde4e0; --muted:#8c9893; --rule:#323c40;
+  --line:#3e494e; --steel-d:#66737a;
+  --msg:#5c9fe4; --tok:#e3a43a; --tool:#3dbea6; --store:#a586d8; --bgw:#d49a62;
+  --ok:#4cc25d; --warn:#eebf3b; --crit:#ff5d50; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a1c; --panel:#1c2326; --panel2:#20282b; --band:#182024; --ink:#dde4e0; --muted:#8c9893; --rule:#323c40;
+  --line:#3e494e; --steel-d:#66737a;
+  --msg:#5c9fe4; --tok:#e3a43a; --tool:#3dbea6; --store:#a586d8; --bgw:#d49a62;
+  --ok:#4cc25d; --warn:#eebf3b; --crit:#ff5d50; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45}
+.wrap{max-width:1400px;margin:0 auto;padding-block:14px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px}
+header.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;justify-content:space-between}
+.ident{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;min-width:0}
+.ident h1{font-family:var(--f-display);font-weight:700;font-size:26px;letter-spacing:.02em;margin:0;text-transform:uppercase;text-wrap:balance}
+.ident .unit{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.status{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-family:var(--f-mono);font-size:12px}
+.chip{border:1px solid var(--rule);background:var(--panel);padding:3px 8px;border-radius:3px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.chip.sim{border-color:var(--warn)} .chip.sim b{color:var(--warn)}
+.chip.alm{border-color:var(--crit)} .chip.alm b{color:var(--crit)}
+.chip.alm.zero{border-color:var(--rule)} .chip.alm.zero b{color:var(--ok)}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:8px 10px}
+.grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.grp .lbl{font-family:var(--f-display);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+button{font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.03em;color:var(--ink);background:var(--panel2);border:1px solid var(--steel-d);border-radius:3px;padding:5px 11px;cursor:pointer;min-height:32px}
+button:hover{background:var(--band)}
+button:focus-visible,[data-eq]:focus-visible{outline:2px solid var(--msg);outline-offset:2px}
+button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.sep{width:1px;align-self:stretch;background:var(--rule)}
+
+.caption{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 16px;align-items:center;background:var(--panel);border:1px solid var(--rule);border-left:6px solid var(--cap,var(--steel-d));border-radius:4px;padding:10px 14px}
+.caption .num{grid-row:span 2;font-family:var(--f-display);font-weight:700;font-size:40px;line-height:1;color:var(--cap,var(--steel-d));min-width:1.2ch;text-align:center}
+.caption .main{grid-column:2;font-family:var(--f-display);font-weight:600;font-size:22px;line-height:1.2;text-wrap:balance}
+.caption .tech{grid-column:2;font-family:var(--f-mono);font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.caption .acts{grid-column:3;grid-row:1/3;display:flex;gap:6px;flex-wrap:wrap}
+.caption .acts[hidden]{display:none}
+.caption .acts button{border-color:var(--warn)}
+@media (max-width:640px){.caption{grid-template-columns:auto minmax(0,1fr)}.caption .acts{grid-row:auto;grid-column:1/-1}}
+
+.mimic-box{background:var(--panel2);border:1px solid var(--rule);border-radius:4px;overflow-x:auto}
+.mimic-box svg{display:block;width:100%;min-width:1060px;height:auto}
+.scroll-hint{display:none;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+@media (max-width:1080px){.scroll-hint{display:block}}
+
+.panels{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:4px;min-width:0;display:flex;flex-direction:column}
+.panel h2{font-family:var(--f-display);font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:0;padding:8px 12px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.panel h2 small{font-family:var(--f-mono);font-weight:400;font-size:11px;letter-spacing:0;text-transform:none;color:var(--muted)}
+.span2{grid-column:1/-1}
+@media (max-width:820px){.panels{grid-template-columns:minmax(0,1fr)}}
+
+.journey{list-style:none;margin:0;padding:8px 12px 12px;display:flex;flex-direction:column;gap:2px;max-height:380px;overflow-y:auto}
+.journey li{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:4px 0;border-bottom:1px dashed var(--rule)}
+.journey li:last-child{border-bottom:0}
+.journey .b{font-family:var(--f-display);font-weight:700;font-size:13px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:var(--panel);background:var(--c,var(--steel-d));align-self:start}
+.journey .tx{overflow-wrap:anywhere}
+.journey .tm{font-family:var(--f-mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.journey li.now .tx{font-weight:600}
+.j-msg{--c:var(--msg)} .j-tok{--c:var(--tok)} .j-tool{--c:var(--tool)} .j-store{--c:var(--store)} .j-crit{--c:var(--crit)} .j-gate{--c:var(--warn)} .j-bgw{--c:var(--bgw)}
+
+.face{padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px}
+.face .ft{font-family:var(--f-display);font-size:22px;font-weight:700;line-height:1.1}
+.face .ff{font-family:var(--f-mono);font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.face p{margin:0;max-width:62ch}
+.face dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;margin:4px 0 0;font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.face dt{color:var(--muted)} .face dd{margin:0;font-weight:500;overflow-wrap:anywhere}
+.face .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.face button{font-size:12px;min-height:28px;padding:3px 9px}
+
+.alist{list-style:none;margin:0;padding:0;font-family:var(--f-mono);font-size:12px;max-height:300px;overflow-y:auto}
+.alist li{display:grid;grid-template-columns:8px 64px 70px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 12px 6px 0;border-bottom:1px solid var(--rule);font-variant-numeric:tabular-nums}
+.alist .sev{align-self:stretch}
+.alist .p1 .sev{background:var(--crit)} .alist .p2 .sev{background:var(--warn)} .alist .p3 .sev{background:var(--msg)}
+.alist .time{color:var(--muted)} .alist .tag{font-weight:600} .alist .txt{min-width:0;overflow-wrap:anywhere}
+.alist li.p4{color:var(--muted)}
+.alist li.unack .tag{animation:blink 1s steps(2,start) infinite}
+.alist li.cleared{opacity:.6}
+.alist .acts{display:flex;gap:4px}
+.alist button{font-size:12px;padding:2px 8px;min-height:26px}
+.alist .st{font-size:10.5px;color:var(--muted)}
+.alist li.empty{display:block;padding:12px;color:var(--muted)}
+@keyframes blink{to{visibility:hidden}}
+@media (max-width:520px){.alist li{grid-template-columns:6px 56px minmax(0,1fr)}.alist .tag{grid-column:3}.alist .txt,.alist .acts{grid-column:2/-1}}
+.note{font-size:12.5px;color:var(--muted);max-width:84ch;margin:0}
+
+.mimic text{fill:var(--ink);font-family:var(--f-mono);font-size:10px}
+.mimic .lane{font-family:var(--f-display);font-size:13px;font-weight:700;letter-spacing:.09em;fill:var(--muted)}
+.mimic .lane-s{font-size:9.5px;fill:var(--muted)}
+.mimic .ttl{font-family:var(--f-display);font-size:15px;font-weight:700;letter-spacing:.02em}
+.mimic .ttl-s{font-family:var(--f-display);font-size:13px;font-weight:600}
+.mimic .sub{font-size:9.5px;fill:var(--muted)}
+.mimic .val{font-size:11.5px;font-weight:600;font-variant-numeric:tabular-nums}
+.mimic .band{fill:var(--band);stroke:none}
+.mimic .box{fill:var(--panel);stroke:var(--steel-d);stroke-width:1.4}
+.mimic .box.dash{stroke-dasharray:4 3}
+.mimic .ln{fill:none;stroke:var(--line);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.mimic .fl{fill:none;stroke-width:4;stroke-dasharray:6 8;stroke-linecap:round;stroke-linejoin:round;opacity:0;animation:flow var(--fdur) linear infinite}
+.mimic .fl.on{opacity:1}
+.mimic .c-msg{stroke:var(--msg)} .mimic .c-tok{stroke:var(--tok)} .mimic .c-tool{stroke:var(--tool)} .mimic .c-store{stroke:var(--store)} .mimic .c-bgw{stroke:var(--bgw)}
+@keyframes flow{to{stroke-dashoffset:-14}}
+.mimic .sig{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:7 3 1 3}
+.mimic .sig.on{stroke:var(--crit)}
+.mimic .badge circle{stroke:none;fill:var(--steel-d)}
+.mimic .badge text{fill:var(--panel);font-family:var(--f-display);font-weight:700;font-size:13px;text-anchor:middle}
+.mimic .st{transition:opacity .35s}
+.mimic.busy .st{opacity:.38}
+.mimic.busy .st.act{opacity:1}
+.mimic .st.act .box{stroke-width:2.6;stroke:var(--k,var(--msg))}
+.mimic .st.act .badge circle{fill:var(--k,var(--msg))}
+.mimic .k-msg{--k:var(--msg)} .mimic .k-tok{--k:var(--tok)} .mimic .k-tool{--k:var(--tool)} .mimic .k-store{--k:var(--store)} .mimic .k-bgw{--k:var(--bgw)} .mimic .k-gate{--k:var(--warn)}
+.mimic .led{fill:var(--panel);stroke:var(--steel-d);stroke-width:1.2}
+.mimic .led.on{fill:var(--k,var(--ok));stroke:var(--k,var(--ok))}
+.mimic .track{fill:none;stroke:var(--line);stroke-width:5}
+.mimic .gauge-bg{fill:var(--panel);stroke:var(--steel-d);stroke-width:1.2}
+.mimic .gauge{fill:var(--tok)}
+.mimic .gauge.hot{fill:var(--crit)}
+.mimic .layer{fill:var(--tok)}
+.mimic .gate{fill:var(--panel);stroke:var(--warn);stroke-width:2}
+.mimic .st.act .gate{fill:var(--warn)}
+.mimic .gate.hold{fill:var(--warn);animation:blink .8s steps(2,start) infinite}
+.mimic .pkt{fill:var(--pk,var(--msg));stroke:var(--panel);stroke-width:2.5}
+.mimic .pkt-h{fill:var(--pk,var(--msg));opacity:.22}
+.mimic [data-eq]{cursor:pointer}
+.mimic [data-eq]:hover .box{stroke:var(--ink)}
+.mimic .warn-t{fill:var(--warn);font-weight:600}
+.mimic .hot-t{fill:var(--crit);font-weight:600}
+@media (prefers-reduced-motion: reduce){
+  .mimic .fl{animation:none;stroke-dasharray:none}
+  .mimic .st{transition:none}
+  .alist li.unack .tag,.mimic .gate.hold{animation:none}
+}
+</style>
+
+<meta name="description" content="A live flow view of the Muse agent harness as Muse describes itself: context assembly from files, the model and tools loop with its approval gate, the proactivity gate for background work, and the self-improvement loop.">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/muse-harness-flow/">
+<meta property="og:title" content="Muse Harness Flow · The BlackCat">
+<meta property="og:description" content="A live flow view of the Muse agent harness as Muse describes itself: context assembly from files, the model and tools loop with its approval gate, the proactivity gate for background work, and the self-improvement loop.">
+<meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/muse-harness-flow/">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/muse-harness-flow-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Muse Harness Flow", "description": "A live flow view of the Muse agent harness as Muse describes itself: context assembly from files, the model and tools loop with its approval gate, the proactivity gate for background work, and the self-improvement loop.", "url": "https://theblackcat98.github.io/TheBlackCat/muse-harness-flow/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/muse-harness-flow-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="muse-harness-flow"></script>
+</head>
+<body>
+<a class="back" href="../tools/">← All tools</a>
+<div class="wrap">
+  <header class="bar">
+    <div class="ident">
+      <h1>Muse Harness · Message Flow</h1>
+      <span class="unit">input → output, one turn at a time</span>
+    </div>
+    <div class="status">
+      <span class="chip sim"><b>●</b> SIMULATED</span>
+      <span class="chip" id="clock">--:--:--</span>
+      <span class="chip alm" id="almChip"><b id="almN">0</b> waiting on you</span>
+    </div>
+  </header>
+
+  <div class="toolbar" role="toolbar" aria-label="Simulation controls">
+    <div class="grp">
+      <span class="lbl">Sim</span>
+      <button id="runBtn" aria-pressed="false">Pause</button>
+      <button id="stepBtn" title="Advance to the next step">Next step ▸</button>
+      <button data-speed=".5" aria-pressed="false">Slow</button>
+      <button data-speed="1" aria-pressed="true">Normal</button>
+      <button data-speed="2" aria-pressed="false">Fast</button>
+    </div>
+    <span class="sep" aria-hidden="true"></span>
+    <div class="grp">
+      <span class="lbl">You send</span>
+      <button data-inject="cal">Calendar question</button>
+      <button data-inject="email">Send an email</button>
+      <button data-inject="buy">Buy something</button>
+      <button data-inject="rem">“Remember…”</button>
+      <button data-inject="build">Build a page</button>
+      <button data-inject="long">Long conversation</button>
+    </div>
+    <span class="sep" aria-hidden="true"></span>
+    <div class="grp">
+      <span class="lbl">Background</span>
+      <button data-inject="hb">Heartbeat</button>
+      <button data-inject="hook">Hook fires</button>
+      <button data-inject="cron">Cron job</button>
+      <button data-inject="si">Self-improvement</button>
+    </div>
+  </div>
+
+  <div class="caption" id="cap" aria-live="polite">
+    <div class="num" id="capN">–</div>
+    <div class="main" id="capMain">Waiting for a message</div>
+    <div class="acts" id="capActs" hidden><button id="capApprove">Approve card</button><button id="capDeny">Decline</button></div>
+    <div class="tech" id="capTech">Nothing in flight</div>
+  </div>
+
+  <div>
+    <div class="mimic-box">
+      <svg class="mimic" id="mimic" viewBox="0 0 1240 822" role="img" aria-label="Flow of one turn through the Muse harness, from input on the left to delivery on the right, with background work below">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="var(--steel-d)"/></marker>
+        </defs>
+
+        <!-- lanes -->
+        <rect class="band" x="170" y="18" width="840" height="132" rx="6"/>
+        <text class="lane" x="182" y="38">INJECTED</text><text class="lane-s" x="264" y="38">every turn, whole</text>
+        <text class="lane" x="580" y="38">SEARCHED</text>
+        <text class="lane" x="682" y="38">READ ON DEMAND</text><text class="lane-s" x="814" y="38">only when the task needs it</text>
+        <rect class="band" x="440" y="566" width="790" height="132" rx="6"/>
+        <text class="lane" x="1218" y="590" text-anchor="end">WRITTEN BACK</text>
+        <text class="lane-s" x="1218" y="604" text-anchor="end">after the reply</text>
+        <text class="lane" x="20" y="150">YOU</text>
+        <text class="lane" x="20" y="308">BACKGROUND</text>
+
+        <g id="lines"></g>
+        <g id="flows"></g>
+
+        <ellipse class="track" cx="680" cy="375" rx="118" ry="103"/>
+        <path d="M562,384 L562,368" fill="none" stroke="none" marker-end="url(#arr)"/>
+        <text class="ttl-s" x="550" y="372" text-anchor="end">results</text><text class="sub" x="550" y="385" text-anchor="end">fenced as data</text>
+        <text class="sub" x="742" y="300">tool calls ↘</text>
+
+        <!-- injected -->
+        <g class="st k-store" data-eq="sysprompt" tabindex="0" role="button" aria-label="System prompt">
+          <rect class="box" x="180" y="52" width="92" height="66" rx="4"/>
+          <text class="ttl-s" x="190" y="72">System prompt</text>
+          <text class="sub" x="190" y="88">runtime-owned</text>
+          <text class="sub" x="190" y="101">tools · safety</text>
+        </g>
+        <g class="st k-store" data-eq="persona" tabindex="0" role="button" aria-label="Persona files">
+          <rect class="box" x="280" y="52" width="92" height="66" rx="4"/>
+          <text class="ttl-s" x="290" y="72">Persona files</text>
+          <text class="sub" x="290" y="88">AGENTS, SOUL</text>
+          <text class="sub" x="290" y="101">IDENTITY, USER</text>
+          <text class="sub" x="290" y="113">TOOLS</text>
+        </g>
+        <g class="st k-store" data-eq="memmd" tabindex="0" role="button" aria-label="MEMORY.md">
+          <rect class="box" x="380" y="52" width="92" height="66" rx="4"/>
+          <text class="ttl-s" x="390" y="72">MEMORY.md</text>
+          <text class="sub" x="390" y="88">curated facts</text>
+          <text class="val" x="390" y="106" id="memFacts">0 facts</text>
+        </g>
+        <g class="st k-store" data-eq="indexes" tabindex="0" role="button" aria-label="Indexes and alignment">
+          <rect class="box" x="480" y="52" width="92" height="66" rx="4"/>
+          <text class="ttl-s" x="490" y="72">Indexes</text>
+          <text class="sub" x="490" y="88">people, groups</text>
+          <text class="sub" x="490" y="101">alignment</text>
+          <text class="sub" x="490" y="113">synthesis</text>
+        </g>
+        <g class="st k-store" data-eq="search" tabindex="0" role="button" aria-label="Memory search">
+          <rect class="box dash" x="580" y="52" width="88" height="66" rx="4"/>
+          <text class="ttl-s" x="590" y="72">Search</text>
+          <text class="sub" x="590" y="88">daily notes</text>
+          <text class="sub" x="590" y="101">bank, people</text>
+          <text class="sub" x="590" y="113">past chats</text>
+        </g>
+        <!-- on demand -->
+        <g class="st k-tok" data-eq="od-skill" tabindex="0" role="button" aria-label="SKILL.md">
+          <rect class="box" x="682" y="52" width="76" height="66" rx="4"/>
+          <text class="ttl-s" x="690" y="72">SKILL.md</text>
+          <text class="sub" x="690" y="88">playbooks</text>
+          <text class="sub" x="690" y="101">54 + custom</text>
+        </g>
+        <g class="st k-tok" data-eq="od-conn" tabindex="0" role="button" aria-label="CONNECTOR.md">
+          <rect class="box" x="764" y="52" width="80" height="66" rx="4"/>
+          <text class="ttl-s" x="772" y="72">CONNECTOR</text>
+          <text class="sub" x="772" y="88">per service</text>
+          <text class="sub" x="772" y="101">63 services</text>
+        </g>
+        <g class="st k-tok" data-eq="od-goal" tabindex="0" role="button" aria-label="GOAL.md">
+          <rect class="box" x="850" y="52" width="72" height="66" rx="4"/>
+          <text class="ttl-s" x="858" y="72">GOAL.md</text>
+          <text class="sub" x="858" y="88">per goal</text>
+          <text class="sub" x="858" y="101">progress, briefs</text>
+        </g>
+        <g class="st k-tok" data-eq="od-docs" tabindex="0" role="button" aria-label="Product docs">
+          <rect class="box" x="928" y="52" width="72" height="66" rx="4"/>
+          <text class="ttl-s" x="936" y="72">docs/</text>
+          <text class="sub" x="936" y="88">how Muse</text>
+          <text class="sub" x="936" y="101">works (29)</text>
+        </g>
+
+        <g id="inputs"></g>
+
+        <!-- stamp -->
+        <g class="st k-msg" data-eq="stamp" tabindex="0" role="button" aria-label="Stamp">
+          <rect class="box" x="205" y="206" width="118" height="68" rx="4"/>
+          <text class="ttl-s" x="215" y="224">Stamped</text>
+          <text class="sub" x="215" y="240">time tag (your tz)</text>
+          <text class="sub" x="215" y="253">device_id</text>
+          <text class="sub" x="215" y="266">attachments</text>
+        </g>
+        <text class="sub" x="266" y="294" text-anchor="middle">fresh worker session</text>
+
+        <!-- 2 assemble -->
+        <g class="st k-store" data-eq="assemble" tabindex="0" role="button" aria-label="Assemble context">
+          <rect class="box" x="365" y="196" width="116" height="88" rx="4"/>
+          <g class="badge"><circle cx="380" cy="212" r="10"/><text x="380" y="216.5">2</text></g>
+          <text class="ttl" x="395" y="217">Assemble</text>
+          <rect class="layer" x="375" y="228" width="96" height="14" rx="2" fill="var(--store)" fill-opacity=".14"/>
+          <rect class="layer" x="375" y="244" width="96" height="14" rx="2" fill="var(--store)" fill-opacity=".26"/>
+          <rect class="layer" x="375" y="260" width="96" height="14" rx="2" fill="var(--store)" fill-opacity=".4"/>
+          <text class="sub" x="380" y="238.5">searched hits</text>
+          <text class="sub" x="380" y="254.5">persona · memory</text>
+          <text class="sub" x="380" y="270.5">system prompt</text>
+        </g>
+
+        <!-- 3 model -->
+        <g class="st k-tok" data-eq="model" tabindex="0" role="button" aria-label="Model reasons">
+          <rect class="box" x="610" y="204" width="140" height="72" rx="4"/>
+          <g class="badge"><circle cx="625" cy="220" r="10"/><text x="625" y="224.5">3</text></g>
+          <text class="ttl" x="640" y="225">Model reasons</text>
+          <text class="sub" x="620" y="245" id="mdA">Muse Spark · stateless</text>
+          <text class="val" x="620" y="264" id="mdB">—</text>
+        </g>
+
+        <!-- approval gate on loop -->
+        <g class="st k-gate" data-eq="approval" tabindex="0" role="button" aria-label="Approval gate">
+          <path id="gateA" class="gate" d="M798,359 L814,375 L798,391 L782,375 Z"/>
+          <text class="ttl-s" x="822" y="370">Approval gate</text>
+          <text class="sub" x="822" y="383">send · buy · publish</text>
+          <text class="sub" x="822" y="395">delete → card tap</text>
+        </g>
+
+        <!-- context gauge -->
+        <g class="st k-tok" data-eq="context" tabindex="0" role="button" aria-label="Context window">
+          <text class="ttl-s" x="680" y="320" text-anchor="middle">Context window</text>
+          <rect class="gauge-bg" x="600" y="330" width="160" height="22" rx="3"/>
+          <rect class="gauge" id="gFill" x="600" y="330" width="0" height="22" rx="3"/>
+          <text class="val" x="680" y="371" text-anchor="middle" id="gTxt" style="font-size:10.5px">—</text>
+          <text class="sub" x="680" y="390" text-anchor="middle" id="gPass">loop idle</text>
+          <text class="sub" x="680" y="408" text-anchor="middle" id="gCmp">compacts when full</text>
+        </g>
+
+        <!-- 4 tools -->
+        <g class="st k-tool" data-eq="tools" tabindex="0" role="button" aria-label="Run tools">
+          <rect class="box" x="615" y="460" width="130" height="50" rx="4"/>
+          <g class="badge"><circle cx="630" cy="476" r="10"/><text x="630" y="480.5">4</text></g>
+          <text class="ttl" x="645" y="481">Run tools</text>
+          <text class="sub" x="625" y="499" id="tlA">load on demand</text>
+        </g>
+        <g id="chips"></g>
+
+        <!-- 5 respond -->
+        <g class="st k-msg" data-eq="respond" tabindex="0" role="button" aria-label="Respond">
+          <rect class="box" x="860" y="204" width="120" height="72" rx="4"/>
+          <g class="badge"><circle cx="875" cy="220" r="10"/><text x="875" y="224.5">5</text></g>
+          <text class="ttl" x="890" y="225">Respond</text>
+          <text class="sub" x="870" y="245">final reply</text>
+          <text class="val" x="870" y="264" id="rpA">—</text>
+        </g>
+
+        <!-- proactivity gate -->
+        <g class="st k-gate" data-eq="proactive" tabindex="0" role="button" aria-label="Proactivity gate">
+          <path id="gateP" class="gate" d="M1005,226 L1019,240 L1005,254 L991,240 Z"/>
+          <text class="sub" x="1040" y="362">◆ proactivity gate: background work only</text>
+        </g>
+
+        <!-- 6 delivered -->
+        <g class="st k-msg" data-eq="output" tabindex="0" role="button" aria-label="Delivered">
+          <rect class="box" x="1030" y="190" width="190" height="100" rx="4"/>
+          <g class="badge"><circle cx="1045" cy="206" r="10"/><text x="1045" y="210.5">6</text></g>
+          <text class="ttl" x="1060" y="211">Delivered</text>
+          <g id="outRows"></g>
+        </g>
+        <g class="st k-gate" data-eq="silent" tabindex="0" role="button" aria-label="Silent">
+          <rect class="box" x="1030" y="304" width="190" height="42" rx="4"/>
+          <text class="ttl-s" x="1040" y="321">Silent</text>
+          <text class="sub" x="1040" y="336">held for a digest, or skipped</text>
+          <text class="val" x="1210" y="321" text-anchor="end" id="silN">0</text>
+        </g>
+
+        <!-- write back -->
+        <g class="st k-store" data-eq="db" tabindex="0" role="button" aria-label="Chat history">
+          <rect class="box" x="470" y="614" width="150" height="74" rx="4"/>
+          <text class="ttl-s" x="480" y="634">Chat history</text>
+          <text class="sub" x="480" y="648">Postgres · permissions</text>
+          <text class="val" x="480" y="667" id="dbA">0 messages</text>
+          <text class="sub" x="480" y="681" id="dbB">0 compactions</text>
+        </g>
+        <g class="st k-store" data-eq="memw" tabindex="0" role="button" aria-label="Memory write-back">
+          <rect class="box" x="645" y="614" width="160" height="74" rx="4"/>
+          <text class="ttl-s" x="655" y="634">Memory write-back</text>
+          <text class="sub" x="655" y="648">MEMORY.md · daily note</text>
+          <text class="sub" x="655" y="661">people / groups pages</text>
+          <text class="val" x="655" y="680" id="memA">0 daily notes</text>
+        </g>
+        <g class="st k-store" data-eq="goalw" tabindex="0" role="button" aria-label="Goal state">
+          <rect class="box" x="830" y="614" width="130" height="74" rx="4"/>
+          <text class="ttl-s" x="840" y="634">Goal state</text>
+          <text class="sub" x="840" y="648">GOAL.md · files</text>
+          <text class="sub" x="840" y="661">todos closed</text>
+          <text class="val" x="840" y="680" id="goalA">0 updates</text>
+        </g>
+        <text class="sub" x="440" y="500" transform="rotate(-90 440 500)" text-anchor="middle">compaction → summary</text>
+
+        <!-- self-improvement band -->
+        <rect class="band" x="20" y="712" width="1200" height="104" rx="6"/>
+        <text class="lane" x="32" y="734">BETWEEN</text>
+        <text class="lane" x="32" y="750">CONVERSATIONS</text>
+        <text class="lane-s" x="32" y="768">same agent,</text>
+        <text class="lane-s" x="32" y="781">runtime’s schedule,</text>
+        <text class="lane-s" x="32" y="794">writes files,</text>
+        <text class="lane-s" x="32" y="807">never sends</text>
+        <g id="siBoxes"></g>
+        <text class="sub" x="1192" y="808" text-anchor="end">↺ the loop continues</text>
+
+        <g id="pkt" style="display:none"><circle class="pkt-h" r="13"/><circle class="pkt" r="6.5"/></g>
+      </svg>
+    </div>
+    <span class="scroll-hint">Scroll the diagram sideways to follow the whole path →</span>
+  </div>
+
+  <section class="panels">
+    <div class="panel">
+      <h2>This turn's journey <small id="jHead">—</small></h2>
+      <ol class="journey" id="journey"></ol>
+    </div>
+    <div class="panel">
+      <h2>What is this? <small id="fpTag">following the turn</small></h2>
+      <div class="face" id="face"></div>
+    </div>
+    <div class="panel span2">
+      <h2>Approvals &amp; events <small id="almSum">—</small></h2>
+      <ul class="alist" id="alist" aria-live="polite"></ul>
+    </div>
+  </section>
+  <p class="note">Built from the Muse Harness Explorer the agent wrote about itself (components, lifecycle diagrams A–D and file routing E–G). Muse isn't open source, so this is the harness as Muse describes it. Counts come from that snapshot; all live values are simulated.</p>
+</div>
+
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const k1=n=>n>=100000?Math.round(n/1000)+'k':n>=1000?(n/1000).toFixed(1)+'k':String(Math.round(n));
+
+/* ---------- inputs ---------- */
+const INPUTS=[
+  {k:'app',name:'Muse app',sub:'web, phone, Mac',y:160,c:'msg'},
+  {k:'wa',name:'WhatsApp',sub:'same agent',y:200,c:'msg'},
+  {k:'side',name:'Side chats',sub:'own memory + rules',y:240,c:'msg'},
+  {k:'hb',name:'Heartbeat',sub:'every ~30 min',y:316,c:'bgw'},
+  {k:'cron',name:'Cron',sub:'workspace/cron.d/',y:356,c:'bgw'},
+  {k:'hook',name:'Hooks',sub:'poll or data change',y:396,c:'bgw'}];
+const inEl={};
+INPUTS.forEach(r=>{const g=el('g',{class:'st k-'+r.c,'data-eq':'in-'+r.k,tabindex:0,role:'button','aria-label':r.name},$('inputs'));
+  el('rect',{class:'box',x:20,y:r.y,width:140,height:34,rx:4},g);
+  const led=el('circle',{class:'led',cx:32,cy:r.y+12,r:4.5},g);
+  el('text',{class:'ttl-s',x:42,y:r.y+16},g,r.name);
+  el('text',{class:'sub',x:28,y:r.y+28},g,r.sub);
+  if(r.k==='hb'||r.k==='cron')el('text',{class:'val',x:152,y:r.y+16,'text-anchor':'end',id:'nx-'+r.k,style:'font-size:10px'},g,'');
+  inEl[r.k]={led};});
+(function(){const b=el('g',{class:'badge'},$('inputs'));el('circle',{cx:150,cy:146,r:10},b);el('text',{x:150,y:150.5},b,'1');})();
+
+/* ---------- outputs ---------- */
+const OUTS=[['chat','Your chat (+ push)'],['wa','WhatsApp'],['side','The side chat'],['feed','The Feed (held items)']];
+const outEl={};
+OUTS.forEach(([k,l],i)=>{const y=232+i*16;outEl[k]=el('circle',{class:'led',cx:1046,cy:y-3.5,r:4},$('outRows'));el('text',{class:'sub',x:1056,y},$('outRows'),l);});
+
+/* ---------- tool chips ---------- */
+const TOOLS=[
+  {k:'shell',name:'Shell · files',col:0,row:0,dur:[.8,2],res:[300,3000],ns:'muse.*',sh:'muse.*'},
+  {k:'browser',name:'Browser',col:1,row:0,dur:[2,4.5],res:[2000,8000],ns:'browser.*',sh:'browser.*'},
+  {k:'connectors',name:'Connectors',col:2,row:0,dur:[1,2.4],res:[600,4000],ns:'connector CLIs',sh:'CLIs'},
+  {k:'artifacts',name:'Artifacts',col:0,row:1,dur:[2.5,4.5],res:[800,2500],ns:'artifact.*',sh:'artifact.*'},
+  {k:'cronhooks',name:'Cron · hooks',col:1,row:1,dur:[.5,1.2],res:[100,400],ns:'cron.* · hooks.*',sh:'cron, hooks'},
+  {k:'subagents',name:'Subagents',col:2,row:1,dur:[6,10],res:[700,2500],ns:'spawn → handoff',sh:'handoff'}];
+const chipEl={};
+TOOLS.forEach(t=>{const x=770+t.col*66,y=t.row?500:440;t.cx=x+30;t.cy=t.row?500:470;
+  const g=el('g',{class:'st k-tool','data-eq':'chip:'+t.k,tabindex:0,role:'button','aria-label':t.name},$('chips'));
+  el('rect',{class:'box',x,y,width:60,height:30,rx:3},g);
+  el('text',{class:'ttl-s',x:x+30,y:y+13,'text-anchor':'middle',style:'font-size:11px'},g,t.name);
+  chipEl[t.k]={st:el('text',{class:'sub',x:x+30,y:y+25,'text-anchor':'middle',style:'font-size:8.5px'},g,'')};});
+
+/* ---------- self-improvement ---------- */
+const SI=[
+  {k:'hourly',t:'Hourly · memory upkeep',w:'daily notes consolidated,',w2:'people & groups pages refreshed',feeds:['memmd','search','indexes']},
+  {k:'nightly',t:'Nightly · dreaming',w:'dated reflection in dreams/,',w2:'ALIGNMENT_SYNTHESIS.md rolled up',feeds:['indexes']},
+  {k:'daily',t:'Daily · curation & skill review',w:'custom skills written, goal briefs,',w2:'Feed & Ideas prepared',feeds:['od-skill','od-goal']},
+  {k:'quiet',t:'Quiet moments · tidy pass',w:'stray observations filed,',w2:'loose ends closed',feeds:['search']}];
+SI.forEach((s,i)=>{const x=170+i*258;s.cx=x+115;
+  const g=el('g',{class:'st k-bgw','data-eq':'si-'+s.k,tabindex:0,role:'button','aria-label':s.t},$('siBoxes'));
+  el('rect',{class:'box',x,y:726,width:230,height:66,rx:4},g);
+  el('text',{class:'ttl-s',x:x+10,y:745},g,s.t);
+  el('text',{class:'sub',x:x+10,y:761},g,s.w);
+  el('text',{class:'sub',x:x+10,y:774},g,s.w2);
+  el('text',{class:'sub',x:x+10,y:787,id:'sio-'+s.k},g,i===1?'injected into tomorrow’s turns ↑':i===2?'read on the next matching task ↑':'searched next turn ↑');});
+
+/* ---------- lines ---------- */
+const LINES={
+  'in-app':['M160,177 H182 V240 H365','msg'],
+  'in-wa':['M160,217 H182 V240 H365','msg'],
+  'in-side':['M160,257 H182 V240 H365','msg'],
+  'in-hb':['M160,333 H190 V300 H342 V268 H365','bgw'],
+  'in-cron':['M160,373 H190 V300 H342 V268 H365','bgw'],
+  'in-hook':['M160,413 H190 V300 H342 V268 H365','bgw'],
+  'i-sys':['M226,118 V168 H423 V196','store'],
+  'i-per':['M326,118 V168 H423 V196','store'],
+  'i-mem':['M426,118 V196','store'],
+  'i-idx':['M526,118 V168 H423 V196','store'],
+  's-mem':['M624,118 V168 H423 V196','store'],
+  'o-skill':['M720,118 V178 H700 V204','tok'],
+  'o-conn':['M804,118 V178 H700 V204','tok'],
+  'o-goal':['M886,118 V178 H700 V204','tok'],
+  'o-docs':['M964,118 V178 H700 V204','tok'],
+  'p2m':['M481,240 H610','tok'],
+  'lp-out':['M680,276 A118,103 0 0 1 680,478','tool'],
+  'lp-back':['M680,478 A118,103 0 0 1 680,276','tool'],
+  'm2r':['M750,240 H860','msg'],
+  'r2o':['M980,240 H1030','msg'],
+  'r2s':['M980,240 H1005 V325 H1030','bgw'],
+  'w-db':['M975,276 V590 H545 V614','store'],
+  'w-mem':['M975,276 V590 H725 V614','store'],
+  'w-goal':['M975,276 V590 H895 V614','store'],
+  'si':['M400,759 H428 M658,759 H686 M916,759 H944','bgw']};
+TOOLS.forEach(t=>{LINES['t-'+t.k]=[`M745,485 H${t.cx} V${t.cy}`,'tool'];});
+const lineEl={};
+for(const id in LINES){const [d,c]=LINES[id];
+  if(id!=='lp-out'&&id!=='lp-back'&&id!=='si')el('path',{d,class:'ln'},$('lines'));
+  lineEl[id]=el('path',{d,class:'fl c-'+c},$('flows'));}
+(function(){const g=$('siBoxes'),f0=g.firstChild;g.insertBefore(el('path',{d:'M400,759 H428 M658,759 H686 M916,759 H944',class:'ln',style:'stroke-width:3'}),f0);g.insertBefore(lineEl.si,f0);})();
+const cmpSig=el('path',{d:'M600,341 H452 V650 H470',class:'sig'},$('lines'));
+
+/* ---------- scenarios (what Muse does per kind of request) ---------- */
+const SC={
+  cal:{src:'app',ask:'What’s on my calendar this week?',route:'Connector route',docs:['conn'],passes:[['connectors']],w:3},
+  email:{src:'app',ask:'Reply to the landlord and say Tuesday works',route:'Connector route',docs:['skill','conn'],passes:[['connectors'],['connectors!']],gate:'Send email reply to the landlord',w:2},
+  buy:{src:'app',ask:'Reorder the dog food we got last month',route:'Skill route (shopping)',docs:['skill'],passes:[['browser'],['browser!']],gate:'Purchase · pay with wallet',w:1.5},
+  how:{src:'wa',ask:'How does the Feed decide what to show me?',route:'Product-question route',docs:['docs'],passes:[],w:1},
+  rem:{src:'wa',ask:'Remember I prefer aisle seats',route:'Learning route',docs:[],passes:[['shell']],mem:'write',w:1.5},
+  build:{src:'app',ask:'Compare three CRMs and make me a page',route:'Build route',docs:['skill'],passes:[['subagents'],['artifacts!']],gate:'Publish the CRM comparison page',w:1},
+  goal:{src:'app',ask:'Where am I on my reading goal?',route:'Goal route',docs:['goal'],passes:[['shell']],goal:true,w:1.5},
+  side:{src:'side',ask:'A contact asks: can we move our call to 3pm?',route:'Side-chat worker',docs:[],passes:[['connectors']],w:1},
+  long:{src:'app',ask:'Keep going on the migration plan',route:'Build route',docs:['skill'],passes:[['shell'],['shell','connectors'],['shell']],long:true,w:0},
+  hb:{src:'hb',ask:'Work through the HEARTBEAT.md checklist',route:'Heartbeat worker',docs:[],passes:[['connectors']],bg:true,w:0},
+  cron:{src:'cron',ask:'Weekly goal briefing',route:'Cron worker · goal route',docs:['goal'],passes:[['shell']],bg:true,goal:true,out:'feed',w:0},
+  hook:{src:'hook',ask:'Hook poll came back true: a watched price dropped',route:'Hook worker',docs:[],passes:[['browser']],bg:true,out:'chat',w:0}};
+const SRCN={app:'the Muse app',wa:'WhatsApp',side:'a side chat',hb:'Heartbeat',cron:'Cron',hook:'A hook'};
+const isBg=T=>['hb','cron','hook'].includes(T.src);
+
+const S={t:0,speed:1,paused:false,stepping:false,stepTarget:0,phaseCount:0,queue:[],phase:'idle',prev:'idle',phaseT:0,phaseDur:0,turn:null,
+  ctx:0,ctxMax:200000,compactions:12,messages:9800,memFacts:150,dailyNotes:30,goalUpd:0,silent:0,custom:5,
+  calls:[],toolsT:0,led:{},alarms:[],aid:0,alarmVer:1,journey:[],lastJourney:null,
+  hbNext:45,hbPeriod:90,cronNext:150,cronPeriod:210,siNext:70,siStage:0,idleT:0,sel:'model',follow:true,jVer:1,gate:null};
+const startWall=Date.now();
+const fmtT=t=>new Date(startWall+t*1000).toLocaleTimeString([], {hour12:false});
+
+function addAlarm(pri,tag,text,o={}){
+  const a={id:++S.aid,t:S.t,pri,tag,text,acked:pri===4,cleared:false,action:o.action||null,auto:o.autoClear?S.t+o.autoClear:null};
+  S.alarms.unshift(a);
+  S.alarms=S.alarms.filter(x=>!(x.cleared&&x.acked&&x.pri!==4&&S.t-x.t>20));
+  while(S.alarms.length>14){const i=S.alarms.map(x=>x.pri===4||(x.cleared&&x.acked)).lastIndexOf(true);if(i<0)break;S.alarms.splice(i,1);}
+  S.alarmVer++;return a;}
+const ev=(tag,text)=>addAlarm(4,tag,text);
+function clearAlarm(a){if(a&&!a.cleared){a.cleared=true;S.alarmVer++;}}
+function J(n,text,c){S.journey.push({n,text,c,t:S.t});S.jVer++;}
+
+function arrive(key){const sc=SC[key];S.led[sc.src]=1.4;S.queue.push({key,...sc,passes:sc.passes.map(p=>p.slice())});}
+
+/* ---------- phase machine ---------- */
+function setPhase(p,dur){S.prev=S.phase;S.phase=p;S.phaseT=0;S.phaseDur=dur;S.phaseCount++;enter(p);}
+function newJourney(){if(S.journey.length)S.lastJourney=S.journey;S.journey=[];S.jVer++;}
+function startTurn(job){
+  newJourney();
+  S.ctx=job.long?rnd(158000,166000):isBg(job)?rnd(16000,22000):rnd(24000,60000);
+  S.turn={...job,iter:0,toolsUsed:0,out:job.out||(isBg(job)?'silent':job.src==='wa'?'wa':job.src==='side'?'side':'chat')};
+  if(job.src==='hb'&&Math.random()<.2)S.turn.out='chat';
+  J(1,isBg(job)?`${SRCN[job.src]} fired: “${job.ask}”. A fresh worker session starts with the same tools and files.`:`Message from ${SRCN[job.src]}: “${job.ask}”. Stamped with a time tag and device_id.`,isBg(job)?'bgw':'msg');
+  setPhase('ingest',isBg(job)?1.6:2);}
+function enter(p){
+  const T=S.turn;
+  if(p==='assemble'){J(2,`Context assembled: system prompt, AGENTS/SOUL/IDENTITY/USER/TOOLS, MEMORY.md, people & groups indexes, alignment synthesis${T.src==='side'?', plus this side chat’s own MEMORY.md and DISCRETION.md':''}`,'store');}
+  if(p==='reason'){const first=T.iter===0;
+    S.reasonDocs=first?T.docs:[];
+    S.phaseDur=(S.prev==='tools'?.9:.7)+rnd(1.2,2)+(S.reasonDocs.length?1.4:0);
+    if(first){const names={skill:'SKILL.md',conn:'CONNECTOR.md (connection verified live)',goal:'GOAL.md and its briefs',docs:'docs/muse.md, then the topic file'};
+      J(3,`Classified as ${T.route}${S.reasonDocs.length?`; read ${S.reasonDocs.map(d=>names[d]).join(' + ')} before acting`:'; no extra files needed'}`,'tok');}}
+  if(p==='compact'){addAlarm(2,'CTX',`Context nearly full (${Math.round(S.ctx/S.ctxMax*100)}%): compacting older turns`,{autoClear:4});}
+  if(p==='respond'){J(5,`Reply written${T.toolsUsed?` from ${T.toolsUsed} tool result${T.toolsUsed>1?'s':''}`:''}`,'msg');}
+  if(p==='deliver'){
+    if(isBg(T)){const map={chat:'fresh, wanted, and new to you → delivered to your chat with a push',feed:'worth knowing but not urgent → held for the Feed',silent:'nothing new worth interrupting you for → silent'};
+      J('◆',`Proactivity gate read PROACTIVE_PREFERENCES.md: ${map[T.out]}`,'gate');
+      if(T.out==='silent'){S.silent++;}}
+    else J('◆','Proactivity gate skipped: you asked, so the reply goes straight back','gate');}
+  if(p==='writeback'){const w=['chat saved'];
+    if(T.mem==='write'){S.memFacts++;w.push('MEMORY.md updated (and the owning file, e.g. USER.md)');}
+    else if(!isBg(T)&&Math.random()<.4){w.push('a durable fact went to today’s daily note');}
+    if(T.goal){S.goalUpd++;w.push('GOAL.md progress updated');}
+    S.wb={mem:T.mem==='write'||w.length>1&&!T.goal,goal:!!T.goal};
+    J('✓','Written back: '+w.join(', '),'store');}}
+function wantCompact(){return S.ctx>.88*S.ctxMax;}
+function advance(){
+  const T=S.turn;
+  switch(S.phase){
+    case 'ingest':setPhase('assemble',2.8);break;
+    case 'assemble':setPhase('reason',0);break;
+    case 'reason':{S.ctx+=rnd(150,600);
+      if(wantCompact()){S.afterCompact='reason2';setPhase('compact',2.6);break;}
+      afterReason();break;}
+    case 'compact':{const b=S.ctx;S.ctx*=rnd(.35,.45);S.compactions++;J(3,`Context full: older turns compacted into a summary (${k1(b)} → ${k1(S.ctx)} tokens) so the thread can continue`,'crit');afterReason();break;}
+    case 'respond':setPhase('deliver',isBg(T)?2.2:1.4);break;
+    case 'deliver':{const out={chat:'your chat',wa:'WhatsApp',side:'the side chat',feed:'the Feed'}[T.out];
+      if(T.out!=='silent')J(6,`Delivered to ${out}`,'msg');setPhase('writeback',2.2);break;}
+    case 'writeback':S.messages+=2+T.toolsUsed*2;S.turn=null;S.prev=S.phase;S.phase='idle';S.phaseCount++;S.idleT=0;break;
+    case 'si':{S.siStage++;if(S.siStage>=SI.length){S.turn=null;S.prev='si';S.phase='idle';S.phaseCount++;S.siNext=rnd(110,150);S.idleT=0;J('↺','Pass complete. Nothing was sent; the files it changed are read back in on the next turn.','bgw');}
+      else{S.phaseT=0;S.phaseCount++;siStageEnter();}break;}}}
+function afterReason(){const T=S.turn;
+  if(T.passes.length){beginTools();}
+  else{J(3,`Model pass ${T.iter+1}: no more tools needed, writing the reply`,'tok');setPhase('respond',1.8);}}
+function beginTools(){const T=S.turn;const list=T.passes.shift();
+  S.calls=list.map(k=>{const cons=k.endsWith('!');k=k.replace('!','');const d=TOOLS.find(t=>t.k===k);return{k,cons,t:0,dur:rnd(...d.dur),res:rnd(...d.res),done:false};});
+  S.toolsT=0;S.gateState=S.calls.some(c=>c.cons)?'pending':null;
+  T.toolsUsed+=S.calls.length;
+  J(3,`Model pass ${T.iter+1}: calls ${S.calls.map(c=>TOOLS.find(t=>t.k===c.k).name.toLowerCase()).join(' + ')}${S.gateState?' (consequential)':''}`,'tok');
+  setPhase('tools',0);}
+function resolveGate(ok){if(S.gateState!=='hold')return;S.gateState=ok?'ok':'no';
+  if(S.gateAlarm){S.gateAlarm.acked=true;clearAlarm(S.gateAlarm);}
+  J('◆',ok?`You approved the card: ${S.turn.gate}`:`You declined the card; the model is told and nothing executes`,ok?'gate':'crit');
+  if(!ok)S.calls.forEach(c=>{if(c.cons){c.denied=true;c.dur=.3;c.res=80;}});}
+function stepTools(dt){
+  S.toolsT+=dt;
+  if(S.toolsT<.6)return;
+  if(S.gateState==='pending'){S.gateState='hold';S.gateT=0;S.gateAlarm=addAlarm(1,'APPROVAL',`Card waiting for your tap: ${S.turn.gate}`,{action:'approve'});J('◆',`Approval card shown: “${S.turn.gate}”. Nothing executes until you tap.`,'gate');}
+  if(S.gateState==='hold'){S.toolsT=.6;S.gateT+=dt;if(S.gateT>30){S.gateState='hold';resolveGate(false);}return;}
+  if(S.toolsT<1.1)return;
+  let all=true;
+  for(const c of S.calls){if(c.done)continue;all=false;c.t+=dt;if(c.t>=c.dur){c.done=true;S.ctx+=c.res;
+    if(c.k==='subagents')ev('HANDOFF','Subagent finished; handoff returned as data and verified');
+    if(c.k==='connectors'&&!isBg(S.turn))ev('CONNECTOR','Connection status verified live (not trusted from config cache)');}}
+  if(all){const T=S.turn;
+    J(4,S.calls.map(c=>{const n=TOOLS.find(t=>t.k===c.k).name;return c.denied?`${n} not run (declined)`:c.k==='subagents'?`Subagent spawned with a brief, handoff back in ${c.dur.toFixed(1)}s`:`${n} done in ${c.dur.toFixed(1)}s (+${k1(c.res)} tok)`;}).join(' · '),'tool');
+    T.iter++;S.calls=[];S.gateState=null;setPhase('reason',0);}}
+function startSI(){newJourney();S.turn={si:true,src:'si'};S.siStage=0;S.prev=S.phase;S.phase='si';S.phaseT=0;S.phaseDur=3.2;S.phaseCount++;
+  J('↺','Nobody’s talking. The self-improvement loop runs on the runtime’s own schedule.','bgw');siStageEnter();}
+function siStageEnter(){const s=SI[S.siStage];S.phaseDur=3.2;
+  if(s.k==='hourly'){S.dailyNotes++;J('↺','Hourly upkeep: today’s notes consolidated; people and groups pages refreshed','bgw');}
+  if(s.k==='nightly')J('↺','Dreaming: a dated reflection lands in dreams/, alignment rolls up into ALIGNMENT_SYNTHESIS.md','bgw');
+  if(s.k==='daily'){const sk=Math.random()<.35;if(sk)S.custom++;J('↺',`Daily pass: Ideas curated, Feed prepared, goal briefings written${sk?', and a new custom skill written from recurring work':', skills reviewed'}`,'bgw');}
+  if(s.k==='quiet')J('↺','Quiet-moment pass: stray observations filed into memory, loose ends closed','bgw');}
+
+function step(dt){
+  S.t+=dt;
+  if(Math.random()<.03*dt){let r=Math.random()*Object.values(SC).reduce((a,s)=>a+s.w,0);for(const k in SC){r-=SC[k].w;if(r<=0){arrive(k);break;}}}
+  if(Math.random()<.004*dt)arrive('hook');
+  S.hbNext-=dt;if(S.hbNext<=0){S.hbNext=S.hbPeriod;arrive('hb');}
+  S.cronNext-=dt;if(S.cronNext<=0){S.cronNext=S.cronPeriod;arrive('cron');}
+  for(const k in S.led)S.led[k]=Math.max(0,S.led[k]-dt);
+  for(const a of S.alarms)if(a.auto&&!a.cleared&&S.t>=a.auto)clearAlarm(a);
+  if(S.phase==='idle'){S.idleT+=dt;S.siNext-=dt;
+    if(S.queue.length&&S.idleT>1.2)startTurn(S.queue.shift());
+    else if(S.siNext<=0&&S.idleT>2)startSI();}
+  else if(S.phase==='tools')stepTools(dt);
+  else{S.phaseT+=dt;if(S.phaseT>=S.phaseDur)advance();}}
+
+/* ---------- render ---------- */
+const setT=(id,v)=>{const e=typeof id==='string'?$(id):id;if(e.textContent!==String(v))e.textContent=v;};
+const setCls=(e,c,on)=>e.classList.toggle(c,!!on);
+const KC={msg:'var(--msg)',tok:'var(--tok)',tool:'var(--tool)',store:'var(--store)',bgw:'var(--bgw)',gate:'var(--warn)'};
+function pathPt(id,f){const p=lineEl[id];return p.getPointAtLength(Math.max(0,Math.min(1,f))*p.getTotalLength());}
+const ODMAP={skill:['od-skill','o-skill'],conn:['od-conn','o-conn'],goal:['od-goal','o-goal'],docs:['od-docs','o-docs']};
+function info(){
+  const T=S.turn,ph=S.phase,act=new Set(),on=new Set();let pt=null,col='msg',n='–',main='Waiting for a message',tech='Nothing in flight. Send something in, or wait for the heartbeat.',eq=null;
+  if(!T)return{act,on,pt,col,n,main,tech,eq};
+  if(ph==='si'){const s=SI[S.siStage];col='bgw';n='↺';act.add('si-'+s.k);s.feeds.forEach(f=>act.add(f));on.add('si');
+    pt={x:s.cx,y:759};
+    main={hourly:'No one’s talking: the hourly pass tidies memory',nightly:'Overnight, Muse “dreams”: it reflects on the day and recalibrates',daily:'The daily pass curates, prepares the Feed, and reviews skills',quiet:'A quiet-moment pass files loose ends'}[s.k];
+    tech={hourly:'memory/YYYY-MM-DD.md consolidated → bank/, people/, groups/ refreshed',nightly:'dreams/YYYY-MM-DD.md written → dreams/alignment/derived/ALIGNMENT_SYNTHESIS.md (injected next turn)',daily:'workspace/custom-skills/ · goals/<slug>/briefs/ · Feed & Ideas',quiet:'stray observations → memory'}[s.k];eq='si-'+s.k;
+    return{act,on,pt,col,n,main,tech,eq};}
+  const ik=T.src;const bg=isBg(T);
+  if(ph==='ingest'){const f=S.phaseT/S.phaseDur;act.add('in-'+ik);on.add('in-'+ik);if(!bg)act.add('stamp');
+    pt=pathPt('in-'+ik,f);n='1';col=bg?'bgw':'msg';eq='in-'+ik;
+    main=bg?`${SRCN[ik]} fires and starts a fresh worker`:'Your message arrives and gets stamped';
+    tech=bg?{hb:'workspace/cron.d/minutely/heartbeat__interval@30m.md → worker reads HEARTBEAT.md',cron:'cron.d job comes due (polled, so times are approximate) → worker session',hook:'hooks/scripts poll emits “wake” → worker gets the hook’s prompt'}[ik]:'time tag in your timezone · device_id · attachments';}
+  else if(ph==='assemble'){const f=S.phaseT/S.phaseDur;act.add('assemble');col='store';n='2';pt={x:423,y:240};eq='assemble';
+    if(f<.6){['sysprompt','persona','memmd','indexes'].forEach(x=>act.add(x));['i-sys','i-per','i-mem','i-idx'].forEach(x=>on.add(x));
+      main='The runtime rebuilds the context from files on disk';tech='system prompt → AGENTS · SOUL · IDENTITY · USER · TOOLS → MEMORY.md → people/groups INDEX.md → ALIGNMENT_SYNTHESIS.md';}
+    else{act.add('search');on.add('s-mem');main='Memory is searched for anything relevant to this message';tech='memory_search: dated notes, bank/, people & groups pages, past chats (only matching pieces, never whole)';}}
+  else if(ph==='reason'){act.add('model');act.add('context');col='tok';n='3';eq='model';
+    const pre=S.prev==='tools'?.9:.7;
+    if(S.phaseT<pre){if(S.prev==='tools'){pt=pathPt('lp-back',S.phaseT/pre);on.add('lp-back');col='tool';}else{pt=pathPt('p2m',S.phaseT/pre);on.add('p2m');}}
+    else{pt={x:680,y:240};
+      if(S.reasonDocs.length&&S.phaseT<pre+1.4){S.reasonDocs.forEach(d=>{act.add(ODMAP[d][0]);on.add(ODMAP[d][1]);});}}
+    const reading=S.reasonDocs.length&&S.phaseT>=pre&&S.phaseT<pre+1.4;
+    main=S.prev==='tools'?'Tool results come back; the model decides what’s next':reading?'Before acting, Muse reads the playbook for this kind of task':'The model works out the ask and what it needs';
+    tech=reading?'SKILL.md before acting · CONNECTOR.md before touching an account · GOAL.md for goal work · docs/ for product questions':`${T.route} · the model holds nothing between turns; everything came from disk`;}
+  else if(ph==='compact'){act.add('context');act.add('db');col='tok';n='3';pt={x:680,y:341};eq='context';
+    main='The conversation got too long, so older turns are compacted';tech='older turns summarised so the thread can continue';}
+  else if(ph==='tools'){col='tool';n='4';eq='tools';
+    if(S.toolsT<.6||S.gateState==='hold'){pt=pathPt('lp-out',.5*Math.min(1,S.toolsT/.6));on.add('lp-out');if(S.gateState){act.add('approval');eq='approval';}else act.add('tools');}
+    else if(S.toolsT<1.1){pt=pathPt('lp-out',.5+.5*(S.toolsT-.6)/.5);on.add('lp-out');act.add('tools');}
+    else{pt={x:680,y:485};act.add('tools');S.calls.filter(c=>!c.done).forEach(c=>{act.add('chip:'+c.k);on.add('t-'+c.k);});}
+    act.add('context');
+    if(S.gateState==='hold'){col='gate';main=`Paused at the approval gate: “${T.gate}”. Tap Approve or Decline.`;tech='consequential writes (send, buy, publish, delete) surface a card and wait for you';}
+    else{main='The runtime executes the tools the model asked for';tech=S.calls.map(c=>TOOLS.find(t=>t.k===c.k).ns).join(' · ')+' · results come back fenced as [EXTERNAL CONTENT]';}}
+  else if(ph==='respond'){act.add('respond');on.add('m2r');pt=pathPt('m2r',S.phaseT/.8);n='5';eq='respond';
+    main='No more tools needed, so the model writes the reply';tech='reactions, widgets or attachments as needed';}
+  else if(ph==='deliver'){const f=S.phaseT/S.phaseDur;act.add('proactive');eq='proactive';
+    if(bg){col='gate';
+      if(f<.45){pt={x:1005,y:240};n='◆';main='The proactivity gate decides whether this reaches you';tech='PROACTIVE_PREFERENCES.md: is it fresh? wanted? new to you?';}
+      else if(T.out==='silent'){act.add('silent');on.add('r2s');pt=pathPt('r2s',(f-.45)/.55);n='◆';col='bgw';main='Nothing worth interrupting you for, so it stays silent';tech='the common case: a decision, not a failure';eq='silent';}
+      else{act.add('output');on.add('r2o');pt=pathPt('r2o',(f-.45)/.55);n='6';col='msg';main=T.out==='feed'?'Not urgent, so it’s held for the Feed':'Worth sending: it lands in your chat with a push';tech='handoff → main agent → delivery';eq='output';}}
+    else{act.add('output');on.add('r2o');pt=pathPt('r2o',f);n='6';main='The reply lands where you asked';tech='you asked, so the proactivity gate is a pass-through';eq='output';}}
+  else if(ph==='writeback'){act.add('db');on.add('w-db');col='store';n='✓';pt=pathPt('w-db',S.phaseT/S.phaseDur);eq='memw';
+    if(S.wb.mem){act.add('memw');on.add('w-mem');}if(S.wb.goal){act.add('goalw');on.add('w-goal');}
+    main='Afterwards, anything durable is written back to disk';tech='the next turn re-reads these files: that is how Muse “remembers”';}
+  return{act,on,pt,col,n,main,tech,eq};}
+function render(){
+  const I=info(),T=S.turn;
+  setCls($('mimic'),'busy',!!T);
+  document.querySelectorAll('#mimic .st').forEach(g=>setCls(g,'act',I.act.has(g.getAttribute('data-eq'))));
+  for(const id in lineEl)setCls(lineEl[id],'on',I.on.has(id));
+  setCls(cmpSig,'on',S.phase==='compact');
+  setCls($('gateA'),'hold',S.gateState==='hold');
+  const pk=$('pkt');if(I.pt){pk.style.display='';pk.setAttribute('transform',`translate(${I.pt.x.toFixed(1)},${I.pt.y.toFixed(1)})`);pk.style.setProperty('--pk',KC[I.col]);}else pk.style.display='none';
+  setT('capN',I.n);setT('capMain',I.main);setT('capTech',I.tech);
+  $('cap').style.setProperty('--cap',T?KC[I.col]:'var(--steel-d)');
+  $('capActs').hidden=S.gateState!=='hold';
+  INPUTS.forEach(r=>setCls(inEl[r.k].led,'on',S.led[r.k]>0||(T&&T.src===r.k)));
+  OUTS.forEach(([k])=>setCls(outEl[k],'on',T&&!T.si&&(S.phase==='deliver'&&I.n==='6'||S.phase==='writeback')&&T.out===k));
+  const fm=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+  setT('nx-hb',fm(S.hbNext));setT('nx-cron',fm(S.cronNext));
+  setT('memFacts',S.memFacts+' facts');
+  setT('mdA',T&&S.phase==='reason'?'reading · reasoning':'Muse Spark · stateless');
+  setT('mdB',T&&!T.si?`pass ${T.iter+1}`:'—');
+  const fr=Math.min(1,S.ctx/S.ctxMax),live=T&&!T.si;$('gFill').setAttribute('width',live?(160*fr).toFixed(1):0);setCls($('gFill'),'hot',fr>=.88);
+  setT('gTxt',live?`${k1(S.ctx)} tokens · ${Math.round(fr*100)}% full`:'—');
+  setT('gPass',live?`loop pass ${T.iter+1}`:'loop idle');
+  setT('gCmp',S.phase==='compact'?'compacting older turns…':'compacts when full');$('gCmp').setAttribute('class',S.phase==='compact'?'sub hot-t':'sub');
+  setT('tlA',S.phase==='tools'&&S.toolsT>=1.1?`${S.calls.filter(c=>!c.done).length} running`:S.gateState==='hold'?'waiting on the gate':'load on demand');
+  TOOLS.forEach(t=>{const c=S.calls.find(c=>c.k===t.k&&!c.done);setT(chipEl[t.k].st,c&&S.toolsT>=1.1?'running':t.sh);});
+  setT('rpA',T&&!T.si&&(S.phase==='respond'||S.phase==='deliver')?(isBg(T)?'handoff':'reply'):'—');
+  setT('silN',S.silent+' so far');
+  setT('dbA',S.messages.toLocaleString()+' messages');setT('dbB',S.compactions+' compactions');
+  setT('memA',S.dailyNotes+' daily notes');setT('goalA',S.goalUpd+' updates');
+  setT('sio-daily',`${S.custom} custom skills · read on next match ↑`);
+  setT('clock',fmtT(S.t));
+  const un=S.alarms.filter(a=>!a.acked).length;setT('almN',un);setCls($('almChip'),'zero',un===0);
+  if(S.follow&&T&&I.eq&&I.eq!==S.sel){S.sel=I.eq;fpBuilt=null;}}
+
+let jLast=0;
+function renderJourney(){
+  if(S.jVer===jLast)return;jLast=S.jVer;
+  const list=S.journey.length?S.journey:(S.lastJourney||[]);
+  const T=S.turn;
+  setT('jHead',T?(T.si?'self-improvement · in progress':`${T.route} · in progress`):list.length?'last turn · complete':'—');
+  const ol=$('journey');ol.textContent='';
+  if(!list.length){const li=document.createElement('li');const s=document.createElement('span');s.className='tx';s.style.gridColumn='1/-1';s.textContent='Nothing yet. Send something in, or wait for the heartbeat.';li.append(s);ol.appendChild(li);return;}
+  list.forEach((s,i)=>{const li=document.createElement('li');li.className='j-'+s.c+(T&&i===list.length-1?' now':'');
+    const b=document.createElement('span');b.className='b';b.textContent=s.n;
+    const tx=document.createElement('span');tx.className='tx';tx.textContent=s.text;
+    const tm=document.createElement('span');tm.className='tm';tm.textContent='+'+(s.t-list[0].t).toFixed(1)+'s';
+    li.append(b,tx,tm);ol.appendChild(li);});
+  ol.scrollTop=ol.scrollHeight;}
+
+let aLast=0;
+function renderAlarms(){
+  if(S.alarmVer===aLast)return;aLast=S.alarmVer;const ul=$('alist');ul.textContent='';
+  if(!S.alarms.length){const li=document.createElement('li');li.className='empty';li.textContent='Nothing waiting. Try “Buy something” to see an approval card.';ul.appendChild(li);}
+  for(const a of S.alarms){const li=document.createElement('li');li.className='p'+a.pri+(!a.acked?' unack':'')+(a.cleared?' cleared':'');
+    const sev=document.createElement('span');sev.className='sev';
+    const tm=document.createElement('span');tm.className='time';tm.textContent=fmtT(a.t);
+    const tg=document.createElement('span');tg.className='tag';tg.textContent=a.tag;
+    const tx=document.createElement('span');tx.className='txt';tx.textContent=a.text;
+    const acts=document.createElement('span');acts.className='acts';
+    if(a.action==='approve'&&!a.cleared){const b1=document.createElement('button');b1.textContent='Approve';b1.onclick=()=>resolveGate(true);
+      const b2=document.createElement('button');b2.textContent='Decline';b2.onclick=()=>resolveGate(false);acts.append(b1,b2);}
+    else if(!a.acked){const b=document.createElement('button');b.textContent='Ack';b.onclick=()=>{a.acked=true;S.alarmVer++;};acts.append(b);}
+    else if(a.pri!==4){const s=document.createElement('span');s.className='st';s.textContent=a.cleared?'DONE':'ACK';acts.append(s);}
+    li.append(sev,tm,tg,tx,acts);ul.appendChild(li);}
+  setT('almSum',`${S.alarms.filter(a=>a.pri<4&&!a.cleared).length} open · ${S.alarms.filter(a=>!a.acked).length} unacknowledged`);}
+
+/* ---------- explainer (paraphrased from the Muse Harness Explorer) ---------- */
+const EQ={
+  'in-app':{t:'Muse app',f:'web · iOS · Android · Mac',d:'The main chat: full context and full memory. Every message is stamped with a time tag in your timezone and your paired device_id before anything else happens.'},
+  'in-wa':{t:'WhatsApp channel',f:'channel into the same agent',d:'Messages over WhatsApp reach the same agent with the same files and memory as the app.'},
+  'in-side':{t:'Side chats',f:'~/side-chats/<chat>/MEMORY.md · DISCRETION.md',d:'Spin-off conversations with their own memory. External side chats put a worker in front of other people; DISCRETION.md says what it may say or decide, and anything consequential routes back to the main agent and to you.'},
+  'in-hb':{t:'Heartbeat',f:'workspace/cron.d/minutely/heartbeat__interval@30m.md · ~/HEARTBEAT.md',d:'Roughly every 30 minutes a worker reads the tiny HEARTBEAT.md checklist and checks it. It only escalates through the proactivity gate if something actually needs you.'},
+  'in-cron':{t:'Cron jobs',f:'workspace/cron.d/ (daily · hourly · minutely · weekly · runonce)',d:'Clock schedules stored as files. They poll rather than watch, so times are approximate by minutes. Each run is a background worker whose findings reach you only through the proactivity gate.'},
+  'in-hook':{t:'Hooks & subscriptions',f:'~/hooks/ · ~/subscriptions/',d:'A small Bash poll script checks a condition; when it comes back true, a worker wakes with the hook’s prompt. New hooks start disabled until tested. Subscriptions (activity feed, device syncs, space actions) wake workers on data changes.'},
+  stamp:{t:'Stamp',f:'runtime',d:'Before the model sees anything, the message gets a time tag in your current timezone (it follows you when you travel), your device_id, and any attachments.'},
+  sysprompt:{t:'System prompt',f:'runtime-owned · readable copy at workspace/system/system_prompt.md',d:'Tool definitions, workflows and safety rules, prepended to every turn of every agent. Nothing written to disk can override it; the copy in the workspace is for reading, not editing.'},
+  persona:{t:'Persona files',f:'~/AGENTS.md · SOUL.md · IDENTITY.md · USER.md · TOOLS.md',d:'House rules (AGENTS), voice and values (SOUL), who the agent is (IDENTITY), your compact profile (USER), and local setup notes (TOOLS). They are prose read fresh every turn, so editing one changes behaviour from the very next message.'},
+  memmd:{t:'MEMORY.md',f:'~/MEMORY.md',d:'The curated long-term memory: durable facts, preferences and commitments, kept small enough to inject whole into every turn.',v:()=>[['Facts',S.memFacts]]},
+  indexes:{t:'Indexes & alignment',f:'memory/people/INDEX.md · memory/groups/INDEX.md · dreams/alignment/derived/ALIGNMENT_SYNTHESIS.md',d:'Indexes of the people and groups in your life are injected every turn (the detail pages are read on demand). The alignment synthesis, written by the nightly dreaming pass, makes each new turn start calibrated.'},
+  search:{t:'memory_search',f:'memory/YYYY-MM-DD.md · memory/bank/ · people/ · groups/ · past chats',d:'The deep store is never loaded whole. Semantic and keyword search pull only the matching pieces into this turn.',v:()=>[['Daily notes',S.dailyNotes]]},
+  'od-skill':{t:'SKILL.md playbooks',f:'/opt/muse/skills/ (54, read-only) · workspace/custom-skills/ (yours)',d:'When a request looks like a known workflow, Muse reads the SKILL.md first and follows it. A skill grants knowledge, never permission: a skill that says “book the flight” still goes through the approval gate.',v:()=>[['Custom skills',S.custom]]},
+  'od-conn':{t:'CONNECTOR.md',f:'/opt/hatch/connectors/ (63) · CLIs in /opt/hatch/bin/ (101)',d:'Each connected service ships a doc describing its CLI and errors, read in the turn that uses it. Connection status is verified live, never trusted from the config cache.'},
+  'od-goal':{t:'GOAL.md',f:'workspace/goals/<slug>/',d:'One folder per tracked goal with GOAL.md, files, briefs, goal-owned crons and agent notes. Read for goal work; updated when progress changes.'},
+  'od-docs':{t:'Product docs',f:'~/docs/ (29 files)',d:'The product’s own documentation. For “how does Muse work?” questions the agent reads docs/muse.md as the index, then the topic file.'},
+  assemble:{t:'Context assembly',f:'runtime · rebuilt every turn',d:'The single most important mechanism: it turns a folder of files into what the model sees right now. Standing files are injected, memory is searched, and anything arriving mid-turn from tools or other agents is fenced as external content: data to use, never instructions to obey.'},
+  model:{t:'The model',f:'Muse Spark (per-session runtime tag) · product docs say Muse Wonder',d:'Reads the assembled context and produces either a reply or tool calls. It never touches files, the web or your accounts directly, and it holds nothing between turns; continuity is re-read from disk every time.'},
+  context:{t:'Context window',f:'runtime',d:'Every pass adds tokens: the model’s output and each tool result. When the context fills, older turns are compacted into summaries so the conversation can continue.',v:()=>[['Compactions',S.compactions]]},
+  approval:{t:'Approval gate',f:'runtime-enforced · approval cards',d:'Consequential actions (sending, buying, publishing, deleting, home and device actions) do not execute directly. They surface a card and wait for your tap. Reads pass quietly.'},
+  tools:{t:'Tools & namespaces',f:'muse.* · browser.* · artifact.* · cron.* · chat.* · hooks.* · media.* …',d:'Namespaces are loaded on demand so each turn stays lean. Long shell commands run in the background and report back rather than blocking the conversation.'},
+  respond:{t:'Respond',f:'main agent',d:'When the model needs no more tools, it writes the reply. For background work, the “reply” is a handoff to the main agent; nothing has been sent yet.'},
+  proactive:{t:'Proactivity gate',f:'proactivity.select · ~/PROACTIVE_PREFERENCES.md',d:'Background findings arrive as a handoff. The gate checks your rules: is it fresh, wanted, and new to you? Only then does it reach you. When you asked the question yourself, the gate is a pass-through.',v:()=>[['Silent so far',S.silent]]},
+  output:{t:'Delivered',f:'your chat · WhatsApp · side chat · Feed',d:'User replies go back where you asked. Background items either land in your chat with a push or are held for the Feed, which the agent authors on a schedule the system controls.'},
+  silent:{t:'Silent',f:'proactivity gate outcome',d:'The most common outcome for background work: held for a digest or skipped. It is a decision, not a failure.'},
+  db:{t:'Chat history',f:'app database (Postgres) · .postgres-ready sentinel',d:'Chats, messages and permission history live in the app database. Compaction summaries keep long threads going.',v:()=>[['Messages',S.messages.toLocaleString()]]},
+  memw:{t:'Memory write-back',f:'~/MEMORY.md · memory/YYYY-MM-DD.md · people/ · groups/',d:'Durable facts go to MEMORY.md (plus the file that owns the subject, like USER.md) or today’s daily note; people and group pages are updated when something about them changed. The forget skill can remove a fact from every layer.'},
+  goalw:{t:'Goal state',f:'workspace/goals/<slug>/GOAL.md',d:'Progress, files and todos for tracked goals are updated so the next turn, and the background briefings, see where things stand.',v:()=>[['Updates',S.goalUpd]]},
+  'si-hourly':{t:'Hourly memory upkeep',f:'memory/ · bank/ · people/ · groups/',d:'Daily notes are consolidated, what lasted is promoted, stale entries pruned, and people and group pages refreshed.'},
+  'si-nightly':{t:'Dreaming',f:'~/dreams/ · dreams/alignment/derived/',d:'Each night a dated reflection is written and alignment notes roll up into ALIGNMENT_SYNTHESIS.md, which is injected into future turns.'},
+  'si-daily':{t:'Curation & skill review',f:'workspace/custom-skills/ · goals/*/briefs/ · Feed & Ideas',d:'Ideas are curated, the Feed prepared, goal briefings written, and a skill-review pass writes or improves playbooks from your recurring work.',v:()=>[['Custom skills',S.custom]]},
+  'si-quiet':{t:'Quiet-moment pass',f:'memory',d:'After a conversation goes quiet, stray observations are filed and loose ends closed.'}};
+const TD={shell:'Shell and files on the VM (muse.*), plus memory tools.',browser:'A real Chromium with one shared profile, so logins persist. Sign-in codes travel as opaque vault references; the agent never sees them.',connectors:'Documented CLIs for Gmail, Calendar, Drive, GitHub, Stripe and dozens more. Auth is OAuth or vault-held tokens.',artifacts:'A builder subagent authors and audits pages, apps and files. Publishing always needs a fresh approval.',cronhooks:'cron.add / hooks.add create schedules and event hooks as files.',subagents:'Workers with a self-contained brief run in parallel and return a handoff, treated as data to verify.'};
+TOOLS.forEach(t=>EQ['chip:'+t.k]={t:t.name,f:t.ns,d:TD[t.k]});
+let fpBuilt=null,fpVals=null;
+function renderFace(){
+  const e=EQ[S.sel];if(!e)return;
+  if(fpBuilt!==S.sel){fpBuilt=S.sel;const f=$('face');f.textContent='';
+    const t=document.createElement('div');t.className='ft';t.textContent=e.t;
+    const ff=document.createElement('div');ff.className='ff';ff.textContent=e.f;
+    const p=document.createElement('p');p.textContent=e.d;
+    fpVals=document.createElement('dl');
+    const row=document.createElement('div');row.className='row';
+    if(!S.follow){const b=document.createElement('button');b.textContent='Follow the turn again';b.onclick=()=>{S.follow=true;fpBuilt=null;setT('fpTag','following the turn');};row.append(b);}
+    f.append(t,ff,p,fpVals,row);}
+  const rows=e.v?e.v():[];fpVals.textContent='';fpVals.hidden=!rows.length;
+  rows.forEach(([k,v])=>{const dt=document.createElement('dt');dt.textContent=k;const dd=document.createElement('dd');dd.textContent=v;fpVals.append(dt,dd);});}
+function selectEq(k){if(EQ[k]){S.follow=false;S.sel=k;fpBuilt=null;setT('fpTag','pinned: '+EQ[k].t);renderFace();}}
+const svgEl=$('mimic');
+svgEl.addEventListener('click',e=>{const g=e.target.closest('[data-eq]');if(g)selectEq(g.getAttribute('data-eq'));});
+svgEl.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const g=e.target.closest('[data-eq]');if(g){e.preventDefault();selectEq(g.getAttribute('data-eq'));}}});
+
+/* ---------- controls ---------- */
+function setPaused(p){S.paused=p;S.stepping=false;$('runBtn').textContent=p?'Play':'Pause';$('runBtn').setAttribute('aria-pressed',p);}
+$('runBtn').onclick=()=>setPaused(!S.paused);
+$('stepBtn').onclick=()=>{S.stepTarget=S.phaseCount+1;S.paused=false;S.stepping=true;$('runBtn').textContent='Play';$('runBtn').setAttribute('aria-pressed',true);};
+$('capApprove').onclick=()=>resolveGate(true);$('capDeny').onclick=()=>resolveGate(false);
+document.querySelectorAll('[data-speed]').forEach(b=>b.onclick=()=>{S.speed=+b.dataset.speed;
+  document.querySelectorAll('[data-speed]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  document.documentElement.style.setProperty('--fdur',(0.7/S.speed)+'s');});
+document.querySelectorAll('[data-inject]').forEach(b=>b.onclick=()=>{const k=b.dataset.inject;
+  if(k==='si'){if(S.phase==='idle')startSI();else S.siNext=0;return;}
+  if(k==='hb'){S.hbNext=.01;return;}if(k==='cron'){S.cronNext=.01;return;}
+  arrive(k);});
+
+/* ---------- boot ---------- */
+ev('BOOT','Runtime up · .postgres-ready present · 54 skills, 63 connectors loaded');
+for(let i=0;i<400;i++){step(.1);if(S.gateState==='hold')resolveGate(true);}
+S.alarms.forEach(a=>{if(a.pri<4&&a.cleared)a.acked=true;});S.alarmVer++;
+if(!S.turn&&!S.queue.length)arrive('cal');
+let last=performance.now(),acc=0,frame=0;
+function loop(now){const dt=Math.min(.25,(now-last)/1000);last=now;
+  if(!S.paused){acc+=dt*S.speed;while(acc>=.05){step(.05);acc-=.05;
+    if(S.stepping&&S.phaseCount>=S.stepTarget){setPaused(true);acc=0;break;}}}
+  render();renderJourney();renderAlarms();
+  if(frame++%6===0)renderFace();
+  requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

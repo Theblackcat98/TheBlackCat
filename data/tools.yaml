@@ -485,7 +485,7 @@ tools:
     related: [svg-optimizer, favicon-generator]
     added: "2026-09-15"
 
-  # ── Exhibits (4) ───────────────────────────────────────────────────────────
+  # ── Exhibits (6) ───────────────────────────────────────────────────────────
   - id: aether-atelier
     name: AETHER atelier
     url: aether-atelier/
@@ -534,3 +534,27 @@ tools:
     related: [aether-atelier, tui-design-study]
     added: "2026-09-15"
     featured: true
+
+  - id: hermes-harness-flow
+    name: Hermes Harness Flow
+    url: hermes-harness-flow/
+    writeup: library/ai/hermes-harness-flow/
+    category: exhibits
+    kind: exhibit
+    short: Follow one message through the Hermes agent harness, SCADA-style, from input to output.
+    desc: "A live, control-room style flow view of the open-source Hermes agent harness: one message followed through the gateway, prompt assembly, the model and tools loop, compression and write-back, on simulated telemetry."
+    tags: [agents, ai, simulation, svg]
+    related: [muse-harness-flow, anatomy]
+    added: "2026-10-31"
+
+  - id: muse-harness-flow
+    name: Muse Harness Flow
+    url: muse-harness-flow/
+    writeup: library/ai/muse-harness-flow/
+    category: exhibits
+    kind: exhibit
+    short: The Muse agent harness as Muse describes itself, from message to delivery and the loops in between.
+    desc: "A live flow view of the Muse agent harness built from the agent's own description: context assembly from files, the model and tools loop with its approval gate, the proactivity gate for background work, and the self-improvement loop."
+    tags: [agents, ai, simulation, svg]
+    related: [hermes-harness-flow, anatomy]
+    added: "2026-10-31"

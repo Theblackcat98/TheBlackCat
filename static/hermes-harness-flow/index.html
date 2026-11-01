@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="en" data-exhibit>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:,">
+<title>Hermes Harness Mimic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+html,body{margin:0}
+/* Layout: control-room HMI. Caption bar, one straight numbered path (loop hangs under the model, read-in lane above, write-out lane below), then journey log, explainer and alarms. */
+:root{
+  --bg:#e2e6e1; --panel:#f0f2ee; --panel2:#e9ece7; --band:#dde2dc; --ink:#1b231f; --muted:#59645e; --rule:#c3cac4;
+  --line:#b3bbb5; --steel-d:#7f8a83;
+  --msg:#2a66a6; --tok:#b4770a; --tool:#167a6c; --store:#6c4f98;
+  --ok:#2c8a3d; --warn:#c08c00; --crit:#c12e29;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --fdur:.7s;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141a1c; --panel:#1c2326; --panel2:#20282b; --band:#182024; --ink:#dde4e0; --muted:#8c9893; --rule:#323c40;
+  --line:#3e494e; --steel-d:#66737a;
+  --msg:#5c9fe4; --tok:#e3a43a; --tool:#3dbea6; --store:#a586d8;
+  --ok:#4cc25d; --warn:#eebf3b; --crit:#ff5d50; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a1c; --panel:#1c2326; --panel2:#20282b; --band:#182024; --ink:#dde4e0; --muted:#8c9893; --rule:#323c40;
+  --line:#3e494e; --steel-d:#66737a;
+  --msg:#5c9fe4; --tok:#e3a43a; --tool:#3dbea6; --store:#a586d8;
+  --ok:#4cc25d; --warn:#eebf3b; --crit:#ff5d50; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45}
+.wrap{max-width:1400px;margin:0 auto;padding-block:14px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px}
+header.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;justify-content:space-between}
+.ident{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;min-width:0}
+.ident h1{font-family:var(--f-display);font-weight:700;font-size:26px;letter-spacing:.02em;margin:0;text-transform:uppercase;text-wrap:balance}
+.ident .unit{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.status{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-family:var(--f-mono);font-size:12px}
+.chip{border:1px solid var(--rule);background:var(--panel);padding:3px 8px;border-radius:3px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.chip.sim{border-color:var(--warn)} .chip.sim b{color:var(--warn)}
+.chip.alm{border-color:var(--crit)} .chip.alm b{color:var(--crit)}
+.chip.alm.zero{border-color:var(--rule)} .chip.alm.zero b{color:var(--ok)}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:8px 10px}
+.grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.grp .lbl{font-family:var(--f-display);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+button{font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.03em;color:var(--ink);background:var(--panel2);border:1px solid var(--steel-d);border-radius:3px;padding:5px 11px;cursor:pointer;min-height:32px}
+button:hover{background:var(--band)}
+button:focus-visible,[data-eq]:focus-visible{outline:2px solid var(--msg);outline-offset:2px}
+button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.sep{width:1px;align-self:stretch;background:var(--rule)}
+
+.caption{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 16px;align-items:center;background:var(--panel);border:1px solid var(--rule);border-left:6px solid var(--cap,var(--steel-d));border-radius:4px;padding:10px 14px}
+.caption .num{grid-row:span 2;font-family:var(--f-display);font-weight:700;font-size:40px;line-height:1;color:var(--cap,var(--steel-d));min-width:1.2ch;text-align:center}
+.caption .main{font-family:var(--f-display);font-weight:600;font-size:22px;line-height:1.2;text-wrap:balance}
+.caption .tech{font-family:var(--f-mono);font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+
+.mimic-box{background:var(--panel2);border:1px solid var(--rule);border-radius:4px;overflow-x:auto}
+.mimic-box svg{display:block;width:100%;min-width:1060px;height:auto}
+.scroll-hint{display:none;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+@media (max-width:1080px){.scroll-hint{display:block}}
+
+.panels{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:4px;min-width:0;display:flex;flex-direction:column}
+.panel h2{font-family:var(--f-display);font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:0;padding:8px 12px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.panel h2 small{font-family:var(--f-mono);font-weight:400;font-size:11px;letter-spacing:0;text-transform:none;color:var(--muted)}
+.span2{grid-column:1/-1}
+@media (max-width:820px){.panels{grid-template-columns:minmax(0,1fr)}}
+
+.journey{list-style:none;margin:0;padding:8px 12px 12px;display:flex;flex-direction:column;gap:2px;max-height:360px;overflow-y:auto}
+.journey li{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:4px 0;border-bottom:1px dashed var(--rule)}
+.journey li:last-child{border-bottom:0}
+.journey .b{font-family:var(--f-display);font-weight:700;font-size:13px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:var(--panel);background:var(--c,var(--steel-d));align-self:start}
+.journey .tx{overflow-wrap:anywhere}
+.journey .tm{font-family:var(--f-mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.journey li.now .tx{font-weight:600}
+.j-msg{--c:var(--msg)} .j-tok{--c:var(--tok)} .j-tool{--c:var(--tool)} .j-store{--c:var(--store)} .j-crit{--c:var(--crit)}
+
+.face{padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px}
+.face .ft{font-family:var(--f-display);font-size:22px;font-weight:700;line-height:1.1}
+.face .ff{font-family:var(--f-mono);font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.face p{margin:0;max-width:62ch}
+.face dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;margin:4px 0 0;font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.face dt{color:var(--muted)} .face dd{margin:0;font-weight:500;overflow-wrap:anywhere}
+.face a{color:var(--msg);font-size:13px}
+.face .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.face button{font-size:12px;min-height:28px;padding:3px 9px}
+
+.alist{list-style:none;margin:0;padding:0;font-family:var(--f-mono);font-size:12px;max-height:300px;overflow-y:auto}
+.alist li{display:grid;grid-template-columns:8px 64px 62px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 12px 6px 0;border-bottom:1px solid var(--rule);font-variant-numeric:tabular-nums}
+.alist .sev{align-self:stretch}
+.alist .p1 .sev{background:var(--crit)} .alist .p2 .sev{background:var(--warn)} .alist .p3 .sev{background:var(--msg)}
+.alist .time{color:var(--muted)} .alist .tag{font-weight:600} .alist .txt{min-width:0;overflow-wrap:anywhere}
+.alist li.p4{color:var(--muted)}
+.alist li.unack .tag{animation:blink 1s steps(2,start) infinite}
+.alist li.cleared{opacity:.6}
+.alist .acts{display:flex;gap:4px}
+.alist button{font-size:12px;padding:2px 8px;min-height:26px}
+.alist .st{font-size:10.5px;color:var(--muted)}
+.alist li.empty{display:block;padding:12px;color:var(--muted)}
+@keyframes blink{to{visibility:hidden}}
+@media (max-width:520px){.alist li{grid-template-columns:6px 56px minmax(0,1fr)}.alist .tag{grid-column:3}.alist .txt,.alist .acts{grid-column:2/-1}}
+.note{font-size:12.5px;color:var(--muted);max-width:80ch;margin:0}
+
+.mimic text{fill:var(--ink);font-family:var(--f-mono);font-size:10px}
+.mimic .lane{font-family:var(--f-display);font-size:13px;font-weight:700;letter-spacing:.09em;fill:var(--muted)}
+.mimic .lane-s{font-size:9.5px;fill:var(--muted)}
+.mimic .ttl{font-family:var(--f-display);font-size:15px;font-weight:700;letter-spacing:.02em}
+.mimic .ttl-s{font-family:var(--f-display);font-size:13px;font-weight:600}
+.mimic .sub{font-size:9.5px;fill:var(--muted)}
+.mimic .val{font-size:11.5px;font-weight:600;font-variant-numeric:tabular-nums}
+.mimic .band{fill:var(--band);stroke:none}
+.mimic .box{fill:var(--panel);stroke:var(--steel-d);stroke-width:1.4}
+.mimic .ln{fill:none;stroke:var(--line);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.mimic .fl{fill:none;stroke-width:4;stroke-dasharray:6 8;stroke-linecap:round;stroke-linejoin:round;opacity:0;animation:flow var(--fdur) linear infinite}
+.mimic .fl.on{opacity:1}
+.mimic .c-msg{stroke:var(--msg)} .mimic .c-tok{stroke:var(--tok)} .mimic .c-tool{stroke:var(--tool)} .mimic .c-store{stroke:var(--store)}
+@keyframes flow{to{stroke-dashoffset:-14}}
+.mimic .sig{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:7 3 1 3}
+.mimic .sig.on{stroke:var(--crit)}
+.mimic .badge circle{stroke:none;fill:var(--steel-d)}
+.mimic .badge text{fill:var(--panel);font-family:var(--f-display);font-weight:700;font-size:13px;text-anchor:middle}
+.mimic .st{transition:opacity .35s}
+.mimic.busy .st{opacity:.4}
+.mimic.busy .st.act{opacity:1}
+.mimic .st.act .box{stroke-width:2.6;stroke:var(--k,var(--msg))}
+.mimic .st.act .badge circle{fill:var(--k,var(--msg))}
+.mimic .k-msg{--k:var(--msg)} .mimic .k-tok{--k:var(--tok)} .mimic .k-tool{--k:var(--tool)} .mimic .k-store{--k:var(--store)}
+.mimic .led{fill:var(--panel);stroke:var(--steel-d);stroke-width:1.2}
+.mimic .led.on{fill:var(--k,var(--ok));stroke:var(--k,var(--ok))}
+.mimic .track{fill:none;stroke:var(--line);stroke-width:5}
+.mimic .gauge-bg{fill:var(--panel);stroke:var(--steel-d);stroke-width:1.2}
+.mimic .gauge{fill:var(--tok)}
+.mimic .gauge.hot{fill:var(--crit)}
+.mimic .layer{fill:var(--tok)}
+.mimic .pkt{fill:var(--pk,var(--msg));stroke:var(--panel);stroke-width:2.5}
+.mimic .pkt-h{fill:var(--pk,var(--msg));opacity:.22}
+.mimic [data-eq]{cursor:pointer}
+.mimic [data-eq]:hover .box{stroke:var(--ink)}
+.mimic .warn-t{fill:var(--warn);font-weight:600}
+.mimic .hot-t{fill:var(--crit);font-weight:600}
+@media (prefers-reduced-motion: reduce){
+  .mimic .fl{animation:none;stroke-dasharray:none}
+  .mimic .st{transition:none}
+  .alist li.unack .tag{animation:none}
+}
+</style>
+
+<meta name="description" content="A live, SCADA-style flow view of the Hermes agent harness: one message followed from input to output through the gateway, prompt, agent loop and tools, with memory, skills and history in and out.">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/hermes-harness-flow/">
+<meta property="og:title" content="Hermes Harness Flow · The BlackCat">
+<meta property="og:description" content="A live, SCADA-style flow view of the Hermes agent harness: one message followed from input to output through the gateway, prompt, agent loop and tools, with memory, skills and history in and out.">
+<meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/hermes-harness-flow/">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/hermes-harness-flow-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Hermes Harness Flow", "description": "A live, SCADA-style flow view of the Hermes agent harness: one message followed from input to output through the gateway, prompt, agent loop and tools, with memory, skills and history in and out.", "url": "https://theblackcat98.github.io/TheBlackCat/hermes-harness-flow/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/hermes-harness-flow-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="hermes-harness-flow"></script>
+</head>
+<body>
+<a class="back" href="../tools/">← All tools</a>
+<div class="wrap">
+  <header class="bar">
+    <div class="ident">
+      <h1>Hermes Harness · Message Flow</h1>
+      <span class="unit">input → output, one message at a time</span>
+    </div>
+    <div class="status">
+      <span class="chip sim"><b>●</b> SIMULATED</span>
+      <span class="chip" id="clock">--:--:--</span>
+      <span class="chip alm" id="almChip"><b id="almN">0</b> unacked alarms</span>
+    </div>
+  </header>
+
+  <div class="toolbar" role="toolbar" aria-label="Simulation controls">
+    <div class="grp">
+      <span class="lbl">Sim</span>
+      <button id="runBtn" aria-pressed="false">Pause</button>
+      <button id="stepBtn" title="Advance to the next step">Next step ▸</button>
+      <button data-speed=".5" aria-pressed="false">Slow</button>
+      <button data-speed="1" aria-pressed="true">Normal</button>
+      <button data-speed="2" aria-pressed="false">Fast</button>
+    </div>
+    <span class="sep" aria-hidden="true"></span>
+    <div class="grp">
+      <span class="lbl">Send in</span>
+      <button data-inject="msg">Telegram message</button>
+      <button data-inject="cli">CLI prompt</button>
+      <button data-inject="cron">Cron job</button>
+      <button data-inject="danger">Risky command</button>
+      <button data-inject="delegate">Delegate task</button>
+      <button data-inject="long">Long conversation</button>
+    </div>
+  </div>
+
+  <div class="caption" id="cap" aria-live="polite">
+    <div class="num" id="capN">–</div>
+    <div class="main" id="capMain">Waiting for a message</div>
+    <div class="tech" id="capTech">Nothing in flight</div>
+  </div>
+
+  <div>
+    <div class="mimic-box">
+      <svg class="mimic" id="mimic" viewBox="0 0 1240 710" role="img" aria-label="Flow of one message through the Hermes harness, from input on the left to output on the right">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="var(--steel-d)"/></marker>
+        </defs>
+
+        <rect class="band" x="170" y="18" width="590" height="132" rx="6"/>
+        <text class="lane" x="182" y="38">READ IN</text><text class="lane-s" x="248" y="38">before the model runs</text>
+        <text class="lane" x="620" y="38">CALLED</text><text class="lane-s" x="690" y="38">each pass</text>
+        <rect class="band" x="440" y="566" width="790" height="136" rx="6"/>
+        <text class="lane" x="1218" y="590" text-anchor="end">WRITTEN OUT</text>
+        <text class="lane-s" x="1218" y="604" text-anchor="end">after the reply</text>
+        <text class="lane" x="20" y="150">INPUTS</text>
+
+        <g id="lines"></g>
+        <g id="flows"></g>
+
+        <ellipse class="track" cx="680" cy="375" rx="118" ry="103"/>
+        <path d="M798,368 L798,384" fill="none" stroke="none" marker-end="url(#arr)"/>
+        <path d="M562,384 L562,368" fill="none" stroke="none" marker-end="url(#arr)"/>
+        <text class="ttl-s" x="810" y="372">tool calls</text><text class="sub" x="810" y="385">model asks</text>
+        <text class="ttl-s" x="550" y="372" text-anchor="end">results</text><text class="sub" x="550" y="385" text-anchor="end">appended</text>
+
+        <g class="st k-store" data-eq="rd-ctx" tabindex="0" role="button" aria-label="Context files">
+          <rect class="box" x="180" y="52" width="92" height="66" rx="4"/>
+          <text class="ttl-s" x="190" y="72">Context files</text>
+          <text class="sub" x="190" y="88">project notes</text>
+          <text class="sub" x="190" y="101">AGENTS.md etc.</text>
+        </g>
+        <g class="st k-store" data-eq="rd-mem" tabindex="0" role="button" aria-label="Memory read">
+          <rect class="box" x="284" y="52" width="92" height="66" rx="4"/>
+          <text class="ttl-s" x="294" y="72">Memory</text>
+          <text class="sub" x="294" y="88">about you</text>
+          <text class="val" x="294" y="106" id="rdMem">0</text>
+        </g>
+        <g class="st k-store" data-eq="rd-skill" tabindex="0" role="button" aria-label="Skills read">
+          <rect class="box" x="388" y="52" width="92" height="66" rx="4"/>
+          <text class="ttl-s" x="398" y="72">Skills</text>
+          <text class="sub" x="398" y="88">playbooks</text>
+          <text class="val" x="398" y="106" id="rdSk">0</text>
+        </g>
+        <g class="st k-store" data-eq="rd-hist" tabindex="0" role="button" aria-label="Session history">
+          <rect class="box" x="492" y="52" width="92" height="66" rx="4"/>
+          <text class="ttl-s" x="502" y="72">History</text>
+          <text class="sub" x="502" y="88">this session</text>
+          <text class="val" x="502" y="106" id="rdHist">—</text>
+        </g>
+        <g class="st k-tok" data-eq="provider" tabindex="0" role="button" aria-label="LLM provider">
+          <rect class="box" x="612" y="52" width="136" height="66" rx="4"/>
+          <text class="ttl-s" x="622" y="72">LLM provider</text>
+          <text class="sub" x="622" y="88" id="provN">nous</text>
+          <text class="sub" x="622" y="101" id="provM">model</text>
+          <text class="val" x="738" y="72" text-anchor="end" id="provT"></text>
+        </g>
+        <text class="sub" x="664" y="165" text-anchor="end">request ↑</text>
+        <text class="sub" x="696" y="165">↓ answer</text>
+
+        <g id="inputs"></g>
+
+        <g class="st k-msg" data-eq="gateway" tabindex="0" role="button" aria-label="Gateway">
+          <rect class="box" x="205" y="196" width="118" height="88" rx="4"/>
+          <g class="badge"><circle cx="220" cy="212" r="10"/><text x="220" y="216.5">2</text></g>
+          <text class="ttl" x="235" y="217">Check &amp; route</text>
+          <text class="sub" x="215" y="236">who sent it?</text>
+          <text class="sub" x="215" y="249">which session?</text>
+          <text class="val" x="215" y="272" id="gwQ">0 waiting</text>
+        </g>
+
+        <g class="st k-tok" data-eq="prompt" tabindex="0" role="button" aria-label="Build prompt">
+          <rect class="box" x="365" y="196" width="116" height="88" rx="4"/>
+          <g class="badge"><circle cx="380" cy="212" r="10"/><text x="380" y="216.5">3</text></g>
+          <text class="ttl" x="395" y="217">Build prompt</text>
+          <rect class="layer" x="375" y="228" width="96" height="14" rx="2" fill-opacity=".14"/>
+          <rect class="layer" x="375" y="244" width="96" height="14" rx="2" fill-opacity=".28"/>
+          <rect class="layer" x="375" y="260" width="96" height="14" rx="2" fill-opacity=".45"/>
+          <text class="sub" x="380" y="238.5">volatile</text>
+          <text class="sub" x="380" y="254.5">context</text>
+          <text class="sub" x="380" y="270.5">stable</text>
+        </g>
+
+        <g class="st k-tok" data-eq="model" tabindex="0" role="button" aria-label="Model">
+          <rect class="box" x="610" y="204" width="140" height="72" rx="4"/>
+          <g class="badge"><circle cx="625" cy="220" r="10"/><text x="625" y="224.5">4</text></g>
+          <text class="ttl" x="640" y="225">Model thinks</text>
+          <text class="sub" x="620" y="245" id="mdA">idle</text>
+          <text class="val" x="620" y="264" id="mdB">—</text>
+        </g>
+
+        <g class="st k-tok" data-eq="context" tabindex="0" role="button" aria-label="Context window">
+          <text class="ttl-s" x="680" y="320" text-anchor="middle">Context window</text>
+          <rect class="gauge-bg" x="600" y="330" width="160" height="22" rx="3"/>
+          <rect class="gauge" id="gFill" x="600" y="330" width="0" height="22" rx="3"/>
+          <line x1="736" x2="736" y1="326" y2="356" stroke="var(--crit)" stroke-width="1.5" stroke-dasharray="3 2"/>
+          <text class="sub" x="736" y="366" text-anchor="middle">85%</text>
+          <text class="val" x="680" y="381" text-anchor="middle" id="gTxt" style="font-size:10.5px">0 / 200k tokens</text>
+          <text class="sub" x="680" y="402" text-anchor="middle" id="gPass">loop pass —</text>
+          <text class="sub" x="680" y="420" text-anchor="middle" id="gCmp"></text>
+        </g>
+
+        <g class="st k-tool" data-eq="tools" tabindex="0" role="button" aria-label="Run tools">
+          <rect class="box" x="615" y="460" width="130" height="50" rx="4"/>
+          <g class="badge"><circle cx="630" cy="476" r="10"/><text x="630" y="480.5">5</text></g>
+          <text class="ttl" x="645" y="481">Run tools</text>
+          <text class="sub" x="625" y="499" id="tlA">70+ tools</text>
+        </g>
+        <g id="chips"></g>
+
+        <g class="st k-msg" data-eq="reply" tabindex="0" role="button" aria-label="Send reply">
+          <rect class="box" x="860" y="204" width="120" height="72" rx="4"/>
+          <g class="badge"><circle cx="875" cy="220" r="10"/><text x="875" y="224.5">6</text></g>
+          <text class="ttl" x="890" y="225">Send reply</text>
+          <text class="sub" x="870" y="245">final answer</text>
+          <text class="val" x="870" y="264" id="rpA">—</text>
+        </g>
+
+        <g class="st k-msg" data-eq="output" tabindex="0" role="button" aria-label="Back to sender">
+          <rect class="box" x="1030" y="190" width="190" height="100" rx="4"/>
+          <g class="badge"><circle cx="1045" cy="206" r="10"/><text x="1045" y="210.5">7</text></g>
+          <text class="ttl" x="1060" y="211">Back to sender</text>
+          <g id="outRows"></g>
+        </g>
+
+        <g class="st k-store" data-eq="db" tabindex="0" role="button" aria-label="Session database">
+          <rect class="box" x="470" y="614" width="160" height="74" rx="4"/>
+          <text class="ttl-s" x="480" y="634">Session database</text>
+          <text class="sub" x="480" y="648">searchable transcript</text>
+          <text class="val" x="480" y="667" id="dbA">0 messages</text>
+          <text class="sub" x="480" y="681" id="dbB">0 sessions</text>
+        </g>
+        <g class="st k-store" data-eq="memory" tabindex="0" role="button" aria-label="Memory write">
+          <rect class="box" x="700" y="614" width="160" height="74" rx="4"/>
+          <text class="ttl-s" x="710" y="634">Memory</text>
+          <text class="sub" x="710" y="648">facts worth keeping</text>
+          <text class="val" x="710" y="667" id="memA">0 entries</text>
+          <text class="sub" x="710" y="681">read back in next time ↑</text>
+        </g>
+        <g class="st k-store" data-eq="skills" tabindex="0" role="button" aria-label="Skills write">
+          <rect class="box" x="935" y="614" width="160" height="74" rx="4"/>
+          <text class="ttl-s" x="945" y="634">Skills</text>
+          <text class="sub" x="945" y="648">learned from work</text>
+          <text class="val" x="945" y="667" id="skA">0 skills</text>
+          <text class="sub" x="945" y="681">read back in next time ↑</text>
+        </g>
+        <text class="sub" x="440" y="500" transform="rotate(-90 440 500)" text-anchor="middle">compression → child session</text>
+
+        <g id="pkt" style="display:none"><circle class="pkt-h" r="13"/><circle class="pkt" r="6.5"/></g>
+      </svg>
+    </div>
+    <span class="scroll-hint">Scroll the diagram sideways to follow the whole path →</span>
+  </div>
+
+  <section class="panels">
+    <div class="panel">
+      <h2>This message's journey <small id="jHead">—</small></h2>
+      <ol class="journey" id="journey"></ol>
+    </div>
+    <div class="panel">
+      <h2>What is this? <small id="fpTag">following the message</small></h2>
+      <div class="face" id="face"></div>
+    </div>
+    <div class="panel span2">
+      <h2>Alarms &amp; events <small id="almSum">—</small></h2>
+      <ul class="alist" id="alist" aria-live="polite"></ul>
+    </div>
+  </section>
+  <p class="note">Structure follows the Hermes Agent developer docs: entry points, gateway, prompt assembly, the AIAgent loop, provider resolution, the tool registry, compression, session storage, memory, skills and cron. All values are simulated.</p>
+</div>
+
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const k1=n=>n>=100000?Math.round(n/1000)+'k':n>=1000?(n/1000).toFixed(1)+'k':String(Math.round(n));
+const DOC='https://hermes-agent.nousresearch.com/docs/developer-guide/';
+
+const INPUTS=[
+  {k:'chat',name:'Chat apps',sub:'Telegram · Discord…',y:160,h:36},
+  {k:'api',name:'API · webhooks',sub:'GitHub · Stripe · HTTP',y:204,h:36},
+  {k:'cli',name:'CLI',sub:'terminal UI',y:288,h:32},
+  {k:'ide',name:'IDE (ACP)',sub:'VS Code · Zed',y:326,h:32},
+  {k:'cron',name:'Cron',sub:'scheduled job',y:364,h:50}];
+const inEl={};
+INPUTS.forEach(r=>{const g=el('g',{class:'st k-msg','data-eq':'in-'+r.k,tabindex:0,role:'button','aria-label':r.name},$('inputs'));
+  el('rect',{class:'box',x:20,y:r.y,width:140,height:r.h,rx:4},g);
+  const led=el('circle',{class:'led',cx:33,cy:r.y+12,r:4.5},g);
+  el('text',{class:'ttl-s',x:43,y:r.y+16},g,r.name);
+  el('text',{class:'sub',x:30,y:r.y+28},g,r.sub);
+  if(r.k==='cron')el('text',{class:'val',x:150,y:r.y+44,'text-anchor':'end',id:'cronT'},g,'');
+  inEl[r.k]={g,led};});
+(function(){const b=el('g',{class:'badge'},$('inputs'));el('circle',{cx:150,cy:146,r:10},b);el('text',{x:150,y:150.5},b,'1');})();
+
+const OUTS=[['chat','Chat app it came from'],['cli','Terminal (CLI)'],['ide','Editor (IDE)'],['cron','Cron’s target channel']];
+const outEl={};
+OUTS.forEach(([k,l],i)=>{const y=232+i*16;outEl[k]=el('circle',{class:'led',cx:1046,cy:y-3.5,r:4},$('outRows'));el('text',{class:'sub',x:1056,y},$('outRows'),l);});
+
+const TOOLS=[
+  {k:'terminal',name:'Terminal',col:0,row:0,w:3,dur:[1.2,3.5],res:[300,4000]},
+  {k:'browser',name:'Browser',col:1,row:0,w:1.5,dur:[2,5],res:[2000,9000]},
+  {k:'web',name:'Web',col:2,row:0,w:2,dur:[1,3],res:[1500,7000]},
+  {k:'file',name:'Files',col:0,row:1,w:3,dur:[.6,1.4],res:[200,5000]},
+  {k:'mcp',name:'MCP',col:1,row:1,w:1.2,dur:[.8,2.5],res:[300,3000]},
+  {k:'delegate',name:'Subagents',col:2,row:1,w:.6,dur:[6,11],res:[600,2500]}];
+const chipEl={};
+TOOLS.forEach(t=>{const x=780+t.col*73,y=t.row?500:440;t.cx=x+33;t.cy=t.row?500:470;
+  const g=el('g',{class:'st k-tool','data-eq':'chip:'+t.k,tabindex:0,role:'button','aria-label':t.name},$('chips'));
+  el('rect',{class:'box',x,y,width:66,height:30,rx:3},g);
+  el('text',{class:'ttl-s',x:x+33,y:y+13,'text-anchor':'middle',style:'font-size:12px'},g,t.name);
+  chipEl[t.k]={g,st:el('text',{class:'sub',x:x+33,y:y+25,'text-anchor':'middle'},g,'')};});
+
+const LINES={
+  'in-chat':['M160,178 H182 V240 H365','msg'],
+  'in-api':['M160,222 H182 V240 H365','msg'],
+  'in-cli':['M160,304 H182 V322 H342 V264 H365','msg'],
+  'in-ide':['M160,342 H182 V322 H342 V264 H365','msg'],
+  'in-cron':['M160,389 H182 V322 H342 V264 H365','msg'],
+  'r-ctx':['M226,118 V170 H423 V196','store'],
+  'r-mem':['M330,118 V170 H423 V196','store'],
+  'r-skill':['M434,118 V170 H423 V196','store'],
+  'r-hist':['M538,118 V170 H423 V196','store'],
+  'p2m':['M481,240 H610','tok'],
+  'up':['M670,204 V118','tok'],
+  'down':['M690,118 V204','tok'],
+  'lp-out':['M680,276 A118,103 0 0 1 680,478','tool'],
+  'lp-back':['M680,478 A118,103 0 0 1 680,276','tool'],
+  'm2o':['M750,240 H1030','msg'],
+  'w-db':['M980,262 H1015 V590 H550 V614','store'],
+  'w-mem':['M980,262 H1015 V590 H780 V614','store'],
+  'w-skill':['M980,262 H1015 V614','store']};
+TOOLS.forEach(t=>{LINES['t-'+t.k]=[`M745,485 H${t.cx} V${t.cy}`,'tool'];});
+const lineEl={};
+for(const id in LINES){const [d,c]=LINES[id];
+  if(id!=='lp-out'&&id!=='lp-back')el('path',{d,class:'ln'},$('lines'));
+  lineEl[id]=el('path',{d,class:'fl c-'+c},$('flows'));}
+const cmpSig=el('path',{d:'M600,341 H452 V650 H470',class:'sig'},$('lines'));
+
+const PROVIDERS=[{name:'nous',model:'Hermes-4-405B'},{name:'anthropic',model:'claude-sonnet-4.5'},{name:'openai-codex',model:'gpt-5-codex'},{name:'openrouter',model:'qwen3-coder'}];
+const PLATS=['Telegram','Discord','Slack','WhatsApp','Signal'];
+const CRON_JOBS=['morning-briefing','repo-triage','inbox-digest'];
+const DANGER=['rm -rf ./build','git push --force','sudo systemctl restart nginx','DROP TABLE staging_events'];
+const SKILLS=['deploy-hugo-site','triage-github-issues','summarize-pdf','kicad-bom-export'];
+const ASKS={chat:['what’s on my calendar tomorrow?','summarize this PDF','check if the site deploy passed','find a cheap flight to Denver'],api:['GitHub: new issue opened','Stripe: payment failed'],cli:['fix the failing test in utils.py','refactor the config loader','why is the build slow?'],ide:['explain this function','add types to this file'],cron:[]};
+const S={t:0,speed:1,paused:false,stepping:false,stepTarget:0,phaseCount:0,queue:[],phase:'idle',prev:'idle',phaseT:0,phaseDur:0,turn:null,
+  ctx:0,ctxMax:200000,thresh:.85,compressions:41,sessions:1284,messages:41210,memory:214,skills:63,lastSkill:null,
+  prov:PROVIDERS[0],ttfb:0,tpsT:0,tps:0,outTok:0,wantTools:false,provCalls:0,fallbacks:0,
+  tools:{},calls:[],toolsT:0,slots:[0,0,0],cronNext:70,cronPeriod:120,
+  led:{},alarms:[],aid:0,alarmVer:1,flags:{},journey:[],lastJourney:null,afterCompress:null,
+  persistMem:false,persistSkill:false,sel:'model',follow:true,jVer:1};
+TOOLS.forEach(t=>S.tools[t.k]={calls:Math.round(rnd(40,400)*t.w)});
+const startWall=Date.now();
+const fmtT=t=>new Date(startWall+t*1000).toLocaleTimeString([], {hour12:false});
+
+function addAlarm(pri,tag,text,o={}){
+  const a={id:++S.aid,t:S.t,pri,tag,text,acked:pri===4,cleared:false,key:o.key||null,action:o.action||null,auto:o.autoClear?S.t+o.autoClear:null};
+  S.alarms.unshift(a);
+  S.alarms=S.alarms.filter(x=>!(x.cleared&&x.acked&&x.pri!==4&&S.t-x.t>20));
+  while(S.alarms.length>14){const i=S.alarms.map(x=>x.pri===4||(x.cleared&&x.acked)).lastIndexOf(true);if(i<0)break;S.alarms.splice(i,1);}
+  S.alarmVer++;return a;}
+const ev=(tag,text)=>addAlarm(4,tag,text);
+function clearAlarm(a){if(a&&!a.cleared){a.cleared=true;S.alarmVer++;}}
+function condAlarm(key,on,pri,tag,text){const a=S.alarms.find(x=>x.key===key&&!x.cleared);if(on&&!a)addAlarm(pri,tag,text,{key});else if(!on&&a)clearAlarm(a);}
+function J(n,text,c){S.journey.push({n,text,c,t:S.t});S.jVer++;}
+
+function arrive(src,o={}){
+  const plat=src==='chat'?(o.plat||pick(PLATS)):null;
+  S.led[src]=1.4;
+  if(src==='chat'&&!o.force&&Math.random()<.04){addAlarm(3,'GW-102',`Message from an unpaired ${plat} user blocked at the gateway`,{autoClear:8});return;}
+  S.queue.push({src,plat,ask:src==='cron'?null:(o.ask||pick(ASKS[src])),job:src==='cron'?pick(CRON_JOBS):null,long:!!o.long});}
+const gwQ=()=>S.queue.filter(j=>j.src==='chat'||j.src==='api').length;
+const viaGw=j=>j.src==='chat'||j.src==='api';
+
+function setPhase(p,dur){S.prev=S.phase;S.phase=p;S.phaseT=0;S.phaseDur=dur;S.phaseCount++;enter(p);}
+function startTurn(job){
+  const cont=job.src!=='cron'&&!job.long&&S.lastKey&&S.lastSrc===job.src&&Math.random()<.4;
+  const key=cont?S.lastKey:({chat:(job.plat||'').slice(0,2).toLowerCase(),api:'api',cli:'cli',ide:'acp',cron:'cron'}[job.src])+':'+Math.floor(rnd(1000,9999));
+  let hist=0;
+  if(job.src==='cron'){S.ctx=rnd(11000,15000);S.prov=PROVIDERS[0];}
+  else if(job.long){S.ctx=rnd(150000,162000);hist=Math.round(rnd(140,190));S.sessions++;}
+  else if(!cont){hist=Math.random()<.6?Math.round(rnd(4,60)):0;S.ctx=rnd(12000,14000)+hist*rnd(800,1600);S.sessions++;if(Math.random()<.3)S.prov=pick(PROVIDERS.slice(0,3));}
+  else hist=Math.round(rnd(8,40));
+  if(S.journey.length)S.lastJourney=S.journey;
+  S.journey=[];S.jVer++;
+  S.lastKey=key;S.lastSrc=job.src;
+  S.turn={...job,key,iter:0,maxIter:90,hist,toolsUsed:0};
+  const from={chat:job.plat,api:'an API webhook',cli:'the CLI',ide:'the IDE (ACP)',cron:'the cron scheduler'}[job.src];
+  J(1,job.src==='cron'?`Cron job “${job.job}” fired`:`Message arrived from ${from}: “${job.ask}”`,'msg');
+  setPhase('ingest',viaGw(job)?2.4:1.6);}
+function enter(p){
+  const T=S.turn;
+  if(p==='ingest')J(2,viaGw(T)?`Gateway authorized the sender and matched session ${T.key}${T.hist?` (${T.hist} earlier turns)`:' (new session)'}`:T.src==='cron'?'Skipped the gateway: cron starts a fresh agent with no history':`Skipped the gateway: the ${T.src==='cli'?'CLI':'IDE'} talks to the agent directly`,'msg');
+  if(p==='prompt'){S.ctx+=T.src==='cron'?rnd(800,2500):rnd(150,1600);
+    const m=Math.round(rnd(2,8)),sk=T.src==='cron'?'the job’s attached skills':Math.round(rnd(0,3))+' relevant skills';
+    J(3,`Prompt built: identity + tool guidance, context files, ${m} memories, ${sk}${T.hist?`, ${T.hist} turns of history`:''}`,'tok');}
+  if(p==='provider'){
+    S.provCalls++;S.ttfb=rnd(.7,1.5);S.tpsT=rnd(60,140);S.tps=0;
+    S.wantTools=(T.iter<T.maxIter&&Math.random()<(T.iter===0?.75:Math.max(.12,.5-T.iter*.14)))||!!S.flags.forceTool;
+    S.outTok=S.wantTools?rnd(80,300):rnd(220,700);
+    if(Math.random()<.04){S.fallbacks++;S.ttfb+=rnd(1.5,2.5);const from=S.prov.name;S.prov=PROVIDERS[3];
+      addAlarm(2,'PV-404',`${from} returned 503, failed over to openrouter`,{autoClear:10});J(4,`${from} errored; the harness failed over to openrouter`,'crit');}
+    S.phaseDur=(S.prev==='tools'?.9:.7)+S.ttfb+Math.min(3,S.outTok/S.tpsT);}
+  if(p==='compress')addAlarm(2,'LT-201',`Context ${Math.round(S.ctx/S.ctxMax*100)}% ≥ 85%: compressing`,{autoClear:4});
+  if(p==='persist'){S.persistMem=Math.random()<.35;S.persistSkill=T.toolsUsed>=2&&Math.random()<.3;
+    const out={chat:`back to ${T.plat}`,api:'back to the webhook source',cli:'to the terminal',ide:'to the editor',cron:'to the job’s target channel'}[T.src];
+    J(7,`Delivered ${out}`,'msg');}}
+function maybeCompress(next){if(S.ctx>S.thresh*S.ctxMax){S.afterCompress=next;setPhase('compress',2.6);return true;}return false;}
+function beginTools(){
+  const T=S.turn;const n=Math.random()<.6?1:(Math.random()<.7?2:3);
+  const list=[];if(S.flags.danger)list.push('terminal');if(S.flags.delegate)list.push('delegate');
+  while(list.length<n){let r=Math.random()*TOOLS.reduce((a,t)=>a+t.w,0);for(const t of TOOLS){r-=t.w;if(r<=0){list.push(t.k);break;}}}
+  S.calls=[];S.toolsT=0;
+  list.forEach(k=>{if(k==='delegate'&&S.slots.indexOf(0)<0)k='file';
+    const d=TOOLS.find(t=>t.k===k);const c={k,t:0,dur:rnd(...d.dur),res:rnd(...d.res),done:false};
+    if(k==='delegate'){c.slot=S.slots.indexOf(0);S.slots[c.slot]=1;}
+    if(k==='terminal'&&(S.flags.danger||Math.random()<.07)){c.wait=true;c.waitT=0;c.cmd=pick(DANGER);
+      c.alarm=addAlarm(1,'XV-501',`Approval needed · terminal wants to run: ${c.cmd}`,{key:'approve',action:'approve'});}
+    S.tools[k].calls++;S.calls.push(c);});
+  S.flags.danger=false;S.flags.delegate=false;S.flags.forceTool=false;
+  T.toolsUsed+=S.calls.length;
+  J(4,`Model call ${T.iter+1}: asked for ${S.calls.map(c=>TOOLS.find(t=>t.k===c.k).name.toLowerCase()).join(' + ')}`,'tok');
+  setPhase('tools',0);}
+function resolveApproval(ok){const c=S.calls.find(c=>c.wait);if(!c)return;c.wait=false;
+  if(!ok){c.denied=true;c.dur=.3;c.res=120;J(5,`You denied: ${c.cmd}`,'crit');}else J(5,`You approved: ${c.cmd}`,'tool');
+  if(c.alarm){c.alarm.acked=true;clearAlarm(c.alarm);}S.alarmVer++;}
+function advance(){
+  const T=S.turn;
+  switch(S.phase){
+    case 'ingest':setPhase('prompt',2);break;
+    case 'prompt':if(!maybeCompress('provider'))setPhase('provider',0);break;
+    case 'provider':S.ctx+=S.outTok;
+      if(S.wantTools){if(!maybeCompress('tools'))beginTools();}
+      else{J(4,`Model call ${T.iter+1}: no tools needed, wrote the final answer`,'tok');J(6,'Answer handed back as the reply','msg');setPhase('deliver',2.2);}break;
+    case 'compress':{const b=S.ctx;S.ctx*=rnd(.3,.42);S.compressions++;S.sessions++;
+      J(4,`Context hit ${Math.round(b/S.ctxMax*100)}%: older turns summarized, ${k1(b)} → ${k1(S.ctx)} tokens, child session started`,'crit');
+      const n=S.afterCompress;S.afterCompress=null;if(n==='tools')beginTools();else setPhase(n,0);break;}
+    case 'deliver':setPhase('persist',2.2);break;
+    case 'persist':{S.messages+=2+T.toolsUsed*2;
+      const w=['transcript saved to the session database'];
+      if(S.persistMem){S.memory++;w.push('1 new memory');}
+      if(S.persistSkill){S.skills++;S.lastSkill=pick(SKILLS);w.push(`new skill “${S.lastSkill}”`);}
+      J('✓',w.join(', '),'store');
+      S.turn=null;S.prev=S.phase;S.phase='idle';S.calls=[];S.phaseCount++;break;}}}
+function stepTools(dt){
+  S.toolsT+=dt;if(S.toolsT<.9)return;
+  let all=true;
+  for(const c of S.calls){if(c.done)continue;all=false;
+    if(c.wait){c.waitT+=dt;if(c.waitT>25){c.wait=false;c.denied=true;c.dur=.3;c.res=120;clearAlarm(c.alarm);addAlarm(2,'XV-501',`Approval timed out, command denied: ${c.cmd}`,{autoClear:8});J(5,`Approval timed out; ${c.cmd} was denied`,'crit');}continue;}
+    c.t+=dt;if(c.t>=c.dur){c.done=true;S.ctx+=c.res;if(c.slot!=null)S.slots[c.slot]=0;}}
+  if(all){const T=S.turn;
+    J(5,S.calls.map(c=>`${TOOLS.find(t=>t.k===c.k).name} ${c.denied?'denied':'done'} in ${c.dur.toFixed(1)}s (+${k1(c.res)} tok)`).join(' · '),'tool');
+    T.iter++;S.calls=[];if(!maybeCompress('provider'))setPhase('provider',0);}}
+
+function step(dt){
+  S.t+=dt;
+  if(Math.random()<.035*dt)arrive('chat');
+  if(Math.random()<.008*dt)arrive('api');
+  if(Math.random()<.012*dt)arrive('cli');
+  if(Math.random()<.005*dt)arrive('ide');
+  S.cronNext-=dt;if(S.cronNext<=0){S.cronNext=S.cronPeriod;arrive('cron');}
+  for(const k in S.led)S.led[k]=Math.max(0,S.led[k]-dt);
+  for(const a of S.alarms)if(a.auto&&!a.cleared&&S.t>=a.auto)clearAlarm(a);
+  if(S.phase==='idle'){if(S.queue.length)startTurn(S.queue.shift());}
+  else if(S.phase==='tools')stepTools(dt);
+  else{S.phaseT+=dt;if(S.phase==='provider'){const pre=S.prev==='tools'?.9:.7;S.tps=S.phaseT<pre+S.ttfb?0:S.tpsT;}
+    if(S.phaseT>=S.phaseDur)advance();}
+  const q=gwQ();condAlarm('gwq',q>=5,2,'LT-101',`Gateway backlog: ${q} messages waiting`);}
+
+const setT=(id,v)=>{const e=typeof id==='string'?$(id):id;if(e.textContent!==String(v))e.textContent=v;};
+const setCls=(e,c,on)=>e.classList.toggle(c,!!on);
+const KC={msg:'var(--msg)',tok:'var(--tok)',tool:'var(--tool)',store:'var(--store)'};
+const SRCK={chat:'chat',api:'api',cli:'cli',ide:'ide',cron:'cron'};
+function pathPt(id,f){const p=lineEl[id];return p.getPointAtLength(Math.max(0,Math.min(1,f))*p.getTotalLength());}
+function info(){
+  const T=S.turn,ph=S.phase,act=new Set(),on=new Set();let pt=null,col='msg',n='–',main='Waiting for a message',tech='Nothing in flight. Use “Send in” above to push one through.';
+  if(!T)return{act,on,pt,col,n,main,tech};
+  const ik=SRCK[T.src];
+  if(ph==='ingest'){const f=S.phaseT/S.phaseDur;act.add('in-'+ik);on.add('in-'+ik);
+    pt=pathPt('in-'+ik,f);n=viaGw(T)&&f>.3?'2':'1';if(n==='2')act.add('gateway');
+    main=viaGw(T)?(n==='1'?`A message arrives from ${T.plat||'a webhook'}`:'The gateway checks who sent it and finds the conversation'):T.src==='cron'?'The scheduler fires a job and starts a fresh agent':`A ${T.src==='cli'?'CLI':'IDE'} prompt goes straight to the agent`;
+    tech=viaGw(T)?'Adapter.on_message() → GatewayRunner: authorize (allowlist / DM pairing) → resolve session key → load history':T.src==='cron'?'cron/scheduler.py: load due job → new AIAgent with no history → attach skills':'HermesCLI / acp_adapter → AIAgent.run_conversation()';}
+  else if(ph==='prompt'){act.add('prompt');['rd-ctx','rd-mem','rd-skill'].forEach(x=>act.add(x));if(T.hist)act.add('rd-hist');
+    ['r-ctx','r-mem','r-skill'].forEach(x=>on.add(x));if(T.hist)on.add('r-hist');
+    pt={x:423,y:240};col='tok';n='3';main='Everything the model needs is stacked into one prompt';tech='prompt_builder.py: stable tier (identity, tool guidance, skills) → context tier (context files) → volatile tier (memory, profile, time)';}
+  else if(ph==='provider'){act.add('model');act.add('provider');act.add('context');col='tok';n='4';
+    const pre=S.prev==='tools'?.9:.7;
+    if(S.phaseT<pre){if(S.prev==='tools'){pt=pathPt('lp-back',S.phaseT/pre);on.add('lp-back');col='tool';}else{pt=pathPt('p2m',S.phaseT/pre);on.add('p2m');}}
+    else{pt={x:680,y:240};on.add(S.phaseT<pre+S.ttfb?'up':'down');}
+    main=S.prev==='tools'?'Tool results go back to the model, which decides what to do next':'The model reads the prompt and decides: answer now, or use a tool?';
+    tech=`runtime_provider.py → ${S.prov.name} · ${S.prov.model} · ${S.phaseT<pre+S.ttfb?'waiting for first token':'streaming '+Math.round(S.tps)+' tok/s'}`;}
+  else if(ph==='tools'){act.add('tools');act.add('context');col='tool';n='5';
+    if(S.toolsT<.9){pt=pathPt('lp-out',S.toolsT/.9);on.add('lp-out');}
+    else{pt={x:680,y:485};S.calls.filter(c=>!c.done).forEach(c=>{act.add('chip:'+c.k);if(!c.wait)on.add('t-'+c.k);});}
+    const w=S.toolsT>=.9&&S.calls.find(c=>c.wait);
+    main=w?`Paused: the terminal wants to run “${w.cmd}”. Approve or deny it in the alarm list.`:'The harness runs the tools the model asked for';
+    tech=w?'tools/approval.py flagged a dangerous command; it is held until a human decides':'model_tools.handle_function_call() → tools/registry.py → '+S.calls.map(c=>c.k).join(', ');}
+  else if(ph==='compress'){act.add('context');act.add('db');col='tok';n='4';pt={x:680,y:341};
+    main='The conversation got too long, so older turns are summarized';tech='context_compressor.py: summarize middle turns → new child session in the session database (lineage kept)';}
+  else if(ph==='deliver'){const f=S.phaseT/S.phaseDur;act.add('reply');on.add('m2o');pt=pathPt('m2o',f);n=f>.55?'7':'6';if(n==='7')act.add('output');
+    main=n==='6'?'No more tools needed, so the model’s answer becomes the reply':'The reply goes back to wherever the message came from';
+    tech=viaGw(T)||T.src==='cron'?'gateway/delivery.py → platform adapter':T.src==='cli'?'HermesCLI prints the answer':'ACP JSON-RPC response to the editor';}
+  else if(ph==='persist'){act.add('db');on.add('w-db');col='store';n='✓';pt=pathPt('w-db',S.phaseT/S.phaseDur);
+    if(S.persistMem){act.add('memory');on.add('w-mem');}if(S.persistSkill){act.add('skills');on.add('w-skill');}
+    main='Afterwards the harness writes down what happened'+(S.persistSkill?' and learns a new skill':S.persistMem?' and saves a memory':'');
+    tech='hermes_state.py (SQLite + FTS5)'+(S.persistMem?' · memory_manager.py':'')+(S.persistSkill?' · skills/':'');}
+  return{act,on,pt,col,n,main,tech};}
+function render(){
+  const I=info(),T=S.turn;
+  setCls($('mimic'),'busy',!!T);
+  document.querySelectorAll('#mimic .st').forEach(g=>setCls(g,'act',I.act.has(g.getAttribute('data-eq'))));
+  for(const id in lineEl)setCls(lineEl[id],'on',I.on.has(id));
+  setCls(cmpSig,'on',S.phase==='compress');
+  const pk=$('pkt');if(I.pt){pk.style.display='';pk.setAttribute('transform',`translate(${I.pt.x.toFixed(1)},${I.pt.y.toFixed(1)})`);pk.style.setProperty('--pk',KC[I.col]);}else pk.style.display='none';
+  setT('capN',I.n);setT('capMain',I.main);setT('capTech',I.tech);
+  $('cap').style.setProperty('--cap',T?KC[I.col]:'var(--steel-d)');
+  INPUTS.forEach(r=>setCls(inEl[r.k].led,'on',S.led[r.k]>0||(T&&T.src===r.k)));
+  OUTS.forEach(([k])=>setCls(outEl[k],'on',T&&(S.phase==='deliver'&&I.n==='7'||S.phase==='persist')&&({chat:'chat',api:'chat',cli:'cli',ide:'ide',cron:'cron'}[T.src])===k));
+  const cs=Math.ceil(S.cronNext);setT('cronT','next '+Math.floor(cs/60)+':'+String(cs%60).padStart(2,'0'));
+  const q=gwQ();setT('gwQ',q+' waiting');$('gwQ').setAttribute('class',q>=5?'val hot-t':'val');
+  setT('rdMem',S.memory+' saved');setT('rdSk',S.skills+' saved');setT('rdHist',T?(T.hist?T.hist+' turns':'none'):'—');
+  setT('provN',S.prov.name);setT('provM',S.prov.model);setT('provT',S.phase==='provider'&&S.tps?Math.round(S.tps)+' t/s':'');
+  setT('mdA',T&&S.phase==='provider'?(S.tps?'streaming answer':'waiting for first token'):(T?'waiting':'idle'));
+  setT('mdB',T?`pass ${T.iter+1}`:'—');
+  const fr=Math.min(1,S.ctx/S.ctxMax);$('gFill').setAttribute('width',(160*fr).toFixed(1));setCls($('gFill'),'hot',fr>=S.thresh);
+  setT('gTxt',`${k1(S.ctx)} / 200k tokens · ${Math.round(fr*100)}%`);
+  setT('gPass',T?`loop pass ${T.iter+1} (max ${T.maxIter})`:'loop idle');
+  setT('gCmp',S.phase==='compress'?'compressing older turns…':`${S.compressions} compressions so far`);
+  $('gCmp').setAttribute('class',S.phase==='compress'?'sub hot-t':'sub');
+  const w=S.calls.some(c=>c.wait);
+  setT('tlA',S.phase==='tools'&&S.toolsT>=.9?(w?'waiting for approval':`${S.calls.filter(c=>!c.done).length} running`):'70+ tools');
+  $('tlA').setAttribute('class',w?'sub warn-t':'sub');
+  TOOLS.forEach(t=>{const c=S.calls.find(c=>c.k===t.k&&!c.done);let s=c?(c.wait?'needs OK':'running'):(S.tools[t.k].calls+' calls');
+    const busy=S.slots.filter(Boolean).length;if(t.k==='delegate'&&busy)s=busy+'/3 busy';
+    setT(chipEl[t.k].st,s);chipEl[t.k].st.setAttribute('class',c&&c.wait?'sub warn-t':'sub');});
+  setT('rpA',S.phase==='deliver'?Math.round(S.outTok)+' tokens':'—');
+  setT('dbA',S.messages.toLocaleString()+' messages');setT('dbB',S.sessions.toLocaleString()+' sessions');
+  setT('memA',S.memory+' entries');setT('skA',S.skills+' skills');
+  setT('clock',fmtT(S.t));
+  const un=S.alarms.filter(a=>!a.acked).length;setT('almN',un);setCls($('almChip'),'zero',un===0);
+  if(S.follow&&T){const map={ingest:I.n==='2'?'gateway':'in-'+SRCK[T.src],prompt:'prompt',provider:'model',tools:'tools',compress:'context',deliver:I.n==='7'?'output':'reply',persist:'db'};
+    const want=map[S.phase];if(want&&want!==S.sel){S.sel=want;fpBuilt=null;}}}
+
+let jLast=0;
+function renderJourney(){
+  if(S.jVer===jLast)return;jLast=S.jVer;
+  const list=S.journey.length?S.journey:(S.lastJourney||[]);
+  setT('jHead',S.turn?`session ${S.turn.key} · in progress`:list.length?'last message · complete':'—');
+  const ol=$('journey');ol.textContent='';
+  if(!list.length){const li=document.createElement('li');const s=document.createElement('span');s.className='tx';s.style.gridColumn='1/-1';s.textContent='No message yet. Use “Send in” above, or wait for one to arrive.';li.append(s);ol.appendChild(li);return;}
+  list.forEach((s,i)=>{const li=document.createElement('li');li.className='j-'+s.c+(S.turn&&i===list.length-1?' now':'');
+    const b=document.createElement('span');b.className='b';b.textContent=s.n;
+    const tx=document.createElement('span');tx.className='tx';tx.textContent=s.text;
+    const tm=document.createElement('span');tm.className='tm';tm.textContent='+'+(s.t-list[0].t).toFixed(1)+'s';
+    li.append(b,tx,tm);ol.appendChild(li);});
+  ol.scrollTop=ol.scrollHeight;}
+
+let aLast=0;
+function renderAlarms(){
+  if(S.alarmVer===aLast)return;aLast=S.alarmVer;const ul=$('alist');ul.textContent='';
+  if(!S.alarms.length){const li=document.createElement('li');li.className='empty';li.textContent='No alarms. Try “Risky command” to see an approval hold.';ul.appendChild(li);}
+  for(const a of S.alarms){const li=document.createElement('li');li.className='p'+a.pri+(!a.acked?' unack':'')+(a.cleared?' cleared':'');
+    const sev=document.createElement('span');sev.className='sev';
+    const tm=document.createElement('span');tm.className='time';tm.textContent=fmtT(a.t);
+    const tg=document.createElement('span');tg.className='tag';tg.textContent=a.tag;
+    const tx=document.createElement('span');tx.className='txt';tx.textContent=a.text;
+    const acts=document.createElement('span');acts.className='acts';
+    if(a.action==='approve'&&!a.cleared){const b1=document.createElement('button');b1.textContent='Approve';b1.onclick=()=>resolveApproval(true);
+      const b2=document.createElement('button');b2.textContent='Deny';b2.onclick=()=>resolveApproval(false);acts.append(b1,b2);}
+    else if(!a.acked){const b=document.createElement('button');b.textContent='Ack';b.onclick=()=>{a.acked=true;S.alarmVer++;};acts.append(b);}
+    else if(a.pri!==4){const s=document.createElement('span');s.className='st';s.textContent=a.cleared?'RTN':'ACK';acts.append(s);}
+    li.append(sev,tm,tg,tx,acts);ul.appendChild(li);}
+  setT('almSum',`${S.alarms.filter(a=>a.pri<4&&!a.cleared).length} active · ${S.alarms.filter(a=>!a.acked).length} unacked`);}
+
+const EQ={
+  'in-chat':{t:'Chat apps',f:'plugins/platforms/ (telegram, discord, slack, whatsapp, signal, +20)',d:'Messages from chat apps. Each platform has an adapter that turns its events into one common message format for the gateway.',doc:'gateway-internals'},
+  'in-api':{t:'API server & webhooks',f:'gateway/platforms/api_server · webhook',d:'HTTP requests and signed webhooks (GitHub, GitLab, Jira, Stripe) come in through the gateway like any chat message.',doc:'gateway-internals'},
+  'in-cli':{t:'CLI',f:'cli.py · HermesCLI',d:'The terminal interface. It runs the agent directly, so it skips the gateway.',doc:'architecture'},
+  'in-ide':{t:'IDE via ACP',f:'acp_adapter/',d:'Editors like VS Code, Zed and JetBrains talk to Hermes over stdio JSON-RPC. This also skips the gateway.',doc:'acp-internals'},
+  'in-cron':{t:'Cron scheduler',f:'cron/scheduler.py · jobs.json',d:'Scheduled jobs are real agent tasks. Each run starts a fresh agent with no history, attaches the job’s skills, and delivers the result to a chosen platform.',doc:'cron-internals',v:()=>[['Next job in',Math.ceil(S.cronNext)+' s']]},
+  gateway:{t:'Gateway: check & route',f:'gateway/run.py · GatewayRunner',d:'A long-running process. For every chat or webhook message it checks the sender is allowed (allowlists, DM pairing), works out which conversation it belongs to, and loads that conversation’s history.',doc:'gateway-internals',v:()=>[['Waiting',gwQ()]]},
+  prompt:{t:'Build the prompt',f:'agent/prompt_builder.py · system_prompt.py',d:'Stacks everything the model needs into one prompt, in tiers that change at different speeds: stable (identity, tool guidance, skills), context (project files), volatile (memory, profile, time). Keeping the stable part fixed lets the provider cache it.',doc:'prompt-assembly'},
+  'rd-ctx':{t:'Context files',f:'project context files',d:'Notes kept in a project that shape every conversation there. They go into the context tier of the prompt.',doc:'prompt-assembly'},
+  'rd-mem':{t:'Memory (read)',f:'agent/memory_manager.py',d:'Facts the agent saved in earlier conversations, added to the volatile tier so it remembers you.',doc:'memory-provider-plugin',v:()=>[['Entries',S.memory]]},
+  'rd-skill':{t:'Skills (read)',f:'skills/ · optional-skills/',d:'Saved playbooks for tasks the agent has done before. Relevant ones are listed in the prompt so the model can follow them.',link:'https://hermes-agent.nousresearch.com/docs/skills',v:()=>[['Skills',S.skills]]},
+  'rd-hist':{t:'Session history',f:'hermes_state.py · gateway/session.py',d:'Earlier turns of this same conversation, loaded from the session database.',doc:'session-storage'},
+  provider:{t:'LLM provider',f:'hermes_cli/runtime_provider.py',d:'Picks the API style, key and URL for the chosen model (18+ providers, credential pools, automatic failover), then sends the request.',doc:'provider-runtime',v:()=>[['Provider',S.prov.name],['Model',S.prov.model],['Calls',S.provCalls],['Failovers',S.fallbacks]]},
+  model:{t:'Model thinks',f:'agent/conversation_loop.py',d:'The model reads the prompt and does one of two things: writes a final answer, or asks the harness to run tools. If it asks for tools, the loop goes around again.',doc:'agent-loop',v:()=>[['This message',S.turn?'pass '+(S.turn.iter+1):'—']]},
+  context:{t:'Context window',f:'agent/context_compressor.py',d:'Every pass adds tokens: the model’s output and each tool result. When the total crosses 85% of the model’s limit, older middle turns are summarized and a child session is recorded so nothing is lost.',doc:'context-compression-and-caching',v:()=>[['Tokens',Math.round(S.ctx).toLocaleString()],['Limit',S.ctxMax.toLocaleString()],['Compressions',S.compressions]]},
+  tools:{t:'Run tools',f:'model_tools.py · tools/registry.py',d:'The harness runs the tools, not the model. 70+ tools in about 28 toolsets register themselves; results are added to the conversation and sent back to the model.',doc:'tools-runtime'},
+  reply:{t:'Send reply',f:'agent/conversation_loop.py',d:'When the model answers without asking for tools, the loop ends and that answer becomes the reply.',doc:'agent-loop'},
+  output:{t:'Back to sender',f:'gateway/delivery.py',d:'Replies go back the way the message came: to the same chat, the terminal, the editor, or for cron jobs to the channel the job targets.',doc:'gateway-internals'},
+  db:{t:'Session database',f:'hermes_state.py (SQLite + FTS5)',d:'Every conversation is saved and full-text searchable. Compression splits are stored as parent/child sessions.',doc:'session-storage',v:()=>[['Messages',S.messages.toLocaleString()],['Sessions',S.sessions.toLocaleString()]]},
+  memory:{t:'Memory (write)',f:'agent/memory_manager.py · plugins/memory/',d:'After a conversation the agent may save facts worth keeping. They are read back in on the next message: one half of the learning loop.',doc:'memory-provider-plugin',v:()=>[['Entries',S.memory]]},
+  skills:{t:'Skills (write)',f:'skills/',d:'After multi-step work the agent can write a new skill describing how it did it, and improve skills as it uses them: the other half of the learning loop.',link:'https://hermes-agent.nousresearch.com/docs/skills',v:()=>[['Skills',S.skills],['Latest',S.lastSkill||'—']]}};
+const TD={terminal:['tools/terminal_tool.py · approval.py','Runs shell commands on local, Docker, SSH, Daytona, Modal or Vercel Sandbox backends. Risky commands are held until a human approves.'],browser:['tools/browser_session.py','Drives a real browser over CDP, locally or in the cloud.'],web:['tools/web_tools.py','Web search and page extraction through pluggable backends.'],file:['tools/file_tools.py','Read, write, patch and search files, plus image understanding.'],mcp:['tools/mcp_tool.py','Tools discovered from any connected MCP servers.'],delegate:['tools/delegate_tool.py','Spawns child agents with their own context and limited tools. Up to 3 run at once; only their summary comes back.']};
+TOOLS.forEach(t=>EQ['chip:'+t.k]={t:t.name,f:TD[t.k][0],d:TD[t.k][1],doc:'tools-runtime',v:()=>[['Calls',S.tools[t.k].calls]]});
+let fpBuilt=null,fpVals=null;
+function renderFace(){
+  const e=EQ[S.sel];if(!e)return;
+  if(fpBuilt!==S.sel){fpBuilt=S.sel;const f=$('face');f.textContent='';
+    const t=document.createElement('div');t.className='ft';t.textContent=e.t;
+    const ff=document.createElement('div');ff.className='ff';ff.textContent=e.f;
+    const p=document.createElement('p');p.textContent=e.d;
+    fpVals=document.createElement('dl');
+    const row=document.createElement('div');row.className='row';
+    const a=document.createElement('a');a.href=e.link||DOC+e.doc;a.target='_blank';a.rel='noopener';a.textContent='Hermes docs ↗';row.append(a);
+    if(!S.follow){const b=document.createElement('button');b.textContent='Follow the message again';b.onclick=()=>{S.follow=true;fpBuilt=null;setT('fpTag','following the message');};row.append(b);}
+    f.append(t,ff,p,fpVals,row);}
+  const rows=e.v?e.v():[];fpVals.textContent='';fpVals.hidden=!rows.length;
+  rows.forEach(([k,v])=>{const dt=document.createElement('dt');dt.textContent=k;const dd=document.createElement('dd');dd.textContent=v;fpVals.append(dt,dd);});}
+function selectEq(k){if(EQ[k]){S.follow=false;S.sel=k;fpBuilt=null;setT('fpTag','pinned: '+EQ[k].t);renderFace();}}
+const svgEl=$('mimic');
+svgEl.addEventListener('click',e=>{const g=e.target.closest('[data-eq]');if(g)selectEq(g.getAttribute('data-eq'));});
+svgEl.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const g=e.target.closest('[data-eq]');if(g){e.preventDefault();selectEq(g.getAttribute('data-eq'));}}});
+
+function setPaused(p){S.paused=p;S.stepping=false;$('runBtn').textContent=p?'Play':'Pause';$('runBtn').setAttribute('aria-pressed',p);}
+$('runBtn').onclick=()=>setPaused(!S.paused);
+$('stepBtn').onclick=()=>{S.stepTarget=S.phaseCount+1;S.paused=false;S.stepping=true;$('runBtn').textContent='Play';$('runBtn').setAttribute('aria-pressed',true);};
+document.querySelectorAll('[data-speed]').forEach(b=>b.onclick=()=>{S.speed=+b.dataset.speed;
+  document.querySelectorAll('[data-speed]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  document.documentElement.style.setProperty('--fdur',(0.7/S.speed)+'s');});
+document.querySelectorAll('[data-inject]').forEach(b=>b.onclick=()=>{const k=b.dataset.inject;
+  if(k==='msg')arrive('chat',{plat:'Telegram',force:true});
+  if(k==='cli')arrive('cli');
+  if(k==='cron')S.cronNext=.01;
+  if(k==='danger'){S.flags.danger=true;S.flags.forceTool=true;arrive('cli',{ask:'clean up the build folder'});}
+  if(k==='delegate'){S.flags.delegate=true;S.flags.forceTool=true;arrive('chat',{plat:'Telegram',force:true,ask:'research three CRMs and compare pricing'});}
+  if(k==='long'){S.flags.forceTool=true;arrive('chat',{plat:'Discord',force:true,long:true,ask:'keep going on the migration plan'});}});
+
+ev('SYS-000','Gateway started · 25 adapters loaded · 3 MCP servers connected');
+for(let i=0;i<500;i++)step(.1);
+S.alarms.forEach(a=>{if(a.pri<4&&a.cleared)a.acked=true;});S.alarmVer++;
+if(!S.turn&&!S.queue.length)arrive('chat',{plat:'Telegram',force:true,ask:'check if the site deploy passed'});
+let last=performance.now(),acc=0,frame=0;
+function loop(now){const dt=Math.min(.25,(now-last)/1000);last=now;
+  if(!S.paused){acc+=dt*S.speed;while(acc>=.05){step(.05);acc-=.05;
+    if(S.stepping&&S.phaseCount>=S.stepTarget){setPaused(true);acc=0;break;}}}
+  render();renderJourney();renderAlarms();
+  if(frame++%6===0)renderFace();
+  requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

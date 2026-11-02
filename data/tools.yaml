@@ -485,6 +485,18 @@ tools:
     related: [svg-optimizer, favicon-generator]
     added: "2026-09-15"
 
+  - id: bot-avatar
+    name: Bot Avatar Studio
+    url: bot-avatar/
+    writeup: library/tools/bot-avatar/
+    category: images-media
+    kind: app
+    short: Silhouette mascot avatars with moods, cursor-tracking eyes and SVG export.
+    desc: Pick a silhouette body, colour, eye style and mood, let the eyes follow your cursor, then export an SVG, a portable JSON definition, a share link or an image-generation prompt.
+    tags: [svg, design, javascript, color, image-generation]
+    related: [palette-studio, qr-code-studio]
+    added: "2026-11-01"
+
   # ── Exhibits (6) ───────────────────────────────────────────────────────────
   - id: aether-atelier
     name: AETHER atelier

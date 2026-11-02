@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Bot Avatar Studio</title>
+<meta name="description" content="Design a silhouette bot avatar: pick a body, a colour and a mood, let the eyes follow your cursor, then download an SVG, copy a portable JSON definition or share a link. Runs entirely in the browser.">
+<link rel="icon" href="data:,">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/bot-avatar/">
+<meta property="og:title" content="Bot Avatar Studio · The BlackCat">
+<meta property="og:description" content="Pick a body, a colour and a mood, let the eyes follow your cursor, then export SVG, JSON or a share link.">
+<meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/bot-avatar/">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/bot-avatar-light.webp">
+<meta property="og:type" content="website">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Bot Avatar Studio", "description": "Design a silhouette bot avatar: pick a body, a colour and a mood, let the eyes follow your cursor, then export SVG, JSON or a share link.", "url": "https://theblackcat98.github.io/TheBlackCat/bot-avatar/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/bot-avatar-light.webp", "applicationCategory": "DesignApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="bot-avatar"></script>
+<style>
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--ui-font);font-size:15px;line-height:1.45;background:var(--bg);color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+h1,h2,h3{margin:0}
+a{color:var(--accent-strong)}
+.page{max-width:1180px;margin:0 auto;padding:1rem 1.15rem 4rem;display:grid;gap:1.1rem}
+.hd h1{font-family:var(--serif-font);font-size:clamp(1.6rem,4vw,2.1rem);font-weight:600;letter-spacing:-.02em}
+.hd p{margin:.4rem 0 0;color:var(--muted);max-width:52rem}
+kbd{font-family:var(--mono-font);font-size:.78em;border:1px solid var(--line-2);border-bottom-width:2px;border-radius:5px;padding:.05em .35em;background:var(--surface-2)}
+
+.layout{display:grid;gap:1.1rem;align-items:start}
+@media(min-width:920px){
+  .layout{grid-template-columns:1.05fr .95fr}
+  .stagecard{position:sticky;top:calc(var(--tk-bar-h) + .9rem)}
+}
+
+.stagecard{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:.9rem;display:grid;gap:.85rem;justify-items:center}
+.stage{position:relative;width:100%;max-width:440px;aspect-ratio:5/4;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;display:grid;place-items:center;overflow:hidden;cursor:crosshair}
+.stage::before{content:"";position:absolute;inset:0;background-image:radial-gradient(var(--line) .7px,transparent .7px);background-size:16px 16px;opacity:.5;pointer-events:none}
+#bot{width:80%;height:auto;display:block;position:relative;z-index:1;overflow:visible}
+.caption{margin:0;font-family:var(--mono-font);font-size:.82rem;color:var(--muted);text-align:center;min-height:1.2em}
+.caption b{color:var(--ink);font-weight:600}
+
+.moods{display:flex;gap:.3rem;flex-wrap:wrap;justify-content:center;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:.25rem}
+.moods button{appearance:none;border:0;background:transparent;color:var(--muted);font:inherit;font-size:.84rem;padding:.35rem .8rem;border-radius:999px;cursor:pointer;transition:background .15s,color .15s}
+.moods button:hover{color:var(--ink)}
+.moods button[aria-pressed="true"]{background:var(--ink);color:var(--bg);font-weight:600}
+
+.panel{display:grid;gap:.85rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-sm);padding:.85rem .95rem 1rem}
+.card h2{font-size:.7rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:0 0 .65rem;display:flex;justify-content:space-between;align-items:baseline;gap:.5rem}
+.card h2 span{text-transform:none;letter-spacing:0;font-weight:400;font-size:.72rem;color:var(--muted)}
+
+.bodies{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem}
+.bodies button{appearance:none;border:1px solid var(--line);background:var(--surface-2);border-radius:11px;padding:.3rem;cursor:pointer;color:var(--ink-2);display:grid;place-items:center;transition:border-color .15s,color .15s,transform .12s}
+.bodies button:hover{color:var(--ink);border-color:var(--line-2);transform:translateY(-1px)}
+.bodies button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.bodies svg{width:100%;height:auto;max-width:44px;display:block}
+
+.swatches{display:flex;flex-wrap:wrap;gap:.45rem}
+.swatches button{appearance:none;width:2rem;height:2rem;border-radius:999px;border:2px solid transparent;box-shadow:0 0 0 1px var(--line-2) inset;cursor:pointer;padding:0;transition:transform .12s}
+.swatches button:hover{transform:scale(1.08)}
+.swatches button[aria-pressed="true"]{border-color:var(--surface);box-shadow:0 0 0 2px var(--ink)}
+
+.seg{display:flex;gap:.3rem;flex-wrap:wrap}
+.seg button{appearance:none;border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);font:inherit;font-size:.8rem;padding:.3rem .65rem;border-radius:8px;cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent-strong);background:var(--accent-wash);font-weight:600}
+
+.toggles{display:grid;gap:.5rem;margin-top:.7rem}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:1rem;font-size:.85rem;cursor:pointer}
+.toggle input{appearance:none;width:2.5rem;height:1.4rem;border-radius:999px;background:var(--line-2);border:0;position:relative;cursor:pointer;flex:0 0 auto;transition:background .18s}
+.toggle input::after{content:"";position:absolute;top:3px;left:3px;width:calc(1.4rem - 6px);height:calc(1.4rem - 6px);border-radius:999px;background:var(--surface);transition:transform .18s}
+.toggle input:checked{background:var(--accent)}
+.toggle input:checked::after{transform:translateX(1.1rem)}
+
+.acts{display:flex;flex-wrap:wrap;gap:.4rem}
+.btn{appearance:none;font:inherit;font-size:.83rem;border-radius:9px;padding:.42rem .8rem;cursor:pointer;border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink);transition:border-color .15s,background .15s}
+.btn:hover{border-color:var(--accent);color:var(--accent-strong)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong);color:var(--accent-ink)}
+textarea{width:100%;font-family:var(--mono-font);font-size:.78rem;line-height:1.5;color:var(--ink);background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:.5rem .6rem;resize:vertical;min-height:5.5rem;tab-size:2}
+.msg{margin:.6rem 0 0;font-size:.8rem;color:var(--muted);min-height:1.2em}
+.msg.ok{color:var(--ok)}
+.msg.bad{color:var(--danger)}
+.ft{color:var(--muted);font-size:.8rem;border-top:1px solid var(--line);padding-top:.9rem;display:grid;gap:.35rem}
+.ft code{font-family:var(--mono-font);font-size:.92em}
+
+/* ── avatar animation ─────────────────────────────────────────── */
+#bot.m-idle{animation:bob 4.6s ease-in-out infinite}
+#bot.m-thinking{animation:tilt 5.2s ease-in-out infinite}
+#bot.m-happy{animation:hop 2.2s ease-in-out infinite}
+#bot.m-sleepy{animation:breathe 6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes hop{0%,62%,100%{transform:translateY(0)}74%{transform:translateY(-10px)}86%{transform:translateY(0)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.022)}}
+@keyframes tilt{0%,100%{transform:rotate(0)}50%{transform:rotate(-1.6deg)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.12)}}
+.eye{transform-box:fill-box;transform-origin:center;animation:blink 5.4s infinite}
+@keyframes orbit{0%{transform:rotate(0) translateX(9px)}100%{transform:rotate(360deg) translateX(9px)}}
+.decor{transform-box:fill-box;transform-origin:center;animation:orbit 3.4s linear infinite}
+@keyframes drift{0%{opacity:0;transform:translate(0,0) scale(.8)}25%{opacity:1}100%{opacity:0;transform:translate(9px,-22px) scale(1.1)}}
+.drift{animation:drift 3.6s ease-out infinite}
+body.no-motion #bot,body.no-motion .eye,body.no-motion .decor,body.no-motion .drift{animation:none!important}
+@media(prefers-reduced-motion:reduce){.stage::before{opacity:.35}}
+</style>
+</head>
+<body>
+<a class="back tk-fallback" href="../tools/">&larr; All tools</a>
+<div class="page">
+  <header class="hd">
+    <h1>Bot Avatar Studio</h1>
+    <p>A silhouette mascot you can actually ship: pick a body, a colour and a mood. The eyes follow your cursor, and everything exports as SVG, a portable JSON definition or a shareable link. No libraries, no network calls.</p>
+  </header>
+
+  <div class="layout">
+    <section class="stagecard" aria-label="Avatar preview">
+      <div class="stage" id="stage">
+        <svg id="bot" viewBox="0 0 240 240" role="img" aria-label="Bot avatar preview"></svg>
+      </div>
+      <p class="caption" id="caption"><b>Bit</b> · idle</p>
+      <div class="moods" id="moods" role="group" aria-label="Mood"></div>
+    </section>
+
+    <div class="panel">
+      <div class="card">
+        <h2>Body <span id="bodyName">Bot</span></h2>
+        <div class="bodies" id="bodies" role="group" aria-label="Body shape"></div>
+      </div>
+
+      <div class="card">
+        <h2>Colour <span id="colourName">Tangerine</span></h2>
+        <div class="swatches" id="swatches" role="group" aria-label="Body colour"></div>
+      </div>
+
+      <div class="card">
+        <h2>Eyes</h2>
+        <div class="seg" id="eyeSeg" role="group" aria-label="Eye colour"></div>
+        <div class="seg" id="motionSeg" role="group" aria-label="Motion" style="margin-top:.6rem"></div>
+        <div class="toggles">
+          <label class="toggle"><span>Eyes follow the cursor</span><input type="checkbox" id="follow" checked></label>
+          <label class="toggle"><span>Sound effects</span><input type="checkbox" id="sound" checked></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Actions</h2>
+        <div class="acts">
+          <button class="btn primary" id="gen">Generate</button>
+          <button class="btn" id="reset">Reset</button>
+        </div>
+        <div class="acts" style="margin-top:.45rem">
+          <button class="btn" id="dlSvg">Download SVG</button>
+          <button class="btn" id="copyJson">Copy JSON</button>
+          <button class="btn" id="copyLink">Copy link</button>
+          <button class="btn" id="copyPrompt">Copy prompt</button>
+        </div>
+        <h2 style="margin-top:.9rem">Definition <span>edit and apply, or import a file</span></h2>
+        <textarea id="io" spellcheck="false" aria-label="Avatar definition JSON"></textarea>
+        <div class="acts" style="margin-top:.45rem">
+          <button class="btn" id="apply">Apply JSON</button>
+          <label class="btn" for="file" style="display:inline-block">Choose file</label>
+          <input type="file" id="file" accept=".json,application/json" hidden>
+        </div>
+        <p class="msg" id="msg" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="ft">
+    <p style="margin:0">Served from <code>static/bot-avatar/index.html</code> · vanilla JavaScript, no libraries, no third-party requests, nothing leaves your browser.</p>
+    <p style="margin:0">Keys: <kbd>1</kbd>–<kbd>4</kbd> moods · <kbd>G</kbd> generate · <kbd>R</kbd> reset. The SVG export is a flat still in the current colour and mood; the JSON is the portable avatar.</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ── data ─────────────────────────────────────────────────────── */
+  const BODIES = [
+    {
+      id: "bot", label: "Bot",
+      parts: [
+        { t: "c", x: 120, y: 24, r: 9 },
+        { t: "r", x: 116, y: 26, w: 8, h: 24 },
+        { t: "r", x: 26, y: 88, w: 18, h: 46, rx: 9 },
+        { t: "r", x: 196, y: 88, w: 18, h: 46, rx: 9 },
+        { t: "r", x: 44, y: 46, w: 152, h: 132, rx: 40 }
+      ],
+      e: { cy: 100, dx: 26, w: 15, h: 27 }
+    },
+    {
+      id: "controller", label: "Controller",
+      parts: [
+        { t: "p", d: "M62 76 H178 A42 42 0 0 1 220 118 C220 152 208 170 190 170 C176 170 166 154 148 154 H92 C74 154 64 170 50 170 C32 170 20 152 20 118 A42 42 0 0 1 62 76 Z" }
+      ],
+      e: { cy: 110, dx: 26, w: 14, h: 24 }
+    },
+    {
+      id: "blob", label: "Blob",
+      parts: [
+        { t: "p", d: "M120 48 C166 48 198 82 198 124 C198 164 166 188 120 188 C74 188 42 164 42 124 C42 82 74 48 120 48 Z" }
+      ],
+      e: { cy: 116, dx: 28, w: 16, h: 28 }
+    },
+    {
+      id: "bulb", label: "Bulb",
+      parts: [
+        { t: "p", d: "M120 40 C162 40 192 72 192 112 C192 140 176 156 166 166 L166 190 A10 10 0 0 1 156 200 H84 A10 10 0 0 1 74 190 L74 166 C64 156 48 140 48 112 C48 72 78 40 120 40 Z" }
+      ],
+      e: { cy: 106, dx: 26, w: 15, h: 26 }
+    },
+    {
+      id: "chat", label: "Chat",
+      parts: [
+        { t: "p", d: "M54 50 H186 A28 28 0 0 1 214 78 V138 A28 28 0 0 1 186 166 H124 L92 196 V166 H54 A28 28 0 0 1 26 138 V78 A28 28 0 0 1 54 50 Z" }
+      ],
+      e: { cy: 104, dx: 26, w: 15, h: 26 }
+    },
+    {
+      id: "bunny", label: "Bunny",
+      parts: [
+        { t: "p", d: "M80 104 C70 74 68 44 82 34 C96 24 110 44 114 82 Z" },
+        { t: "p", d: "M160 104 C170 74 172 44 158 34 C144 24 130 44 126 82 Z" },
+        { t: "p", d: "M120 86 C168 86 196 116 196 148 C196 180 166 196 120 196 C74 196 44 180 44 148 C44 116 74 86 120 86 Z" }
+      ],
+      e: { cy: 142, dx: 26, w: 15, h: 26 }
+    },
+    {
+      id: "fish", label: "Fish",
+      parts: [
+        { t: "p", d: "M50 112 L6 86 C22 114 22 128 6 156 L50 160 Z" },
+        { t: "p", d: "M100 76 L128 36 L158 74 Z" },
+        { t: "p", d: "M126 72 C176 72 208 100 208 128 C208 156 176 184 126 184 C76 184 44 156 44 128 C44 100 76 72 126 72 Z" }
+      ],
+      e: { cx: 132, cy: 124, dx: 24, w: 14, h: 24 }
+    },
+    {
+      id: "heart", label: "Heart",
+      parts: [
+        { t: "p", d: "M120 192 C42 144 22 108 34 80 C46 52 86 48 106 70 L120 86 L134 70 C154 48 194 52 206 80 C218 108 198 144 120 192 Z" }
+      ],
+      e: { cy: 104, dx: 24, w: 14, h: 24 }
+    }
+  ];
+
+  const PALETTE = [
+    { name: "Chalk", hex: "#efe9dc" },
+    { name: "Cocoa", hex: "#7a4a2b" },
+    { name: "Rose", hex: "#c2415c" },
+    { name: "Tangerine", hex: "#e0662a" },
+    { name: "Amber", hex: "#e3a008" },
+    { name: "Moss", hex: "#4e7a34" },
+    { name: "Teal", hex: "#1f7a72" },
+    { name: "Cobalt", hex: "#2b56b8" },
+    { name: "Violet", hex: "#6d43b8" },
+    { name: "Blossom", hex: "#d0649f" },
+    { name: "Slate", hex: "#5c6670" }
+  ];
+
+  const MOODS = [
+    { id: "idle", label: "Idle", word: "idle" },
+    { id: "thinking", label: "Thinking", word: "thinking" },
+    { id: "happy", label: "Happy", word: "delighted" },
+    { id: "sleepy", label: "Sleepy", word: "drowsy" }
+  ];
+
+  const EYES = [
+    { id: "cut", label: "Cut-out" },
+    { id: "ink", label: "Dark" },
+    { id: "glow", label: "Amber" }
+  ];
+
+  const MOTION = [
+    { id: "system", label: "System" },
+    { id: "reduced", label: "Reduced" },
+    { id: "full", label: "Full" }
+  ];
+
+  const NAMES = ["Bit", "Bolt", "Pip", "Mox", "Nub", "Tic", "Gizmo", "Widget", "Sprout", "Echo", "Fizz", "Orb", "Kilo", "Bean", "Rune", "Volt"];
+
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const bodyById = (id) => BODIES.find((b) => b.id === id) || BODIES[0];
+  const paletteByHex = (hex) => PALETTE.find((p) => p.hex.toLowerCase() === String(hex).toLowerCase());
+  const paletteByName = (name) => PALETTE.find((p) => p.name.toLowerCase() === String(name).toLowerCase());
+
+  const state = {
+    body: "bot",
+    color: "#e0662a",
+    eye: "cut",
+    mood: "idle",
+    motion: "system",
+    follow: true,
+    sound: true,
+    name: "Bit"
+  };
+
+  /* ── colour helpers ───────────────────────────────────────────── */
+  let probe = null;
+  function resolveCss(prop) {
+    if (!probe) {
+      probe = document.createElement("span");
+      probe.style.cssText = "position:absolute;left:-9999px;top:0";
+      document.body.appendChild(probe);
+    }
+    probe.style.color = "var(" + prop + ")";
+    const rgb = getComputedStyle(probe).color;
+    const m = rgb.match(/[\d.]+/g);
+    if (!m) return "#000000";
+    return "#" + m.slice(0, 3).map((n) => Math.round(+n).toString(16).padStart(2, "0")).join("");
+  }
+
+  function lum(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  }
+
+  function stageColour() {
+    const c = getComputedStyle($("#stage")).backgroundColor;
+    const m = c.match(/[\d.]+/g);
+    if (!m) return "#ffffff";
+    return "#" + m.slice(0, 3).map((n) => Math.round(+n).toString(16).padStart(2, "0")).join("");
+  }
+
+  // Eye colour as a concrete hex, resolved for the current theme.
+  function eyeHex() {
+    if (state.eye === "cut") return stageColour();
+    if (state.eye === "ink") return resolveCss("--ink");
+    return resolveCss("--accent");
+  }
+
+  /* ── svg construction ─────────────────────────────────────────── */
+  function partsInner(b) {
+    return b.parts.map((p) => {
+      if (p.t === "r") return `<rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" rx="${p.rx || 0}"/>`;
+      if (p.t === "c") return `<circle cx="${p.x}" cy="${p.y}" r="${p.r}"/>`;
+      return `<path d="${p.d}"/>`;
+    }).join("");
+  }
+
+  function partsMarkup(b, fill) {
+    const stroke = lum(fill) > 0.72 ? ` stroke="${resolveCss("--line-2")}" stroke-width="1.5"` : "";
+    return `<g fill="${fill}"${stroke}>${partsInner(b)}</g>`;
+  }
+
+  function eyeShapes(b, colour, mood) {
+    const cx = b.e.cx || 120;
+    const xs = [cx - b.e.dx, cx + b.e.dx];
+    const { cy, w, h } = b.e;
+    if (mood === "happy") {
+      return xs.map((x) => `<path d="M${x - w / 2} ${cy + h * 0.2} Q${x} ${cy - h * 0.72} ${x + w / 2} ${cy + h * 0.2}" fill="none" stroke="${colour}" stroke-width="${(w * 0.62).toFixed(1)}" stroke-linecap="round"/>`).join("");
+    }
+    if (mood === "sleepy") {
+      const hh = Math.max(5, w * 0.44);
+      return xs.map((x) => `<rect x="${x - w / 2}" y="${cy - hh / 2}" width="${w}" height="${hh}" rx="${hh / 2}" fill="${colour}"/>`).join("");
+    }
+    const squish = mood === "thinking" ? 0.7 : 1;
+    const hh = h * squish;
+    return xs.map((x) => `<rect class="eye" x="${x - w / 2}" y="${cy - hh / 2}" width="${w}" height="${hh}" rx="${w / 2}" fill="${colour}"/>`).join("");
+  }
+
+  function decorMarkup(b, colour, mood) {
+    const cx = b.e.cx || 120;
+    if (mood === "thinking") {
+      return `<g transform="translate(${cx},${b.e.cy - 40})"><circle class="decor" r="4.5" fill="${colour}" opacity=".85"/></g>`;
+    }
+    if (mood === "sleepy") {
+      const x = cx + 34;
+      const y = b.e.cy - 34;
+      return `<path class="drift" d="M${x} ${y} h11 l-11 11 h11" fill="none" stroke="${colour}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>`;
+    }
+    return "";
+  }
+
+  function buildSvg(withFollow) {
+    const b = bodyById(state.body);
+    const fill = state.color;
+    const eye = eyeHex();
+    const eyes = withFollow
+      ? `<g id="eyesG">${eyeShapes(b, eye, state.mood)}</g>`
+      : eyeShapes(b, eye, state.mood);
+    return partsMarkup(b, fill) + decorMarkup(b, eye, state.mood) + eyes;
+  }
+
+  function render() {
+    const svg = $("#bot");
+    svg.setAttribute("class", "m-" + state.mood);
+    svg.innerHTML = buildSvg(true);
+    const b = bodyById(state.body);
+    svg.setAttribute("aria-label", `Bot avatar: ${state.name}, ${b.label} body, ${state.mood}`);
+    $("#caption").innerHTML = `<b>${esc(state.name)}</b> · ${moodWord(state.mood)}`;
+    $("#bodyName").textContent = b.label;
+    $("#colourName").textContent = (paletteByHex(state.color) || { name: state.color }).name;
+    $("#io").value = JSON.stringify(definition(), null, 2);
+    syncControls();
+  }
+
+  function moodWord(id) {
+    const m = MOODS.find((x) => x.id === id);
+    return m ? m.word : id;
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  /* ── controls ─────────────────────────────────────────────────── */
+  function buildControls() {
+    const mini = (b) => {
+      const parts = b.parts.map((p) => {
+        if (p.t === "r") return `<rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" rx="${p.rx || 0}"/>`;
+        if (p.t === "c") return `<circle cx="${p.x}" cy="${p.y}" r="${p.r}"/>`;
+        return `<path d="${p.d}"/>`;
+      }).join("");
+      const cx = b.e.cx || 120;
+      const eyes = [cx - b.e.dx, cx + b.e.dx].map((x) =>
+        `<rect x="${x - b.e.w / 2}" y="${b.e.cy - b.e.h / 2}" width="${b.e.w}" height="${b.e.h}" rx="${b.e.w / 2}" fill="var(--surface)"/>`).join("");
+      return `<svg viewBox="0 0 240 240" aria-hidden="true"><g fill="currentColor">${parts}</g>${eyes}</svg>`;
+    };
+
+    $("#bodies").innerHTML = BODIES.map((b) =>
+      `<button type="button" data-body="${b.id}" aria-pressed="false" title="${b.label}"><span class="sr-only">${b.label}</span>${mini(b)}</button>`).join("");
+
+    $("#moods").innerHTML = MOODS.map((m) =>
+      `<button type="button" data-mood="${m.id}" aria-pressed="false">${m.label}</button>`).join("");
+
+    $("#swatches").innerHTML = PALETTE.map((p) =>
+      `<button type="button" data-color="${p.hex}" aria-pressed="false" title="${p.name}" aria-label="${p.name}" style="background:${p.hex}"></button>`).join("");
+
+    $("#eyeSeg").innerHTML = EYES.map((e) =>
+      `<button type="button" data-eye="${e.id}" aria-pressed="false">${e.label}</button>`).join("");
+
+    $("#motionSeg").innerHTML = MOTION.map((m) =>
+      `<button type="button" data-motion="${m.id}" aria-pressed="false">${m.label}</button>`).join("");
+  }
+
+  function syncControls() {
+    document.querySelectorAll("[data-body]").forEach((el) =>
+      el.setAttribute("aria-pressed", String(el.dataset.body === state.body)));
+    document.querySelectorAll("[data-mood]").forEach((el) =>
+      el.setAttribute("aria-pressed", String(el.dataset.mood === state.mood)));
+    document.querySelectorAll("[data-color]").forEach((el) =>
+      el.setAttribute("aria-pressed", String(el.dataset.color.toLowerCase() === state.color.toLowerCase())));
+    document.querySelectorAll("[data-eye]").forEach((el) =>
+      el.setAttribute("aria-pressed", String(el.dataset.eye === state.eye)));
+    document.querySelectorAll("[data-motion]").forEach((el) =>
+      el.setAttribute("aria-pressed", String(el.dataset.motion === state.motion)));
+    $("#follow").checked = state.follow;
+    $("#sound").checked = state.sound;
+    document.body.classList.toggle("no-motion", !motionAllowed());
+  }
+
+  /* ── sound ────────────────────────────────────────────────────── */
+  let actx = null;
+  function blip(freq, dur = 0.09, type = "triangle", gain = 0.05) {
+    if (!state.sound) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = actx.createOscillator();
+      const g = actx.createGain();
+      o.type = type;
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0, actx.currentTime);
+      g.gain.linearRampToValueAtTime(gain, actx.currentTime + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+      o.connect(g).connect(actx.destination);
+      o.start();
+      o.stop(actx.currentTime + dur + 0.02);
+    } catch (_) { /* audio blocked — silence is fine */ }
+  }
+
+  /* ── motion & cursor follow ───────────────────────────────────── */
+  const reducedMQ = window.matchMedia("(prefers-reduced-motion: reduce)");
+  function motionAllowed() {
+    if (state.motion === "reduced") return false;
+    if (state.motion === "full") return true;
+    return !reducedMQ.matches;
+  }
+
+  let pointer = { x: 0, y: 0 };
+  let offset = { x: 0, y: 0 };
+  let raf = 0;
+
+  function track(e) {
+    const pt = e.touches && e.touches[0] ? e.touches[0] : e;
+    pointer.x = pt.clientX;
+    pointer.y = pt.clientY;
+  }
+
+  function loop() {
+    raf = 0;
+    const g = document.getElementById("eyesG");
+    if (!g || !state.follow || !motionAllowed()) {
+      if (g && !state.follow) g.removeAttribute("transform");
+      return;
+    }
+    const box = $("#stage").getBoundingClientRect();
+    const cx = box.left + box.width / 2;
+    const cy = box.top + box.height / 2;
+    const tx = Math.max(-1, Math.min(1, (pointer.x - cx) / (box.width || 1))) * 7;
+    const ty = Math.max(-1, Math.min(1, (pointer.y - cy) / (box.height || 1))) * 5;
+    offset.x += (tx - offset.x) * 0.14;
+    offset.y += (ty - offset.y) * 0.14;
+    g.setAttribute("transform", `translate(${offset.x.toFixed(2)},${offset.y.toFixed(2)})`);
+    if (Math.abs(tx - offset.x) > 0.05 || Math.abs(ty - offset.y) > 0.05) raf = requestAnimationFrame(loop);
+  }
+
+  function kick() {
+    if (!raf) raf = requestAnimationFrame(loop);
+  }
+
+  window.addEventListener("pointermove", (e) => { track(e); kick(); }, { passive: true });
+  window.addEventListener("touchmove", (e) => { track(e); kick(); }, { passive: true });
+  reducedMQ.addEventListener && reducedMQ.addEventListener("change", syncControls);
+
+  /* ── export / import ──────────────────────────────────────────── */
+  function definition() {
+    return { v: 1, name: state.name, body: state.body, color: state.color, eye: state.eye, mood: state.mood };
+  }
+
+  function svgDocument() {
+    const b = bodyById(state.body);
+    const eye = eyeHex();
+    const bg = stageColour();
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="480" height="480" role="img" aria-label="${esc(state.name)}, ${b.label} bot avatar, ${state.mood}">
+<title>${esc(state.name)} — ${b.label} bot avatar</title>
+<rect width="240" height="240" fill="${bg}"/>
+${partsMarkup(b, state.color)}
+${decorMarkup(b, eye, state.mood)}
+${eyeShapes(b, eye, state.mood)}
+</svg>`;
+  }
+
+  function download(name, text, mime) {
+    const blob = new Blob([text], { type: mime });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+
+  function shareLink() {
+    const u = new URL(location.href);
+    u.search = "";
+    const p = new URLSearchParams();
+    p.set("n", state.name);
+    p.set("b", state.body);
+    p.set("c", state.color.replace("#", ""));
+    p.set("e", state.eye);
+    p.set("m", state.mood);
+    u.search = p.toString();
+    return u.toString();
+  }
+
+  function prompt() {
+    const b = bodyById(state.body);
+    const eyeDesc = state.eye === "cut" ? "cut-out" : state.eye === "ink" ? "dark" : "amber";
+    const colour = (paletteByHex(state.color) || { name: state.color }).name.toLowerCase();
+    return `A flat vector mascot avatar: a ${b.label.toLowerCase()}-shaped silhouette filled in ${colour}, on a plain cream background. Two ${eyeDesc} patterned eyes, ${moodWord(state.mood)} expression, no mouth, no text, no outline, centred with generous margin, single flat colour, crisp vector edges, friendly and minimal.`;
+  }
+
+  function say(text, kind) {
+    const el = $("#msg");
+    el.textContent = text;
+    el.className = "msg" + (kind ? " " + kind : "");
+    clearTimeout(say.t);
+    say.t = setTimeout(() => { el.textContent = ""; el.className = "msg"; }, 3200);
+  }
+
+  async function copy(text, label) {
+    try {
+      await navigator.clipboard.writeText(text);
+      say(label + " copied.", "ok");
+    } catch (_) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); say(label + " copied.", "ok"); }
+      catch (e) { say("Copy failed — select the definition and copy it by hand.", "bad"); }
+      ta.remove();
+    }
+  }
+
+  function apply(obj) {
+    if (!obj || typeof obj !== "object") return say("That is not an avatar definition.", "bad");
+    if (obj.body && !BODIES.some((b) => b.id === obj.body)) return say(`Unknown body "${obj.body}".`, "bad");
+    if (obj.color) {
+      const byName = paletteByName(obj.color);
+      const hex = /^#?[0-9a-f]{6}$/i.test(obj.color) ? "#" + obj.color.replace("#", "") : byName && byName.hex;
+      if (!hex) return say(`Unknown colour "${obj.color}".`, "bad");
+      state.color = hex.toLowerCase();
+    }
+    if (obj.body) state.body = obj.body;
+    if (obj.eye && EYES.some((e) => e.id === obj.eye)) state.eye = obj.eye;
+    if (obj.mood && MOODS.some((m) => m.id === obj.mood)) state.mood = obj.mood;
+    if (typeof obj.name === "string" && obj.name.trim()) state.name = obj.name.trim().slice(0, 24);
+    render();
+    say("Definition applied.", "ok");
+  }
+
+  function fromLink() {
+    const p = new URLSearchParams(location.search);
+    if (![...p.keys()].length) return;
+    const obj = {};
+    if (p.get("b")) obj.body = p.get("b");
+    if (p.get("c")) obj.color = p.get("c");
+    if (p.get("e")) obj.eye = p.get("e");
+    if (p.get("m")) obj.mood = p.get("m");
+    if (p.get("n")) obj.name = p.get("n");
+    try { apply(obj); } catch (_) { /* ignore malformed links */ }
+  }
+
+  /* ── wiring ───────────────────────────────────────────────────── */
+  buildControls();
+  fromLink();
+  render();
+
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("button");
+    if (!t) return;
+    if (t.dataset.body) { state.body = t.dataset.body; blip(520); render(); }
+    else if (t.dataset.mood) {
+      state.mood = t.dataset.mood;
+      blip({ idle: 392, thinking: 466, happy: 587, sleepy: 294 }[state.mood]);
+      render();
+    }
+    else if (t.dataset.color) { state.color = t.dataset.color; blip(660, 0.05); render(); }
+    else if (t.dataset.eye) { state.eye = t.dataset.eye; blip(740, 0.05); render(); }
+    else if (t.dataset.motion) { state.motion = t.dataset.motion; render(); }
+  });
+
+  $("#follow").addEventListener("change", (e) => { state.follow = e.target.checked; kick(); });
+  $("#sound").addEventListener("change", (e) => { state.sound = e.target.checked; if (state.sound) blip(600); });
+
+  $("#gen").addEventListener("click", () => {
+    const b = BODIES[Math.floor(Math.random() * BODIES.length)];
+    const p = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+    state.body = b.id;
+    state.color = p.hex;
+    state.name = NAMES[Math.floor(Math.random() * NAMES.length)];
+    render();
+    blip(523, 0.07);
+    setTimeout(() => blip(784, 0.09), 70);
+    say("Generated " + state.name + " the " + b.label + ".", "ok");
+  });
+
+  $("#reset").addEventListener("click", () => {
+    Object.assign(state, { body: "bot", color: "#e0662a", eye: "cut", mood: "idle", motion: "system", follow: true, sound: true, name: "Bit" });
+    render();
+    say("Reset to defaults.", "ok");
+  });
+
+  $("#dlSvg").addEventListener("click", () => {
+    download("bot-avatar-" + state.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".svg", svgDocument(), "image/svg+xml");
+    say("SVG downloaded.", "ok");
+  });
+  $("#copyJson").addEventListener("click", () => copy(JSON.stringify(definition(), null, 2), "Definition"));
+  $("#copyLink").addEventListener("click", () => copy(shareLink(), "Link"));
+  $("#copyPrompt").addEventListener("click", () => copy(prompt(), "Prompt"));
+  $("#apply").addEventListener("click", () => {
+    try { apply(JSON.parse($("#io").value)); }
+    catch (err) { say("That JSON does not parse: " + err.message, "bad"); }
+  });
+
+  $("#file").addEventListener("change", async (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    try { apply(JSON.parse(await f.text())); }
+    catch (err) { say("Could not read that file: " + err.message, "bad"); }
+    e.target.value = "";
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.target.matches("textarea,input")) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const k = e.key.toLowerCase();
+    const byNum = { "1": "idle", "2": "thinking", "3": "happy", "4": "sleepy" }[e.key];
+    if (byNum) { state.mood = byNum; render(); e.preventDefault(); }
+    else if (k === "g") { $("#gen").click(); e.preventDefault(); }
+    else if (k === "r") { $("#reset").click(); e.preventDefault(); }
+  });
+
+  // Re-resolve cut-out eyes when the site theme flips.
+  new MutationObserver(() => { render(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "class"] });
+})();
+</script>
+</body>
+</html>

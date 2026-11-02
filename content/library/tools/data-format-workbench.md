@@ -11,7 +11,7 @@ tags:
   - toml
 status: filed
 created: 2026-10-30
-updated: 2026-10-30
+updated: 2026-11-02
 tool: data-format-workbench
 ---
 
@@ -32,5 +32,5 @@ A browser-based workbench for formatting, viewing, querying, and converting betw
 ## Notes
 
 - The page is a static HTML file served straight from the site: `static/data-format-workbench/index.html`.
-- YAML parsing/formatting is powered by [js-yaml](https://github.com/nodeca/js-yaml), TOML by [smol-toml](https://github.com/squirrelchat/smol-toml), and JSONPath queries by [JSONPath-Plus](https://github.com/JSONPath-Plus/JSONPath-Plus), all loaded from the jsDelivr CDN. The conversion logic itself is hand-written JavaScript in the page — including a syntax check before each query, because JSONPath-Plus silently returns empty results for most malformed queries instead of throwing.
+- YAML parsing/formatting is powered by [js-yaml](https://github.com/nodeca/js-yaml), TOML by [smol-toml](https://github.com/squirrelchat/smol-toml), and JSONPath queries by [JSONPath-Plus](https://github.com/JSONPath-Plus/JSONPath), all loaded from the jsDelivr CDN. The conversion logic itself is hand-written JavaScript in the page — including a syntax check before each query, because JSONPath-Plus silently returns empty results for most malformed queries instead of throwing.
 - TOML datetimes are normalised to ISO strings in JSON/YAML output; JSON and YAML round-trip everything the input formats can express, TOML output is the constrained direction (top-level table, no nulls).

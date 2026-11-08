@@ -12,7 +12,7 @@ tags:
   - typescript
   - react
   - ui
-status: inbox
+status: filed
 created: 2026-11-08
 updated: 2026-11-08
 ---

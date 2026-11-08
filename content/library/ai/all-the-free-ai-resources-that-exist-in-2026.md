@@ -10,11 +10,11 @@ tags:
   - llm
   - local-llm
   - guide
-status: inbox
+status: filed
 created: 2026-11-02
-updated: 2026-11-02
+updated: 2026-11-08
 related:
-  - /inbox/uncensored-qwen35-9b-reportedly-beats-qwens-27b
+  - /library/ai/uncensored-qwen35-9b-reportedly-beats-qwens-27b
 ---
 
 ## Why I saved this

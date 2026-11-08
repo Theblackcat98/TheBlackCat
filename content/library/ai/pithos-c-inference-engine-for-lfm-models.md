@@ -11,9 +11,9 @@ tags:
   - llm
   - local-llm
   - open-source
-status: inbox
+status: filed
 created: 2026-11-02
-updated: 2026-11-02
+updated: 2026-11-08
 ---
 
 ## Why I saved this

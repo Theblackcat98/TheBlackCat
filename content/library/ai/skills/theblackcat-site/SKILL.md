@@ -1,7 +1,7 @@
 ---
 name: theblackcat-site
 description: "Operate Nik's TheBlackCat site: save bookmarks, write blog posts (draft-flag flow), weekly triage, and maintain the Hugo repo safely."
-version: 1.6.0
+version: 1.7.1
 author: Hermes Agent
 license: MIT
 platforms: [linux]
@@ -26,6 +26,9 @@ includes personal/private context, confirm before writing it into the repo.
 - "bookmark this" / "add to my bookmarks/library/BlackCat" → bookmark workflow
 - "add this to my website" / "put this on the site" **with an HTML file** →
   live artifact page (static page + library entry), see router below
+- "add this tool to my website" **with a URL to someone else's interactive
+  tool** → hosted copy: build our own page under `static/<slug>/`, never a
+  vendored bundle — see `references/static-tool-pages.md`
 - "write a blog post about X" / "blog this" → blog workflow (draft)
 - "publish X" / "publish <slug>" → blog workflow (publish step)
 - Editing this skill itself (SKILL.md or any reference) → do the edit in the
@@ -46,7 +49,7 @@ includes personal/private context, confirm before writing it into the repo.
 | Dead links, the weekly link-check issue, lychee/CI link checking | `references/link-check.md` |
 | Projects section, GitHub-repo sync, generated project pages | `references/projects-sync.md` |
 | Publish an HTML artifact as a live page (sent file → `static/<slug>/`) | `references/live-artifact-pages.md` |
-| Build or rework a static tool page we own (generator, vendoring, local test loop) | `references/static-tool-pages.md` |
+| Build a static tool page — a new tool, a reimplementation of a third-party tool, or a rework (registry, thumbs, generator, local test loop) | `references/static-tool-pages.md` |
 | Past build/rendering incidents (context for debugging) | `references/theblackcat-*.md` |
 | Generic Hugo debugging on any site (local builds, bisect) | `hugo-site-maintenance` skill |
 
@@ -105,6 +108,19 @@ includes personal/private context, confirm before writing it into the repo.
    keep the md5 to prove what Pages serves, and never tidy the artifact itself.
    Recipe, browser-render checks and the unquoted-attribute grep trap:
    `references/live-artifact-pages.md`.
+15. **A tool URL is not a bookmark.** When Nik sends a link to someone else's
+   interactive tool and says "add this to my website", the default is a page
+   under `static/<slug>/`, not an inbox entry. But "host the tool" and "save
+   the link" differ by hours, so settle which with ONE question before
+   building — unless the request names the destination outright ("add this to
+   my bookmarks"), which is an answer, not an ambiguity: run the bookmark
+   workflow and do not make Nik re-confirm it. Never copy a production bundle — no license and no public repo
+   means no right to the code; read the original for behaviour, then write our
+   own implementation on the site's tokens. A new tool is additive and ships
+   direct to `main` in ONE commit (page + write-up + `data/tools.yaml` row +
+   both thumbnails) because `scripts/check_tools.py` fails on any missing
+   piece. Contract, checks and the Hugo-less thumbnail fallback:
+   `references/static-tool-pages.md`.
 
 ## Repo facts at a glance
 

@@ -19,6 +19,27 @@ private notes — BlackCat is public.
    README for what it does. Before publishing a surprising star count, cross-
    check it against the repo page (the HTML embeds `stargazerCount`) — the repo
    is public. On failure: URL-derived title + note "page fetch failed".
+   **Client-routed galleries and SPA demo sites return only the shell to
+   `web_extract`** — a root-page extract yields the headline tagline and
+   nothing about what is actually inside, which makes a useless bookmark (the
+   description just repeats the `<title>`). Enumerate the routes from the
+   served HTML, then read each route's own meta:
+
+   ```bash
+   curl -sL <url> | tr '>' '>\n' | grep -oiE 'href="[^"]+"' | sort -u   # routes
+   for p in <routes>; do
+     d=$(curl -sL "<host>/$p" | tr -d '\n' \
+         | grep -oE 'name="description"[^>]*content="[^"]*"' | sed -e 's/.*content="//' -e 's/"$//')
+     echo "$p :: $d"
+   done
+   ```
+
+   Per-route tags are wrapped across lines in the HTML, so `tr -d '\n'`
+   before grepping — otherwise every description comes back empty. Then write
+   the `description:` from the whole route list (what the site *is*, in one
+   line) and enumerate the individual demos/tools under `## Notes`; a gallery
+   saved without its contents listed is a link Nik has to re-open to
+   remember.
 4. **Topics/tags**: check existing
    (`git -C <repo> grep -h -A2 '^tags:' -- 'content/*.md'`), reuse
    case-insensitively, lowercase kebab-case.

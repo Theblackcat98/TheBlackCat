@@ -201,8 +201,8 @@
     const count = $("[data-filter-count]", box);
     const empty = $("[data-filter-empty]", box);
     const noun = box.dataset.filterNoun || (list.classList.contains("grid") ? "projects" : "items");
-    const state = { type: "", domain: "", tag: "", q: "" };
-    const keys = ["type", "domain", "tag"];
+    const state = { type: "", domain: "", tag: "", lang: "", band: "", q: "" };
+    const keys = ["type", "domain", "tag", "lang", "band"];
 
     const fromURL = () => {
       const p = new URLSearchParams(location.search);
@@ -230,6 +230,8 @@
           (!state.type || d.type === state.type) &&
           (!state.domain || d.domain === state.domain) &&
           (!state.tag || (" " + d.tags + " ").includes(" " + state.tag + " ")) &&
+          (!state.lang || (d.lang || "") === state.lang) &&
+          (!state.band || d.band === state.band) &&
           words.every((w) => (d.q || d.title + " " + d.tags).includes(w));
         li.hidden = !ok;
         if (ok) shown++;
@@ -255,6 +257,10 @@
         recent: (a, b) => (b.dataset.date || "").localeCompare(a.dataset.date || "") || a.dataset.title.localeCompare(b.dataset.title),
         az: (a, b) => a.dataset.title.localeCompare(b.dataset.title),
         stars: (a, b) => (+b.dataset.stars || 0) - (+a.dataset.stars || 0) || a.dataset.title.localeCompare(b.dataset.title),
+        issues: (a, b) => (+b.dataset.issues || 0) - (+a.dataset.issues || 0) || a.dataset.title.localeCompare(b.dataset.title),
+        prs: (a, b) => (+b.dataset.prs || 0) - (+a.dataset.prs || 0) || a.dataset.title.localeCompare(b.dataset.title),
+        "health-lo": (a, b) => (+a.dataset.health || 0) - (+b.dataset.health || 0) || a.dataset.title.localeCompare(b.dataset.title),
+        "health-hi": (a, b) => (+b.dataset.health || 0) - (+a.dataset.health || 0) || a.dataset.title.localeCompare(b.dataset.title),
       }[by];
       items.slice().sort(cmp).forEach((li) => list.appendChild(li));
     };
@@ -272,6 +278,20 @@
     });
     q && q.addEventListener("input", () => { state.q = q.value.trim(); apply(); toURL(); });
     sortSel && sortSel.addEventListener("change", () => { sort(); toURL(); });
+
+    /* View toggle (dashboard cards/table): swaps a class on the list, remembered per browser. */
+    const viewBtns = $$("[data-view-btn]", box);
+    if (viewBtns.length) {
+      const setView = (v) => {
+        list.classList.toggle("dash-table", v === "table");
+        viewBtns.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.viewBtn === v)));
+        try { localStorage.setItem("bc:dash-view", v); } catch (_) {}
+      };
+      let v0 = "cards";
+      try { v0 = localStorage.getItem("bc:dash-view") || "cards"; } catch (_) {}
+      setView(v0);
+      viewBtns.forEach((b) => b.addEventListener("click", () => setView(b.dataset.viewBtn)));
+    }
 
     fromURL(); sort(); apply();
   });

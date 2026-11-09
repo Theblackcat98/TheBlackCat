@@ -1,13 +1,40 @@
 {{ define "main" }}
 {{- $d := site.Data.dashboard -}}
 {{- $repos := $d.repos -}}
+{{- $total := len $repos -}}
 
-{{- /* Topic counts for the filter chips, mirroring the projects page. */ -}}
-{{- $tagCounts := dict -}}
-{{- range $repos -}}{{- range .topics -}}{{- $t := lower (string .) -}}{{- $tagCounts = merge $tagCounts (dict $t (add 1 (index $tagCounts $t | default 0))) -}}{{- end -}}{{- end -}}
-{{- $top := slice -}}
-{{- range $t, $n := $tagCounts -}}{{- if ge $n 2 -}}{{- $top = $top | append (dict "t" $t "n" $n "k" (printf "%04d|%s" (sub 9999 $n) $t)) -}}{{- end -}}{{- end -}}
-{{- $top = sort $top "k" -}}
+{{- /* Fleet aggregates, computed at build time from data/dashboard.json. */ -}}
+{{- $stars := 0 -}}{{- $hi := 0 -}}{{- $mid := 0 -}}{{- $lo := 0 -}}{{- $stale := 0 -}}
+{{- $langCounts := dict -}}{{- $langLabels := dict -}}
+{{- range $repos -}}
+  {{- $stars = add $stars (.stars | default 0) -}}
+  {{- if ge .health 90 -}}{{- $hi = add $hi 1 -}}{{- else if ge .health 70 -}}{{- $mid = add $mid 1 -}}{{- else -}}{{- $lo = add $lo 1 -}}{{- end -}}
+  {{- if in .missing "pushed<90d" -}}{{- $stale = add $stale 1 -}}{{- end -}}
+  {{- with .language -}}{{- $l := lower . -}}{{- $langCounts = merge $langCounts (dict $l (add 1 (index $langCounts $l | default 0))) -}}{{- if not (isset $langLabels $l) -}}{{- $langLabels = merge $langLabels (dict $l .) -}}{{- end -}}{{- end -}}
+{{- end -}}
+{{- $langs := slice -}}
+{{- range $l, $n := $langCounts -}}{{- $langs = $langs | append (dict "t" $l "label" (index $langLabels $l) "n" $n "k" (printf "%04d|%s" (sub 9999 $n) $l)) -}}{{- end -}}
+{{- $langs = sort $langs "k" -}}
+{{- $langKnown := 0 -}}{{- range $langs -}}{{- $langKnown = add $langKnown .n -}}{{- end -}}
+
+{{- /* Health-band donut segments, on the r=15.9155 circle whose circumference is 100 units. */ -}}
+{{- $hiPct := div (mul (float $hi) 100.0) (float $total) -}}
+{{- $midPct := div (mul (float $mid) 100.0) (float $total) -}}
+{{- $loPct := div (mul (float $lo) 100.0) (float $total) -}}
+
+{{- /* Open-issues bar chart data (top repos only). */ -}}
+{{- $byIssues := slice -}}
+{{- range $repos -}}{{- $n := len .issues -}}{{- if gt $n 0 -}}{{- $byIssues = $byIssues | append (dict "name" .name "url" .url "n" $n "k" (printf "%04d" (sub 9999 $n))) -}}{{- end -}}{{- end -}}
+{{- $byIssues = sort $byIssues "k" -}}
+{{- $maxIssues := 1 -}}{{- if $byIssues -}}{{- $maxIssues = (index $byIssues 0).n -}}{{- end -}}
+
+{{- /* Hygiene gaps: repos missing each of the six health checks, worst first. */ -}}
+{{- $hygiene := slice -}}
+{{- range $row := slice (dict "label" "License" "key" "license") (dict "label" "Topics (3+)" "key" "topics>=3") (dict "label" "Description" "key" "description") (dict "label" "README" "key" "readme") (dict "label" "README over 500B" "key" "readme>500B") (dict "label" "Push in last 90d" "key" "pushed<90d") -}}
+  {{- $n := 0 -}}{{- range $repos -}}{{- if in .missing $row.key -}}{{- $n = add $n 1 -}}{{- end -}}{{- end -}}
+  {{- $hygiene = $hygiene | append (dict "label" $row.label "n" $n "k" (printf "%04d" (sub 9999 $n))) -}}
+{{- end -}}
+{{- $hygiene = sort $hygiene "k" -}}
 
 {{ partial "breadcrumbs.html" . }}
 <header class="page-head">
@@ -17,56 +44,172 @@
   <p class="dash-synced">Synced {{ $d.generated }} · {{ $d.scope }}</p>
 </header>
 
-<div class="dash-stats">
-  <div class="dash-stat"><b>{{ $d.summary.repos }}</b><span>Repos</span></div>
-  <div class="dash-stat"><b>{{ $d.summary.open_issues }}</b><span>Open issues (todos)</span></div>
-  <div class="dash-stat"><b>{{ $d.summary.open_prs }}</b><span>Open PRs</span></div>
-  <div class="dash-stat"><b>{{ $d.summary.avg_health }}</b><span>Avg health /100</span></div>
-  <div class="dash-stat"><b>{{ $d.summary.missing_description }}</b><span>Missing description</span></div>
-  <div class="dash-stat"><b>{{ $d.summary.missing_license }}</b><span>Missing license</span></div>
-  <div class="dash-stat"><b>{{ $d.summary.missing_readme }}</b><span>Missing README</span></div>
+<div class="dash-kpis">
+  <div class="dash-kpi"><b>{{ $d.summary.repos }}</b><span>Repos</span></div>
+  <div class="dash-kpi"><b>{{ $d.summary.open_issues }}</b><span>Open issues</span></div>
+  <div class="dash-kpi"><b>{{ $d.summary.open_prs }}</b><span>Open PRs</span></div>
+  <div class="dash-kpi"><b>{{ $d.summary.avg_health }}</b><span>Avg health</span></div>
+  <div class="dash-kpi"><b>{{ $stars }}</b><span>Stars</span></div>
+  <div class="dash-kpi"><b>{{ $stale }}</b><span>Stale &gt;90d</span></div>
 </div>
 
-<h2 class="dash-h">Needs attention — lowest health</h2>
-<ul class="dash-attention">
-  {{- range first 6 (sort $repos "health") }}
-  <li><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">{{ .name }}</a> — health {{ .health }}, missing: {{ delimit .missing ", " }}</li>
-  {{- end }}
-</ul>
+<section class="dash-panels" aria-label="Fleet overview">
+  <div class="dash-panel">
+    <h2 class="dash-panel__h">Fleet health</h2>
+    <div class="dash-rings">
+      <figure class="dash-ring">
+        <svg viewBox="0 0 42 42" role="img" aria-label="Average health {{ $d.summary.avg_health }} out of 100">
+          <circle class="dash-ring__track" cx="21" cy="21" r="15.9155"></circle>
+          <circle class="dash-ring__val" cx="21" cy="21" r="15.9155" transform="rotate(-90 21 21)" stroke-dasharray="{{ $d.summary.avg_health }} {{ sub 100 $d.summary.avg_health }}"></circle>
+          <text class="dash-ring__num" x="21" y="21">{{ $d.summary.avg_health }}</text>
+        </svg>
+        <figcaption>Avg health /100</figcaption>
+      </figure>
+      <figure class="dash-ring">
+        <svg viewBox="0 0 42 42" role="img" aria-label="Health bands: {{ $hi }} healthy, {{ $mid }} fair, {{ $lo }} need work">
+          <circle class="dash-ring__track" cx="21" cy="21" r="15.9155"></circle>
+          <g transform="rotate(-90 21 21)">
+            <circle class="dash-seg-hi" cx="21" cy="21" r="15.9155" stroke-dasharray="{{ printf "%.1f %.1f" $hiPct (sub 100.0 $hiPct) }}"></circle>
+            <circle class="dash-seg-mid" cx="21" cy="21" r="15.9155" stroke-dasharray="{{ printf "%.1f %.1f" $midPct (sub 100.0 $midPct) }}" stroke-dashoffset="{{ printf "%.1f" (mul -1.0 $hiPct) }}"></circle>
+            <circle class="dash-seg-lo" cx="21" cy="21" r="15.9155" stroke-dasharray="{{ printf "%.1f %.1f" $loPct (sub 100.0 $loPct) }}" stroke-dashoffset="{{ printf "%.1f" (mul -1.0 (add $hiPct $midPct)) }}"></circle>
+          </g>
+          <text class="dash-ring__num" x="21" y="21">{{ $total }}</text>
+        </svg>
+        <figcaption>Repos by band</figcaption>
+      </figure>
+    </div>
+    <ul class="dash-legend">
+      <li><span class="dash-dot dash-dot--hi"></span>Healthy 90+<b>{{ $hi }}</b></li>
+      <li><span class="dash-dot dash-dot--mid"></span>Fair 70–89<b>{{ $mid }}</b></li>
+      <li><span class="dash-dot dash-dot--lo"></span>Needs work &lt;70<b>{{ $lo }}</b></li>
+    </ul>
+  </div>
 
-<div data-filter-root>
-  <div class="toolbar">
+  <div class="dash-panel">
+    <h2 class="dash-panel__h">Open issues by repo</h2>
+    <ul class="dash-bars">
+      {{- range first 7 $byIssues }}
+      <li>
+        <a class="dash-bars__name" href="{{ .url }}" target="_blank" rel="noopener noreferrer">{{ .name }}</a>
+        <span class="dash-bar"><span class="dash-bar__fill" style="width: {{ printf "%.1f" (div (mul (float .n) 100.0) (float $maxIssues)) }}%"></span></span>
+        <b>{{ .n }}</b>
+      </li>
+      {{- end }}
+    </ul>
+    <p class="dash-panel__foot">{{ $d.summary.open_issues }} open issues across {{ len $byIssues }} repos · {{ $d.summary.open_prs }} open PRs</p>
+  </div>
+
+  <div class="dash-panel">
+    <h2 class="dash-panel__h">Languages</h2>
+    <div class="dash-stack" role="img" aria-label="Primary language share across repos">
+      {{- $covered := 0 -}}
+      {{- range $i, $l := first 5 $langs -}}{{- $covered = add $covered $l.n -}}<span class="dash-stack__seg dash-stack__seg--{{ $i }}" style="width: {{ printf "%.1f" (div (mul (float $l.n) 100.0) (float $langKnown)) }}%"></span>{{- end -}}
+      {{- if gt (sub $langKnown $covered) 0 -}}<span class="dash-stack__seg dash-stack__seg--other" style="width: {{ printf "%.1f" (div (mul (float (sub $langKnown $covered)) 100.0) (float $langKnown)) }}%"></span>{{- end -}}
+    </div>
+    <ul class="dash-legend">
+      {{- range $i, $l := first 5 $langs }}
+      <li><span class="dash-dot dash-stack__seg--{{ $i }}"></span>{{ $l.label }}<b>{{ $l.n }}</b></li>
+      {{- end }}
+      {{- if gt (sub $langKnown $covered) 0 }}
+      <li><span class="dash-dot dash-stack__seg--other"></span>Other<b>{{ sub $langKnown $covered }}</b></li>
+      {{- end }}
+      {{- if gt (sub $total $langKnown) 0 }}
+      <li><span class="dash-dot dash-dot--none"></span>No language<b>{{ sub $total $langKnown }}</b></li>
+      {{- end }}
+    </ul>
+  </div>
+
+  <div class="dash-panel">
+    <h2 class="dash-panel__h">Hygiene gaps</h2>
+    <ul class="dash-bars">
+      {{- range $hygiene }}
+      <li>
+        <span class="dash-bars__name">Missing: {{ .label }}</span>
+        <span class="dash-bar"><span class="dash-bar__fill" style="width: {{ printf "%.1f" (div (mul (float .n) 100.0) (float $total)) }}%"></span></span>
+        <b>{{ .n }}</b>
+      </li>
+      {{- end }}
+    </ul>
+    <p class="dash-panel__foot">Repos missing each of the six health checks, of {{ $total }} total</p>
+  </div>
+
+  <div class="dash-panel dash-panel--wide">
+    <h2 class="dash-panel__h">Needs attention — lowest health</h2>
+    <ul class="dash-attention">
+      {{- range first 5 (sort $repos "health") }}
+      <li>
+        <a href="{{ .url }}" target="_blank" rel="noopener noreferrer">{{ .name }}</a>
+        <span class="dash-bar"><span class="dash-bar__fill" style="width: {{ .health }}%"></span></span>
+        <b>{{ .health }}</b>
+        <span class="dash-attention__missing">missing: {{ delimit .missing ", " }}</span>
+      </li>
+      {{- end }}
+    </ul>
+  </div>
+</section>
+
+<div data-filter-root data-filter-noun="repositories">
+  <div class="toolbar dash-toolbar">
     <div class="toolbar__row">
-      <div class="chips" role="group" aria-label="Filter by topic">
-        <button class="chip" type="button" data-filter="tag" data-value="" aria-pressed="true">All <small>{{ len $repos }}</small></button>
-        {{- range first 8 $top }}
-        <button class="chip" type="button" data-filter="tag" data-value="{{ .t }}" aria-pressed="false">{{ .t }} <small>{{ .n }}</small></button>
-        {{- end }}
-      </div>
-      <label class="field" style="padding: 0 var(--s-3)">
+      <label class="field dash-search">
+        {{ partial "icon.html" "search" }}
+        <span class="visually-hidden">Search repositories</span>
+        <input type="search" placeholder="Search repos…" autocomplete="off" spellcheck="false" data-filter-q>
+      </label>
+      <label class="field">
         <span class="visually-hidden">Sort repositories</span>
         <select data-filter-sort>
+          <option value="issues" selected>Most issues</option>
+          <option value="prs">Most PRs</option>
+          <option value="recent">Recently pushed</option>
+          <option value="health-lo">Health: lowest first</option>
+          <option value="health-hi">Health: highest first</option>
           <option value="stars">Most stars</option>
           <option value="az">A → Z</option>
         </select>
       </label>
+      <div class="dash-views" role="group" aria-label="Change view">
+        <button class="dash-view" type="button" data-view-btn="cards" aria-pressed="true">Cards</button>
+        <button class="dash-view" type="button" data-view-btn="table" aria-pressed="false">Table</button>
+      </div>
     </div>
-    <p class="count" aria-live="polite" data-filter-count>{{ len $repos }} repositories</p>
+    <div class="toolbar__row">
+      <div class="chips" role="group" aria-label="Filter by health">
+        <button class="chip" type="button" data-filter="band" data-value="" aria-pressed="true">All health <small>{{ $total }}</small></button>
+        <button class="chip" type="button" data-filter="band" data-value="hi" aria-pressed="false">Healthy 90+ <small>{{ $hi }}</small></button>
+        <button class="chip" type="button" data-filter="band" data-value="mid" aria-pressed="false">Fair 70–89 <small>{{ $mid }}</small></button>
+        <button class="chip" type="button" data-filter="band" data-value="lo" aria-pressed="false">Needs work &lt;70 <small>{{ $lo }}</small></button>
+      </div>
+    </div>
+    <div class="toolbar__row">
+      <div class="chips" role="group" aria-label="Filter by language">
+        <button class="chip" type="button" data-filter="lang" data-value="" aria-pressed="true">All languages</button>
+        {{- range first 6 $langs }}
+        <button class="chip" type="button" data-filter="lang" data-value="{{ .t }}" aria-pressed="false">{{ .label }} <small>{{ .n }}</small></button>
+        {{- end }}
+      </div>
+      <p class="count" aria-live="polite" data-filter-count>{{ $total }} repositories</p>
+    </div>
   </div>
 
-  <ul class="grid" role="list" data-filter-list>
+  <ul class="grid dash-grid" role="list" data-filter-list>
+    <li class="dash-thead" aria-hidden="true"><span>Repo</span><span>Language · pushed</span><span>Issues · PRs</span></li>
     {{- range $repos }}
-    <li class="card" data-title="{{ lower .name }}" data-tags="{{ delimit .topics " " }}" data-stars="{{ .stars | default 0 }}">
-      <div class="meta">
-        {{- with .language }}<span class="type">{{ . }}</span>{{ end }}
-        <span>Health {{ .health }}</span>
-        <span>Pushed {{ .pushed_at }}</span>
+    {{- $band := "lo" -}}{{- if ge .health 90 -}}{{- $band = "hi" -}}{{- else if ge .health 70 -}}{{- $band = "mid" -}}{{- end -}}
+    <li class="card dash-card" data-filter-item data-title="{{ lower .name }}" data-tags="{{ delimit .topics " " }}" data-q="{{ lower .name }} {{ lower (.language | default "") }} {{ delimit .topics " " }}" data-stars="{{ .stars | default 0 }}" data-date="{{ .pushed_at }}" data-health="{{ .health }}" data-issues="{{ len .issues }}" data-prs="{{ len .prs }}" data-lang="{{ lower (.language | default "") }}" data-band="{{ $band }}">
+      <div class="dash-card__top">
+        <h3 class="dash-card__name"><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">{{ .name }}</a></h3>
+        <span class="dash-pill"><span class="dash-dot dash-dot--{{ $band }}"></span>{{ .health }}</span>
       </div>
-      <h3 class="card__title">{{ .name }}</h3>
-      {{- with .description }}<p class="card__desc">{{ . }}</p>{{ else }}<p class="card__desc">No description.</p>{{ end }}
-      {{- with .missing }}<p class="dash-missing">Missing: {{ delimit . ", " }}</p>{{ end }}
+      <p class="dash-card__meta">{{ .language | default "—" }} · ★ {{ .stars | default 0 }} · pushed {{ .pushed_at }}</p>
+      <p class="dash-card__desc">{{ .description | default "No description." }}</p>
+      <div class="dash-card__counts">
+        <span><b>{{ len .issues }}</b> issues</span>
+        <span><b>{{ len .prs }}</b> PRs</span>
+        {{- with .missing }}<span class="dash-card__missing">missing: {{ delimit . ", " }}</span>{{ end }}
+      </div>
       <details class="dash-details">
-        <summary>{{ len .issues }} open issues · {{ len .prs }} open PRs</summary>
+        <summary>Open issues &amp; PRs</summary>
         {{- with .issues }}
         <ul class="dash-issues">
           {{- range . }}<li><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">#{{ .number }} {{ .title }}</a></li>{{ end }}
@@ -78,11 +221,8 @@
           {{- range . }}<li><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">PR #{{ .number }} {{ .title }}</a></li>{{ end }}
         </ul>
         {{- end }}
+        {{- if and (eq (len .issues) 0) (eq (len .prs) 0) }}<p class="dash-missing">Nothing open.</p>{{ end }}
       </details>
-      <div class="card__foot">
-        <span></span>
-        <a class="card__link" href="{{ .url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ .name }} repo on GitHub">{{ partial "icon.html" "github" }}<span>Repo</span></a>
-      </div>
     </li>
     {{- end }}
   </ul>

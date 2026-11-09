@@ -257,6 +257,7 @@
         recent: (a, b) => (b.dataset.date || "").localeCompare(a.dataset.date || "") || a.dataset.title.localeCompare(b.dataset.title),
         az: (a, b) => a.dataset.title.localeCompare(b.dataset.title),
         stars: (a, b) => (+b.dataset.stars || 0) - (+a.dataset.stars || 0) || a.dataset.title.localeCompare(b.dataset.title),
+        lang: (a, b) => (a.dataset.lang || "").localeCompare(b.dataset.lang || "") || a.dataset.title.localeCompare(b.dataset.title),
         issues: (a, b) => (+b.dataset.issues || 0) - (+a.dataset.issues || 0) || a.dataset.title.localeCompare(b.dataset.title),
         prs: (a, b) => (+b.dataset.prs || 0) - (+a.dataset.prs || 0) || a.dataset.title.localeCompare(b.dataset.title),
         "health-lo": (a, b) => (+a.dataset.health || 0) - (+b.dataset.health || 0) || a.dataset.title.localeCompare(b.dataset.title),
@@ -285,12 +286,73 @@
       const setView = (v) => {
         list.classList.toggle("dash-table", v === "table");
         viewBtns.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.viewBtn === v)));
+        if (v !== "table") $$(".dash-card__detail", list).forEach((d) => (d.hidden = true));
+        if (v !== "table") $$("[data-dash-open]", list).forEach((b) => b.setAttribute("aria-expanded", "false"));
         try { localStorage.setItem("bc:dash-view", v); } catch (_) {}
       };
       let v0 = "cards";
       try { v0 = localStorage.getItem("bc:dash-view") || "cards"; } catch (_) {}
       setView(v0);
       viewBtns.forEach((b) => b.addEventListener("click", () => setView(b.dataset.viewBtn)));
+    }
+
+    /* Dashboard table headers: clicking a header sorts by that column (Health toggles direction). */
+    const sortBtns = $$("[data-sort-btn]", box);
+    if (sortBtns.length && sortSel) {
+      const markSort = (key) => {
+        sortBtns.forEach((b) => {
+          const mine = b.dataset.sortBtn === key || (b.dataset.sortBtn === "health-hi" && key === "health-lo");
+          b.classList.toggle("is-sorted", mine);
+          b.dataset.dir = ["az", "lang", "health-lo"].includes(key) ? "asc" : "desc";
+        });
+      };
+      sortBtns.forEach((b) => b.addEventListener("click", () => {
+        let key = b.dataset.sortBtn;
+        if (key === "health-hi" && sortSel.value === "health-hi") key = "health-lo";
+        sortSel.value = key;
+        sortSel.dispatchEvent(new Event("change"));
+        markSort(key);
+      }));
+      sortSel.addEventListener("change", () => markSort(sortSel.value));
+      markSort(sortSel.value);
+    }
+
+    /* Dashboard details: the button (or a card click) opens a focused modal in cards view,
+       and expands the row inline in table view. */
+    const modal = $("[data-dash-modal]", box);
+    if (modal) {
+      const mLink = $("[data-dash-modal-link]", modal);
+      const mMeta = $("[data-dash-modal-meta]", modal);
+      const mBody = $("[data-dash-modal-body]", modal);
+      $("[data-dash-modal-close]", modal).addEventListener("click", () => modal.close());
+      modal.addEventListener("click", (ev) => { if (ev.target === modal) modal.close(); });
+      items.forEach((card) => {
+        const btn = $("[data-dash-open]", card);
+        const detail = $(".dash-card__detail", card);
+        if (!btn || !detail) return;
+        const open = () => {
+          if (list.classList.contains("dash-table")) {
+            detail.hidden = !detail.hidden;
+            btn.setAttribute("aria-expanded", String(!detail.hidden));
+            return;
+          }
+          const d = card.dataset;
+          mLink.textContent = d.name || d.title;
+          mLink.href = d.url || "#";
+          mMeta.textContent = `${d.lang || "—"} · health ${d.health} · ${d.issues} issues · ${d.prs} PRs · pushed ${d.date}`;
+          mBody.innerHTML = "";
+          const clone = detail.cloneNode(true);
+          clone.removeAttribute("hidden");
+          mBody.appendChild(clone);
+          modal.showModal();
+        };
+        btn.addEventListener("click", open);
+        card.addEventListener("click", (ev) => {
+          if (list.classList.contains("dash-table")) return;
+          if (ev.target.closest("a, button")) return;
+          open();
+        });
+      });
     }
 
     fromURL(); sort(); apply();

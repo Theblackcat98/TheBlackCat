@@ -165,7 +165,8 @@
           <option value="health-lo">Health: lowest first</option>
           <option value="health-hi">Health: highest first</option>
           <option value="stars">Most stars</option>
-          <option value="az">A → Z</option>
+          <option value="lang">Language A → Z</option>
+          <option value="az">Name A → Z</option>
         </select>
       </label>
       <div class="dash-views" role="group" aria-label="Change view">
@@ -193,39 +194,57 @@
   </div>
 
   <ul class="grid dash-grid" role="list" data-filter-list>
-    <li class="dash-thead" aria-hidden="true"><span>Repo</span><span>Language · pushed</span><span>Issues · PRs</span></li>
+    <li class="dash-thead">
+      <button class="dash-th" type="button" data-sort-btn="az">Repo</button>
+      <button class="dash-th" type="button" data-sort-btn="lang">Language</button>
+      <button class="dash-th dash-th--num" type="button" data-sort-btn="health-hi">Health</button>
+      <button class="dash-th dash-th--num" type="button" data-sort-btn="issues">Issues</button>
+      <button class="dash-th dash-th--num" type="button" data-sort-btn="prs">PRs</button>
+      <button class="dash-th" type="button" data-sort-btn="recent">Pushed</button>
+      <span></span>
+    </li>
     {{- range $repos }}
     {{- $band := "lo" -}}{{- if ge .health 90 -}}{{- $band = "hi" -}}{{- else if ge .health 70 -}}{{- $band = "mid" -}}{{- end -}}
-    <li class="card dash-card" data-filter-item data-title="{{ lower .name }}" data-tags="{{ delimit .topics " " }}" data-q="{{ lower .name }} {{ lower (.language | default "") }} {{ delimit .topics " " }}" data-stars="{{ .stars | default 0 }}" data-date="{{ .pushed_at }}" data-health="{{ .health }}" data-issues="{{ len .issues }}" data-prs="{{ len .prs }}" data-lang="{{ lower (.language | default "") }}" data-band="{{ $band }}">
+    <li class="card dash-card" data-filter-item data-name="{{ .name }}" data-url="{{ .url }}" data-title="{{ lower .name }}" data-tags="{{ delimit .topics " " }}" data-q="{{ lower .name }} {{ lower (.language | default "") }} {{ delimit .topics " " }}" data-stars="{{ .stars | default 0 }}" data-date="{{ .pushed_at }}" data-health="{{ .health }}" data-issues="{{ len .issues }}" data-prs="{{ len .prs }}" data-lang="{{ lower (.language | default "") }}" data-band="{{ $band }}">
       <div class="dash-card__top">
         <h3 class="dash-card__name"><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">{{ .name }}</a></h3>
         <span class="dash-pill"><span class="dash-dot dash-dot--{{ $band }}"></span>{{ .health }}</span>
       </div>
-      <p class="dash-card__meta">{{ .language | default "—" }} · ★ {{ .stars | default 0 }} · pushed {{ .pushed_at }}</p>
+      <p class="dash-card__meta"><span class="dash-card__lang">{{ .language | default "—" }}</span> · <span class="dash-card__stars">★ {{ .stars | default 0 }}</span> · <span class="dash-card__pushed">pushed {{ .pushed_at }}</span></p>
       <p class="dash-card__desc">{{ .description | default "No description." }}</p>
       <div class="dash-card__counts">
-        <span><b>{{ len .issues }}</b> issues</span>
-        <span><b>{{ len .prs }}</b> PRs</span>
+        <span class="dash-card__issues"><b>{{ len .issues }}</b> issues</span>
+        <span class="dash-card__prs"><b>{{ len .prs }}</b> PRs</span>
         {{- with .missing }}<span class="dash-card__missing">missing: {{ delimit . ", " }}</span>{{ end }}
       </div>
-      <details class="dash-details">
-        <summary>Open issues &amp; PRs</summary>
+      <button class="dash-card__open" type="button" data-dash-open aria-expanded="false">Issues &amp; PRs<span class="dash-card__chev" aria-hidden="true">▸</span></button>
+      <div class="dash-card__detail" hidden>
         {{- with .issues }}
+        <h4 class="dash-detail__h">Open issues ({{ len . }})</h4>
         <ul class="dash-issues">
           {{- range . }}<li><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">#{{ .number }} {{ .title }}</a></li>{{ end }}
         </ul>
         {{- end }}
         {{- with .prs }}
-        <p class="dash-missing">Pull requests:</p>
+        <h4 class="dash-detail__h">Pull requests ({{ len . }})</h4>
         <ul class="dash-issues">
           {{- range . }}<li><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">PR #{{ .number }} {{ .title }}</a></li>{{ end }}
         </ul>
         {{- end }}
         {{- if and (eq (len .issues) 0) (eq (len .prs) 0) }}<p class="dash-missing">Nothing open.</p>{{ end }}
-      </details>
+      </div>
     </li>
     {{- end }}
   </ul>
   <div class="empty" data-filter-empty hidden><h2>No matches</h2><p><button class="chip" type="button" data-filter-reset>Clear filters</button></p></div>
+
+  <dialog class="dash-modal" data-dash-modal aria-labelledby="dash-modal-title">
+    <div class="dash-modal__head">
+      <h2 class="dash-modal__title" id="dash-modal-title"><a data-dash-modal-link href="#" target="_blank" rel="noopener noreferrer"></a></h2>
+      <button class="dash-modal__close" type="button" data-dash-modal-close aria-label="Close details">✕</button>
+    </div>
+    <p class="dash-modal__meta" data-dash-modal-meta></p>
+    <div class="dash-modal__body" data-dash-modal-body></div>
+  </dialog>
 </div>
 {{ end }}

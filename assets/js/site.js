@@ -340,7 +340,11 @@
           const langEl = $(".dash-card__lang", card);
           mLink.textContent = d.name || d.title;
           mLink.href = d.url || "#";
-          mMeta.textContent = `${langEl ? langEl.textContent : d.lang || "—"} · health ${d.health} · ${d.issues} issues · ${d.prs} PRs · pushed ${d.date}`;
+          mMeta.textContent = `${langEl ? langEl.textContent : d.lang || "—"} · last push ${d.date}`;
+          $("[data-dash-modal-health]", modal).textContent = d.health;
+          $("[data-dash-modal-issues]", modal).textContent = d.issues;
+          $("[data-dash-modal-prs]", modal).textContent = d.prs;
+          $("[data-dash-modal-stars]", modal).textContent = d.stars;
           mBody.innerHTML = "";
           const clone = detail.cloneNode(true);
           clone.removeAttribute("hidden");

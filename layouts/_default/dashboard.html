@@ -1,0 +1,91 @@
+{{ define "main" }}
+{{- $d := site.Data.dashboard -}}
+{{- $repos := $d.repos -}}
+
+{{- /* Topic counts for the filter chips, mirroring the projects page. */ -}}
+{{- $tagCounts := dict -}}
+{{- range $repos -}}{{- range .topics -}}{{- $t := lower (string .) -}}{{- $tagCounts = merge $tagCounts (dict $t (add 1 (index $tagCounts $t | default 0))) -}}{{- end -}}{{- end -}}
+{{- $top := slice -}}
+{{- range $t, $n := $tagCounts -}}{{- if ge $n 2 -}}{{- $top = $top | append (dict "t" $t "n" $n "k" (printf "%04d|%s" (sub 9999 $n) $t)) -}}{{- end -}}{{- end -}}
+{{- $top = sort $top "k" -}}
+
+{{ partial "breadcrumbs.html" . }}
+<header class="page-head">
+  <span class="kicker">Dashboard</span>
+  <h1 class="h-page">{{ partial "title.html" . }}</h1>
+  {{ with .Content }}<div class="lede prose" style="max-width: 38rem">{{ . }}</div>{{ end }}
+  <p class="dash-synced">Synced {{ $d.generated }} · {{ $d.scope }}</p>
+</header>
+
+<div class="dash-stats">
+  <div class="dash-stat"><b>{{ $d.summary.repos }}</b><span>Repos</span></div>
+  <div class="dash-stat"><b>{{ $d.summary.open_issues }}</b><span>Open issues (todos)</span></div>
+  <div class="dash-stat"><b>{{ $d.summary.open_prs }}</b><span>Open PRs</span></div>
+  <div class="dash-stat"><b>{{ $d.summary.avg_health }}</b><span>Avg health /100</span></div>
+  <div class="dash-stat"><b>{{ $d.summary.missing_description }}</b><span>Missing description</span></div>
+  <div class="dash-stat"><b>{{ $d.summary.missing_license }}</b><span>Missing license</span></div>
+  <div class="dash-stat"><b>{{ $d.summary.missing_readme }}</b><span>Missing README</span></div>
+</div>
+
+<h2 class="dash-h">Needs attention — lowest health</h2>
+<ul class="dash-attention">
+  {{- range first 6 (sort $repos "health") }}
+  <li><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">{{ .name }}</a> — health {{ .health }}, missing: {{ delimit .missing ", " }}</li>
+  {{- end }}
+</ul>
+
+<div data-filter-root>
+  <div class="toolbar">
+    <div class="toolbar__row">
+      <div class="chips" role="group" aria-label="Filter by topic">
+        <button class="chip" type="button" data-filter="tag" data-value="" aria-pressed="true">All <small>{{ len $repos }}</small></button>
+        {{- range first 8 $top }}
+        <button class="chip" type="button" data-filter="tag" data-value="{{ .t }}" aria-pressed="false">{{ .t }} <small>{{ .n }}</small></button>
+        {{- end }}
+      </div>
+      <label class="field" style="padding: 0 var(--s-3)">
+        <span class="visually-hidden">Sort repositories</span>
+        <select data-filter-sort>
+          <option value="stars">Most stars</option>
+          <option value="az">A → Z</option>
+        </select>
+      </label>
+    </div>
+    <p class="count" aria-live="polite" data-filter-count>{{ len $repos }} repositories</p>
+  </div>
+
+  <ul class="grid" role="list" data-filter-list>
+    {{- range $repos }}
+    <li class="card" data-title="{{ lower .name }}" data-tags="{{ delimit .topics " " }}" data-stars="{{ .stars | default 0 }}">
+      <div class="meta">
+        {{- with .language }}<span class="type">{{ . }}</span>{{ end }}
+        <span>Health {{ .health }}</span>
+        <span>Pushed {{ .pushed_at }}</span>
+      </div>
+      <h3 class="card__title">{{ .name }}</h3>
+      {{- with .description }}<p class="card__desc">{{ . }}</p>{{ else }}<p class="card__desc">No description.</p>{{ end }}
+      {{- with .missing }}<p class="dash-missing">Missing: {{ delimit . ", " }}</p>{{ end }}
+      <details class="dash-details">
+        <summary>{{ len .issues }} open issues · {{ len .prs }} open PRs</summary>
+        {{- with .issues }}
+        <ul class="dash-issues">
+          {{- range . }}<li><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">#{{ .number }} {{ .title }}</a></li>{{ end }}
+        </ul>
+        {{- end }}
+        {{- with .prs }}
+        <p class="dash-missing">Pull requests:</p>
+        <ul class="dash-issues">
+          {{- range . }}<li><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">PR #{{ .number }} {{ .title }}</a></li>{{ end }}
+        </ul>
+        {{- end }}
+      </details>
+      <div class="card__foot">
+        <span></span>
+        <a class="card__link" href="{{ .url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ .name }} repo on GitHub">{{ partial "icon.html" "github" }}<span>Repo</span></a>
+      </div>
+    </li>
+    {{- end }}
+  </ul>
+  <div class="empty" data-filter-empty hidden><h2>No matches</h2><p><button class="chip" type="button" data-filter-reset>Clear filters</button></p></div>
+</div>
+{{ end }}

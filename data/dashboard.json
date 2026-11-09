@@ -1,0 +1,1449 @@
+{
+ "generated": "2026-11-09",
+ "scope": "public, non-fork, non-archived owner repositories; todos = open GitHub Issues",
+ "private_skipped": 0,
+ "summary": {
+  "repos": 27,
+  "open_issues": 84,
+  "open_prs": 49,
+  "avg_health": 84,
+  "missing_description": 1,
+  "missing_license": 19,
+  "missing_readme": 1
+ },
+ "repos": [
+  {
+   "name": "opencode-android",
+   "url": "https://github.com/Theblackcat98/opencode-android",
+   "description": "Unofficial android client app to drive Opencode sessions.",
+   "topics": [
+    "android",
+    "client",
+    "kotlin",
+    "opencode"
+   ],
+   "language": "Kotlin",
+   "license": null,
+   "stars": 0,
+   "pushed_at": "2026-11-02",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [
+    {
+     "number": 85,
+     "title": "Install scoped Android skills (second-pass review)",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/85",
+     "labels": []
+    },
+    {
+     "number": 56,
+     "title": "[P2] Bind config editor reads to the requested path and directory",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/56",
+     "labels": [
+      "no-device"
+     ]
+    },
+    {
+     "number": 54,
+     "title": "[P2] Make integrationTest fail when required live tests are unavailable",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/54",
+     "labels": [
+      "no-device"
+     ]
+    },
+    {
+     "number": 53,
+     "title": "[P2] Run the documented Spotless and Detekt quality gate in CI",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/53",
+     "labels": [
+      "no-device"
+     ]
+    },
+    {
+     "number": 52,
+     "title": "[P2] Discard review results from stale scope or session loads",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/52",
+     "labels": [
+      "no-device"
+     ]
+    },
+    {
+     "number": 45,
+     "title": "[P2] Roll back server profile changes when credential persistence fails",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/45",
+     "labels": [
+      "no-device"
+     ]
+    },
+    {
+     "number": 44,
+     "title": "[P2] Prevent request resync snapshots from restoring answered requests",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/44",
+     "labels": [
+      "no-device"
+     ]
+    },
+    {
+     "number": 42,
+     "title": "[P2] Consume incoming image share intents or remove the image share target",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/42",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 41,
+     "title": "[P1] Use a valid Android SDK platform identifier in fresh CI setup",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/41",
+     "labels": [
+      "no-device"
+     ]
+    },
+    {
+     "number": 40,
+     "title": "[P1] Cancel history timeline collectors when changing sessions",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/40",
+     "labels": [
+      "no-device"
+     ]
+    },
+    {
+     "number": 38,
+     "title": "[P1] Restore composer drafts independently for each session",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/38",
+     "labels": [
+      "no-device"
+     ]
+    },
+    {
+     "number": 35,
+     "title": "[P0] Build, sign, verify and publish Play/F-Droid release artifacts",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/35",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 34,
+     "title": "[P1] Complete live-server integrations and execute the full manual matrix",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/34",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 30,
+     "title": "[P1] Resolve security/privacy decisions and verify sensitive-data lifecycle",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/30",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 29,
+     "title": "[P1] Close accessibility release gates across screens, fonts and assistive input",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/29",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 28,
+     "title": "[P2] Measure baseline profiles and publish changelog/compatibility information",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/28",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 27,
+     "title": "[P2] Implement safe OpenCode theme import with contrast validation",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/27",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 26,
+     "title": "[P2] Implement adaptive list-detail navigation for wide Android windows",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/26",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 25,
+     "title": "[P2] Add isolated multi-session tabs with state preservation",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/25",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 24,
+     "title": "[P2] Implement home widget, Quick Settings connection tile and launcher shortcuts",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/24",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 23,
+     "title": "[P2] Add touch-accessible command palette and safe leader shortcuts",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/23",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 22,
+     "title": "[P2] Implement opt-in, bounded LAN OpenCode discovery or formally descope it",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/22",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 21,
+     "title": "[P2] Finish QR pairing for another device and gate unsupported servers",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/21",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 20,
+     "title": "[P2] Build Quick Ask and share one implementation across Android surfaces",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/20",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 19,
+     "title": "[P2] Add confirmed advanced session tools (synthetic note, wait, permission and form)",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/19",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 18,
+     "title": "[P2] Build a session log viewer with replay/live deduplication",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/18",
+     "labels": [
+      "no-device"
+     ]
+    },
+    {
+     "number": 17,
+     "title": "[P2] Add guarded RPC console and RPC event viewer",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/17",
+     "labels": [
+      "no-device"
+     ]
+    },
+    {
+     "number": 16,
+     "title": "[P2] Surface TUI control events with safe follow-desktop mode",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/16",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 15,
+     "title": "[P2] Expose the usage dashboard in Manage",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/15",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 10,
+     "title": "[P1] Clarify queue/steer/background controls and harden terminal interactions",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/10",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 9,
+     "title": "[P1] Wire staged undo/redo into the active session UI",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/9",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 8,
+     "title": "[P1] Make reconnect state converge to authoritative server state",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/8",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 7,
+     "title": "[P1] Correct worktree branch/ref semantics and surface create errors",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/7",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 6,
+     "title": "[P1] Render image attachments in the session timeline",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/6",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 5,
+     "title": "[P1] Make background permission/form requests reliable and safe",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/5",
+     "labels": [
+      "needs-device"
+     ]
+    },
+    {
+     "number": 4,
+     "title": "[P0] Reconcile Phase 11 plan PR with current manual-test evidence",
+     "url": "https://github.com/Theblackcat98/opencode-android/issues/4",
+     "labels": [
+      "no-device"
+     ]
+    }
+   ],
+   "prs": [
+    {
+     "number": 92,
+     "title": "Make integrationTest fail when required live tests are unavailable",
+     "url": "https://github.com/Theblackcat98/opencode-android/pull/92"
+    },
+    {
+     "number": 91,
+     "title": "feat: Install scoped Android skills (second-pass review)",
+     "url": "https://github.com/Theblackcat98/opencode-android/pull/91"
+    },
+    {
+     "number": 90,
+     "title": "Fix CI gate by running Detekt",
+     "url": "https://github.com/Theblackcat98/opencode-android/pull/90"
+    },
+    {
+     "number": 89,
+     "title": "Fix #45: Stage credential modifications before profile updates",
+     "url": "https://github.com/Theblackcat98/opencode-android/pull/89"
+    },
+    {
+     "number": 88,
+     "title": "Fix RequestCenter to avoid resurrecting answered requests on resync",
+     "url": "https://github.com/Theblackcat98/opencode-android/pull/88"
+    },
+    {
+     "number": 86,
+     "title": "feat: Complete remaining phase 10 todos, theme import, accessibility, and detekt quality gate",
+     "url": "https://github.com/Theblackcat98/opencode-android/pull/86"
+    },
+    {
+     "number": 83,
+     "title": "feat: add safe theme import and accessibility gates",
+     "url": "https://github.com/Theblackcat98/opencode-android/pull/83"
+    }
+   ]
+  },
+  {
+   "name": "termux-ui",
+   "url": "https://github.com/Theblackcat98/termux-ui",
+   "description": "Single-binary TUI for Termux: settings, extra keys, themes, fonts, shell setup, and a front-end to core-termux",
+   "topics": [
+    "android",
+    "go",
+    "termux",
+    "tui"
+   ],
+   "language": "Go",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-11-09",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [
+    {
+     "number": 33,
+     "title": "Update PLAN.md to match the configured SSH port and native ZIP extraction",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/33",
+     "labels": []
+    },
+    {
+     "number": 31,
+     "title": "Add the planned file and directory browsers for path-based controls",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/31",
+     "labels": []
+    },
+    {
+     "number": 29,
+     "title": "Validate and bound self-update binaries before replacement",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/29",
+     "labels": []
+    },
+    {
+     "number": 28,
+     "title": "Bound and authenticate downloaded fonts before installation",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/28",
+     "labels": []
+    },
+    {
+     "number": 26,
+     "title": "Prevent same-second backups from overwriting one another",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/26",
+     "labels": []
+    },
+    {
+     "number": 24,
+     "title": "Remove unreachable confirmation state from Settings and Extra Keys",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/24",
+     "labels": []
+    },
+    {
+     "number": 23,
+     "title": "Do not let Modules Space toggle a tool in the unfocused pane",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/23",
+     "labels": []
+    },
+    {
+     "number": 22,
+     "title": "Escape should close the custom hex editor from every field",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/22",
+     "labels": []
+    },
+    {
+     "number": 21,
+     "title": "Complete text editing in Extra Keys cell fields",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/21",
+     "labels": []
+    },
+    {
+     "number": 20,
+     "title": "Make the global help box responsive to narrow terminal widths",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/20",
+     "labels": []
+    },
+    {
+     "number": 19,
+     "title": "Render the Apps & System pager as a bounded modal",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/19",
+     "labels": []
+    },
+    {
+     "number": 18,
+     "title": "Size the post-failure Modules log pager to the terminal",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/18",
+     "labels": []
+    },
+    {
+     "number": 17,
+     "title": "Accept uppercase Y when applying the Extra Keys diff",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/17",
+     "labels": []
+    },
+    {
+     "number": 15,
+     "title": "Clamp list cursors when modules or boot-script rows change",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/15",
+     "labels": []
+    },
+    {
+     "number": 14,
+     "title": "Mark use-fullscreen-workaround as restart-required",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/14",
+     "labels": []
+    },
+    {
+     "number": 13,
+     "title": "Guard Modules & Packages show/open actions when core is unavailable",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/13",
+     "labels": []
+    },
+    {
+     "number": 12,
+     "title": "Suppress global keys while the Apps & System boot filename dialog is active",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/12",
+     "labels": []
+    },
+    {
+     "number": 11,
+     "title": "Do not switch Themes & Fonts tabs while a modal editor or import input is active",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/11",
+     "labels": []
+    },
+    {
+     "number": 10,
+     "title": "Use the masked SSH wizard password without environment leakage",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/10",
+     "labels": []
+    },
+    {
+     "number": 8,
+     "title": "Constrain new boot-script names to ~/.termux/boot",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/8",
+     "labels": []
+    },
+    {
+     "number": 6,
+     "title": "Show and confirm the colors.properties diff before applying a theme",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/6",
+     "labels": []
+    },
+    {
+     "number": 5,
+     "title": "Handle termux.properties load failures without nil-document panics",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/5",
+     "labels": []
+    },
+    {
+     "number": 4,
+     "title": "Settings editable fields ignore printable keyboard input",
+     "url": "https://github.com/Theblackcat98/termux-ui/issues/4",
+     "labels": []
+    }
+   ],
+   "prs": [
+    {
+     "number": 60,
+     "title": "Add interactive file and directory browsers for path-based controls",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/60"
+    },
+    {
+     "number": 59,
+     "title": "docs: update PLAN.md to match configured SSH port and native ZIP extraction",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/59"
+    },
+    {
+     "number": 56,
+     "title": "Fix: Validate and bound self-update binaries before replacement",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/56"
+    },
+    {
+     "number": 55,
+     "title": "Bound and authenticate downloaded fonts before installation",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/55"
+    },
+    {
+     "number": 53,
+     "title": "fix: prevent same-second backups from overwriting one another",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/53"
+    },
+    {
+     "number": 51,
+     "title": "Refactor: Remove unreachable UI state fields and branches",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/51"
+    },
+    {
+     "number": 48,
+     "title": "fix: complete text editing in Extra Keys cell fields",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/48"
+    },
+    {
+     "number": 46,
+     "title": "fix: render Apps & System pager as bounded modal",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/46"
+    },
+    {
+     "number": 44,
+     "title": "Accept uppercase Y in Extra Keys diff pager",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/44"
+    },
+    {
+     "number": 43,
+     "title": "Fix list cursors not clamping when rows change",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/43"
+    },
+    {
+     "number": 42,
+     "title": "fix: guard Modules & Packages show/open actions against uninstalled core",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/42"
+    },
+    {
+     "number": 41,
+     "title": "Fix tab switching consuming modal inputs",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/41"
+    },
+    {
+     "number": 40,
+     "title": "Fix SSH wizard password environment leakage",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/40"
+    },
+    {
+     "number": 38,
+     "title": "Fix boot-script path traversal and symlink escape vulnerabilities",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/38"
+    },
+    {
+     "number": 36,
+     "title": "feat: show diff and require confirmation before applying theme",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/36"
+    },
+    {
+     "number": 35,
+     "title": "Fix nil-document panics on termux.properties read failure",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/35"
+    },
+    {
+     "number": 34,
+     "title": "Fix settings printable keyboard input",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/34"
+    },
+    {
+     "number": 2,
+     "title": "Improve error handling for file and system operations",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/2"
+    },
+    {
+     "number": 1,
+     "title": "Fix Termux environment detection bug and clean up unused code",
+     "url": "https://github.com/Theblackcat98/termux-ui/pull/1"
+    }
+   ]
+  },
+  {
+   "name": "SyncWeave",
+   "url": "https://github.com/Theblackcat98/SyncWeave",
+   "description": "A file transfer TUI app to learn OpenTUI and Bubbletea+ Lipgloss",
+   "topics": [
+    "file-transfer",
+    "opentui",
+    "tui",
+    "typescript"
+   ],
+   "language": "TypeScript",
+   "license": "MIT",
+   "stars": 1,
+   "pushed_at": "2026-11-09",
+   "health": 100,
+   "missing": [],
+   "issues": [
+    {
+     "number": 28,
+     "title": "Physical verification tracking: two-host LAN, packet captures, Termux",
+     "url": "https://github.com/Theblackcat98/SyncWeave/issues/28",
+     "labels": [
+      "testing"
+     ]
+    },
+    {
+     "number": 27,
+     "title": "Receive destination is hardcoded to ~/Downloads (no picker)",
+     "url": "https://github.com/Theblackcat98/SyncWeave/issues/27",
+     "labels": [
+      "enhancement"
+     ]
+    },
+    {
+     "number": 26,
+     "title": "Real-mode transfers have no retry loop (decisions.md says 3)",
+     "url": "https://github.com/Theblackcat98/SyncWeave/issues/26",
+     "labels": [
+      "enhancement"
+     ]
+    },
+    {
+     "number": 25,
+     "title": "Send path follows symlinks (listed as 0-byte files, sent as targets)",
+     "url": "https://github.com/Theblackcat98/SyncWeave/issues/25",
+     "labels": [
+      "bug"
+     ]
+    },
+    {
+     "number": 24,
+     "title": "Transport: O(n\u00b2) buffer growth on receive (CPU-amplification DoS)",
+     "url": "https://github.com/Theblackcat98/SyncWeave/issues/24",
+     "labels": [
+      "security"
+     ]
+    },
+    {
+     "number": 8,
+     "title": "Phase 1 \u00b7 Group 7 \u2014 Finish responsive/mobile UX, touch interaction, help, and end-to-end polish",
+     "url": "https://github.com/Theblackcat98/SyncWeave/issues/8",
+     "labels": []
+    },
+    {
+     "number": 6,
+     "title": "Phase 1 \u00b7 Group 5 \u2014 Complete the visual diff inspector and hunk staging workflow",
+     "url": "https://github.com/Theblackcat98/SyncWeave/issues/6",
+     "labels": []
+    },
+    {
+     "number": 4,
+     "title": "Phase 1 \u00b7 Group 3 \u2014 Complete the mock filesystem workspace and selection workflow",
+     "url": "https://github.com/Theblackcat98/SyncWeave/issues/4",
+     "labels": []
+    }
+   ],
+   "prs": [
+    {
+     "number": 44,
+     "title": "chore: bump @biomejs/biome from 2.5.15 to 2.6.5",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/44"
+    },
+    {
+     "number": 43,
+     "title": "chore: bump @opentui/core from 0.6.0 to 0.8.2",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/43"
+    },
+    {
+     "number": 40,
+     "title": "test: fix hang in floodUntil during backpressure",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/40"
+    },
+    {
+     "number": 39,
+     "title": "Fix: Refuse to send symlinks",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/39"
+    },
+    {
+     "number": 37,
+     "title": "chore: bump @types/bun from 1.4.3 to 1.4.4",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/37"
+    },
+    {
+     "number": 34,
+     "title": "Production readiness: audit fix pack (P1\u2013P7)",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/34"
+    },
+    {
+     "number": 33,
+     "title": "chore: bump actions/upload-artifact from 4.6.2 to 7.0.2",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/33"
+    },
+    {
+     "number": 31,
+     "title": "chore: bump actions/checkout from 4.4.0 to 7.0.1",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/31"
+    },
+    {
+     "number": 30,
+     "title": "chore: bump typescript from 5.8.3 to 7.0.2",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/30"
+    }
+   ]
+  },
+  {
+   "name": "PAGS",
+   "url": "https://github.com/Theblackcat98/PAGS",
+   "description": "Portable Agent Guide System \u2014 written rules and records plus a checker that keeps AI coding agents aligned to a project's conventions.",
+   "topics": [
+    "agent",
+    "docs",
+    "python",
+    "workflow"
+   ],
+   "language": "Python",
+   "license": "NOASSERTION",
+   "stars": 1,
+   "pushed_at": "2026-11-02",
+   "health": 100,
+   "missing": [],
+   "issues": [
+    {
+     "number": 33,
+     "title": "Add portable role-based model and tool configuration",
+     "url": "https://github.com/Theblackcat98/PAGS/issues/33",
+     "labels": []
+    },
+    {
+     "number": 32,
+     "title": "Introduce risk-based independent review and explicit escalation gates",
+     "url": "https://github.com/Theblackcat98/PAGS/issues/32",
+     "labels": []
+    },
+    {
+     "number": 30,
+     "title": "Add optional project-specific verification profiles for real application behavior",
+     "url": "https://github.com/Theblackcat98/PAGS/issues/30",
+     "labels": []
+    },
+    {
+     "number": 24,
+     "title": "Pilot PAGS on a real greenfield and a real brownfield project",
+     "url": "https://github.com/Theblackcat98/PAGS/issues/24",
+     "labels": [
+      "enhancement"
+     ]
+    },
+    {
+     "number": 13,
+     "title": "Single-file record logs conflict across parallel branches and grow without bound",
+     "url": "https://github.com/Theblackcat98/PAGS/issues/13",
+     "labels": [
+      "enhancement",
+      "question"
+     ]
+    },
+    {
+     "number": 11,
+     "title": "Define who can approve: agent vs. human authority",
+     "url": "https://github.com/Theblackcat98/PAGS/issues/11",
+     "labels": [
+      "enhancement",
+      "question"
+     ]
+    },
+    {
+     "number": 5,
+     "title": "Installer: brownfield repos lose the pointer to PAGS docs when AGENTS.md or README.md already exist",
+     "url": "https://github.com/Theblackcat98/PAGS/issues/5",
+     "labels": [
+      "enhancement"
+     ]
+    },
+    {
+     "number": 1,
+     "title": "Tracking: design and installer review follow-ups",
+     "url": "https://github.com/Theblackcat98/PAGS/issues/1",
+     "labels": []
+    }
+   ],
+   "prs": [
+    {
+     "number": 50,
+     "title": "Fix single-file record conflicts via string slugs and archive files",
+     "url": "https://github.com/Theblackcat98/PAGS/pull/50"
+    },
+    {
+     "number": 48,
+     "title": "Add optional role-based runtime configuration template",
+     "url": "https://github.com/Theblackcat98/PAGS/pull/48"
+    },
+    {
+     "number": 47,
+     "title": "feat: Introduce risk-based independent review and explicit escalation gates",
+     "url": "https://github.com/Theblackcat98/PAGS/pull/47"
+    },
+    {
+     "number": 37,
+     "title": "Fix remaining tracking issue items for PAGS (#1)",
+     "url": "https://github.com/Theblackcat98/PAGS/pull/37"
+    },
+    {
+     "number": 36,
+     "title": "feat(installer): add merge conflict policy for brownfield adoption",
+     "url": "https://github.com/Theblackcat98/PAGS/pull/36"
+    }
+   ]
+  },
+  {
+   "name": "llamacpp-runner",
+   "url": "https://github.com/Theblackcat98/llamacpp-runner",
+   "description": "llama-deck: keyboard-first TUI and CLI to discover, configure, launch, and monitor a single managed llama.cpp llama-server instance, with presets and live telemetry.",
+   "topics": [
+    "cli",
+    "llm",
+    "local-llm",
+    "tui"
+   ],
+   "language": "TypeScript",
+   "license": "MIT",
+   "stars": 1,
+   "pushed_at": "2026-11-02",
+   "health": 100,
+   "missing": [],
+   "issues": [
+    {
+     "number": 71,
+     "title": "[task]: dead-code sweep \u2014 unused exports (core branch, then ui branch)",
+     "url": "https://github.com/Theblackcat98/llamacpp-runner/issues/71",
+     "labels": [
+      "ready",
+      "layer:core",
+      "priority:low",
+      "task"
+     ]
+    },
+    {
+     "number": 70,
+     "title": "[task]: decompose SessionApp into hooks; fix telemetry service churn",
+     "url": "https://github.com/Theblackcat98/llamacpp-runner/issues/70",
+     "labels": [
+      "ready",
+      "layer:ui",
+      "task",
+      "priority:medium"
+     ]
+    },
+    {
+     "number": 69,
+     "title": "[task]: config ownership consolidation + `llama-deck config` setter + ~/.configs precedence",
+     "url": "https://github.com/Theblackcat98/llamacpp-runner/issues/69",
+     "labels": [
+      "ready",
+      "layer:core",
+      "layer:cli",
+      "task",
+      "priority:medium"
+     ]
+    },
+    {
+     "number": 68,
+     "title": "[feature]: live loading progress in the console drawer (\\r in-place updates, \u00a72.5)",
+     "url": "https://github.com/Theblackcat98/llamacpp-runner/issues/68",
+     "labels": [
+      "enhancement",
+      "ready",
+      "layer:core",
+      "priority:medium"
+     ]
+    },
+    {
+     "number": 67,
+     "title": "[task]: UX consistency pass \u2014 explorer preview, palette set-port, Esc arm, labels, modal state, port validation",
+     "url": "https://github.com/Theblackcat98/llamacpp-runner/issues/67",
+     "labels": [
+      "ready",
+      "layer:ui",
+      "task",
+      "priority:medium"
+     ]
+    },
+    {
+     "number": 66,
+     "title": "[feature]: hardware reprobe action and honest no-GPU messaging",
+     "url": "https://github.com/Theblackcat98/llamacpp-runner/issues/66",
+     "labels": [
+      "enhancement",
+      "ready",
+      "layer:ui",
+      "priority:medium"
+     ]
+    },
+    {
+     "number": 63,
+     "title": "[task]: reconcile spec & docs with reality (compat-matrix sign-off, D3 PTY, theme list, stale rows)",
+     "url": "https://github.com/Theblackcat98/llamacpp-runner/issues/63",
+     "labels": [
+      "ready",
+      "task",
+      "priority:medium",
+      "docs"
+     ]
+    }
+   ],
+   "prs": [
+    {
+     "number": 78,
+     "title": "core: expose throttled partial lines for loading progress",
+     "url": "https://github.com/Theblackcat98/llamacpp-runner/pull/78"
+    },
+    {
+     "number": 77,
+     "title": "ui: UX consistency pass (explorer preview, palette label, Esc arm, footer hints)",
+     "url": "https://github.com/Theblackcat98/llamacpp-runner/pull/77"
+    },
+    {
+     "number": 76,
+     "title": "[feature]: hardware reprobe action and honest no-GPU messaging",
+     "url": "https://github.com/Theblackcat98/llamacpp-runner/pull/76"
+    },
+    {
+     "number": 1,
+     "title": "docs: ideas \u2014 GGUF fixture coverage & strict shell-command import",
+     "url": "https://github.com/Theblackcat98/llamacpp-runner/pull/1"
+    }
+   ]
+  },
+  {
+   "name": "opencode-workflow",
+   "url": "https://github.com/Theblackcat98/opencode-workflow",
+   "description": "A thin engineering-operating layer on top of opencode: delegate feature-level objectives to an agent team (lead orchestrator + planner/coder/reviewer/researcher subagents) that inspects, plans, implements, tests, reviews, documents, and commits \u2014 with worktree-based parallel isolation.",
+   "topics": [
+    "agent",
+    "opencode",
+    "orchestration"
+   ],
+   "language": "TypeScript",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-10-17",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": [
+    {
+     "number": 3,
+     "title": "Specify concrete state-machine implementation for the engineering workflow",
+     "url": "https://github.com/Theblackcat98/opencode-workflow/pull/3"
+    },
+    {
+     "number": 2,
+     "title": "Formalize and more closely enforce the canonical engineering workflow",
+     "url": "https://github.com/Theblackcat98/opencode-workflow/pull/2"
+    }
+   ]
+  },
+  {
+   "name": "tui-kanban",
+   "url": "https://github.com/Theblackcat98/tui-kanban",
+   "description": "A beautiful terminal Kanban board built with Rust and Ratatui",
+   "topics": [
+    "productivity",
+    "rust",
+    "terminal",
+    "tui"
+   ],
+   "language": "Rust",
+   "license": "MIT",
+   "stars": 1,
+   "pushed_at": "2026-10-30",
+   "health": 100,
+   "missing": [],
+   "issues": [
+    {
+     "number": 31,
+     "title": "UI polish: relative times, rail counts, scroll position, overflow indicators, detail drawer",
+     "url": "https://github.com/Theblackcat98/tui-kanban/issues/31",
+     "labels": [
+      "enhancement"
+     ]
+    },
+    {
+     "number": 1,
+     "title": "Tracking: full review findings and from-scratch redesign ideas",
+     "url": "https://github.com/Theblackcat98/tui-kanban/issues/1",
+     "labels": [
+      "enhancement"
+     ]
+    }
+   ],
+   "prs": []
+  },
+  {
+   "name": "agentconfigs",
+   "url": "https://github.com/Theblackcat98/agentconfigs",
+   "description": "Personal storage and showcase for coding-agent configurations \u2014 skills, agents, commands, rules, and hooks kept as plain text.",
+   "topics": [
+    "agent",
+    "config",
+    "opencode",
+    "showcase"
+   ],
+   "language": "HTML",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-10-17",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": [
+    {
+     "number": 2,
+     "title": "Add one-click Install button to the inspector",
+     "url": "https://github.com/Theblackcat98/agentconfigs/pull/2"
+    }
+   ]
+  },
+  {
+   "name": "CL-AI",
+   "url": "https://github.com/Theblackcat98/CL-AI",
+   "description": "Minimal CLI/TUI that turns a local LLM into bash command suggestions.",
+   "topics": [
+    "cli",
+    "llm",
+    "local-llm",
+    "tui"
+   ],
+   "language": "Python",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-10-10",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": [
+    {
+     "number": 8,
+     "title": "Refactor cl-ai into modular package",
+     "url": "https://github.com/Theblackcat98/CL-AI/pull/8"
+    }
+   ]
+  },
+  {
+   "name": "skillman",
+   "url": "https://github.com/Theblackcat98/skillman",
+   "description": "Terminal skill manager for opencode: browse, preview, validate, edit and install skills",
+   "topics": [
+    "agent",
+    "cli",
+    "go",
+    "tui"
+   ],
+   "language": "Go",
+   "license": "MIT",
+   "stars": 0,
+   "pushed_at": "2026-09-29",
+   "health": 100,
+   "missing": [],
+   "issues": [],
+   "prs": [
+    {
+     "number": 1,
+     "title": "fix: clear lint and vulnerability findings",
+     "url": "https://github.com/Theblackcat98/skillman/pull/1"
+    }
+   ]
+  },
+  {
+   "name": "html-tests",
+   "url": "https://github.com/Theblackcat98/html-tests",
+   "description": null,
+   "topics": [],
+   "language": "HTML",
+   "license": null,
+   "stars": 0,
+   "pushed_at": "2026-11-03",
+   "health": 17,
+   "missing": [
+    "description",
+    "topics>=3",
+    "readme",
+    "readme>500B",
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "live-edit",
+   "url": "https://github.com/Theblackcat98/live-edit",
+   "description": "Live-edit multimodal note workspace \u2014 talk or show a slide, and watch a grounded, verified Markdown note update in place.",
+   "topics": [],
+   "language": "TypeScript",
+   "license": null,
+   "stars": 0,
+   "pushed_at": "2026-11-09",
+   "health": 67,
+   "missing": [
+    "topics>=3",
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "ASCII-Everything",
+   "url": "https://github.com/Theblackcat98/ASCII-Everything",
+   "description": "A collection of python and javascripts tools and programs I made to play with the terminal.",
+   "topics": [
+    "ascii",
+    "collection",
+    "python",
+    "terminal"
+   ],
+   "language": "JavaScript",
+   "license": null,
+   "stars": 2,
+   "pushed_at": "2026-10-20",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "Awesome-AI-Python-Scripts",
+   "url": "https://github.com/Theblackcat98/Awesome-AI-Python-Scripts",
+   "description": "Collection of OpenWebUI functions and plugins that extend LLM behaviour inside OpenWebUI.",
+   "topics": [
+    "collection",
+    "llm",
+    "openwebui",
+    "python"
+   ],
+   "language": "Python",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-10-20",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "blackcatdesigns",
+   "url": "https://github.com/Theblackcat98/blackcatdesigns",
+   "description": "Personal portfolio and blog \u2014 Next.js 15, React, Tailwind, with Markdown-driven posts.",
+   "topics": [
+    "blog",
+    "nextjs",
+    "portfolio",
+    "website"
+   ],
+   "language": "HTML",
+   "license": null,
+   "stars": 0,
+   "pushed_at": "2026-09-29",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "cardputer-voice",
+   "url": "https://github.com/Theblackcat98/cardputer-voice",
+   "description": "M5Stack Cardputer push-to-talk voice client for a local llama.cpp server, plus a server status dashboard. All STT/LLM/TTS runs on your own hardware.",
+   "topics": [
+    "hardware",
+    "llm",
+    "stt",
+    "voice"
+   ],
+   "language": "HTML",
+   "license": null,
+   "stars": 0,
+   "pushed_at": "2026-09-19",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "ESP32-CANBUS",
+   "url": "https://github.com/Theblackcat98/ESP32-CANBUS",
+   "description": "Research notes and experiments on the ESP32 CAN bus peripheral.",
+   "topics": [
+    "can-bus",
+    "esp32",
+    "hardware",
+    "research"
+   ],
+   "language": null,
+   "license": null,
+   "stars": 0,
+   "pushed_at": "2026-10-20",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "github-stars",
+   "url": "https://github.com/Theblackcat98/github-stars",
+   "description": "My GitHub stars, kept up to date by a daily workflow",
+   "topics": [
+    "automation",
+    "github",
+    "stars"
+   ],
+   "language": "HTML",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-11-08",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "liquidscribe",
+   "url": "https://github.com/Theblackcat98/liquidscribe",
+   "description": "Local-first Markdown note workspace with inline, reviewable AI suggestions. Next.js 16 + Tiptap + Postgres.",
+   "topics": [],
+   "language": "TypeScript",
+   "license": "MIT",
+   "stars": 0,
+   "pushed_at": "2026-11-09",
+   "health": 83,
+   "missing": [
+    "topics>=3"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "Online-Tools",
+   "url": "https://github.com/Theblackcat98/Online-Tools",
+   "description": "Small collection of browser-based utilities hosted on GitHub Pages.",
+   "topics": [
+    "html",
+    "pages",
+    "tools",
+    "utilities"
+   ],
+   "language": "HTML",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-10-31",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "opencode-plugins",
+   "url": "https://github.com/Theblackcat98/opencode-plugins",
+   "description": "OpenCode V2 plugins: goal mode, session handoff, and OpenCode Go usage in the sidebar",
+   "topics": [
+    "agent",
+    "opencode",
+    "plugin",
+    "typescript"
+   ],
+   "language": "TypeScript",
+   "license": null,
+   "stars": 0,
+   "pushed_at": "2026-11-09",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "otg-bot",
+   "url": "https://github.com/Theblackcat98/otg-bot",
+   "description": "URL keeper \u2014 a Bun service that ingests links from bookmarks and RSS feeds, stores clean text plus raw snapshots in SQLite, and makes everything searchable.",
+   "topics": [
+    "bookmark",
+    "bun",
+    "scraper",
+    "search"
+   ],
+   "language": "TypeScript",
+   "license": null,
+   "stars": 0,
+   "pushed_at": "2026-10-20",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "TheBlackCat",
+   "url": "https://github.com/Theblackcat98/TheBlackCat",
+   "description": "Personal, Git-native knowledge library \u2014 a Markdown archive with a Hugo static site as the view.",
+   "topics": [
+    "hugo",
+    "knowledge-base",
+    "personal",
+    "static-site"
+   ],
+   "language": "HTML",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-11-09",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "Theblackcat98",
+   "url": "https://github.com/Theblackcat98/Theblackcat98",
+   "description": "Config files for my GitHub profile.",
+   "topics": [
+    "config",
+    "github",
+    "profile"
+   ],
+   "language": null,
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-10-28",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "veritas",
+   "url": "https://github.com/Theblackcat98/veritas",
+   "description": "Terminal chat app in Rust",
+   "topics": [
+    "chat",
+    "rust",
+    "tui"
+   ],
+   "language": "Rust",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-09-23",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "opencode-session-ext",
+   "url": "https://github.com/Theblackcat98/opencode-session-ext",
+   "description": "Linux fork of the OpenCode Sessions Raycast extension \u2014 browse, search, and resume OpenCode sessions in a terminal.",
+   "topics": [
+    "fork",
+    "linux",
+    "opencode",
+    "raycast"
+   ],
+   "language": "TypeScript",
+   "license": "MIT",
+   "stars": 0,
+   "pushed_at": "2026-10-10",
+   "health": 100,
+   "missing": [],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "Text-Adventure-TUI",
+   "url": "https://github.com/Theblackcat98/Text-Adventure-TUI",
+   "description": "LLM-powered terminal text-adventure engine with branching narratives and persistent saves.",
+   "topics": [
+    "game",
+    "llm",
+    "python",
+    "tui"
+   ],
+   "language": "Python",
+   "license": "NOASSERTION",
+   "stars": 2,
+   "pushed_at": "2026-10-17",
+   "health": 100,
+   "missing": [],
+   "issues": [],
+   "prs": []
+  }
+ ]
+}

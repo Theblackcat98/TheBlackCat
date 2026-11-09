@@ -1,0 +1,42 @@
+# Keep data/dashboard.json in step with the owner's public repositories.
+#
+# Scope: non-fork, non-archived repos only. Todos are open GitHub Issues.
+# The script never writes private-repo detail (this site is public), even
+# though the token below could read more in other contexts.
+name: Dashboard sync
+
+on:
+  schedule:
+    - cron: "10 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync dashboard data from GitHub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROJECTS_OWNER: Theblackcat98
+        run: python3 scripts/sync_dashboard.py
+
+      - name: Commit and push when something changed
+        run: |
+          if [ -z "$(git status --porcelain data/dashboard.json)" ]; then
+            echo "dashboard is already up to date"
+            exit 0
+          fi
+          git config user.name "Theblackcat98"
+          git config user.email "4934499+Theblackcat98@users.noreply.github.com"
+          git add data/dashboard.json
+          git commit -m "dashboard: sync from GitHub ($(date -u +%F))"
+          git push

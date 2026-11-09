@@ -166,6 +166,21 @@
 .lost p { margin-top: var(--s-3); color: var(--ink-2); }
 .lost .actions { display: flex; align-items: center; gap: var(--s-3); justify-content: center; margin-top: var(--s-5); flex-wrap: wrap; }
 
+/* ---- Repo dashboard (/dashboard/, layouts/_default/dashboard.html) ---------------------------- */
+.dash-synced { margin-top: var(--s-3); font: 400 .78rem/1.5 var(--mono); color: var(--ink-3); }
+.dash-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr)); gap: var(--s-3); margin-bottom: var(--s-6); }
+.dash-stat { padding: var(--s-3) var(--s-4); background: var(--paper-2); border: 1px solid var(--rule); border-radius: var(--radius-lg); }
+.dash-stat b { display: block; font-size: 1.5rem; font-weight: 700; line-height: 1.15; }
+.dash-stat span { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-3); font-weight: 600; }
+.dash-h { font-size: 1.05rem; font-weight: 650; margin: var(--s-6) 0 var(--s-3); }
+.dash-attention { padding-left: 1.1rem; color: var(--ink-2); margin-bottom: var(--s-6); }
+.dash-attention li { margin: .3rem 0; }
+.dash-missing { font-size: .85rem; color: var(--ink-3); }
+.dash-details { margin-top: var(--s-2); }
+.dash-details summary { cursor: pointer; font-weight: 600; font-size: .9rem; color: var(--accent); }
+.dash-issues { padding-left: 1.1rem; font-size: .9rem; margin: var(--s-2) 0; }
+.dash-issues li { margin: .25rem 0; overflow-wrap: anywhere; }
+
 /* ---- Print --------------------------------------------------------------------------------- */
 @media print {
   :root { color-scheme: light; --paper: #fff; --paper-2: #fff; --code-bg: #f5f5f5; }

@@ -30,7 +30,7 @@
 
 {{- /* Hygiene gaps: repos missing each of the six health checks, worst first. */ -}}
 {{- $hygiene := slice -}}
-{{- range $row := slice (dict "label" "License" "key" "license") (dict "label" "Topics (3+)" "key" "topics>=3") (dict "label" "Description" "key" "description") (dict "label" "README" "key" "readme") (dict "label" "README over 500B" "key" "readme>500B") (dict "label" "Push in last 90d" "key" "pushed<90d") -}}
+{{- range $row := slice (dict "label" "License" "key" "license") (dict "label" "Topics (3+)" "key" "topics>=3") (dict "label" "Description" "key" "description") (dict "label" "README" "key" "readme") (dict "label" "README >500B" "key" "readme>500B") (dict "label" "Push in last 90d" "key" "pushed<90d") -}}
   {{- $n := 0 -}}{{- range $repos -}}{{- if in .missing $row.key -}}{{- $n = add $n 1 -}}{{- end -}}{{- end -}}
   {{- $hygiene = $hygiene | append (dict "label" $row.label "n" $n "k" (printf "%04d" (sub 9999 $n))) -}}
 {{- end -}}
@@ -124,7 +124,7 @@
     <ul class="dash-bars">
       {{- range $hygiene }}
       <li>
-        <span class="dash-bars__name">Missing: {{ .label }}</span>
+        <span class="dash-bars__name">{{ .label }}</span>
         <span class="dash-bar"><span class="dash-bar__fill" style="width: {{ printf "%.1f" (div (mul (float .n) 100.0) (float $total)) }}%"></span></span>
         <b>{{ .n }}</b>
       </li>
@@ -210,14 +210,16 @@
         <h3 class="dash-card__name"><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">{{ .name }}</a></h3>
         <span class="dash-pill"><span class="dash-dot dash-dot--{{ $band }}"></span>{{ .health }}</span>
       </div>
-      <p class="dash-card__meta"><span class="dash-card__lang">{{ .language | default "—" }}</span> · <span class="dash-card__stars">★ {{ .stars | default 0 }}</span> · <span class="dash-card__pushed">pushed {{ .pushed_at }}</span></p>
+      <p class="dash-card__meta"><span class="dash-card__lang">{{ .language | default "—" }}</span><span class="dash-card__sep" aria-hidden="true"> · </span><span class="dash-card__stars">★ {{ .stars | default 0 }}</span><span class="dash-card__sep" aria-hidden="true"> · </span><span class="dash-card__pushed">{{ .pushed_at }}</span></p>
       <p class="dash-card__desc">{{ .description | default "No description." }}</p>
-      <div class="dash-card__counts">
-        <span class="dash-card__issues"><b>{{ len .issues }}</b> issues</span>
-        <span class="dash-card__prs"><b>{{ len .prs }}</b> PRs</span>
-        {{- with .missing }}<span class="dash-card__missing">missing: {{ delimit . ", " }}</span>{{ end }}
+      {{- with .missing }}<p class="dash-card__missing">missing: {{ delimit . ", " }}</p>{{ end }}
+      <div class="dash-card__foot">
+        <div class="dash-card__counts">
+          <span class="dash-card__issues"><b>{{ len .issues }}</b> issues</span>
+          <span class="dash-card__prs"><b>{{ len .prs }}</b> PRs</span>
+        </div>
+        <button class="dash-card__open" type="button" data-dash-open aria-expanded="false">Issues &amp; PRs<span class="dash-card__chev" aria-hidden="true">▸</span></button>
       </div>
-      <button class="dash-card__open" type="button" data-dash-open aria-expanded="false">Issues &amp; PRs<span class="dash-card__chev" aria-hidden="true">▸</span></button>
       <div class="dash-card__detail" hidden>
         {{- with .issues }}
         <h4 class="dash-detail__h">Open issues ({{ len . }})</h4>

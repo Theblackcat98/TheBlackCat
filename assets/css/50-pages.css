@@ -231,20 +231,22 @@ a.dash-bars__name:hover { color: var(--accent); }
 .dash-view[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 
 /* Condensed repo cards */
-.dash-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: var(--s-2); }
+.dash-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 12.5rem), 1fr)); gap: var(--s-2); }
 .dash-grid:not(.dash-table) .dash-card { cursor: pointer; }
-.dash-card { padding: .55rem .65rem; gap: .15rem; }
+.dash-card { padding: .5rem .6rem; gap: .15rem; }
 .dash-card__top { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
 .dash-card__name { font-size: .92rem; font-weight: 600; line-height: 1.2; letter-spacing: -.012em; overflow-wrap: anywhere; }
 .dash-card__name a:hover { color: var(--accent); }
 .dash-pill { flex: none; display: inline-flex; align-items: center; gap: .3rem; font: 600 .7rem/1 var(--mono); color: var(--ink); background: var(--paper-3); border: 1px solid var(--rule); border-radius: 999px; padding: .22rem .45rem; }
-.dash-card__meta { font: 400 .68rem/1.4 var(--mono); color: var(--ink-3); }
-.dash-card__desc { color: var(--ink-2); font-size: .8rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.dash-card__counts { display: flex; flex-wrap: wrap; gap: 0 var(--s-3); font: 400 .72rem/1.4 var(--mono); color: var(--ink-2); }
+.dash-card__meta { font: 400 .66rem/1.4 var(--mono); color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dash-card__desc { color: var(--ink-2); font-size: .78rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dash-card__counts { display: flex; flex: none; flex-wrap: nowrap; gap: 0 var(--s-2); font: 400 .7rem/1.4 var(--mono); color: var(--ink-2); }
+.dash-card__counts > span { flex: none; white-space: nowrap; }
 .dash-card__counts b { color: var(--ink); }
-.dash-card__missing { color: var(--ink-3); }
+.dash-card__missing { font: 400 .68rem/1.4 var(--mono); color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dash-missing { font-size: .85rem; color: var(--ink-3); }
-.dash-card__open { align-self: flex-start; display: inline-flex; align-items: center; gap: .3rem; margin-top: .2rem; padding: .15rem 0; background: none; border: 0; cursor: pointer; font: 600 .75rem/1.2 var(--mono); color: var(--accent); }
+.dash-card__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-1) var(--s-2); margin-top: auto; padding-top: .3rem; }
+.dash-card__open { flex: none; display: inline-flex; align-items: center; gap: .3rem; padding: .15rem 0; background: none; border: 0; cursor: pointer; font: 600 .72rem/1.2 var(--mono); color: var(--accent); }
 .dash-card__chev { display: inline-block; transition: transform .15s var(--ease); }
 .dash-card__open[aria-expanded="true"] .dash-card__chev { transform: rotate(90deg); }
 .dash-card__detail { border-top: 1px dashed var(--rule); margin-top: var(--s-2); padding-top: var(--s-1); }
@@ -282,15 +284,16 @@ a.dash-bars__name:hover { color: var(--accent); }
 .dash-table .dash-card { display: grid; align-items: center; gap: var(--s-3); padding-top: .45rem; padding-bottom: .45rem; }
 .dash-table .dash-card[hidden] { display: none; }
 .dash-table .dash-card:hover { transform: none; }
-.dash-table .dash-card__top, .dash-table .dash-card__meta, .dash-table .dash-card__counts { display: contents; }
-.dash-table .dash-card__name { grid-column: 1; }
-.dash-table .dash-card__lang { grid-column: 2; font: 400 .78rem/1.4 var(--mono); color: var(--ink-2); }
-.dash-table .dash-pill { grid-column: 3; justify-self: end; }
-.dash-table .dash-card__issues { grid-column: 4; text-align: right; font-size: 0; }
-.dash-table .dash-card__prs { grid-column: 5; text-align: right; font-size: 0; }
+.dash-table .dash-card__top, .dash-table .dash-card__meta, .dash-table .dash-card__counts, .dash-table .dash-card__foot { display: contents; }
+.dash-table .dash-card__sep { display: none; }
+.dash-table .dash-card__name { grid-row: 1; grid-column: 1; }
+.dash-table .dash-card__lang { grid-row: 1; grid-column: 2; font: 400 .78rem/1.4 var(--mono); color: var(--ink-2); }
+.dash-table .dash-pill { grid-row: 1; grid-column: 3; justify-self: end; }
+.dash-table .dash-card__issues { grid-row: 1; grid-column: 4; text-align: right; font-size: 0; }
+.dash-table .dash-card__prs { grid-row: 1; grid-column: 5; text-align: right; font-size: 0; }
 .dash-table .dash-card__issues b, .dash-table .dash-card__prs b { font: 600 .85rem/1.4 var(--mono); }
-.dash-table .dash-card__pushed { grid-column: 6; font: 400 .78rem/1.4 var(--mono); color: var(--ink-2); }
-.dash-table .dash-card__open { grid-column: 7; justify-self: end; align-self: center; margin-top: 0; font-size: 0; padding: .2rem; }
+.dash-table .dash-card__pushed { grid-row: 1; grid-column: 6; font: 400 .78rem/1.4 var(--mono); color: var(--ink-2); }
+.dash-table .dash-card__open { grid-row: 1; grid-column: 7; justify-self: end; align-self: center; margin-top: 0; font-size: 0; padding: .2rem; }
 .dash-table .dash-card__chev { font-size: .95rem; }
 .dash-table .dash-card__detail { grid-column: 1 / -1; }
 .dash-table .dash-card__desc, .dash-table .dash-card__stars, .dash-table .dash-card__missing { display: none; }
@@ -304,4 +307,13 @@ a.dash-bars__name:hover { color: var(--accent); }
   .prose { max-width: none; font-size: 11pt; }
   .prose a[href^="http"]::after { content: " (" attr(href) ")"; font: 400 .8em var(--mono); color: #555; }
   .codeblock pre { white-space: pre-wrap; }
+}
+
+@media (max-width: 40rem) {
+  .dash-table .dash-thead, .dash-table .dash-card { grid-template-columns: minmax(8rem, 1fr) 4.4rem 4.6rem 4rem 2.4rem; min-width: 0; }
+  .dash-table .dash-card__lang, .dash-table .dash-card__pushed, .dash-th[data-sort-btn="lang"], .dash-th[data-sort-btn="recent"] { display: none; }
+  .dash-table .dash-pill { grid-column: 2; }
+  .dash-table .dash-card__issues { grid-column: 3; }
+  .dash-table .dash-card__prs { grid-column: 4; }
+  .dash-table .dash-card__open { grid-column: 5; }
 }

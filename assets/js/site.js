@@ -337,9 +337,10 @@
             return;
           }
           const d = card.dataset;
+          const langEl = $(".dash-card__lang", card);
           mLink.textContent = d.name || d.title;
           mLink.href = d.url || "#";
-          mMeta.textContent = `${d.lang || "—"} · health ${d.health} · ${d.issues} issues · ${d.prs} PRs · pushed ${d.date}`;
+          mMeta.textContent = `${langEl ? langEl.textContent : d.lang || "—"} · health ${d.health} · ${d.issues} issues · ${d.prs} PRs · pushed ${d.date}`;
           mBody.innerHTML = "";
           const clone = detail.cloneNode(true);
           clone.removeAttribute("hidden");

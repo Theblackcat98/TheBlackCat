@@ -540,8 +540,8 @@ tools:
     writeup: blog/anatomy-machines/
     category: exhibits
     kind: exhibit
-    short: Five cutaway machines as interactive isometric SVG figures on test rigs.
-    desc: "Five machines as interactive isometric figures: a quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine and a quadruped robot — each with a dark and a light build."
+    short: Six cutaway machines as interactive isometric SVG figures on test rigs.
+    desc: "Six machines as interactive isometric figures: a quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine, a quadruped robot and a pneumatic impact wrench — each with a dark and a light theme."
     tags: [svg, isometric, simulation, creative-coding]
     related: [aether-atelier, tui-design-study]
     added: "2026-09-15"

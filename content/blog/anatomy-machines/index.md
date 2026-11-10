@@ -1,6 +1,6 @@
 ---
-title: "Five machines, drawn to be taken apart"
-description: "A quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine and a quadruped robot: five interactive isometric figures, running inline in this post."
+title: "Six machines, drawn to be taken apart"
+description: "A quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine, a quadruped robot and a pneumatic impact wrench: six interactive isometric figures, running inline in this post."
 date: 2026-10-27
 topics:
   - design
@@ -17,7 +17,7 @@ tool: anatomy
 
 Most diagrams of a mechanism are a picture of a mechanism. They show you the parts and then stop, because a picture cannot answer the question you actually have: what happens when this moves.
 
-These five figures answer it. Each one is a machine drawn in isometric SVG, sitting on a test rig, with the mechanism live underneath. They run below in this page: no plugin, no install, and no request to anyone else's server. Each is also a standalone file if you would rather have it full width: the whole set lives at [Anatomy](/anatomy/).
+These six figures answer it. Each one is a machine drawn in isometric SVG, sitting on a test rig, with the mechanism live underneath. They run below in this page: no plugin, no install, and no request to anyone else's server. Each is also a standalone file if you would rather have it full width: the whole set lives at [Anatomy](/anatomy/).
 
 ## How a quadcopter flies
 
@@ -64,6 +64,14 @@ The optical collimator runs along a front rail and commands up to ±26° of gaze
 {{< anatomy slug="robotic-cat" title="FELIS-09 robotic cat" height="938" >}}
 
 Hover the rail and watch the load pads trade force between the front feet. Then crouch and watch all four climb at once — the tail can cancel a drift, but it cannot take weight off the ground.
+
+## The pneumatic impact wrench
+
+An impact wrench does not tighten a bolt with steady torque. Compressed air spins a vane motor up to speed, a cam lets the hammer run free of the anvil, and then the hammer catches it — a short, hard blow instead of a long pull. The reaction goes into the mechanism rather than the operator's wrist.
+
+{{< anatomy slug="pneumatic-impact-gun" title="Pneumatic impact wrench" height="700" >}}
+
+Watch the anvil lag the hammer through each cycle: the hammer accelerates on its own, strikes, and the anvil takes the torque in bursts.
 
 ## How they are built
 

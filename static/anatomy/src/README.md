@@ -1,6 +1,6 @@
 # Anatomy · source and screenshots
 
-The five figures one level up are built artefacts, not hand-written pages. This
+The six figures one level up are built artefacts, not hand-written pages. This
 folder keeps the source and the screenshots that produced them, so the shipped
 HTML can be traced back to something editable.
 
@@ -10,6 +10,7 @@ src/bookshelf-speaker/         build.mjs, shots/
 src/limited-slip-differential/ build.mjs, shots/
 src/flamelicker/               build.mjs, marks.png, shots/
 src/robotic-cat/               build.mjs, model.mjs, live.js, robotic-cat.css, shots/
+src/pneumatic-impact-gun/      build.mjs
 ```
 
 ## How a figure is published

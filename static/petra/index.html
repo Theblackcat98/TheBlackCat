@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Petra — Al-Khazneh (The Treasury) — Axonometric Architectural Diagram</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #e3ded4;
+    }
+    #canvas-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+    }
+    #hint {
+      position: absolute; left: 18px; right: 18px; bottom: 14px; z-index: 2;
+      color: rgba(65,53,43,.68); font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: .08em; text-transform: uppercase; pointer-events: none;
+    }
+    #paper-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      opacity: 0.55;
+    }
+  </style>
+<meta name="description" content="Al-Khazneh at Petra drawn as an axonometric on drafting paper: the two-storey Treasury facade carved into a stratified rose-red cliff — six columns and relief figures below, a broken pediment, tholos and urn above, the Siq slit in the spur beside it.">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/petra/">
+<meta property="og:title" content="Petra — Al-Khazneh (The Treasury)">
+<meta property="og:description" content="Al-Khazneh at Petra drawn as an axonometric on drafting paper: the two-storey Treasury facade carved into a stratified rose-red cliff — six columns and relief figures below, a broken pediment, tholos and urn above, the Siq slit in the spur beside it.">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/petra-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "VisualArtwork", "name": "Petra — Al-Khazneh (The Treasury)", "description": "Al-Khazneh at Petra drawn as an axonometric on drafting paper: the two-storey Treasury facade carved into a stratified rose-red cliff — six columns and relief figures below, a broken pediment, tholos and urn above, the Siq slit in the spur beside it.", "url": "https://theblackcat98.github.io/TheBlackCat/petra/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/petra-light.webp", "creator": {"@type": "Person", "name": "Nik"} }</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="petra"></script>
+</head>
+<body>
+<a class="back tk-fallback" href="../tools/">&#8592; All tools</a>
+  <div id="canvas-container">
+    <canvas id="paper-overlay"></canvas>
+    <div id="hint">PETRA &middot; AL-KHAZNEH &middot; AXONOMETRIC STUDY &nbsp; / &nbsp; DRAG TO ORBIT &middot; DOUBLE-CLICK TO RESET</div>
+  </div>
+
+  <script src="../vendor/three/three.min.js"></script>
+  <script src="../vendor/three/OrbitControls.js"></script>
+  <script>
+    // =========================================================================
+    // 1. DETERMINISTIC PRNG & DRAFTING PAPER TEXTURE OVERLAY
+    // =========================================================================
+    function mulberry32(a) {
+      return function () {
+        let t = (a += 0x6d2b79f5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    const rng = mulberry32(312); // 312 BC: Petra rises as the Nabataean capital
+
+    function generatePaperOverlay() {
+      const canvas = document.getElementById('paper-overlay');
+      const w = (canvas.width = window.innerWidth);
+      const h = (canvas.height = window.innerHeight);
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#ede9e0';
+      ctx.fillRect(0, 0, w, h);
+
+      // Subtle orthogonal drafting grid
+      ctx.strokeStyle = 'rgba(130, 120, 108, 0.09)';
+      ctx.lineWidth = 1;
+      const step = 28;
+      ctx.beginPath();
+      for (let x = 0; x < w; x += step) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+      }
+      for (let y = 0; y < h; y += step) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+      }
+      ctx.stroke();
+
+      // Organic rough paper fiber grain
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+      const localRng = mulberry32(7104);
+      for (let i = 0; i < data.length; i += 4) {
+        const grain = (localRng() - 0.5) * 18;
+        data[i] = Math.min(255, Math.max(0, data[i] + grain));
+        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + grain));
+        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + grain));
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+    generatePaperOverlay();
+
+    // =========================================================================
+    // 2. THREE.JS SCENE & ORTHOGRAPHIC AXONOMETRIC CAMERA
+    // =========================================================================
+    const container = document.getElementById('canvas-container');
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0xe5e0d6, 1);
+    container.insertBefore(renderer.domElement, document.getElementById('paper-overlay'));
+
+    const scene = new THREE.Scene();
+
+    const frustumSize = 60;
+    const aspect = window.innerWidth / window.innerHeight;
+    const camera = new THREE.OrthographicCamera(
+      (-frustumSize * aspect) / 2,
+      (frustumSize * aspect) / 2,
+      frustumSize / 2,
+      -frustumSize / 2,
+      -200,
+      300
+    );
+
+    const targetY = 13.8;
+    const camDist = 66;
+    const defaultCamPos = new THREE.Vector3(camDist, targetY + camDist * 0.78, camDist);
+    camera.position.copy(defaultCamPos);
+    camera.lookAt(0, targetY, 0);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, targetY, 0);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.update();
+
+    window.addEventListener('dblclick', () => {
+      camera.position.copy(defaultCamPos);
+      controls.target.set(0, targetY, 0);
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controls.update();
+    });
+
+    // =========================================================================
+    // 3. SPAARNDAM PALETTE & MULTI-WEIGHT INK ENGINE
+    // =========================================================================
+    const PALETTE = {
+      soapstone:  { lit: 0xf1ece1, mid: 0xe6dfd3, shade: 0xd4cbb9, top: 0xf6f3eb, bot: 0x948779 },
+      mantle:     { lit: 0xeae3d7, mid: 0xddd5c7, shade: 0xc9bfb0, top: 0xf0ece2, bot: 0x877a6c },
+      cream:      { lit: 0xebe5da, mid: 0xe0d9cc, shade: 0xcfc6b6, top: 0xf1ede4, bot: 0x8f8274 },
+      stone:      { lit: 0xdfd8cc, mid: 0xd2c9ba, shade: 0xbeb4a4, top: 0xe8e2d8, bot: 0x7d7164 },
+      granite:    { lit: 0xc9bfb0, mid: 0xb5aa9a, shade: 0x9c9181, top: 0xd6cec0, bot: 0x695e53 },
+      terracotta: { lit: 0xc27a63, mid: 0xb06851, shade: 0x94513d, top: 0xd4947e, bot: 0x6b3829 },
+      brickDark:  { lit: 0x9e5b47, mid: 0x8a4c3a, shade: 0x703b2c, top: 0xb36f5b, bot: 0x4f271c },
+      teal:       { lit: 0x94b9bb, mid: 0x82a8aa, shade: 0x6b9092, top: 0xa8c8ca, bot: 0x517072 },
+      tealDeep:   { lit: 0x789fa2, mid: 0x668c8f, shade: 0x527477, top: 0x8eb2b5, bot: 0x3e595b },
+      dark:       { lit: 0x73675e, mid: 0x5e534b, shade: 0x4a4039, top: 0x85786e, bot: 0x332c27 },
+      plaza:      { lit: 0xe8e3d9, mid: 0xdfd9ce, shade: 0xd2ccc0, top: 0xebe6dc, bot: 0xa69e91 },
+      rose:       { lit: 0xdfa982, mid: 0xd09a72, shade: 0xb57a55, top: 0xeabf9c, bot: 0x8a5a3d },
+      roseDeep:   { lit: 0xc9855e, mid: 0xb06f4b, shade: 0x8f5636, top: 0xd99a70, bot: 0x68402a },
+      ochre:      { lit: 0xe3bc8d, mid: 0xd3a878, shade: 0xb8895a, top: 0xeed0a6, bot: 0x8f6a45 },
+      violetRock: { lit: 0xb08a7d, mid: 0x9a7366, shade: 0x7d5a4f, top: 0xc09c8f, bot: 0x5a423c },
+      sandPale:   { lit: 0xe8c39a, mid: 0xdbaf85, shade: 0xc49a6e, top: 0xf2d3ac, bot: 0x96754f },
+      ghost:      { lit: 0xe6e1d7, mid: 0xdfd9ce, shade: 0xd8d2c6, top: 0xebe6dc, bot: 0xc2bbb0 }
+    };
+
+    const washPositions = [];
+    const washColors = [];
+
+    const inkLayers = {
+      bold:   [], // Primary structural & sculptural silhouettes, major fold creases
+      medium: [], // Secondary edges, drapery pleats, pedestal frames, stairs
+      fine:   [], // Soapstone tile courses, directional shadow hatching
+      rust:   [], // Terracotta course hatching, Sacred Heart rays, trim
+      teal:   [], // Relief panel reflections & mosaic accents
+      faint:  []  // Vitruvian halo geometry, sky rays, & site grid dashes
+    };
+
+    const tempColor = new THREE.Color();
+    const lightDir = new THREE.Vector3(-0.38, 0.28, 0.88).normalize();
+
+    function computeDirectionalHex(palName, nx, ny, nz) {
+      const pal = PALETTE[palName] || PALETTE.cream;
+      if (ny > 0.68) return pal.top;
+      if (ny < -0.58) return pal.bot;
+      const dot = nx * lightDir.x + ny * lightDir.y + nz * lightDir.z;
+      if (dot > 0.25) return pal.lit;
+      if (dot > -0.18) return pal.mid;
+      return pal.shade;
+    }
+
+    function computeQuadNormal(p0, p1, p2) {
+      const ux = p1[0] - p0[0], uy = p1[1] - p0[1], uz = p1[2] - p0[2];
+      const vx = p2[0] - p0[0], vy = p2[1] - p0[1], vz = p2[2] - p0[2];
+      const nx = uy * vz - uz * vy;
+      const ny = uz * vx - ux * vz;
+      const nz = ux * vy - uy * vx;
+      const len = Math.hypot(nx, ny, nz) || 1;
+      return [nx / len, ny / len, nz / len];
+    }
+
+    function pushQuadWorld(p0, p1, p2, p3, hexColor, shadeShift = 0) {
+      tempColor.setHex(hexColor);
+      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
+      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
+      washPositions.push(
+        p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2],
+        p0[0], p0[1], p0[2], p2[0], p2[1], p2[2], p3[0], p3[1], p3[2]
+      );
+      for (let i = 0; i < 6; i++) washColors.push(r, g, b);
+    }
+
+    function pushTriWorld(p0, p1, p2, hexColor, shadeShift = 0) {
+      tempColor.setHex(hexColor);
+      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
+      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
+      washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+      for (let i = 0; i < 3; i++) washColors.push(r, g, b);
+    }
+
+    function addLineWorld(p1, p2, layer = 'medium', overshoot = 0.022) {
+      const x1 = p1[0], y1 = p1[1], z1 = p1[2];
+      const x2 = p2[0], y2 = p2[1], z2 = p2[2];
+      const dx = x2 - x1, dy = y2 - y1, dz = z2 - z1;
+      const len = Math.hypot(dx, dy, dz);
+      if (len < 1e-5) return;
+      const ux = (dx / len) * overshoot;
+      const uy = (dy / len) * overshoot;
+      const uz = (dz / len) * overshoot;
+
+      const j = layer === 'faint' ? 0 : 0.007;
+      const ax = x1 - ux + (rng() - 0.5) * j;
+      const ay = y1 - uy + (rng() - 0.5) * j;
+      const az = z1 - uz + (rng() - 0.5) * j;
+      const bx = x2 + ux + (rng() - 0.5) * j;
+      const by = y2 + uy + (rng() - 0.5) * j;
+      const bz = z2 + uz + (rng() - 0.5) * j;
+
+      const target = inkLayers[layer] || inkLayers.medium;
+      target.push(ax, ay, az, bx, by, bz);
+
+      if (layer === 'bold') {
+        const off = 0.018;
+        target.push(ax + off, ay, az - off, bx + off, by, bz - off);
+        target.push(ax - off * 0.7, ay + off * 0.7, az + off * 0.7, bx - off * 0.7, by + off * 0.7, bz + off * 0.7);
+      }
+    }
+
+    function lerpPt(a, b, t) {
+      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+    }
+
+    // =========================================================================
+    // 4. PARAMETRIC LOFTING, BOX, & OCTAGONAL BUILDERS
+    // =========================================================================
+    /**
+     * Connects two closed polygonal cross-sections (ringA and ringB) with
+     * normal-shaded Art Deco facets, crease lines, soapstone courses, and hatching.
+     */
+    function addLoftedRing(ringA, ringB, palName = 'soapstone', opts = {}) {
+      const n = ringA.length;
+      const normals = [];
+      for (let i = 0; i < n; i++) {
+        const next = (i + 1) % n;
+        normals.push(computeQuadNormal(ringA[i], ringA[next], ringB[next]));
+      }
+
+      for (let i = 0; i < n; i++) {
+        const next = (i + 1) % n;
+        const prev = (i - 1 + n) % n;
+        const p0 = ringA[i], p1 = ringA[next], p2 = ringB[next], p3 = ringB[i];
+        const norm = normals[i];
+
+        const col = computeDirectionalHex(palName, norm[0], norm[1], norm[2]);
+        const shift = (rng() - 0.5) * 0.015;
+        pushQuadWorld(p0, p1, p2, p3, col, shift);
+
+        // Top and bottom ring joints
+        if (opts.ringEdges !== false) {
+          addLineWorld(p0, p1, opts.ringLayer || 'fine', 0.01);
+          addLineWorld(p3, p2, opts.ringLayer || 'fine', 0.01);
+        }
+
+        // Longitudinal crease detection between facet prev and facet i
+        const nPrev = normals[prev];
+        const dotCrease = norm[0] * nPrev[0] + norm[1] * nPrev[1] + norm[2] * nPrev[2];
+        // Check if edge is a silhouette relative to camera direction (1, 0.78, 1)
+        const vPrev = nPrev[0] * 0.6 + nPrev[1] * 0.45 + nPrev[2] * 0.6;
+        const vCurr = norm[0] * 0.6 + norm[1] * 0.45 + norm[2] * 0.6;
+        const isSilhouette = (vPrev * vCurr <= 0);
+
+        if (isSilhouette || opts.allBoldLong) {
+          addLineWorld(p0, p3, 'bold', 0.02);
+        } else if (dotCrease < 0.88) {
+          addLineWorld(p0, p3, 'medium', 0.015);
+        } else if (opts.allLongEdges) {
+          addLineWorld(p0, p3, 'fine', 0.01);
+        }
+
+        // Intermediate soapstone courses along the loft
+        const courses = opts.courses || 0;
+        for (let c = 1; c < courses; c++) {
+          const t = c / courses;
+          addLineWorld(lerpPt(p0, p3, t), lerpPt(p1, p2, t), 'fine', 0.008);
+        }
+
+        // Automatic parallel hatching on shaded facets
+        const lightDot = norm[0] * lightDir.x + norm[1] * lightDir.y + norm[2] * lightDir.z;
+        if (opts.shadeHatch !== false && lightDot < -0.08 && vCurr > -0.35) {
+          const hSteps = lightDot < -0.45 ? 3 : 2;
+          for (let h = 1; h <= hSteps; h++) {
+            const ht = h / (hSteps + 1);
+            addLineWorld(lerpPt(p0, p1, ht), lerpPt(p3, p2, ht), opts.hatchLayer || 'fine', 0);
+          }
+        }
+      }
+
+      if (opts.capBottom) {
+        const cBot = ringA.reduce((acc, p) => [acc[0] + p[0] / n, acc[1] + p[1] / n, acc[2] + p[2] / n], [0, 0, 0]);
+        for (let i = 0; i < n; i++) {
+          pushTriWorld(ringA[(i + 1) % n], ringA[i], cBot, PALETTE[palName].bot, 0);
+        }
+      }
+      if (opts.capTop) {
+        const cTop = ringB.reduce((acc, p) => [acc[0] + p[0] / n, acc[1] + p[1] / n, acc[2] + p[2] / n], [0, 0, 0]);
+        for (let i = 0; i < n; i++) {
+          pushTriWorld(ringB[i], ringB[(i + 1) % n], cTop, PALETTE[palName].top, 0);
+        }
+      }
+    }
+
+    /**
+     * Adds an axis-aligned architectural box with courses and hatching
+     */
+    function addBox(x, y, z, w, h, d, palName = 'cream', opts = {}) {
+      const pal = PALETTE[palName] || PALETTE.cream;
+      const shift = (rng() - 0.5) * 0.015;
+      const x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
+
+      const p000 = [x0, y0, z0], p100 = [x1, y0, z0], p110 = [x1, y1, z0], p010 = [x0, y1, z0];
+      const p001 = [x0, y0, z1], p101 = [x1, y0, z1], p111 = [x1, y1, z1], p011 = [x0, y1, z1];
+
+      pushQuadWorld(p001, p101, p111, p011, pal.lit, shift);
+      pushQuadWorld(p101, p100, p110, p111, pal.shade, shift);
+      pushQuadWorld(p011, p111, p110, p010, pal.top, shift);
+      pushQuadWorld(p000, p100, p101, p001, pal.bot, shift);
+      pushQuadWorld(p100, p000, p010, p110, pal.shade, shift);
+      pushQuadWorld(p000, p001, p011, p010, pal.mid, shift);
+
+      const lyr = opts.edgeLayer || 'medium';
+      const ov = opts.overshoot !== undefined ? opts.overshoot : 0.022;
+      const edges = [
+        [p000, p100], [p100, p101], [p101, p001], [p001, p000],
+        [p010, p110], [p110, p111], [p111, p011], [p011, p010],
+        [p000, p010], [p100, p110], [p101, p111], [p001, p011]
+      ];
+      edges.forEach(e => addLineWorld(e[0], e[1], lyr, ov));
+
+      if (opts.courses) {
+        const cLayer = palName === 'terracotta' || palName === 'brickDark' ? 'rust' : 'fine';
+        for (let i = 1; i < opts.courses; i++) {
+          const cy = y0 + (h * i) / opts.courses;
+          addLineWorld([x0, cy, z1 + 0.01], [x1, cy, z1 + 0.01], cLayer, 0.01);
+          addLineWorld([x1 + 0.01, cy, z0], [x1 + 0.01, cy, z1], cLayer, 0.01);
+        }
+      }
+      if (opts.vHatchX) {
+        for (let i = 1; i < opts.vHatchX; i++) {
+          const hz = z0 + (d * i) / opts.vHatchX;
+          addLineWorld([x1 + 0.012, y0 + 0.03, hz], [x1 + 0.012, y1 - 0.03, hz], 'fine', 0);
+        }
+      }
+    }
+
+    /**
+     * Generates an 8-sided (or N-sided) octagonal ring of vertices at height y
+     */
+    function makeOctagonRing(y, rx, rz, dentDepth = 0) {
+      const pts = [];
+      const segs = 8;
+      for (let i = 0; i < segs; i++) {
+        // Offset by PI/8 so flat faces align orthogonally with +Z, +X, -Z, -X
+        const a0 = (i * Math.PI * 2) / segs - Math.PI / 8;
+        const a1 = ((i + 1) * Math.PI * 2) / segs - Math.PI / 8;
+        const c0 = Math.cos(a0), s0 = Math.sin(a0);
+        pts.push([c0 * rx, y, s0 * rz]);
+
+        if (dentDepth !== 0) {
+          const aMid = (a0 + a1) * 0.5;
+          pts.push([Math.cos(aMid) * (rx - dentDepth), y, Math.sin(aMid) * (rz - dentDepth)]);
+        }
+      }
+      return pts;
+    }
+
+    /**
+     * Adds an octagonal 3-part Art Deco cornice band (COURSES)
+     */
+    function addOctagonalCornice(y, h, rx, rz, over = 0.35, dark = false) {
+      const h1 = h * 0.25, h2 = h * 0.48, h3 = h * 0.27;
+      const r0 = makeOctagonRing(y, rx + over * 0.3, rz + over * 0.3);
+      const r1 = makeOctagonRing(y + h1, rx + over * 0.3, rz + over * 0.3);
+      addLoftedRing(r0, r1, 'cream', { ringLayer: 'medium', capBottom: true });
+
+      const r2 = makeOctagonRing(y + h1, rx + over * 0.65, rz + over * 0.65);
+      const r3 = makeOctagonRing(y + h1 + h2, rx + over * 0.65, rz + over * 0.65);
+      addLoftedRing(r2, r3, dark ? 'brickDark' : 'terracotta', {
+        ringLayer: 'medium',
+        courses: 2,
+        hatchLayer: 'rust',
+        capBottom: true
+      });
+
+      const r4 = makeOctagonRing(y + h1 + h2, rx + over, rz + over);
+      const r5 = makeOctagonRing(y + h, rx + over, rz + over);
+      addLoftedRing(r4, r5, 'cream', {
+        ringLayer: 'bold',
+        allBoldLong: true,
+        capBottom: true,
+        capTop: true
+      });
+    }
+
+
+    // =========================================================================
+    // 4b. PETRA BUILDERS: ROUND COLUMNS, FIGURES, TRIANGULAR PEDIMENTS
+    // =========================================================================
+    function makeCircleRing(y, cx, cz, r, segs = 14) {
+      const pts = [];
+      for (let i = 0; i < segs; i++) {
+        const a = (i * Math.PI * 2) / segs;
+        pts.push([cx + Math.cos(a) * r, y, cz + Math.sin(a) * r]);
+      }
+      return pts;
+    }
+
+    function addRoundColumn(cx, cz, y0, y1, r, palName = 'sandPale') {
+      // Square plinth base and capital block in the carved-stone manner
+      addBox(cx - r * 1.55, y0, cz - r * 1.55, r * 3.1, 0.30, r * 3.1, 'ochre', { edgeLayer: 'bold' });
+      addBox(cx - r * 1.30, y0 + 0.30, cz - r * 1.30, r * 2.6, 0.18, r * 2.6, 'roseDeep', { edgeLayer: 'medium' });
+      const shaft0 = makeCircleRing(y0 + 0.48, cx, cz, r);
+      const shaftMid = makeCircleRing((y0 + y1) / 2, cx, cz, r * 0.96);
+      const shaft1 = makeCircleRing(y1 - 0.55, cx, cz, r * 0.92);
+      addLoftedRing(shaft0, shaftMid, palName, { ringLayer: 'fine', courses: 2, allLongEdges: true });
+      addLoftedRing(shaftMid, shaft1, palName, { ringLayer: 'fine', courses: 2, allLongEdges: true });
+      // Corinthian bell capital: flaring loft + abacus slab
+      addLoftedRing(shaft1, makeCircleRing(y1 - 0.18, cx, cz, r * 1.35), palName, { ringLayer: 'medium', allLongEdges: true });
+      addBox(cx - r * 1.65, y1 - 0.18, cz - r * 1.65, r * 3.3, 0.20, r * 3.3, 'ochre', { edgeLayer: 'bold' });
+    }
+
+    /** Standing carved figure (relief deity / Amazon / visitor) in the same lofted language. */
+    function addFigure(cx, cz, yBase, h, palName = 'roseDeep') {
+      const s = h / 4.4; // figures are authored ~4.4 units tall, then scaled
+      addBox(cx - 0.42 * s, yBase, cz - 0.42 * s, 0.84 * s, 0.35 * s, 0.84 * s, 'ochre', { edgeLayer: 'medium' });
+      const b0 = makeCircleRing(yBase + 0.35 * s, cx, cz, 0.40 * s, 10);
+      const b1 = makeCircleRing(yBase + 1.55 * s, cx, cz, 0.30 * s, 10);
+      const b2 = makeCircleRing(yBase + 2.85 * s, cx, cz, 0.38 * s, 10);
+      addLoftedRing(b0, b1, palName, { ringLayer: 'fine', allLongEdges: true });
+      addLoftedRing(b1, b2, palName, { ringLayer: 'fine', allLongEdges: true, capTop: true });
+      const h0 = makeCircleRing(yBase + 2.95 * s, cx, cz, 0.14 * s, 10);
+      const h1 = makeCircleRing(yBase + 3.45 * s, cx, cz, 0.30 * s, 10);
+      const h2 = makeCircleRing(yBase + 3.95 * s, cx, cz, 0.10 * s, 10);
+      addLoftedRing(h0, h1, palName, { ringLayer: 'medium', allLongEdges: true });
+      addLoftedRing(h1, h2, palName, { ringLayer: 'medium', capTop: true });
+    }
+
+    /** Triangular pediment prism: front triangle tri=[a,b,c] (x,y), extruded zBack..zFront. */
+    function addTriPrism(tri, zFront, zBack, palName = 'sandPale') {
+      const F = tri.map(p => [p[0], p[1], zFront]);
+      const B = tri.map(p => [p[0], p[1], zBack]);
+      pushTriWorld(F[0], F[1], F[2], PALETTE[palName].lit, 0);
+      pushTriWorld(B[2], B[1], B[0], PALETTE[palName].shade, 0);
+      for (let i = 0; i < 3; i++) {
+        const j = (i + 1) % 3;
+        pushQuadWorld(F[i], F[j], B[j], B[i], PALETTE[palName].mid, 0);
+        addLineWorld(F[i], F[j], 'bold', 0.02);
+        addLineWorld(B[i], B[j], 'medium', 0.015);
+        addLineWorld(F[i], B[i], 'medium', 0.015);
+      }
+    }
+
+    /** Small spread-wing eagle sketched in ink, perched at (x, y, z). */
+    function addEagle(x, y, z) {
+      addLineWorld([x - 0.85, y + 0.55, z], [x - 0.2, y + 0.15, z], 'bold', 0.01);
+      addLineWorld([x - 0.2, y + 0.15, z], [x, y + 0.62, z], 'bold', 0.01);
+      addLineWorld([x, y + 0.62, z], [x + 0.2, y + 0.15, z], 'bold', 0.01);
+      addLineWorld([x + 0.2, y + 0.15, z], [x + 0.85, y + 0.55, z], 'bold', 0.01);
+      addLineWorld([x, y + 0.15, z], [x, y - 0.35, z], 'medium', 0.01);
+    }
+
+
+    // =========================================================================
+    // 5. STRATUM 0: THE ROSE-RED CLIFF — STRATIFIED SANDSTONE MASSIF
+    // =========================================================================
+    // Horizontal strata bands of the canyon wall behind the facade (z = -11 .. -0.8).
+    // Banding is Petra's signature: rose, ochre, rust and violet stone in layers.
+    const strata = [
+      { y: 0.0,  h: 4.6, pal: 'roseDeep',   inset: 0.0,  front: -0.9 },
+      { y: 4.6,  h: 4.4, pal: 'rose',       inset: 0.5,  front: -1.5 },
+      { y: 9.0,  h: 4.6, pal: 'ochre',      inset: 0.2,  front: -0.6 },
+      { y: 13.6, h: 4.4, pal: 'rose',       inset: 0.7,  front: -1.3 },
+      { y: 18.0, h: 4.6, pal: 'violetRock', inset: 0.1,  front: -0.8 },
+      { y: 22.6, h: 4.4, pal: 'rose',       inset: 0.9,  front: -1.6 },
+      { y: 27.0, h: 4.2, pal: 'ochre',      inset: 0.4,  front: -0.7 }
+    ];
+    strata.forEach(b => {
+      addBox(-23 + b.inset, b.y, -11, 46 - b.inset * 2, b.h, b.front + 11, b.pal, {
+        edgeLayer: 'medium', courses: 3
+      });
+    });
+    // Vertical weathering cracks down the exposed cliff faces (never across the carving)
+    strata.forEach(b => {
+      for (let cx = -21.5; cx < 22; cx += 2.4 + rng() * 1.8) {
+        if (Math.abs(cx) < 9.9) continue;
+        const len = 0.8 + rng() * 1.7;
+        addLineWorld([cx, b.y + 0.25, b.front + 0.02], [cx + 0.18, b.y + 0.25 + len, b.front + 0.02], 'fine', 0);
+      }
+    });
+    // Irregular stepped crest — broken rock skyline above the facade
+    addBox(-23, 31.2, -11, 13, 2.4, 9.5, 'rose', { edgeLayer: 'medium', courses: 2 });
+    addBox(-11, 31.2, -10.6, 10, 3.4, 9.0, 'ochre', { edgeLayer: 'medium', courses: 2 });
+    addBox(-1, 31.2, -11, 12, 2.0, 9.5, 'roseDeep', { edgeLayer: 'medium', courses: 2 });
+    addBox(11, 31.2, -10.4, 12, 3.0, 8.8, 'violetRock', { edgeLayer: 'medium', courses: 2 });
+
+    // Canyon spurs stepping forward on both flanks, framing the forecourt
+    // Left spur (stacked, receding as it rises)
+    addBox(-23.5, 0, -1.7, 5.6, 7.5, 6.3, 'rose', { edgeLayer: 'bold', courses: 3 });
+    addBox(-23.2, 7.5, -1.7, 5.2, 6.5, 5.5, 'ochre', { edgeLayer: 'bold', courses: 3 });
+    addBox(-22.9, 14.0, -1.7, 4.8, 6.0, 4.7, 'roseDeep', { edgeLayer: 'bold', courses: 3 });
+    // Right spur — taller, and split by the dark slit of the Siq gorge
+    addBox(17.9, 0, -1.7, 5.6, 8.5, 6.5, 'roseDeep', { edgeLayer: 'bold', courses: 3 });
+    addBox(18.2, 8.5, -1.7, 5.2, 7.0, 5.7, 'rose', { edgeLayer: 'bold', courses: 3 });
+    addBox(18.5, 15.5, -1.7, 4.8, 6.5, 4.9, 'ochre', { edgeLayer: 'bold', courses: 3 });
+    addBox(20.05, 0, 4.82, 0.95, 6.2, 0.14, 'dark', { edgeLayer: 'bold' }); // The Siq slit, lower reach
+    addBox(20.32, 6.2, 4.82, 0.62, 5.4, 0.14, 'dark', { edgeLayer: 'bold' }); // ...wandering upward, narrower
+
+    // Small carved tomb niches high in the cliff faces, left and right of the Treasury
+    function addCliffTomb(cx, cy, w, h, frontZ) {
+      addBox(cx - w / 2, cy, frontZ, w, h, 0.16, 'dark', { edgeLayer: 'bold' });
+      addTriPrism([[cx - w / 2 - 0.3, cy + h], [cx + w / 2 + 0.3, cy + h], [cx, cy + h + w * 0.42]], frontZ + 0.18, frontZ + 0.02, 'roseDeep');
+    }
+    addCliffTomb(-13.6, 6.5, 2.7, 4.4, -1.5);
+    addCliffTomb(-15.4, 16.5, 2.1, 3.4, -1.3);
+    addCliffTomb(13.2, 12.0, 2.4, 3.9, -0.6);
+    addCliffTomb(14.6, 21.5, 1.8, 2.9, -0.8);
+
+    // =========================================================================
+    // 6. STRATUM 1: THE CARVED FACADE WALL & FORECOURT STEPS
+    // =========================================================================
+    // The Treasury is not built but cut into the rock: one pale carved panel,
+    // its face at z = 0.5, standing proud of the darker cliff behind it.
+    addBox(-8.6, 0, -0.6, 17.2, 24.2, 1.1, 'sandPale', { edgeLayer: 'bold', courses: 9 });
+    // Pilaster frame strips where the carving meets the living rock
+    addBox(-8.6, 0, 0.5, 0.55, 24.2, 0.35, 'roseDeep', { edgeLayer: 'bold', courses: 8 });
+    addBox(8.05, 0, 0.5, 0.55, 24.2, 0.35, 'roseDeep', { edgeLayer: 'bold', courses: 8 });
+
+    // Three broad forecourt steps
+    addBox(-7.0, 0, 0.5, 14.0, 0.32, 3.1, 'stone', { edgeLayer: 'medium' });
+    addBox(-6.6, 0.32, 0.5, 13.2, 0.30, 2.5, 'cream', { edgeLayer: 'medium' });
+    addBox(-6.2, 0.62, 0.5, 12.4, 0.30, 1.9, 'stone', { edgeLayer: 'medium' });
+
+    // =========================================================================
+    // 7. STRATUM 2: LOWER ORDER — SIX COLUMNS, THE GREAT DOOR, DIOSCURI RELIEFS
+    // =========================================================================
+    const doorZ = 0.52;
+    // The tall central doorway, deep in shadow (the "treasury" chamber beyond)
+    addBox(-1.45, 0.92, doorZ, 2.9, 7.3, 0.20, 'dark', { edgeLayer: 'bold', courses: 5 });
+    addBox(-1.75, 0.92, doorZ + 0.02, 0.30, 7.3, 0.22, 'roseDeep', { edgeLayer: 'bold' });
+    addBox(1.45, 0.92, doorZ + 0.02, 0.30, 7.3, 0.22, 'roseDeep', { edgeLayer: 'bold' });
+    addBox(-1.75, 8.22, doorZ + 0.02, 3.5, 0.34, 0.22, 'roseDeep', { edgeLayer: 'bold' });
+    addTriPrism([[-2.05, 8.56], [2.05, 8.56], [0, 9.72]], 0.78, 0.54, 'ochre');
+    // Side niches flanking the door
+    [-5.65, 5.65].forEach(nx => {
+      addBox(nx - 1.05, 0.92, doorZ, 2.1, 5.6, 0.16, 'dark', { edgeLayer: 'medium' });
+    });
+
+    // Six Corinthian columns of the portico (wider central gap for the door)
+    const lowerCols = [-7.0, -4.25, -1.95, 1.95, 4.25, 7.0];
+    lowerCols.forEach(cx => addRoundColumn(cx, 1.95, 0.92, 9.05, 0.52, 'sandPale'));
+
+    // Dioscuri relief figures standing between the outer columns
+    addFigure(-5.65, 0.95, 0.92, 4.6, 'roseDeep');
+    addFigure(5.65, 0.95, 0.92, 4.6, 'roseDeep');
+
+    // Lower entablature: architrave, figured frieze band, dentils, cornice
+    addBox(-8.35, 9.25, 0.45, 16.7, 0.62, 2.15, 'ochre', { edgeLayer: 'bold', courses: 2 });
+    addBox(-8.35, 9.87, 0.45, 16.7, 0.78, 2.15, 'roseDeep', { edgeLayer: 'bold', courses: 2 });
+    for (let dx = -8.0; dx <= 7.9; dx += 0.62) {
+      addBox(dx, 10.65, 2.28, 0.34, 0.30, 0.30, 'cream', { edgeLayer: 'fine' });
+    }
+    addBox(-8.55, 10.95, 0.35, 17.1, 0.34, 2.45, 'sandPale', { edgeLayer: 'bold' });
+
+    // =========================================================================
+    // 8. STRATUM 3: UPPER ORDER — BROKEN PEDIMENT, THOLOS & THE URN
+    // =========================================================================
+    // Attic plinth between the orders
+    addBox(-8.35, 11.29, 0.45, 16.7, 0.72, 2.0, 'rose', { edgeLayer: 'bold', courses: 2 });
+
+    // Upper niches with Amazon figures, left and right of the tholos
+    [-5.5, 5.5].forEach(nx => {
+      addBox(nx - 1.15, 12.01, doorZ, 2.3, 5.5, 0.16, 'dark', { edgeLayer: 'medium' });
+      addFigure(nx, 0.95, 12.01, 4.1, 'roseDeep');
+    });
+    // Slender upper columns / pilasters
+    [-7.1, -3.55, 3.55, 7.1].forEach(cx => addRoundColumn(cx, 1.55, 12.01, 17.75, 0.36, 'sandPale'));
+
+    // Segmented upper entablature, leaving the centre open for the tholos
+    addBox(-8.35, 17.95, 0.45, 5.85, 0.60, 1.95, 'ochre', { edgeLayer: 'bold', courses: 2 });
+    addBox(2.50, 17.95, 0.45, 5.85, 0.60, 1.95, 'ochre', { edgeLayer: 'bold', courses: 2 });
+
+    // The broken pediment: two raking halves rising toward the centre
+    addTriPrism([[-8.35, 18.55], [-2.50, 18.55], [-2.50, 21.85]], 1.55, 0.50, 'sandPale');
+    addTriPrism([[2.50, 18.55], [8.35, 18.55], [2.50, 21.85]], 1.55, 0.50, 'sandPale');
+    // Eagles perched on the outer pediment corners
+    addEagle(-8.1, 18.85, 1.65);
+    addEagle(8.1, 18.85, 1.65);
+
+    // --- The central tholos: a round temple standing in the break ---
+    const tholosZ = 1.95;
+    // Stepped circular base
+    addLoftedRing(makeCircleRing(12.01, 0, tholosZ, 2.42), makeCircleRing(12.55, 0, tholosZ, 2.42), 'roseDeep',
+      { ringLayer: 'bold', allLongEdges: true, capBottom: true });
+    // Inner drum, glimpsed between the tholos columns
+    addLoftedRing(makeCircleRing(12.55, 0, tholosZ, 1.52), makeCircleRing(17.55, 0, tholosZ, 1.52), 'ochre',
+      { ringLayer: 'fine', courses: 4 });
+    // The goddess figure within, front and centre
+    addFigure(0, tholosZ + 0.95, 12.55, 3.9, 'roseDeep');
+    // Ring of small tholos columns
+    for (let i = 0; i < 8; i++) {
+      const a = (i * Math.PI * 2) / 8 + Math.PI / 8;
+      addRoundColumn(Math.cos(a) * 2.05, tholosZ + Math.sin(a) * 2.05, 12.55, 17.55, 0.17, 'sandPale');
+    }
+    // Tholos entablature ring, conical roof, and the legendary urn
+    addLoftedRing(makeCircleRing(17.55, 0, tholosZ, 2.34), makeCircleRing(18.25, 0, tholosZ, 2.34), 'rose',
+      { ringLayer: 'bold', allLongEdges: true });
+    addLoftedRing(makeCircleRing(18.25, 0, tholosZ, 2.30), makeCircleRing(20.15, 0, tholosZ, 1.25), 'roseDeep',
+      { ringLayer: 'medium', allLongEdges: true, courses: 2 });
+    addLoftedRing(makeCircleRing(20.15, 0, tholosZ, 1.25), makeCircleRing(22.05, 0, tholosZ, 0.30), 'roseDeep',
+      { ringLayer: 'medium', allLongEdges: true, capTop: true });
+    // The urn itself — Bedouin marksmen once shot at it, hunting the treasure
+    addLoftedRing(makeCircleRing(22.05, 0, tholosZ, 0.34), makeCircleRing(22.85, 0, tholosZ, 0.55), 'ochre',
+      { ringLayer: 'bold', allLongEdges: true });
+    addLoftedRing(makeCircleRing(22.85, 0, tholosZ, 0.55), makeCircleRing(23.65, 0, tholosZ, 0.16), 'ochre',
+      { ringLayer: 'bold', capTop: true });
+    addLineWorld([0, 23.6, tholosZ], [0, 24.35, tholosZ], 'bold', 0.01);
+
+    // Weathering streaks: fine vertical hatching running down the carved face
+    for (let wx = -7.6; wx <= 7.6; wx += 1.9) {
+      if (Math.abs(wx) < 2.6) continue;
+      addLineWorld([wx, 23.9, 0.56], [wx + 0.12, 19.5, 0.56], 'fine', 0);
+      addLineWorld([wx + 0.5, 11.0, 0.56], [wx + 0.58, 8.2, 0.56], 'fine', 0);
+    }
+
+    // =========================================================================
+    // 9. FORECOURT PLAZA, SITE GRID, SHRUBS & GHOST ROCK MESAS
+    // =========================================================================
+    const pMinX = -21, pMaxX = 21, pMinZ = -3, pMaxZ = 19;
+    addBox(pMinX, -0.55, pMinZ, pMaxX - pMinX, 0.55, pMaxZ - pMinZ, 'plaza', { edgeLayer: 'bold' });
+    addBox(pMinX - 0.45, -0.58, pMinZ - 0.45, pMaxX - pMinX + 0.9, 0.06, pMaxZ - pMinZ + 0.9, 'plaza', { edgeLayer: 'bold' });
+
+    // Sandy forecourt joints — sparse radial paving lines in front of the facade
+    for (let gx = -18; gx <= 18; gx += 3.0) {
+      addLineWorld([gx, 0.02, 4.2], [gx, 0.02, 18.4], 'fine', 0);
+    }
+    for (let gz = 6.0; gz <= 18.0; gz += 3.0) {
+      addLineWorld([-20.4, 0.02, gz], [20.4, 0.02, gz], 'fine', 0);
+    }
+
+    // Two visitors on the plaza, for scale against the 39-metre facade
+    addFigure(-3.6, 7.5, 0, 1.85, 'dark');
+    addFigure(4.4, 9.5, 0, 1.85, 'dark');
+
+    function addDashedLineWorld(p1, p2, dashLen = 0.52, gapLen = 0.42) {
+      const dx = p2[0] - p1[0], dy = p2[1] - p1[1], dz = p2[2] - p1[2];
+      const dist = Math.hypot(dx, dy, dz);
+      const ux = dx / dist, uy = dy / dist, uz = dz / dist;
+      let cur = 0;
+      while (cur < dist) {
+        const end = Math.min(dist, cur + dashLen);
+        addLineWorld(
+          [p1[0] + ux * cur, p1[1] + uy * cur, p1[2] + uz * cur],
+          [p1[0] + ux * end, p1[1] + uy * end, p1[2] + uz * end],
+          'faint', 0
+        );
+        cur += dashLen + gapLen;
+      }
+    }
+
+    function addSketchShrub(sx, sz) {
+      const r = 0.26 + rng() * 0.10;
+      const h = 0.38 + rng() * 0.14;
+      const baseY = -0.55;
+      addLineWorld([sx, baseY, sz], [sx, baseY + h * 0.4, sz], 'medium', 0);
+      addLineWorld([sx - r * 0.8, baseY + 0.01, sz + r * 0.5], [sx + r * 0.9, baseY + 0.01, sz - r * 0.5], 'fine', 0);
+      const cy = baseY + h;
+      addLineWorld([sx - r, cy, sz], [sx, cy + r * 0.7, sz - r], 'medium', 0.01);
+      addLineWorld([sx, cy + r * 0.7, sz - r], [sx + r, cy, sz], 'medium', 0.01);
+      addLineWorld([sx + r, cy, sz], [sx, cy - r * 0.4, sz + r], 'medium', 0.01);
+      addLineWorld([sx, cy - r * 0.4, sz + r], [sx - r, cy, sz], 'medium', 0.01);
+    }
+
+    const siteLim = 30;
+    for (let s = -28.5; s <= 28.5; s += 3.8) {
+      if (s < pMinX - 0.6 || s > pMaxX + 0.6) {
+        addDashedLineWorld([s, -0.55, -siteLim], [s, -0.55, siteLim]);
+      } else {
+        addDashedLineWorld([s, -0.55, pMaxZ + 0.6], [s, -0.55, siteLim + 3.0]);
+      }
+      if (s < pMinZ - 0.6 || s > pMaxZ + 0.6) {
+        addDashedLineWorld([-siteLim, -0.55, s], [siteLim, -0.55, s]);
+      } else {
+        addDashedLineWorld([pMaxX + 0.6, -0.55, s], [siteLim + 3.0, -0.55, s]);
+        addDashedLineWorld([-siteLim, -0.55, s], [pMinX - 0.6, -0.55, s]);
+      }
+    }
+
+    for (let sx = -27.5; sx <= 27.5; sx += 3.2) {
+      for (let sz = -24; sz <= 27; sz += 3.2) {
+        const inside = sx > pMinX - 1.0 && sx < pMaxX + 1.0 && sz > pMinZ - 1.0 && sz < pMaxZ + 1.0;
+        const inCliff = sx > -24 && sx < 24 && sz < -0.5;
+        if (!inside && !inCliff && Math.hypot(sx, sz) < 33 && rng() > 0.30) {
+          addSketchShrub(sx, sz);
+        }
+      }
+    }
+
+    // Ghost wireframe rock mesas at the diagram edges — the wider canyon system
+    addBox(pMaxX + 1.4, -0.55, -6.5, 5.2, 9.0, 9.0, 'ghost', { edgeLayer: 'faint' });
+    addBox(pMinX - 7.0, -0.55, -5.5, 5.6, 11.5, 8.5, 'ghost', { edgeLayer: 'faint' });
+
+    // Faint diagonal drafting construction rays from top-left sky
+    for (let i = 0; i < 16; i++) {
+      const spread = (i / 15) * 34;
+      addLineWorld([-52, 52, -8], [-13, 8.0 + spread, 4.0 - spread * 0.25], 'faint', 0);
+    }
+
+    // =========================================================================
+    // 9. BUILD THREE.JS GEOMETRIES & RENDER LOOP
+
+    // =========================================================================
+    const washGeo = new THREE.BufferGeometry();
+    washGeo.setAttribute('position', new THREE.Float32BufferAttribute(washPositions, 3));
+    washGeo.setAttribute('color', new THREE.Float32BufferAttribute(washColors, 3));
+
+    const washMat = new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      side: THREE.DoubleSide,
+      polygonOffset: true,
+      polygonOffsetFactor: 1.4,
+      polygonOffsetUnits: 1.4
+    });
+    scene.add(new THREE.Mesh(washGeo, washMat));
+
+    function createInkSegmentMesh(vertices, hexColor, opacity) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      const mat = new THREE.LineBasicMaterial({
+        color: hexColor,
+        transparent: true,
+        opacity: opacity
+      });
+      return new THREE.LineSegments(geo, mat);
+    }
+
+    scene.add(createInkSegmentMesh(inkLayers.bold,   0x211b17, 0.92));
+    scene.add(createInkSegmentMesh(inkLayers.medium, 0x332a24, 0.80));
+    scene.add(createInkSegmentMesh(inkLayers.fine,   0x4a3f37, 0.44));
+    scene.add(createInkSegmentMesh(inkLayers.rust,   0x8c4531, 0.64));
+    scene.add(createInkSegmentMesh(inkLayers.teal,   0x527d80, 0.52));
+    scene.add(createInkSegmentMesh(inkLayers.faint,  0x6b6157, 0.32));
+
+    window.addEventListener('resize', () => {
+      const newAspect = window.innerWidth / window.innerHeight;
+      camera.left = (-frustumSize * newAspect) / 2;
+      camera.right = (frustumSize * newAspect) / 2;
+      camera.top = frustumSize / 2;
+      camera.bottom = -frustumSize / 2;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      generatePaperOverlay();
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>

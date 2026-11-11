@@ -634,3 +634,15 @@ tools:
     tags: [svg, isometric, creative-coding, architecture]
     related: [colosseum, hoogbouw]
     added: "2026-11-11"
+
+  - id: petra
+    name: Petra — Al-Khazneh (The Treasury)
+    url: petra/
+    writeup: showcase/petra/
+    category: showcase
+    kind: exhibit
+    short: The Treasury carved into a rose-red cliff — six columns, a broken pediment, the tholos and its urn.
+    desc: "Al-Khazneh at Petra drawn as an axonometric on drafting paper: the two-storey Treasury facade carved into a stratified rose-red cliff — six columns and relief figures below, a broken pediment, tholos and urn above, the Siq slit in the spur beside it."
+    tags: [svg, isometric, creative-coding, architecture]
+    related: [colosseum, hanging-gardens]
+    added: "2026-11-11"

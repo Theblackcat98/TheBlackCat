@@ -158,7 +158,16 @@ Nothing is stored anywhere but the repo. There is no database and no CMS. `publi
 - **Tag, topic and type pages** (`/tags/x/`, `/topics/x/`, `/contenttype/x/`): non-inbox items only.
 - **Projects** (`/projects/`): cards, sortable and filterable by tag.
 - **Tools** (`/tools/`): the workshop hub (`layouts/partials/lists/tools.html`), driven by `data/tools.yaml`. Renders filterable category sections, featured tools, recently used tools, and 16:10 light/dark thumbnails (`static/toolkit/thumbs/`). Every hosted tool under `static/<id>/` loads `static/toolkit/toolkit.css` and `static/toolkit/toolkit.js`, which provide the shared top bar, `⌘K`/`Ctrl+K` tool switcher, prev/next category links, related strip, and `bc-theme` sync. When a new live tool ships, register it in `data/tools.yaml` and add `tool: <id>` to its write-up.
-- **Showcase** (`/showcase/`): art and visual artifacts — figures built to be looked at rather than used. Anatomy is the only entry so far. It is the same registry (`data/tools.yaml`, `category: showcase`) and the same card partial, but the page is written as an article: the body of `content/showcase/_index.md` carries the long-form write-up and embeds the figures, and `layouts/partials/lists/showcase.html` adds a card grid only once there is more than one artifact. Everything that is *used* rather than *looked at* stays in Tools.
+- **Showcase artifacts** are standalone Three.js pages (`pisa/`, `colosseum/`,
+  `hanging-gardens/`, `hanging-gardens-reconstruction/`, `hoogbouw/`) that share
+  one vendored copy of three.js r128 + OrbitControls in `static/vendor/three/`
+  — **never** point one of them at a CDN. Each artifact has its own write-up at
+  `showcase/<slug>/`. Packaging a new one means injecting the site chrome the
+  `check_tools.py` contract wants (toolkit css/js with `data-tool`, meta
+  description, canonical, og:image, `data-tk-ld` JSON-LD, the `tk-fallback`
+  link) and shooting light/dark thumbnails; the repeatable script is
+  `~/hermes/work/experiments/package_artifacts.py`.
+- **Showcase** (`/showcase/`): art and visual artifacts — figures built to be looked at rather than used. The index is a **gallery**: a short intro plus one card per artifact (`layouts/partials/lists/showcase.html`), so it grows by rows, not by length. Each artifact gets its own write-up page at `content/showcase/<slug>/index.md` with `tool: <slug>` in the front matter. Same registry as Tools (`data/tools.yaml`, `category: showcase`), which the tools view filters out of every chip, count and grid. Everything that is *used* rather than *looked at* stays in Tools.
 - **Collections** (`/collections/`): a card per collection. A collection page lists its members automatically.
 - **Blog and docs**: a guide or series (a folder with `_index.md` plus chapter files) gets a chapter list, and previous/next links. Chapters sort by `weight`, then by the first number in the file name (`chapter_2` before `chapter_10`).
 - **Article pages**: breadcrumbs mirroring the folders, a table of contents when there are three or more headings, a facts sidebar for projects, related items, and "Edit this page / History / View source" links.

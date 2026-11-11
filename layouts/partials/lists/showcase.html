@@ -1,0 +1,42 @@
+{{- /*
+  Showcase section index (layouts/partials/lists/showcase.html).
+
+  Art and visual artifacts live here instead of in the tools workshop. Items are
+  registry entries with `category: showcase` in data/tools.yaml — the registry is
+  still the single index (scripts/check_tools.py requires every static/<slug>/
+  page to be registered), the tools hub just filters this category out.
+
+  The body of content/showcase/_index.md carries the long-form write-up, so a
+  one-item showcase reads as an article rather than a card grid. Once there are
+  two or more items the grid appears as an index above the prose.
+*/ -}}
+{{- $reg := site.Data.tools -}}
+{{- $items := where $reg.tools "category" "showcase" -}}
+{{- $n := len $items -}}
+
+{{ partial "breadcrumbs.html" . }}
+<header class="page-head">
+  <span class="kicker">Showcase · {{ $n }} artifact{{ if ne $n 1 }}s{{ end }}</span>
+  <h1 class="h-page">{{ partial "title.html" . }}</h1>
+  {{ with .Description }}<p class="lede">{{ . }}</p>{{ end }}
+</header>
+
+{{- if gt $n 1 }}
+<section class="section" aria-labelledby="showcase-index-h">
+  <div class="section__head">
+    <h2 id="showcase-index-h" class="h-section">In the showcase</h2>
+    <span class="count">{{ $n }} artifacts</span>
+  </div>
+  <ul class="tool-grid" role="list">
+    {{- range $items }}
+      {{ partial "tool-card.html" (dict "tool" . "hideWriteup" true) }}
+    {{- end }}
+  </ul>
+</section>
+{{- end }}
+
+{{ with .Content }}
+<article class="prose">
+  {{ . }}
+</article>
+{{ end }}

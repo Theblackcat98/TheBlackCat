@@ -103,6 +103,9 @@ menu:
     - name: Tools
       pageRef: /tools
       weight: 15
+    - name: Showcase
+      pageRef: /showcase
+      weight: 16
     - name: Collections
       pageRef: /collections
       weight: 20

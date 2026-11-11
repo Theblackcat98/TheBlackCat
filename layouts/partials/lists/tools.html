@@ -1,6 +1,8 @@
 {{- $reg := site.Data.tools -}}
-{{- $cats := $reg.categories -}}
-{{- $tools := $reg.tools -}}
+{{- /* Showcase artefacts have their own page (layouts/partials/lists/showcase.html);
+       keep them out of every count, chip, featured strip and grid here. */ -}}
+{{- $cats := where $reg.categories "id" "!=" "showcase" -}}
+{{- $tools := where $reg.tools "category" "!=" "showcase" -}}
 {{- $featured := where $tools "featured" true -}}
 {{- $res := resources.FromString "toolkit/registry.json" ($reg | jsonify) -}}
 

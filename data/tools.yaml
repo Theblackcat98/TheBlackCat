@@ -17,6 +17,9 @@ categories:
   - id: exhibits
     name: Exhibits
     blurb: Interactive visual essays, mathematical ateliers, diagram galleries and cutaways.
+  - id: showcase
+    name: Showcase
+    blurb: Art and visual artifacts — figures built to be looked at rather than used. Listed on their own page, not in the workshop.
 
 tools:
   # ── Color & design (9) ─────────────────────────────────────────────────────
@@ -538,7 +541,7 @@ tools:
     name: Anatomy
     url: anatomy/
     writeup: blog/anatomy-machines/
-    category: exhibits
+    category: showcase
     kind: exhibit
     short: Six cutaway machines as interactive isometric SVG figures on test rigs.
     desc: "Six machines as interactive isometric figures: a quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine, a quadruped robot and a pneumatic impact wrench — each with a dark and a light theme."

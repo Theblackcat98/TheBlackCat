@@ -646,3 +646,15 @@ tools:
     tags: [svg, isometric, creative-coding, architecture]
     related: [colosseum, hanging-gardens]
     added: "2026-11-11"
+
+  - id: christ-the-redeemer
+    name: Christ the Redeemer
+    url: christ-the-redeemer/
+    writeup: showcase/christ-the-redeemer/
+    category: showcase
+    kind: exhibit
+    short: The Art Deco Christ above Rio — octagonal pedestal, fluted robe, arms outstretched over the terrace.
+    desc: "Christ the Redeemer drawn as an axonometric on drafting paper: the Art Deco statue with outstretched arms on its octagonal pedestal — fluted soapstone robe, diagonal mantle and the Sacred Heart on its chest — above the stepped sanctuary terrace on Corcovado."
+    tags: [svg, isometric, creative-coding, architecture]
+    related: [pisa, colosseum]
+    added: "2026-11-11"

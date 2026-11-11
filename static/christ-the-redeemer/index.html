@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Christ the Redeemer — Axonometric Architectural Diagram</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #e3ded4;
+    }
+    #canvas-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+    }
+    #paper-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      opacity: 0.55;
+    }
+  </style>
+<meta name="description" content="Christ the Redeemer drawn as an axonometric on drafting paper: the Art Deco statue with outstretched arms on its octagonal pedestal — fluted soapstone robe, diagonal mantle and the Sacred Heart on its chest — above the stepped sanctuary terrace on Corcovado.">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/christ-the-redeemer/">
+<meta property="og:title" content="Christ the Redeemer">
+<meta property="og:description" content="Christ the Redeemer drawn as an axonometric on drafting paper: the Art Deco statue with outstretched arms on its octagonal pedestal — fluted soapstone robe, diagonal mantle and the Sacred Heart on its chest — above the stepped sanctuary terrace on Corcovado.">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/christ-the-redeemer-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "VisualArtwork", "name": "Christ the Redeemer", "description": "Christ the Redeemer drawn as an axonometric on drafting paper: the Art Deco statue with outstretched arms on its octagonal pedestal — fluted soapstone robe, diagonal mantle and the Sacred Heart on its chest — above the stepped sanctuary terrace on Corcovado.", "url": "https://theblackcat98.github.io/TheBlackCat/christ-the-redeemer/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/christ-the-redeemer-light.webp", "creator": {"@type": "Person", "name": "Nik"} }</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="christ-the-redeemer"></script>
+</head>
+<body>
+<a class="back tk-fallback" href="../tools/">&#8592; All tools</a>
+  <div id="canvas-container">
+    <canvas id="paper-overlay"></canvas>
+  </div>
+
+  <script src="../vendor/three/three.min.js"></script>
+  <script src="../vendor/three/OrbitControls.js"></script>
+  <script>
+    // =========================================================================
+    // 1. DETERMINISTIC PRNG & DRAFTING PAPER TEXTURE OVERLAY
+    // =========================================================================
+    function mulberry32(a) {
+      return function () {
+        let t = (a += 0x6d2b79f5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    const rng = mulberry32(1931); // 1931: Year Christ the Redeemer was dedicated
+
+    function generatePaperOverlay() {
+      const canvas = document.getElementById('paper-overlay');
+      const w = (canvas.width = window.innerWidth);
+      const h = (canvas.height = window.innerHeight);
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#ede9e0';
+      ctx.fillRect(0, 0, w, h);
+
+      // Subtle orthogonal drafting grid
+      ctx.strokeStyle = 'rgba(130, 120, 108, 0.09)';
+      ctx.lineWidth = 1;
+      const step = 28;
+      ctx.beginPath();
+      for (let x = 0; x < w; x += step) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+      }
+      for (let y = 0; y < h; y += step) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+      }
+      ctx.stroke();
+
+      // Organic rough paper fiber grain
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+      const localRng = mulberry32(7104);
+      for (let i = 0; i < data.length; i += 4) {
+        const grain = (localRng() - 0.5) * 18;
+        data[i] = Math.min(255, Math.max(0, data[i] + grain));
+        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + grain));
+        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + grain));
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+    generatePaperOverlay();
+
+    // =========================================================================
+    // 2. THREE.JS SCENE & ORTHOGRAPHIC AXONOMETRIC CAMERA
+    // =========================================================================
+    const container = document.getElementById('canvas-container');
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0xe5e0d6, 1);
+    container.insertBefore(renderer.domElement, document.getElementById('paper-overlay'));
+
+    const scene = new THREE.Scene();
+
+    const frustumSize = 55;
+    const aspect = window.innerWidth / window.innerHeight;
+    const camera = new THREE.OrthographicCamera(
+      (-frustumSize * aspect) / 2,
+      (frustumSize * aspect) / 2,
+      frustumSize / 2,
+      -frustumSize / 2,
+      -200,
+      300
+    );
+
+    const targetY = 19.2;
+    const camDist = 66;
+    const defaultCamPos = new THREE.Vector3(camDist, targetY + camDist * 0.78, camDist);
+    camera.position.copy(defaultCamPos);
+    camera.lookAt(0, targetY, 0);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, targetY, 0);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.update();
+
+    window.addEventListener('dblclick', () => {
+      camera.position.copy(defaultCamPos);
+      controls.target.set(0, targetY, 0);
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controls.update();
+    });
+
+    // =========================================================================
+    // 3. SPAARNDAM PALETTE & MULTI-WEIGHT INK ENGINE
+    // =========================================================================
+    const PALETTE = {
+      soapstone:  { lit: 0xf1ece1, mid: 0xe6dfd3, shade: 0xd4cbb9, top: 0xf6f3eb, bot: 0x948779 },
+      mantle:     { lit: 0xeae3d7, mid: 0xddd5c7, shade: 0xc9bfb0, top: 0xf0ece2, bot: 0x877a6c },
+      cream:      { lit: 0xebe5da, mid: 0xe0d9cc, shade: 0xcfc6b6, top: 0xf1ede4, bot: 0x8f8274 },
+      stone:      { lit: 0xdfd8cc, mid: 0xd2c9ba, shade: 0xbeb4a4, top: 0xe8e2d8, bot: 0x7d7164 },
+      granite:    { lit: 0xc9bfb0, mid: 0xb5aa9a, shade: 0x9c9181, top: 0xd6cec0, bot: 0x695e53 },
+      terracotta: { lit: 0xc27a63, mid: 0xb06851, shade: 0x94513d, top: 0xd4947e, bot: 0x6b3829 },
+      brickDark:  { lit: 0x9e5b47, mid: 0x8a4c3a, shade: 0x703b2c, top: 0xb36f5b, bot: 0x4f271c },
+      teal:       { lit: 0x94b9bb, mid: 0x82a8aa, shade: 0x6b9092, top: 0xa8c8ca, bot: 0x517072 },
+      tealDeep:   { lit: 0x789fa2, mid: 0x668c8f, shade: 0x527477, top: 0x8eb2b5, bot: 0x3e595b },
+      dark:       { lit: 0x73675e, mid: 0x5e534b, shade: 0x4a4039, top: 0x85786e, bot: 0x332c27 },
+      plaza:      { lit: 0xe8e3d9, mid: 0xdfd9ce, shade: 0xd2ccc0, top: 0xebe6dc, bot: 0xa69e91 },
+      ghost:      { lit: 0xe6e1d7, mid: 0xdfd9ce, shade: 0xd8d2c6, top: 0xebe6dc, bot: 0xc2bbb0 }
+    };
+
+    const washPositions = [];
+    const washColors = [];
+
+    const inkLayers = {
+      bold:   [], // Primary structural & sculptural silhouettes, major fold creases
+      medium: [], // Secondary edges, drapery pleats, pedestal frames, stairs
+      fine:   [], // Soapstone tile courses, directional shadow hatching
+      rust:   [], // Terracotta course hatching, Sacred Heart rays, trim
+      teal:   [], // Relief panel reflections & mosaic accents
+      faint:  []  // Vitruvian halo geometry, sky rays, & site grid dashes
+    };
+
+    const tempColor = new THREE.Color();
+    const lightDir = new THREE.Vector3(-0.38, 0.28, 0.88).normalize();
+
+    function computeDirectionalHex(palName, nx, ny, nz) {
+      const pal = PALETTE[palName] || PALETTE.cream;
+      if (ny > 0.68) return pal.top;
+      if (ny < -0.58) return pal.bot;
+      const dot = nx * lightDir.x + ny * lightDir.y + nz * lightDir.z;
+      if (dot > 0.25) return pal.lit;
+      if (dot > -0.18) return pal.mid;
+      return pal.shade;
+    }
+
+    function computeQuadNormal(p0, p1, p2) {
+      const ux = p1[0] - p0[0], uy = p1[1] - p0[1], uz = p1[2] - p0[2];
+      const vx = p2[0] - p0[0], vy = p2[1] - p0[1], vz = p2[2] - p0[2];
+      const nx = uy * vz - uz * vy;
+      const ny = uz * vx - ux * vz;
+      const nz = ux * vy - uy * vx;
+      const len = Math.hypot(nx, ny, nz) || 1;
+      return [nx / len, ny / len, nz / len];
+    }
+
+    function pushQuadWorld(p0, p1, p2, p3, hexColor, shadeShift = 0) {
+      tempColor.setHex(hexColor);
+      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
+      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
+      washPositions.push(
+        p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2],
+        p0[0], p0[1], p0[2], p2[0], p2[1], p2[2], p3[0], p3[1], p3[2]
+      );
+      for (let i = 0; i < 6; i++) washColors.push(r, g, b);
+    }
+
+    function pushTriWorld(p0, p1, p2, hexColor, shadeShift = 0) {
+      tempColor.setHex(hexColor);
+      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
+      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
+      washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+      for (let i = 0; i < 3; i++) washColors.push(r, g, b);
+    }
+
+    function addLineWorld(p1, p2, layer = 'medium', overshoot = 0.022) {
+      const x1 = p1[0], y1 = p1[1], z1 = p1[2];
+      const x2 = p2[0], y2 = p2[1], z2 = p2[2];
+      const dx = x2 - x1, dy = y2 - y1, dz = z2 - z1;
+      const len = Math.hypot(dx, dy, dz);
+      if (len < 1e-5) return;
+      const ux = (dx / len) * overshoot;
+      const uy = (dy / len) * overshoot;
+      const uz = (dz / len) * overshoot;
+
+      const j = layer === 'faint' ? 0 : 0.007;
+      const ax = x1 - ux + (rng() - 0.5) * j;
+      const ay = y1 - uy + (rng() - 0.5) * j;
+      const az = z1 - uz + (rng() - 0.5) * j;
+      const bx = x2 + ux + (rng() - 0.5) * j;
+      const by = y2 + uy + (rng() - 0.5) * j;
+      const bz = z2 + uz + (rng() - 0.5) * j;
+
+      const target = inkLayers[layer] || inkLayers.medium;
+      target.push(ax, ay, az, bx, by, bz);
+
+      if (layer === 'bold') {
+        const off = 0.018;
+        target.push(ax + off, ay, az - off, bx + off, by, bz - off);
+        target.push(ax - off * 0.7, ay + off * 0.7, az + off * 0.7, bx - off * 0.7, by + off * 0.7, bz + off * 0.7);
+      }
+    }
+
+    function lerpPt(a, b, t) {
+      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+    }
+
+    // =========================================================================
+    // 4. PARAMETRIC LOFTING, BOX, & OCTAGONAL BUILDERS
+    // =========================================================================
+    /**
+     * Connects two closed polygonal cross-sections (ringA and ringB) with
+     * normal-shaded Art Deco facets, crease lines, soapstone courses, and hatching.
+     */
+    function addLoftedRing(ringA, ringB, palName = 'soapstone', opts = {}) {
+      const n = ringA.length;
+      const normals = [];
+      for (let i = 0; i < n; i++) {
+        const next = (i + 1) % n;
+        normals.push(computeQuadNormal(ringA[i], ringA[next], ringB[next]));
+      }
+
+      for (let i = 0; i < n; i++) {
+        const next = (i + 1) % n;
+        const prev = (i - 1 + n) % n;
+        const p0 = ringA[i], p1 = ringA[next], p2 = ringB[next], p3 = ringB[i];
+        const norm = normals[i];
+
+        const col = computeDirectionalHex(palName, norm[0], norm[1], norm[2]);
+        const shift = (rng() - 0.5) * 0.015;
+        pushQuadWorld(p0, p1, p2, p3, col, shift);
+
+        // Top and bottom ring joints
+        if (opts.ringEdges !== false) {
+          addLineWorld(p0, p1, opts.ringLayer || 'fine', 0.01);
+          addLineWorld(p3, p2, opts.ringLayer || 'fine', 0.01);
+        }
+
+        // Longitudinal crease detection between facet prev and facet i
+        const nPrev = normals[prev];
+        const dotCrease = norm[0] * nPrev[0] + norm[1] * nPrev[1] + norm[2] * nPrev[2];
+        // Check if edge is a silhouette relative to camera direction (1, 0.78, 1)
+        const vPrev = nPrev[0] * 0.6 + nPrev[1] * 0.45 + nPrev[2] * 0.6;
+        const vCurr = norm[0] * 0.6 + norm[1] * 0.45 + norm[2] * 0.6;
+        const isSilhouette = (vPrev * vCurr <= 0);
+
+        if (isSilhouette || opts.allBoldLong) {
+          addLineWorld(p0, p3, 'bold', 0.02);
+        } else if (dotCrease < 0.88) {
+          addLineWorld(p0, p3, 'medium', 0.015);
+        } else if (opts.allLongEdges) {
+          addLineWorld(p0, p3, 'fine', 0.01);
+        }
+
+        // Intermediate soapstone courses along the loft
+        const courses = opts.courses || 0;
+        for (let c = 1; c < courses; c++) {
+          const t = c / courses;
+          addLineWorld(lerpPt(p0, p3, t), lerpPt(p1, p2, t), 'fine', 0.008);
+        }
+
+        // Automatic parallel hatching on shaded facets
+        const lightDot = norm[0] * lightDir.x + norm[1] * lightDir.y + norm[2] * lightDir.z;
+        if (opts.shadeHatch !== false && lightDot < -0.08 && vCurr > -0.35) {
+          const hSteps = lightDot < -0.45 ? 3 : 2;
+          for (let h = 1; h <= hSteps; h++) {
+            const ht = h / (hSteps + 1);
+            addLineWorld(lerpPt(p0, p1, ht), lerpPt(p3, p2, ht), opts.hatchLayer || 'fine', 0);
+          }
+        }
+      }
+
+      if (opts.capBottom) {
+        const cBot = ringA.reduce((acc, p) => [acc[0] + p[0] / n, acc[1] + p[1] / n, acc[2] + p[2] / n], [0, 0, 0]);
+        for (let i = 0; i < n; i++) {
+          pushTriWorld(ringA[(i + 1) % n], ringA[i], cBot, PALETTE[palName].bot, 0);
+        }
+      }
+      if (opts.capTop) {
+        const cTop = ringB.reduce((acc, p) => [acc[0] + p[0] / n, acc[1] + p[1] / n, acc[2] + p[2] / n], [0, 0, 0]);
+        for (let i = 0; i < n; i++) {
+          pushTriWorld(ringB[i], ringB[(i + 1) % n], cTop, PALETTE[palName].top, 0);
+        }
+      }
+    }
+
+    /**
+     * Adds an axis-aligned architectural box with courses and hatching
+     */
+    function addBox(x, y, z, w, h, d, palName = 'cream', opts = {}) {
+      const pal = PALETTE[palName] || PALETTE.cream;
+      const shift = (rng() - 0.5) * 0.015;
+      const x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
+
+      const p000 = [x0, y0, z0], p100 = [x1, y0, z0], p110 = [x1, y1, z0], p010 = [x0, y1, z0];
+      const p001 = [x0, y0, z1], p101 = [x1, y0, z1], p111 = [x1, y1, z1], p011 = [x0, y1, z1];
+
+      pushQuadWorld(p001, p101, p111, p011, pal.lit, shift);
+      pushQuadWorld(p101, p100, p110, p111, pal.shade, shift);
+      pushQuadWorld(p011, p111, p110, p010, pal.top, shift);
+      pushQuadWorld(p000, p100, p101, p001, pal.bot, shift);
+      pushQuadWorld(p100, p000, p010, p110, pal.shade, shift);
+      pushQuadWorld(p000, p001, p011, p010, pal.mid, shift);
+
+      const lyr = opts.edgeLayer || 'medium';
+      const ov = opts.overshoot !== undefined ? opts.overshoot : 0.022;
+      const edges = [
+        [p000, p100], [p100, p101], [p101, p001], [p001, p000],
+        [p010, p110], [p110, p111], [p111, p011], [p011, p010],
+        [p000, p010], [p100, p110], [p101, p111], [p001, p011]
+      ];
+      edges.forEach(e => addLineWorld(e[0], e[1], lyr, ov));
+
+      if (opts.courses) {
+        const cLayer = palName === 'terracotta' || palName === 'brickDark' ? 'rust' : 'fine';
+        for (let i = 1; i < opts.courses; i++) {
+          const cy = y0 + (h * i) / opts.courses;
+          addLineWorld([x0, cy, z1 + 0.01], [x1, cy, z1 + 0.01], cLayer, 0.01);
+          addLineWorld([x1 + 0.01, cy, z0], [x1 + 0.01, cy, z1], cLayer, 0.01);
+        }
+      }
+      if (opts.vHatchX) {
+        for (let i = 1; i < opts.vHatchX; i++) {
+          const hz = z0 + (d * i) / opts.vHatchX;
+          addLineWorld([x1 + 0.012, y0 + 0.03, hz], [x1 + 0.012, y1 - 0.03, hz], 'fine', 0);
+        }
+      }
+    }
+
+    /**
+     * Generates an 8-sided (or N-sided) octagonal ring of vertices at height y
+     */
+    function makeOctagonRing(y, rx, rz, dentDepth = 0) {
+      const pts = [];
+      const segs = 8;
+      for (let i = 0; i < segs; i++) {
+        // Offset by PI/8 so flat faces align orthogonally with +Z, +X, -Z, -X
+        const a0 = (i * Math.PI * 2) / segs - Math.PI / 8;
+        const a1 = ((i + 1) * Math.PI * 2) / segs - Math.PI / 8;
+        const c0 = Math.cos(a0), s0 = Math.sin(a0);
+        pts.push([c0 * rx, y, s0 * rz]);
+
+        if (dentDepth !== 0) {
+          const aMid = (a0 + a1) * 0.5;
+          pts.push([Math.cos(aMid) * (rx - dentDepth), y, Math.sin(aMid) * (rz - dentDepth)]);
+        }
+      }
+      return pts;
+    }
+
+    /**
+     * Adds an octagonal 3-part Art Deco cornice band (COURSES)
+     */
+    function addOctagonalCornice(y, h, rx, rz, over = 0.35, dark = false) {
+      const h1 = h * 0.25, h2 = h * 0.48, h3 = h * 0.27;
+      const r0 = makeOctagonRing(y, rx + over * 0.3, rz + over * 0.3);
+      const r1 = makeOctagonRing(y + h1, rx + over * 0.3, rz + over * 0.3);
+      addLoftedRing(r0, r1, 'cream', { ringLayer: 'medium', capBottom: true });
+
+      const r2 = makeOctagonRing(y + h1, rx + over * 0.65, rz + over * 0.65);
+      const r3 = makeOctagonRing(y + h1 + h2, rx + over * 0.65, rz + over * 0.65);
+      addLoftedRing(r2, r3, dark ? 'brickDark' : 'terracotta', {
+        ringLayer: 'medium',
+        courses: 2,
+        hatchLayer: 'rust',
+        capBottom: true
+      });
+
+      const r4 = makeOctagonRing(y + h1 + h2, rx + over, rz + over);
+      const r5 = makeOctagonRing(y + h, rx + over, rz + over);
+      addLoftedRing(r4, r5, 'cream', {
+        ringLayer: 'bold',
+        allBoldLong: true,
+        capBottom: true,
+        capTop: true
+      });
+    }
+
+    // =========================================================================
+    // 5. STRATUM 0 & 1: CORCOVADO SANCTUARY TERRACE & ART DECO PEDESTAL
+    // =========================================================================
+
+    // -------------------------------------------------------------------------
+    // STRATUM 0: CORCOVADO OBSERVATION SANCTUARY, RETAINING WALLS & STAIRS
+    // -------------------------------------------------------------------------
+    // Lower granite peak strata platform (y = -3.2 .. -1.4)
+    const peakBase = makeOctagonRing(-3.2, 13.8, 12.8, 0.45);
+    const peakMid  = makeOctagonRing(-1.4, 12.4, 11.5, 0.35);
+    addLoftedRing(peakBase, peakMid, 'granite', {
+      ringLayer: 'bold',
+      courses: 4,
+      allBoldLong: true,
+      capTop: true
+    });
+
+    // Upper octagonal sanctuary terrace deck (y = -1.4 .. 0.0)
+    const deckBot = makeOctagonRing(-1.4, 10.6, 10.0);
+    const deckTop = makeOctagonRing(0.0, 10.4, 9.8);
+    addLoftedRing(deckBot, deckTop, 'stone', {
+      ringLayer: 'bold',
+      courses: 3,
+      allBoldLong: true,
+      capTop: true
+    });
+
+    // Octagonal stone & terracotta parapet balustrade around the upper terrace deck
+    for (let i = 0; i < 8; i++) {
+      // Leave front-left (+Z, i=2) and front-right (+X, i=0) open for ceremonial staircases
+      if (i === 0 || i === 2) continue;
+      const a0 = (i * Math.PI * 2) / 8 - Math.PI / 8 + 0.05;
+      const a1 = ((i + 1) * Math.PI * 2) / 8 - Math.PI / 8 - 0.05;
+      const rOut = 10.25, rIn = 9.85;
+      const p0 = [Math.cos(a0) * rOut, 0.0, Math.sin(a0) * rOut];
+      const p1 = [Math.cos(a1) * rOut, 0.0, Math.sin(a1) * rOut];
+      const q0 = [Math.cos(a0) * rIn, 0.0, Math.sin(a0) * rIn];
+      const q1 = [Math.cos(a1) * rIn, 0.0, Math.sin(a1) * rIn];
+
+      const bBot = [p0, p1, q1, q0];
+      const bTop = bBot.map(p => [p[0], 0.85, p[2]]);
+      addLoftedRing(bBot, bTop, 'cream', { ringLayer: 'bold', courses: 2, capTop: true });
+
+      const cBot = bTop;
+      const cTop = bBot.map(p => [p[0], 1.05, p[2]]);
+      addLoftedRing(cBot, cTop, 'terracotta', { ringLayer: 'bold', capTop: true });
+    }
+
+    // Ceremonial Monumental Staircases on Front-Left (+Z) and Front-Right (+X)
+    function addMonumentalStairs(axis = 'Z') {
+      const steps = 8;
+      const yStart = -3.2, yEnd = 0.0;
+      const stepH = (yEnd - yStart) / steps;
+      const stairW = 4.2;
+
+      for (let s = 0; s < steps; s++) {
+        const sy = yStart + s * stepH;
+        const reach = 13.8 - s * 0.52;
+        if (axis === 'Z') {
+          addBox(-stairW / 2, sy, 8.8, stairW, stepH, reach - 8.8, s % 2 === 0 ? 'cream' : 'stone', {
+            edgeLayer: 'medium'
+          });
+        } else {
+          addBox(8.8, sy, -stairW / 2, reach - 8.8, stepH, stairW, s % 2 === 0 ? 'cream' : 'stone', {
+            edgeLayer: 'medium'
+          });
+        }
+      }
+      // Flanking Art Deco stair pylons with terracotta caps
+      if (axis === 'Z') {
+        [-stairW / 2 - 0.65, stairW / 2].forEach(px => {
+          addBox(px, -3.2, 8.8, 0.65, 4.1, 5.2, 'cream', { edgeLayer: 'bold', courses: 6 });
+          addBox(px - 0.06, 0.9, 8.74, 0.77, 0.28, 5.32, 'terracotta', { edgeLayer: 'bold' });
+        });
+      } else {
+        [-stairW / 2 - 0.65, stairW / 2].forEach(pz => {
+          addBox(8.8, -3.2, pz, 5.2, 4.1, 0.65, 'cream', { edgeLayer: 'bold', courses: 6 });
+          addBox(8.74, 0.9, pz - 0.06, 5.32, 0.28, 0.77, 'terracotta', { edgeLayer: 'bold' });
+        });
+      }
+    }
+    addMonumentalStairs('Z');
+    addMonumentalStairs('X');
+
+    // -------------------------------------------------------------------------
+    // STRATUM 1: THE 8-METER OCTAGONAL ART DECO PEDESTAL (y = 0.0 .. 11.4)
+    // -------------------------------------------------------------------------
+    // 1. Stepped Pedestal Plinth (y = 0.0 .. 1.3)
+    addLoftedRing(makeOctagonRing(0.0, 6.6, 6.2), makeOctagonRing(0.65, 6.5, 6.1), 'stone', {
+      ringLayer: 'bold', allBoldLong: true, capTop: true
+    });
+    addLoftedRing(makeOctagonRing(0.65, 6.1, 5.7), makeOctagonRing(1.25, 6.0, 5.6), 'terracotta', {
+      ringLayer: 'bold', courses: 2, capTop: true
+    });
+
+    // 2. Lower Pedestal Drum & Chapel of Our Lady of Aparecida Level (y = 1.25 .. 5.2)
+    // Built with 16 vertices (8 flat facets + 8 notched Art Deco buttress ribs)
+    const pedLowBot = makeOctagonRing(1.25, 5.65, 5.25, -0.28);
+    const pedLowTop = makeOctagonRing(4.65, 5.25, 4.90, -0.25);
+    addLoftedRing(pedLowBot, pedLowTop, 'cream', {
+      ringLayer: 'medium',
+      courses: 6,
+      allBoldLong: true,
+      capTop: true
+    });
+
+    // Chapel Entrance Portal on the Front-Left (+Z) face & Recessed Teal Relief Panels on the 8 faces
+    addBox(-1.35, 1.25, 4.55, 2.7, 3.1, 0.45, 'terracotta', { edgeLayer: 'bold', courses: 5 });
+    addBox(-0.95, 1.25, 4.68, 1.9, 2.65, 0.38, 'dark', { edgeLayer: 'bold', courses: 4 });
+    addBox(-1.55, 4.15, 4.55, 3.1, 0.32, 0.58, 'cream', { edgeLayer: 'bold' });
+
+    // Tall vertical teal Art Deco intarsia panels on the side faces of the pedestal
+    addBox(4.62, 1.65, -1.15, 0.35, 2.6, 2.3, 'tealDeep', { edgeLayer: 'bold', courses: 4 });
+    addBox(-4.95, 1.65, -1.15, 0.35, 2.6, 2.3, 'tealDeep', { edgeLayer: 'bold', courses: 4 });
+
+    // Middle Pedestal Cornice Band (y = 4.65 .. 5.45)
+    addOctagonalCornice(4.65, 0.80, 5.25, 4.90, 0.36, true);
+
+    // 3. Upper Tapered Art Deco Pedestal Shaft (y = 5.45 .. 9.65)
+    const pedUpBot = makeOctagonRing(5.45, 4.85, 4.55, -0.26);
+    const pedUpTop = makeOctagonRing(9.65, 4.15, 3.90, -0.22);
+    addLoftedRing(pedUpBot, pedUpTop, 'stone', {
+      ringLayer: 'medium',
+      courses: 8,
+      allBoldLong: true,
+      capTop: true
+    });
+
+    // Vertical Teal & Terracotta Fluted Panels on the Upper Pedestal Shaft
+    for (let side of [-1, 1]) {
+      addBox(side * 0.72 - 0.35, 5.85, 3.85, 0.7, 3.35, 0.42, 'teal', { edgeLayer: 'bold', courses: 5 });
+      addBox(3.75, 5.85, side * 0.72 - 0.35, 0.42, 3.35, 0.7, 'tealDeep', { edgeLayer: 'bold', courses: 5 });
+    }
+
+    // 4. Pedestal Crown Cornice & Sculpted Octagonal Socle Plinth (y = 9.65 .. 11.6)
+    addOctagonalCornice(9.65, 0.95, 4.15, 3.90, 0.45, false);
+
+    const socleBot = makeOctagonRing(10.60, 3.45, 3.15);
+    const socleTop = makeOctagonRing(11.60, 2.85, 2.45);
+    addLoftedRing(socleBot, socleTop, 'terracotta', {
+      ringLayer: 'bold',
+      courses: 2,
+      allBoldLong: true,
+      capTop: true
+    });
+
+    // =========================================================================
+    // 6. STRATUM 2: THE FLUTED ART DECO TUNIC COLUMN & DIAGONAL MANTLE
+    // =========================================================================
+    /**
+     * Generates a 24-point pleated elliptical cross-section of Christ's tunic & mantle
+     * at height y, with authentic Paul Landowski vertical Art Deco flutes and diagonal sash.
+     */
+    function makeRobeSection(y, rx, rz, pleatDepth = 0.16, mantleFactor = 0) {
+      const pts = [];
+      const segs = 24;
+      for (let i = 0; i < segs; i++) {
+        const ang = (i * Math.PI * 2) / segs;
+        const c = Math.cos(ang), s = Math.sin(ang);
+
+        // Sharp planar Art Deco vertical drapery flutes (alternating ridges and channels)
+        const flute = (i % 2 === 0 ? 1 : -1) * pleatDepth;
+
+        // Asymmetric outer mantle fold cascading down the left flank (+X) and sweeping diagonally
+        let mantleBulge = 0;
+        if (mantleFactor > 0) {
+          // Left hip/flank cascade (around ang = 0 .. PI/3)
+          const flankDist = Math.abs(ang - 0.25);
+          if (flankDist < 0.75) {
+            mantleBulge += Math.cos((flankDist / 0.75) * (Math.PI / 2)) * 0.42 * mantleFactor;
+          }
+          // Diagonal sash ridge sweeping across front chest (+Z, around ang = PI/2)
+          const sashTargetAng = 1.15 + (y - 18.0) * 0.055;
+          const sashDist = Math.abs(ang - sashTargetAng);
+          if (sashDist < 0.55 && y > 17.5) {
+            mantleBulge += Math.cos((sashDist / 0.55) * (Math.PI / 2)) * 0.32 * mantleFactor;
+          }
+        }
+
+        const curRx = rx + flute + mantleBulge;
+        const curRz = rz + flute * 0.85 + mantleBulge * 0.75;
+        pts.push([c * curRx, y, s * curRz]);
+      }
+      return pts;
+    }
+
+    // 1. Sculpted Feet / Sandals Peeking Beneath the Hem (y = 11.6 .. 12.25)
+    addBox(-1.15, 11.6, 1.55, 0.78, 0.48, 0.95, 'stone', { edgeLayer: 'bold', courses: 2 });
+    addBox(0.38,  11.6, 1.45, 0.78, 0.48, 0.95, 'stone', { edgeLayer: 'bold', courses: 2 });
+
+    // 2. Multi-Tiered Fluted Tunic Column from Hem (y = 11.6) to Chest (y = 33.8)
+    const robeLevels = [
+      { y: 11.6, rx: 2.15, rz: 1.58, pleat: 0.16, mantle: 0.2 }, // Hem at ankles
+      { y: 14.5, rx: 2.02, rz: 1.48, pleat: 0.18, mantle: 0.4 }, // Shins
+      { y: 18.0, rx: 2.10, rz: 1.52, pleat: 0.19, mantle: 0.7 }, // Knees
+      { y: 21.8, rx: 2.25, rz: 1.62, pleat: 0.18, mantle: 1.0 }, // Hips / Lower sash
+      { y: 25.5, rx: 2.48, rz: 1.72, pleat: 0.16, mantle: 1.1 }, // Waist / Under-sleeve
+      { y: 29.2, rx: 2.78, rz: 1.84, pleat: 0.14, mantle: 1.0 }, // Mid Torso / Sacred Heart
+      { y: 32.8, rx: 3.12, rz: 1.92, pleat: 0.11, mantle: 0.8 }, // Upper Chest
+      { y: 34.8, rx: 2.45, rz: 1.55, pleat: 0.07, mantle: 0.4 }  // Shoulder Collar
+    ];
+
+    for (let i = 0; i < robeLevels.length - 1; i++) {
+      const L0 = robeLevels[i];
+      const L1 = robeLevels[i + 1];
+      const ring0 = makeRobeSection(L0.y, L0.rx, L0.rz, L0.pleat, L0.mantle);
+      const ring1 = makeRobeSection(L1.y, L1.rx, L1.rz, L1.pleat, L1.mantle);
+      addLoftedRing(ring0, ring1, 'soapstone', {
+        ringLayer: 'fine',
+        courses: 3,
+        allLongEdges: true,
+        capTop: i === robeLevels.length - 2
+      });
+    }
+
+    // 3. Layered Diagonal Art Deco Mantle (Cloak) Draping Over Right Shoulder (-X) Across Chest to Left Hip (+X)
+    const sashSlices = 10;
+    for (let s = 0; s < sashSlices; s++) {
+      const t0 = s / sashSlices;
+      const t1 = (s + 1) / sashSlices;
+
+      function makeMantleBand(t) {
+        // Sweeps from right shoulder (x = -2.6, y = 34.6) diagonally down to left hip (x = +2.5, y = 22.5)
+        const cx = -2.45 + t * 5.1;
+        const cy = 34.5 - t * 11.2 + Math.sin(t * Math.PI) * 1.1;
+        const bh = 1.65 + Math.sin(t * Math.PI) * 0.65;
+        const zFront = Math.sqrt(Math.max(0.2, 1 - (cx / 3.15) ** 2)) * 1.96 + 0.16;
+        const zBack  = -zFront + 0.12;
+        return [
+          [cx, cy - bh, zFront],
+          [cx, cy + bh, zFront + 0.08],
+          [cx, cy + bh, zBack - 0.08],
+          [cx, cy - bh, zBack]
+        ];
+      }
+      addLoftedRing(makeMantleBand(t0), makeMantleBand(t1), 'mantle', {
+        ringLayer: 'medium',
+        allBoldLong: true,
+        courses: 2
+      });
+    }
+
+    // Vertical Mantle Cascade Hanging Down Left Flank (+X side, y = 13.5 .. 25.0)
+    for (let k = 0; k < 4; k++) {
+      const yA = 13.5 + k * 2.85;
+      const yB = yA + 2.85;
+      const rA = [
+        [2.05, yA, 1.15], [2.65, yA, 0.55], [2.75, yA, -0.45], [2.05, yA, -1.05]
+      ];
+      const rB = [
+        [2.15, yB, 1.22], [2.78, yB, 0.60], [2.85, yB, -0.50], [2.15, yB, -1.12]
+      ];
+      addLoftedRing(rA, rB, 'mantle', {
+        ringLayer: 'medium',
+        allBoldLong: true,
+        courses: 2,
+        capBottom: k === 0,
+        capTop: k === 3
+      });
+    }
+
+    // 4. The Sacred Heart Relief on the Front Chest (y = 29.8 .. 31.6, z = +1.98)
+    const shY = 30.7, shZ = 2.04;
+    const hTopL = [-0.36, shY + 0.62, shZ], hTopR = [0.36, shY + 0.62, shZ];
+    const hMidL = [-0.62, shY + 0.18, shZ + 0.08], hMidR = [0.62, shY + 0.18, shZ + 0.08];
+    const hBot  = [0.0, shY - 0.78, shZ + 0.06], hCleft = [0.0, shY + 0.42, shZ + 0.08];
+
+    pushTriWorld(hBot, hMidR, hCleft, PALETTE.terracotta.lit, 0);
+    pushTriWorld(hBot, hCleft, hMidL, PALETTE.terracotta.mid, 0);
+    pushTriWorld(hCleft, hMidR, hTopR, PALETTE.terracotta.lit, 0);
+    pushTriWorld(hCleft, hTopL, hMidL, PALETTE.terracotta.mid, 0);
+
+    addLineWorld(hBot, hMidR, 'bold', 0.015);
+    addLineWorld(hMidR, hTopR, 'bold', 0.015);
+    addLineWorld(hTopR, hCleft, 'bold', 0.015);
+    addLineWorld(hCleft, hTopL, 'bold', 0.015);
+    addLineWorld(hTopL, hMidL, 'bold', 0.015);
+    addLineWorld(hMidL, hBot, 'bold', 0.015);
+    // Tiny cross & radial rays around the Sacred Heart
+    addLineWorld([0, shY + 0.52, shZ + 0.1], [0, shY + 1.05, shZ + 0.1], 'bold', 0.01);
+    addLineWorld([-0.24, shY + 0.82, shZ + 0.1], [0.24, shY + 0.82, shZ + 0.1], 'bold', 0.01);
+    for (let r = 0; r < 10; r++) {
+      const ra = (r * Math.PI * 2) / 10;
+      addLineWorld(
+        [Math.cos(ra) * 0.7, shY + Math.sin(ra) * 0.7, shZ + 0.04],
+        [Math.cos(ra) * 1.15, shY + Math.sin(ra) * 1.15, shZ + 0.04],
+        'rust',
+        0
+      );
+    }
+
+    // =========================================================================
+    // 7. STRATUM 3: OUTSTRETCHED CRUCIFORM ARMS, SLEEVES, & SCULPTED HANDS
+    // =========================================================================
+    /**
+     * Builds the monumental outstretched left (+X) or right (-X) cantilevered arm,
+     * with faceted Art Deco hanging sleeve pleats and sculpted fingers.
+     */
+    function buildOutstretchedArm(side = 1) {
+      // side = +1 (Christ's Left Arm, +X) or -1 (Christ's Right Arm, -X)
+      // Slices from shoulder root (|x| = 2.4) out to wrist cuff (|x| = 11.6)
+      const slices = [
+        { x: 2.35, yTop: 34.85, yBot: 25.40, zHalf: 1.42, pleat: 0.22 },
+        { x: 4.20, yTop: 34.60, yBot: 26.35, zHalf: 1.32, pleat: 0.24 },
+        { x: 6.15, yTop: 34.35, yBot: 27.60, zHalf: 1.18, pleat: 0.22 },
+        { x: 8.10, yTop: 34.10, yBot: 28.95, zHalf: 1.04, pleat: 0.18 },
+        { x: 9.95, yTop: 33.85, yBot: 30.25, zHalf: 0.90, pleat: 0.14 },
+        { x: 11.60, yTop: 33.65, yBot: 31.35, zHalf: 0.76, pleat: 0.08 }
+      ];
+
+      function makeSleeveCrossSection(s) {
+        const x = side * s.x;
+        const yT = s.yTop, yB = s.yBot, zh = s.zHalf, p = s.pleat;
+        const yMid1 = yB + (yT - yB) * 0.72;
+        const yMid2 = yB + (yT - yB) * 0.38;
+
+        // 10-point faceted Art Deco sleeve profile with hanging drapery pleats
+        const raw = [
+          [x, yT, 0],                             // Top shoulder/arm ridge
+          [x, yT - 0.32, zh * 0.78],              // Upper front bevel
+          [x, yMid1, zh + p],                     // Front upper pleat ridge
+          [x, (yMid1 + yMid2) * 0.5, zh - p * 0.6],// Front flute valley
+          [x, yMid2, zh * 0.85 + p],              // Front lower pleat ridge
+          [x, yB, 0],                             // Bottom knife-edge sleeve hem
+          [x, yMid2, -(zh * 0.85 + p)],           // Back lower pleat ridge
+          [x, (yMid1 + yMid2) * 0.5, -(zh - p * 0.6)],// Back flute valley
+          [x, yMid1, -(zh + p)],                  // Back upper pleat ridge
+          [x, yT - 0.32, -zh * 0.78]              // Upper back bevel
+        ];
+        // Reverse winding for -X arm so outward normals always point out
+        return side === 1 ? raw : raw.slice().reverse();
+      }
+
+      for (let i = 0; i < slices.length - 1; i++) {
+        const ringA = makeSleeveCrossSection(slices[i]);
+        const ringB = makeSleeveCrossSection(slices[i + 1]);
+        addLoftedRing(ringA, ringB, 'soapstone', {
+          ringLayer: 'medium',
+          courses: 2,
+          allLongEdges: true,
+          capTop: i === slices.length - 2
+        });
+      }
+
+      // Sculpted Art Deco Wrist, Palm, Thumb, & Extended Fingers (|x| = 11.6 .. 14.3)
+      const wx0 = 11.60, wx1 = 12.95, wx2 = 14.25;
+      const handY = 32.65;
+
+      function makeHandBox(xa, xb, yCenter, hHalf, zHalf, pal = 'stone') {
+        const xMin = Math.min(side * xa, side * xb);
+        const xMax = Math.max(side * xa, side * xb);
+        addBox(xMin, yCenter - hHalf, -zHalf, xMax - xMin, hHalf * 2, zHalf * 2, pal, {
+          edgeLayer: 'bold',
+          courses: 2
+        });
+      }
+
+      // Wrist & Palm block
+      makeHandBox(wx0, wx1, handY, 0.68, 0.42, 'stone');
+      // Terracotta stigmata relief mark on the center of each palm
+      addBox(side * 12.35 - 0.14, handY - 0.14, 0.38, 0.28, 0.28, 0.1, 'terracotta', { edgeLayer: 'bold' });
+
+      // 4 Extended Art Deco Fingers
+      const fingerYOffsets = [0.46, 0.16, -0.14, -0.42];
+      const fingerLengths  = [1.15, 1.32, 1.22, 0.95];
+      for (let f = 0; f < 4; f++) {
+        makeHandBox(wx1, wx1 + fingerLengths[f], handY + fingerYOffsets[f], 0.13, 0.22, 'stone');
+      }
+      // Slightly raised Art Deco Thumb
+      makeHandBox(wx0 + 0.35, wx0 + 1.35, handY + 0.82, 0.16, 0.24, 'stone');
+    }
+
+    buildOutstretchedArm(1);  // Left Arm (+X)
+    buildOutstretchedArm(-1); // Right Arm (-X)
+
+    // =========================================================================
+    // 8. STRATUM 4: ART DECO NECK, FORWARD-TILTED HEAD, & CROWN ARRESTORS
+    // =========================================================================
+    // Helper to tilt head vertices slightly forward (+14 degrees toward +Z) around neck pivot (y = 35.5)
+    function headPoint(hx, hy, hz) {
+      const pivotY = 35.4;
+      const dy = hy - pivotY;
+      const tilt = (14.5 * Math.PI) / 180;
+      const cosT = Math.cos(tilt), sinT = Math.sin(tilt);
+      return [
+        hx,
+        pivotY + dy * cosT - hz * sinT,
+        hz * cosT + dy * sinT + 0.18
+      ];
+    }
+
+    function makeHeadRing(hy, rx, rz, frontBevel = 1.0) {
+      // 12-sided sculpted Art Deco cranial/facial contour
+      const pts = [];
+      const segs = 12;
+      for (let i = 0; i < segs; i++) {
+        const a = (i * Math.PI * 2) / segs;
+        const c = Math.cos(a), s = Math.sin(a);
+        // Flatten back of hair slightly and sharpen front jawline/cheekbones
+        const zScale = s > 0 ? rz * frontBevel : rz * 0.92;
+        // Fluted hair waves along the sides and back (s <= 0.3)
+        const hairFlute = s <= 0.25 ? (i % 2 === 0 ? 0.08 : -0.06) : 0;
+        pts.push(headPoint(c * (rx + hairFlute), hy, s * zScale));
+      }
+      return pts;
+    }
+
+    const headSlices = [
+      { y: 34.7, rx: 1.08, rz: 1.02, bev: 0.95 }, // V-Collar / Neck base
+      { y: 35.9, rx: 0.98, rz: 0.98, bev: 1.00 }, // Upper Neck / Chin base
+      { y: 36.8, rx: 1.18, rz: 1.32, bev: 1.12 }, // Sculpted Pointed Beard & Jaw
+      { y: 38.1, rx: 1.35, rz: 1.38, bev: 1.06 }, // Cheekbones & Mustache
+      { y: 39.4, rx: 1.38, rz: 1.42, bev: 1.04 }, // Brow Ridge & Deep-Set Eyes
+      { y: 40.7, rx: 1.28, rz: 1.32, bev: 0.96 }, // Forehead & Parted Hair
+      { y: 41.6, rx: 0.82, rz: 0.88, bev: 0.90 }  // Crown of Head
+    ];
+
+    for (let i = 0; i < headSlices.length - 1; i++) {
+      const s0 = headSlices[i], s1 = headSlices[i + 1];
+      addLoftedRing(
+        makeHeadRing(s0.y, s0.rx, s0.rz, s0.bev),
+        makeHeadRing(s1.y, s1.rx, s1.rz, s1.bev),
+        i < 2 ? 'stone' : 'soapstone',
+        {
+          ringLayer: 'medium',
+          allLongEdges: true,
+          capTop: i === headSlices.length - 2
+        }
+      );
+    }
+
+    // Symmetrical Art Deco Shoulder-Length Hair Locks Framing the Face
+    for (let side of [-1, 1]) {
+      const hairBot = [
+        headPoint(side * 1.05, 35.1, 0.55),
+        headPoint(side * 1.48, 35.1, 0.45),
+        headPoint(side * 1.52, 35.1, -0.85),
+        headPoint(side * 1.05, 35.1, -0.95)
+      ];
+      const hairTop = [
+        headPoint(side * 1.12, 39.6, 0.45),
+        headPoint(side * 1.46, 39.6, 0.35),
+        headPoint(side * 1.48, 39.6, -0.82),
+        headPoint(side * 1.12, 39.6, -0.90)
+      ];
+      if (side === -1) { hairBot.reverse(); hairTop.reverse(); }
+      addLoftedRing(hairBot, hairTop, 'mantle', {
+        ringLayer: 'medium',
+        allBoldLong: true,
+        courses: 4,
+        capBottom: true
+      });
+    }
+
+    // Sculpted Prismatic Nose Bridge, Brow Line, & Mustache Planes on the Face (+Z)
+    const noseTop = headPoint(0, 39.35, 1.48);
+    const noseTip = headPoint(0, 38.05, 1.72);
+    const noseL   = headPoint(-0.24, 38.10, 1.46);
+    const noseR   = headPoint(0.24, 38.10, 1.46);
+    pushTriWorld(noseTip, noseR, noseTop, PALETTE.soapstone.lit, 0);
+    pushTriWorld(noseTip, noseTop, noseL, PALETTE.soapstone.shade, 0);
+    addLineWorld(noseTop, noseTip, 'bold', 0.015);
+    addLineWorld(noseL, noseTip, 'medium', 0.01);
+    addLineWorld(noseR, noseTip, 'medium', 0.01);
+
+    // Serene downcast Art Deco brow & eye planes
+    addLineWorld(headPoint(-0.82, 39.25, 1.36), headPoint(-0.22, 39.32, 1.48), 'bold', 0.015);
+    addLineWorld(headPoint(0.22, 39.32, 1.48), headPoint(0.82, 39.25, 1.36), 'bold', 0.015);
+    addLineWorld(headPoint(-0.72, 38.92, 1.38), headPoint(-0.28, 38.95, 1.46), 'medium', 0.01);
+    addLineWorld(headPoint(0.28, 38.95, 1.46), headPoint(0.72, 38.92, 1.38), 'medium', 0.01);
+    // Mustache & beard cleft lines
+    addLineWorld(headPoint(0, 37.85, 1.56), headPoint(-0.58, 37.45, 1.42), 'bold', 0.01);
+    addLineWorld(headPoint(0, 37.85, 1.56), headPoint(0.58, 37.45, 1.42), 'bold', 0.01);
+
+    // Authentic Lightning-Rod Arrestor Crown Points along Head & Arms
+    for (let a = -2; a <= 2; a++) {
+      const px = a * 0.35;
+      addLineWorld(headPoint(px, 41.5, 0), headPoint(px, 42.15, 0), 'medium', 0);
+    }
+
+    // =========================================================================
+    // 9. GROUND PLINTH, COURTYARD PAVEMENT, SHRUBS, & SACRED GEOMETRY RAYS
+    // =========================================================================
+    const pMinX = -15.2, pMaxX = 15.2;
+    const pMinZ = -14.2, pMaxZ = 14.8;
+    addBox(pMinX, -3.65, pMinZ, pMaxX - pMinX, 0.45, pMaxZ - pMinZ, 'plaza', { edgeLayer: 'bold' });
+    addBox(pMinX - 0.45, -3.68, pMinZ - 0.45, pMaxX - pMinX + 0.9, 0.06, pMaxZ - pMinZ + 0.9, 'plaza', { edgeLayer: 'bold' });
+
+    // Courtyard pavement grid around the octagonal Corcovado base
+    const tileStep = 2.4;
+    for (let gx = pMinX + tileStep; gx < pMaxX; gx += tileStep) {
+      for (let gz = pMinZ; gz < pMaxZ - 0.2; gz += 0.6) {
+        if (Math.hypot(gx, gz) > 13.8) {
+          addLineWorld([gx, -3.18, gz], [gx, -3.18, Math.min(pMaxZ, gz + 0.6)], 'fine', 0);
+        }
+      }
+    }
+    for (let gz = pMinZ + tileStep; gz < pMaxZ; gz += tileStep) {
+      for (let gx = pMinX; gx < pMaxX - 0.2; gx += 0.6) {
+        if (Math.hypot(gx, gz) > 13.8) {
+          addLineWorld([gx, -3.18, gz], [Math.min(pMaxX, gx + 0.6), -3.18, gz], 'fine', 0);
+        }
+      }
+    }
+
+    // Dashed Site Grid Lines & Sketched Corcovado Forest Shrubs
+    function addDashedLineWorld(p1, p2, dashLen = 0.52, gapLen = 0.42) {
+      const dx = p2[0] - p1[0], dy = p2[1] - p1[1], dz = p2[2] - p1[2];
+      const dist = Math.hypot(dx, dy, dz);
+      const ux = dx / dist, uy = dy / dist, uz = dz / dist;
+      let cur = 0;
+      while (cur < dist) {
+        const end = Math.min(dist, cur + dashLen);
+        addLineWorld(
+          [p1[0] + ux * cur, p1[1] + uy * cur, p1[2] + uz * cur],
+          [p1[0] + ux * end, p1[1] + uy * end, p1[2] + uz * end],
+          'faint',
+          0
+        );
+        cur += dashLen + gapLen;
+      }
+    }
+
+    function addSketchShrub(sx, sz) {
+      const r = 0.26 + rng() * 0.10;
+      const h = 0.38 + rng() * 0.14;
+      const baseY = -3.65;
+      addLineWorld([sx, baseY, sz], [sx, baseY + h * 0.4, sz], 'medium', 0);
+      addLineWorld([sx - r * 0.8, baseY + 0.01, sz + r * 0.5], [sx + r * 0.9, baseY + 0.01, sz - r * 0.5], 'fine', 0);
+      const cy = baseY + h;
+      addLineWorld([sx - r, cy, sz], [sx, cy + r * 0.7, sz - r], 'medium', 0.01);
+      addLineWorld([sx, cy + r * 0.7, sz - r], [sx + r, cy, sz], 'medium', 0.01);
+      addLineWorld([sx + r, cy, sz], [sx, cy - r * 0.4, sz + r], 'medium', 0.01);
+      addLineWorld([sx, cy - r * 0.4, sz + r], [sx - r, cy, sz], 'medium', 0.01);
+    }
+
+    const siteLim = 23.5;
+    for (let s = -21.5; s <= 21.5; s += 3.8) {
+      if (s < pMinX - 0.6 || s > pMaxX + 0.6) {
+        addDashedLineWorld([s, -3.65, -siteLim], [s, -3.65, siteLim]);
+      } else {
+        addDashedLineWorld([s, -3.65, pMaxZ + 0.6], [s, -3.65, siteLim + 3.0]);
+      }
+      if (s < pMinZ - 0.6 || s > pMaxZ + 0.6) {
+        addDashedLineWorld([-siteLim, -3.65, s], [siteLim, -3.65, s]);
+      } else {
+        addDashedLineWorld([pMaxX + 0.6, -3.65, s], [siteLim + 3.0, -3.65, s]);
+        addDashedLineWorld([-siteLim, -3.65, s], [pMinX - 0.6, -3.65, s]);
+      }
+    }
+
+    for (let sx = -20.5; sx <= 20.5; sx += 3.2) {
+      for (let sz = -19.5; sz <= 20.5; sz += 3.2) {
+        const inside = sx > pMinX - 1.0 && sx < pMaxX + 1.0 && sz > pMinZ - 1.0 && sz < pMaxZ + 1.0;
+        if (!inside && Math.hypot(sx, sz) < 25.0 && rng() > 0.28) {
+          addSketchShrub(sx, sz);
+        }
+      }
+    }
+
+    // Ghost Wireframe Corcovado Elevator/Escalator Annex Towers at Perimeter
+    addBox(pMaxX + 1.2, -3.65, -7.5, 4.6, 5.5, 8.0, 'ghost', { edgeLayer: 'faint' });
+    addBox(pMinX - 6.5, -3.65, -6.5, 5.2, 7.2, 8.5, 'ghost', { edgeLayer: 'faint' });
+    addBox(1.4, -3.65, pMaxZ + 2.0, 2.8, 7.8, 2.8, 'ghost', { edgeLayer: 'medium' });
+    addBox(1.85, -3.65, pMaxZ + 2.9, 1.8, 10.2, 1.8, 'ghost', { edgeLayer: 'medium' });
+
+    // Vitruvian / Art Deco Sacred-Geometry Halo & Proportion Circles in Faint Drafting Ink
+    const haloSegs = 48;
+    [3.8, 5.2, 14.25].forEach((rad, rIdx) => {
+      const centerY = rIdx === 2 ? 32.8 : 38.8;
+      for (let i = 0; i < haloSegs; i++) {
+        if (rIdx === 2 && i % 2 === 1) continue; // Dashed outer Vitruvian arm-span circle
+        const a0 = (i * Math.PI * 2) / haloSegs;
+        const a1 = ((i + 1) * Math.PI * 2) / haloSegs;
+        addLineWorld(
+          [Math.cos(a0) * rad, centerY + Math.sin(a0) * rad, -0.5],
+          [Math.cos(a1) * rad, centerY + Math.sin(a1) * rad, -0.5],
+          'faint',
+          0
+        );
+      }
+    });
+
+    // Faint diagonal drafting construction rays from top-left sky
+    for (let i = 0; i < 16; i++) {
+      const spread = (i / 15) * 32;
+      addLineWorld([-48, 50, -8], [-11.5, 4.0 + spread, 5.0 - spread * 0.25], 'faint', 0);
+    }
+
+    // =========================================================================
+    // 10. BUILD THREE.JS GEOMETRIES & RENDER LOOP
+    // =========================================================================
+    const washGeo = new THREE.BufferGeometry();
+    washGeo.setAttribute('position', new THREE.Float32BufferAttribute(washPositions, 3));
+    washGeo.setAttribute('color', new THREE.Float32BufferAttribute(washColors, 3));
+
+    const washMat = new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      side: THREE.DoubleSide,
+      polygonOffset: true,
+      polygonOffsetFactor: 1.4,
+      polygonOffsetUnits: 1.4
+    });
+    scene.add(new THREE.Mesh(washGeo, washMat));
+
+    function createInkSegmentMesh(vertices, hexColor, opacity) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      const mat = new THREE.LineBasicMaterial({
+        color: hexColor,
+        transparent: true,
+        opacity: opacity
+      });
+      return new THREE.LineSegments(geo, mat);
+    }
+
+    scene.add(createInkSegmentMesh(inkLayers.bold,   0x211b17, 0.92));
+    scene.add(createInkSegmentMesh(inkLayers.medium, 0x332a24, 0.80));
+    scene.add(createInkSegmentMesh(inkLayers.fine,   0x4a3f37, 0.44));
+    scene.add(createInkSegmentMesh(inkLayers.rust,   0x8c4531, 0.64));
+    scene.add(createInkSegmentMesh(inkLayers.teal,   0x527d80, 0.52));
+    scene.add(createInkSegmentMesh(inkLayers.faint,  0x6b6157, 0.32));
+
+    window.addEventListener('resize', () => {
+      const newAspect = window.innerWidth / window.innerHeight;
+      camera.left = (-frustumSize * newAspect) / 2;
+      camera.right = (frustumSize * newAspect) / 2;
+      camera.top = frustumSize / 2;
+      camera.bottom = -frustumSize / 2;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      generatePaperOverlay();
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>

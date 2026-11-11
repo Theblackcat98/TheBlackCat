@@ -40,6 +40,15 @@ private notes — BlackCat is public.
    line) and enumerate the individual demos/tools under `## Notes`; a gallery
    saved without its contents listed is a link Nik has to re-open to
    remember.
+
+   **The served-HTML route list is still a subset.** Client-rendered card
+   grids, paid tiers (`/library`, `/pricing`, `/premium`) and ad/sponsor
+   surfaces only exist after JS runs, so the shell's `href`s miss them. Render
+   the page once and read `document.body.innerText` plus the footer links;
+   then `## Notes` must carry three things — what it is, what is inside, and
+   how it is monetised or distributed (paid unlock, ads, one npm package per
+   component). A bookmark that lists routes but not the model gets re-opened
+   the moment Nik asks a follow-up, and the enrichment is a second commit.
 4. **Topics/tags**: check existing
    (`git -C <repo> grep -h -A2 '^tags:' -- 'content/*.md'`), reuse
    case-insensitively, lowercase kebab-case.
@@ -92,6 +101,9 @@ private notes — BlackCat is public.
 - Existing legacy content has capitalized tags; write lowercase, match
   case-insensitively when reusing.
 - Quote titles containing `:` or `"` in YAML.
+- A route list scraped from served HTML is a subset, not an inventory —
+  client-rendered grids and paid/sponsor pages are invisible to it, so a
+  route-only bookmark under-describes the site.
 - Lint before committing: `scripts/lint_content.py <files>` needs PyYAML — if
   system `python3` lacks it, run it with a Python that has it (on this host,
   the Hermes venv python: `~/.hermes/hermes-agent/venv/bin/python`). CI

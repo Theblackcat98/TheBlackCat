@@ -9,6 +9,51 @@ contract does not apply here.
 Reimplementing someone else's tool also lands here: a tool URL from Nik is a
 brief, not a source of code. Read it for behaviour, then write the page.
 
+## Porting a whole tool suite (catalogue before you build)
+
+"Add all these tools to my site" is explicit authorization to host — do not
+re-ask host-versus-bookmark. It is also a multi-page project, so write the
+phase plan to disk before touching the repo. Catalogue and plan live together:
+`knowledge/research/<app>/feature-catalog.md` (per tool: controls with defaults,
+outputs, quirks, payload numbers, observed bugs) and `port-plan.md` beside it.
+When Nik says "note the features", those files are the deliverable even if no
+page ever ships.
+
+A runtime dependency that breaks the no-third-party rule goes to Nik as three
+options, not a silent choice: skip the tool, vendor it under
+`static/<slug>/vendor/` with a pinned sha256, or a page-scoped exception that
+says so in that page's copy.
+
+1. **Read the served modules, don't click N UIs.** Fetch the shell, grep it for
+   the registry's dynamic imports (`import("./tools/<name>.js")`), then pull
+   each tool module. Minified code keeps UI strings intact, so
+   `grep -oE '"([^"\\]{4,120})"'` per module yields the labels, options,
+   defaults and help text that would take a browser session each to reach. Use
+   the browser for the look and for end-to-end proof on a few tools, not to
+   enumerate 20 forms.
+2. **Licence gate first.** Read the module header and the site config. An
+   all-rights-reserved banner or a host guard that bricks the page off-domain
+   means reimplement from behaviour and say so in the plan; MIT npm packages
+   elsewhere in the product do not license the site code.
+3. **Measure the target per route** (`curl -H 'Accept-Encoding: gzip'` on its
+   js and css). A single bundle for many routes is the shape to avoid; per-tool
+   modules loaded on demand are the shape to copy.
+4. **Engine first, then thin tools.** One shared engine under
+   `static/toolkit/<suite>/` (decode/encode helpers, file intake, control
+   builders) plus one small module per tool holding only its form and a
+   `run()`. The product is the shared result screen — progress per item,
+   before/after comparison, stats, download-all, and "continue with" links to
+   the obvious follow-on tools — not the individual tools. Nineteen
+   self-contained pages is the failure mode.
+5. **Phase the build**: engine + the cheap high-traffic tools, then
+document/create tools, then canvas editors, then anything needing a model or a
+third-party CDN last. Each shipped tool is still one commit with page,
+write-up, `data/tools.yaml` row and both thumbnails.
+6. **Fix the original's bugs instead of inheriting them.** Note the defects you
+   observe in the catalogue (misformatted metadata fields, mislabelled units,
+   single-image tools inside a batch suite) so the reimplementation doesn't
+   copy them by accident.
+
 ## Route and approval
 
 - Small additive change → direct push (after the standard sync + CI gate).

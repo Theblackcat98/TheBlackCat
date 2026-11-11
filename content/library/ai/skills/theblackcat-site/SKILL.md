@@ -1,7 +1,7 @@
 ---
 name: theblackcat-site
 description: "Operate Nik's TheBlackCat site: save bookmarks, write blog posts (draft-flag flow), weekly triage, and maintain the Hugo repo safely."
-version: 1.7.1
+version: 1.8.0
 author: Hermes Agent
 license: MIT
 platforms: [linux]
@@ -44,7 +44,7 @@ includes personal/private context, confirm before writing it into the repo.
 | Save a URL as a bookmark | `references/bookmark-workflow.md` |
 | Weekly inbox triage / promote inbox items | `references/bookmark-workflow.md` (triage section) |
 | Write or publish a blog post | `references/blog-workflow.md` |
-| Site facts: layouts, config, taxonomy, CSS, menu, deploy | `references/site-model.md` |
+| Site facts: layouts, config, taxonomy, CSS, menu, deploy, data pages (dashboard + its nightly sync) | `references/site-model.md` |
 | Front matter recipes, reserved keys, placement rules | `references/content-model.md` |
 | Dead links, the weekly link-check issue, lychee/CI link checking | `references/link-check.md` |
 | Projects section, GitHub-repo sync, generated project pages | `references/projects-sync.md` |
@@ -116,13 +116,39 @@ includes personal/private context, confirm before writing it into the repo.
    my bookmarks"), which is an answer, not an ambiguity: run the bookmark
    workflow and do not make Nik re-confirm it. Never copy a production bundle — no license and no public repo
    means no right to the code; read the original for behaviour, then write our
-   own implementation on the site's tokens. A new tool is additive and ships
+   own implementation on the site's tokens. When the ask is a whole suite
+   ("add all these tools"), the host-versus-bookmark question is already
+   settled — don't re-ask it, plan instead: catalogue the modules, phase the
+   build (engine first, then cheap high-traffic tools, dependency-heavy ones
+   last) per `references/static-tool-pages.md` § Porting a whole tool suite,
+   and put a dependency that would break the site's no-third-party rule
+   (an AI model from a CDN, say) to Nik as a decision instead of absorbing it.
+   A new tool is additive and ships
    direct to `main` in ONE commit (page + write-up + `data/tools.yaml` row +
    both thumbnails) because `scripts/check_tools.py` fails on any missing
    piece. Contract, checks and the Hugo-less thumbnail fallback:
    `references/static-tool-pages.md`.
 
+16. **A "synced nightly" line on a page is a claim, not a fact.** Before you
+   trust or extend a generated page, prove the producer runs
+   (`gh run list --workflow=<file>`) and that its input can see what it claims
+   to see — cross-check the summary fields against ground truth
+   (`gh api /user/repos`, `gh api repos/...`). A committed JSON plus a green
+   deploy only proves the file was committed. Mechanism, file map and the
+   token trap: `references/site-model.md` § Data-driven pages.
+
 ## Repo facts at a glance
+
+- **Two hubs, one registry.** `/tools/` (the workshop) is for things you *use*;
+  `/showcase/` is for art and visual artifacts, figures built to be *looked at*.
+  Both read `data/tools.yaml` — a showcase item is a normal entry with
+  `category: showcase`, which `layouts/partials/lists/tools.html` filters out of
+  every chip, count, featured strip and grid. `scripts/check_tools.py` still
+  requires the entry, its thumbnails and its `static/<slug>/` page, so never
+  "unregister" an artifact to move it. The showcase section is written as an
+  article: the prose lives in `content/showcase/_index.md`, and
+  `layouts/partials/lists/showcase.html` adds a card grid only past one item.
+  New art → showcase. Anything with a job to do → tools.
 
 - Custom layouts only (b7661b6 redesign); `hugo.yaml` has NO theme key;
   `themes/hextra` was removed 2026-09-04. Details: `references/site-model.md`.

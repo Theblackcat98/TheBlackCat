@@ -1,0 +1,35 @@
+.sp-stage {
+  position: relative;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  outline: none;
+}
+.sp-stage:active {
+  cursor: grabbing;
+}
+.sp-stage:focus-visible {
+  outline: 1px solid var(--anatomy-muted);
+  outline-offset: 6px;
+  border-radius: 4px;
+}
+.sp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.sp-screen {
+  fill: var(--anatomy-shade-0);
+  stroke: var(--anatomy-lo);
+  stroke-width: var(--anatomy-weight);
+}
+.sp-bar {
+  fill: var(--anatomy-hi);
+  stroke: none;
+}

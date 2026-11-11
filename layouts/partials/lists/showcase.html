@@ -29,7 +29,7 @@
   </div>
   <ul class="tool-grid" role="list">
     {{- range $items }}
-      {{ partial "tool-card.html" (dict "tool" . "hideWriteup" true) }}
+      {{ partial "tool-card.html" (dict "tool" .) }}
     {{- end }}
   </ul>
 </section>

@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaning Tower of Pisa — Axonometric Diagram</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #e3ded4;
+    }
+    #canvas-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+    }
+    #paper-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      opacity: 0.55;
+    }
+  </style>
+<meta name="description" content="The Leaning Tower of Pisa drawn as a cutaway axonometric: a stepped marble base, fifteen blind arches round the ground tier, six open colonnades and the belfry, carried on a spine that curves where the masons corrected the lean.">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/pisa/">
+<meta property="og:title" content="Leaning Tower of Pisa">
+<meta property="og:description" content="The Leaning Tower of Pisa drawn as a cutaway axonometric: a stepped marble base, fifteen blind arches round the ground tier, six open colonnades and the belfry, carried on a spine that curves where the masons corrected the lean.">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/pisa-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "VisualArtwork", "name": "Leaning Tower of Pisa", "description": "The Leaning Tower of Pisa drawn as a cutaway axonometric: a stepped marble base, fifteen blind arches round the ground tier, six open colonnades and the belfry, carried on a spine that curves where the masons corrected the lean.", "url": "https://theblackcat98.github.io/TheBlackCat/pisa/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/pisa-light.webp", "creator": {"@type": "Person", "name": "Nik"} }</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="pisa"></script>
+</head>
+<body>
+<a class="back tk-fallback" href="../tools/">&#8592; All tools</a>
+  <div id="canvas-container">
+    <canvas id="paper-overlay"></canvas>
+  </div>
+
+  <script src="../vendor/three/three.min.js"></script>
+  <script src="../vendor/three/OrbitControls.js"></script>
+  <script>
+    // =========================================================================
+    // 1. DETERMINISTIC PRNG & DRAFTING PAPER TEXTURE OVERLAY
+    // =========================================================================
+    function mulberry32(a) {
+      return function () {
+        let t = (a += 0x6d2b79f5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    const rng = mulberry32(1173); // 1173 AD: Year construction began on the Tower of Pisa
+
+    function generatePaperOverlay() {
+      const canvas = document.getElementById('paper-overlay');
+      const w = (canvas.width = window.innerWidth);
+      const h = (canvas.height = window.innerHeight);
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#ede9e0';
+      ctx.fillRect(0, 0, w, h);
+
+      // Subtle orthogonal drafting grid
+      ctx.strokeStyle = 'rgba(130, 120, 108, 0.09)';
+      ctx.lineWidth = 1;
+      const step = 28;
+      ctx.beginPath();
+      for (let x = 0; x < w; x += step) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+      }
+      for (let y = 0; y < h; y += step) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+      }
+      ctx.stroke();
+
+      // Organic rough paper fiber grain
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+      const localRng = mulberry32(8841);
+      for (let i = 0; i < data.length; i += 4) {
+        const grain = (localRng() - 0.5) * 18;
+        data[i] = Math.min(255, Math.max(0, data[i] + grain));
+        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + grain));
+        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + grain));
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+    generatePaperOverlay();
+
+    // =========================================================================
+    // 2. THREE.JS SCENE & AXONOMETRIC ORTHOGRAPHIC CAMERA
+    // =========================================================================
+    const container = document.getElementById('canvas-container');
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0xe5e0d6, 1);
+    container.insertBefore(renderer.domElement, document.getElementById('paper-overlay'));
+
+    const scene = new THREE.Scene();
+
+    const frustumSize = 58;
+    const aspect = window.innerWidth / window.innerHeight;
+    const camera = new THREE.OrthographicCamera(
+      (-frustumSize * aspect) / 2,
+      (frustumSize * aspect) / 2,
+      frustumSize / 2,
+      -frustumSize / 2,
+      -200,
+      300
+    );
+
+    const targetY = 21.0;
+    const camDist = 68;
+    const defaultCamPos = new THREE.Vector3(camDist, targetY + camDist * 0.78, camDist);
+    camera.position.copy(defaultCamPos);
+    camera.lookAt(1.5, targetY, 0);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.target.set(1.5, targetY, 0);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.update();
+
+    window.addEventListener('dblclick', () => {
+      camera.position.copy(defaultCamPos);
+      controls.target.set(1.5, targetY, 0);
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controls.update();
+    });
+
+    // =========================================================================
+    // 3. COLOR WASH PALETTE & MULTI-WEIGHT INK ENGINE
+    // =========================================================================
+    const PALETTE = {
+      cream:      { lit: 0xefe9de, mid: 0xe4ddd1, shade: 0xd2c9b9, top: 0xf4f0e6, bot: 0x8f8274 },
+      stone:      { lit: 0xe3dcd0, mid: 0xd6cec0, shade: 0xc2b9a9, top: 0xeae4da, bot: 0x807467 },
+      coreWall:   { lit: 0xc9bfb0, mid: 0xb5aa9a, shade: 0x998e7e, top: 0xd6cec0, bot: 0x695e53 },
+      terracotta: { lit: 0xc27a63, mid: 0xb06851, shade: 0x94513d, top: 0xd4947e, bot: 0x6b3829 },
+      brickDark:  { lit: 0x9e5b47, mid: 0x8a4c3a, shade: 0x703b2c, top: 0xb36f5b, bot: 0x4f271c },
+      teal:       { lit: 0x94b9bb, mid: 0x82a8aa, shade: 0x6b9092, top: 0xa8c8ca, bot: 0x517072 },
+      tealDeep:   { lit: 0x789fa2, mid: 0x668c8f, shade: 0x527477, top: 0x8eb2b5, bot: 0x3e595b },
+      dark:       { lit: 0x73675e, mid: 0x5e534b, shade: 0x4a4039, top: 0x85786e, bot: 0x332c27 },
+      plaza:      { lit: 0xe8e3d9, mid: 0xdfd9ce, shade: 0xd2ccc0, top: 0xebe6dc, bot: 0xa69e91 },
+      ghost:      { lit: 0xe6e1d7, mid: 0xdfd9ce, shade: 0xd8d2c6, top: 0xebe6dc, bot: 0xc2bbb0 }
+    };
+
+    const washPositions = [];
+    const washColors = [];
+
+    const inkLayers = {
+      bold:   [], // Primary structural silhouettes, arch rings, column shafts
+      medium: [], // Secondary architectural edges, capitals, stone courses
+      fine:   [], // Directional shadow hatching, roof & stone texture
+      rust:   [], // Terracotta course hatching & ornamental inlays
+      teal:   [], // Intarsia & window reflection strokes
+      faint:  []  // Plumb-line diagram & site grid context
+    };
+
+    const tempColor = new THREE.Color();
+    // Light vector from upper front-left (matches axonometric sun convention)
+    const lightDir = new THREE.Vector3(-0.35, 0.25, 0.90).normalize();
+
+    function computeDirectionalHex(palName, nx, ny, nz) {
+      const pal = PALETTE[palName] || PALETTE.cream;
+      if (ny > 0.65) return pal.top;
+      if (ny < -0.65) return pal.bot;
+      const dot = nx * lightDir.x + ny * lightDir.y + nz * lightDir.z;
+      if (dot > 0.28) return pal.lit;
+      if (dot > -0.18) return pal.mid;
+      return pal.shade;
+    }
+
+    function pushQuadWorld(p0, p1, p2, p3, hexColor, shadeShift = 0) {
+      tempColor.setHex(hexColor);
+      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
+      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
+      washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+      washPositions.push(p0[0], p0[1], p0[2], p2[0], p2[1], p2[2], p3[0], p3[1], p3[2]);
+      for (let i = 0; i < 6; i++) washColors.push(r, g, b);
+    }
+
+    function pushTriWorld(p0, p1, p2, hexColor, shadeShift = 0) {
+      tempColor.setHex(hexColor);
+      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
+      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
+      washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+      for (let i = 0; i < 3; i++) washColors.push(r, g, b);
+    }
+
+    function addLineWorld(p1, p2, layer = 'medium', overshoot = 0.022) {
+      const x1 = p1[0], y1 = p1[1], z1 = p1[2];
+      const x2 = p2[0], y2 = p2[1], z2 = p2[2];
+      const dx = x2 - x1, dy = y2 - y1, dz = z2 - z1;
+      const len = Math.hypot(dx, dy, dz);
+      if (len < 1e-5) return;
+      const ux = (dx / len) * overshoot;
+      const uy = (dy / len) * overshoot;
+      const uz = (dz / len) * overshoot;
+
+      const j = layer === 'faint' ? 0 : 0.007;
+      const ax = x1 - ux + (rng() - 0.5) * j;
+      const ay = y1 - uy + (rng() - 0.5) * j;
+      const az = z1 - uz + (rng() - 0.5) * j;
+      const bx = x2 + ux + (rng() - 0.5) * j;
+      const by = y2 + uy + (rng() - 0.5) * j;
+      const bz = z2 + uz + (rng() - 0.5) * j;
+
+      const target = inkLayers[layer] || inkLayers.medium;
+      target.push(ax, ay, az, bx, by, bz);
+
+      if (layer === 'bold') {
+        const off = 0.017;
+        target.push(ax + off, ay, az - off, bx + off, by, bz - off);
+        target.push(ax - off * 0.7, ay + off * 0.7, az + off * 0.7, bx - off * 0.7, by + off * 0.7, bz + off * 0.7);
+      }
+    }
+
+    // =========================================================================
+    // 4. LEANING SPINE & BANANA-CURVE COORDINATE TRANSFORMATION
+    // =========================================================================
+    // The Tower of Pisa leans ~5.5 degrees, with slight historical mason corrections
+    // on the upper galleries and the belfry chamber, creating its famous subtle curve.
+    const leanDirX = Math.cos(0.42);  // Tilts predominantly toward screen-right (+X, -Z)
+    const leanDirZ = -Math.sin(0.42);
+
+    function getTiltAngleAtHeight(y) {
+      if (y <= 0) return (5.65 * Math.PI) / 180;
+      if (y < 15) {
+        return (5.65 * Math.PI) / 180;
+      } else if (y < 39.0) {
+        // Gradual corrective curve built into tiers 4 through 7
+        const t = (y - 15) / (39.0 - 15);
+        const deg = 5.65 - t * 0.95;
+        return (deg * Math.PI) / 180;
+      } else {
+        // Belfry level tilted slightly back toward vertical by 14th-century masons
+        return (3.65 * Math.PI) / 180;
+      }
+    }
+
+    // Precompute spine centerline table at fine vertical intervals
+    const spineSteps = 600;
+    const maxSpineY = 55.0;
+    const spineTable = [];
+    let curX = 0, curY = -0.35, curZ = 0; // Base slightly sunken into the catino basin
+    const dyStep = maxSpineY / spineSteps;
+
+    for (let i = 0; i <= spineSteps; i++) {
+      const h = i * dyStep;
+      const ang = getTiltAngleAtHeight(h);
+      spineTable.push({
+        h: h,
+        cx: curX,
+        cy: curY,
+        cz: curZ,
+        ang: ang
+      });
+      const sinA = Math.sin(ang);
+      const cosA = Math.cos(ang);
+      curX += sinA * leanDirX * dyStep;
+      curY += cosA * dyStep;
+      curZ += sinA * leanDirZ * dyStep;
+    }
+
+    /**
+     * Transforms a local tower coordinate (lx, ly, lz) into tilted 3D world space
+     */
+    function towerPoint(lx, ly, lz) {
+      const clampedY = Math.max(0, Math.min(maxSpineY - 0.01, ly));
+      const idx = Math.floor(clampedY / dyStep);
+      const frac = (clampedY - idx * dyStep) / dyStep;
+      const s0 = spineTable[idx];
+      const s1 = spineTable[idx + 1] || s0;
+
+      const cx = s0.cx + (s1.cx - s0.cx) * frac;
+      const cy = s0.cy + (s1.cy - s0.cy) * frac;
+      const cz = s0.cz + (s1.cz - s0.cz) * frac;
+      const ang = s0.ang + (s1.ang - s0.ang) * frac;
+
+      // Project horizontal offset (lx, lz) along the lean direction
+      const proj = lx * leanDirX + lz * leanDirZ;
+      const perpX = lx - proj * leanDirX;
+      const perpZ = lz - proj * leanDirZ;
+
+      const cosA = Math.cos(ang);
+      const sinA = Math.sin(ang);
+
+      const wx = cx + perpX + proj * cosA * leanDirX;
+      const wy = cy - proj * sinA + (ly < 0 ? ly : 0);
+      const wz = cz + perpZ + proj * cosA * leanDirZ;
+      return [wx, wy, wz];
+    }
+
+    // =========================================================================
+    // 5. CYLINDRICAL, ARCHED, & ROMANESQUE ARCHITECTURAL BUILDERS
+    // =========================================================================
+    /**
+     * Builds a cylindrical or polygonal drum/ring between rInner and rOuter, y0 and y1
+     */
+    function addTowerCylinder(y0, y1, rOuter, rInner, segs, palName = 'cream', opts = {}) {
+      const dTheta = (Math.PI * 2) / segs;
+      const startAngle = opts.angleOffset || 0;
+      const edgeLayer = opts.edgeLayer || 'medium';
+
+      for (let i = 0; i < segs; i++) {
+        const a0 = startAngle + i * dTheta;
+        const a1 = startAngle + (i + 1) * dTheta;
+        const aMid = (a0 + a1) * 0.5;
+
+        const c0 = Math.cos(a0), s0 = Math.sin(a0);
+        const c1 = Math.cos(a1), s1 = Math.sin(a1);
+        const nx = Math.cos(aMid), nz = Math.sin(aMid);
+
+        // Outer wall quad
+        const p00 = towerPoint(c0 * rOuter, y0, s0 * rOuter);
+        const p10 = towerPoint(c1 * rOuter, y0, s1 * rOuter);
+        const p11 = towerPoint(c1 * rOuter, y1, s1 * rOuter);
+        const p01 = towerPoint(c0 * rOuter, y1, s0 * rOuter);
+
+        const colOuter = computeDirectionalHex(palName, nx, 0, nz);
+        const shift = (rng() - 0.5) * 0.018;
+        pushQuadWorld(p00, p10, p11, p01, colOuter, shift);
+
+        // Top & bottom perimeter ink rings
+        addLineWorld(p00, p10, edgeLayer, 0.015);
+        addLineWorld(p01, p11, edgeLayer, 0.015);
+
+        // Silhouette and periodic vertical joint lines
+        const viewDot = nx * 0.707 + nz * 0.707;
+        const CrossSilhouette = Math.abs(nx * 0.707 - nz * 0.707);
+        if (CrossSilhouette > 0.96) {
+          addLineWorld(p00, p01, 'bold', 0.02);
+        } else if (opts.verticalJoints && i % opts.verticalJoints === 0) {
+          addLineWorld(p00, p01, 'fine', 0.01);
+        }
+
+        // Directional right-side shadow hatching on cylindrical surfaces
+        const lightDot = nx * lightDir.x + nz * lightDir.z;
+        if (opts.shadeHatch !== false && lightDot < -0.12 && viewDot > -0.35) {
+          const hatchCount = lightDot < -0.5 ? 3 : 2;
+          for (let h = 1; h <= hatchCount; h++) {
+            const t = h / (hatchCount + 1);
+            const ha = a0 + (a1 - a0) * t;
+            const hc = Math.cos(ha) * (rOuter + 0.015);
+            const hs = Math.sin(ha) * (rOuter + 0.015);
+            addLineWorld(
+              towerPoint(hc, y0 + 0.04, hs),
+              towerPoint(hc, y1 - 0.04, hs),
+              opts.hatchLayer || 'fine',
+              0
+            );
+          }
+        }
+
+        // Optional horizontal stone/brick courses
+        if (opts.courses) {
+          const cLayer = palName === 'terracotta' || palName === 'brickDark' ? 'rust' : 'fine';
+          for (let c = 1; c < opts.courses; c++) {
+            const cy = y0 + ((y1 - y0) * c) / opts.courses;
+            addLineWorld(
+              towerPoint(c0 * (rOuter + 0.012), cy, s0 * (rOuter + 0.012)),
+              towerPoint(c1 * (rOuter + 0.012), cy, s1 * (rOuter + 0.012)),
+              cLayer,
+              0.01
+            );
+          }
+        }
+
+        // Top and bottom caps (and inner wall if hollow)
+        if (rInner > 0) {
+          const q00 = towerPoint(c0 * rInner, y0, s0 * rInner);
+          const q10 = towerPoint(c1 * rInner, y0, s1 * rInner);
+          const q11 = towerPoint(c1 * rInner, y1, s1 * rInner);
+          const q01 = towerPoint(c0 * rInner, y1, s0 * rInner);
+
+          // Inner wall
+          const colInner = computeDirectionalHex(palName, -nx, 0, -nz);
+          pushQuadWorld(q10, q00, q01, q11, colInner, -0.04);
+          // Top annular ring
+          pushQuadWorld(p01, p11, q11, q01, computeDirectionalHex(palName, 0, 1, 0), shift);
+          // Bottom annular soffit
+          pushQuadWorld(q00, q10, p10, p00, computeDirectionalHex(palName, 0, -1, 0), shift);
+
+          if (opts.innerEdges) {
+            addLineWorld(q01, q11, 'medium', 0.01);
+            addLineWorld(q00, q10, 'medium', 0.01);
+          }
+        } else {
+          const centerTop = towerPoint(0, y1, 0);
+          const centerBot = towerPoint(0, y0, 0);
+          pushTriWorld(p01, p11, centerTop, computeDirectionalHex(palName, 0, 1, 0), shift);
+          pushTriWorld(p10, p00, centerBot, computeDirectionalHex(palName, 0, -1, 0), shift);
+        }
+      }
+    }
+
+    /**
+     * Adds a multi-course Romanesque overhanging circular cornice band (COURSES)
+     */
+    function addCircularCornice(y, h, rBase, segs = 36, opts = {}) {
+      const over = opts.overhang || 0.28;
+      const rInner = opts.rInner || 0;
+      const h1 = h * 0.24;
+      const h2 = h * 0.48;
+      const h3 = h * 0.28;
+
+      // Lower stone astragal ring
+      addTowerCylinder(y, y + h1, rBase + over * 0.35, rInner, segs, 'cream', { edgeLayer: 'medium' });
+      // Middle terracotta polychrome frieze with brick courses
+      addTowerCylinder(y + h1, y + h1 + h2, rBase + over * 0.65, rInner, segs, opts.dark ? 'brickDark' : 'terracotta', {
+        edgeLayer: 'medium',
+        courses: 2,
+        hatchLayer: 'rust'
+      });
+      // Upper overhanging corona slab
+      addTowerCylinder(y + h1 + h2, y + h, rBase + over, rInner, segs, 'cream', {
+        edgeLayer: 'bold'
+      });
+
+      // Radial dentil brackets under the cornice overhang
+      const bracketCount = segs * 2;
+      for (let i = 0; i < bracketCount; i++) {
+        const ang = (i * Math.PI * 2) / bracketCount;
+        const c = Math.cos(ang), s = Math.sin(ang);
+        addLineWorld(
+          towerPoint(c * rBase, y + h1, s * rBase),
+          towerPoint(c * (rBase + over * 0.92), y + h1 + h2, s * (rBase + over * 0.92)),
+          'medium',
+          0
+        );
+      }
+    }
+
+    /**
+     * Adds a classical Romanesque column with base plinth, fluted shaft, and capital
+     */
+    function addRomanesqueColumn(angle, radius, y0, y1, colRadius = 0.22, opts = {}) {
+      const cx = Math.cos(angle) * radius;
+      const cz = Math.sin(angle) * radius;
+      const h = y1 - y0;
+      const baseH = Math.min(0.42, h * 0.12);
+      const capH = Math.min(0.52, h * 0.15);
+      const shaftY0 = y0 + baseH;
+      const shaftY1 = y1 - capH;
+
+      // Helper for small local prism around (cx, cz) aligned radially
+      function addLocalPrism(py0, py1, halfW, halfD, palName, lyr = 'medium') {
+        const uX = Math.cos(angle), uZ = Math.sin(angle); // Radial outward
+        const vX = -uZ, vZ = uX;                          // Tangential
+
+        const corners = [
+          [cx + uX * halfD - vX * halfW, cz + uZ * halfD - vZ * halfW],
+          [cx + uX * halfD + vX * halfW, cz + uZ * halfD + vZ * halfW],
+          [cx - uX * halfD + vX * halfW, cz - uZ * halfD + vZ * halfW],
+          [cx - uX * halfD - vX * halfW, cz - uZ * halfD - vZ * halfW]
+        ];
+        const normals = [
+          [uX, uZ],
+          [vX, vZ],
+          [-uX, -uZ],
+          [-vX, -vZ]
+        ];
+
+        const botPts = corners.map(c => towerPoint(c[0], py0, c[1]));
+        const topPts = corners.map(c => towerPoint(c[0], py1, c[1]));
+
+        for (let f = 0; f < 4; f++) {
+          const nf = (f + 1) % 4;
+          const col = computeDirectionalHex(palName, normals[f][0], 0, normals[f][1]);
+          pushQuadWorld(botPts[f], botPts[nf], topPts[nf], topPts[f], col, 0);
+          addLineWorld(botPts[f], botPts[nf], lyr, 0.015);
+          addLineWorld(topPts[f], topPts[nf], lyr, 0.015);
+          addLineWorld(botPts[f], topPts[f], lyr, 0.015);
+        }
+        pushQuadWorld(topPts[0], topPts[1], topPts[2], topPts[3], PALETTE[palName].top, 0);
+        pushQuadWorld(botPts[3], botPts[2], botPts[1], botPts[0], PALETTE[palName].bot, 0);
+      }
+
+      // 1. Moulded column base pedestal
+      addLocalPrism(y0, y0 + baseH * 0.55, colRadius * 1.45, colRadius * 1.45, 'stone', 'medium');
+      addLocalPrism(y0 + baseH * 0.55, shaftY0, colRadius * 1.2, colRadius * 1.2, 'terracotta', 'medium');
+
+      // 2. Octagonal/cylindrical column shaft with vertical ink fluting
+      const shaftSegs = 6;
+      for (let s = 0; s < shaftSegs; s++) {
+        const a0 = angle + (s * Math.PI * 2) / shaftSegs;
+        const a1 = angle + ((s + 1) * Math.PI * 2) / shaftSegs;
+        const nx = Math.cos((a0 + a1) * 0.5), nz = Math.sin((a0 + a1) * 0.5);
+
+        const p00 = towerPoint(cx + Math.cos(a0) * colRadius, shaftY0, cz + Math.sin(a0) * colRadius);
+        const p10 = towerPoint(cx + Math.cos(a1) * colRadius, shaftY0, cz + Math.sin(a1) * colRadius);
+        const p11 = towerPoint(cx + Math.cos(a1) * colRadius, shaftY1, cz + Math.sin(a1) * colRadius);
+        const p01 = towerPoint(cx + Math.cos(a0) * colRadius, shaftY1, cz + Math.sin(a0) * colRadius);
+
+        pushQuadWorld(p00, p10, p11, p01, computeDirectionalHex(opts.shaftPalette || 'cream', nx, 0, nz), 0.02);
+        addLineWorld(p00, p01, s % 2 === 0 ? 'bold' : 'fine', 0.01);
+      }
+
+      // 3. Corinthian bell capital & terracotta/cream abacus block
+      addLocalPrism(shaftY1, shaftY1 + capH * 0.58, colRadius * 1.32, colRadius * 1.32, 'cream', 'medium');
+      addLocalPrism(shaftY1 + capH * 0.58, y1, colRadius * 1.58, colRadius * 1.58, 'terracotta', 'bold');
+    }
+
+    /**
+     * Builds an entire circular arcade of 3D semicircular arches & spandrels between columns
+     */
+    function addCircularArcadeArches(ySpring, yTop, rOuter, rInner, numArches, opts = {}) {
+      const dAngle = (Math.PI * 2) / numArches;
+      const startAngle = opts.angleOffset || 0;
+      const archSpan = rOuter * dAngle;
+      const clearRadius = (archSpan - (opts.colWidth || 0.34)) * 0.5;
+      const archCrownY = Math.min(yTop - 0.22, ySpring + clearRadius * 1.05);
+      const archSteps = 6; // Voussoir segments per arch
+
+      for (let i = 0; i < numArches; i++) {
+        const aStart = startAngle + i * dAngle;
+        const aEnd = startAngle + (i + 1) * dAngle;
+        const aMid = (aStart + aEnd) * 0.5;
+        const nx = Math.cos(aMid), nz = Math.sin(aMid);
+
+        // Trim angle slightly for column capital clearance
+        const padA = dAngle * 0.08;
+        const a0 = aStart + padA;
+        const a1 = aEnd - padA;
+
+        for (let s = 0; s < archSteps; s++) {
+          const t0 = s / archSteps;
+          const t1 = (s + 1) / archSteps;
+          // Semicircular arch parameter from 0 to PI
+          const phi0 = t0 * Math.PI;
+          const phi1 = t1 * Math.PI;
+
+          const ang0 = a0 + (a1 - a0) * ((1 - Math.cos(phi0)) * 0.5);
+          const ang1 = a0 + (a1 - a0) * ((1 - Math.cos(phi1)) * 0.5);
+
+          const intradosY0 = ySpring + Math.sin(phi0) * (archCrownY - ySpring);
+          const intradosY1 = ySpring + Math.sin(phi1) * (archCrownY - ySpring);
+
+          const c0 = Math.cos(ang0), s0 = Math.sin(ang0);
+          const c1 = Math.cos(ang1), s1 = Math.sin(ang1);
+
+          // Outer spandrel wall quad from intrados arch up to yTop
+          const pArch0 = towerPoint(c0 * rOuter, intradosY0, s0 * rOuter);
+          const pArch1 = towerPoint(c1 * rOuter, intradosY1, s1 * rOuter);
+          const pTop1  = towerPoint(c1 * rOuter, yTop, s1 * rOuter);
+          const pTop0  = towerPoint(c0 * rOuter, yTop, s0 * rOuter);
+
+          // Polychrome banded spandrel color
+          const spandrelPal = s === 2 || s === 3 ? 'terracotta' : 'cream';
+          pushQuadWorld(pArch0, pArch1, pTop1, pTop0, computeDirectionalHex(spandrelPal, nx, 0, nz), 0);
+
+          // Inner spandrel wall facing the gallery walkway
+          const qArch0 = towerPoint(c0 * rInner, intradosY0, s0 * rInner);
+          const qArch1 = towerPoint(c1 * rInner, intradosY1, s1 * rInner);
+          const qTop1  = towerPoint(c1 * rInner, yTop, s1 * rInner);
+          const qTop0  = towerPoint(c0 * rInner, yTop, s0 * rInner);
+          pushQuadWorld(qArch1, qArch0, qTop0, qTop1, PALETTE.cream.bot, 0);
+
+          // Deep shadowed arch intrados soffit (underside of the arch)
+          pushQuadWorld(qArch0, qArch1, pArch1, pArch0, PALETTE.dark.bot, 0);
+
+          // Bold ink arch curve + extrados double-line moulding + voussoir joints
+          addLineWorld(pArch0, pArch1, 'bold', 0.015);
+          addLineWorld(qArch0, qArch1, 'medium', 0.01);
+          addLineWorld(pArch0, qArch0, 'fine', 0.01);
+
+          const extradosY0 = Math.min(yTop - 0.04, intradosY0 + 0.24);
+          const extradosY1 = Math.min(yTop - 0.04, intradosY1 + 0.24);
+          const pExt0 = towerPoint(c0 * (rOuter + 0.015), extradosY0, s0 * (rOuter + 0.015));
+          const pExt1 = towerPoint(c1 * (rOuter + 0.015), extradosY1, s1 * (rOuter + 0.015));
+          addLineWorld(pExt0, pExt1, 'rust', 0.01);
+          addLineWorld(pArch0, pExt0, 'medium', 0.01);
+        }
+
+        // Fill the narrow pier spandrel directly above each column capital (aEnd - padA to aEnd + padA)
+        const aP0 = aEnd - padA;
+        const aP1 = aEnd + padA;
+        const cp0 = Math.cos(aP0), sp0 = Math.sin(aP0);
+        const cp1 = Math.cos(aP1), sp1 = Math.sin(aP1);
+        const pierB0 = towerPoint(cp0 * rOuter, ySpring, sp0 * rOuter);
+        const pierB1 = towerPoint(cp1 * rOuter, ySpring, sp1 * rOuter);
+        const pierT1 = towerPoint(cp1 * rOuter, yTop, sp1 * rOuter);
+        const pierT0 = towerPoint(cp0 * rOuter, yTop, sp0 * rOuter);
+        pushQuadWorld(pierB0, pierB1, pierT1, pierT0, computeDirectionalHex('cream', Math.cos(aEnd), 0, Math.sin(aEnd)), 0);
+
+        // Decorative Pisan diamond/lozenge inlay in the spandrel above each column
+        const spMidY = (ySpring + yTop) * 0.52;
+        const dH = (yTop - ySpring) * 0.34;
+        const dA = padA * 0.78;
+        const dTop = towerPoint(Math.cos(aEnd) * (rOuter + 0.02), spMidY + dH, Math.sin(aEnd) * (rOuter + 0.02));
+        const dBot = towerPoint(Math.cos(aEnd) * (rOuter + 0.02), spMidY - dH, Math.sin(aEnd) * (rOuter + 0.02));
+        const dL   = towerPoint(Math.cos(aEnd - dA) * (rOuter + 0.02), spMidY, Math.sin(aEnd - dA) * (rOuter + 0.02));
+        const dR   = towerPoint(Math.cos(aEnd + dA) * (rOuter + 0.02), spMidY, Math.sin(aEnd + dA) * (rOuter + 0.02));
+        pushQuadWorld(dBot, dR, dTop, dL, PALETTE.tealDeep.mid, 0);
+        addLineWorld(dBot, dR, 'medium', 0.01);
+        addLineWorld(dR, dTop, 'medium', 0.01);
+        addLineWorld(dTop, dL, 'medium', 0.01);
+        addLineWorld(dL, dBot, 'medium', 0.01);
+      }
+    }
+
+    /**
+     * Adds an ornamental Pisan lozenge (diamond intarsia panel) on a cylindrical wall
+     */
+    function addWallLozengeInlay(angle, dAngle, yCenter, halfH, rWall, isPortal = false) {
+      const r = rWall + 0.025;
+      if (isPortal) {
+        // Grand Romanesque entrance portal on the Ground Floor
+        const aL = angle - dAngle * 0.55;
+        const aR = angle + dAngle * 0.55;
+        const yBot = yCenter - halfH * 1.45;
+        const yTop = yCenter + halfH * 0.75;
+        const pBL = towerPoint(Math.cos(aL) * r, yBot, Math.sin(aL) * r);
+        const pBR = towerPoint(Math.cos(aR) * r, yBot, Math.sin(aR) * r);
+        const pTR = towerPoint(Math.cos(aR) * r, yTop, Math.sin(aR) * r);
+        const pTL = towerPoint(Math.cos(aL) * r, yTop, Math.sin(aL) * r);
+        pushQuadWorld(pBL, pBR, pTR, pTL, PALETTE.dark.shade, 0);
+        addLineWorld(pBL, pBR, 'bold', 0.02);
+        addLineWorld(pBR, pTR, 'bold', 0.02);
+        addLineWorld(pTR, pTL, 'bold', 0.02);
+        addLineWorld(pTL, pBL, 'bold', 0.02);
+        // Terracotta lintel & teal lunette tympanum above portal
+        const pLunPeak = towerPoint(Math.cos(angle) * r, yTop + 0.95, Math.sin(angle) * r);
+        pushTriWorld(pTL, pTR, pLunPeak, PALETTE.teal.mid, 0);
+        addLineWorld(pTL, pLunPeak, 'bold', 0.02);
+        addLineWorld(pTR, pLunPeak, 'bold', 0.02);
+        return;
+      }
+
+      // Outer stepped terracotta diamond frame
+      const pTop = towerPoint(Math.cos(angle) * r, yCenter + halfH, Math.sin(angle) * r);
+      const pBot = towerPoint(Math.cos(angle) * r, yCenter - halfH, Math.sin(angle) * r);
+      const pL   = towerPoint(Math.cos(angle - dAngle) * r, yCenter, Math.sin(angle - dAngle) * r);
+      const pR   = towerPoint(Math.cos(angle + dAngle) * r, yCenter, Math.sin(angle + dAngle) * r);
+
+      pushQuadWorld(pBot, pR, pTop, pL, PALETTE.terracotta.mid, 0);
+      addLineWorld(pBot, pR, 'bold', 0.015);
+      addLineWorld(pR, pTop, 'bold', 0.015);
+      addLineWorld(pTop, pL, 'bold', 0.015);
+      addLineWorld(pL, pBot, 'bold', 0.015);
+
+      // Inner canal-teal intarsia center
+      const r2 = r + 0.015;
+      const qTop = towerPoint(Math.cos(angle) * r2, yCenter + halfH * 0.58, Math.sin(angle) * r2);
+      const qBot = towerPoint(Math.cos(angle) * r2, yCenter - halfH * 0.58, Math.sin(angle) * r2);
+      const qL   = towerPoint(Math.cos(angle - dAngle * 0.58) * r2, yCenter, Math.sin(angle - dAngle * 0.58) * r2);
+      const qR   = towerPoint(Math.cos(angle + dAngle * 0.58) * r2, yCenter, Math.sin(angle + dAngle * 0.58) * r2);
+
+      pushQuadWorld(qBot, qR, qTop, qL, PALETTE.teal.mid, 0);
+      addLineWorld(qBot, qR, 'medium', 0.01);
+      addLineWorld(qR, qTop, 'medium', 0.01);
+      addLineWorld(qTop, qL, 'medium', 0.01);
+      addLineWorld(qL, qBot, 'medium', 0.01);
+    }
+
+    // =========================================================================
+    // 6. ASSEMBLING THE 8 TIERS OF THE LEANING TOWER OF PISA
+    // =========================================================================
+
+    // -------------------------------------------------------------------------
+    // TIER 0: STEPPED MARBLE BASE & FOUNDATION PLINTH (y = 0.0 .. 1.35)
+    // -------------------------------------------------------------------------
+    addTowerCylinder(0.0, 0.55, 6.85, 0, 36, 'stone', { edgeLayer: 'bold' });
+    addTowerCylinder(0.55, 1.05, 6.55, 0, 36, 'cream', { edgeLayer: 'bold' });
+    addTowerCylinder(1.05, 1.35, 6.38, 0, 36, 'terracotta', { edgeLayer: 'medium', courses: 2 });
+
+    // -------------------------------------------------------------------------
+    // TIER 1: GROUND FLOOR BLIND ARCADE DRUM (y = 1.35 .. 9.5)
+    // -------------------------------------------------------------------------
+    const t1Y0 = 1.35, t1Y1 = 8.75, t1CorniceH = 0.75;
+    const t1Radius = 6.08;
+    const t1Arches = 15; // Classic 15 blind arches on the ground tier
+
+    // Banded Pisan marble drum with alternating stone/terracotta stringcourses
+    const bandCountT1 = 10;
+    const bandHT1 = (t1Y1 - t1Y0) / bandCountT1;
+    for (let b = 0; b < bandCountT1; b++) {
+      const by0 = t1Y0 + b * bandHT1;
+      const by1 = by0 + bandHT1;
+      const pal = b % 3 === 1 ? 'stone' : 'cream';
+      addTowerCylinder(by0, by1, t1Radius, 3.8, 30, pal, {
+        edgeLayer: 'fine',
+        verticalJoints: 2,
+        courses: 2
+      });
+      // Thin terracotta stringcourse every 3rd band
+      if (b % 3 === 2) {
+        addTowerCylinder(by1 - 0.14, by1, t1Radius + 0.03, 3.8, 30, 'terracotta', { edgeLayer: 'rust' });
+      }
+    }
+
+    // 15 Engaged Columns, Blind Arches, and Lozenge Intarsia Panels
+    const t1SpringY = t1Y0 + 5.35;
+    for (let i = 0; i < t1Arches; i++) {
+      const aCol = (i * Math.PI * 2) / t1Arches + 0.2;
+      addRomanesqueColumn(aCol, t1Radius + 0.16, t1Y0, t1SpringY, 0.25);
+
+      // Center of the blind arch bay for lozenge inlay (or entrance portal at front-left)
+      const aBay = aCol + Math.PI / t1Arches;
+      const isFrontLeftPortal = i === 3;
+      addWallLozengeInlay(aBay, (Math.PI / t1Arches) * 0.56, t1Y0 + 3.05, 1.25, t1Radius, isFrontLeftPortal);
+    }
+    addCircularArcadeArches(t1SpringY, t1Y1, t1Radius + 0.28, t1Radius - 0.02, t1Arches, {
+      angleOffset: 0.2,
+      colWidth: 0.36
+    });
+    addCircularCornice(t1Y1, t1CorniceH, t1Radius + 0.25, 36, { overhang: 0.38, dark: true });
+
+    // -------------------------------------------------------------------------
+    // TIERS 2 TO 7: THE SIX OPEN COLONNADE GALLERIES (y = 9.5 .. 39.2)
+    // -------------------------------------------------------------------------
+    const gallerySpecs = [
+      { y0: 9.50,  h: 5.05, rOuter: 5.95, rCore: 4.35, cols: 24 }, // Tier 2 (1st Open Gallery)
+      { y0: 14.55, h: 4.95, rOuter: 5.88, rCore: 4.30, cols: 24 }, // Tier 3 (2nd Open Gallery)
+      { y0: 19.50, h: 4.90, rOuter: 5.80, rCore: 4.24, cols: 24 }, // Tier 4 (3rd Open Gallery)
+      { y0: 24.40, h: 4.85, rOuter: 5.72, rCore: 4.18, cols: 24 }, // Tier 5 (4th Open Gallery)
+      { y0: 29.25, h: 4.85, rOuter: 5.65, rCore: 4.12, cols: 24 }, // Tier 6 (5th Open Gallery)
+      { y0: 34.10, h: 5.10, rOuter: 5.60, rCore: 4.08, cols: 24 }  // Tier 7 (6th Open Gallery)
+    ];
+
+    gallerySpecs.forEach((g, idx) => {
+      const yBase = g.y0;
+      const corniceH = idx === 5 ? 0.78 : 0.62;
+      const yTop = yBase + g.h - corniceH;
+      const yPlinth = yBase + 0.36;
+      const ySpring = yBase + (g.h - corniceH) * 0.68;
+      const angOffset = (idx % 2) * (Math.PI / g.cols);
+
+      // 1. Deeply shadowed inner cylindrical masonry core wall behind the colonnade
+      addTowerCylinder(yBase, yTop, g.rCore, g.rCore - 1.2, 24, 'coreWall', {
+        edgeLayer: 'medium',
+        courses: 8,
+        shadeHatch: true
+      });
+      // Terracotta stringcourse band & teal casement/lancet gallery windows on inner core
+      addTowerCylinder(yBase + (yTop - yBase) * 0.48, yBase + (yTop - yBase) * 0.58, g.rCore + 0.04, g.rCore - 0.1, 24, 'terracotta', {
+        edgeLayer: 'rust'
+      });
+      for (let w = 0; w < 12; w++) {
+        const wa = (w * Math.PI * 2) / 12 + angOffset;
+        addWallLozengeInlay(wa, 0.09, yBase + (yTop - yBase) * 0.42, 0.72, g.rCore, w % 3 === 0);
+      }
+
+      // 2. Gallery walkway floor slab & outer column plinth ring
+      addTowerCylinder(yBase, yPlinth, g.rOuter + 0.14, g.rCore - 0.05, 36, 'stone', {
+        edgeLayer: 'bold'
+      });
+
+      // Historical steel/iron tension tie-ring cinching the middle galleries
+      if (idx === 1 || idx === 2) {
+        addTowerCylinder(yBase + 0.12, yBase + 0.24, g.rOuter + 0.2, g.rOuter, 36, 'dark', {
+          edgeLayer: 'bold'
+        });
+      }
+
+      // 3. Free-standing slender Romanesque columns around the gallery perimeter
+      for (let c = 0; c < g.cols; c++) {
+        const aCol = angOffset + (c * Math.PI * 2) / g.cols;
+        addRomanesqueColumn(aCol, g.rOuter - 0.15, yPlinth, ySpring, 0.17, {
+          shaftPalette: c % 4 === 0 ? 'stone' : 'cream'
+        });
+      }
+
+      // 4. Open 3D semicircular arcade arches & polychrome spandrel ring
+      addCircularArcadeArches(ySpring, yTop, g.rOuter, g.rOuter - 0.34, g.cols, {
+        angleOffset: angOffset,
+        colWidth: 0.28
+      });
+
+      // 5. Shadowed gallery ceiling slab connecting outer arcade to inner core
+      addTowerCylinder(yTop - 0.18, yTop, g.rOuter, g.rCore - 0.05, 36, 'dark', {
+        edgeLayer: 'medium'
+      });
+
+      // 6. Overhanging circular cornice crowning the gallery tier
+      addCircularCornice(yTop, corniceH, g.rOuter, 36, {
+        rInner: g.rCore - 0.1,
+        overhang: idx === 5 ? 0.46 : 0.30,
+        dark: idx % 2 === 1
+      });
+    });
+
+    // Upper 7th-Tier Observation Deck Parapet Balustrade around the base of the Belfry
+    const deckY = 39.20;
+    const deckR = 5.82;
+    addTowerCylinder(deckY, deckY + 0.68, deckR, deckR - 0.22, 36, 'cream', {
+      edgeLayer: 'bold',
+      verticalJoints: 1,
+      courses: 2
+    });
+    addTowerCylinder(deckY + 0.68, deckY + 0.84, deckR + 0.08, deckR - 0.26, 36, 'terracotta', {
+      edgeLayer: 'bold'
+    });
+
+    // -------------------------------------------------------------------------
+    // TIER 8: THE BELFRY CROWN (CAMPANILE CHAMBER, y = 39.2 .. 46.8)
+    // -------------------------------------------------------------------------
+    const belfryY0 = 39.20;
+    const belfryH = 6.95;
+    const belfryY1 = belfryY0 + belfryH;
+    const belfryR = 4.48;
+    const belfryCols = 12;
+
+    // Stepped base plinth of the belfry drum
+    addTowerCylinder(belfryY0, belfryY0 + 0.72, belfryR + 0.22, 2.8, 24, 'stone', {
+      edgeLayer: 'bold',
+      courses: 2
+    });
+    addTowerCylinder(belfryY0 + 0.72, belfryY0 + 1.05, belfryR + 0.12, 2.8, 24, 'terracotta', {
+      edgeLayer: 'medium',
+      courses: 2
+    });
+
+    // Main cylindrical body of the belfry with polychrome stone courses
+    const bBodyY0 = belfryY0 + 1.05;
+    const bSpringY = belfryY0 + 4.55;
+    const bArchTopY = belfryY1 - 0.82;
+
+    addTowerCylinder(bBodyY0, bArchTopY, belfryR, 2.75, 24, 'cream', {
+      edgeLayer: 'medium',
+      courses: 10,
+      verticalJoints: 2
+    });
+
+    // 12 Engaged Columns around the Belfry + 6 Recessed Twin Bell Openings & Lozenges
+    for (let i = 0; i < belfryCols; i++) {
+      const aCol = (i * Math.PI * 2) / belfryCols + 0.12;
+      addRomanesqueColumn(aCol, belfryR + 0.15, bBodyY0, bSpringY, 0.21);
+
+      const aBay = aCol + Math.PI / belfryCols;
+      if (i % 2 === 0) {
+        // Deep recessed bell chamber opening with hanging bronze/dark bell silhouette
+        addWallLozengeInlay(aBay, (Math.PI / belfryCols) * 0.68, bBodyY0 + 1.95, 1.35, belfryR, true);
+      } else {
+        // Ornate teal & terracotta diamond intarsia panel on alternating bays
+        addWallLozengeInlay(aBay, (Math.PI / belfryCols) * 0.58, bBodyY0 + 1.85, 1.15, belfryR, false);
+      }
+    }
+
+    // Blind/open arch ring crowning the 12 belfry bays
+    addCircularArcadeArches(bSpringY, bArchTopY, belfryR + 0.24, belfryR - 0.04, belfryCols, {
+      angleOffset: 0.12,
+      colWidth: 0.30
+    });
+
+    // Ornate Belfry Crown Cornice, Crenellated Parapet, & Inner Dome Ring
+    addCircularCornice(bArchTopY, 0.82, belfryR + 0.22, 36, {
+      rInner: 2.75,
+      overhang: 0.42,
+      dark: true
+    });
+
+    const crownY = belfryY1;
+    addTowerCylinder(crownY, crownY + 0.62, belfryR + 0.28, belfryR - 0.05, 36, 'cream', {
+      edgeLayer: 'bold',
+      verticalJoints: 1,
+      courses: 2
+    });
+    addTowerCylinder(crownY + 0.62, crownY + 0.78, belfryR + 0.34, belfryR - 0.08, 36, 'terracotta', {
+      edgeLayer: 'bold'
+    });
+
+    // Conical/domed roof cap & spiral stair turret finial (HORNS) at the summit
+    addTowerCylinder(crownY, crownY + 1.15, 2.85, 0.9, 24, 'stone', {
+      edgeLayer: 'medium',
+      courses: 3
+    });
+
+    // Spiral stair access turret & flagpole finial rising on the left edge of the belfry crown
+    const turretAngle = 2.45;
+    const tx = Math.cos(turretAngle) * (belfryR - 0.65);
+    const tz = Math.sin(turretAngle) * (belfryR - 0.65);
+    for (let s = 0; s < 8; s++) {
+      const a0 = (s * Math.PI * 2) / 8;
+      const a1 = ((s + 1) * Math.PI * 2) / 8;
+      const tr = 0.62;
+      const p00 = towerPoint(tx + Math.cos(a0) * tr, crownY, tz + Math.sin(a0) * tr);
+      const p10 = towerPoint(tx + Math.cos(a1) * tr, crownY, tz + Math.sin(a1) * tr);
+      const p11 = towerPoint(tx + Math.cos(a1) * tr, crownY + 2.15, tz + Math.sin(a1) * tr);
+      const p01 = towerPoint(tx + Math.cos(a0) * tr, crownY + 2.15, tz + Math.sin(a0) * tr);
+      pushQuadWorld(p00, p10, p11, p01, PALETTE.dark.mid, 0);
+      addLineWorld(p00, p01, 'bold', 0.015);
+      addLineWorld(p01, p11, 'bold', 0.015);
+    }
+    // Summit banner / weathervane mast
+    addLineWorld(towerPoint(0, crownY + 1.15, 0), towerPoint(0, crownY + 3.65, 0), 'bold', 0.02);
+    addLineWorld(towerPoint(0, crownY + 3.35, 0), towerPoint(0.95, crownY + 3.15, -0.4), 'medium', 0.01);
+    addLineWorld(towerPoint(0.95, crownY + 3.15, -0.4), towerPoint(0, crownY + 2.85, 0), 'medium', 0.01);
+
+    // =========================================================================
+    // 7. SUNKEN CATINO BASIN, PIAZZA PLAZA, & ARCHITECTURAL DIAGRAM CONTEXT
+    // =========================================================================
+    // 1. Circular Sunken Marble Basin ("Catino") & Stepped Curb around the leaning base
+    const catinoR1 = 7.25;
+    const catinoR2 = 9.45;
+    const catinoR3 = 10.35;
+    const catinoSegs = 40;
+
+    for (let i = 0; i < catinoSegs; i++) {
+      const a0 = (i * Math.PI * 2) / catinoSegs;
+      const a1 = ((i + 1) * Math.PI * 2) / catinoSegs;
+      const c0 = Math.cos(a0), s0 = Math.sin(a0);
+      const c1 = Math.cos(a1), s1 = Math.sin(a1);
+
+      // Sunken basin floor with radial stone joint lines
+      const b0 = [c0 * catinoR1, -0.28, s0 * catinoR1];
+      const b1 = [c1 * catinoR1, -0.28, s1 * catinoR1];
+      const b2 = [c1 * catinoR2, -0.28, s1 * catinoR2];
+      const b3 = [c0 * catinoR2, -0.28, s0 * catinoR2];
+      pushQuadWorld(b0, b1, b2, b3, PALETTE.stone.mid, 0);
+      addLineWorld(b1, b2, 'fine', 0);
+
+      // Inner vertical curb wall of the sunken basin
+      const w0 = [c0 * catinoR2, -0.28, s0 * catinoR2];
+      const w1 = [c1 * catinoR2, -0.28, s1 * catinoR2];
+      const w2 = [c1 * catinoR2, 0.16, s1 * catinoR2];
+      const w3 = [c0 * catinoR2, 0.16, s0 * catinoR2];
+      pushQuadWorld(w1, w0, w3, w2, PALETTE.cream.shade, -0.04);
+      addLineWorld(w2, w3, 'bold', 0.015);
+
+      // Outer stepped marble curb ring
+      const r0 = [c0 * catinoR2, 0.16, s0 * catinoR2];
+      const r1 = [c1 * catinoR2, 0.16, s1 * catinoR2];
+      const r2 = [c1 * catinoR3, 0.16, s1 * catinoR3];
+      const r3 = [c0 * catinoR3, 0.16, s0 * catinoR3];
+      pushQuadWorld(r0, r1, r2, r3, PALETTE.cream.top, 0);
+      addLineWorld(r2, r3, 'bold', 0.015);
+      if (i % 2 === 0) addLineWorld(r1, r2, 'medium', 0);
+    }
+
+    // 2. Axis-aligned helper for Ground Plinth, Gridded Courtyard, & Ghost Context
+    function addWorldBox(x, y, z, w, h, d, palName = 'plaza', lyr = 'bold') {
+      const pal = PALETTE[palName] || PALETTE.plaza;
+      const x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
+      const p000 = [x0, y0, z0], p100 = [x1, y0, z0], p110 = [x1, y1, z0], p010 = [x0, y1, z0];
+      const p001 = [x0, y0, z1], p101 = [x1, y0, z1], p111 = [x1, y1, z1], p011 = [x0, y1, z1];
+
+      pushQuadWorld(p001, p101, p111, p011, pal.lit, 0);
+      pushQuadWorld(p101, p100, p110, p111, pal.shade, 0);
+      pushQuadWorld(p011, p111, p110, p010, pal.top, 0);
+      pushQuadWorld(p000, p100, p101, p001, pal.bot, 0);
+      pushQuadWorld(p100, p000, p010, p110, pal.shade, 0);
+      pushQuadWorld(p000, p001, p011, p010, pal.mid, 0);
+
+      const edges = [
+        [p000, p100], [p100, p101], [p101, p001], [p001, p000],
+        [p010, p110], [p110, p111], [p111, p011], [p011, p010],
+        [p000, p010], [p100, p110], [p101, p111], [p001, p011]
+      ];
+      edges.forEach(e => addLineWorld(e[0], e[1], lyr, 0.02));
+    }
+
+    const pMinX = -12.5, pMaxX = 13.5;
+    const pMinZ = -12.5, pMaxZ = 12.5;
+    addWorldBox(pMinX, -0.45, pMinZ, pMaxX - pMinX, 0.45, pMaxZ - pMinZ, 'plaza', 'bold');
+    addWorldBox(pMinX - 0.45, -0.48, pMinZ - 0.45, pMaxX - pMinX + 0.9, 0.06, pMaxZ - pMinZ + 0.9, 'plaza', 'bold');
+
+    // Orthogonal courtyard stone tile grid on the plaza deck around the circular basin
+    const tileStep = 2.15;
+    for (let gx = pMinX + tileStep; gx < pMaxX; gx += tileStep) {
+      for (let gz = pMinZ; gz < pMaxZ - 0.1; gz += 0.5) {
+        const zNext = Math.min(pMaxZ, gz + 0.5);
+        if (Math.hypot(gx, (gz + zNext) * 0.5) > catinoR3 + 0.15) {
+          addLineWorld([gx, 0.02, gz], [gx, 0.02, zNext], 'fine', 0);
+        }
+      }
+    }
+    for (let gz = pMinZ + tileStep; gz < pMaxZ; gz += tileStep) {
+      for (let gx = pMinX; gx < pMaxX - 0.1; gx += 0.5) {
+        const xNext = Math.min(pMaxX, gx + 0.5);
+        if (Math.hypot((gx + xNext) * 0.5, gz) > catinoR3 + 0.15) {
+          addLineWorld([gx, 0.02, gz], [xNext, 0.02, gz], 'fine', 0);
+        }
+      }
+    }
+
+    // Small isometric monument bench in the front-left plaza corner
+    addWorldBox(-7.8, 0.0, 9.2, 1.8, 0.12, 1.8, 'plaza', 'medium');
+    addWorldBox(-7.35, 0.12, 9.5, 0.9, 0.45, 0.7, 'cream', 'bold');
+
+    // 3. Dashed Site Grid Lines, Sketched Shrubs, & Plumb-Line Tilt Diagram
+    function addDashedLineWorld(p1, p2, dashLen = 0.5, gapLen = 0.4) {
+      const dx = p2[0] - p1[0], dy = p2[1] - p1[1], dz = p2[2] - p1[2];
+      const dist = Math.hypot(dx, dy, dz);
+      const ux = dx / dist, uy = dy / dist, uz = dz / dist;
+      let cur = 0;
+      while (cur < dist) {
+        const end = Math.min(dist, cur + dashLen);
+        addLineWorld(
+          [p1[0] + ux * cur, p1[1] + uy * cur, p1[2] + uz * cur],
+          [p1[0] + ux * end, p1[1] + uy * end, p1[2] + uz * end],
+          'faint',
+          0
+        );
+        cur += dashLen + gapLen;
+      }
+    }
+
+    function addSketchShrub(sx, sz) {
+      const r = 0.24 + rng() * 0.09;
+      const h = 0.35 + rng() * 0.12;
+      addLineWorld([sx, -0.45, sz], [sx, -0.45 + h * 0.4, sz], 'medium', 0);
+      addLineWorld([sx - r * 0.8, -0.44, sz + r * 0.5], [sx + r * 0.9, -0.44, sz - r * 0.5], 'fine', 0);
+      const cy = -0.45 + h;
+      addLineWorld([sx - r, cy, sz], [sx, cy + r * 0.7, sz - r], 'medium', 0.01);
+      addLineWorld([sx, cy + r * 0.7, sz - r], [sx + r, cy, sz], 'medium', 0.01);
+      addLineWorld([sx + r, cy, sz], [sx, cy - r * 0.4, sz + r], 'medium', 0.01);
+      addLineWorld([sx, cy - r * 0.4, sz + r], [sx - r, cy, sz], 'medium', 0.01);
+    }
+
+    const siteLim = 21.0;
+    for (let s = -19.5; s <= 19.5; s += 3.5) {
+      if (s < pMinX - 0.6 || s > pMaxX + 0.6) {
+        addDashedLineWorld([s, -0.45, -siteLim], [s, -0.45, siteLim]);
+      } else {
+        addDashedLineWorld([s, -0.45, pMaxZ + 0.6], [s, -0.45, siteLim + 3.0]);
+      }
+      if (s < pMinZ - 0.6 || s > pMaxZ + 0.6) {
+        addDashedLineWorld([-siteLim, -0.45, s], [siteLim, -0.45, s]);
+      } else {
+        addDashedLineWorld([pMaxX + 0.6, -0.45, s], [siteLim + 3.0, -0.45, s]);
+        addDashedLineWorld([-siteLim, -0.45, s], [pMinX - 0.6, -0.45, s]);
+      }
+    }
+
+    for (let sx = -18.5; sx <= 19.5; sx += 3.0) {
+      for (let sz = -17.5; sz <= 18.5; sz += 3.0) {
+        const inside = sx > pMinX - 1.0 && sx < pMaxX + 1.0 && sz > pMinZ - 1.0 && sz < pMaxZ + 1.0;
+        if (!inside && Math.hypot(sx, sz) < 22.5 && rng() > 0.30) {
+          addSketchShrub(sx, sz);
+        }
+      }
+    }
+
+    // Ghost wireframe low-rise Piazza context massings at outer corners
+    addWorldBox(pMaxX + 1.2, -0.45, -6.5, 4.8, 5.2, 8.2, 'ghost', 'faint');
+    addWorldBox(pMinX - 6.8, -0.45, -5.5, 5.8, 7.8, 9.0, 'ghost', 'faint');
+    addWorldBox(1.2, -0.45, pMaxZ + 2.2, 2.6, 7.6, 2.6, 'ghost', 'medium');
+    addWorldBox(1.65, -0.45, pMaxZ + 3.1, 1.7, 9.8, 1.7, 'ghost', 'medium');
+
+    // Architectural diagram plumb line vs lean centerline & upper-left construction rays
+    addDashedLineWorld([0, 0, 0], [0, 51.5, 0], 0.65, 0.45);
+    addDashedLineWorld(towerPoint(0, 0, 0), towerPoint(0, 50.5, 0), 0.65, 0.45);
+    for (let i = 0; i < 16; i++) {
+      const spread = (i / 15) * 32;
+      addLineWorld([-48, 52, -8], [-8.5, 6.0 + spread, 5.0 - spread * 0.25], 'faint', 0);
+    }
+
+    // =========================================================================
+    // 8. BUILD THREE.JS GEOMETRIES & RENDER LOOP
+    // =========================================================================
+    const washGeo = new THREE.BufferGeometry();
+    washGeo.setAttribute('position', new THREE.Float32BufferAttribute(washPositions, 3));
+    washGeo.setAttribute('color', new THREE.Float32BufferAttribute(washColors, 3));
+
+    const washMat = new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      polygonOffset: true,
+      polygonOffsetFactor: 1.4,
+      polygonOffsetUnits: 1.4
+    });
+    scene.add(new THREE.Mesh(washGeo, washMat));
+
+    function createInkSegmentMesh(vertices, hexColor, opacity) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      const mat = new THREE.LineBasicMaterial({
+        color: hexColor,
+        transparent: true,
+        opacity: opacity
+      });
+      return new THREE.LineSegments(geo, mat);
+    }
+
+    scene.add(createInkSegmentMesh(inkLayers.bold,   0x211b17, 0.92));
+    scene.add(createInkSegmentMesh(inkLayers.medium, 0x332a24, 0.80));
+    scene.add(createInkSegmentMesh(inkLayers.fine,   0x4a3f37, 0.44));
+    scene.add(createInkSegmentMesh(inkLayers.rust,   0x8c4531, 0.64));
+    scene.add(createInkSegmentMesh(inkLayers.teal,   0x527d80, 0.52));
+    scene.add(createInkSegmentMesh(inkLayers.faint,  0x6b6157, 0.32));
+
+    window.addEventListener('resize', () => {
+      const newAspect = window.innerWidth / window.innerHeight;
+      camera.left = (-frustumSize * newAspect) / 2;
+      camera.right = (frustumSize * newAspect) / 2;
+      camera.top = frustumSize / 2;
+      camera.bottom = -frustumSize / 2;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      generatePaperOverlay();
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>

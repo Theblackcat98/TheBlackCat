@@ -540,7 +540,7 @@ tools:
   - id: anatomy
     name: Anatomy
     url: anatomy/
-    writeup: blog/anatomy-machines/
+    writeup: showcase/anatomy/
     category: showcase
     kind: exhibit
     short: Six cutaway machines as interactive isometric SVG figures on test rigs.
@@ -573,3 +573,64 @@ tools:
     tags: [agents, ai, simulation, svg]
     related: [hermes-harness-flow, anatomy]
     added: "2026-10-31"
+
+  # ── Showcase (5) ───────────────────────────────────────────────────────────
+  - id: colosseum
+    name: Colosseum
+    url: colosseum/
+    writeup: showcase/colosseum/
+    category: showcase
+    kind: exhibit
+    short: "The Flavian amphitheatre cut open: 80 bays, three arcades, the hypogeum exposed."
+    desc: "The Colosseum as a cutaway axonometric at true proportions (4.5 m unit, 188 x 156 m ellipse, 80 bays): three arcaded storeys and the attic, the cavea stepped back to the arena wall, and the two-level hypogeum exposed under the sand."
+    tags: [svg, isometric, creative-coding, architecture]
+    related: [pisa, hanging-gardens]
+    added: "2026-11-11"
+
+  - id: hanging-gardens
+    name: Hanging Gardens of Babylon
+    url: hanging-gardens/
+    writeup: showcase/hanging-gardens/
+    category: showcase
+    kind: exhibit
+    short: Six planted terraces, a double corner cascade and a walled basin at every landing.
+    desc: "The Hanging Gardens as a ziggurat of six planted terraces: hedged parapets, palms and cypresses overhanging the edges, a double cascade down the near corner into walled basins, and a brick cistern at the summit. Built closed from every orbit angle."
+    tags: [svg, isometric, creative-coding, architecture]
+    related: [colosseum, hanging-gardens-reconstruction]
+    added: "2026-11-11"
+
+  - id: hanging-gardens-reconstruction
+    name: Hanging Gardens, earlier reconstruction
+    url: hanging-gardens-reconstruction/
+    writeup: showcase/hanging-gardens-reconstruction/
+    category: showcase
+    kind: exhibit
+    short: An earlier pass at the same subject, kept for comparison with the finished piece.
+    desc: "An earlier reconstruction of the Hanging Gardens as a stepped axonometric: terraced planting on every level, waterfalls down the tiers, drawn for a front view rather than a full orbit. Kept alongside the finished piece because the difference between them is the point."
+    tags: [svg, isometric, creative-coding, architecture]
+    related: [hanging-gardens]
+    added: "2026-11-11"
+
+  - id: hoogbouw
+    name: Hoogbouw
+    url: hoogbouw/
+    writeup: showcase/hoogbouw/
+    category: showcase
+    kind: exhibit
+    short: "The anonymous Dutch street building as a cutaway: canted bays, cornice bands, stepped gable."
+    desc: "An average Dutch multistory building as a cutaway axonometric: six floors at 5.3 units on a 3.5-unit structural bay, with canted bay windows, cornice bands, a stepped gable, chimneys, and one bay opened to expose the floor structure."
+    tags: [svg, isometric, creative-coding, architecture]
+    related: [pisa, colosseum]
+    added: "2026-11-11"
+
+  - id: pisa
+    name: Leaning Tower of Pisa
+    url: pisa/
+    writeup: showcase/pisa/
+    category: showcase
+    kind: exhibit
+    short: Eight tiers, fifteen blind arches at ground level, and a lean carried on a curved spine.
+    desc: "The Leaning Tower of Pisa as a cutaway axonometric: a stepped marble base, fifteen blind arches round the ground tier, six open colonnades and the belfry, all carried on a spine that eases from 5.65 to 3.65 degrees where the masons corrected the lean."
+    tags: [svg, isometric, creative-coding, architecture]
+    related: [colosseum, hoogbouw]
+    added: "2026-11-11"

@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hoogbouw Axonometric Structure</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #e3ded4;
+    }
+    #canvas-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+    }
+    #paper-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      opacity: 0.55;
+    }
+  </style>
+<meta name="description" content="An average Dutch multistory building as a cutaway axonometric: canted bay windows, cornice bands, a stepped gable and chimneys, with one bay opened to show the floors.">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/hoogbouw/">
+<meta property="og:title" content="Hoogbouw">
+<meta property="og:description" content="An average Dutch multistory building as a cutaway axonometric: canted bay windows, cornice bands, a stepped gable and chimneys, with one bay opened to show the floors.">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/hoogbouw-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "VisualArtwork", "name": "Hoogbouw", "description": "An average Dutch multistory building as a cutaway axonometric: canted bay windows, cornice bands, a stepped gable and chimneys, with one bay opened to show the floors.", "url": "https://theblackcat98.github.io/TheBlackCat/hoogbouw/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/hoogbouw-light.webp", "creator": {"@type": "Person", "name": "Nik"} }</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="hoogbouw"></script>
+</head>
+<body>
+<a class="back tk-fallback" href="../tools/">&#8592; All tools</a>
+  <div id="canvas-container">
+    <canvas id="paper-overlay"></canvas>
+  </div>
+
+  <script src="../vendor/three/three.min.js"></script>
+  <script src="../vendor/three/OrbitControls.js"></script>
+  <script>
+    // =========================================================================
+    // 1. DETERMINISTIC PRNG & PAPER TEXTURE OVERLAY
+    // =========================================================================
+    function mulberry32(a) {
+      return function () {
+        let t = (a += 0x6d2b79f5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    const rng = mulberry32(3727);
+
+    function generatePaperOverlay() {
+      const canvas = document.getElementById('paper-overlay');
+      const w = (canvas.width = window.innerWidth);
+      const h = (canvas.height = window.innerHeight);
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#ede9e0';
+      ctx.fillRect(0, 0, w, h);
+
+      // Subtle drafting grid
+      ctx.strokeStyle = 'rgba(130, 120, 108, 0.09)';
+      ctx.lineWidth = 1;
+      const step = 28;
+      ctx.beginPath();
+      for (let x = 0; x < w; x += step) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+      }
+      for (let y = 0; y < h; y += step) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+      }
+      ctx.stroke();
+
+      // Fine paper grain noise
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+      const localRng = mulberry32(9912);
+      for (let i = 0; i < data.length; i += 4) {
+        const grain = (localRng() - 0.5) * 18;
+        data[i] = Math.min(255, Math.max(0, data[i] + grain));
+        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + grain));
+        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + grain));
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+    generatePaperOverlay();
+
+    // =========================================================================
+    // 2. THREE.JS SCENE & AXONOMETRIC ORTHOGRAPHIC CAMERA
+    // =========================================================================
+    const container = document.getElementById('canvas-container');
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0xe5e0d6, 1);
+    container.insertBefore(renderer.domElement, document.getElementById('paper-overlay'));
+
+    const scene = new THREE.Scene();
+
+    const frustumSize = 56;
+    const aspect = window.innerWidth / window.innerHeight;
+    const camera = new THREE.OrthographicCamera(
+      (-frustumSize * aspect) / 2,
+      (frustumSize * aspect) / 2,
+      frustumSize / 2,
+      -frustumSize / 2,
+      -200,
+      300
+    );
+
+    // True architectural axonometric viewing angle
+    const targetY = 18.2;
+    const camDist = 65;
+    const defaultCamPos = new THREE.Vector3(camDist, targetY + camDist * 0.78, camDist);
+    camera.position.copy(defaultCamPos);
+    camera.lookAt(0, targetY, 0);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, targetY, 0);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.update();
+
+    window.addEventListener('dblclick', () => {
+      camera.position.copy(defaultCamPos);
+      controls.target.set(0, targetY, 0);
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controls.update();
+    });
+
+    // =========================================================================
+    // 3. ARCHITECTURAL WASH & MULTI-WEIGHT INK ENGINE
+    // =========================================================================
+    const PALETTE = {
+      cream:      { zPos: 0xebe5da, xPos: 0xdcd4c6, yPos: 0xf1ede4, yNeg: 0x998c7e, zNeg: 0xd5cdc0, xNeg: 0xe3ddd2 },
+      stone:      { zPos: 0xe2dbd0, xPos: 0xd2c9ba, yPos: 0xeae4da, yNeg: 0x8f8274, zNeg: 0xcbc2b4, xNeg: 0xdad2c6 },
+      terracotta: { zPos: 0xb8725b, xPos: 0x9c5a46, yPos: 0xd1937d, yNeg: 0x6e3b2c, zNeg: 0x915340, xNeg: 0xad6852 },
+      brickDark:  { zPos: 0x965644, xPos: 0x7d4434, yPos: 0xb06e5a, yNeg: 0x572d21, zNeg: 0x753f30, xNeg: 0x8c4f3e },
+      teal:       { zPos: 0x8db3b5, xPos: 0x769c9e, yPos: 0xa6c7c9, yNeg: 0x567577, zNeg: 0x729698, xNeg: 0x84a9ab },
+      tealDeep:   { zPos: 0x749c9f, xPos: 0x608588, yPos: 0x8eb2b5, yNeg: 0x486668, zNeg: 0x5d8082, xNeg: 0x6c9396 },
+      dark:       { zPos: 0x6e6259, xPos: 0x594e46, yPos: 0x82756b, yNeg: 0x3d352f, zNeg: 0x524840, xNeg: 0x665a52 },
+      roof:       { zPos: 0xe6dfd3, xPos: 0xd6cec0, yPos: 0xeee9df, yNeg: 0x8c7f72, zNeg: 0xcfc7b8, xNeg: 0xdfd8cc },
+      plaza:      { zPos: 0xe6e1d7, xPos: 0xdcd6cb, yPos: 0xe8e3d9, yNeg: 0xaba396, zNeg: 0xd9d3c8, xNeg: 0xe0dbd0 },
+      ghost:      { zPos: 0xe6e1d7, xPos: 0xdfd9ce, yPos: 0xebe6dc, yNeg: 0xc7c0b4, zNeg: 0xdcd6cb, xNeg: 0xe3ded4 }
+    };
+
+    const washPositions = [];
+    const washColors = [];
+
+    const inkLayers = {
+      bold:   [], // Primary heavy outlines & structural columns
+      medium: [], // Secondary architectural edges, frames, mullions
+      fine:   [], // Hatching, roof tiles, surface shading
+      rust:   [], // Terracotta brick courses & trim lines
+      teal:   [], // Window pane reflection hatches
+      faint:  []  // Site context & construction lines
+    };
+
+    const tempColor = new THREE.Color();
+
+    function pushQuad(p0, p1, p2, p3, hexColor, shadeShift = 0) {
+      tempColor.setHex(hexColor);
+      if (shadeShift !== 0) {
+        tempColor.offsetHSL(0, 0, shadeShift);
+      }
+      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
+      // Triangle 1
+      washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+      // Triangle 2
+      washPositions.push(p0[0], p0[1], p0[2], p2[0], p2[1], p2[2], p3[0], p3[1], p3[2]);
+      for (let i = 0; i < 6; i++) {
+        washColors.push(r, g, b);
+      }
+    }
+
+    function pushTri(p0, p1, p2, hexColor, shadeShift = 0) {
+      tempColor.setHex(hexColor);
+      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
+      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
+      washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+      for (let i = 0; i < 3; i++) washColors.push(r, g, b);
+    }
+
+    function addLine(x1, y1, z1, x2, y2, z2, layer = 'medium', overshoot = 0.025) {
+      const dx = x2 - x1, dy = y2 - y1, dz = z2 - z1;
+      const len = Math.hypot(dx, dy, dz);
+      if (len < 1e-5) return;
+      const ux = (dx / len) * overshoot;
+      const uy = (dy / len) * overshoot;
+      const uz = (dz / len) * overshoot;
+
+      const j = layer === 'faint' ? 0 : 0.008;
+      const jx1 = (rng() - 0.5) * j, jy1 = (rng() - 0.5) * j, jz1 = (rng() - 0.5) * j;
+      const jx2 = (rng() - 0.5) * j, jy2 = (rng() - 0.5) * j, jz2 = (rng() - 0.5) * j;
+
+      const ax = x1 - ux + jx1, ay = y1 - uy + jy1, az = z1 - uz + jz1;
+      const bx = x2 + ux + jx2, by = y2 + uy + jy2, bz = z2 + uz + jz2;
+
+      const target = inkLayers[layer] || inkLayers.medium;
+      target.push(ax, ay, az, bx, by, bz);
+
+      // Multi-stroke pen weight for bold ink lines
+      if (layer === 'bold') {
+        const off = 0.018;
+        target.push(ax + off, ay, az - off, bx + off, by, bz - off);
+        target.push(ax - off * 0.7, ay + off * 0.7, az + off * 0.7, bx - off * 0.7, by + off * 0.7, bz + off * 0.7);
+      }
+    }
+
+    // =========================================================================
+    // 4. MODULAR ARCHITECTURAL PRIMITIVES
+    // =========================================================================
+    /**
+     * Adds an axis-aligned box with corner min (x, y, z) and dimensions (w, h, d)
+     */
+    function addBox(x, y, z, w, h, d, paletteName = 'cream', opts = {}) {
+      const pal = PALETTE[paletteName] || PALETTE.cream;
+      const shift = opts.shadeShift !== undefined ? opts.shadeShift : (rng() - 0.5) * 0.02;
+      const x0 = x, x1 = x + w;
+      const y0 = y, y1 = y + h;
+      const z0 = z, z1 = z + d;
+
+      const p000 = [x0, y0, z0], p100 = [x1, y0, z0], p110 = [x1, y1, z0], p010 = [x0, y1, z0];
+      const p001 = [x0, y0, z1], p101 = [x1, y0, z1], p111 = [x1, y1, z1], p011 = [x0, y1, z1];
+
+      if (opts.faces !== false) {
+        pushQuad(p001, p101, p111, p011, pal.zPos, shift); // +Z Front-Left
+        pushQuad(p101, p100, p110, p111, pal.xPos, shift); // +X Front-Right
+        pushQuad(p011, p111, p110, p010, pal.yPos, shift); // +Y Top
+        pushQuad(p000, p100, p101, p001, pal.yNeg, shift); // -Y Bottom
+        pushQuad(p100, p000, p010, p110, pal.zNeg, shift); // -Z Back-Right
+        pushQuad(p000, p001, p011, p010, pal.xNeg, shift); // -X Back-Left
+      }
+
+      const edgeLayer = opts.edgeLayer || 'medium';
+      const ov = opts.overshoot !== undefined ? opts.overshoot : 0.025;
+
+      if (opts.edges !== false) {
+        // Bottom loop
+        addLine(x0, y0, z0, x1, y0, z0, edgeLayer, ov);
+        addLine(x1, y0, z0, x1, y0, z1, edgeLayer, ov);
+        addLine(x1, y0, z1, x0, y0, z1, edgeLayer, ov);
+        addLine(x0, y0, z1, x0, y0, z0, edgeLayer, ov);
+        // Top loop
+        addLine(x0, y1, z0, x1, y1, z0, edgeLayer, ov);
+        addLine(x1, y1, z0, x1, y1, z1, edgeLayer, ov);
+        addLine(x1, y1, z1, x0, y1, z1, edgeLayer, ov);
+        addLine(x0, y1, z1, x0, y1, z0, edgeLayer, ov);
+        // Verticals
+        addLine(x0, y0, z0, x0, y1, z0, edgeLayer, ov);
+        addLine(x1, y0, z0, x1, y1, z0, edgeLayer, ov);
+        addLine(x1, y0, z1, x1, y1, z1, edgeLayer, ov);
+        addLine(x0, y0, z1, x0, y1, z1, edgeLayer, ov);
+      }
+
+      // Optional horizontal courses (brick/stone bands)
+      if (opts.courses) {
+        const cLayer = opts.courseLayer || (paletteName === 'terracotta' || paletteName === 'brickDark' ? 'rust' : 'fine');
+        for (let i = 1; i < opts.courses; i++) {
+          const cy = y0 + (h * i) / opts.courses;
+          addLine(x0, cy, z1 + 0.01, x1, cy, z1 + 0.01, cLayer, 0.01);
+          addLine(x1 + 0.01, cy, z0, x1 + 0.01, cy, z1, cLayer, 0.01);
+          addLine(x0 - 0.01, cy, z0, x0 - 0.01, cy, z1, cLayer, 0.01);
+        }
+      }
+
+      // Optional vertical hatching on +Z and +X faces
+      if (opts.vHatchZ) {
+        const hLayer = opts.hatchLayer || 'fine';
+        for (let i = 1; i < opts.vHatchZ; i++) {
+          const hx = x0 + (w * i) / opts.vHatchZ;
+          addLine(hx, y0 + 0.03, z1 + 0.012, hx, y1 - 0.03, z1 + 0.012, hLayer, 0);
+        }
+      }
+      if (opts.vHatchX) {
+        const hLayer = opts.hatchLayer || 'fine';
+        for (let i = 1; i < opts.vHatchX; i++) {
+          const hz = z0 + (d * i) / opts.vHatchX;
+          addLine(x1 + 0.012, y0 + 0.03, hz, x1 + 0.012, y1 - 0.03, hz, hLayer, 0);
+        }
+      }
+    }
+
+    /**
+     * Adds an ornate brick & stone horizontal cornice band (COURSES)
+     */
+    function addCorniceBand(x, y, z, w, h, d, opts = {}) {
+      const overhang = opts.overhang !== undefined ? opts.overhang : 0.14;
+      const lowerH = h * 0.22;
+      const midH = h * 0.52;
+      const topH = h * 0.26;
+
+      // Lower stone trim
+      addBox(x - overhang * 0.4, y, z - overhang * 0.4, w + overhang * 0.8, lowerH, d + overhang * 0.8, 'cream', {
+        edgeLayer: 'medium'
+      });
+      // Terracotta brick frieze with horizontal & soldier courses
+      addBox(x, y + lowerH, z, w, midH, d, opts.dark ? 'brickDark' : 'terracotta', {
+        edgeLayer: 'medium',
+        courses: 3,
+        vHatchZ: Math.max(3, Math.round(w * 3.2)),
+        vHatchX: Math.max(3, Math.round(d * 3.2)),
+        hatchLayer: 'rust'
+      });
+      // Upper projecting stone cornice hood
+      addBox(x - overhang, y + lowerH + midH, z - overhang, w + overhang * 2, topH, d + overhang * 2, 'cream', {
+        edgeLayer: 'bold'
+      });
+    }
+
+    /**
+     * Adds a multipane canal-house casement window assembly (PANELS)
+     * face: 'Z+' (front-left), 'X+' (front-right), 'X-' (back-left)
+     */
+    function addWindowPanel(x, y, z, span, height, face = 'Z+', opts = {}) {
+      const cols = opts.cols || Math.max(2, Math.round(span / 0.85));
+      const hasTransom = opts.transom !== false;
+      const transomH = hasTransom ? height * 0.26 : 0;
+      const frameT = 0.1;
+
+      if (face === 'Z+') {
+        // Recessed backing panel
+        addBox(x, y, z - 0.12, span, height, 0.12, opts.deep ? 'tealDeep' : 'teal', { edgeLayer: 'medium' });
+        // Sill & lintel
+        addBox(x - 0.06, y - 0.1, z - 0.14, span + 0.12, 0.12, 0.24, 'terracotta', { edgeLayer: 'medium' });
+        if (opts.lintel !== false) {
+          addBox(x - 0.05, y + height - 0.04, z - 0.12, span + 0.1, 0.12, 0.2, 'cream', { edgeLayer: 'medium' });
+        }
+        // Vertical mullions
+        for (let i = 0; i <= cols; i++) {
+          const mx = x + (span * i) / cols;
+          addLine(mx, y, z + 0.01, mx, y + height, z + 0.01, i === 0 || i === cols ? 'bold' : 'medium', 0.01);
+          if (i < cols) {
+            const cx = mx + span / cols / 2;
+            addLine(cx, y, z + 0.008, cx, y + height, z + 0.008, 'fine', 0);
+            // Glass reflection strokes
+            addLine(cx - 0.08, y + 0.2, z + 0.01, cx - 0.08, y + height - 0.2, z + 0.01, 'teal', 0);
+            addLine(cx + 0.06, y + 0.35, z + 0.01, cx + 0.06, y + height - 0.3, z + 0.01, 'teal', 0);
+          }
+        }
+        // Horizontal transom & muntins
+        if (hasTransom) {
+          const ty = y + height - transomH;
+          addLine(x, ty, z + 0.015, x + span, ty, z + 0.015, 'medium', 0.01);
+          addLine(x, ty - 0.06, z + 0.015, x + span, ty - 0.06, z + 0.015, 'fine', 0.01);
+        }
+        const midY = y + (height - transomH) * 0.5;
+        addLine(x, midY, z + 0.01, x + span, midY, z + 0.01, 'fine', 0.01);
+      } else if (face === 'X+') {
+        addBox(x - 0.12, y, z, 0.12, height, span, opts.deep ? 'tealDeep' : 'teal', { edgeLayer: 'medium' });
+        addBox(x - 0.14, y - 0.1, z - 0.06, 0.24, 0.12, span + 0.12, 'terracotta', { edgeLayer: 'medium' });
+        if (opts.lintel !== false) {
+          addBox(x - 0.12, y + height - 0.04, z - 0.05, 0.2, 0.12, span + 0.1, 'cream', { edgeLayer: 'medium' });
+        }
+        for (let i = 0; i <= cols; i++) {
+          const mz = z + (span * i) / cols;
+          addLine(x + 0.01, y, mz, x + 0.01, y + height, mz, i === 0 || i === cols ? 'bold' : 'medium', 0.01);
+          if (i < cols) {
+            const cz = mz + span / cols / 2;
+            addLine(x + 0.008, y, cz, x + 0.008, y + height, cz, 'fine', 0);
+            addLine(x + 0.01, y + 0.25, cz - 0.06, x + 0.01, y + height - 0.25, cz - 0.06, 'teal', 0);
+          }
+        }
+        if (hasTransom) {
+          const ty = y + height - transomH;
+          addLine(x + 0.015, ty, z, x + 0.015, ty, z + span, 'medium', 0.01);
+        }
+        const midY = y + (height - transomH) * 0.5;
+        addLine(x + 0.01, midY, z, x + 0.01, midY, z + span, 'fine', 0.01);
+      }
+    }
+
+    /**
+     * Builds a standard modular Amsterdam facade bay (1 or more bays wide/deep)
+     */
+    function addBuildingModule(x, y, z, w, h, d, opts = {}) {
+      const corniceH = opts.corniceH !== undefined ? opts.corniceH : 0.72;
+      const bodyH = h - corniceH;
+      const pierW = opts.pierW !== undefined ? opts.pierW : 0.34;
+      const wallPalette = opts.palette || 'cream';
+
+      // Core structural box
+      addBox(x, y, z, w, bodyH, d, wallPalette, {
+        edgeLayer: 'bold',
+        vHatchZ: opts.solidZ ? Math.round(w * 2.5) : 0,
+        vHatchX: opts.solidX ? Math.round(d * 2.5) : 0
+      });
+
+      // Corner & intermediate pilasters on +Z face
+      const baysZ = opts.baysZ || Math.max(1, Math.round(w / 2.2));
+      const bayWidthZ = (w - pierW * (baysZ + 1)) / baysZ;
+      for (let i = 0; i <= baysZ; i++) {
+        const px = x + i * (bayWidthZ + pierW);
+        addBox(px, y, z + d - 0.06, pierW, bodyH, 0.14, opts.brickPiers ? 'terracotta' : 'cream', {
+          edgeLayer: 'medium',
+          courses: opts.brickPiers ? 8 : 4
+        });
+        if (i < baysZ && !opts.solidZ) {
+          const winX = px + pierW + 0.05;
+          const winW = bayWidthZ - 0.1;
+          const sillH = opts.sillH !== undefined ? opts.sillH : 0.52;
+          // Spandrel panel below window
+          addBox(winX, y + 0.06, z + d - 0.04, winW, sillH - 0.12, 0.08, 'terracotta', {
+            edgeLayer: 'medium',
+            courses: 2,
+            vHatchZ: 5,
+            hatchLayer: 'rust'
+          });
+          addWindowPanel(winX, y + sillH, z + d, winW, bodyH - sillH - 0.22, 'Z+', {
+            cols: opts.winColsZ || 2,
+            deep: opts.deepTeal
+          });
+        }
+      }
+
+      // Corner & intermediate pilasters on +X face
+      const baysX = opts.baysX || Math.max(1, Math.round(d / 2.2));
+      const bayWidthX = (d - pierW * (baysX + 1)) / baysX;
+      for (let i = 0; i <= baysX; i++) {
+        const pz = z + i * (bayWidthX + pierW);
+        addBox(x + w - 0.06, y, pz, 0.14, bodyH, pierW, opts.brickPiers ? 'terracotta' : 'cream', {
+          edgeLayer: 'medium',
+          courses: opts.brickPiers ? 8 : 4
+        });
+        if (i < baysX && !opts.solidX) {
+          const winZ = pz + pierW + 0.05;
+          const winD = bayWidthX - 0.1;
+          const sillH = opts.sillH !== undefined ? opts.sillH : 0.52;
+          addBox(x + w - 0.04, y + 0.06, winZ, 0.08, sillH - 0.12, winD, 'terracotta', {
+            edgeLayer: 'medium',
+            courses: 2,
+            vHatchX: 5,
+            hatchLayer: 'rust'
+          });
+          addWindowPanel(x + w, y + sillH, winZ, winD, bodyH - sillH - 0.22, 'X+', {
+            cols: opts.winColsX || 2,
+            deep: opts.deepTeal
+          });
+        }
+      }
+
+      // Top floor cornice band
+      if (corniceH > 0) {
+        addCorniceBand(x, y + bodyH, z, w, corniceH, d, { overhang: opts.overhang || 0.15, dark: opts.darkCornice });
+      }
+    }
+
+    /**
+     * Adds an open structural post-and-beam colonnade/ladder frame (LADDER / PORTALS)
+     */
+    function addOpenFrame(x, y, z, w, h, d, baysX = 1, baysZ = 1, opts = {}) {
+      const pSize = opts.pillarSize || 0.34;
+      const beamH = opts.beamH || 0.48;
+      const pal = opts.palette || 'cream';
+
+      for (let ix = 0; ix <= baysX; ix++) {
+        for (let iz = 0; iz <= baysZ; iz++) {
+          // Only perimeter pillars
+          if (ix > 0 && ix < baysX && iz > 0 && iz < baysZ) continue;
+          const px = x + (ix * (w - pSize)) / baysX;
+          const pz = z + (iz * (d - pSize)) / baysZ;
+          addBox(px, y, pz, pSize, h - beamH, pSize, pal, {
+            edgeLayer: 'bold',
+            courses: opts.rungs || 7
+          });
+        }
+      }
+
+      // Horizontal tie beam / architrave around top
+      if (opts.corniceTop) {
+        addCorniceBand(x, y + h - beamH, z, w, beamH, d, { overhang: 0.12 });
+      } else {
+        addBox(x, y + h - beamH, z, w, beamH, d, 'terracotta', {
+          edgeLayer: 'bold',
+          courses: 2
+        });
+      }
+
+      // Optional mid-level horizontal ladder struts on left/front faces
+      if (opts.midStruts) {
+        const midY = y + (h - beamH) * 0.52;
+        addBox(x, midY, z + d - pSize, w, 0.22, pSize, 'dark', { edgeLayer: 'medium' });
+        addBox(x, midY, z, pSize, 0.22, d, 'dark', { edgeLayer: 'medium' });
+      }
+    }
+
+    /**
+     * Adds the signature protruding polygonal/canted bay window (CRAFT) on +Z facade
+     */
+    function addCantedBayWindow(x, y, z, w, h, proj = 0.85) {
+      const inset = w * 0.22;
+      const apronH = h * 0.21;
+      const hoodH = h * 0.21;
+      const glassH = h - apronH - hoodH;
+
+      // Helper to build a trapezoidal prism section between yA and yB
+      function buildTrapSection(yA, yB, expand, palName, isGlass) {
+        const pal = PALETTE[palName];
+        const zBack = z - 0.02;
+        const zFront = z + proj + expand;
+        const xL0 = x - expand, xR0 = x + w + expand;
+        const xL1 = x + inset - expand * 0.4, xR1 = x + w - inset + expand * 0.4;
+
+        const b0 = [xL0, yA, zBack], b1 = [xL1, yA, zFront], b2 = [xR1, yA, zFront], b3 = [xR0, yA, zBack];
+        const t0 = [xL0, yB, zBack], t1 = [xL1, yB, zFront], t2 = [xR1, yB, zFront], t3 = [xR0, yB, zBack];
+
+        // 3 front facets + top + bottom
+        pushQuad(b0, b1, t1, t0, pal.xNeg, 0.02); // Left angled facet
+        pushQuad(b1, b2, t2, t1, pal.zPos, 0);    // Center front facet
+        pushQuad(b2, b3, t3, t2, pal.xPos, -0.02);// Right angled facet
+        pushQuad(t0, t1, t2, t3, pal.yPos, 0);    // Top cap
+        pushQuad(b3, b2, b1, b0, pal.yNeg, 0);    // Bottom soffit
+
+        const lyr = isGlass ? 'medium' : 'bold';
+        // Horizontal loops
+        addLine(b0[0], yA, b0[2], b1[0], yA, b1[2], lyr, 0.02);
+        addLine(b1[0], yA, b1[2], b2[0], yA, b2[2], lyr, 0.02);
+        addLine(b2[0], yA, b2[2], b3[0], yA, b3[2], lyr, 0.02);
+
+        addLine(t0[0], yB, t0[2], t1[0], yB, t1[2], lyr, 0.02);
+        addLine(t1[0], yB, t1[2], t2[0], yB, t2[2], lyr, 0.02);
+        addLine(t2[0], yB, t2[2], t3[0], yB, t3[2], lyr, 0.02);
+
+        // Vertical facet ridges
+        addLine(b0[0], yA, b0[2], t0[0], yB, t0[2], lyr, 0.02);
+        addLine(b1[0], yA, b1[2], t1[0], yB, t1[2], lyr, 0.02);
+        addLine(b2[0], yA, b2[2], t2[0], yB, t2[2], lyr, 0.02);
+        addLine(b3[0], yA, b3[2], t3[0], yB, t3[2], lyr, 0.02);
+
+        if (isGlass) {
+          // Transom bar across all 3 facets
+          const ty = yA + glassH * 0.72;
+          addLine(b0[0], ty, b0[2] + 0.01, b1[0], ty, b1[2] + 0.01, 'medium', 0.01);
+          addLine(b1[0], ty, b1[2] + 0.01, b2[0], ty, b2[2] + 0.01, 'medium', 0.01);
+          addLine(b2[0], ty, b2[2] + 0.01, b3[0], ty, b3[2] + 0.01, 'medium', 0.01);
+
+          // Center mullion & glass reflections on front facet
+          const midX = (b1[0] + b2[0]) * 0.5;
+          addLine(midX, yA, zFront + 0.015, midX, yB, zFront + 0.015, 'medium', 0.01);
+          addLine(midX - 0.22, yA + 0.15, zFront + 0.015, midX - 0.22, yB - 0.15, zFront + 0.015, 'teal', 0);
+          addLine(midX + 0.22, yA + 0.15, zFront + 0.015, midX + 0.22, yB - 0.15, zFront + 0.015, 'teal', 0);
+        } else {
+          // Brick courses & hatching on terracotta apron/hood
+          const midY = (yA + yB) * 0.5;
+          addLine(b0[0], midY, b0[2] + 0.01, b1[0], midY, b1[2] + 0.01, 'rust', 0.01);
+          addLine(b1[0], midY, b1[2] + 0.01, b2[0], midY, b2[2] + 0.01, 'rust', 0.01);
+          addLine(b2[0], midY, b2[2] + 0.01, b3[0], midY, b3[2] + 0.01, 'rust', 0.01);
+          const steps = 6;
+          for (let s = 1; s < steps; s++) {
+            const fx = b1[0] + ((b2[0] - b1[0]) * s) / steps;
+            addLine(fx, yA + 0.04, zFront + 0.015, fx, yB - 0.04, zFront + 0.015, 'rust', 0);
+          }
+        }
+      }
+
+      // 1. Lower sculpted terracotta corbel apron
+      buildTrapSection(y, y + apronH, 0.04, 'terracotta', false);
+      addTrapUnderCorbel(x, y, z, w, proj, inset);
+
+      // 2. Multipane teal glass casement zone
+      buildTrapSection(y + apronH, y + apronH + glassH, 0, 'teal', true);
+
+      // 3. Upper projecting terracotta & cream cornice hood
+      buildTrapSection(y + apronH + glassH, y + h - 0.14, 0.08, 'terracotta', false);
+      buildTrapSection(y + h - 0.14, y + h, 0.15, 'cream', false);
+    }
+
+    function addTrapUnderCorbel(x, y, z, w, proj, inset) {
+      // Corner bracket ticks under bay window
+      const x1 = x + inset, x2 = x + w - inset;
+      addBox(x1 - 0.12, y - 0.24, z, 0.24, 0.24, proj * 0.75, 'dark', { edgeLayer: 'medium' });
+      addBox(x2 - 0.12, y - 0.24, z, 0.24, 0.24, proj * 0.75, 'dark', { edgeLayer: 'medium' });
+    }
+
+    /**
+     * Adds an Amsterdam stepped/notched gable crown & attic roof (ROOFS)
+     */
+    function addDutchGableCrown(x, y, z, w, h, d) {
+      const atticH = h * 0.56;
+      // Lower attic story
+      addBuildingModule(x, y, z, w, atticH, d, {
+        baysZ: 1,
+        baysX: 1,
+        winColsZ: 2,
+        winColsX: 2,
+        corniceH: 0.45,
+        brickPiers: true,
+        sillH: 0.32
+      });
+
+      const gy = y + atticH;
+      const gableH = h - atticH;
+      const step1W = w * 0.76;
+      const step2W = w * 0.44;
+      const wallT = 0.28;
+
+      // Stepped/notched front parapet on +Z face
+      const s1H = gableH * 0.44;
+      const s2H = gableH * 0.36;
+      const s3H = gableH * 0.20;
+
+      // Base parapet tier
+      addBox(x + (w - step1W) / 2, gy, z + d - wallT, step1W, s1H, wallT, 'cream', { edgeLayer: 'bold' });
+      // Terracotta coping shoulders
+      addBox(x, gy, z + d - wallT - 0.04, (w - step1W) / 2 + 0.08, 0.22, wallT + 0.08, 'terracotta', { edgeLayer: 'medium' });
+      addBox(x + w - (w - step1W) / 2 - 0.08, gy, z + d - wallT - 0.04, (w - step1W) / 2 + 0.08, 0.22, wallT + 0.08, 'terracotta', { edgeLayer: 'medium' });
+
+      // Middle parapet tier with central hoist opening / relief panel
+      const mx = x + (w - step2W) / 2;
+      addBox(mx, gy + s1H, z + d - wallT, step2W, s2H, wallT, 'cream', { edgeLayer: 'bold' });
+      addBox(mx - 0.18, gy + s1H, z + d - wallT - 0.04, 0.22, 0.18, wallT + 0.08, 'terracotta', { edgeLayer: 'medium' });
+      addBox(mx + step2W - 0.04, gy + s1H, z + d - wallT - 0.04, 0.22, 0.18, wallT + 0.08, 'terracotta', { edgeLayer: 'medium' });
+      addBox(x + w * 0.38, gy + s1H * 0.25, z + d - wallT + 0.04, w * 0.24, s1H * 0.85, wallT, 'tealDeep', { edgeLayer: 'medium' });
+
+      // Top pediment cap
+      const topW = w * 0.24;
+      addBox(x + (w - topW) / 2, gy + s1H + s2H, z + d - wallT - 0.04, topW, s3H, wallT + 0.08, 'terracotta', { edgeLayer: 'bold' });
+
+      // Pitched gable roof running back from the front parapet
+      addPitchedRoof(x + 0.08, gy, z + 0.08, w - 0.16, gableH * 0.78, d - wallT - 0.08, 'Z');
+    }
+
+    /**
+     * Adds a pitched gable or hipped roof with roof-seam hatching (EAVES / ROOFS)
+     */
+    function addPitchedRoof(x, y, z, w, h, d, axis = 'X', opts = {}) {
+      const overhang = opts.overhang || 0.22;
+      const eaveH = 0.22;
+      const x0 = x - overhang, x1 = x + w + overhang;
+      const z0 = z - overhang, z1 = z + d + overhang;
+      const yBase = y + eaveH;
+      const yPeak = y + h;
+
+      // Moulded eave base fascia
+      addBox(x0, y, z0, x1 - x0, eaveH, z1 - z0, 'cream', { edgeLayer: 'bold' });
+
+      // Under-eave dentil brackets
+      const numBracketsX = Math.max(3, Math.round((x1 - x0) * 1.6));
+      for (let i = 0; i <= numBracketsX; i++) {
+        const bx = x0 + ((x1 - x0) * i) / numBracketsX;
+        addLine(bx, y - 0.12, z1, bx, y, z1, 'bold', 0);
+      }
+
+      if (axis === 'X') {
+        // Ridge runs along X axis
+        const zMid = (z0 + z1) * 0.5;
+        const insetX = opts.hipped ? Math.min(w * 0.18, d * 0.45) : 0;
+        const rx0 = x0 + insetX, rx1 = x1 - insetX;
+
+        const bFL = [x0, yBase, z1], bFR = [x1, yBase, z1];
+        const bBL = [x0, yBase, z0], bBR = [x1, yBase, z0];
+        const rL = [rx0, yPeak, zMid], rR = [rx1, yPeak, zMid];
+
+        // Front-Left slope (+Z)
+        pushQuad(bFL, bFR, rR, rL, PALETTE.roof.yPos, 0.01);
+        // Back-Right slope (-Z)
+        pushQuad(bBR, bBL, rL, rR, PALETTE.roof.xPos, -0.02);
+        // Left & right hip triangles
+        pushTri(bBL, bFL, rL, PALETTE.roof.xNeg, 0);
+        pushTri(bFR, bBR, rR, PALETTE.roof.xPos, -0.03);
+
+        // Bold roof outlines
+        addLine(bFL[0], yBase, bFL[2], rL[0], yPeak, rL[2], 'bold', 0.02);
+        addLine(bFR[0], yBase, bFR[2], rR[0], yPeak, rR[2], 'bold', 0.02);
+        addLine(bBL[0], yBase, bBL[2], rL[0], yPeak, rL[2], 'bold', 0.02);
+        addLine(bBR[0], yBase, bBR[2], rR[0], yPeak, rR[2], 'bold', 0.02);
+        addLine(rL[0], yPeak, rL[2], rR[0], yPeak, rR[2], 'bold', 0.03);
+        // Double ridge cap line
+        addLine(rL[0], yPeak + 0.06, rL[2], rR[0], yPeak + 0.06, rR[2], 'medium', 0.02);
+
+        // Roof tile seam hatching
+        const seams = Math.max(8, Math.round((rx1 - rx0) * 3.2));
+        for (let i = 1; i < seams; i++) {
+          const t = i / seams;
+          const sxTop = rx0 + (rx1 - rx0) * t;
+          const sxBot = x0 + (x1 - x0) * t;
+          addLine(sxBot, yBase + 0.02, z1 - 0.02, sxTop, yPeak - 0.02, zMid + 0.02, 'fine', 0);
+        }
+      } else {
+        // Ridge runs along Z axis
+        const xMid = (x0 + x1) * 0.5;
+        const bFL = [x0, yBase, z1], bFR = [x1, yBase, z1];
+        const bBL = [x0, yBase, z0], bBR = [x1, yBase, z0];
+        const rF = [xMid, yPeak, z1], rB = [xMid, yPeak, z0];
+
+        pushQuad(bBL, bFL, rF, rB, PALETTE.roof.zPos, 0);
+        pushQuad(bFR, bBR, rB, rF, PALETTE.roof.xPos, -0.02);
+        pushTri(bFL, bFR, rF, PALETTE.roof.zPos, -0.01);
+        pushTri(bBR, bBL, rB, PALETTE.roof.zNeg, -0.02);
+
+        addLine(rB[0], yPeak, rB[2], rF[0], yPeak, rF[2], 'bold', 0.02);
+        addLine(bFL[0], yBase, bFL[2], rF[0], yPeak, rF[2], 'bold', 0.02);
+        addLine(bFR[0], yBase, bFR[2], rF[0], yPeak, rF[2], 'bold', 0.02);
+
+        const seams = Math.max(6, Math.round((z1 - z0) * 3.0));
+        for (let i = 1; i < seams; i++) {
+          const sz = z0 + ((z1 - z0) * i) / seams;
+          addLine(x0 + 0.02, yBase + 0.02, sz, xMid - 0.02, yPeak - 0.02, sz, 'fine', 0);
+          addLine(x1 - 0.02, yBase + 0.02, sz, xMid + 0.02, yPeak - 0.02, sz, 'fine', 0);
+        }
+      }
+    }
+
+    /**
+     * Adds a tall octagonal/cylindrical dark-hatched brick shaft/chimney (HORNS)
+     */
+    function addChimneyHorn(cx, yBottom, yTop, cz, radius = 0.56) {
+      const sides = 8;
+      const pts = [];
+      for (let i = 0; i < sides; i++) {
+        const ang = (i * Math.PI * 2) / sides + Math.PI / 8;
+        pts.push([cx + Math.cos(ang) * radius, cz + Math.sin(ang) * radius]);
+      }
+
+      for (let i = 0; i < sides; i++) {
+        const next = (i + 1) % sides;
+        const p0 = [pts[i][0], yBottom, pts[i][1]];
+        const p1 = [pts[next][0], yBottom, pts[next][1]];
+        const p2 = [pts[next][0], yTop, pts[next][1]];
+        const p3 = [pts[i][0], yTop, pts[i][1]];
+
+        const shade = (i === 1 || i === 2) ? 0.03 : (i === 5 || i === 6) ? -0.05 : -0.01;
+        pushQuad(p0, p1, p2, p3, PALETTE.dark.zPos, shade);
+
+        // Dense vertical hatching lines along every facet of the shaft
+        addLine(p0[0], yBottom, p0[2], p3[0], yTop, p3[2], 'bold', 0.02);
+        const midX = (p0[0] + p1[0]) * 0.5;
+        const midZ = (p0[2] + p1[2]) * 0.5;
+        addLine(midX, yBottom, midZ, midX, yTop, midZ, 'medium', 0);
+      }
+
+      // Periodic horizontal iron band rings
+      const ringSpacing = 2.65;
+      for (let ry = yBottom + 1.5; ry < yTop - 0.5; ry += ringSpacing) {
+        addBox(cx - radius * 1.08, ry, cz - radius * 1.08, radius * 2.16, 0.18, radius * 2.16, 'terracotta', {
+          edgeLayer: 'bold'
+        });
+      }
+
+      // Flared chimney cap at top
+      addBox(cx - radius * 1.25, yTop, cz - radius * 1.25, radius * 2.5, 0.38, radius * 2.5, 'terracotta', {
+        edgeLayer: 'bold'
+      });
+      addBox(cx - radius * 1.1, yTop + 0.38, cz - radius * 1.1, radius * 2.2, 0.25, radius * 2.2, 'cream', {
+        edgeLayer: 'bold'
+      });
+    }
+
+    // =========================================================================
+    // 5. ASSEMBLING THE HOOGBOUW STRUCTURE (TIERS F1 TO F7)
+    // =========================================================================
+    const FH = 5.3; // Standard floor height (F1 through F6)
+    const B = 3.5;  // Standard structural bay unit
+
+    // -------------------------------------------------------------------------
+    // ZONE A: BACK-LEFT & BACK-RIGHT HIGH-RISE SPINE TOWERS (F1 to F7+)
+    // -------------------------------------------------------------------------
+    // 1. Far-Left Spine Pair (x = -3*B..-2*B, z = -1*B..+1*B) rising to F6.8
+    for (let f = 0; f < 6; f++) {
+      const y = f * FH;
+      // Front-most left bay (z = 0..B)
+      if (f === 2) {
+        // Open colonnade loggia at F3
+        addOpenFrame(-3 * B, y, 0, B, FH, B, 1, 1, { corniceTop: true, midStruts: true });
+        addBuildingModule(-2.82 * B, y, 0.12 * B, B * 0.72, FH - 0.5, B * 0.76, { corniceH: 0, baysZ: 1, baysX: 1 });
+      } else {
+        addBuildingModule(-3 * B, y, 0, B, FH, B, {
+          baysZ: 1,
+          baysX: 1,
+          brickPiers: f % 2 === 1,
+          deepTeal: f < 2
+        });
+      }
+
+      // Open structural ladder framing along the outer left flank (-X face) on F3..F6
+      if (f >= 2) {
+        addOpenFrame(-3 * B - 0.48, y, 0, 0.48, FH, B, 1, 2, {
+          pillarSize: 0.24,
+          rungs: 8,
+          midStruts: true
+        });
+      }
+
+      // Second left bay behind it (z = -B..0)
+      addBuildingModule(-3 * B, y, -B, B, FH, B, {
+        baysZ: 1,
+        baysX: 1,
+        brickPiers: f >= 3
+      });
+    }
+    // Dutch Gable Crowns on top of the Far-Left Spine Pair (above F6)
+    addDutchGableCrown(-3 * B, 6 * FH, 0, B, FH * 0.92, B);
+    addDutchGableCrown(-3 * B, 6 * FH, -B, B, FH * 0.92, B);
+
+    // 2. Tall Cylindrical Brick Chimney / Horn #1 (front-left spine corner)
+    addChimneyHorn(-2.05 * B, 0, 6.28 * FH, 0.85 * B, 0.58);
+
+    // 3. Inner-Left Spine Tower (x = -2*B..-1*B, z = 0..B) rising to F5.5
+    for (let f = 0; f < 5; f++) {
+      const y = f * FH;
+      addBuildingModule(-2 * B, y, 0, B, FH, B, {
+        baysZ: 1,
+        baysX: 1,
+        brickPiers: true,
+        deepTeal: f < 3
+      });
+    }
+    addDutchGableCrown(-2 * B, 5 * FH, 0, B, FH * 0.85, B);
+
+    // 4. Central-Back High-Rise Cluster (x = -2.8*B..-1.8*B, z = -2.1*B..-0.9*B) rising to F7.1
+    for (let f = 0; f < 6; f++) {
+      const y = f * FH;
+      addBuildingModule(-2.2 * B, y, -1.8 * B, B * 1.15, FH, B * 1.8, {
+        baysZ: 1,
+        baysX: 2,
+        brickPiers: f >= 3
+      });
+    }
+    // Elevated stilted frame & twin high gable crowns at F6..F7.1
+    addOpenFrame(-2.35 * B, 5.4 * FH, -1.05 * B, B * 1.1, FH * 0.78, B * 0.95, 1, 1, {
+      corniceTop: true,
+      midStruts: true
+    });
+    addDutchGableCrown(-2.35 * B, 6.18 * FH, -1.05 * B, B * 1.05, FH * 0.95, B * 0.95);
+    addDutchGableCrown(-2.35 * B, 6.18 * FH, -2.0 * B, B * 1.05, FH * 0.95, B * 0.95);
+
+    // 5. Back-Right Apex High-Rise Cluster (x = -1.3*B..-0.2*B, z = -2.6*B..-1.4*B) rising to F7.4
+    for (let f = 0; f < 5; f++) {
+      const y = f * FH;
+      addBuildingModule(-1.3 * B, y, -2.5 * B, B * 1.3, FH, B * 1.4, {
+        baysZ: 1,
+        baysX: 2,
+        brickPiers: true
+      });
+    }
+    // Tall open stilted column frames at F5..F6.4 supporting the highest summit gable blocks
+    addOpenFrame(-1.3 * B, 5 * FH, -1.55 * B, B * 1.05, FH * 1.42, B * 0.95, 1, 1, {
+      corniceTop: true,
+      midStruts: true,
+      rungs: 11
+    });
+    addOpenFrame(-1.3 * B, 5 * FH, -2.5 * B, B * 1.05, FH * 1.42, B * 0.95, 1, 1, {
+      corniceTop: true,
+      midStruts: true,
+      rungs: 11
+    });
+    addDutchGableCrown(-1.3 * B, 6.42 * FH, -1.55 * B, B * 1.02, FH * 0.98, B * 0.95);
+    addDutchGableCrown(-1.3 * B, 6.42 * FH, -2.5 * B, B * 1.02, FH * 0.98, B * 0.95);
+
+    // Step-down Far-Back-Right Single Bay Tower (x = -0.25*B..+0.68*B, z = -2.4*B..-1.45*B)
+    for (let f = 0; f < 5; f++) {
+      addBuildingModule(-0.25 * B, f * FH, -2.35 * B, B * 0.95, FH, B * 0.95, {
+        baysZ: 1,
+        baysX: 1,
+        brickPiers: f % 2 === 0
+      });
+    }
+    addOpenFrame(-0.25 * B, 4.6 * FH, -2.35 * B, B * 0.95, FH * 0.9, B * 0.95, 1, 1, {
+      corniceTop: true,
+      midStruts: true
+    });
+    addDutchGableCrown(-0.25 * B, 5.5 * FH, -2.35 * B, B * 0.95, FH * 0.9, B * 0.95);
+
+    // 6. Second Tall Dark-Hatched Shaft / Horn #2 in the inner junction corner
+    addChimneyHorn(-1.05 * B, 0, 5.85 * FH, -0.05 * B, 0.46);
+
+    // -------------------------------------------------------------------------
+    // ZONE B: MAIN RIGHT WING (HORIZONTAL GALLERY & CORNICE SLAB, F1 to F5.8)
+    // -------------------------------------------------------------------------
+    const rwX = -0.95 * B;
+    const rwW = 3.55 * B; // Extends out to x = +2.6*B
+    const rwZ = -1.45 * B;
+    const rwD = 1.18 * B;
+
+    // F1: Ground floor storefront arcade + central breezeway portal
+    addBuildingModule(rwX, 0, rwZ, rwW * 0.42, FH, rwD, {
+      baysZ: 2,
+      baysX: 1,
+      sillH: 0.25,
+      deepTeal: true,
+      brickPiers: true
+    });
+    // Open portal passage in middle of F1
+    addOpenFrame(rwX + rwW * 0.42, 0, rwZ, rwW * 0.18, FH, rwD, 1, 1, {
+      corniceTop: true,
+      pillarSize: 0.38
+    });
+    // Right-most section of F1
+    addBuildingModule(rwX + rwW * 0.6, 0, rwZ, rwW * 0.4, FH, rwD, {
+      baysZ: 2,
+      baysX: 2,
+      sillH: 0.25,
+      deepTeal: true,
+      brickPiers: true
+    });
+
+    // F2 & F3: Continuous horizontal ribbon/casement stories with bold terracotta bands
+    for (let f = 1; f <= 2; f++) {
+      const y = f * FH;
+      addBuildingModule(rwX, y, rwZ, rwW, FH, rwD, {
+        baysZ: 4,
+        baysX: 2,
+        winColsZ: 3,
+        winColsX: 2,
+        brickPiers: true,
+        corniceH: 0.82,
+        overhang: 0.18
+      });
+    }
+
+    // F4: Lower window tier + upper open colonnade stilt gallery (y = 3*FH .. 4.35*FH)
+    addBuildingModule(rwX, 3 * FH, rwZ, rwW, FH * 0.85, rwD, {
+      baysZ: 4,
+      baysX: 2,
+      winColsZ: 3,
+      brickPiers: false,
+      corniceH: 0.65
+    });
+    addOpenFrame(rwX, 3.85 * FH, rwZ, rwW, FH * 0.58, rwD, 4, 1, {
+      corniceTop: true,
+      pillarSize: 0.36,
+      rungs: 5
+    });
+
+    // F5: Overhanging L-Shaped Sky Gallery & Upper Colonnade (y = 4.43*FH .. 5.85*FH)
+    const f5Y = 4.43 * FH;
+    const f5H = FH * 0.82;
+    // Main bar of F5 along X
+    addBuildingModule(rwX, f5Y, rwZ - 0.08, rwW + 0.12, f5H, rwD + 0.16, {
+      baysZ: 5,
+      baysX: 2,
+      sillH: 0.65,
+      brickPiers: true,
+      corniceH: 0.72,
+      overhang: 0.2
+    });
+    // Returning L-wing of F5 projecting forward (+Z) on the inner-left side
+    const lWingW = 1.15 * B;
+    const lWingD = 1.18 * B;
+    addOpenFrame(rwX, 3.85 * FH, rwZ + rwD, lWingW, FH * 0.58, lWingD, 1, 1, {
+      corniceTop: true,
+      pillarSize: 0.36
+    });
+    addBuildingModule(rwX, f5Y, rwZ + rwD, lWingW, f5H, lWingD, {
+      baysZ: 1,
+      baysX: 2,
+      sillH: 0.65,
+      brickPiers: true,
+      corniceH: 0.72,
+      overhang: 0.2
+    });
+
+    // Open eave colonnade & long pitched roof canopy crowning the Main Right Wing (y = 5.25*FH .. 5.95*FH)
+    const rwEaveY = f5Y + f5H;
+    const rwEaveH = FH * 0.38;
+    addOpenFrame(rwX + lWingW, rwEaveY, rwZ, rwW - lWingW, rwEaveH, rwD, 3, 1, {
+      pillarSize: 0.3,
+      beamH: 0.32
+    });
+    addOpenFrame(rwX, rwEaveY, rwZ, lWingW, rwEaveH, rwD + lWingD, 1, 2, {
+      pillarSize: 0.3,
+      beamH: 0.32
+    });
+    // Long pitched roof along X
+    addPitchedRoof(rwX + 0.05, rwEaveY + rwEaveH, rwZ + 0.05, rwW - 0.1, FH * 0.36, rwD - 0.1, 'X', {
+      hipped: true,
+      overhang: 0.25
+    });
+    // Returning pitched roof over the forward L-wing
+    addPitchedRoof(rwX + 0.05, rwEaveY + rwEaveH, rwZ + rwD - 0.1, lWingW - 0.1, FH * 0.34, lWingD + 0.05, 'Z', {
+      overhang: 0.22
+    });
+
+    // -------------------------------------------------------------------------
+    // ZONE C: FRONT-CENTER STEPPED BAY-WINDOW WING (F1 to F4.65)
+    // -------------------------------------------------------------------------
+    const fwX = -1.02 * B;
+    const fwW = 2.08 * B; // Two structural bays wide
+    const fwZ = 0.22 * B;
+    const fwD = 1.05 * B;
+    const fwBayW = (fwW - 0.38 * 3) / 2;
+
+    // Continuous vertical dark-hatched structural piers (LADDER) running from F1 to F4.35
+    const fwTopY = 4.25 * FH;
+    for (let ip = 0; ip < 3; ip++) {
+      const px = fwX + ip * (fwBayW + 0.38);
+      addBox(px, 0, fwZ + fwD - 0.22, 0.38, fwTopY, 0.42, 'dark', {
+        edgeLayer: 'bold',
+        courses: 36,
+        vHatchZ: 3,
+        vHatchX: 3
+      });
+    }
+
+    // Stacked floors F1, F2, F3, F4 of the Front-Center Wing
+    for (let f = 0; f < 4; f++) {
+      const y = f * FH;
+      const floorH = f === 3 ? FH * 0.88 : FH;
+
+      // Backing core module & side facade (+X face)
+      addBuildingModule(fwX, y, fwZ, fwW, floorH, fwD - 0.12, {
+        solidZ: true,
+        baysX: 1,
+        winColsX: 2,
+        brickPiers: true,
+        corniceH: 0.68
+      });
+
+      // Connecting side bridge frames between Front Wing and Main Right Wing
+      addOpenFrame(fwX, y, rwZ + rwD, fwW, floorH, fwZ - (rwZ + rwD), 2, 1, {
+        corniceTop: true,
+        pillarSize: 0.3
+      });
+
+      // Twin Protruding Canted Bay Windows (CRAFT) on +Z face for each floor
+      for (let ib = 0; ib < 2; ib++) {
+        const bx = fwX + 0.38 + ib * (fwBayW + 0.38) + 0.06;
+        const bw = fwBayW - 0.12;
+        addCantedBayWindow(bx, y + 0.35, fwZ + fwD - 0.1, bw, floorH - 0.62, 0.88);
+      }
+    }
+
+    // Upper open colonnade & long pitched roof canopy crowning the Front-Center Wing at F4.5
+    const fwEaveY = 3.88 * FH;
+    const fwEaveH = FH * 0.44;
+    addOpenFrame(fwX, fwEaveY, fwZ, fwW, fwEaveH, fwD, 2, 1, {
+      pillarSize: 0.34,
+      beamH: 0.36,
+      corniceTop: true
+    });
+    addPitchedRoof(fwX + 0.04, fwEaveY + fwEaveH, fwZ + 0.04, fwW - 0.08, FH * 0.36, fwD - 0.08, 'X', {
+      hipped: true,
+      overhang: 0.25
+    });
+
+    // Ground-Level (F1) Forward-Stepping Bay-Window Porch Pavilion (z = fwZ + fwD .. +1.05*B)
+    const porchZ = fwZ + fwD;
+    const porchD = 0.88 * B;
+    const porchH = FH * 0.88;
+    addBuildingModule(fwX, 0, porchZ, fwW, porchH, porchD - 0.1, {
+      solidZ: true,
+      baysX: 1,
+      winColsX: 2,
+      brickPiers: true,
+      corniceH: 0.68
+    });
+    // Structural piers flanking the ground-level porch bays
+    for (let ip = 0; ip < 3; ip++) {
+      const px = fwX + ip * (fwBayW + 0.38);
+      addBox(px, 0, porchZ + porchD - 0.2, 0.38, porchH, 0.38, 'dark', {
+        edgeLayer: 'bold',
+        courses: 9
+      });
+    }
+    // Twin Canted Bay Windows on the ground-level front porch
+    for (let ib = 0; ib < 2; ib++) {
+      const bx = fwX + 0.38 + ib * (fwBayW + 0.38) + 0.06;
+      const bw = fwBayW - 0.12;
+      addCantedBayWindow(bx, 0.28, porchZ + porchD - 0.08, bw, porchH - 0.52, 0.85);
+    }
+
+    // =========================================================================
+    // 6. GROUND PLAZA, COURTYARD GRID, & IMMEDIATE SITE CONTEXT
+    // =========================================================================
+    const pMinX = -3.45 * B, pMaxX = 3.05 * B;
+    const pMinZ = -2.85 * B, pMaxZ = 2.55 * B;
+    const pW = pMaxX - pMinX, pD = pMaxZ - pMinZ;
+
+    // Main raised architectural plinth under the tower
+    addBox(pMinX, -0.35, pMinZ, pW, 0.35, pD, 'plaza', { edgeLayer: 'bold' });
+    // Outer double border frame on ground plane
+    addBox(pMinX - 0.35, -0.38, pMinZ - 0.35, pW + 0.7, 0.06, pD + 0.7, 'plaza', { edgeLayer: 'bold' });
+
+    // Gridded Courtyard Pavement (HOF) in the front-right pocket
+    const ctX0 = fwX + fwW + 0.15, ctX1 = pMaxX - 0.25;
+    const ctZ0 = rwZ + rwD + 0.15, ctZ1 = pMaxZ - 0.25;
+    addBox(ctX0, -0.02, ctZ0, ctX1 - ctX0, 0.08, ctZ1 - ctZ0, 'plaza', { edgeLayer: 'bold' });
+
+    const gridSteps = 7;
+    for (let i = 1; i < gridSteps; i++) {
+      const gx = ctX0 + ((ctX1 - ctX0) * i) / gridSteps;
+      const gz = ctZ0 + ((ctZ1 - ctZ0) * i) / gridSteps;
+      addLine(gx, 0.08, ctZ0, gx, 0.08, ctZ1, 'medium', 0);
+      addLine(ctX0, 0.08, gz, ctX1, 0.08, gz, 'medium', 0);
+    }
+
+    // Left courtyard apron tiles
+    for (let i = 1; i <= 5; i++) {
+      const gz = -1.2 * B + i * 0.65 * B;
+      if (gz < pMaxZ) addLine(pMinX, 0.04, gz, fwX, 0.04, gz, 'fine', 0);
+    }
+
+    // Small isometric courtyard table/bench monument in front-left plaza pocket
+    const monX = -0.55 * B, monZ = 2.85 * B;
+    addBox(monX - 0.85, -0.35, monZ - 0.85, 1.7, 0.12, 1.7, 'plaza', { edgeLayer: 'medium' });
+    addBox(monX - 0.45, -0.23, monZ - 0.35, 0.9, 0.42, 0.7, 'cream', { edgeLayer: 'bold' });
+
+    // Subtle wireframe site context (dotted street lanes, tiny sketched shrubs, ghost neighbor outlines)
+    function addDashedLine(x1, y1, z1, x2, y2, z2, dashLen = 0.45, gapLen = 0.38) {
+      const dx = x2 - x1, dy = y2 - y1, dz = z2 - z1;
+      const dist = Math.hypot(dx, dy, dz);
+      const ux = dx / dist, uy = dy / dist, uz = dz / dist;
+      let cur = 0;
+      while (cur < dist) {
+        const end = Math.min(dist, cur + dashLen);
+        addLine(x1 + ux * cur, y1 + uy * cur, z1 + uz * cur, x1 + ux * end, y1 + uy * end, z1 + uz * end, 'faint', 0);
+        cur += dashLen + gapLen;
+      }
+    }
+
+    function addSketchShrub(sx, sz) {
+      const r = 0.22 + rng() * 0.08;
+      const h = 0.32 + rng() * 0.12;
+      // Tiny trunk & ground shadow tick
+      addLine(sx, -0.35, sz, sx, -0.35 + h * 0.4, sz, 'medium', 0);
+      addLine(sx - r * 0.8, -0.34, sz + r * 0.5, sx + r * 0.9, -0.34, sz - r * 0.5, 'fine', 0);
+      // Sketchy crown loops
+      const crownY = -0.35 + h;
+      addLine(sx - r, crownY, sz, sx, crownY + r * 0.7, sz - r, 'medium', 0.01);
+      addLine(sx, crownY + r * 0.7, sz - r, sx + r, crownY, sz, 'medium', 0.01);
+      addLine(sx + r, crownY, sz, sx, crownY - r * 0.4, sz + r, 'medium', 0.01);
+      addLine(sx, crownY - r * 0.4, sz + r, sx - r, crownY, sz, 'medium', 0.01);
+    }
+
+    // Surrounding street grid lanes & shrub rows
+    const siteLimit = 5.2 * B;
+    for (let s = -4.8 * B; s <= 4.8 * B; s += 0.95 * B) {
+      if (s < pMinX - 0.5 || s > pMaxX + 0.5) {
+        addDashedLine(s, -0.35, -siteLimit, s, -0.35, siteLimit);
+      } else {
+        addDashedLine(s, -0.35, pMaxZ + 0.5, s, -0.35, siteLimit + 1.2 * B);
+      }
+      if (s < pMinZ - 0.5 || s > pMaxZ + 0.5) {
+        addDashedLine(-siteLimit, -0.35, s, siteLimit, -0.35, s);
+      } else {
+        addDashedLine(pMaxX + 0.5, -0.35, s, siteLimit + 1.2 * B, -0.35, s);
+        addDashedLine(-siteLimit, -0.35, s, pMinX - 0.5, -0.35, s);
+      }
+    }
+
+    for (let sx = -4.6 * B; sx <= 4.6 * B; sx += 0.82 * B) {
+      for (let sz = -4.2 * B; sz <= 4.8 * B; sz += 0.82 * B) {
+        const insidePlaza = sx > pMinX - 0.8 && sx < pMaxX + 0.8 && sz > pMinZ - 0.8 && sz < pMaxZ + 0.8;
+        const distCenter = Math.hypot(sx, sz);
+        if (!insidePlaza && distCenter < 5.6 * B && rng() > 0.32) {
+          addSketchShrub(sx, sz);
+        }
+      }
+    }
+
+    // Ghost wireframe neighboring low-rise sheds (right, left, and foreground turret)
+    // Right low warehouse ghost
+    addBox(pMaxX + 0.6, -0.35, -1.6 * B, 1.35 * B, 0.9 * FH, 2.3 * B, 'ghost', { edgeLayer: 'faint' });
+    // Left low warehouse ghost
+    addBox(pMinX - 1.9 * B, -0.35, -1.5 * B, 1.7 * B, 1.45 * FH, 2.5 * B, 'ghost', { edgeLayer: 'faint' });
+    // Foreground stepped turret ghost at bottom-center
+    addBox(0.35 * B, -0.35, pMaxZ + 0.85, 0.72 * B, 1.45 * FH, 0.72 * B, 'ghost', { edgeLayer: 'medium' });
+    addBox(0.48 * B, -0.35, pMaxZ + 1.15, 0.45 * B, 1.85 * FH, 0.45 * B, 'ghost', { edgeLayer: 'medium' });
+
+    // Faint diagonal construction lines radiating from top-left sky behind the tower
+    for (let i = 0; i < 16; i++) {
+      const spread = (i / 15) * 26;
+      addLine(-14 * B, 9.2 * FH, -2 * B, -3.2 * B, 1.2 * FH + spread, 1.5 * B - spread * 0.3, 'faint', 0);
+    }
+
+    // =========================================================================
+    // 7. BUILD THREE.JS GEOMETRIES & RENDER LOOP
+    // =========================================================================
+    // 1. Solid Wash Occlusion & Color Mesh
+    const washGeo = new THREE.BufferGeometry();
+    washGeo.setAttribute('position', new THREE.Float32BufferAttribute(washPositions, 3));
+    washGeo.setAttribute('color', new THREE.Float32BufferAttribute(washColors, 3));
+
+    const washMat = new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      polygonOffset: true,
+      polygonOffsetFactor: 1.4,
+      polygonOffsetUnits: 1.4
+    });
+    const washMesh = new THREE.Mesh(washGeo, washMat);
+    scene.add(washMesh);
+
+    // 2. Multi-Weight Ink Line Segments
+    function createInkSegmentMesh(vertices, hexColor, opacity) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      const mat = new THREE.LineBasicMaterial({
+        color: hexColor,
+        transparent: true,
+        opacity: opacity
+      });
+      return new THREE.LineSegments(geo, mat);
+    }
+
+    scene.add(createInkSegmentMesh(inkLayers.bold,   0x211b17, 0.92));
+    scene.add(createInkSegmentMesh(inkLayers.medium, 0x332a24, 0.80));
+    scene.add(createInkSegmentMesh(inkLayers.fine,   0x4a3f37, 0.44));
+    scene.add(createInkSegmentMesh(inkLayers.rust,   0x8c4531, 0.64));
+    scene.add(createInkSegmentMesh(inkLayers.teal,   0x527d80, 0.52));
+    scene.add(createInkSegmentMesh(inkLayers.faint,  0x6b6157, 0.30));
+
+    // Responsive resize handler
+    window.addEventListener('resize', () => {
+      const newAspect = window.innerWidth / window.innerHeight;
+      camera.left = (-frustumSize * newAspect) / 2;
+      camera.right = (frustumSize * newAspect) / 2;
+      camera.top = frustumSize / 2;
+      camera.bottom = -frustumSize / 2;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      generatePaperOverlay();
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>

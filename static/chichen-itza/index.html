@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>El Castillo, Chichén Itzá — Axonometric Diagram</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #e3ded4;
+    }
+    #canvas-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+    }
+    #hint {
+      position: absolute; left: 18px; right: 18px; bottom: 14px; z-index: 2;
+      color: rgba(65,53,43,.68); font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: .08em; text-transform: uppercase; pointer-events: none;
+    }
+    #paper-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      opacity: 0.55;
+    }
+  </style>
+<meta name="description" content="El Castillo at Chichén Itzá drawn as an axonometric on drafting paper: a nine-terrace stepped pyramid with four stairways — ninety-one steps each in the real stone, 365 with the platform — a temple on top, and serpent heads at the foot of the northern balustrades.">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/chichen-itza/">
+<meta property="og:title" content="Chichén Itzá — El Castillo">
+<meta property="og:description" content="El Castillo at Chichén Itzá drawn as an axonometric on drafting paper: a nine-terrace stepped pyramid with four stairways — ninety-one steps each in the real stone, 365 with the platform — a temple on top, and serpent heads at the foot of the northern balustrades.">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/chichen-itza-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "VisualArtwork", "name": "Chichén Itzá — El Castillo", "description": "El Castillo at Chichén Itzá drawn as an axonometric on drafting paper: a nine-terrace stepped pyramid with four stairways — ninety-one steps each in the real stone, 365 with the platform — a temple on top, and serpent heads at the foot of the northern balustrades.", "url": "https://theblackcat98.github.io/TheBlackCat/chichen-itza/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/chichen-itza-light.webp", "creator": {"@type": "Person", "name": "Nik"} }</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="chichen-itza"></script>
+
+</head>
+<body>
+<a class="back tk-fallback" href="../tools/">&#8592; All tools</a>
+  <div id="canvas-container">
+    <canvas id="paper-overlay"></canvas>
+    <div id="hint">CHICH&Eacute;N ITZ&Aacute; &middot; EL CASTILLO &middot; AXONOMETRIC STUDY &nbsp; / &nbsp; DRAG TO ORBIT &middot; DOUBLE-CLICK TO RESET</div>
+  </div>
+
+  <script src="../vendor/three/three.min.js"></script>
+  <script src="../vendor/three/OrbitControls.js"></script>
+  <script>
+    // =========================================================================
+    // 1. DETERMINISTIC PRNG & DRAFTING PAPER TEXTURE OVERLAY
+    // =========================================================================
+    function mulberry32(a) {
+      return function () {
+        let t = (a += 0x6d2b79f5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    const rng = mulberry32(900); // c. AD 900: El Castillo built c. 800-900 AD, Terminal Classic Chichén Itzá
+
+    function generatePaperOverlay() {
+      const canvas = document.getElementById('paper-overlay');
+      const w = (canvas.width = window.innerWidth);
+      const h = (canvas.height = window.innerHeight);
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#ede9e0';
+      ctx.fillRect(0, 0, w, h);
+
+      // Subtle orthogonal drafting grid
+      ctx.strokeStyle = 'rgba(130, 120, 108, 0.09)';
+      ctx.lineWidth = 1;
+      const step = 28;
+      ctx.beginPath();
+      for (let x = 0; x < w; x += step) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+      }
+      for (let y = 0; y < h; y += step) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+      }
+      ctx.stroke();
+
+      // Organic rough paper fiber grain
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+      const localRng = mulberry32(8841);
+      for (let i = 0; i < data.length; i += 4) {
+        const grain = (localRng() - 0.5) * 18;
+        data[i] = Math.min(255, Math.max(0, data[i] + grain));
+        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + grain));
+        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + grain));
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+    generatePaperOverlay();
+
+    // =========================================================================
+    // 2. THREE.JS SCENE & AXONOMETRIC ORTHOGRAPHIC CAMERA
+    // =========================================================================
+    const container = document.getElementById('canvas-container');
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0xe5e0d6, 1);
+    container.insertBefore(renderer.domElement, document.getElementById('paper-overlay'));
+
+    const scene = new THREE.Scene();
+
+    const frustumSize = 60; // SUBJECT FIT: frame the subject ~70% of height
+    const aspect = window.innerWidth / window.innerHeight;
+    const camera = new THREE.OrthographicCamera(
+      (-frustumSize * aspect) / 2,
+      (frustumSize * aspect) / 2,
+      frustumSize / 2,
+      -frustumSize / 2,
+      -200,
+      300
+    );
+
+    const targetY = 7.6; // SUBJECT FIT: vertical centre of the subject
+    const camDist = 72;
+    const defaultCamPos = new THREE.Vector3(camDist, targetY + camDist * 0.78, camDist);
+    camera.position.copy(defaultCamPos);
+    camera.lookAt(0, targetY, 0);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, targetY, 0);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.update();
+
+    window.addEventListener('dblclick', () => {
+      camera.position.copy(defaultCamPos);
+      controls.target.set(0, targetY, 0);
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controls.update();
+    });
+
+    // =========================================================================
+    // 3. COLOR WASH PALETTE & MULTI-WEIGHT INK ENGINE
+    // =========================================================================
+    const PALETTE = {
+      cream:      { lit: 0xefe9de, mid: 0xe4ddd1, shade: 0xd2c9b9, top: 0xf4f0e6, bot: 0x8f8274 },
+      stone:      { lit: 0xe3dcd0, mid: 0xd6cec0, shade: 0xc2b9a9, top: 0xeae4da, bot: 0x807467 },
+      coreWall:   { lit: 0xc9bfb0, mid: 0xb5aa9a, shade: 0x998e7e, top: 0xd6cec0, bot: 0x695e53 },
+      terracotta: { lit: 0xc27a63, mid: 0xb06851, shade: 0x94513d, top: 0xd4947e, bot: 0x6b3829 },
+      brickDark:  { lit: 0x9e5b47, mid: 0x8a4c3a, shade: 0x703b2c, top: 0xb36f5b, bot: 0x4f271c },
+      teal:       { lit: 0x94b9bb, mid: 0x82a8aa, shade: 0x6b9092, top: 0xa8c8ca, bot: 0x517072 },
+      tealDeep:   { lit: 0x789fa2, mid: 0x668c8f, shade: 0x527477, top: 0x8eb2b5, bot: 0x3e595b },
+      dark:       { lit: 0x73675e, mid: 0x5e534b, shade: 0x4a4039, top: 0x85786e, bot: 0x332c27 },
+      plaza:      { lit: 0xe8e3d9, mid: 0xdfd9ce, shade: 0xd2ccc0, top: 0xebe6dc, bot: 0xa69e91 },
+      lime:       { lit: 0xe9e1cf, mid: 0xdbd1ba, shade: 0xc2b696, top: 0xf3edde, bot: 0x877c62 },
+      ghost:      { lit: 0xe6e1d7, mid: 0xdfd9ce, shade: 0xd8d2c6, top: 0xebe6dc, bot: 0xc2bbb0 }
+    };
+
+    const washPositions = [];
+    const washColors = [];
+
+    const inkLayers = {
+      bold:   [], // Primary structural silhouettes, arch rings, column shafts
+      medium: [], // Secondary architectural edges, capitals, stone courses
+      fine:   [], // Directional shadow hatching, roof & stone texture
+      rust:   [], // Terracotta course hatching & ornamental inlays
+      teal:   [], // Intarsia & window reflection strokes
+      faint:  []  // Plumb-line diagram & site grid context
+    };
+
+    const tempColor = new THREE.Color();
+    // Light vector from upper front-left (matches axonometric sun convention)
+    const lightDir = new THREE.Vector3(-0.35, 0.25, 0.90).normalize();
+
+    function computeDirectionalHex(palName, nx, ny, nz) {
+      const pal = PALETTE[palName] || PALETTE.cream;
+      if (ny > 0.65) return pal.top;
+      if (ny < -0.65) return pal.bot;
+      const dot = nx * lightDir.x + ny * lightDir.y + nz * lightDir.z;
+      if (dot > 0.28) return pal.lit;
+      if (dot > -0.18) return pal.mid;
+      return pal.shade;
+    }
+
+    function pushQuadWorld(p0, p1, p2, p3, hexColor, shadeShift = 0) {
+      tempColor.setHex(hexColor);
+      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
+      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
+      washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+      washPositions.push(p0[0], p0[1], p0[2], p2[0], p2[1], p2[2], p3[0], p3[1], p3[2]);
+      for (let i = 0; i < 6; i++) washColors.push(r, g, b);
+    }
+
+    function pushTriWorld(p0, p1, p2, hexColor, shadeShift = 0) {
+      tempColor.setHex(hexColor);
+      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
+      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
+      washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+      for (let i = 0; i < 3; i++) washColors.push(r, g, b);
+    }
+
+    function addLineWorld(p1, p2, layer = 'medium', overshoot = 0.022) {
+      const x1 = p1[0], y1 = p1[1], z1 = p1[2];
+      const x2 = p2[0], y2 = p2[1], z2 = p2[2];
+      const dx = x2 - x1, dy = y2 - y1, dz = z2 - z1;
+      const len = Math.hypot(dx, dy, dz);
+      if (len < 1e-5) return;
+      const ux = (dx / len) * overshoot;
+      const uy = (dy / len) * overshoot;
+      const uz = (dz / len) * overshoot;
+
+      const j = layer === 'faint' ? 0 : 0.007;
+      const ax = x1 - ux + (rng() - 0.5) * j;
+      const ay = y1 - uy + (rng() - 0.5) * j;
+      const az = z1 - uz + (rng() - 0.5) * j;
+      const bx = x2 + ux + (rng() - 0.5) * j;
+      const by = y2 + uy + (rng() - 0.5) * j;
+      const bz = z2 + uz + (rng() - 0.5) * j;
+
+      const target = inkLayers[layer] || inkLayers.medium;
+      target.push(ax, ay, az, bx, by, bz);
+
+      if (layer === 'bold') {
+        const off = 0.017;
+        target.push(ax + off, ay, az - off, bx + off, by, bz - off);
+        target.push(ax - off * 0.7, ay + off * 0.7, az + off * 0.7, bx - off * 0.7, by + off * 0.7, bz + off * 0.7);
+      }
+    }
+
+    // =========================================================================
+    // SUBJECT TRANSFORM — every builder emits points through subjectPoint().
+    // Identity for an upright subject. Pisa overrides it with a curved leaning
+    // spine; keep the hook so warped subjects stay possible. Builders that work
+    // in plain world space (addWorldBox, dashed lines, shrubs) bypass it.
+    // =========================================================================
+    function subjectPoint(x, y, z) { return [x, y, z]; }
+
+
+    // =========================================================================
+    // 4. BUILDERS (cylinder / cornice / column, generalised from Pisa)
+    // =========================================================================
+    /**
+     * Builds a cylindrical or polygonal drum/ring between rInner and rOuter, y0 and y1
+     */
+    function addCylinder(y0, y1, rOuter, rInner, segs, palName = 'cream', opts = {}) {
+      const dTheta = (Math.PI * 2) / segs;
+      const startAngle = opts.angleOffset || 0;
+      const edgeLayer = opts.edgeLayer || 'medium';
+
+      for (let i = 0; i < segs; i++) {
+        const a0 = startAngle + i * dTheta;
+        const a1 = startAngle + (i + 1) * dTheta;
+        const aMid = (a0 + a1) * 0.5;
+
+        const c0 = Math.cos(a0), s0 = Math.sin(a0);
+        const c1 = Math.cos(a1), s1 = Math.sin(a1);
+        const nx = Math.cos(aMid), nz = Math.sin(aMid);
+
+        // Outer wall quad
+        const p00 = subjectPoint(c0 * rOuter, y0, s0 * rOuter);
+        const p10 = subjectPoint(c1 * rOuter, y0, s1 * rOuter);
+        const p11 = subjectPoint(c1 * rOuter, y1, s1 * rOuter);
+        const p01 = subjectPoint(c0 * rOuter, y1, s0 * rOuter);
+
+        const colOuter = computeDirectionalHex(palName, nx, 0, nz);
+        const shift = (rng() - 0.5) * 0.018;
+        pushQuadWorld(p00, p10, p11, p01, colOuter, shift);
+
+        // Top & bottom perimeter ink rings
+        addLineWorld(p00, p10, edgeLayer, 0.015);
+        addLineWorld(p01, p11, edgeLayer, 0.015);
+
+        // Silhouette and periodic vertical joint lines
+        const viewDot = nx * 0.707 + nz * 0.707;
+        const CrossSilhouette = Math.abs(nx * 0.707 - nz * 0.707);
+        if (CrossSilhouette > 0.96) {
+          addLineWorld(p00, p01, 'bold', 0.02);
+        } else if (opts.verticalJoints && i % opts.verticalJoints === 0) {
+          addLineWorld(p00, p01, 'fine', 0.01);
+        }
+
+        // Directional right-side shadow hatching on cylindrical surfaces
+        const lightDot = nx * lightDir.x + nz * lightDir.z;
+        if (opts.shadeHatch !== false && lightDot < -0.12 && viewDot > -0.35) {
+          const hatchCount = lightDot < -0.5 ? 3 : 2;
+          for (let h = 1; h <= hatchCount; h++) {
+            const t = h / (hatchCount + 1);
+            const ha = a0 + (a1 - a0) * t;
+            const hc = Math.cos(ha) * (rOuter + 0.015);
+            const hs = Math.sin(ha) * (rOuter + 0.015);
+            addLineWorld(
+              subjectPoint(hc, y0 + 0.04, hs),
+              subjectPoint(hc, y1 - 0.04, hs),
+              opts.hatchLayer || 'fine',
+              0
+            );
+          }
+        }
+
+        // Optional horizontal stone/brick courses
+        if (opts.courses) {
+          const cLayer = palName === 'terracotta' || palName === 'brickDark' ? 'rust' : 'fine';
+          for (let c = 1; c < opts.courses; c++) {
+            const cy = y0 + ((y1 - y0) * c) / opts.courses;
+            addLineWorld(
+              subjectPoint(c0 * (rOuter + 0.012), cy, s0 * (rOuter + 0.012)),
+              subjectPoint(c1 * (rOuter + 0.012), cy, s1 * (rOuter + 0.012)),
+              cLayer,
+              0.01
+            );
+          }
+        }
+
+        // Top and bottom caps (and inner wall if hollow)
+        if (rInner > 0) {
+          const q00 = subjectPoint(c0 * rInner, y0, s0 * rInner);
+          const q10 = subjectPoint(c1 * rInner, y0, s1 * rInner);
+          const q11 = subjectPoint(c1 * rInner, y1, s1 * rInner);
+          const q01 = subjectPoint(c0 * rInner, y1, s0 * rInner);
+
+          // Inner wall
+          const colInner = computeDirectionalHex(palName, -nx, 0, -nz);
+          pushQuadWorld(q10, q00, q01, q11, colInner, -0.04);
+          // Top annular ring
+          pushQuadWorld(p01, p11, q11, q01, computeDirectionalHex(palName, 0, 1, 0), shift);
+          // Bottom annular soffit
+          pushQuadWorld(q00, q10, p10, p00, computeDirectionalHex(palName, 0, -1, 0), shift);
+
+          if (opts.innerEdges) {
+            addLineWorld(q01, q11, 'medium', 0.01);
+            addLineWorld(q00, q10, 'medium', 0.01);
+          }
+        } else {
+          const centerTop = subjectPoint(0, y1, 0);
+          const centerBot = subjectPoint(0, y0, 0);
+          pushTriWorld(p01, p11, centerTop, computeDirectionalHex(palName, 0, 1, 0), shift);
+          pushTriWorld(p10, p00, centerBot, computeDirectionalHex(palName, 0, -1, 0), shift);
+        }
+      }
+    }
+    /**
+     * Adds a multi-course Romanesque overhanging circular cornice band (COURSES)
+     */
+    function addCircularCornice(y, h, rBase, segs = 36, opts = {}) {
+      const over = opts.overhang || 0.28;
+      const rInner = opts.rInner || 0;
+      const h1 = h * 0.24;
+      const h2 = h * 0.48;
+      const h3 = h * 0.28;
+
+      // Lower stone astragal ring
+      addCylinder(y, y + h1, rBase + over * 0.35, rInner, segs, 'cream', { edgeLayer: 'medium' });
+      // Middle terracotta polychrome frieze with brick courses
+      addCylinder(y + h1, y + h1 + h2, rBase + over * 0.65, rInner, segs, opts.dark ? 'brickDark' : 'terracotta', {
+        edgeLayer: 'medium',
+        courses: 2,
+        hatchLayer: 'rust'
+      });
+      // Upper overhanging corona slab
+      addCylinder(y + h1 + h2, y + h, rBase + over, rInner, segs, 'cream', {
+        edgeLayer: 'bold'
+      });
+
+      // Radial dentil brackets under the cornice overhang
+      const bracketCount = segs * 2;
+      for (let i = 0; i < bracketCount; i++) {
+        const ang = (i * Math.PI * 2) / bracketCount;
+        const c = Math.cos(ang), s = Math.sin(ang);
+        addLineWorld(
+          subjectPoint(c * rBase, y + h1, s * rBase),
+          subjectPoint(c * (rBase + over * 0.92), y + h1 + h2, s * (rBase + over * 0.92)),
+          'medium',
+          0
+        );
+      }
+    }
+    /**
+     * Adds a classical Romanesque column with base plinth, fluted shaft, and capital
+     */
+    function addColumn(angle, radius, y0, y1, colRadius = 0.22, opts = {}) {
+      const cx = Math.cos(angle) * radius;
+      const cz = Math.sin(angle) * radius;
+      const h = y1 - y0;
+      const baseH = Math.min(0.42, h * 0.12);
+      const capH = Math.min(0.52, h * 0.15);
+      const shaftY0 = y0 + baseH;
+      const shaftY1 = y1 - capH;
+
+      // Helper for small local prism around (cx, cz) aligned radially
+      function addLocalPrism(py0, py1, halfW, halfD, palName, lyr = 'medium') {
+        const uX = Math.cos(angle), uZ = Math.sin(angle); // Radial outward
+        const vX = -uZ, vZ = uX;                          // Tangential
+
+        const corners = [
+          [cx + uX * halfD - vX * halfW, cz + uZ * halfD - vZ * halfW],
+          [cx + uX * halfD + vX * halfW, cz + uZ * halfD + vZ * halfW],
+          [cx - uX * halfD + vX * halfW, cz - uZ * halfD + vZ * halfW],
+          [cx - uX * halfD - vX * halfW, cz - uZ * halfD - vZ * halfW]
+        ];
+        const normals = [
+          [uX, uZ],
+          [vX, vZ],
+          [-uX, -uZ],
+          [-vX, -vZ]
+        ];
+
+        const botPts = corners.map(c => subjectPoint(c[0], py0, c[1]));
+        const topPts = corners.map(c => subjectPoint(c[0], py1, c[1]));
+
+        for (let f = 0; f < 4; f++) {
+          const nf = (f + 1) % 4;
+          const col = computeDirectionalHex(palName, normals[f][0], 0, normals[f][1]);
+          pushQuadWorld(botPts[f], botPts[nf], topPts[nf], topPts[f], col, 0);
+          addLineWorld(botPts[f], botPts[nf], lyr, 0.015);
+          addLineWorld(topPts[f], topPts[nf], lyr, 0.015);
+          addLineWorld(botPts[f], topPts[f], lyr, 0.015);
+        }
+        pushQuadWorld(topPts[0], topPts[1], topPts[2], topPts[3], PALETTE[palName].top, 0);
+        pushQuadWorld(botPts[3], botPts[2], botPts[1], botPts[0], PALETTE[palName].bot, 0);
+      }
+
+      // 1. Moulded column base pedestal
+      addLocalPrism(y0, y0 + baseH * 0.55, colRadius * 1.45, colRadius * 1.45, 'stone', 'medium');
+      addLocalPrism(y0 + baseH * 0.55, shaftY0, colRadius * 1.2, colRadius * 1.2, 'terracotta', 'medium');
+
+      // 2. Octagonal/cylindrical column shaft with vertical ink fluting
+      const shaftSegs = 6;
+      for (let s = 0; s < shaftSegs; s++) {
+        const a0 = angle + (s * Math.PI * 2) / shaftSegs;
+        const a1 = angle + ((s + 1) * Math.PI * 2) / shaftSegs;
+        const nx = Math.cos((a0 + a1) * 0.5), nz = Math.sin((a0 + a1) * 0.5);
+
+        const p00 = subjectPoint(cx + Math.cos(a0) * colRadius, shaftY0, cz + Math.sin(a0) * colRadius);
+        const p10 = subjectPoint(cx + Math.cos(a1) * colRadius, shaftY0, cz + Math.sin(a1) * colRadius);
+        const p11 = subjectPoint(cx + Math.cos(a1) * colRadius, shaftY1, cz + Math.sin(a1) * colRadius);
+        const p01 = subjectPoint(cx + Math.cos(a0) * colRadius, shaftY1, cz + Math.sin(a0) * colRadius);
+
+        pushQuadWorld(p00, p10, p11, p01, computeDirectionalHex(opts.shaftPalette || 'cream', nx, 0, nz), 0.02);
+        addLineWorld(p00, p01, s % 2 === 0 ? 'bold' : 'fine', 0.01);
+      }
+
+      // 3. Corinthian bell capital & terracotta/cream abacus block
+      addLocalPrism(shaftY1, shaftY1 + capH * 0.58, colRadius * 1.32, colRadius * 1.32, 'cream', 'medium');
+      addLocalPrism(shaftY1 + capH * 0.58, y1, colRadius * 1.58, colRadius * 1.58, 'terracotta', 'bold');
+    }
+    // =========================================================================
+    // 5. SITE FURNITURE HELPERS
+    // =========================================================================
+    function addWorldBox(x, y, z, w, h, d, palName = 'plaza', lyr = 'bold') {
+      const pal = PALETTE[palName] || PALETTE.plaza;
+      const x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
+      const p000 = [x0, y0, z0], p100 = [x1, y0, z0], p110 = [x1, y1, z0], p010 = [x0, y1, z0];
+      const p001 = [x0, y0, z1], p101 = [x1, y0, z1], p111 = [x1, y1, z1], p011 = [x0, y1, z1];
+
+      pushQuadWorld(p001, p101, p111, p011, pal.lit, 0);
+      pushQuadWorld(p101, p100, p110, p111, pal.shade, 0);
+      pushQuadWorld(p011, p111, p110, p010, pal.top, 0);
+      pushQuadWorld(p000, p100, p101, p001, pal.bot, 0);
+      pushQuadWorld(p100, p000, p010, p110, pal.shade, 0);
+      pushQuadWorld(p000, p001, p011, p010, pal.mid, 0);
+
+      const edges = [
+        [p000, p100], [p100, p101], [p101, p001], [p001, p000],
+        [p010, p110], [p110, p111], [p111, p011], [p011, p010],
+        [p000, p010], [p100, p110], [p101, p111], [p001, p011]
+      ];
+      edges.forEach(e => addLineWorld(e[0], e[1], lyr, 0.02));
+    }
+
+    function addDashedLineWorld(p1, p2, dashLen = 0.5, gapLen = 0.4) {
+      const dx = p2[0] - p1[0], dy = p2[1] - p1[1], dz = p2[2] - p1[2];
+      const dist = Math.hypot(dx, dy, dz);
+      const ux = dx / dist, uy = dy / dist, uz = dz / dist;
+      let cur = 0;
+      while (cur < dist) {
+        const end = Math.min(dist, cur + dashLen);
+        addLineWorld(
+          [p1[0] + ux * cur, p1[1] + uy * cur, p1[2] + uz * cur],
+          [p1[0] + ux * end, p1[1] + uy * end, p1[2] + uz * end],
+          'faint',
+          0
+        );
+        cur += dashLen + gapLen;
+      }
+    }
+
+    function addSketchShrub(sx, sz) {
+      const r = 0.24 + rng() * 0.09;
+      const h = 0.35 + rng() * 0.12;
+      addLineWorld([sx, -0.45, sz], [sx, -0.45 + h * 0.4, sz], 'medium', 0);
+      addLineWorld([sx - r * 0.8, -0.44, sz + r * 0.5], [sx + r * 0.9, -0.44, sz - r * 0.5], 'fine', 0);
+      const cy = -0.45 + h;
+      addLineWorld([sx - r, cy, sz], [sx, cy + r * 0.7, sz - r], 'medium', 0.01);
+      addLineWorld([sx, cy + r * 0.7, sz - r], [sx + r, cy, sz], 'medium', 0.01);
+      addLineWorld([sx + r, cy, sz], [sx, cy - r * 0.4, sz + r], 'medium', 0.01);
+      addLineWorld([sx, cy - r * 0.4, sz + r], [sx - r, cy, sz], 'medium', 0.01);
+    }
+
+
+    // =========================================================================
+    // 5. EL CASTILLO — nine terraces, four stairways, summit temple
+    // =========================================================================
+    // Real proportions: base 55.3 m square, pyramid body 24 m, temple to 30 m.
+    // World units: base half-width 15.5, nine terraces of 1.45 each = 13.05.
+    // Each real stairway has 91 steps: 4 x 91 + the top platform = 365, the
+    // days of the year. Drawn steps are representative (30 per stairway);
+    // all four stairways are present and read from any orbit angle.
+    const TERR = 9;              // nine terraces
+    const TH = 1.45;             // terrace height
+    const BASE_HALF = 15.5;      // half-width of the pyramid base
+    const INSET = 1.15;          // horizontal inset per terrace
+    const PYR_H = TERR * TH;     // 13.05 — top platform height
+    const STAIR_N = 30;          // drawn steps per stairway (91 real)
+    const STAIR_HALF = 2.3;      // stairway half-width
+    const STAIR_D0 = 18.35;      // ground distance of first riser from centre
+
+    // face: 0 = +z (north), 1 = +x (east), 2 = -z (south), 3 = -x (west)
+    // u = distance out from centre along the face normal, s = lateral offset
+    function facePoint(f, u, y, s) {
+      if (f === 0) return [s, y, u];
+      if (f === 1) return [u, y, s];
+      if (f === 2) return [s, y, -u];
+      return [-u, y, s];
+    }
+    function faceNormal(f) {
+      if (f === 0) return [0, 0, 1];
+      if (f === 1) return [1, 0, 0];
+      if (f === 2) return [0, 0, -1];
+      return [-1, 0, 0];
+    }
+
+    // pushQuadWorld with automatic winding so the front face points along n
+    function pushQuadN(p0, p1, p2, p3, hex, nx, ny, nz, shift = 0) {
+      const ux = p1[0] - p0[0], uy = p1[1] - p0[1], uz = p1[2] - p0[2];
+      const vx = p2[0] - p0[0], vy = p2[1] - p0[1], vz = p2[2] - p0[2];
+      const cx = uy * vz - uz * vy, cy = uz * vx - ux * vz, cz = ux * vy - uy * vx;
+      if (cx * nx + cy * ny + cz * nz < 0) pushQuadWorld(p0, p3, p2, p1, hex, shift);
+      else pushQuadWorld(p0, p1, p2, p3, hex, shift);
+    }
+
+    // ---- one terrace: sloped talud, recessed ledge, vertical tablero panel --
+    function addTerrace(k) {
+      const y0 = k * TH, y1 = y0 + TH;
+      const Wk = BASE_HALF - k * INSET;   // face half-width at terrace base
+      const Wk1 = Wk - INSET;             // face half-width at terrace top
+      const talTop = Wk - INSET * 0.5;    // talud top edge half-width
+      const yTal = y0 + TH * 0.60;        // talud top height
+      for (let f = 0; f < 4; f++) {
+        const n = faceNormal(f);
+        const shift = (rng() - 0.5) * 0.014;
+        // talud (battered slope), normal tilted up-slope
+        const talHex = computeDirectionalHex('lime', n[0] * 0.835, 0.55, n[2] * 0.835);
+        pushQuadN(
+          facePoint(f, Wk, y0, -Wk), facePoint(f, Wk, y0, Wk),
+          facePoint(f, talTop, yTal, talTop), facePoint(f, talTop, yTal, -talTop),
+          talHex, n[0] * 0.835, 0.55, n[2] * 0.835, shift);
+        // recessed ledge between talud top and tablero
+        pushQuadN(
+          facePoint(f, talTop, yTal, -talTop), facePoint(f, talTop, yTal, talTop),
+          facePoint(f, Wk1, yTal, Wk1), facePoint(f, Wk1, yTal, -Wk1),
+          PALETTE.lime.top, 0, 1, 0, shift);
+        // tablero (vertical panel)
+        const tabHex = computeDirectionalHex('lime', n[0], n[1], n[2]);
+        pushQuadN(
+          facePoint(f, Wk1, yTal, -Wk1), facePoint(f, Wk1, yTal, Wk1),
+          facePoint(f, Wk1, y1, Wk1), facePoint(f, Wk1, y1, -Wk1),
+          tabHex, n[0], n[1], n[2], shift);
+        // ink: talud top edge + tablero top edge
+        addLineWorld(facePoint(f, talTop, yTal, -talTop), facePoint(f, talTop, yTal, talTop), 'medium', 0.012);
+        addLineWorld(facePoint(f, Wk1, y1, -Wk1), facePoint(f, Wk1, y1, Wk1), 'medium', 0.012);
+        // recessed panel rectangle on the tablero
+        const pu = Wk1 + 0.02, py0 = yTal + 0.09, py1 = y1 - 0.07, ps = Wk1 - 0.42;
+        addLineWorld(facePoint(f, pu, py0, -ps), facePoint(f, pu, py0, ps), 'fine', 0);
+        addLineWorld(facePoint(f, pu, py1, -ps), facePoint(f, pu, py1, ps), 'fine', 0);
+        addLineWorld(facePoint(f, pu, py0, -ps), facePoint(f, pu, py1, -ps), 'fine', 0);
+        addLineWorld(facePoint(f, pu, py0, ps), facePoint(f, pu, py1, ps), 'fine', 0);
+        // shade-side hatching on the talud
+        const lightDot = n[0] * lightDir.x + n[2] * lightDir.z;
+        if (lightDot < -0.12) {
+          for (let j = 0; j < 4; j++) {
+            const s0 = -Wk * 0.62 + j * Wk * 0.38;
+            const a = facePoint(f, Wk - 0.05, y0 + 0.07, s0);
+            const b = facePoint(f, talTop + 0.03, yTal - 0.05, s0 + Wk * 0.10);
+            a[0] += n[0] * 0.02; a[2] += n[2] * 0.02;
+            b[0] += n[0] * 0.02; b[2] += n[2] * 0.02;
+            addLineWorld(a, b, 'fine', 0);
+          }
+        }
+      }
+      // bold corner profile: talud slope, ledge, tablero rise
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+        const A = [sx * Wk, y0, sz * Wk];
+        const B = [sx * talTop, yTal, sz * talTop];
+        const C = [sx * Wk1, yTal, sz * Wk1];
+        const D = [sx * Wk1, y1, sz * Wk1];
+        addLineWorld(A, B, 'bold', 0.015);
+        addLineWorld(B, C, 'bold', 0.015);
+        addLineWorld(C, D, 'bold', 0.015);
+      }
+    }
+
+    // ---- balustrade (alfarda): sloped slab flanking a stairway --------------
+    function addBalustrade(f, side) {
+      const n = faceNormal(f);
+      const sIn = side * STAIR_HALF;
+      const sOut = side * (STAIR_HALF + 0.6);
+      const uF = STAIR_D0 + 0.2;                 // front (ground) end
+      const uB = STAIR_D0 - PYR_H + 0.1;         // top end
+      const HB = 0.95;                           // slab height above slope
+      const yBot = u => STAIR_D0 + 0.2 - u;      // slope line (45 degrees)
+      // lateral outward direction (unit) for shading/winding
+      const pa = facePoint(f, 5, 0, sOut), pb = facePoint(f, 5, 0, sIn);
+      let ln = [pa[0] - pb[0], 0, pa[2] - pb[2]];
+      const ll = Math.hypot(ln[0], ln[2]) || 1; ln = [ln[0] / ll, 0, ln[2] / ll];
+      const sideHex = computeDirectionalHex('lime', ln[0], 0, ln[2]);
+      const topHex = computeDirectionalHex('lime', n[0] * 0.707, 0.707, n[2] * 0.707);
+      // outer side face
+      pushQuadN(facePoint(f, uF, yBot(uF), sOut), facePoint(f, uB, yBot(uB), sOut),
+                facePoint(f, uB, yBot(uB) + HB, sOut), facePoint(f, uF, yBot(uF) + HB, sOut),
+                sideHex, ln[0], 0, ln[2], 0);
+      // inner side face
+      pushQuadN(facePoint(f, uF, yBot(uF), sIn), facePoint(f, uB, yBot(uB), sIn),
+                facePoint(f, uB, yBot(uB) + HB, sIn), facePoint(f, uF, yBot(uF) + HB, sIn),
+                sideHex, -ln[0], 0, -ln[2], -0.02);
+      // sloped top face
+      pushQuadN(facePoint(f, uF, yBot(uF) + HB, sIn), facePoint(f, uF, yBot(uF) + HB, sOut),
+                facePoint(f, uB, yBot(uB) + HB, sOut), facePoint(f, uB, yBot(uB) + HB, sIn),
+                topHex, n[0] * 0.707, 0.707, n[2] * 0.707, 0);
+      // front cap
+      pushQuadN(facePoint(f, uF, yBot(uF), sIn), facePoint(f, uF, yBot(uF), sOut),
+                facePoint(f, uF, yBot(uF) + HB, sOut), facePoint(f, uF, yBot(uF) + HB, sIn),
+                computeDirectionalHex('lime', n[0], 0, n[2]), n[0], 0, n[2], 0);
+      // ink: bold top edge, medium bottom edge on the outer face
+      addLineWorld(facePoint(f, uF, yBot(uF) + HB, sOut), facePoint(f, uB, yBot(uB) + HB, sOut), 'bold', 0.015);
+      addLineWorld(facePoint(f, uF, yBot(uF), sOut), facePoint(f, uB, yBot(uB), sOut), 'medium', 0.01);
+      addLineWorld(facePoint(f, uF, yBot(uF), sOut), facePoint(f, uF, yBot(uF) + HB, sOut), 'medium', 0.01);
+    }
+
+    // ---- one stairway: stepped ramp at 45 degrees + two balustrades ---------
+    function addStairway(f) {
+      const n = faceNormal(f);
+      const sh = PYR_H / STAIR_N;
+      const riserHex = computeDirectionalHex('lime', n[0], n[1], n[2]);
+      for (let i = 0; i < STAIR_N; i++) {
+        const uR = STAIR_D0 - i * sh;
+        const yB = i * sh, yT = (i + 1) * sh;
+        pushQuadN(facePoint(f, uR, yB, -STAIR_HALF), facePoint(f, uR, yB, STAIR_HALF),
+                  facePoint(f, uR, yT, STAIR_HALF), facePoint(f, uR, yT, -STAIR_HALF),
+                  riserHex, n[0], n[1], n[2], (rng() - 0.5) * 0.01);
+        pushQuadN(facePoint(f, uR, yT, -STAIR_HALF), facePoint(f, uR, yT, STAIR_HALF),
+                  facePoint(f, uR - sh, yT, STAIR_HALF), facePoint(f, uR - sh, yT, -STAIR_HALF),
+                  PALETTE.lime.top, 0, 1, 0, 0);
+        addLineWorld(facePoint(f, uR, yT, -STAIR_HALF), facePoint(f, uR, yT, STAIR_HALF), 'medium', 0.01);
+      }
+      addBalustrade(f, -1);
+      addBalustrade(f, +1);
+    }
+
+    // ---- serpent head at the foot of a north balustrade ----------------------
+    function addSerpentHead(side) {
+      const sC = side * (STAIR_HALF + 0.3);   // balustrade centre line
+      const u0 = STAIR_D0 + 0.2;              // balustrade front plane (z)
+      // skull block
+      addWorldBox(sC - 0.58, 0.34, u0, 1.16, 0.68, 1.55, 'lime', 'medium');
+      // lower jaw, thrust forward under the skull
+      addWorldBox(sC - 0.50, 0.0, u0 + 0.28, 1.00, 0.26, 1.55, 'lime', 'medium');
+      // dark mouth slit between jaw and skull
+      addWorldBox(sC - 0.52, 0.265, u0 + 0.30, 1.04, 0.085, 1.42, 'dark', 'fine');
+    }
+
+    // ---- summit temple --------------------------------------------------------
+    function addTemple() {
+      const yB = PYR_H;
+      const HW = 3.9;              // temple half-width
+      const H = 3.1;               // wall height
+      addWorldBox(-HW, yB, -HW, HW * 2, H, HW * 2, 'lime', 'medium');
+      // flat roof slab with overhang
+      addWorldBox(-HW - 0.4, yB + H, -HW - 0.4, (HW + 0.4) * 2, 0.38, (HW + 0.4) * 2, 'lime', 'bold');
+      // doorways: one per face, the north one wider with two column ticks
+      for (let f = 0; f < 4; f++) {
+        const n = faceNormal(f);
+        const wDoor = f === 0 ? 1.5 : 0.95;
+        const hDoor = 2.1;
+        const u = HW + 0.015;
+        pushQuadN(facePoint(f, u, yB + 0.02, -wDoor), facePoint(f, u, yB + 0.02, wDoor),
+                  facePoint(f, u, yB + hDoor, wDoor), facePoint(f, u, yB + hDoor, -wDoor),
+                  PALETTE.dark.shade, n[0], n[1], n[2], 0);
+        addLineWorld(facePoint(f, u + 0.01, yB + 0.02, -wDoor), facePoint(f, u + 0.01, yB + hDoor, -wDoor), 'medium', 0.005);
+        addLineWorld(facePoint(f, u + 0.01, yB + 0.02, wDoor), facePoint(f, u + 0.01, yB + hDoor, wDoor), 'medium', 0.005);
+        addLineWorld(facePoint(f, u + 0.01, yB + hDoor, -wDoor), facePoint(f, u + 0.01, yB + hDoor, wDoor), 'medium', 0.005);
+        if (f === 0) {
+          for (const cs of [-0.5, 0.5]) {
+            addLineWorld(facePoint(f, u + 0.01, yB + 0.02, cs), facePoint(f, u + 0.01, yB + hDoor, cs), 'medium', 0.005);
+          }
+        }
+      }
+    }
+
+    // ---- assemble the pyramid --------------------------------------------------
+    for (let k = 0; k < TERR; k++) addTerrace(k);
+    // top platform (the +1 that makes 365)
+    const W9 = BASE_HALF - TERR * INSET;
+    pushQuadN([-W9, PYR_H, -W9], [W9, PYR_H, -W9], [W9, PYR_H, W9], [-W9, PYR_H, W9],
+              PALETTE.lime.top, 0, 1, 0, 0);
+    for (let f = 0; f < 4; f++) {
+      addStairway(f);
+      // landing strip bridging platform edge (W9) to the stair's top tread
+      pushQuadN(facePoint(f, W9, PYR_H, -STAIR_HALF), facePoint(f, W9, PYR_H, STAIR_HALF),
+                facePoint(f, STAIR_D0 - PYR_H, PYR_H, STAIR_HALF),
+                facePoint(f, STAIR_D0 - PYR_H, PYR_H, -STAIR_HALF),
+                PALETTE.lime.top, 0, 1, 0, 0);
+    }
+    addSerpentHead(-1);
+    addSerpentHead(+1);
+    addTemple();
+
+    // =========================================================================
+    // 6. SITE FURNITURE — limestone plaza, survey grid, scrub, ghost ruins
+    // =========================================================================
+    const pMinX = -21, pMaxX = 21, pMinZ = -21, pMaxZ = 21;
+    addWorldBox(pMinX, -0.45, pMinZ, pMaxX - pMinX, 0.45, pMaxZ - pMinZ, 'plaza', 'bold');
+    addWorldBox(pMinX - 0.45, -0.48, pMinZ - 0.45, pMaxX - pMinX + 0.9, 0.06, pMaxZ - pMinZ + 0.9, 'plaza', 'bold');
+
+    // plaza stone tile grid (fine), kept off the pyramid footprint
+    const tileStep = 2.6;
+    for (let gx = pMinX + tileStep; gx < pMaxX; gx += tileStep) {
+      for (let gz = pMinZ; gz < pMaxZ - 0.1; gz += 0.65) {
+        const zNext = Math.min(pMaxZ, gz + 0.65);
+        if (Math.max(Math.abs(gx), Math.abs((gz + zNext) * 0.5)) > 17.4) {
+          addLineWorld([gx, 0.02, gz], [gx, 0.02, zNext], 'fine', 0);
+        }
+      }
+    }
+    for (let gz = pMinZ + tileStep; gz < pMaxZ; gz += tileStep) {
+      for (let gx = pMinX; gx < pMaxX - 0.1; gx += 0.65) {
+        const xNext = Math.min(pMaxX, gx + 0.65);
+        if (Math.max(Math.abs((gx + xNext) * 0.5), Math.abs(gz)) > 17.4) {
+          addLineWorld([gx, 0.02, gz], [xNext, 0.02, gz], 'fine', 0);
+        }
+      }
+    }
+
+    // low, wide Yucatan scrub — flatter and sparser than the template shrub
+    function addSketchScrub(sx, sz) {
+      const r = 0.42 + rng() * 0.26;
+      const h = 0.15 + rng() * 0.12;
+      const cy = -0.45 + h;
+      addLineWorld([sx, -0.45, sz], [sx, cy, sz], 'medium', 0);
+      addLineWorld([sx - r, -0.45 + h * 0.35, sz + r * 0.3], [sx - r * 0.3, cy + h * 0.55, sz - r * 0.35], 'fine', 0.01);
+      addLineWorld([sx - r * 0.3, cy + h * 0.55, sz - r * 0.35], [sx + r * 0.35, cy, sz + r * 0.25], 'fine', 0.01);
+      addLineWorld([sx + r * 0.35, cy, sz + r * 0.25], [sx + r, -0.45 + h * 0.3, sz - r * 0.3], 'fine', 0.01);
+      addLineWorld([sx - r * 0.7, -0.44, sz + r * 0.55], [sx + r * 0.7, -0.44, sz - r * 0.5], 'fine', 0);
+    }
+
+    const siteLim = 30.0;
+    for (let s = -29.0; s <= 29.0; s += 3.5) {
+      addDashedLineWorld([s, -0.45, -siteLim], [s, -0.45, siteLim]);
+      addDashedLineWorld([-siteLim, -0.45, s], [siteLim, -0.45, s]);
+    }
+    for (let sx = -28.5; sx <= 29.5; sx += 3.0) {
+      for (let sz = -27.5; sz <= 28.5; sz += 3.0) {
+        const inside = Math.abs(sx) < 22.6 && Math.abs(sz) < 22.6;
+        if (!inside && Math.hypot(sx, sz) < 31 && rng() > 0.38) {
+          addSketchScrub(sx, sz);
+        }
+      }
+    }
+
+    // ghost context at the back corners: distant platform edges and ruins, kept low
+    addWorldBox(-27.5, -0.45, -13, 7, 2.4, 9, 'ghost', 'faint');
+    addWorldBox(16, -0.45, -27.5, 9, 3.2, 6.5, 'ghost', 'faint');
+    addWorldBox(-20, -0.45, -24.5, 24, 1.0, 3, 'ghost', 'faint');
+
+    // faint plumb line over the pyramid axis
+    addDashedLineWorld([0, 0, 0], [0, 19.5, 0], 0.65, 0.45);
+
+    // =========================================================================
+    // 6. BUILD THREE.JS GEOMETRIES & RENDER LOOP
+    // =========================================================================
+    const washGeo = new THREE.BufferGeometry();
+    washGeo.setAttribute('position', new THREE.Float32BufferAttribute(washPositions, 3));
+    washGeo.setAttribute('color', new THREE.Float32BufferAttribute(washColors, 3));
+
+    const washMat = new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      polygonOffset: true,
+      polygonOffsetFactor: 1.4,
+      polygonOffsetUnits: 1.4
+    });
+    scene.add(new THREE.Mesh(washGeo, washMat));
+
+    function createInkSegmentMesh(vertices, hexColor, opacity) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      const mat = new THREE.LineBasicMaterial({
+        color: hexColor,
+        transparent: true,
+        opacity: opacity
+      });
+      return new THREE.LineSegments(geo, mat);
+    }
+
+    scene.add(createInkSegmentMesh(inkLayers.bold,   0x211b17, 0.92));
+    scene.add(createInkSegmentMesh(inkLayers.medium, 0x332a24, 0.80));
+    scene.add(createInkSegmentMesh(inkLayers.fine,   0x4a3f37, 0.44));
+    scene.add(createInkSegmentMesh(inkLayers.rust,   0x8c4531, 0.64));
+    scene.add(createInkSegmentMesh(inkLayers.teal,   0x527d80, 0.52));
+    scene.add(createInkSegmentMesh(inkLayers.faint,  0x6b6157, 0.32));
+
+    window.addEventListener('resize', () => {
+      const newAspect = window.innerWidth / window.innerHeight;
+      camera.left = (-frustumSize * newAspect) / 2;
+      camera.right = (frustumSize * newAspect) / 2;
+      camera.top = frustumSize / 2;
+      camera.bottom = -frustumSize / 2;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      generatePaperOverlay();
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+</script>
+</body>
+</html>

@@ -658,3 +658,52 @@ tools:
     tags: [svg, isometric, creative-coding, architecture]
     related: [pisa, colosseum]
     added: "2026-11-11"
+
+
+  - id: great-wall
+    name: Great Wall of China
+    url: great-wall/
+    writeup: showcase/great-wall/
+    category: showcase
+    kind: exhibit
+    short: A Ming watchtower where the wall turns on the ridge — crenellated parapets, a stepped walk, a beacon terrace behind.
+    desc: "A Ming-dynasty section of the Great Wall drawn as an axonometric on drafting paper: a two-storey watchtower where the wall turns on the ridge, crenellated parapets on both sides, the walk stepped down the grades, and a beacon terrace on the spur behind."
+    tags: [svg, isometric, creative-coding, architecture]
+    related: [machu-picchu, taj-mahal]
+    added: "2026-11-11"
+
+  - id: machu-picchu
+    name: Machu Picchu
+    url: machu-picchu/
+    writeup: showcase/machu-picchu/
+    category: showcase
+    kind: exhibit
+    short: The citadel on its saddle — terrace courses, gabled stone houses, the Temple of the Sun, Huayna Picchu behind.
+    desc: "Machu Picchu drawn as an axonometric on drafting paper: the citadel on its ridge saddle — ten agricultural terrace courses, rows of gabled dry-stone houses with trapezoidal doorways, the curved Temple of the Sun, the Intihuatana stone, and Huayna Picchu standing behind."
+    tags: [svg, isometric, creative-coding, architecture]
+    related: [chichen-itza, great-wall]
+    added: "2026-11-11"
+
+  - id: chichen-itza
+    name: Chichén Itzá — El Castillo
+    url: chichen-itza/
+    writeup: showcase/chichen-itza/
+    category: showcase
+    kind: exhibit
+    short: "Nine terraces, four stairways of ninety-one steps: a calendar in stone, serpent heads at the northern stair."
+    desc: "El Castillo at Chichén Itzá drawn as an axonometric on drafting paper: a nine-terrace stepped pyramid with four stairways — ninety-one steps each in the real stone, 365 with the platform — a temple on top, and serpent heads at the foot of the northern balustrades."
+    tags: [svg, isometric, creative-coding, architecture]
+    related: [machu-picchu, colosseum]
+    added: "2026-11-11"
+
+  - id: taj-mahal
+    name: Taj Mahal
+    url: taj-mahal/
+    writeup: showcase/taj-mahal/
+    category: showcase
+    kind: exhibit
+    short: White marble on the garden axis — the great onion dome, four minarets, the reflecting channel leading in.
+    desc: "The Taj Mahal drawn as an axonometric on drafting paper: white marble on the charbagh axis — the great onion dome over a chamfered block of iwans, four minarets leaning a degree outward, and the reflecting channel running down the garden to the gate."
+    tags: [svg, isometric, creative-coding, architecture]
+    related: [great-wall, petra]
+    added: "2026-11-11"

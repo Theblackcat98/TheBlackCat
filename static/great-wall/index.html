@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Great Wall of China — Axonometric Diagram</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #e3ded4;
+    }
+    #canvas-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+    }
+    #hint {
+      position: absolute; left: 18px; bottom: 14px; z-index: 2;
+      max-width: calc(100% - 30px);
+      background: rgba(237,233,224,0.88); padding: 3px 6px; margin: 0 0 -3px -6px;
+      color: rgba(65,53,43,.68); font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: .08em; text-transform: uppercase; pointer-events: none;
+    }
+    #paper-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      opacity: 0.55;
+    }
+  </style>
+<meta name="description" content="A Ming-dynasty section of the Great Wall drawn as an axonometric on drafting paper: a two-storey watchtower where the wall turns on the ridge, crenellated parapets on both sides, the walk stepped down the grades, and a beacon terrace on the spur behind.">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/great-wall/">
+<meta property="og:title" content="Great Wall of China">
+<meta property="og:description" content="A Ming-dynasty section of the Great Wall drawn as an axonometric on drafting paper: a two-storey watchtower where the wall turns on the ridge, crenellated parapets on both sides, the walk stepped down the grades, and a beacon terrace on the spur behind.">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/great-wall-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "VisualArtwork", "name": "Great Wall of China", "description": "A Ming-dynasty section of the Great Wall drawn as an axonometric on drafting paper: a two-storey watchtower where the wall turns on the ridge, crenellated parapets on both sides, the walk stepped down the grades, and a beacon terrace on the spur behind.", "url": "https://theblackcat98.github.io/TheBlackCat/great-wall/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/great-wall-light.webp", "creator": {"@type": "Person", "name": "Nik"} }</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="great-wall"></script>
+
+</head>
+<body>
+<a class="back tk-fallback" href="../tools/">&#8592; All tools</a>
+  <div id="canvas-container">
+    <canvas id="paper-overlay"></canvas>
+    <div id="hint">GREAT WALL OF CHINA &middot; MING SECTION &middot; AXONOMETRIC STUDY &nbsp; / &nbsp; DRAG TO ORBIT &middot; DOUBLE-CLICK TO RESET</div>
+  </div>
+
+  <script src="../vendor/three/three.min.js"></script>
+  <script src="../vendor/three/OrbitControls.js"></script>
+  <script>
+    // =========================================================================
+    // 1. DETERMINISTIC PRNG & DRAFTING PAPER TEXTURE OVERLAY
+    // =========================================================================
+    function mulberry32(a) {
+      return function () {
+        let t = (a += 0x6d2b79f5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    const rng = mulberry32(1644); // 1644: the year the Ming dynasty fell — the dynasty whose wall this is
+
+    function generatePaperOverlay() {
+      const canvas = document.getElementById('paper-overlay');
+      const w = (canvas.width = window.innerWidth);
+      const h = (canvas.height = window.innerHeight);
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#ede9e0';
+      ctx.fillRect(0, 0, w, h);
+
+      // Subtle orthogonal drafting grid
+      ctx.strokeStyle = 'rgba(130, 120, 108, 0.09)';
+      ctx.lineWidth = 1;
+      const step = 28;
+      ctx.beginPath();
+      for (let x = 0; x < w; x += step) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+      }
+      for (let y = 0; y < h; y += step) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+      }
+      ctx.stroke();
+
+      // Organic rough paper fiber grain
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+      const localRng = mulberry32(8841);
+      for (let i = 0; i < data.length; i += 4) {
+        const grain = (localRng() - 0.5) * 18;
+        data[i] = Math.min(255, Math.max(0, data[i] + grain));
+        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + grain));
+        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + grain));
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+    generatePaperOverlay();
+
+    // =========================================================================
+    // 2. THREE.JS SCENE & AXONOMETRIC ORTHOGRAPHIC CAMERA
+    // =========================================================================
+    const container = document.getElementById('canvas-container');
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0xe5e0d6, 1);
+    container.insertBefore(renderer.domElement, document.getElementById('paper-overlay'));
+
+    const scene = new THREE.Scene();
+
+    const frustumSize = 74; // SUBJECT FIT: wide subject — the wall runs to both frame edges
+    const aspect = window.innerWidth / window.innerHeight;
+    const camera = new THREE.OrthographicCamera(
+      (-frustumSize * aspect) / 2,
+      (frustumSize * aspect) / 2,
+      frustumSize / 2,
+      -frustumSize / 2,
+      -200,
+      300
+    );
+
+    const targetY = 7.0; // SUBJECT FIT: vertical centre (ridge valleys to roof ridge)
+    const camDist = 90;
+    const defaultCamPos = new THREE.Vector3(camDist, targetY + camDist * 0.78, camDist);
+    camera.position.copy(defaultCamPos);
+    camera.lookAt(0, targetY, 0);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, targetY, 0);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.update();
+
+    window.addEventListener('dblclick', () => {
+      camera.position.copy(defaultCamPos);
+      controls.target.set(0, targetY, 0);
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controls.update();
+    });
+
+    // =========================================================================
+    // 3. COLOR WASH PALETTE & MULTI-WEIGHT INK ENGINE
+    // =========================================================================
+    const PALETTE = {
+      cream:      { lit: 0xefe9de, mid: 0xe4ddd1, shade: 0xd2c9b9, top: 0xf4f0e6, bot: 0x8f8274 },
+      stone:      { lit: 0xe3dcd0, mid: 0xd6cec0, shade: 0xc2b9a9, top: 0xeae4da, bot: 0x807467 },
+      coreWall:   { lit: 0xc9bfb0, mid: 0xb5aa9a, shade: 0x998e7e, top: 0xd6cec0, bot: 0x695e53 },
+      terracotta: { lit: 0xc27a63, mid: 0xb06851, shade: 0x94513d, top: 0xd4947e, bot: 0x6b3829 },
+      brickDark:  { lit: 0x9e5b47, mid: 0x8a4c3a, shade: 0x703b2c, top: 0xb36f5b, bot: 0x4f271c },
+      teal:       { lit: 0x94b9bb, mid: 0x82a8aa, shade: 0x6b9092, top: 0xa8c8ca, bot: 0x517072 },
+      tealDeep:   { lit: 0x789fa2, mid: 0x668c8f, shade: 0x527477, top: 0x8eb2b5, bot: 0x3e595b },
+      dark:       { lit: 0x73675e, mid: 0x5e534b, shade: 0x4a4039, top: 0x85786e, bot: 0x332c27 },
+      plaza:      { lit: 0xe8e3d9, mid: 0xdfd9ce, shade: 0xd2ccc0, top: 0xebe6dc, bot: 0xa69e91 },
+      ghost:      { lit: 0xe6e1d7, mid: 0xdfd9ce, shade: 0xd8d2c6, top: 0xebe6dc, bot: 0xc2bbb0 },
+      brickGrey:  { lit: 0xc2c5c0, mid: 0xabaca6, shade: 0x8f9189, top: 0xd2d5cf, bot: 0x60625c },
+      roofTile:   { lit: 0x7d848c, mid: 0x686e75, shade: 0x50555c, top: 0x9299a1, bot: 0x35393f },
+      rockHigh:   { lit: 0xd6c8ac, mid: 0xc4b294, shade: 0xa68f6c, top: 0xe4d6bc, bot: 0x7a674c },
+      rockMid:    { lit: 0xc9bba0, mid: 0xb5a586, shade: 0x98835f, top: 0xd8c8ae, bot: 0x6e5c42 },
+      rockLow:    { lit: 0xae9a76, mid: 0x9c8867, shade: 0x82704f, top: 0xbaa888, bot: 0x584a36 }
+    };
+
+    const washPositions = [];
+    const washColors = [];
+
+    const inkLayers = {
+      bold:   [], // Primary structural silhouettes, arch rings, column shafts
+      medium: [], // Secondary architectural edges, capitals, stone courses
+      fine:   [], // Directional shadow hatching, roof & stone texture
+      rust:   [], // Terracotta course hatching & ornamental inlays
+      teal:   [], // Intarsia & window reflection strokes
+      faint:  []  // Plumb-line diagram & site grid context
+    };
+
+    const tempColor = new THREE.Color();
+    // Light vector from upper front-left (matches axonometric sun convention)
+    const lightDir = new THREE.Vector3(-0.35, 0.25, 0.90).normalize();
+
+    function computeDirectionalHex(palName, nx, ny, nz) {
+      const pal = PALETTE[palName] || PALETTE.cream;
+      if (ny > 0.65) return pal.top;
+      if (ny < -0.65) return pal.bot;
+      const dot = nx * lightDir.x + ny * lightDir.y + nz * lightDir.z;
+      if (dot > 0.28) return pal.lit;
+      if (dot > -0.18) return pal.mid;
+      return pal.shade;
+    }
+
+    function pushQuadWorld(p0, p1, p2, p3, hexColor, shadeShift = 0) {
+      tempColor.setHex(hexColor);
+      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
+      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
+      washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+      washPositions.push(p0[0], p0[1], p0[2], p2[0], p2[1], p2[2], p3[0], p3[1], p3[2]);
+      for (let i = 0; i < 6; i++) washColors.push(r, g, b);
+    }
+
+    function pushTriWorld(p0, p1, p2, hexColor, shadeShift = 0) {
+      tempColor.setHex(hexColor);
+      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
+      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
+      washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+      for (let i = 0; i < 3; i++) washColors.push(r, g, b);
+    }
+
+    function addLineWorld(p1, p2, layer = 'medium', overshoot = 0.022) {
+      const x1 = p1[0], y1 = p1[1], z1 = p1[2];
+      const x2 = p2[0], y2 = p2[1], z2 = p2[2];
+      const dx = x2 - x1, dy = y2 - y1, dz = z2 - z1;
+      const len = Math.hypot(dx, dy, dz);
+      if (len < 1e-5) return;
+      const ux = (dx / len) * overshoot;
+      const uy = (dy / len) * overshoot;
+      const uz = (dz / len) * overshoot;
+
+      const j = layer === 'faint' ? 0 : 0.007;
+      const ax = x1 - ux + (rng() - 0.5) * j;
+      const ay = y1 - uy + (rng() - 0.5) * j;
+      const az = z1 - uz + (rng() - 0.5) * j;
+      const bx = x2 + ux + (rng() - 0.5) * j;
+      const by = y2 + uy + (rng() - 0.5) * j;
+      const bz = z2 + uz + (rng() - 0.5) * j;
+
+      const target = inkLayers[layer] || inkLayers.medium;
+      target.push(ax, ay, az, bx, by, bz);
+
+      if (layer === 'bold') {
+        const off = 0.017;
+        target.push(ax + off, ay, az - off, bx + off, by, bz - off);
+        target.push(ax - off * 0.7, ay + off * 0.7, az + off * 0.7, bx - off * 0.7, by + off * 0.7, bz + off * 0.7);
+      }
+    }
+
+    // =========================================================================
+    // SUBJECT TRANSFORM — every builder emits points through subjectPoint().
+    // Identity for an upright subject. Pisa overrides it with a curved leaning
+    // spine; keep the hook so warped subjects stay possible. Builders that work
+    // in plain world space (addWorldBox, dashed lines, shrubs) bypass it.
+    // =========================================================================
+    function subjectPoint(x, y, z) { return [x, y, z]; }
+
+
+    // =========================================================================
+    // 4. BUILDERS (cylinder / cornice / column, generalised from Pisa)
+    // =========================================================================
+    // =========================================================================
+    // 5. SITE FURNITURE HELPERS
+    // =========================================================================
+    function addWorldBox(x, y, z, w, h, d, palName = 'plaza', lyr = 'bold') {
+      const pal = PALETTE[palName] || PALETTE.plaza;
+      const x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
+      const p000 = [x0, y0, z0], p100 = [x1, y0, z0], p110 = [x1, y1, z0], p010 = [x0, y1, z0];
+      const p001 = [x0, y0, z1], p101 = [x1, y0, z1], p111 = [x1, y1, z1], p011 = [x0, y1, z1];
+
+      pushQuadWorld(p001, p101, p111, p011, pal.lit, 0);
+      pushQuadWorld(p101, p100, p110, p111, pal.shade, 0);
+      pushQuadWorld(p011, p111, p110, p010, pal.top, 0);
+      pushQuadWorld(p000, p100, p101, p001, pal.bot, 0);
+      pushQuadWorld(p100, p000, p010, p110, pal.shade, 0);
+      pushQuadWorld(p000, p001, p011, p010, pal.mid, 0);
+
+      const edges = [
+        [p000, p100], [p100, p101], [p101, p001], [p001, p000],
+        [p010, p110], [p110, p111], [p111, p011], [p011, p010],
+        [p000, p010], [p100, p110], [p101, p111], [p001, p011]
+      ];
+      edges.forEach(e => addLineWorld(e[0], e[1], lyr, 0.02));
+    }
+
+    function addDashedLineWorld(p1, p2, dashLen = 0.5, gapLen = 0.4) {
+      const dx = p2[0] - p1[0], dy = p2[1] - p1[1], dz = p2[2] - p1[2];
+      const dist = Math.hypot(dx, dy, dz);
+      const ux = dx / dist, uy = dy / dist, uz = dz / dist;
+      let cur = 0;
+      while (cur < dist) {
+        const end = Math.min(dist, cur + dashLen);
+        addLineWorld(
+          [p1[0] + ux * cur, p1[1] + uy * cur, p1[2] + uz * cur],
+          [p1[0] + ux * end, p1[1] + uy * end, p1[2] + uz * end],
+          'faint',
+          0
+        );
+        cur += dashLen + gapLen;
+      }
+    }
+
+    function addSketchShrub(sx, sz) {
+      const r = 0.24 + rng() * 0.09;
+      const h = 0.35 + rng() * 0.12;
+      addLineWorld([sx, -0.45, sz], [sx, -0.45 + h * 0.4, sz], 'medium', 0);
+      addLineWorld([sx - r * 0.8, -0.44, sz + r * 0.5], [sx + r * 0.9, -0.44, sz - r * 0.5], 'fine', 0);
+      const cy = -0.45 + h;
+      addLineWorld([sx - r, cy, sz], [sx, cy + r * 0.7, sz - r], 'medium', 0.01);
+      addLineWorld([sx, cy + r * 0.7, sz - r], [sx + r, cy, sz], 'medium', 0.01);
+      addLineWorld([sx + r, cy, sz], [sx, cy - r * 0.4, sz + r], 'medium', 0.01);
+      addLineWorld([sx, cy - r * 0.4, sz + r], [sx - r, cy, sz], 'medium', 0.01);
+    }
+
+
+    // =========================================================================
+    // 4. SUBJECT BUILDERS — oriented boxes, tapered blocks, arches, hip roofs.
+    // A "frame" is a centre point plus a unit along-axis u=(ux,uz); the lateral
+    // axis is v=(-uz,ux). All faces are wound CCW seen from outside, matching
+    // the winding conventions of addWorldBox / addBox in the other plates.
+    // =========================================================================
+    function framePoint(cx, cz, ux, uz, du, dv, y) {
+      const vx = -uz, vz = ux;
+      return [cx + ux * du + vx * dv, y, cz + uz * du + vz * dv];
+    }
+
+    /** Axis-aligned-in-frame box: centre (cx,cz), base y, length along u, width along v. */
+    function addOrientedBox(cx, cy, cz, ux, uz, len, h, wid, palName = 'stone', opts = {}) {
+      const hu = len / 2, hv = wid / 2, y1 = cy + h;
+      const pal = PALETTE[palName] || PALETTE.stone;
+      const lyr = opts.edgeLayer || 'medium';
+      const c = [
+        framePoint(cx, cz, ux, uz, -hu,  hv, cy), framePoint(cx, cz, ux, uz,  hu,  hv, cy),
+        framePoint(cx, cz, ux, uz,  hu, -hv, cy), framePoint(cx, cz, ux, uz, -hu, -hv, cy),
+        framePoint(cx, cz, ux, uz, -hu,  hv, y1), framePoint(cx, cz, ux, uz,  hu,  hv, y1),
+        framePoint(cx, cz, ux, uz,  hu, -hv, y1), framePoint(cx, cz, ux, uz, -hu, -hv, y1)
+      ];
+      pushQuadWorld(c[0], c[1], c[5], c[4], pal.lit, 0);          // +v face
+      pushQuadWorld(c[2], c[3], c[7], c[6], pal.shade, 0);        // -v face
+      pushQuadWorld(c[4], c[5], c[6], c[7], pal.top, 0);          // top
+      pushQuadWorld(c[3], c[2], c[1], c[0], pal.bot, 0);          // bottom
+      pushQuadWorld(c[1], c[2], c[6], c[5], pal.shade, 0);        // +u face
+      pushQuadWorld(c[3], c[0], c[4], c[7], pal.mid, 0);          // -u face
+      const edges = [
+        [c[0], c[1]], [c[1], c[2]], [c[2], c[3]], [c[3], c[0]],
+        [c[4], c[5]], [c[5], c[6]], [c[6], c[7]], [c[7], c[4]],
+        [c[0], c[4]], [c[1], c[5]], [c[2], c[6]], [c[3], c[7]]
+      ];
+      edges.forEach(e => addLineWorld(e[0], e[1], lyr, 0.02));
+    }
+
+    /** Tapered block (battered walls): bottom half-extents (hu0,hv0) at y0, top (hu1,hv1) at y1. */
+    function addTaperedBlock(cx, cz, ux, uz, y0, y1, hu0, hv0, hu1, hv1, palName = 'stone', opts = {}) {
+      const pal = PALETTE[palName] || PALETTE.stone;
+      const shift = (rng() - 0.5) * 0.012;
+      const B = [
+        framePoint(cx, cz, ux, uz, -hu0,  hv0, y0), framePoint(cx, cz, ux, uz,  hu0,  hv0, y0),
+        framePoint(cx, cz, ux, uz,  hu0, -hv0, y0), framePoint(cx, cz, ux, uz, -hu0, -hv0, y0)
+      ];
+      const T = [
+        framePoint(cx, cz, ux, uz, -hu1,  hv1, y1), framePoint(cx, cz, ux, uz,  hu1,  hv1, y1),
+        framePoint(cx, cz, ux, uz,  hu1, -hv1, y1), framePoint(cx, cz, ux, uz, -hu1, -hv1, y1)
+      ];
+      pushQuadWorld(B[0], B[1], T[1], T[0], pal.lit, shift);      // +v
+      pushQuadWorld(B[2], B[3], T[3], T[2], pal.shade, shift);    // -v
+      pushQuadWorld(B[1], B[2], T[2], T[1], pal.shade, shift);    // +u
+      pushQuadWorld(B[3], B[0], T[0], T[3], pal.mid, shift);      // -u
+      pushQuadWorld(T[0], T[1], T[2], T[3], pal.top, shift);      // top
+      const botLyr = opts.edgeLayer || 'medium';
+      const topLyr = opts.topLayer || 'bold';
+      for (let i = 0; i < 4; i++) {
+        const n = (i + 1) % 4;
+        addLineWorld(B[i], B[n], botLyr, 0.02);
+        addLineWorld(T[i], T[n], topLyr, 0.02);
+        addLineWorld(B[i], T[i], botLyr, 0.02);
+      }
+      if (opts.courses) {
+        const cLayer = (palName === 'terracotta' || palName === 'brickDark') ? 'rust' : 'fine';
+        for (let i = 1; i < opts.courses; i++) {
+          const t = i / opts.courses;
+          const cy = y0 + (y1 - y0) * t;
+          const hu = hu0 + (hu1 - hu0) * t + 0.012, hv = hv0 + (hv1 - hv0) * t + 0.012;
+          const q = [
+            framePoint(cx, cz, ux, uz, -hu,  hv, cy), framePoint(cx, cz, ux, uz,  hu,  hv, cy),
+            framePoint(cx, cz, ux, uz,  hu, -hv, cy), framePoint(cx, cz, ux, uz, -hu, -hv, cy)
+          ];
+          for (let f = 0; f < 4; f++) addLineWorld(q[f], q[(f + 1) % 4], cLayer, 0.01);
+        }
+      }
+    }
+
+    /**
+     * Arched opening drawn on a wall face. P = point on the face at the bottom
+     * centre of the opening; u = unit axis along the face; n = outward normal.
+     * Dark recess (rectangle + semicircle fan) set 0.04 proud of the face,
+     * bold arch outline, medium sill.
+     */
+    function addArch(P, ux, uz, nx, nz, w, h) {
+      const r = w / 2, spring = h - r;
+      const q = (du, dy) => [P[0] + ux * du + nx * 0.04, P[1] + dy, P[2] + uz * du + nz * 0.04];
+      const dark = PALETTE.dark.shade;
+      pushQuadWorld(q(-r, 0), q(r, 0), q(r, spring), q(-r, spring), dark, 0);
+      const C = q(0, spring);
+      const arcPts = [];
+      const arcSegs = 8;
+      for (let i = 0; i <= arcSegs; i++) {
+        const a = (i / arcSegs) * Math.PI;
+        arcPts.push(q(Math.cos(a) * r, spring + Math.sin(a) * r));
+      }
+      for (let i = 0; i < arcSegs; i++) pushTriWorld(C, arcPts[i], arcPts[i + 1], dark, 0);
+      addLineWorld(q(-r, 0), q(-r, spring), 'bold', 0.01);
+      addLineWorld(q(r, 0), q(r, spring), 'bold', 0.01);
+      for (let i = 0; i < arcSegs; i++) addLineWorld(arcPts[i], arcPts[i + 1], 'bold', 0.01);
+      addLineWorld(q(-r - 0.18, 0), q(r + 0.18, 0), 'medium', 0.01);
+    }
+
+    /** Hip roof: eaves half-extents (hu,hv) at yEave, ridge along u with half-length ridgeHalf. */
+    function addHipRoof(cx, cz, ux, uz, yEave, hu, hv, ridgeHalf, h, palName = 'roofTile') {
+      const E = [
+        framePoint(cx, cz, ux, uz, -hu,  hv, yEave), framePoint(cx, cz, ux, uz,  hu,  hv, yEave),
+        framePoint(cx, cz, ux, uz,  hu, -hv, yEave), framePoint(cx, cz, ux, uz, -hu, -hv, yEave)
+      ];
+      const R0 = framePoint(cx, cz, ux, uz, -ridgeHalf, 0, yEave + h);
+      const R1 = framePoint(cx, cz, ux, uz,  ridgeHalf, 0, yEave + h);
+      const pal = PALETTE[palName];
+      pushQuadWorld(E[0], E[1], R1, R0, pal.lit, 0);              // +v slope
+      pushQuadWorld(E[2], E[3], R0, R1, pal.shade, 0);            // -v slope
+      pushTriWorld(E[1], E[2], R1, pal.mid, 0);                   // +u hip
+      pushTriWorld(E[3], E[0], R0, pal.mid, 0);                   // -u hip
+      addLineWorld(E[0], E[1], 'bold', 0.02);
+      addLineWorld(E[2], E[3], 'bold', 0.02);
+      addLineWorld(E[1], E[2], 'bold', 0.02);
+      addLineWorld(E[3], E[0], 'bold', 0.02);
+      addLineWorld(E[0], R0, 'bold', 0.02);
+      addLineWorld(E[1], R1, 'bold', 0.02);
+      addLineWorld(E[2], R1, 'bold', 0.02);
+      addLineWorld(E[3], R0, 'bold', 0.02);
+      addLineWorld(R0, R1, 'bold', 0.02);
+      // Tile courses: two lines parallel to each eave + ribs down the slopes
+      for (const t of [0.36, 0.68]) {
+        const l0 = E[0].map((v, i) => v + (R0[i] - E[0][i]) * t);
+        const l1 = E[1].map((v, i) => v + (R1[i] - E[1][i]) * t);
+        const l2 = E[2].map((v, i) => v + (R1[i] - E[2][i]) * t);
+        const l3 = E[3].map((v, i) => v + (R0[i] - E[3][i]) * t);
+        addLineWorld(l0, l1, 'fine', 0);
+        addLineWorld(l2, l3, 'fine', 0);
+      }
+      const ribs = 9;
+      for (let i = 1; i < ribs; i++) {
+        const t = i / ribs;
+        const bF = E[0].map((v, k) => v + (E[1][k] - E[0][k]) * t);
+        const tF = R0.map((v, k) => v + (R1[k] - R0[k]) * t);
+        addLineWorld(bF, tF, 'fine', 0);
+        const bB = E[3].map((v, k) => v + (E[2][k] - E[3][k]) * t);
+        addLineWorld(bB, tF, 'fine', 0);
+      }
+    }
+
+    // =========================================================================
+    // 5. RIDGE TERRAIN — lofted cross-sections along a node path, coloured in
+    // strata bands by depth below the crest (Petra's banding, as landscape).
+    // Profile: [lateral offset, dy below crest], ordered across the ridge.
+    // =========================================================================
+    const RIDGE_PROFILE = [
+      [-15.5, -19], [-13, -15], [-9, -9.5], [-6, -5.5], [-4.2, -2.2], [-3.1, -0.5],
+      [0, -0.12],
+      [3.1, -0.5], [4.2, -2.2], [6, -5.5], [9, -9.5], [13, -15], [15.5, -19]
+    ];
+
+    function nodeFrames(nodes) {
+      return nodes.map((n, i) => {
+        const a = nodes[Math.max(0, i - 1)], b = nodes[Math.min(nodes.length - 1, i + 1)];
+        let dx = b[0] - a[0], dz = b[1] - a[1];
+        const l = Math.hypot(dx, dz) || 1;
+        dx /= l; dz /= l;
+        return { x: n[0], z: n[1], crest: n[2], ux: dx, uz: dz, vx: -dz, vz: dx };
+      });
+    }
+
+    function buildTerrain(nodes, widthScale = 1, dyScale = 1) {
+      const F = nodeFrames(nodes);
+      const P = RIDGE_PROFILE.map(p => [p[0] * widthScale, p[1] * dyScale]);
+      const pt = (i, j) => {
+        const f = F[i];
+        // Clamp at the ground sheet: the ridge foot spreads into the plain
+        // instead of diving through the board.
+        return [f.x + f.vx * P[j][0], Math.max(f.crest + P[j][1], -16.0), f.z + f.vz * P[j][0]];
+      };
+      for (let i = 0; i < F.length - 1; i++) {
+        for (let j = 0; j < P.length - 1; j++) {
+          const midDy = (P[j][1] + P[j + 1][1]) / 2;
+          const palName = midDy > -2.8 ? 'rockHigh' : (midDy > -6.5 ? 'rockMid' : 'rockLow');
+          // Directional wash from the quad's own normal, like every other face
+          const q0 = pt(i, j), q1 = pt(i + 1, j), q2 = pt(i, j + 1);
+          const e1 = [q1[0] - q0[0], q1[1] - q0[1], q1[2] - q0[2]];
+          const e2 = [q2[0] - q0[0], q2[1] - q0[1], q2[2] - q0[2]];
+          let nx = e1[1] * e2[2] - e1[2] * e2[1];
+          let ny = e1[2] * e2[0] - e1[0] * e2[2];
+          let nz = e1[0] * e2[1] - e1[1] * e2[0];
+          const nl = Math.hypot(nx, ny, nz) || 1;
+          nx /= nl; ny /= nl; nz /= nl;
+          if (ny < 0) { nx = -nx; ny = -ny; nz = -nz; }
+          const hex = computeDirectionalHex(palName, nx, ny, nz);
+          const shift = (rng() - 0.5) * 0.02;
+          const midOff = (P[j][0] + P[j + 1][0]) / 2;
+          if (midOff < 0) {
+            pushQuadWorld(pt(i + 1, j), pt(i, j), pt(i, j + 1), pt(i + 1, j + 1), hex, shift);
+          } else {
+            pushQuadWorld(pt(i, j), pt(i, j + 1), pt(i + 1, j + 1), pt(i + 1, j), hex, shift);
+          }
+        }
+        // Longitudinal strata lines at chosen profile joints
+        for (const j of [1, 2, 3, 4, 8, 9, 10, 11]) {
+          addLineWorld(pt(i, j), pt(i + 1, j), 'fine', 0);
+        }
+        addLineWorld(pt(i, 5), pt(i + 1, 5), 'medium', 0);
+        addLineWorld(pt(i, 7), pt(i + 1, 7), 'medium', 0);
+        // Fall-line hatching on the slopes (two chances per segment, any band)
+        for (let fh = 0; fh < 2; fh++) {
+          if (rng() > 0.38) {
+            const t = 0.15 + rng() * 0.7;
+            const mix = (a, b) => a.map((v, k) => v + (b[k] - v) * t);
+            const front = [[9, 10], [10, 11]], back = [[1, 2], [2, 3]];
+            const side = rng() > 0.5 ? front[Math.floor(rng() * 2)] : back[Math.floor(rng() * 2)];
+            addLineWorld(mix(pt(i, side[0]), pt(i + 1, side[0])), mix(pt(i, side[1]), pt(i + 1, side[1])), 'fine', 0);
+          }
+        }
+      }
+      return F;
+    }
+
+    function profileDy(offset) {
+      const P = RIDGE_PROFILE;
+      if (offset <= P[0][0]) return P[0][1];
+      for (let j = 0; j < P.length - 1; j++) {
+        if (offset <= P[j + 1][0]) {
+          const t = (offset - P[j][0]) / (P[j + 1][0] - P[j][0]);
+          return P[j][1] + (P[j + 1][1] - P[j][1]) * t;
+        }
+      }
+      return P[P.length - 1][1];
+    }
+
+    // =========================================================================
+    // 6. THE WALL — coursed segments lofted between mitered node frames.
+    // Stone lower body, grey-brick upper band, stepped walk on steep grades,
+    // crenellated parapets both sides.
+    // =========================================================================
+    const WALL_NODES = [
+      [-36, 7, 0.5], [-28, 4, 5], [-20, 0, 10], [-12, -3, 14],
+      [-4, -5, 17],
+      [4, -1, 14.5], [12, 3, 10.5], [20, 6, 13], [28, 9, 8], [36, 11, 2.5]
+    ];
+    const TOWER_NODE = 4;
+    const wallFrames = nodeFrames(WALL_NODES);
+
+    // Wall cross-section heights, relative to a node's crest
+    const W_BOT = -1.6, W_BAND = 3.1, W_WALK = 5.0;
+    const W_HALF_BOT = 3.05, W_HALF_BAND = 2.60, W_HALF_TOP = 2.42;
+    const P_IN = 1.82, P_OUT = 2.42, P_TOP = 6.5; // parapet: inner/outer offset, top (crest-relative)
+
+    function wallPt(f, off, y) {
+      return [f.x + f.vx * off, y, f.z + f.vz * off];
+    }
+
+    function buildWallSegment(i) {
+      const A = wallFrames[i], B = wallFrames[i + 1];
+      const segLen = Math.hypot(B.x - A.x, B.z - A.z);
+      const wyA = A.crest + W_WALK, wyB = B.crest + W_WALK;
+
+      // --- body strips: [yBotRel, yTopRel, halfBot, halfTop, palette]
+      const strips = [
+        [W_BOT, W_BAND, W_HALF_BOT, W_HALF_BAND, 'coreWall', 3],
+        [W_BAND, W_WALK, W_HALF_BAND, W_HALF_TOP, 'brickGrey', 4]
+      ];
+      for (const [yB, yT, hB, hT, palName, courses] of strips) {
+        const pal = PALETTE[palName];
+        const aF0 = wallPt(A, hB, A.crest + yB), bF0 = wallPt(B, hB, B.crest + yB);
+        const aF1 = wallPt(A, hT, A.crest + yT), bF1 = wallPt(B, hT, B.crest + yT);
+        const aB0 = wallPt(A, -hB, A.crest + yB), bB0 = wallPt(B, -hB, B.crest + yB);
+        const aB1 = wallPt(A, -hT, A.crest + yT), bB1 = wallPt(B, -hT, B.crest + yT);
+        const shift = (rng() - 0.5) * 0.012;
+        pushQuadWorld(aF0, bF0, bF1, aF1, pal.lit, shift);       // front (+v)
+        pushQuadWorld(bB0, aB0, aB1, bB1, pal.shade, shift);     // back (-v)
+        addLineWorld(aF1, bF1, 'medium', 0.015);
+        addLineWorld(aB1, bB1, 'medium', 0.015);
+        for (let c = 1; c <= courses; c++) {
+          const t = c / (courses + 1);
+          const yyA = A.crest + yB + (yT - yB) * t, yyB = B.crest + yB + (yT - yB) * t;
+          const h = hB + (hT - hB) * t + 0.012;
+          addLineWorld(wallPt(A, h, yyA), wallPt(B, h, yyB), 'fine', 0.01);
+          addLineWorld(wallPt(A, -h, yyA), wallPt(B, -h, yyB), 'fine', 0.01);
+        }
+      }
+
+      // --- walk: stepped on steep grades, smooth ramp otherwise
+      const slope = Math.abs(B.crest - A.crest) / segLen;
+      const cornerAt = (t, off) => {
+        const pA = wallPt(A, off, wyA), pB = wallPt(B, off, wyB);
+        return [pA[0] + (pB[0] - pA[0]) * t, 0, pA[2] + (pB[2] - pA[2]) * t];
+      };
+      const wyAt = t => wyA + (wyB - wyA) * t;
+      const walkHex = PALETTE.brickGrey.top;
+      if (slope > 0.16) {
+        const steps = Math.max(3, Math.min(9, Math.round(segLen / 1.5)));
+        for (let k = 0; k < steps; k++) {
+          const t0 = k / steps, t1 = (k + 1) / steps;
+          const treadY = Math.max(wyAt(t0), wyAt(t1));
+          const f0 = cornerAt(t0, W_HALF_TOP), f1 = cornerAt(t1, W_HALF_TOP);
+          const b0 = cornerAt(t0, -W_HALF_TOP), b1 = cornerAt(t1, -W_HALF_TOP);
+          pushQuadWorld(
+            [f0[0], treadY, f0[2]], [f1[0], treadY, f1[2]],
+            [b1[0], treadY, b1[2]], [b0[0], treadY, b0[2]],
+            walkHex, (rng() - 0.5) * 0.012
+          );
+          // riser at the lower end of the tread, wound to face the lower side
+          const ascending = wyAt(t0) < wyAt(t1);
+          const tR = ascending ? t0 : t1;
+          const rY0 = wyAt(tR), rF = cornerAt(tR, W_HALF_TOP), rB = cornerAt(tR, -W_HALF_TOP);
+          if (treadY - rY0 > 0.05) {
+            const r00 = [rF[0], rY0, rF[2]], r01 = [rB[0], rY0, rB[2]];
+            const r11 = [rB[0], treadY, rB[2]], r10 = [rF[0], treadY, rF[2]];
+            if (ascending) pushQuadWorld(r01, r00, r10, r11, PALETTE.brickGrey.shade, 0);
+            else pushQuadWorld(r00, r01, r11, r10, PALETTE.brickGrey.shade, 0);
+            addLineWorld([rF[0], treadY, rF[2]], [rB[0], treadY, rB[2]], 'medium', 0.01);
+          }
+          addLineWorld([f0[0], treadY, f0[2]], [f1[0], treadY, f1[2]], 'medium', 0.01);
+          addLineWorld([b0[0], treadY, b0[2]], [b1[0], treadY, b1[2]], 'medium', 0.01);
+        }
+      } else {
+        const aF = wallPt(A, W_HALF_TOP, wyA), bF = wallPt(B, W_HALF_TOP, wyB);
+        const aB = wallPt(A, -W_HALF_TOP, wyA), bB = wallPt(B, -W_HALF_TOP, wyB);
+        pushQuadWorld(aF, bF, bB, aB, walkHex, 0);
+        addLineWorld(aF, bF, 'medium', 0.015);
+        addLineWorld(aB, bB, 'medium', 0.015);
+      }
+
+      // --- parapets both sides (smooth strips following the grade)
+      for (const sgn of [1, -1]) {
+        const oI = P_IN * sgn, oO = P_OUT * sgn;
+        const aI0 = wallPt(A, oI, wyA), bI0 = wallPt(B, oI, wyB);
+        const aI1 = wallPt(A, oI, A.crest + P_TOP), bI1 = wallPt(B, oI, B.crest + P_TOP);
+        const aO0 = wallPt(A, oO, wyA), bO0 = wallPt(B, oO, wyB);
+        const aO1 = wallPt(A, oO, A.crest + P_TOP), bO1 = wallPt(B, oO, B.crest + P_TOP);
+        const pal = PALETTE.brickGrey;
+        if (sgn > 0) {
+          pushQuadWorld(aO0, bO0, bO1, aO1, pal.lit, 0);         // outer
+          pushQuadWorld(bI0, aI0, aI1, bI1, pal.shade, 0);       // inner
+        } else {
+          pushQuadWorld(bO0, aO0, aO1, bO1, pal.lit, 0);
+          pushQuadWorld(aI0, bI0, bI1, aI1, pal.shade, 0);
+        }
+        if (sgn > 0) pushQuadWorld(aO1, bO1, bI1, aI1, pal.top, 0);   // top
+        else pushQuadWorld(aI1, bI1, bO1, aO1, pal.top, 0);
+        addLineWorld(aO1, bO1, 'medium', 0.015);
+        addLineWorld(aI1, bI1, 'medium', 0.015);
+      }
+
+      // --- merlons: discrete blocks along both parapet tops
+      const dirx = (B.x - A.x) / segLen, dirz = (B.z - A.z) / segLen;
+      const latx = -dirz, latz = dirx;
+      for (let s = 1.05; s < segLen - 0.55; s += 2.05) {
+        const t = s / segLen;
+        const cx = A.x + (B.x - A.x) * t, cz = A.z + (B.z - A.z) * t;
+        const topY = wyAt(t) + (P_TOP - W_WALK);
+        for (const sgn of [1, -1]) {
+          addOrientedBox(
+            cx + latx * 2.12 * sgn, topY, cz + latz * 2.12 * sgn,
+            dirx, dirz, 1.15, 0.8, 0.58, 'brickGrey', { edgeLayer: 'medium' }
+          );
+        }
+      }
+    }
+
+    function buildWallCap(idx, flip) {
+      const f = wallFrames[idx];
+      const c = f.crest;
+      const pts = [
+        wallPt(f, -W_HALF_BOT, c + W_BOT), wallPt(f, W_HALF_BOT, c + W_BOT),
+        wallPt(f, W_HALF_TOP, c + W_WALK), wallPt(f, -W_HALF_TOP, c + W_WALK)
+      ];
+      const hex = PALETTE.coreWall.mid;
+      if (flip) pushQuadWorld(pts[0], pts[1], pts[2], pts[3], hex, 0);
+      else pushQuadWorld(pts[1], pts[0], pts[3], pts[2], hex, 0);
+      addLineWorld(pts[0], pts[1], 'bold', 0.02);
+      addLineWorld(pts[1], pts[2], 'bold', 0.02);
+      addLineWorld(pts[2], pts[3], 'bold', 0.02);
+      addLineWorld(pts[3], pts[0], 'bold', 0.02);
+      // parapet end caps
+      for (const sgn of [1, -1]) {
+        const q = [
+          wallPt(f, P_IN * sgn, c + W_WALK), wallPt(f, P_OUT * sgn, c + W_WALK),
+          wallPt(f, P_OUT * sgn, c + P_TOP), wallPt(f, P_IN * sgn, c + P_TOP)
+        ];
+        pushQuadWorld(q[0], q[1], q[2], q[3], PALETTE.brickGrey.mid, 0);
+      }
+    }
+
+    // =========================================================================
+    // 7. WATCHTOWER at the direction change (node 4): stone podium at walk
+    // level, two brick storeys with arched openings, overhanging hip roof.
+    // =========================================================================
+    const TF = wallFrames[TOWER_NODE];
+    const TH = TF.crest; // 17
+    const hvAt = (y, y0, y1, h0, h1) => h0 + (h1 - h0) * ((y - y0) / (y1 - y0));
+
+    function archOnBlock(y0, y1, hu0, hu1, hv0, hv1, face, off, bottom, w, h) {
+      const hu = hvAt(bottom, y0, y1, hu0, hu1), hv = hvAt(bottom, y0, y1, hv0, hv1);
+      let P, ax, az, nx, nz;
+      if (face === 'front') {
+        P = framePoint(TF.x, TF.z, TF.ux, TF.uz, off, hv + 0.01, bottom);
+        ax = TF.ux; az = TF.uz; nx = TF.vx; nz = TF.vz;
+      } else if (face === 'back') {
+        P = framePoint(TF.x, TF.z, TF.ux, TF.uz, off, -hv - 0.01, bottom);
+        ax = TF.ux; az = TF.uz; nx = -TF.vx; nz = -TF.vz;
+      } else if (face === 'right') {
+        P = framePoint(TF.x, TF.z, TF.ux, TF.uz, hu + 0.01, off, bottom);
+        ax = TF.vx; az = TF.vz; nx = TF.ux; nz = TF.uz;
+      } else {
+        P = framePoint(TF.x, TF.z, TF.ux, TF.uz, -hu - 0.01, off, bottom);
+        ax = TF.vx; az = TF.vz; nx = -TF.ux; nz = -TF.uz;
+      }
+      addArch(P, ax, az, nx, nz, w, h);
+    }
+
+    // Podium (top = wall-walk level) + terrace parapets front/back
+    addTaperedBlock(TF.x, TF.z, TF.ux, TF.uz, TH - 5, TH + 5, 6.1, 5.6, 5.6, 5.1, 'coreWall', { courses: 5 });
+    for (const sgn of [1, -1]) {
+      const c = framePoint(TF.x, TF.z, TF.ux, TF.uz, 0, sgn * 4.87, TH + 5);
+      addOrientedBox(c[0], TH + 5, c[2], TF.ux, TF.uz, 11.2, 0.9, 0.46, 'brickGrey', { edgeLayer: 'medium' });
+    }
+    // Two brick storeys
+    addTaperedBlock(TF.x, TF.z, TF.ux, TF.uz, TH + 5, TH + 8.6, 5.0, 4.5, 4.8, 4.3, 'brickGrey', { courses: 3 });
+    addTaperedBlock(TF.x, TF.z, TF.ux, TF.uz, TH + 8.6, TH + 11.6, 4.3, 3.9, 4.05, 3.65, 'brickGrey', { courses: 3 });
+    // Eave slab, hip roof, ridge beam + end ornaments
+    addOrientedBox(TF.x, TH + 11.6, TF.z, TF.ux, TF.uz, 11.6, 0.32, 10.6, 'roofTile', { edgeLayer: 'bold' });
+    addHipRoof(TF.x, TF.z, TF.ux, TF.uz, TH + 11.92, 5.8, 5.3, 2.4, 2.5);
+    addOrientedBox(TF.x, TH + 14.42, TF.z, TF.ux, TF.uz, 5.6, 0.34, 0.72, 'roofTile', { edgeLayer: 'bold' });
+    for (const sgn of [1, -1]) {
+      const c = framePoint(TF.x, TF.z, TF.ux, TF.uz, sgn * 2.95, 0, TH + 14.42);
+      addOrientedBox(c[0], TH + 14.42, c[2], TF.ux, TF.uz, 0.55, 0.6, 0.55, 'dark', {});
+    }
+    // Arched openings: podium slits, storey-1 windows + walk doors, storey-2 windows
+    for (const face of ['front', 'back']) {
+      for (const off of [-3.4, 3.4]) archOnBlock(TH - 5, TH + 5, 6.1, 5.6, 5.6, 5.1, face, off, TH + 1.2, 0.7, 1.6);
+      for (const off of [-3.1, 0, 3.1]) archOnBlock(TH + 5, TH + 8.6, 5.0, 4.8, 4.5, 4.3, face, off, TH + 5.95, 1.05, 2.05);
+      for (const off of [-2.9, 0, 2.9]) archOnBlock(TH + 8.6, TH + 11.6, 4.3, 4.05, 3.9, 3.65, face, off, TH + 9.15, 0.95, 1.8);
+      for (const off of [-1.9, 1.9]) archOnBlock(TH + 8.6, TH + 11.6, 4.3, 4.05, 3.9, 3.65, face === 'front' ? 'right' : 'left', off, TH + 9.15, 0.95, 1.8);
+    }
+    for (const face of ['right', 'left']) {
+      archOnBlock(TH + 5, TH + 8.6, 5.0, 4.8, 4.5, 4.3, face, 0, TH + 5, 1.9, 2.6);
+    }
+
+    // =========================================================================
+    // 8. BEACON TERRACE on a spur knob behind the wall: tapered stone
+    // platform, low parapet ring, fire brazier with a thread of smoke.
+    // =========================================================================
+    const BC = { x: 16, z: -13 };
+    addTaperedBlock(BC.x, BC.z, 1, 0, 9.8, 18.2, 4.4, 4.4, 3.6, 3.6, 'coreWall', { courses: 5 });
+    addOrientedBox(BC.x, 18.2, BC.z + 3.4, 1, 0, 7.2, 0.85, 0.4, 'coreWall', {});
+    addOrientedBox(BC.x, 18.2, BC.z - 3.4, 1, 0, 7.2, 0.85, 0.4, 'coreWall', {});
+    addOrientedBox(BC.x + 3.4, 18.2, BC.z, 0, 1, 7.2, 0.85, 0.4, 'coreWall', {});
+    addOrientedBox(BC.x - 3.4, 18.2, BC.z, 0, 1, 7.2, 0.85, 0.4, 'coreWall', {});
+    addOrientedBox(BC.x, 18.2, BC.z, 1, 0, 1.1, 0.75, 1.1, 'dark', {});
+    addLineWorld([BC.x - 0.5, 19.0, BC.z - 0.3], [BC.x + 0.5, 19.25, BC.z + 0.3], 'rust', 0);
+    addLineWorld([BC.x - 0.4, 19.05, BC.z + 0.4], [BC.x + 0.45, 19.3, BC.z - 0.35], 'rust', 0);
+    let smX = BC.x, smZ = BC.z;
+    let smPrev = [smX, 19.3, smZ];
+    for (let k = 1; k <= 5; k++) {
+      smX += (rng() - 0.35) * 0.55;
+      smZ += (rng() - 0.5) * 0.4;
+      const p = [smX, 19.3 + k * 0.55, smZ];
+      addLineWorld(smPrev, p, 'faint', 0);
+      smPrev = p;
+    }
+
+    // =========================================================================
+    // 9. PINES — trunk + three tiered canopy fans, in teal/fine ink.
+    // =========================================================================
+    function addPine(x, z, yBase, s) {
+      addLineWorld([x, yBase, z], [x, yBase + 0.5 * s, z], 'medium', 0);
+      const tiers = [[0.45, 0.88], [0.78, 0.64], [1.08, 0.42]];
+      for (const [ty, tr] of tiers) {
+        const cy = yBase + ty * s;
+        for (const [dx, dz] of [[1, 0.35], [-1, 0.35], [0.35, -1], [-0.35, -1], [0.7, 0.8], [-0.7, 0.8]]) {
+          addLineWorld([x, cy, z], [x + dx * tr * s, cy - 0.17 * s, z + dz * tr * s], 'teal', 0);
+        }
+        addLineWorld([x - tr * s, cy - 0.17 * s, z + 0.3 * tr * s], [x + tr * s, cy - 0.17 * s, z + 0.3 * tr * s], 'fine', 0);
+      }
+      addLineWorld([x, yBase + 1.08 * s, z], [x, yBase + 1.42 * s, z], 'teal', 0);
+    }
+
+    // =========================================================================
+    // 10. ASSEMBLY — terrain, wall, site furniture
+    // =========================================================================
+    const terrainNodes = [[-42, 8.5, -6], ...WALL_NODES, [42, 12.5, -5.5]];
+    buildTerrain(terrainNodes, 1, 1);
+    const spurFrames = buildTerrain([[12, 3, 10.5], [14, -5, 12], [16, -13, 14.5]], 0.75, 0.8);
+
+    for (let i = 0; i < WALL_NODES.length - 1; i++) buildWallSegment(i);
+    buildWallCap(0, true);
+    buildWallCap(WALL_NODES.length - 1, false);
+
+    // Ground sheet, dashed survey grid, ghost peaks at the back corners
+    addWorldBox(-46, -16.2, -28, 92, 0.5, 56, 'plaza', 'bold');
+    const sheetY = -15.66;
+    for (let gx = -44; gx <= 44; gx += 4) addDashedLineWorld([gx, sheetY, -27], [gx, sheetY, 27]);
+    for (let gz = -24; gz <= 24; gz += 4) addDashedLineWorld([-45, sheetY, gz], [45, sheetY, gz]);
+    addWorldBox(-42, -15.7, -27, 22, 7.5, 8, 'ghost', 'faint');
+    addWorldBox(24, -15.7, -27, 20, 9.5, 8, 'ghost', 'faint');
+
+    // Pines on the ridge slopes
+    const ridgePines = [
+      [1, -7.5, 1.5], [2, 6.8, 1.7], [2, -8.5, 1.3], [3, -6.2, 1.4], [5, 7.2, 1.6],
+      [6, -7.8, 1.5], [6, 8.6, 1.2], [7, -6.4, 1.8], [8, 6.9, 1.4], [8, -9.0, 1.2],
+      [1, 9.5, 1.2], [7, 10.5, 1.3], [3, 8.2, 1.1], [5, -8.8, 1.35],
+      [3, 7.8, 1.3], [8, -7.6, 1.3], [9, 6.5, 1.1], [2, -6.6, 1.45]
+    ];
+    for (const [ni, off, s] of ridgePines) {
+      const f = wallFrames[ni];
+      addPine(f.x + f.vx * off, f.z + f.vz * off, f.crest + profileDy(off) - 0.08, s);
+    }
+    // Pines on the spur
+    for (const [fi, off, s] of [[1, 4.5, 1.2], [2, -5, 1.4], [1, -5.5, 1.0]]) {
+      const f = spurFrames[fi];
+      addPine(f.x + f.vx * off, f.z + f.vz * off, f.crest + profileDy(off / 0.75) * 0.8 - 0.08, s);
+    }
+    // Pines scattered on the ground sheet
+    for (let k = 0; k < 9; k++) {
+      const px = -34 + rng() * 68;
+      const pz = (k % 2 === 0) ? 15 + rng() * 8 : -24 + rng() * 7;
+      addPine(px, pz, -15.7, 1.7 + rng() * 1.1);
+    }
+
+    // Plumb line beside the tower (construction geometry, as on Pisa)
+    const plumb = framePoint(TF.x, TF.z, TF.ux, TF.uz, -8.5, 3.5, 0);
+    addDashedLineWorld([plumb[0], TH + 14.8, plumb[2]], [plumb[0], -15.7, plumb[2]], 0.65, 0.45);
+    // =========================================================================
+    // 6. BUILD THREE.JS GEOMETRIES & RENDER LOOP
+    // =========================================================================
+    const washGeo = new THREE.BufferGeometry();
+    washGeo.setAttribute('position', new THREE.Float32BufferAttribute(washPositions, 3));
+    washGeo.setAttribute('color', new THREE.Float32BufferAttribute(washColors, 3));
+
+    const washMat = new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      polygonOffset: true,
+      polygonOffsetFactor: 1.4,
+      polygonOffsetUnits: 1.4
+    });
+    scene.add(new THREE.Mesh(washGeo, washMat));
+
+    function createInkSegmentMesh(vertices, hexColor, opacity) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      const mat = new THREE.LineBasicMaterial({
+        color: hexColor,
+        transparent: true,
+        opacity: opacity
+      });
+      return new THREE.LineSegments(geo, mat);
+    }
+
+    scene.add(createInkSegmentMesh(inkLayers.bold,   0x211b17, 0.92));
+    scene.add(createInkSegmentMesh(inkLayers.medium, 0x332a24, 0.80));
+    scene.add(createInkSegmentMesh(inkLayers.fine,   0x4a3f37, 0.44));
+    scene.add(createInkSegmentMesh(inkLayers.rust,   0x8c4531, 0.64));
+    scene.add(createInkSegmentMesh(inkLayers.teal,   0x527d80, 0.52));
+    scene.add(createInkSegmentMesh(inkLayers.faint,  0x6b6157, 0.32));
+
+    window.addEventListener('resize', () => {
+      const newAspect = window.innerWidth / window.innerHeight;
+      camera.left = (-frustumSize * newAspect) / 2;
+      camera.right = (frustumSize * newAspect) / 2;
+      camera.top = frustumSize / 2;
+      camera.bottom = -frustumSize / 2;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      generatePaperOverlay();
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+</script>
+</body>
+</html>

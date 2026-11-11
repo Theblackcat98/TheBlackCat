@@ -20,10 +20,10 @@ The tomb Shah Jahan built for Mumtaz Mahal, drawn on its garden axis so the famo
 
 ## What was drawn
 
-- The mausoleum block with chamfered corners: a large central iwan — pointed-arch recess in its pishtaq frame, teal inlay line, dark doorway — on each face, with two tiers of blind niches flanking it and a blind-arch frieze around the plinth.
-- The great onion dome as a lofted profile on its drum, kept to a few latitude lines so it reads as a dome and not a cage, with four small chhatris at the roof corners and a lotus finial with a crescent on top.
-- Four freestanding minarets at the plinth corners — three balcony rings, chhatri caps, square bases — each leaning about a degree outward, as built, so a falling minaret would fall clear of the tomb. At plate scale the lean is honest rather than visible.
-- The charbagh: four lawn quadrants, cross paths, cypress pairs, and the raised reflecting channel on the axis interrupted by the octagonal tank platform at the garden's centre; the mosque and jawab in quiet red sandstone, deliberately kept below the marble in ink weight.
+- The mausoleum block with chamfered corners: a large central iwan on each face — a framed arch bay with a teal jali screen set into the recess — flanked by two-storey niche bays that wrap around the chamfers, with slender guldasta pinnacles standing along the roofline.
+- The great dome as a bulbous profile lofted on its ringed drum: swelling past the drum, an inverted lotus collar at the neck, and a tall finial. Four chhatris sit at the roof corners, each a miniature of the same drum-and-dome idea.
+- Four freestanding minarets at the plinth corners, built as stacked drums with balcony rings and chhatri caps on octagonal bases — each tilted 1.4° outward, as built, so that a falling minaret would fall clear of the tomb. The tilt runs through every course and ring, not just the silhouette.
+- The charbagh: the raised reflecting channel on the axis with its fountain ticks, the central marble tank, double-bordered parterre beds, and a cypress avenue. At the terrace's flanks, the mosque and its mirror jawab modelled in red sandstone — pishtaq toward the tomb, three white marble domes each — where the first build of this plate left blank blocks.
 
 ## How it works
 

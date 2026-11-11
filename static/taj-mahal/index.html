@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Taj Mahal — Axonometric Plate</title>
+  <title>Taj Mahal — Axonometric Architectural Diagram</title>
   <style>
     * {
       box-sizing: border-box;
@@ -24,12 +24,6 @@
     canvas {
       display: block;
     }
-    #hint {
-      position: absolute; left: 12px; bottom: 11px; z-index: 2; max-width: calc(100vw - 24px);
-      color: rgba(65,53,43,.68); font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
-      letter-spacing: .08em; text-transform: uppercase; pointer-events: none;
-      background: #ede9e0; padding: 3px 6px;
-    }
     #paper-overlay {
       position: absolute;
       top: 0;
@@ -39,6 +33,12 @@
       pointer-events: none;
       mix-blend-mode: multiply;
       opacity: 0.55;
+    }
+    #hint {
+      position: absolute; left: 18px; bottom: 14px; z-index: 2;
+      color: rgba(65,53,43,.68); font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: .08em; text-transform: uppercase; pointer-events: none;
+      background: #ede9e0; padding: 3px 6px; max-width: calc(100% - 48px);
     }
   </style>
 <meta name="description" content="The Taj Mahal drawn as an axonometric on drafting paper: white marble on the charbagh axis — the great onion dome over a chamfered block of iwans, four minarets leaning a degree outward, and the reflecting channel running down the garden to the gate.">
@@ -55,7 +55,7 @@
 <a class="back tk-fallback" href="../tools/">&#8592; All tools</a>
   <div id="canvas-container">
     <canvas id="paper-overlay"></canvas>
-    <div id="hint">TAJ MAHAL &middot; AGRA &middot; AXONOMETRIC STUDY &nbsp; / &nbsp; DRAG TO ORBIT &middot; DOUBLE-CLICK TO RESET</div>
+    <div id="hint">TAJ MAHAL &middot; AXONOMETRIC STUDY &nbsp; / &nbsp; DRAG TO ORBIT &middot; DOUBLE-CLICK TO RESET</div>
   </div>
 
   <script src="../vendor/three/three.min.js"></script>
@@ -72,7 +72,7 @@
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
       };
     }
-    const rng = mulberry32(1632); // 1632: Shah Jahan commissions the Taj Mahal for Mumtaz Mahal
+    const rng = mulberry32(1632); // 1632 AD: Year construction began on the Taj Mahal
 
     function generatePaperOverlay() {
       const canvas = document.getElementById('paper-overlay');
@@ -101,7 +101,7 @@
       // Organic rough paper fiber grain
       const imgData = ctx.getImageData(0, 0, w, h);
       const data = imgData.data;
-      const localRng = mulberry32(8841);
+      const localRng = mulberry32(7731);
       for (let i = 0; i < data.length; i += 4) {
         const grain = (localRng() - 0.5) * 18;
         data[i] = Math.min(255, Math.max(0, data[i] + grain));
@@ -124,7 +124,7 @@
 
     const scene = new THREE.Scene();
 
-    const frustumSize = 78; // SUBJECT FIT: frame the subject ~70% of height
+    const frustumSize = 54;
     const aspect = window.innerWidth / window.innerHeight;
     const camera = new THREE.OrthographicCamera(
       (-frustumSize * aspect) / 2,
@@ -135,60 +135,59 @@
       300
     );
 
-    const targetY = 13.5; // SUBJECT FIT: vertical centre of the subject
-    const camDist = 80;
-    const defaultCamPos = new THREE.Vector3(camDist, targetY + camDist * 0.78, camDist);
+    const targetCenter = new THREE.Vector3(0, 13.5, 2.2);
+    const camDist = 68;
+    const defaultCamPos = new THREE.Vector3(
+      targetCenter.x + camDist,
+      targetCenter.y + camDist * 0.78,
+      targetCenter.z + camDist
+    );
     camera.position.copy(defaultCamPos);
-    camera.lookAt(0, targetY, -6);
+    camera.lookAt(targetCenter);
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, targetY, -6);
+    controls.target.copy(targetCenter);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.update();
 
     window.addEventListener('dblclick', () => {
       camera.position.copy(defaultCamPos);
-      controls.target.set(0, targetY, -6);
+      controls.target.copy(targetCenter);
       camera.zoom = 1;
       camera.updateProjectionMatrix();
       controls.update();
     });
 
     // =========================================================================
-    // 3. COLOR WASH PALETTE & MULTI-WEIGHT INK ENGINE
+    // 3. SPAARNDAM PALETTE & MULTI-WEIGHT INK ENGINE
     // =========================================================================
     const PALETTE = {
-      cream:      { lit: 0xefe9de, mid: 0xe4ddd1, shade: 0xd2c9b9, top: 0xf4f0e6, bot: 0x8f8274 },
-      stone:      { lit: 0xe3dcd0, mid: 0xd6cec0, shade: 0xc2b9a9, top: 0xeae4da, bot: 0x807467 },
-      coreWall:   { lit: 0xc9bfb0, mid: 0xb5aa9a, shade: 0x998e7e, top: 0xd6cec0, bot: 0x695e53 },
+      cream:      { lit: 0xf1ece1, mid: 0xe6dfd3, shade: 0xd4cbbd, top: 0xf6f3eb, bot: 0x918476 },
+      stone:      { lit: 0xe5ded2, mid: 0xd8d0c2, shade: 0xc4bba9, top: 0xebe5dc, bot: 0x827668 },
+      coreWall:   { lit: 0xc2b7a7, mid: 0xab9f8e, shade: 0x8f8373, top: 0xd1c7b8, bot: 0x5e5348 },
       terracotta: { lit: 0xc27a63, mid: 0xb06851, shade: 0x94513d, top: 0xd4947e, bot: 0x6b3829 },
       brickDark:  { lit: 0x9e5b47, mid: 0x8a4c3a, shade: 0x703b2c, top: 0xb36f5b, bot: 0x4f271c },
       teal:       { lit: 0x94b9bb, mid: 0x82a8aa, shade: 0x6b9092, top: 0xa8c8ca, bot: 0x517072 },
       tealDeep:   { lit: 0x789fa2, mid: 0x668c8f, shade: 0x527477, top: 0x8eb2b5, bot: 0x3e595b },
       dark:       { lit: 0x73675e, mid: 0x5e534b, shade: 0x4a4039, top: 0x85786e, bot: 0x332c27 },
       plaza:      { lit: 0xe8e3d9, mid: 0xdfd9ce, shade: 0xd2ccc0, top: 0xebe6dc, bot: 0xa69e91 },
-      ghost:      { lit: 0xe6e1d7, mid: 0xdfd9ce, shade: 0xd8d2c6, top: 0xebe6dc, bot: 0xc2bbb0 },
-      marble:     { lit: 0xf4f0e7, mid: 0xe8e2d2, shade: 0xd2c7ae, top: 0xfbf8f0, bot: 0x998b74 },
-      marbleShade:{ lit: 0xe3dcc9, mid: 0xd6cdb6, shade: 0xbfb294, top: 0xece5d2, bot: 0x847963 },
-      sandstone:  { lit: 0xbc6d50, mid: 0xa85a3f, shade: 0x8a4630, top: 0xcf8663, bot: 0x61321f },
-      garden:     { lit: 0xabb69c, mid: 0x96a589, shade: 0x7a8a6e, top: 0xc0cbb2, bot: 0x5d6c53 }
+      ghost:      { lit: 0xe6e1d7, mid: 0xdfd9ce, shade: 0xd8d2c6, top: 0xebe6dc, bot: 0xc2bbb0 }
     };
 
     const washPositions = [];
     const washColors = [];
 
     const inkLayers = {
-      bold:   [], // Primary structural silhouettes, arch rings, column shafts
-      medium: [], // Secondary architectural edges, capitals, stone courses
-      fine:   [], // Directional shadow hatching, roof & stone texture
-      rust:   [], // Terracotta course hatching & ornamental inlays
-      teal:   [], // Intarsia & window reflection strokes
-      faint:  []  // Plumb-line diagram & site grid context
+      bold:   [], // Primary structural silhouettes, iwan arches, dome contours
+      medium: [], // Secondary architectural edges, frames, panels, columns
+      fine:   [], // Directional shadow hatching, marble courses, jali screens
+      rust:   [], // Pietra dura inlays, red sandstone courses, lotus petals
+      teal:   [], // Jali screen reflections, spandrel arabesques, pool water
+      faint:  []  // Site grid dashes, ghost pavilions, sky construction rays
     };
 
     const tempColor = new THREE.Color();
-    // Light vector from upper front-left (matches axonometric sun convention)
     const lightDir = new THREE.Vector3(-0.35, 0.25, 0.90).normalize();
 
     function computeDirectionalHex(palName, nx, ny, nz) {
@@ -247,245 +246,1002 @@
     }
 
     // =========================================================================
-    // SUBJECT TRANSFORM — every builder emits points through subjectPoint().
-    // Identity for an upright subject. Pisa overrides it with a curved leaning
-    // spine; keep the hook so warped subjects stay possible. Builders that work
-    // in plain world space (addWorldBox, dashed lines, shrubs) bypass it.
-    // =========================================================================
-    function subjectPoint(x, y, z) { return [x, y, z]; }
-
-
-    // =========================================================================
-    // 4. BUILDERS (cylinder / cornice / column, generalised from Pisa)
+    // 4. MUGHAL ARCHITECTURAL KIT-OF-PARTS (DOMES, IWANS, CHHATRIS, MINARETS)
     // =========================================================================
     /**
-     * Builds a cylindrical or polygonal drum/ring between rInner and rOuter, y0 and y1
+     * Axis-aligned architectural box with optional courses and vertical hatching
      */
-    function addCylinder(y0, y1, rOuter, rInner, segs, palName = 'cream', opts = {}) {
+    function addWorldBox(x, y, z, w, h, d, palName = 'cream', opts = {}) {
+      const pal = PALETTE[palName] || PALETTE.cream;
+      const shift = opts.shadeShift !== undefined ? opts.shadeShift : (rng() - 0.5) * 0.016;
+      const x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
+      const p000 = [x0, y0, z0], p100 = [x1, y0, z0], p110 = [x1, y1, z0], p010 = [x0, y1, z0];
+      const p001 = [x0, y0, z1], p101 = [x1, y0, z1], p111 = [x1, y1, z1], p011 = [x0, y1, z1];
+
+      pushQuadWorld(p001, p101, p111, p011, pal.lit, shift);
+      pushQuadWorld(p101, p100, p110, p111, pal.shade, shift);
+      pushQuadWorld(p011, p111, p110, p010, pal.top, shift);
+      pushQuadWorld(p000, p100, p101, p001, pal.bot, shift);
+      pushQuadWorld(p100, p000, p010, p110, pal.shade, shift);
+      pushQuadWorld(p000, p001, p011, p010, pal.mid, shift);
+
+      const lyr = opts.edgeLayer || 'medium';
+      const ov = opts.overshoot !== undefined ? opts.overshoot : 0.022;
+      if (opts.edges !== false) {
+        const edges = [
+          [p000, p100], [p100, p101], [p101, p001], [p001, p000],
+          [p010, p110], [p110, p111], [p111, p011], [p011, p010],
+          [p000, p010], [p100, p110], [p101, p111], [p001, p011]
+        ];
+        edges.forEach(e => addLineWorld(e[0], e[1], lyr, ov));
+      }
+
+      if (opts.courses) {
+        const cLayer = palName === 'terracotta' || palName === 'brickDark' ? 'rust' : 'fine';
+        for (let i = 1; i < opts.courses; i++) {
+          const cy = y0 + (h * i) / opts.courses;
+          addLineWorld([x0, cy, z1 + 0.01], [x1, cy, z1 + 0.01], cLayer, 0.01);
+          addLineWorld([x1 + 0.01, cy, z0], [x1 + 0.01, cy, z1], cLayer, 0.01);
+        }
+      }
+    }
+
+    /**
+     * Builds a cylindrical or polygonal drum centered at (cx, cz) with optional tilt
+     */
+    function addCylinderDrum(cx, cz, y0, y1, rOuter, rInner, segs, palName = 'cream', opts = {}) {
       const dTheta = (Math.PI * 2) / segs;
-      const startAngle = opts.angleOffset || 0;
-      const edgeLayer = opts.edgeLayer || 'medium';
+      const startA = opts.angleOffset || 0;
+      const lyr = opts.edgeLayer || 'medium';
+      const tiltX = opts.tiltX || 0;
+      const tiltZ = opts.tiltZ || 0;
+      const baseY = opts.tiltBaseY || y0;
+
+      function pt(lx, ly, lz) {
+        const dy = ly - baseY;
+        return [cx + lx + dy * tiltX, ly, cz + lz + dy * tiltZ];
+      }
 
       for (let i = 0; i < segs; i++) {
-        const a0 = startAngle + i * dTheta;
-        const a1 = startAngle + (i + 1) * dTheta;
+        const a0 = startA + i * dTheta;
+        const a1 = startA + (i + 1) * dTheta;
         const aMid = (a0 + a1) * 0.5;
-
         const c0 = Math.cos(a0), s0 = Math.sin(a0);
         const c1 = Math.cos(a1), s1 = Math.sin(a1);
         const nx = Math.cos(aMid), nz = Math.sin(aMid);
 
-        // Outer wall quad
-        const p00 = subjectPoint(c0 * rOuter, y0, s0 * rOuter);
-        const p10 = subjectPoint(c1 * rOuter, y0, s1 * rOuter);
-        const p11 = subjectPoint(c1 * rOuter, y1, s1 * rOuter);
-        const p01 = subjectPoint(c0 * rOuter, y1, s0 * rOuter);
+        const p00 = pt(c0 * rOuter, y0, s0 * rOuter);
+        const p10 = pt(c1 * rOuter, y0, s1 * rOuter);
+        const p11 = pt(c1 * rOuter, y1, s1 * rOuter);
+        const p01 = pt(c0 * rOuter, y1, s0 * rOuter);
 
-        const colOuter = computeDirectionalHex(palName, nx, 0, nz);
-        const shift = (rng() - 0.5) * 0.018;
-        pushQuadWorld(p00, p10, p11, p01, colOuter, shift);
+        const col = computeDirectionalHex(palName, nx, 0, nz);
+        const shift = (rng() - 0.5) * 0.015;
+        pushQuadWorld(p00, p10, p11, p01, col, shift);
 
-        // Top & bottom perimeter ink rings
-        addLineWorld(p00, p10, edgeLayer, 0.015);
-        addLineWorld(p01, p11, edgeLayer, 0.015);
+        addLineWorld(p00, p10, lyr, 0.012);
+        addLineWorld(p01, p11, lyr, 0.012);
 
-        // Silhouette and periodic vertical joint lines
-        const viewDot = nx * 0.707 + nz * 0.707;
-        const CrossSilhouette = Math.abs(nx * 0.707 - nz * 0.707);
-        if (CrossSilhouette > 0.96) {
-          addLineWorld(p00, p01, 'bold', 0.02);
+        // Silhouette contour detection
+        const crossSil = Math.abs(nx * 0.707 - nz * 0.707);
+        if (crossSil > 0.95 || opts.allVerticals) {
+          addLineWorld(p00, p01, crossSil > 0.95 ? 'bold' : lyr, 0.015);
         } else if (opts.verticalJoints && i % opts.verticalJoints === 0) {
           addLineWorld(p00, p01, 'fine', 0.01);
         }
 
-        // Directional right-side shadow hatching on cylindrical surfaces
+        // Automatic right-side shadow hatching
         const lightDot = nx * lightDir.x + nz * lightDir.z;
-        if (opts.shadeHatch !== false && lightDot < -0.12 && viewDot > -0.35) {
-          const hatchCount = lightDot < -0.5 ? 3 : 2;
-          for (let h = 1; h <= hatchCount; h++) {
-            const t = h / (hatchCount + 1);
-            const ha = a0 + (a1 - a0) * t;
-            const hc = Math.cos(ha) * (rOuter + 0.015);
-            const hs = Math.sin(ha) * (rOuter + 0.015);
-            addLineWorld(
-              subjectPoint(hc, y0 + 0.04, hs),
-              subjectPoint(hc, y1 - 0.04, hs),
-              opts.hatchLayer || 'fine',
-              0
-            );
+        const viewDot = nx * 0.707 + nz * 0.707;
+        if (opts.shadeHatch !== false && lightDot < -0.15 && viewDot > -0.35) {
+          const hCount = lightDot < -0.5 ? 2 : 1;
+          for (let h = 1; h <= hCount; h++) {
+            const ha = a0 + ((a1 - a0) * h) / (hCount + 1);
+            const hc = Math.cos(ha) * (rOuter + 0.012);
+            const hs = Math.sin(ha) * (rOuter + 0.012);
+            addLineWorld(pt(hc, y0 + 0.03, hs), pt(hc, y1 - 0.03, hs), opts.hatchLayer || 'fine', 0);
           }
         }
 
-        // Optional horizontal stone/brick courses
         if (opts.courses) {
           const cLayer = palName === 'terracotta' || palName === 'brickDark' ? 'rust' : 'fine';
           for (let c = 1; c < opts.courses; c++) {
             const cy = y0 + ((y1 - y0) * c) / opts.courses;
             addLineWorld(
-              subjectPoint(c0 * (rOuter + 0.012), cy, s0 * (rOuter + 0.012)),
-              subjectPoint(c1 * (rOuter + 0.012), cy, s1 * (rOuter + 0.012)),
+              pt(c0 * (rOuter + 0.01), cy, s0 * (rOuter + 0.01)),
+              pt(c1 * (rOuter + 0.01), cy, s1 * (rOuter + 0.01)),
               cLayer,
               0.01
             );
           }
         }
 
-        // Top and bottom caps (and inner wall if hollow)
         if (rInner > 0) {
-          const q00 = subjectPoint(c0 * rInner, y0, s0 * rInner);
-          const q10 = subjectPoint(c1 * rInner, y0, s1 * rInner);
-          const q11 = subjectPoint(c1 * rInner, y1, s1 * rInner);
-          const q01 = subjectPoint(c0 * rInner, y1, s0 * rInner);
-
-          // Inner wall
-          const colInner = computeDirectionalHex(palName, -nx, 0, -nz);
-          pushQuadWorld(q10, q00, q01, q11, colInner, -0.04);
-          // Top annular ring
+          const q00 = pt(c0 * rInner, y0, s0 * rInner);
+          const q10 = pt(c1 * rInner, y0, s1 * rInner);
+          const q11 = pt(c1 * rInner, y1, s1 * rInner);
+          const q01 = pt(c0 * rInner, y1, s0 * rInner);
+          pushQuadWorld(q10, q00, q01, q11, computeDirectionalHex(palName, -nx, 0, -nz), -0.04);
           pushQuadWorld(p01, p11, q11, q01, computeDirectionalHex(palName, 0, 1, 0), shift);
-          // Bottom annular soffit
           pushQuadWorld(q00, q10, p10, p00, computeDirectionalHex(palName, 0, -1, 0), shift);
-
-          if (opts.innerEdges) {
-            addLineWorld(q01, q11, 'medium', 0.01);
-            addLineWorld(q00, q10, 'medium', 0.01);
-          }
         } else {
-          const centerTop = subjectPoint(0, y1, 0);
-          const centerBot = subjectPoint(0, y0, 0);
-          pushTriWorld(p01, p11, centerTop, computeDirectionalHex(palName, 0, 1, 0), shift);
-          pushTriWorld(p10, p00, centerBot, computeDirectionalHex(palName, 0, -1, 0), shift);
+          const cTop = pt(0, y1, 0);
+          const cBot = pt(0, y0, 0);
+          pushTriWorld(p01, p11, cTop, computeDirectionalHex(palName, 0, 1, 0), shift);
+          pushTriWorld(p10, p00, cBot, computeDirectionalHex(palName, 0, -1, 0), shift);
         }
       }
     }
-    /**
-     * Adds a multi-course Romanesque overhanging circular cornice band (COURSES)
-     */
-    function addCircularCornice(y, h, rBase, segs = 36, opts = {}) {
-      const over = opts.overhang || 0.28;
-      const rInner = opts.rInner || 0;
-      const h1 = h * 0.24;
-      const h2 = h * 0.48;
-      const h3 = h * 0.28;
 
-      // Lower stone astragal ring
-      addCylinder(y, y + h1, rBase + over * 0.35, rInner, segs, 'cream', { edgeLayer: 'medium' });
-      // Middle terracotta polychrome frieze with brick courses
-      addCylinder(y + h1, y + h1 + h2, rBase + over * 0.65, rInner, segs, opts.dark ? 'brickDark' : 'terracotta', {
+    /**
+     * Builds an authentic Mughal Bulbous Double Dome ("Amrud" / Guava Profile)
+     * complete with inverted terracotta lotus collar (padmakosh) and tall finial (kalash)
+     */
+    function addBulbousMughalDome(cx, cz, yBase, domeH, rBase, segs = 32, opts = {}) {
+      const tiltX = opts.tiltX || 0;
+      const tiltZ = opts.tiltZ || 0;
+      const baseY = opts.tiltBaseY || yBase;
+
+      function pt(lx, ly, lz) {
+        const dy = ly - baseY;
+        return [cx + lx + dy * tiltX, ly, cz + lz + dy * tiltZ];
+      }
+
+      // Profile curve table: [heightFraction, radiusFraction, palette]
+      const profile = [
+        [0.00, 1.00, 'cream'],
+        [0.10, 1.06, 'cream'],
+        [0.22, 1.09, 'cream'], // Characteristic bulbous outward swell
+        [0.36, 1.05, 'cream'],
+        [0.50, 0.94, 'cream'],
+        [0.64, 0.77, 'cream'],
+        [0.76, 0.54, 'cream'],
+        [0.85, 0.31, 'cream'],
+        [0.90, 0.24, 'terracotta'], // Inverted lotus collar neck
+        [0.95, 0.14, 'terracotta'],
+        [1.00, 0.00, 'terracotta']
+      ];
+
+      const dTheta = (Math.PI * 2) / segs;
+
+      for (let r = 0; r < profile.length - 1; r++) {
+        const [t0, rf0, pal0] = profile[r];
+        const [t1, rf1] = profile[r + 1];
+        const y0 = yBase + t0 * domeH;
+        const y1 = yBase + t1 * domeH;
+        const rad0 = rBase * rf0;
+        const rad1 = rBase * rf1;
+        const isLotus = pal0 === 'terracotta';
+
+        for (let i = 0; i < segs; i++) {
+          const a0 = i * dTheta;
+          const a1 = (i + 1) * dTheta;
+          const aMid = (a0 + a1) * 0.5;
+          const c0 = Math.cos(a0), s0 = Math.sin(a0);
+          const c1 = Math.cos(a1), s1 = Math.sin(a1);
+
+          // Normal vector with vertical curvature component
+          const dr = rad0 - rad1;
+          const dy = y1 - y0;
+          const nLen = Math.hypot(dy, dr) || 1;
+          const nx = (Math.cos(aMid) * dy) / nLen;
+          const ny = dr / nLen;
+          const nz = (Math.sin(aMid) * dy) / nLen;
+
+          const p00 = pt(c0 * rad0, y0, s0 * rad0);
+          const p10 = pt(c1 * rad0, y0, s1 * rad0);
+          const p11 = pt(c1 * rad1, y1, s1 * rad1);
+          const p01 = pt(c0 * rad1, y1, s0 * rad1);
+
+          const col = computeDirectionalHex(pal0, nx, ny, nz);
+          if (rad1 < 1e-3) {
+            pushTriWorld(p00, p10, p01, col, 0);
+          } else {
+            pushQuadWorld(p00, p10, p11, p01, col, 0);
+          }
+
+          // Horizontal stone course rings
+          addLineWorld(p00, p10, isLotus ? 'rust' : 'fine', 0.01);
+
+          // Bold outer contour silhouette of the dome
+          const crossSil = Math.abs(Math.cos(aMid) * 0.707 - Math.sin(aMid) * 0.707);
+          if (crossSil > 0.95) {
+            addLineWorld(p00, p01, 'bold', 0.02);
+          } else if (isLotus || (opts.ribbed && i % 2 === 0)) {
+            addLineWorld(p00, p01, isLotus ? 'rust' : 'fine', 0.01);
+          }
+
+          // Directional right-side shadow hatching on the bulbous dome
+          const lightDot = Math.cos(aMid) * lightDir.x + Math.sin(aMid) * lightDir.z;
+          const viewDot = Math.cos(aMid) * 0.707 + Math.sin(aMid) * 0.707;
+          if (lightDot < -0.14 && viewDot > -0.35 && !isLotus) {
+            const hm = pt(Math.cos(aMid) * rad0, y0 + 0.02, Math.sin(aMid) * rad0);
+            const hmTop = pt(Math.cos(aMid) * rad1, y1 - 0.02, Math.sin(aMid) * rad1);
+            addLineWorld(hm, hmTop, 'fine', 0);
+          }
+        }
+      }
+
+      // Tall Finial Spire (Kalash) with stacked orbs and crescent motif
+      const finialH = opts.finialH || domeH * 0.34;
+      const yApex = yBase + domeH;
+      const pBase = pt(0, yApex, 0);
+      const pTop  = pt(0, yApex + finialH, 0);
+      addLineWorld(pBase, pTop, 'bold', 0.02);
+
+      // Three spherical kalash orbs along the spire shaft
+      [0.22, 0.48, 0.72].forEach((f, idx) => {
+        const oy = yApex + finialH * f;
+        const orbR = rBase * (0.09 - idx * 0.018);
+        addCylinderDrum(
+          cx + (oy - baseY) * tiltX,
+          cz + (oy - baseY) * tiltZ,
+          oy - orbR,
+          oy + orbR,
+          orbR,
+          0,
+          8,
+          'terracotta',
+          { edgeLayer: 'bold', shadeHatch: false }
+        );
+      });
+      // Crescent horns near top of finial
+      const cY = yApex + finialH * 0.84;
+      const cSpan = rBase * 0.11;
+      addLineWorld(pt(-cSpan, cY + 0.12, cSpan), pt(0, cY - 0.05, 0), 'bold', 0.01);
+      addLineWorld(pt(0, cY - 0.05, 0), pt(cSpan, cY + 0.12, -cSpan), 'bold', 0.01);
+    }
+
+    /**
+     * Builds a slender octagonal engaged corner shaft (Guldasta) with chevron fluting & lotus pinnacle
+     */
+    function addGuldastaShaft(cx, cz, y0, y1, radius = 0.28, pinnacleH = 1.65) {
+      addCylinderDrum(cx, cz, y0, y1, radius, 0, 8, 'cream', {
+        edgeLayer: 'bold',
+        courses: Math.round((y1 - y0) * 1.4),
+        allVerticals: false
+      });
+      // Collared terracotta capital rings at roof parapet level
+      addCylinderDrum(cx, cz, y1, y1 + 0.28, radius * 1.28, 0, 8, 'terracotta', { edgeLayer: 'bold' });
+      // Mini lotus cupola pinnacle above parapet
+      addBulbousMughalDome(cx, cz, y1 + 0.28, pinnacleH * 0.65, radius * 1.15, 8, {
+        finialH: pinnacleH * 0.45,
+        ribbed: true
+      });
+    }
+
+    /**
+     * Builds an 8-columned Octagonal Domed Chhatri Pavilion (used on Roof & Minaret Crowns)
+     */
+    function addOctagonalChhatri(cx, cz, y0, radius, totalH, opts = {}) {
+      const tiltX = opts.tiltX || 0;
+      const tiltZ = opts.tiltZ || 0;
+      const baseY = opts.tiltBaseY || y0;
+
+      function shiftX(y) { return cx + (y - baseY) * tiltX; }
+      function shiftZ(y) { return cz + (y - baseY) * tiltZ; }
+
+      const plinthH = totalH * 0.10;
+      const colH    = totalH * 0.34;
+      const eaveH   = totalH * 0.07;
+      const drumH   = totalH * 0.13;
+      const domeH   = totalH * 0.36;
+
+      // 1. Octagonal base pedestal
+      addCylinderDrum(cx, cz, y0, y0 + plinthH, radius * 1.06, 0, 8, 'stone', {
+        edgeLayer: 'bold',
+        angleOffset: Math.PI / 8,
+        tiltX, tiltZ, tiltBaseY: baseY
+      });
+
+      // 2. 8 Slender Perimeter Columns + Pointed Arch Ring
+      const yCol0 = y0 + plinthH;
+      const yCol1 = yCol0 + colH;
+      const colRad = radius * 0.88;
+      const postR = radius * 0.095;
+
+      for (let i = 0; i < 8; i++) {
+        const a0 = (i * Math.PI * 2) / 8 + Math.PI / 8;
+        const a1 = ((i + 1) * Math.PI * 2) / 8 + Math.PI / 8;
+        const px0 = Math.cos(a0) * colRad, pz0 = Math.sin(a0) * colRad;
+        const px1 = Math.cos(a1) * colRad, pz1 = Math.sin(a1) * colRad;
+
+        // Column shaft at corner i
+        addCylinderDrum(cx + px0, cz + pz0, yCol0, yCol1, postR, 0, 6, 'cream', {
+          edgeLayer: 'bold',
+          tiltX, tiltZ, tiltBaseY: baseY,
+          shadeHatch: false
+        });
+
+        // Pointed arch lintel connecting column i to column i+1
+        const midX = (px0 + px1) * 0.5, midZ = (pz0 + pz1) * 0.5;
+        const ySpring = yCol0 + colH * 0.66;
+        const yPeak   = yCol1 - 0.08;
+
+        const pL = [shiftX(ySpring) + px0, ySpring, shiftZ(ySpring) + pz0];
+        const pR = [shiftX(ySpring) + px1, ySpring, shiftZ(ySpring) + pz1];
+        const pPeak = [shiftX(yPeak) + midX, yPeak, shiftZ(yPeak) + midZ];
+        const pTopL = [shiftX(yCol1) + px0, yCol1, shiftZ(yCol1) + pz0];
+        const pTopR = [shiftX(yCol1) + px1, yCol1, shiftZ(yCol1) + pz1];
+
+        const colSpandrel = computeDirectionalHex('terracotta', midX, 0, midZ);
+        pushTriWorld(pL, pPeak, pTopL, colSpandrel, 0);
+        pushTriWorld(pPeak, pR, pTopR, colSpandrel, 0);
+        pushTriWorld(pTopL, pPeak, pTopR, colSpandrel, 0);
+
+        addLineWorld(pL, pPeak, 'bold', 0.015);
+        addLineWorld(pPeak, pR, 'bold', 0.015);
+        addLineWorld(pTopL, pTopR, 'bold', 0.015);
+      }
+
+      // Shadowed interior ceiling of the open kiosk
+      addCylinderDrum(cx, cz, yCol1 - 0.12, yCol1, colRad, 0, 8, 'dark', {
+        edgeLayer: 'medium',
+        angleOffset: Math.PI / 8,
+        tiltX, tiltZ, tiltBaseY: baseY
+      });
+
+      // 3. Overhanging Sloped Chhajja Eave Canopy
+      const yEave0 = yCol1;
+      const yEave1 = yEave0 + eaveH;
+      addCylinderDrum(cx, cz, yEave0, yEave1, radius * 1.24, 0, 8, 'cream', {
+        edgeLayer: 'bold',
+        angleOffset: Math.PI / 8,
+        tiltX, tiltZ, tiltBaseY: baseY
+      });
+
+      // 4. Octagonal Polychrome Drum
+      const yDrum0 = yEave1;
+      const yDrum1 = yDrum0 + drumH;
+      addCylinderDrum(cx, cz, yDrum0, yDrum1, radius * 0.82, 0, 8, 'terracotta', {
         edgeLayer: 'medium',
         courses: 2,
-        hatchLayer: 'rust'
-      });
-      // Upper overhanging corona slab
-      addCylinder(y + h1 + h2, y + h, rBase + over, rInner, segs, 'cream', {
-        edgeLayer: 'bold'
+        angleOffset: Math.PI / 8,
+        tiltX, tiltZ, tiltBaseY: baseY
       });
 
-      // Radial dentil brackets under the cornice overhang
-      const bracketCount = segs * 2;
-      for (let i = 0; i < bracketCount; i++) {
-        const ang = (i * Math.PI * 2) / bracketCount;
-        const c = Math.cos(ang), s = Math.sin(ang);
-        addLineWorld(
-          subjectPoint(c * rBase, y + h1, s * rBase),
-          subjectPoint(c * (rBase + over * 0.92), y + h1 + h2, s * (rBase + over * 0.92)),
-          'medium',
-          0
-        );
-      }
+      // 5. Bulbous Ribbed Cupola Dome & Finial
+      addBulbousMughalDome(cx, cz, yDrum1, domeH, radius * 0.80, 16, {
+        ribbed: true,
+        finialH: domeH * 0.42,
+        tiltX, tiltZ, tiltBaseY: baseY
+      });
     }
+
     /**
-     * Adds a classical Romanesque column with base plinth, fluted shaft, and capital
+     * Builds a 3D Recessed Mughal Pointed-Arch Wall Segment (Pishtaq Iwan or Flanking Bay)
+     * Works along any horizontal wall vector from (xL, zL) to (xR, zR)!
      */
-    function addColumn(angle, radius, y0, y1, colRadius = 0.22, opts = {}) {
-      const cx = Math.cos(angle) * radius;
-      const cz = Math.sin(angle) * radius;
-      const h = y1 - y0;
-      const baseH = Math.min(0.42, h * 0.12);
-      const capH = Math.min(0.52, h * 0.15);
-      const shaftY0 = y0 + baseH;
-      const shaftY1 = y1 - capH;
+    function addMughalArchBay(xL, zL, xR, zR, y0, y1, depth, opts = {}) {
+      const dx = xR - xL, dz = zR - zL;
+      const span = Math.hypot(dx, dz);
+      const tx = dx / span, tz = dz / span; // Unit tangent along wall
+      const nx = -tz, nz = tx;              // Outward unit normal (for counter-clockwise perimeter)
 
-      // Helper for small local prism around (cx, cz) aligned radially
-      function addLocalPrism(py0, py1, halfW, halfD, palName, lyr = 'medium') {
-        const uX = Math.cos(angle), uZ = Math.sin(angle); // Radial outward
-        const vX = -uZ, vZ = uX;                          // Tangential
-
-        const corners = [
-          [cx + uX * halfD - vX * halfW, cz + uZ * halfD - vZ * halfW],
-          [cx + uX * halfD + vX * halfW, cz + uZ * halfD + vZ * halfW],
-          [cx - uX * halfD + vX * halfW, cz - uZ * halfD + vZ * halfW],
-          [cx - uX * halfD - vX * halfW, cz - uZ * halfD - vZ * halfW]
+      function wallPt(u, y, recess = 0) {
+        return [
+          xL + tx * u - nx * recess,
+          y,
+          zL + tz * u - nz * recess
         ];
-        const normals = [
-          [uX, uZ],
-          [vX, vZ],
-          [-uX, -uZ],
-          [-vX, -vZ]
-        ];
+      }
 
-        const botPts = corners.map(c => subjectPoint(c[0], py0, c[1]));
-        const topPts = corners.map(c => subjectPoint(c[0], py1, c[1]));
+      const pierW = opts.pierW || span * 0.16;
+      const uArchL = pierW;
+      const uArchR = span - pierW;
+      const archW = uArchR - uArchL;
+      const uMid = span * 0.5;
 
-        for (let f = 0; f < 4; f++) {
-          const nf = (f + 1) % 4;
-          const col = computeDirectionalHex(palName, normals[f][0], 0, normals[f][1]);
-          pushQuadWorld(botPts[f], botPts[nf], topPts[nf], topPts[f], col, 0);
-          addLineWorld(botPts[f], botPts[nf], lyr, 0.015);
-          addLineWorld(topPts[f], topPts[nf], lyr, 0.015);
-          addLineWorld(botPts[f], topPts[f], lyr, 0.015);
+      const parapetH = opts.parapetH || 0.72;
+      const frameTopY = y1 - parapetH;
+      const archSpringY = y0 + (frameTopY - y0) * (opts.springRatio || 0.52);
+      const archPeakY   = frameTopY - (opts.spandrelH || 0.75);
+
+      const wallColor = computeDirectionalHex('cream', nx, 0, nz);
+      const pierColor = computeDirectionalHex('stone', nx, 0, nz);
+      const vaultSideColor = computeDirectionalHex('coreWall', tx, 0, tz);
+      const backWallColor  = computeDirectionalHex('coreWall', nx, 0, nz);
+
+      // 1. Left & Right Outer Flanking Piers (with Pietra Dura recessed border frames)
+      const pLL0 = wallPt(0, y0, 0),      pLR0 = wallPt(uArchL, y0, 0);
+      const pLR1 = wallPt(uArchL, frameTopY, 0), pLL1 = wallPt(0, frameTopY, 0);
+      pushQuadWorld(pLL0, pLR0, pLR1, pLL1, wallColor, 0);
+
+      const pRL0 = wallPt(uArchR, y0, 0), pRR0 = wallPt(span, y0, 0);
+      const pRR1 = wallPt(span, frameTopY, 0),   pRL1 = wallPt(uArchR, frameTopY, 0);
+      pushQuadWorld(pRL0, pRR0, pRR1, pRL1, wallColor, 0);
+
+      // Outer structural frame lines
+      addLineWorld(pLL0, pLL1, 'bold', 0.02);
+      addLineWorld(pRR0, pRR1, 'bold', 0.02);
+      addLineWorld(pLL0, pRR0, 'bold', 0.02);
+      addLineWorld(pLL1, pRR1, 'bold', 0.02);
+      addLineWorld(pLR0, wallPt(uArchL, archSpringY, 0), 'bold', 0.02);
+      addLineWorld(pRL0, wallPt(uArchR, archSpringY, 0), 'bold', 0.02);
+
+      // Pietra Dura rectangular border inlay on piers
+      const insetP = pierW * 0.25;
+      addLineWorld(wallPt(insetP, y0 + 0.25, -0.015), wallPt(insetP, frameTopY - 0.25, -0.015), 'rust', 0.01);
+      addLineWorld(wallPt(span - insetP, y0 + 0.25, -0.015), wallPt(span - insetP, frameTopY - 0.25, -0.015), 'rust', 0.01);
+
+      // Horizontal marble courses on piers
+      const courses = Math.max(4, Math.round((frameTopY - y0) * 1.1));
+      for (let c = 1; c < courses; c++) {
+        const cy = y0 + ((frameTopY - y0) * c) / courses;
+        addLineWorld(wallPt(0, cy, -0.01), wallPt(uArchL, cy, -0.01), 'fine', 0);
+        addLineWorld(wallPt(uArchR, cy, -0.01), wallPt(span, cy, -0.01), 'fine', 0);
+      }
+
+      // 2. Deep Recessed Side Reveal Walls inside the Iwan Opening (from y0 to archSpringY)
+      const revL0 = wallPt(uArchL, y0, 0), revL1 = wallPt(uArchL, y0, depth);
+      const revL2 = wallPt(uArchL, archSpringY, depth), revL3 = wallPt(uArchL, archSpringY, 0);
+      pushQuadWorld(revL0, revL1, revL2, revL3, vaultSideColor, -0.03);
+      addLineWorld(revL1, revL2, 'medium', 0.01);
+
+      const revR0 = wallPt(uArchR, y0, depth), revR1 = wallPt(uArchR, y0, 0);
+      const revR2 = wallPt(uArchR, archSpringY, 0), revR3 = wallPt(uArchR, archSpringY, depth);
+      pushQuadWorld(revR0, revR1, revR2, revR3, vaultSideColor, -0.05);
+      addLineWorld(revR0, revR3, 'medium', 0.01);
+
+      // Floor slab inside recessed niche
+      pushQuadWorld(
+        wallPt(uArchL, y0, 0),
+        wallPt(uArchR, y0, 0),
+        wallPt(uArchR, y0, depth),
+        wallPt(uArchL, y0, depth),
+        PALETTE.stone.top,
+        0
+      );
+
+      // 3. Parameterized 4-Centered Mughal Pointed Arch Curve & Vault Soffit
+      const archSegs = 10; // 5 segments per half-arch meeting at a crisp pointed apex
+      for (let s = 0; s < archSegs; s++) {
+        const t0 = -1 + (2 * s) / archSegs;
+        const t1 = -1 + (2 * (s + 1)) / archSegs;
+
+        const u0 = uMid + t0 * (archW * 0.5);
+        const u1 = uMid + t1 * (archW * 0.5);
+
+        // Authentic Mughal pointed arch curve formula
+        const ay0 = archSpringY + (archPeakY - archSpringY) * Math.pow(1 - Math.pow(Math.abs(t0), 1.48), 0.72);
+        const ay1 = archSpringY + (archPeakY - archSpringY) * Math.pow(1 - Math.pow(Math.abs(t1), 1.48), 0.72);
+
+        // Front spandrel quad above arch curve up to frameTopY
+        const fA0 = wallPt(u0, ay0, 0);
+        const fA1 = wallPt(u1, ay1, 0);
+        const fT1 = wallPt(u1, frameTopY, 0);
+        const fT0 = wallPt(u0, frameTopY, 0);
+        pushQuadWorld(fA0, fA1, fT1, fT0, wallColor, 0);
+
+        // Deep shadowed pointed vault soffit connecting front arch to back arch
+        const bA0 = wallPt(u0, ay0, depth);
+        const bA1 = wallPt(u1, ay1, depth);
+        pushQuadWorld(bA0, bA1, fA1, fA0, PALETTE.dark.bot, 0);
+
+        // Bold ink outline on front pointed arch + vault ribs
+        addLineWorld(fA0, fA1, 'bold', 0.018);
+        addLineWorld(bA0, bA1, 'medium', 0.01);
+        addLineWorld(fA0, bA0, 'fine', 0.01);
+
+        // Pietra Dura extrados trim line following the pointed arch
+        const extY0 = Math.min(frameTopY - 0.12, ay0 + 0.26);
+        const extY1 = Math.min(frameTopY - 0.12, ay1 + 0.26);
+        addLineWorld(wallPt(u0, extY0, -0.015), wallPt(u1, extY1, -0.015), 'rust', 0.01);
+      }
+
+      // Decorative Pietra Dura spandrel medallions (arabesque discs) on left and right spandrels
+      const medY = archSpringY + (frameTopY - archSpringY) * 0.62;
+      [uArchL + archW * 0.18, uArchR - archW * 0.18].forEach(mu => {
+        const mr = Math.min(0.45, archW * 0.075);
+        const mTop = wallPt(mu, medY + mr, -0.02);
+        const mBot = wallPt(mu, medY - mr, -0.02);
+        const mL   = wallPt(mu - mr, medY, -0.02);
+        const mR   = wallPt(mu + mr, medY, -0.02);
+        pushQuadWorld(mBot, mR, mTop, mL, PALETTE.terracotta.mid, 0);
+        addLineWorld(mBot, mR, 'rust', 0.01);
+        addLineWorld(mR, mTop, 'rust', 0.01);
+        addLineWorld(mTop, mL, 'rust', 0.01);
+        addLineWorld(mL, mBot, 'rust', 0.01);
+      });
+
+      // 4. Recessed Back Wall inside the Iwan Vault + Teal Marble Jali Lattice Windows
+      const bLL = wallPt(uArchL, y0, depth);
+      const bRR = wallPt(uArchR, y0, depth);
+      const bTR = wallPt(uArchR, archPeakY, depth);
+      const bTL = wallPt(uArchL, archPeakY, depth);
+      pushQuadWorld(bLL, bRR, bTR, bTL, backWallColor, 0);
+
+      // Inner Teal Jali Screen (PANELS) inside the recessed vault
+      const jaliMargin = archW * 0.18;
+      const jU0 = uArchL + jaliMargin;
+      const jU1 = uArchR - jaliMargin;
+      const jH1 = y0 + (archSpringY - y0) * 0.78;
+
+      function addJaliPanel(yA, yB, isDeep) {
+        const j0 = wallPt(jU0, yA, depth - 0.03);
+        const j1 = wallPt(jU1, yA, depth - 0.03);
+        const j2 = wallPt(jU1, yB, depth - 0.03);
+        const j3 = wallPt(jU0, yB, depth - 0.03);
+        pushQuadWorld(j0, j1, j2, j3, isDeep ? PALETTE.tealDeep.mid : PALETTE.teal.mid, 0);
+        addLineWorld(j0, j1, 'bold', 0.015);
+        addLineWorld(j1, j2, 'bold', 0.015);
+        addLineWorld(j2, j3, 'bold', 0.015);
+        addLineWorld(j3, j0, 'bold', 0.015);
+
+        // Fine geometric jali lattice mullions & teal reflection strokes
+        const cols = opts.isGrandIwan ? 4 : 2;
+        for (let c = 1; c < cols; c++) {
+          const cu = jU0 + ((jU1 - jU0) * c) / cols;
+          addLineWorld(wallPt(cu, yA, depth - 0.04), wallPt(cu, yB, depth - 0.04), 'medium', 0.01);
+          addLineWorld(wallPt(cu - 0.08, yA + 0.2, depth - 0.04), wallPt(cu - 0.08, yB - 0.2, depth - 0.04), 'teal', 0);
         }
-        pushQuadWorld(topPts[0], topPts[1], topPts[2], topPts[3], PALETTE[palName].top, 0);
-        pushQuadWorld(botPts[3], botPts[2], botPts[1], botPts[0], PALETTE[palName].bot, 0);
+        const midJY = (yA + yB) * 0.5;
+        addLineWorld(wallPt(jU0, midJY, depth - 0.04), wallPt(jU1, midJY, depth - 0.04), 'fine', 0.01);
       }
 
-      // 1. Moulded column base pedestal
-      addLocalPrism(y0, y0 + baseH * 0.55, colRadius * 1.45, colRadius * 1.45, 'stone', 'medium');
-      addLocalPrism(y0 + baseH * 0.55, shaftY0, colRadius * 1.2, colRadius * 1.2, 'terracotta', 'medium');
-
-      // 2. Octagonal/cylindrical column shaft with vertical ink fluting
-      const shaftSegs = 6;
-      for (let s = 0; s < shaftSegs; s++) {
-        const a0 = angle + (s * Math.PI * 2) / shaftSegs;
-        const a1 = angle + ((s + 1) * Math.PI * 2) / shaftSegs;
-        const nx = Math.cos((a0 + a1) * 0.5), nz = Math.sin((a0 + a1) * 0.5);
-
-        const p00 = subjectPoint(cx + Math.cos(a0) * colRadius, shaftY0, cz + Math.sin(a0) * colRadius);
-        const p10 = subjectPoint(cx + Math.cos(a1) * colRadius, shaftY0, cz + Math.sin(a1) * colRadius);
-        const p11 = subjectPoint(cx + Math.cos(a1) * colRadius, shaftY1, cz + Math.sin(a1) * colRadius);
-        const p01 = subjectPoint(cx + Math.cos(a0) * colRadius, shaftY1, cz + Math.sin(a0) * colRadius);
-
-        pushQuadWorld(p00, p10, p11, p01, computeDirectionalHex(opts.shaftPalette || 'cream', nx, 0, nz), 0.02);
-        addLineWorld(p00, p01, s % 2 === 0 ? 'bold' : 'fine', 0.01);
+      if (opts.isGrandIwan) {
+        // Two tiers of jali screens inside the monumental central pishtaq iwan
+        addJaliPanel(y0 + 0.25, jH1 * 0.62, true);
+        addJaliPanel(jH1 * 0.72, archSpringY + 0.65, false);
+        // Horizontal gallery stringcourse inside the grand iwan
+        addLineWorld(wallPt(uArchL, jH1 * 0.67, depth - 0.02), wallPt(uArchR, jH1 * 0.67, depth - 0.02), 'bold', 0.01);
+      } else {
+        addJaliPanel(y0 + 0.22, archSpringY - 0.12, false);
       }
 
-      // 3. Corinthian bell capital & terracotta/cream abacus block
-      addLocalPrism(shaftY1, shaftY1 + capH * 0.58, colRadius * 1.32, colRadius * 1.32, 'cream', 'medium');
-      addLocalPrism(shaftY1 + capH * 0.58, y1, colRadius * 1.58, colRadius * 1.58, 'terracotta', 'bold');
+      // 5. Ornamental Parapet Frieze & Terracotta Merlon Crown at top of wall (frameTopY .. y1)
+      const parB0 = wallPt(0, frameTopY, -0.08), parB1 = wallPt(span, frameTopY, -0.08);
+      const parT1 = wallPt(span, y1, -0.08),     parT0 = wallPt(0, y1, -0.08);
+      const parBack0 = wallPt(0, y1, depth),     parBack1 = wallPt(span, y1, depth);
+
+      // Terracotta inlaid lower band + cream crenellated upper band
+      const midParY = frameTopY + parapetH * 0.45;
+      pushQuadWorld(
+        parB0, parB1,
+        wallPt(span, midParY, -0.08), wallPt(0, midParY, -0.08),
+        computeDirectionalHex('terracotta', nx, 0, nz), 0
+      );
+      pushQuadWorld(
+        wallPt(0, midParY, -0.08), wallPt(span, midParY, -0.08),
+        parT1, parT0,
+        wallColor, 0
+      );
+      // Top roof deck cap over this bay
+      pushQuadWorld(parT0, parT1, parBack1, parBack0, PALETTE.cream.top, 0);
+
+      addLineWorld(parB0, parB1, 'bold', 0.02);
+      addLineWorld(wallPt(0, midParY, -0.09), wallPt(span, midParY, -0.09), 'rust', 0.01);
+      addLineWorld(parT0, parT1, 'bold', 0.02);
+
+      // Vertical merlon/crenellation ticks along parapet frieze
+      const merlons = Math.max(5, Math.round(span * 2.4));
+      for (let m = 1; m < merlons; m++) {
+        const mu = (span * m) / merlons;
+        addLineWorld(wallPt(mu, frameTopY, -0.09), wallPt(mu, y1, -0.09), m % 2 === 0 ? 'rust' : 'fine', 0);
+      }
     }
-    // =========================================================================
-    // 5. SITE FURNITURE HELPERS
-    // =========================================================================
-    function addWorldBox(x, y, z, w, h, d, palName = 'plaza', lyr = 'bold') {
-      const pal = PALETTE[palName] || PALETTE.plaza;
-      const x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
-      const p000 = [x0, y0, z0], p100 = [x1, y0, z0], p110 = [x1, y1, z0], p010 = [x0, y1, z0];
-      const p001 = [x0, y0, z1], p101 = [x1, y0, z1], p111 = [x1, y1, z1], p011 = [x0, y1, z1];
 
-      pushQuadWorld(p001, p101, p111, p011, pal.lit, 0);
-      pushQuadWorld(p101, p100, p110, p111, pal.shade, 0);
-      pushQuadWorld(p011, p111, p110, p010, pal.top, 0);
-      pushQuadWorld(p000, p100, p101, p001, pal.bot, 0);
-      pushQuadWorld(p100, p000, p010, p110, pal.shade, 0);
-      pushQuadWorld(p000, p001, p011, p010, pal.mid, 0);
+    // =========================================================================
+    // 5. ASSEMBLING THE TAJ MAHAL MONUMENT COMPLEX
+    // =========================================================================
 
-      const edges = [
-        [p000, p100], [p100, p101], [p101, p001], [p001, p000],
-        [p010, p110], [p110, p111], [p111, p011], [p011, p010],
-        [p000, p010], [p100, p110], [p101, p111], [p001, p011]
-      ];
-      edges.forEach(e => addLineWorld(e[0], e[1], lyr, 0.02));
+    // -------------------------------------------------------------------------
+    // TIER 0: RED SANDSTONE BASE & WHITE MARBLE TERRACE PLATFORM (KAUROS)
+    // -------------------------------------------------------------------------
+    const sandW = 33.6, sandD = 33.6;
+    const sandY0 = 0.0, sandH = 1.15;
+    addWorldBox(-sandW / 2, sandY0, -sandD / 2 - 2.0, sandW, sandH, sandD, 'terracotta', {
+      edgeLayer: 'bold',
+      courses: 3
+    });
+
+    // White Marble Terrace Platform (y = 1.15 .. 3.45)
+    const platW = 29.8, platD = 29.8;
+    const platY0 = sandH, platH = 2.30;
+    const deckY = platY0 + platH; // y = 3.45: Main marble terrace floor!
+
+    addWorldBox(-platW / 2, platY0, -platD / 2 - 2.0, platW, platH - 0.28, platD, 'cream', {
+      edgeLayer: 'bold',
+      courses: 4
+    });
+    // Overhanging moulded marble & terracotta platform cornice
+    addWorldBox(-platW / 2 - 0.18, deckY - 0.28, -platD / 2 - 2.18, platW + 0.36, 0.28, platD + 0.36, 'stone', {
+      edgeLayer: 'bold'
+    });
+
+    // Decorative recessed arch dado panels along the front (+Z) and right (+X) marble platform walls
+    const platFrontZ = platD / 2 - 2.0;
+    const platRightX = platW / 2;
+    for (let i = -6; i <= 6; i++) {
+      if (Math.abs(i) <= 1) continue; // Leave center clear for monumental entry steps
+      const px = i * 2.1;
+      addWorldBox(px - 0.75, platY0 + 0.32, platFrontZ - 0.05, 1.5, platH - 0.75, 0.12, 'stone', {
+        edgeLayer: 'medium'
+      });
+      addWorldBox(platRightX - 0.05, platY0 + 0.32, px - 2.0 - 0.75, 0.12, platH - 0.75, 1.5, 'stone', {
+        edgeLayer: 'medium'
+      });
     }
 
+    // Monumental Recessed Entry Staircase at center of +Z platform face
+    for (let st = 0; st < 6; st++) {
+      const sy = sandY0 + ( st * (deckY - sandY0) ) / 6;
+      const sh = (deckY - sandY0) / 6;
+      const sz = platFrontZ + 1.2 - st * 0.32;
+      addWorldBox(-2.1, sy, sz, 4.2, sh, 0.42, st % 2 === 0 ? 'cream' : 'terracotta', { edgeLayer: 'bold' });
+    }
+
+    // -------------------------------------------------------------------------
+    // ZONE A: THE FOUR CORNER MINARETS (Slightly tilted outward by 1.4 degrees!)
+    // -------------------------------------------------------------------------
+    const minOffset = 13.05;
+    const minaretCorners = [
+      [-minOffset, -minOffset - 2.0, -0.022, -0.022], // Back-Left
+      [ minOffset, -minOffset - 2.0,  0.022, -0.022], // Back-Right
+      [ minOffset,  minOffset - 2.0,  0.022,  0.022], // Front-Right
+      [-minOffset,  minOffset - 2.0, -0.022,  0.022]  // Front-Left
+    ];
+
+    function buildCornerMinaret(mx, mz, tiltX, tiltZ) {
+      const baseH = 1.65;
+      const tierH = 4.65;
+      const rBase = 1.48;
+
+      // 1. Octagonal sculpted marble base plinth on terrace corner
+      addCylinderDrum(mx, mz, deckY, deckY + baseH, rBase * 1.18, 0, 8, 'stone', {
+        edgeLayer: 'bold',
+        courses: 3,
+        angleOffset: Math.PI / 8,
+        tiltX, tiltZ, tiltBaseY: deckY
+      });
+
+      // 2. Three tapering cylindrical shaft tiers separated by cantilevered balconies (Chhajja)
+      let curY = deckY + baseH;
+      for (let t = 0; t < 3; t++) {
+        const r0 = rBase * (1 - t * 0.12);
+        const r1 = rBase * (1 - (t + 1) * 0.11);
+        const tY1 = curY + tierH;
+
+        // Cylindrical marble shaft with horizontal dark-inlay stone courses
+        addCylinderDrum(mx, mz, curY, tY1 - 0.55, (r0 + r1) * 0.5, 0, 16, 'cream', {
+          edgeLayer: 'medium',
+          courses: 7,
+          verticalJoints: 2,
+          tiltX, tiltZ, tiltBaseY: deckY
+        });
+
+        // Cantilevered Balcony Corbel Frieze (Terracotta) & Overhanging Stone Walk
+        const bY0 = tY1 - 0.55;
+        addCylinderDrum(mx, mz, bY0, bY0 + 0.25, r1 * 1.22, 0, 16, 'terracotta', {
+          edgeLayer: 'rust',
+          tiltX, tiltZ, tiltBaseY: deckY
+        });
+        addCylinderDrum(mx, mz, bY0 + 0.25, tY1, r1 * 1.42, 0, 16, 'cream', {
+          edgeLayer: 'bold',
+          tiltX, tiltZ, tiltBaseY: deckY
+        });
+        // Balcony balustrade railing ring
+        addCylinderDrum(mx, mz, tY1, tY1 + 0.42, r1 * 1.38, r1 * 1.15, 16, 'stone', {
+          edgeLayer: 'medium',
+          verticalJoints: 1,
+          tiltX, tiltZ, tiltBaseY: deckY
+        });
+
+        curY = tY1;
+      }
+
+      // 3. Open 8-Columned Octagonal Chhatri Cupola crowning the Minaret
+      addOctagonalChhatri(mx, mz, curY, rBase * 0.78, 4.45, {
+        tiltX, tiltZ, tiltBaseY: deckY
+      });
+    }
+
+    minaretCorners.forEach(([mx, mz, tx, tz]) => buildCornerMinaret(mx, mz, tx, tz));
+
+    // -------------------------------------------------------------------------
+    // ZONE B: CENTRAL CHAMFERED OCTAGONAL MAUSOLEUM (HASHT-BIHISHT)
+    // -------------------------------------------------------------------------
+    const mCenterZ = -2.0;
+    const halfSpan = 8.45;  // Half-width of main mausoleum square (Total width = 16.9)
+    const chamfer  = 2.65;  // 45-degree corner chamfer inset
+    const flankW   = 2.45;  // Width of two-story flanking bays on either side of central pishtaq
+    const pishtaqHalf = halfSpan - chamfer - flankW; // Half-width of central monumental pishtaq (3.35)
+
+    const bodyH    = 11.85; // Height of flanking bays & chamfered corners above deckY
+    const pishtaqH = 14.35; // Taller height of the 4 central monumental pishtaq portals!
+    const roofY    = deckY + bodyH; // y = 15.30: Main roof terrace level
+
+    // Moulded marble base dado running around the mausoleum footprint
+    addWorldBox(-halfSpan + chamfer * 0.5, deckY, mCenterZ - halfSpan + chamfer * 0.5,
+      (halfSpan - chamfer * 0.5) * 2, 0.55, (halfSpan - chamfer * 0.5) * 2, 'stone', { edgeLayer: 'bold' });
+
+    /**
+     * Helper to build a Two-Story Flanking or Chamfered Corner Bay (Lower & Upper Pointed Niches)
+     */
+    function addTwoStoryNicheBay(xL, zL, xR, zR, depth = 1.05) {
+      const midY = deckY + (bodyH - 0.72) * 0.50;
+      // Lower story pointed arch niche + jali window
+      addMughalArchBay(xL, zL, xR, zR, deckY + 0.45, midY + 0.35, depth, {
+        parapetH: 0.35,
+        springRatio: 0.54,
+        spandrelH: 0.45,
+        pierW: Math.hypot(xR - xL, zR - zL) * 0.17
+      });
+      // Upper story pointed arch niche + jali window + roof parapet crown
+      addMughalArchBay(xL, zL, xR, zR, midY + 0.35, deckY + bodyH, depth, {
+        parapetH: 0.75,
+        springRatio: 0.52,
+        spandrelH: 0.52,
+        pierW: Math.hypot(xR - xL, zR - zL) * 0.17
+      });
+    }
+
+    /**
+     * Builds one complete cardinal facade (Left Flanking Bay + Central Tall Pishtaq Iwan + Right Flanking Bay)
+     */
+    function buildCardinalFacade(p0, p1, p2, p3) {
+      // 1. Left Two-Story Flanking Bay (p0 -> p1)
+      addTwoStoryNicheBay(p0[0], p0[1], p1[0], p1[1], 1.05);
+
+      // 2. Central Monumental Pishtaq Iwan Portal (p1 -> p2, rising higher to deckY + pishtaqH!)
+      addMughalArchBay(p1[0], p1[1], p2[0], p2[1], deckY + 0.45, deckY + pishtaqH, 2.25, {
+        isGrandIwan: true,
+        parapetH: 1.05,
+        springRatio: 0.54,
+        spandrelH: 1.05,
+        pierW: 0.92
+      });
+
+      // Side cheek walls of the raised Pishtaq block above roofY (y = roofY .. deckY + pishtaqH)
+      const dx = p2[0] - p1[0], dz = p2[1] - p1[1];
+      const len = Math.hypot(dx, dz);
+      const nx = -dz / len, nz = dx / len; // Outward normal
+      const pDepth = 2.25;
+      const yTop = deckY + pishtaqH;
+
+      // Left cheek wall of raised pishtaq
+      pushQuadWorld(
+        [p1[0] - nx * pDepth, roofY, p1[1] - nz * pDepth],
+        [p1[0], roofY, p1[1]],
+        [p1[0], yTop, p1[1]],
+        [p1[0] - nx * pDepth, yTop, p1[1] - nz * pDepth],
+        computeDirectionalHex('cream', -dx / len, 0, -dz / len), 0
+      );
+      // Right cheek wall of raised pishtaq
+      pushQuadWorld(
+        [p2[0], roofY, p2[1]],
+        [p2[0] - nx * pDepth, roofY, p2[1] - nz * pDepth],
+        [p2[0] - nx * pDepth, yTop, p2[1] - nz * pDepth],
+        [p2[0], yTop, p2[1]],
+        computeDirectionalHex('cream', dx / len, 0, dz / len), 0
+      );
+
+      // Twin engaged Guldasta shafts & lotus pinnacles framing the central Pishtaq!
+      addGuldastaShaft(p1[0], p1[1], deckY, yTop, 0.26, 1.85);
+      addGuldastaShaft(p2[0], p2[1], deckY, yTop, 0.26, 1.85);
+
+      // 3. Right Two-Story Flanking Bay (p2 -> p3)
+      addTwoStoryNicheBay(p2[0], p2[1], p3[0], p3[1], 1.05);
+
+      // Outer corner Guldasta shafts at p0 and p3
+      addGuldastaShaft(p0[0], p0[1], deckY, roofY, 0.28, 1.65);
+      addGuldastaShaft(p3[0], p3[1], deckY, roofY, 0.28, 1.65);
+    }
+
+    // Define perimeter vertices in counter-clockwise order (so outward normals point outward)
+    const zFront = mCenterZ + halfSpan;
+    const zBack  = mCenterZ - halfSpan;
+    const xRight = halfSpan;
+    const xLeft  = -halfSpan;
+
+    // 1. SOUTH / FRONT-LEFT FACADE (+Z)
+    const f0 = [-halfSpan + chamfer, zFront];
+    const f1 = [-pishtaqHalf, zFront];
+    const f2 = [ pishtaqHalf, zFront];
+    const f3 = [ halfSpan - chamfer, zFront];
+    buildCardinalFacade(f0, f1, f2, f3);
+
+    // 2. EAST / FRONT-RIGHT FACADE (+X)
+    const r0 = [xRight, mCenterZ + halfSpan - chamfer];
+    const r1 = [xRight, mCenterZ + pishtaqHalf];
+    const r2 = [xRight, mCenterZ - pishtaqHalf];
+    const r3 = [xRight, mCenterZ - halfSpan + chamfer];
+    buildCardinalFacade(r0, r1, r2, r3);
+
+    // 3. NORTH / BACK-RIGHT FACADE (-Z)
+    const b0 = [ halfSpan - chamfer, zBack];
+    const b1 = [ pishtaqHalf, zBack];
+    const b2 = [-pishtaqHalf, zBack];
+    const b3 = [-halfSpan + chamfer, zBack];
+    buildCardinalFacade(b0, b1, b2, b3);
+
+    // 4. WEST / BACK-LEFT FACADE (-X)
+    const l0 = [xLeft, mCenterZ - halfSpan + chamfer];
+    const l1 = [xLeft, mCenterZ - pishtaqHalf];
+    const l2 = [xLeft, mCenterZ + pishtaqHalf];
+    const l3 = [xLeft, mCenterZ + halfSpan - chamfer];
+    buildCardinalFacade(l0, l1, l2, l3);
+
+    // 5. FOUR 45-DEGREE CHAMFERED CORNER BAYS
+    addTwoStoryNicheBay(f3[0], f3[1], r0[0], r0[1], 1.15); // Front-Bottom Chamfer (+X, +Z)
+    addTwoStoryNicheBay(r3[0], r3[1], b0[0], b0[1], 1.15); // Right-Back Chamfer (+X, -Z)
+    addTwoStoryNicheBay(b3[0], b3[1], l0[0], l0[1], 1.15); // Top-Back Chamfer (-X, -Z)
+    addTwoStoryNicheBay(l3[0], l3[1], f0[0], f0[1], 1.15); // Left-Front Chamfer (-X, +Z)
+
+    // Solid interior roof deck slab capping the mausoleum core at y = roofY
+    const coreInset = 1.05;
+    addWorldBox(
+      -halfSpan + chamfer * 0.65,
+      roofY - 0.4,
+      mCenterZ - halfSpan + chamfer * 0.65,
+      (halfSpan - chamfer * 0.65) * 2,
+      0.4,
+      (halfSpan - chamfer * 0.65) * 2,
+      'cream',
+      { edgeLayer: 'medium' }
+    );
+
+    // -------------------------------------------------------------------------
+    // ZONE C: FOUR ROOF CHHATRIS & ICONIC CENTRAL BULBOUS DOUBLE DOME
+    // -------------------------------------------------------------------------
+    // 1. Four Octagonal Domed Chhatri Kiosks surrounding the central dome
+    const chhatriOffset = 4.95;
+    const chhatriCoords = [
+      [-chhatriOffset, mCenterZ - chhatriOffset],
+      [ chhatriOffset, mCenterZ - chhatriOffset],
+      [ chhatriOffset, mCenterZ + chhatriOffset],
+      [-chhatriOffset, mCenterZ + chhatriOffset]
+    ];
+    chhatriCoords.forEach(([cx, cz]) => {
+      addOctagonalChhatri(cx, cz, roofY, 1.58, 6.25);
+    });
+
+    // 2. High Cylindrical Drum (Gardan) of the Central Dome (y = roofY .. roofY + 5.35)
+    const drumR = 4.55;
+    const drumH = 5.35;
+    const domeBaseY = roofY + drumH; // y = 20.65
+
+    // Stepped octagonal/circular transition base of drum
+    addCylinderDrum(0, mCenterZ, roofY, roofY + 0.85, drumR + 0.28, 0, 24, 'stone', {
+      edgeLayer: 'bold',
+      courses: 2
+    });
+
+    // Main drum body with horizontal courses & Pietra Dura pointed arch intarsia band
+    addCylinderDrum(0, mCenterZ, roofY + 0.85, domeBaseY - 0.78, drumR, 0, 32, 'cream', {
+      edgeLayer: 'medium',
+      courses: 7,
+      verticalJoints: 2
+    });
+
+    // Ornamental ring of alternating Teal & Terracotta lozenge inlays around the drum
+    const drumInlays = 16;
+    for (let i = 0; i < drumInlays; i++) {
+      const ang = (i * Math.PI * 2) / drumInlays;
+      const dA = (Math.PI / drumInlays) * 0.55;
+      const rIn = drumR + 0.025;
+      const ym = roofY + 2.65;
+      const pTop = [Math.cos(ang) * rIn, ym + 0.85, mCenterZ + Math.sin(ang) * rIn];
+      const pBot = [Math.cos(ang) * rIn, ym - 0.85, mCenterZ + Math.sin(ang) * rIn];
+      const pL   = [Math.cos(ang - dA) * rIn, ym, mCenterZ + Math.sin(ang - dA) * rIn];
+      const pR   = [Math.cos(ang + dA) * rIn, ym, mCenterZ + Math.sin(ang + dA) * rIn];
+
+      pushQuadWorld(pBot, pR, pTop, pL, i % 2 === 0 ? PALETTE.tealDeep.mid : PALETTE.terracotta.mid, 0);
+      addLineWorld(pBot, pR, 'medium', 0.01);
+      addLineWorld(pR, pTop, 'medium', 0.01);
+      addLineWorld(pTop, pL, 'medium', 0.01);
+      addLineWorld(pL, pBot, 'medium', 0.01);
+    }
+
+    // Moulded terracotta & cream cornice collar at the top of the drum
+    addCylinderDrum(0, mCenterZ, domeBaseY - 0.78, domeBaseY - 0.48, drumR + 0.14, 0, 32, 'terracotta', {
+      edgeLayer: 'rust',
+      courses: 2
+    });
+    addCylinderDrum(0, mCenterZ, domeBaseY - 0.48, domeBaseY, drumR + 0.24, 0, 32, 'cream', {
+      edgeLayer: 'bold'
+    });
+
+    // 3. The Grand Bulbous Guava Dome, Inverted Lotus Collar, & Tall Golden Finial (y = 20.65 .. 35.8)
+    addBulbousMughalDome(0, mCenterZ, domeBaseY, 10.85, drumR, 36, {
+      finialH: 4.15
+    });
+
+    // =========================================================================
+    // 6. CHARBAGH REFLECTING POOL, PARTERRE GARDENS, & SITE CONTEXT (HOF)
+    // =========================================================================
+    const siteMinX = -17.5, siteMaxX = 17.5;
+    const siteMinZ = -19.5, siteMaxZ = 21.5;
+
+    // Main architectural site plinth beneath the entire complex
+    addWorldBox(siteMinX, -0.45, siteMinZ, siteMaxX - siteMinX, 0.45, siteMaxZ - siteMinZ, 'plaza', {
+      edgeLayer: 'bold'
+    });
+    addWorldBox(siteMinX - 0.45, -0.48, siteMinZ - 0.45, siteMaxX - siteMinX + 0.9, 0.06, siteMaxZ - siteMinZ + 0.9, 'plaza', {
+      edgeLayer: 'bold'
+    });
+
+    // Foreground Charbagh Reflecting Pool (Hauz) & Water Channels extending along +Z
+    const poolZ0 = platFrontZ + 2.2;
+    const poolZ1 = siteMaxZ - 1.2;
+    const chanW  = 3.2;
+
+    // Raised marble border of the axial water channel
+    addWorldBox(-chanW / 2 - 0.45, 0.0, poolZ0, chanW + 0.9, 0.22, poolZ1 - poolZ0, 'cream', { edgeLayer: 'bold' });
+    // Canal-teal water surface
+    addWorldBox(-chanW / 2, 0.05, poolZ0 + 0.25, chanW, 0.20, poolZ1 - poolZ0 - 0.5, 'teal', { edgeLayer: 'bold' });
+
+    // Central Square Marble Tank (Al-Kawthar Pool) with lobed corner inlays
+    const tankZ = (poolZ0 + poolZ1) * 0.5;
+    const tankSize = 6.2;
+    addWorldBox(-tankSize / 2 - 0.5, 0.0, tankZ - tankSize / 2 - 0.5, tankSize + 1.0, 0.28, tankSize + 1.0, 'cream', {
+      edgeLayer: 'bold'
+    });
+    addWorldBox(-tankSize / 2, 0.08, tankZ - tankSize / 2, tankSize, 0.24, tankSize, 'tealDeep', {
+      edgeLayer: 'bold'
+    });
+    // Central island platform inside the lotus pool
+    addWorldBox(-1.35, 0.12, tankZ - 1.35, 2.7, 0.28, 2.7, 'cream', { edgeLayer: 'bold' });
+
+    // Water reflection strokes & fountain jet spouts along the reflecting pool
+    for (let wz = poolZ0 + 0.8; wz < poolZ1 - 0.6; wz += 1.35) {
+      addLineWorld([-chanW * 0.35, 0.34, wz], [chanW * 0.35, 0.34, wz], 'teal', 0);
+      // Tiny fountain jet vertical tick
+      addLineWorld([0, 0.32, wz], [0, 0.72, wz], 'medium', 0);
+    }
+
+    // Symmetrical Charbagh Parterre Garden Beds (Left & Right of the Reflecting Pool)
+    [-1, 1].forEach(side => {
+      const gx0 = side === -1 ? siteMinX + 1.2 : chanW / 2 + 1.2;
+      const gx1 = side === -1 ? -chanW / 2 - 1.2 : siteMaxX - 1.2;
+      const gw = gx1 - gx0;
+      const gd = (poolZ1 - poolZ0 - 0.8) * 0.5;
+
+      [poolZ0 + 0.2, tankZ + 0.4].forEach(gz0 => {
+        // Double-bordered sunken parterre bed
+        addWorldBox(gx0, 0.0, gz0, gw, 0.12, gd, 'stone', { edgeLayer: 'bold' });
+        addWorldBox(gx0 + 0.55, 0.04, gz0 + 0.55, gw - 1.1, 0.10, gd - 1.1, 'plaza', { edgeLayer: 'medium' });
+        // Diagonal & orthogonal parterre subdivision walks
+        addLineWorld([gx0 + 0.55, 0.16, gz0 + gd * 0.5], [gx1 - 0.55, 0.16, gz0 + gd * 0.5], 'fine', 0);
+        addLineWorld([gx0 + gw * 0.5, 0.16, gz0 + 0.55], [gx0 + gw * 0.5, 0.16, gz0 + gd - 0.55], 'fine', 0);
+      });
+    });
+
+    // Sketched Isometric Cypress Trees & Garden Shrubs
+    function addSketchCypress(sx, sz, isTall = false) {
+      const r = isTall ? 0.32 : 0.24;
+      const h = isTall ? 1.45 : 0.42;
+      const baseY = 0.0;
+      addLineWorld([sx, baseY, sz], [sx, baseY + h * 0.28, sz], 'bold', 0);
+      addLineWorld([sx - r, baseY + 0.02, sz + r * 0.6], [sx + r * 1.1, baseY + 0.02, sz - r * 0.6], 'fine', 0);
+
+      if (isTall) {
+        // Pointed conical cypress silhouette along the reflecting pool
+        const botY = baseY + h * 0.25;
+        const topY = baseY + h;
+        addLineWorld([sx - r, botY, sz], [sx, topY, sz], 'bold', 0.01);
+        addLineWorld([sx + r, botY, sz], [sx, topY, sz], 'bold', 0.01);
+        addLineWorld([sx, botY, sz - r], [sx, topY, sz], 'medium', 0.01);
+        addLineWorld([sx, botY, sz + r], [sx, topY, sz], 'medium', 0.01);
+        addLineWorld([sx - r, botY, sz], [sx, botY, sz + r], 'medium', 0.01);
+        addLineWorld([sx, botY, sz + r], [sx + r, botY, sz], 'medium', 0.01);
+      } else {
+        const cy = baseY + h;
+        addLineWorld([sx - r, cy, sz], [sx, cy + r * 0.7, sz - r], 'medium', 0.01);
+        addLineWorld([sx, cy + r * 0.7, sz - r], [sx + r, cy, sz], 'medium', 0.01);
+        addLineWorld([sx + r, cy, sz], [sx, cy - r * 0.4, sz + r], 'medium', 0.01);
+        addLineWorld([sx, cy - r * 0.4, sz + r], [sx - r, cy, sz], 'medium', 0.01);
+      }
+    }
+
+    // Avenue of cypress trees flanking the reflecting pool
+    for (let cz = poolZ0 + 1.2; cz < poolZ1 - 0.8; cz += 2.35) {
+      if (Math.abs(cz - tankZ) < 3.4) continue;
+      addSketchCypress(-chanW / 2 - 0.85, cz, true);
+      addSketchCypress( chanW / 2 + 0.85, cz, true);
+    }
+
+    // Dashed Perspective Street Grid & Surrounding Shrubs outside the plinth
     function addDashedLineWorld(p1, p2, dashLen = 0.5, gapLen = 0.4) {
       const dx = p2[0] - p1[0], dy = p2[1] - p1[1], dz = p2[2] - p1[2];
       const dist = Math.hypot(dx, dy, dz);
@@ -503,521 +1259,82 @@
       }
     }
 
-    function addSketchShrub(sx, sz) {
-      const r = 0.24 + rng() * 0.09;
-      const h = 0.35 + rng() * 0.12;
-      addLineWorld([sx, -0.45, sz], [sx, -0.45 + h * 0.4, sz], 'medium', 0);
-      addLineWorld([sx - r * 0.8, -0.44, sz + r * 0.5], [sx + r * 0.9, -0.44, sz - r * 0.5], 'fine', 0);
-      const cy = -0.45 + h;
-      addLineWorld([sx - r, cy, sz], [sx, cy + r * 0.7, sz - r], 'medium', 0.01);
-      addLineWorld([sx, cy + r * 0.7, sz - r], [sx + r, cy, sz], 'medium', 0.01);
-      addLineWorld([sx + r, cy, sz], [sx, cy - r * 0.4, sz + r], 'medium', 0.01);
-      addLineWorld([sx, cy - r * 0.4, sz + r], [sx - r, cy, sz], 'medium', 0.01);
+    const lim = 26.5;
+    for (let s = -24.5; s <= 24.5; s += 3.8) {
+      if (s < siteMinX - 0.6 || s > siteMaxX + 0.6) {
+        addDashedLineWorld([s, -0.45, -lim], [s, -0.45, lim]);
+      } else {
+        addDashedLineWorld([s, -0.45, siteMaxZ + 0.6], [s, -0.45, lim + 2.5]);
+      }
+      if (s < siteMinZ - 0.6 || s > siteMaxZ + 0.6) {
+        addDashedLineWorld([-lim, -0.45, s], [lim, -0.45, s]);
+      } else {
+        addDashedLineWorld([siteMaxX + 0.6, -0.45, s], [lim + 2.5, -0.45, s]);
+        addDashedLineWorld([-lim, -0.45, s], [siteMinX - 0.6, -0.45, s]);
+      }
     }
 
-
-    // =========================================================================
-    // 5. TAJ MAHAL — SUBJECT BUILDERS
-    // Lofting helpers generalised from the Christ plate (addLoftedRing), a
-    // chamfered-prism block, and flat facade arch panels (the Petra approach).
-    // The whole complex is bilaterally symmetric about x = 0; the mausoleum
-    // centre is (0, -23), the charbagh garden runs toward +z (the viewer).
-    // =========================================================================
-    const PLINTH_TOP = 2.7;
-    const MCZ = -23; // mausoleum centre z
-
-    function computeQuadNormal(p0, p1, p2) {
-      const ux = p1[0] - p0[0], uy = p1[1] - p0[1], uz = p1[2] - p0[2];
-      const vx = p2[0] - p0[0], vy = p2[1] - p0[1], vz = p2[2] - p0[2];
-      const nx = uy * vz - uz * vy;
-      const ny = uz * vx - ux * vz;
-      const nz = ux * vy - uy * vx;
-      const len = Math.hypot(nx, ny, nz) || 1;
-      return [nx / len, ny / len, nz / len];
-    }
-
-    function lerpPt(a, b, t) {
-      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
-    }
-
-    /**
-     * Connects two closed polygonal cross-sections (ringA and ringB) with
-     * normal-shaded facets, crease lines, courses, and shaded-side hatching.
-     * (From the Christ plate's lofting engine.)
-     */
-    function addLoftedRing(ringA, ringB, palName = 'marble', opts = {}) {
-      const n = ringA.length;
-      const normals = [];
-      for (let i = 0; i < n; i++) {
-        const next = (i + 1) % n;
-        normals.push(computeQuadNormal(ringA[i], ringA[next], ringB[next]));
-      }
-
-      for (let i = 0; i < n; i++) {
-        const next = (i + 1) % n;
-        const prev = (i - 1 + n) % n;
-        const p0 = ringA[i], p1 = ringA[next], p2 = ringB[next], p3 = ringB[i];
-        const norm = normals[i];
-
-        const col = computeDirectionalHex(palName, norm[0], norm[1], norm[2]);
-        const shift = (rng() - 0.5) * 0.015;
-        pushQuadWorld(p0, p1, p2, p3, col, shift);
-
-        if (opts.ringEdges !== false) {
-          addLineWorld(p0, p1, opts.ringLayer || 'fine', 0.01);
-          addLineWorld(p3, p2, opts.ringLayer || 'fine', 0.01);
-        }
-
-        const nPrev = normals[prev];
-        const dotCrease = norm[0] * nPrev[0] + norm[1] * nPrev[1] + norm[2] * nPrev[2];
-        const vPrev = nPrev[0] * 0.6 + nPrev[1] * 0.45 + nPrev[2] * 0.6;
-        const vCurr = norm[0] * 0.6 + norm[1] * 0.45 + norm[2] * 0.6;
-        const isSilhouette = (vPrev * vCurr <= 0);
-
-        if (isSilhouette || opts.allBoldLong) {
-          addLineWorld(p0, p3, 'bold', 0.02);
-        } else if (dotCrease < 0.88) {
-          addLineWorld(p0, p3, 'medium', 0.015);
-        } else if (opts.allLongEdges) {
-          addLineWorld(p0, p3, 'fine', 0.01);
-        }
-
-        const courses = opts.courses || 0;
-        for (let c = 1; c < courses; c++) {
-          const t = c / courses;
-          addLineWorld(lerpPt(p0, p3, t), lerpPt(p1, p2, t), 'fine', 0.008);
-        }
-
-        const lightDot = norm[0] * lightDir.x + norm[1] * lightDir.y + norm[2] * lightDir.z;
-        if (opts.shadeHatch !== false && lightDot < -0.08 && vCurr > -0.35) {
-          const hSteps = lightDot < -0.45 ? 3 : 2;
-          for (let h = 1; h <= hSteps; h++) {
-            const ht = h / (hSteps + 1);
-            addLineWorld(lerpPt(p0, p1, ht), lerpPt(p3, p2, ht), opts.hatchLayer || 'fine', 0);
-          }
-        }
-      }
-
-      if (opts.capBottom) {
-        const cBot = ringA.reduce((acc, p) => [acc[0] + p[0] / n, acc[1] + p[1] / n, acc[2] + p[2] / n], [0, 0, 0]);
-        for (let i = 0; i < n; i++) {
-          pushTriWorld(ringA[(i + 1) % n], ringA[i], cBot, PALETTE[palName].bot, 0);
-        }
-      }
-      if (opts.capTop) {
-        const cTop = ringB.reduce((acc, p) => [acc[0] + p[0] / n, acc[1] + p[1] / n, acc[2] + p[2] / n], [0, 0, 0]);
-        for (let i = 0; i < n; i++) {
-          pushTriWorld(ringB[i], ringB[(i + 1) % n], cTop, PALETTE[palName].top, 0);
+    for (let sx = -23.5; sx <= 23.5; sx += 3.4) {
+      for (let sz = -22.5; sz <= 24.5; sz += 3.4) {
+        const inPlinth = sx > siteMinX - 1.0 && sx < siteMaxX + 1.0 && sz > siteMinZ - 1.0 && sz < siteMaxZ + 1.0;
+        if (!inPlinth && Math.hypot(sx, sz) < 27.5 && rng() > 0.32) {
+          addSketchCypress(sx, sz - 0.45, false);
         }
       }
     }
 
-    function circleRing(cx, cz, y, r, segs, phase = 0) {
-      const pts = [];
-      for (let i = 0; i < segs; i++) {
-        const a = phase + (i * Math.PI * 2) / segs;
-        pts.push([cx + Math.cos(a) * r, y, cz + Math.sin(a) * r]);
-      }
-      return pts;
-    }
-
-    /** Loft a surface of revolution around (cx, cz). profile: [[y, r], ...] bottom to top. */
-    function addLoft(cx, cz, profile, segs, palName, opts = {}) {
-      let prev = circleRing(cx, cz, profile[0][0], profile[0][1], segs, opts.phase || 0);
-      for (let i = 1; i < profile.length; i++) {
-        const cur = circleRing(cx, cz, profile[i][0], profile[i][1], segs, opts.phase || 0);
-        addLoftedRing(prev, cur, palName, {
-          ringLayer: opts.ringLayer || 'fine',
-          ringEdges: opts.ringEdges,
-          shadeHatch: opts.shadeHatch,
-          courses: opts.courses || 0,
-          capTop: !!opts.capTop && i === profile.length - 1
+    // Flanking Mosque (west) & Jawab (east), modelled properly in red sandstone
+    // with white marble domes — they stood here as blank ghost blocks in the
+    // first build of this plate; the real buildings are near-mirror twins whose
+    // pishtaq faces the tomb across the terrace.
+    function addFlankingPavilion(cx, facing) {
+      const baseY = -0.45;
+      const W = 5.2, L = 11.5, cz = -2.75;
+      const x0 = cx - W / 2;
+      // Terrace plinth the pavilion stands on
+      addWorldBox(x0 - 0.35, baseY, cz - L / 2 - 0.35, W + 0.7, 0.5, L + 0.7, 'terracotta', { edgeLayer: 'medium', courses: 2 });
+      // Main prayer hall
+      const hallY = baseY + 0.5, hallH = 3.5;
+      addWorldBox(x0, hallY, cz - L / 2, W, hallH, L, 'terracotta', { edgeLayer: 'medium', courses: 4 });
+      // Roof parapet slab
+      addWorldBox(x0 - 0.18, hallY + hallH, cz - L / 2 - 0.18, W + 0.36, 0.3, L + 0.36, 'terracotta', { edgeLayer: 'medium' });
+      const roofY = hallY + hallH + 0.3;
+      // Central pishtaq on the face turned toward the tomb, with a dark arch recess
+      const faceX = facing > 0 ? x0 + W : x0;
+      const pishD = 0.7;
+      const px0 = facing > 0 ? faceX : faceX - pishD;
+      addWorldBox(px0, hallY, cz - 1.9, pishD, hallH + 1.15, 3.8, 'terracotta', { edgeLayer: 'bold', courses: 4 });
+      const ax0 = facing > 0 ? faceX + pishD : faceX - pishD - 0.06;
+      addWorldBox(ax0, hallY + 0.35, cz - 1.05, 0.06, hallH + 0.35, 2.1, 'coreWall', { edgeLayer: 'bold' });
+      // Three white marble domes on sandstone drums along the roof
+      [-3.4, 0, 3.4].forEach(dz => {
+        addCylinderDrum(cx, cz + dz, roofY, roofY + 0.5, 1.28, 0, 16, 'terracotta', {});
+        addBulbousMughalDome(cx, cz + dz, roofY + 0.5, 2.35, 1.22, 24, { finialH: 1.5 });
+      });
+      // Small chhatris at the four roof corners
+      [-1, 1].forEach(sx => {
+        [-1, 1].forEach(sz => {
+          addOctagonalChhatri(cx + sx * (W / 2 - 0.55), cz + sz * (L / 2 - 0.55), roofY, 0.52, 1.7, {});
         });
-        prev = cur;
-      }
+      });
     }
+    addFlankingPavilion(-21.6, 1);   // Mosque, iwan facing east toward the tomb
+    addFlankingPavilion(21.6, -1);   // Jawab, iwan facing west toward the tomb
 
-    /** 8-point ring of a square with chamfered corners (increasing-angle winding, as Christ). */
-    function chamferRing(cx, cz, y, halfW, cham) {
-      const x0 = cx - halfW, x1 = cx + halfW, z0 = cz - halfW, z1 = cz + halfW;
-      return [
-        [x0 + cham, y, z0], [x1 - cham, y, z0], [x1, y, z0 + cham], [x1, y, z1 - cham],
-        [x1 - cham, y, z1], [x0 + cham, y, z1], [x0, y, z1 - cham], [x0, y, z0 + cham]
-      ];
-    }
+    // Foreground darwaza (great gate) hint, centred on the axis this time:
+    // two low pylons and a lintel at ghost weight, framing the view in
+    addWorldBox(-5.6, -0.45, siteMaxZ + 2.0, 3.4, 3.4, 2.2, 'ghost', { edgeLayer: 'faint' });
+    addWorldBox(2.2, -0.45, siteMaxZ + 2.0, 3.4, 3.4, 2.2, 'ghost', { edgeLayer: 'faint' });
+    addWorldBox(-5.6, 2.95, siteMaxZ + 2.0, 11.2, 0.85, 2.2, 'ghost', { edgeLayer: 'faint' });
 
-    function addChamferPrism(cx, cz, y0, y1, halfW, cham, palName, opts = {}) {
-      addLoftedRing(
-        chamferRing(cx, cz, y0, halfW, cham),
-        chamferRing(cx, cz, y1, halfW, cham),
-        palName,
-        { ringLayer: opts.ringLayer || 'medium', capTop: !!opts.capTop, courses: opts.courses || 0 }
-      );
-    }
-
-    // --- Flat facade arch panels -------------------------------------------
-    // A face is defined by centre C=[x,y,z], horizontal unit U=[ux,uz] and
-    // outward normal N=[nx,nz]. u runs along the face, v up from C's height.
-    function facePt(C, U, N, u, v, off) {
-      // U and N are [x, z] pairs: index 0 is the x component, index 1 the z.
-      return [C[0] + U[0] * u + N[0] * off, C[1] + v, C[2] + U[1] * u + N[1] * off];
-    }
-
-    function archOutline(C, U, N, uC, vBase, w, h, off) {
-      const spring = vBase + h * 0.58;
-      const bez = (p0, p1, p2, t) => {
-        const a = (1 - t) * (1 - t), b = 2 * (1 - t) * t, c = t * t;
-        return [a * p0[0] + b * p1[0] + c * p2[0], a * p0[1] + b * p1[1] + c * p2[1]];
-      };
-      const L = [uC - w / 2, spring], Lc = [uC - w / 2, vBase + h * 0.99], A = [uC, vBase + h];
-      const Rc = [uC + w / 2, vBase + h * 0.99], R = [uC + w / 2, spring];
-      const pts = [facePt(C, U, N, uC - w / 2, vBase, off), facePt(C, U, N, uC - w / 2, spring, off)];
-      for (let i = 1; i <= 6; i++) { const p = bez(L, Lc, A, i / 6); pts.push(facePt(C, U, N, p[0], p[1], off)); }
-      for (let i = 1; i <= 6; i++) { const p = bez(A, Rc, R, i / 6); pts.push(facePt(C, U, N, p[0], p[1], off)); }
-      pts.push(facePt(C, U, N, uC + w / 2, vBase, off));
-      return pts;
-    }
-
-    function polyline(pts, layer, overshoot = 0.02, closeIt = false) {
-      for (let i = 0; i < pts.length - 1; i++) addLineWorld(pts[i], pts[i + 1], layer, overshoot);
-      if (closeIt && pts.length > 2) addLineWorld(pts[pts.length - 1], pts[0], layer, overshoot);
-    }
-
-    /** A recessed arch panel appliqued on a flat face: darker wash infill + arch ink. */
-    function addArchPanel(C, U, N, o) {
-      const off = 0.06;
-      const spring = o.v0 + o.h * 0.58;
-      const colHex = computeDirectionalHex(o.pal, N[0], 0, N[1]);
-      const shift = o.shift !== undefined ? o.shift : -0.04;
-      const bl = facePt(C, U, N, o.uC - o.w / 2, o.v0, off), br = facePt(C, U, N, o.uC + o.w / 2, o.v0, off);
-      const tr = facePt(C, U, N, o.uC + o.w / 2, spring, off), tl = facePt(C, U, N, o.uC - o.w / 2, spring, off);
-      pushQuadWorld(bl, br, tr, tl, colHex, shift);
-      const outline = archOutline(C, U, N, o.uC, o.v0, o.w, o.h, off);
-      const cen = facePt(C, U, N, o.uC, spring, off);
-      for (let i = 1; i < 13; i++) pushTriWorld(outline[i], outline[i + 1], cen, colHex, shift);
-      polyline(outline, o.line || 'medium', 0.02);
-      addLineWorld(outline[outline.length - 1], outline[0], o.line || 'medium', 0.01);
-      if (o.inner !== false) {
-        polyline(archOutline(C, U, N, o.uC, o.v0 + 0.28, o.w * 0.78, o.h * 0.88, off + 0.012), o.innerLine || 'medium', 0.012);
-      }
-      if (o.inlay) {
-        polyline(archOutline(C, U, N, o.uC, o.v0 + 0.55, o.w * 0.6, o.h * 0.78, off + 0.02), 'teal', 0.01);
-      }
-    }
-
-    /** The great iwan of a mausoleum face: pishtaq frame, bold arch, doorway, flanking niches. */
-    function addIwan(C, U, N, opts = {}) {
-      const w = 6.8, h = 9.2, v0 = 0.25;
-      // rectangular pishtaq frame
-      const fw = w / 2 + 0.85, fh = h + 0.85;
-      polyline([
-        facePt(C, U, N, -fw, 0, 0.1), facePt(C, U, N, fw, 0, 0.1),
-        facePt(C, U, N, fw, fh, 0.1), facePt(C, U, N, -fw, fh, 0.1)
-      ], 'medium', 0.02, true);
-      addArchPanel(C, U, N, { uC: 0, v0: v0, w: w, h: h, pal: 'marbleShade', line: 'bold', shift: -0.05, inlay: true });
-      if (opts.door) {
-        addArchPanel(C, U, N, { uC: 0, v0: 0.25, w: 2.4, h: 4.6, pal: 'dark', line: 'medium', inner: false, shift: 0 });
-      }
-      // two tiers of smaller blind niches flanking the iwan
-      for (const s of [-1, 1]) {
-        for (let t = 0; t < 2; t++) {
-          addArchPanel(C, U, N, { uC: s * 6.35, v0: 1.0 + t * 4.35, w: 2.3, h: 3.3, pal: 'marbleShade', line: 'medium', shift: -0.02 });
-        }
-      }
-      // string course across the face
-      addLineWorld(facePt(C, U, N, -8.6, 10.05, 0.08), facePt(C, U, N, 8.6, 10.05, 0.08), 'medium', 0.02);
-    }
-
-    /** Two tiers of blind niches for a chamfered corner face, plus its string course. */
-    function addChamferFace(C, U, N) {
-      for (let t = 0; t < 2; t++) {
-        addArchPanel(C, U, N, { uC: 0, v0: 1.0 + t * 4.35, w: 2.6, h: 3.3, pal: 'marbleShade', line: 'medium', shift: -0.02 });
-      }
-      addLineWorld(facePt(C, U, N, -3.8, 10.05, 0.08), facePt(C, U, N, 3.8, 10.05, 0.08), 'medium', 0.02);
-    }
-
-    /** Domed kiosk: square base, four posts, entablature, small loft dome, finial. */
-    function addChhatri(cx, cz, yBase, s = 1, palName = 'marble') {
-      addWorldBox(cx - 1.15 * s, yBase, cz - 1.15 * s, 2.3 * s, 0.35 * s, 2.3 * s, palName, 'medium');
-      for (const px of [-0.85, 0.85]) {
-        for (const pz of [-0.85, 0.85]) {
-          addWorldBox(cx + (px - 0.11) * s, yBase + 0.35 * s, cz + (pz - 0.11) * s, 0.22 * s, 1.5 * s, 0.22 * s, palName, 'medium');
-        }
-      }
-      addWorldBox(cx - 1.25 * s, yBase + 1.85 * s, cz - 1.25 * s, 2.5 * s, 0.3 * s, 2.5 * s, palName, 'medium');
-      const yD = yBase + 2.15 * s;
-      addLoft(cx, cz, [
-        [yD, 1.35 * s], [yD + 0.55 * s, 1.44 * s], [yD + 1.2 * s, 1.05 * s],
-        [yD + 1.7 * s, 0.52 * s], [yD + 1.95 * s, 0.03]
-      ], 20, palName, { ringLayer: 'fine', capTop: true });
-      addLoft(cx, cz, [[yD + 1.9 * s, 0.09 * s], [yD + 2.3 * s, 0.09 * s]], 8, 'dark', { ringLayer: 'medium' });
-    }
-
-    /**
-     * A corner minaret. The four minarets were built leaning very slightly
-     * outward (about a degree), away from the tomb — so that if one ever fell,
-     * it would fall clear of the mausoleum. The lean is kept subtle here:
-     * each shaft point is displaced outward in proportion to its height.
-     */
-    function addMinaret(cx, cz) {
-      const lean = Math.tan(1.0 * Math.PI / 180); // ~1 degree outward
-      const leanX = Math.sign(cx) * lean;
-      const leanZ = Math.sign(cz - MCZ) * lean;
-      const mRing = (y, r, segs) => {
-        const pts = [];
-        for (let i = 0; i < segs; i++) {
-          const a = (i * Math.PI * 2) / segs;
-          pts.push([cx + Math.cos(a) * r + leanX * (y - PLINTH_TOP), y, cz + Math.sin(a) * r + leanZ * (y - PLINTH_TOP)]);
-        }
-        return pts;
-      };
-      // square marble base on the plinth corner (below the lean pivot)
-      addWorldBox(cx - 1.5, PLINTH_TOP, cz - 1.5, 3.0, 1.2, 3.0, 'marble', 'medium');
-      // tapered shaft in three sections, flared balcony discs between them
-      const prof = [
-        [3.9, 0.88], [5.5, 0.85], [8.3, 0.80],
-        [8.45, 1.16], [8.8, 1.16],
-        [9.0, 0.78], [12.4, 0.73],
-        [12.55, 1.12], [12.9, 1.12],
-        [13.1, 0.74], [16.3, 0.68],
-        [16.45, 1.2], [16.85, 1.2]
-      ];
-      let prev = mRing(prof[0][0], prof[0][1], 24);
-      for (let i = 1; i < prof.length; i++) {
-        const cur = mRing(prof[i][0], prof[i][1], 24);
-        addLoftedRing(prev, cur, 'marble', { ringLayer: 'fine' });
-        prev = cur;
-      }
-      // balcony railing lines
-      for (const by of [8.8, 12.9, 16.85]) {
-        const rr = by === 16.85 ? 1.2 : 1.14;
-        const ring = mRing(by + 0.28, rr * 0.92, 24);
-        for (let i = 0; i < 24; i++) addLineWorld(ring[i], ring[(i + 1) % 24], 'medium', 0.01);
-      }
-      // chhatri cap, following the lean at its height
-      const capX = cx + leanX * (16.85 - PLINTH_TOP);
-      const capZ = cz + leanZ * (16.85 - PLINTH_TOP);
-      addChhatri(capX, capZ, 16.85, 0.78, 'marble');
-    }
-
-    /** Red-sandstone mosque (west) / jawab (east): quiet block, three arches, three marble domes. */
-    function addSandstoneHall(cx, facing) {
-      const cz = MCZ;
-      addWorldBox(cx - 6, 0, cz - 13, 12, 1.0, 26, 'sandstone', 'medium');
-      addWorldBox(cx - 4.25, 1.0, cz - 11, 8.5, 6.2, 22, 'sandstone', 'medium');
-      addWorldBox(cx - 4.6, 7.2, cz - 11.4, 9.2, 0.4, 22.8, 'sandstone', 'medium');
-      // front face toward the mausoleum
-      const C = [cx + facing * 4.25, 1.0, cz];
-      const U = [0, 1], N = [facing, 0];
-      addArchPanel(C, U, N, { uC: 0, v0: 0.3, w: 4.4, h: 5.2, pal: 'brickDark', line: 'medium', innerLine: 'rust', shift: -0.02 });
-      for (const s of [-1, 1]) {
-        addArchPanel(C, U, N, { uC: s * 6.6, v0: 0.3, w: 3.0, h: 4.2, pal: 'brickDark', line: 'medium', innerLine: 'rust', shift: -0.02 });
-      }
-      // three white marble domes on low drums
-      for (const du of [-6.8, 0, 6.8]) {
-        addLoft(cx, cz + du, [[7.6, 1.5], [8.3, 1.5]], 24, 'marble', { ringLayer: 'fine' });
-        addLoft(cx, cz + du, [
-          [8.3, 1.55], [8.8, 1.72], [9.5, 1.5], [10.1, 1.05], [10.6, 0.5], [10.85, 0.03]
-        ], 24, 'marble', { ringLayer: 'fine', capTop: true });
-      }
-    }
-
-    /** A formal charbagh cypress: narrow lofted cone in the garden palette. */
-    function addCypress(cx, cz, y0) {
-      addLineWorld([cx, y0 - 0.02, cz], [cx, y0 + 0.35, cz], 'medium', 0);
-      addLoft(cx, cz, [
-        [y0 + 0.2, 0.55], [y0 + 0.7, 0.62], [y0 + 1.7, 0.34], [y0 + 2.6, 0.05]
-      ], 10, 'garden', { ringLayer: 'fine', capTop: true });
+    // Faint diagonal drafting construction rays in the upper-left sky
+    for (let i = 0; i < 16; i++) {
+      const spread = (i / 15) * 28;
+      addLineWorld([-52, 46, -12], [-12.5, 5.0 + spread, 4.0 - spread * 0.25], 'faint', 0);
     }
 
     // =========================================================================
-    // 6. ASSEMBLY — SITE, PLINTH, MAUSOLEUM, CHARBAGH
-    // =========================================================================
-    // Ground slab and survey context
-    addWorldBox(-52, -0.45, -54, 104, 0.45, 108, 'plaza', 'bold');
-    addWorldBox(-52.5, -0.48, -54.5, 105, 0.06, 109, 'plaza', 'bold');
-
-    // --- The great marble plinth (terrace) ---------------------------------
-    addWorldBox(-23, 0, -46, 46, PLINTH_TOP, 46, 'marble', 'bold');
-    addWorldBox(-23.6, PLINTH_TOP, -46.6, 47.2, 0.28, 47.2, 'marble', 'medium'); // overhanging slab edge
-    // blind-arch frieze inked along the plinth faces
-    (function plinthFrieze() {
-      const faces = [
-        { C: [0, 0, 0], U: [1, 0], N: [0, 1], from: -20, to: 20 },        // front (garden side)
-        { C: [0, 0, -46], U: [-1, 0], N: [0, -1], from: -20, to: 20 },    // back (river side)
-        { C: [23, 0, MCZ], U: [0, -1], N: [1, 0], from: -20, to: 20 },    // east
-        { C: [-23, 0, MCZ], U: [0, 1], N: [-1, 0], from: -20, to: 20 }    // west
-      ];
-      for (const f of faces) {
-        for (let u = f.from; u <= f.to; u += 4) {
-          polyline(archOutline(f.C, f.U, f.N, u, 0.45, 2.2, 1.7, 0.05), 'fine', 0.01);
-        }
-      }
-    })();
-    // front steps from the garden up to the plinth, on the axis
-    addWorldBox(-2.5, 0, 1.9, 5, 0.9, 1.15, 'marble', 'medium');
-    addWorldBox(-2.5, 0, 0.95, 5, 1.8, 1.0, 'marble', 'medium');
-    addWorldBox(-2.5, 0, 0, 5, PLINTH_TOP, 1.0, 'marble', 'medium');
-
-    // --- Minarets at the four plinth corners --------------------------------
-    addMinaret(-21.2, -1.8);
-    addMinaret(21.2, -1.8);
-    addMinaret(-21.2, -44.2);
-    addMinaret(21.2, -44.2);
-
-    // --- The mausoleum block --------------------------------------------------
-    const BLOCK_Y0 = 3.73, BLOCK_TOP = 14.63, ROOF_Y = 15.18;
-    addChamferPrism(0, MCZ, 2.98, BLOCK_Y0, 14.55, 5.7, 'marble', { ringLayer: 'medium' }); // base band
-    addChamferPrism(0, MCZ, BLOCK_Y0, BLOCK_TOP, 14.2, 5.5, 'marble', { ringLayer: 'medium' }); // main block
-    addChamferPrism(0, MCZ, BLOCK_TOP, ROOF_Y, 14.5, 5.7, 'marble', { ringLayer: 'medium', capTop: true }); // parapet + roof
-
-    // One great iwan per face, blind-niche tiers on the chamfered corners
-    addIwan([0, BLOCK_Y0, MCZ + 14.2], [1, 0], [0, 1], { door: true });   // front, to the garden
-    addIwan([0, BLOCK_Y0, MCZ - 14.2], [-1, 0], [0, -1], { door: true }); // back, to the river
-    addIwan([14.2, BLOCK_Y0, MCZ], [0, -1], [1, 0], {});                  // east
-    addIwan([-14.2, BLOCK_Y0, MCZ], [0, 1], [-1, 0], {});                 // west
-    addChamferFace([11.45, BLOCK_Y0, MCZ + 11.45], [0.7071, -0.7071], [0.7071, 0.7071]);
-    addChamferFace([-11.45, BLOCK_Y0, MCZ + 11.45], [0.7071, 0.7071], [-0.7071, 0.7071]);
-    addChamferFace([11.45, BLOCK_Y0, MCZ - 11.45], [-0.7071, 0.7071], [0.7071, -0.7071]);
-    addChamferFace([-11.45, BLOCK_Y0, MCZ - 11.45], [-0.7071, -0.7071], [-0.7071, -0.7071]);
-
-    // --- Drum and the great onion dome (lofted profile) ----------------------
-    // The drum is a plain marble cylinder, built by hand rather than lofted:
-    // 16 large facets shaded with the marble steps so it reads as solid stone.
-    // Ink is cut to a top ring, a bottom ring and eight medium joints — no
-    // latitude rings, no hatching — so it never reads as a banded glasshouse.
-    (function addDrum() {
-      const segs = 16, rD = 4.6, y0 = ROOF_Y, y1 = 17.9;
-      const bot = circleRing(0, MCZ, y0, rD, segs), top = circleRing(0, MCZ, y1, rD, segs);
-      for (let i = 0; i < segs; i++) {
-        const nx = (i + 1) % segs;
-        const aMid = ((i + 0.5) * Math.PI * 2) / segs;
-        const col = computeDirectionalHex('marble', Math.cos(aMid), 0, Math.sin(aMid));
-        pushQuadWorld(bot[i], bot[nx], top[nx], top[i], col, (rng() - 0.5) * 0.015);
-        addLineWorld(bot[i], bot[nx], 'medium', 0.01);
-        addLineWorld(top[i], top[nx], 'medium', 0.01);
-        if (i % 2 === 0) addLineWorld(bot[i], top[i], 'medium', 0.01); // eight joints
-      }
-      // dome base band, same solid treatment, its ledge capped in marble top
-      const rB = 4.9, y2 = 18.4;
-      const bBot = circleRing(0, MCZ, y1, rB, segs), bTop = circleRing(0, MCZ, y2, rB, segs);
-      for (let i = 0; i < segs; i++) {
-        const nx = (i + 1) % segs;
-        const aMid = ((i + 0.5) * Math.PI * 2) / segs;
-        const col = computeDirectionalHex('marble', Math.cos(aMid), 0, Math.sin(aMid));
-        pushQuadWorld(bBot[i], bBot[nx], bTop[nx], bTop[i], col, (rng() - 0.5) * 0.015);
-        pushQuadWorld(bBot[i], bBot[nx], top[nx], top[i], computeDirectionalHex('marble', 0, 1, 0), 0);
-        addLineWorld(bBot[i], bBot[nx], 'medium', 0.01);
-        addLineWorld(bTop[i], bTop[nx], 'medium', 0.01);
-      }
-    })();
-    addLoft(0, MCZ, [
-      [18.4, 4.62], [18.95, 4.95], [19.75, 5.18], [20.75, 5.22], [21.95, 5.05],
-      [23.35, 4.68], [24.75, 4.15], [26.05, 3.5], [27.15, 2.78], [28.15, 2.0],
-      [28.95, 1.22], [29.5, 0.55], [29.85, 0.03]
-    ], 44, 'marble', { ringLayer: 'fine', capTop: true, ringEdges: false, shadeHatch: false });
-    // sparse latitude lines only — base, bulge, and two up the taper — so the
-    // onion profile reads from the wash steps and the silhouette, not a cage
-    (function domeRings() {
-      const rings = [[18.42, 4.64, 'medium'], [20.75, 5.24, 'fine'], [23.35, 4.7, 'fine'], [26.05, 3.52, 'fine']];
-      for (const [ry, rr, layer] of rings) {
-        const pts = circleRing(0, MCZ, ry, rr, 44);
-        for (let i = 0; i < 44; i++) addLineWorld(pts[i], pts[(i + 1) % 44], layer, 0.008);
-      }
-    })();
-    // lotus finial + spike + crescent
-    addLoft(0, MCZ, [[29.8, 0.5], [30.15, 0.3], [30.4, 0.44], [30.7, 0.15]], 16, 'dark', { ringLayer: 'medium' });
-    addLoft(0, MCZ, [[30.7, 0.07], [31.65, 0.07]], 8, 'dark', { ringLayer: 'medium' });
-    (function crescent() {
-      const cy = 32.15, r = 0.45;
-      const outer = [], inner = [];
-      for (let d = 215; d <= 325; d += 11) {
-        const a = (d * Math.PI) / 180;
-        outer.push([Math.cos(a) * r, cy + Math.sin(a) * r, MCZ]);
-        inner.push([Math.cos(a) * (r - 0.13), cy + 0.15 + Math.sin(a) * (r - 0.13), MCZ]);
-      }
-      polyline(outer, 'rust', 0.01);
-      polyline(inner, 'rust', 0.01);
-      addLineWorld(outer[0], inner[0], 'rust', 0.01);
-      addLineWorld(outer[outer.length - 1], inner[inner.length - 1], 'rust', 0.01);
-    })();
-
-    // --- Four chhatris at the roof corners -----------------------------------
-    addChhatri(-10.2, MCZ - 10.2, ROOF_Y, 1, 'marble');
-    addChhatri(10.2, MCZ - 10.2, ROOF_Y, 1, 'marble');
-    addChhatri(-10.2, MCZ + 10.2, ROOF_Y, 1, 'marble');
-    addChhatri(10.2, MCZ + 10.2, ROOF_Y, 1, 'marble');
-
-    // --- Mosque (west) and jawab (east), in red sandstone ---------------------
-    addSandstoneHall(-33, 1);
-    addSandstoneHall(33, -1);
-
-    // --- The charbagh: quadripartite garden and reflecting channel ------------
-    // lawn quadrants
-    for (const qx of [[-22.5, -3.7], [3.7, 22.5]]) {
-      for (const qz of [[2, 22.6], [25.4, 45.5]]) {
-        addWorldBox(qx[0], 0, qz[0], qx[1] - qx[0], 0.14, qz[1] - qz[0], 'garden', 'medium');
-      }
-    }
-    // cross paths
-    addWorldBox(-22.5, 0, 22.6, 45, 0.1, 2.8, 'plaza', 'medium');
-    addWorldBox(-3.7, 0, 2, 2.25, 0.1, 43.5, 'plaza', 'medium');
-    addWorldBox(1.45, 0, 2, 2.25, 0.1, 43.5, 'plaza', 'medium');
-    // reflecting channel: marble curbs + still water on the axis
-    addWorldBox(-1.45, 0, 3, 0.25, 0.3, 41, 'marble', 'medium');
-    addWorldBox(1.2, 0, 3, 0.25, 0.3, 41, 'marble', 'medium');
-    (function channelWater() {
-      const colHex = computeDirectionalHex('tealDeep', 0, 1, 0);
-      for (const seg of [[3.2, 20.6], [27.4, 43.8]]) {
-        pushQuadWorld([-1.2, 0.2, seg[0]], [1.2, 0.2, seg[0]], [1.2, 0.2, seg[1]], [-1.2, 0.2, seg[1]], colHex, 0);
-        addLineWorld([-0.55, 0.21, seg[0] + 0.4], [-0.55, 0.21, seg[1] - 0.4], 'teal', 0);
-        addLineWorld([0.55, 0.21, seg[0] + 0.4], [0.55, 0.21, seg[1] - 0.4], 'teal', 0);
-        for (let z = seg[0] + 2.2; z < seg[1] - 0.6; z += 2.75) {
-          addLineWorld([-0.8, 0.21, z], [0.8, 0.21, z], 'teal', 0);
-        }
-      }
-    })();
-    // raised marble tank platform at the garden's centre, interrupting the channel
-    addLoft(0, 24, [[0, 3.4], [0.5, 3.4]], 8, 'marble', { ringLayer: 'medium', capTop: true, phase: Math.PI / 8 });
-    addLoft(0, 24, [[0.5, 0.5], [0.85, 0.5]], 12, 'marble', { ringLayer: 'medium' });
-    // low sandstone garden walls
-    addWorldBox(23.2, 0, 0.5, 0.45, 0.55, 46.5, 'sandstone', 'medium');
-    addWorldBox(-23.65, 0, 0.5, 0.45, 0.55, 46.5, 'sandstone', 'medium');
-    addWorldBox(-23.2, 0, 46.9, 46.85, 0.55, 0.45, 'sandstone', 'medium');
-    // formal planting: mirrored cypresses and sketched shrubs
-    for (const s of [-1, 1]) {
-      addCypress(s * 5.8, 9, 0.14);
-      addCypress(s * 5.8, 39, 0.14);
-      addCypress(s * 20.8, 12.4, 0.14);
-      addCypress(s * 20.8, 35.6, 0.14);
-    }
-    for (const s of [-1, 1]) {
-      addSketchShrub(s * 4.9, 16.5);
-      addSketchShrub(s * 4.9, 31.5);
-    }
-
-    // --- Site furniture: survey grid, scattered shrubs, ghost context ---------
-    const siteLim = 58;
-    for (let s = -56; s <= 56; s += 3.5) {
-      addDashedLineWorld([s, -0.44, -siteLim], [s, -0.44, siteLim]);
-      addDashedLineWorld([-siteLim, -0.44, s], [siteLim, -0.44, s]);
-    }
-    for (let sx = -50; sx <= 50; sx += 3.0) {
-      for (let sz = -52; sz <= 54; sz += 3.0) {
-        const inComplex = sx > -42 && sx < 42 && sz > -50 && sz < 50;
-        if (!inComplex && Math.hypot(sx, sz) < 58 && rng() > 0.35) addSketchShrub(sx, sz);
-      }
-    }
-    // ghost context masses at the corners only — never centre-front
-    addWorldBox(40, -0.45, -54, 9, 7, 10, 'ghost', 'faint');
-    addWorldBox(-49, -0.45, -52, 9, 9, 12, 'ghost', 'faint');
-    addWorldBox(38, -0.45, 42, 10, 5, 9, 'ghost', 'faint');
-    addWorldBox(-48, -0.45, 36, 8, 6, 10, 'ghost', 'faint');
-    // faint dashed survey axis along the garden, on the line of symmetry
-    addDashedLineWorld([0, 0.03, 50], [0, 0.03, -50], 0.65, 0.45);
-
-    // =========================================================================
-    // 6. BUILD THREE.JS GEOMETRIES & RENDER LOOP
+    // 7. BUILD THREE.JS GEOMETRIES & RENDER LOOP
     // =========================================================================
     const washGeo = new THREE.BufferGeometry();
     washGeo.setAttribute('position', new THREE.Float32BufferAttribute(washPositions, 3));
@@ -1025,6 +1342,7 @@
 
     const washMat = new THREE.MeshBasicMaterial({
       vertexColors: true,
+      side: THREE.DoubleSide,
       polygonOffset: true,
       polygonOffsetFactor: 1.4,
       polygonOffsetUnits: 1.4
@@ -1047,7 +1365,7 @@
     scene.add(createInkSegmentMesh(inkLayers.fine,   0x4a3f37, 0.44));
     scene.add(createInkSegmentMesh(inkLayers.rust,   0x8c4531, 0.64));
     scene.add(createInkSegmentMesh(inkLayers.teal,   0x527d80, 0.52));
-    scene.add(createInkSegmentMesh(inkLayers.faint,  0x6b6157, 0.32));
+    scene.add(createInkSegmentMesh(inkLayers.faint,  0x6b6157, 0.30));
 
     window.addEventListener('resize', () => {
       const newAspect = window.innerWidth / window.innerHeight;
@@ -1066,6 +1384,6 @@
       renderer.render(scene, camera);
     }
     animate();
-</script>
+  </script>
 </body>
 </html>

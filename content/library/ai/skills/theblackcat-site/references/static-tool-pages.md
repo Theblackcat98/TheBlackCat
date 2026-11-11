@@ -190,6 +190,36 @@ URL.createObjectURL = (b) => { window.__blobs.push(b); return orig(b); };
   (a tail sitting high, a fin too round); render the chosen shape big and look
   at the pixels before shipping.
 
+## Packaging a self-contained Three.js artifact (Showcase)
+
+Art goes to `/showcase/`, not the workshop: a registry entry with
+`category: showcase` (the tools view filters that category out of every chip,
+count and grid), the artifact at `static/<slug>/index.html`, and its write-up at
+`content/showcase/<slug>/index.md` carrying `tool: <slug>`.
+
+- **Vendor the library, never a CDN.** `static/vendor/three/` holds one copy of
+  three.js r128 + OrbitControls for every artifact page; the originals are
+  CDN-built and arrive with `cdnjs`/`jsdelivr` script tags that must be
+  repointed at `../vendor/three/…`. Check with a grep for `https?://` in `src`/
+  `href` afterwards — the only survivors should be the canonical URL and
+  `schema.org`.
+- **`check_tools.py` still applies** to a showcase page (it globs
+  `static/*/index.html`), so it needs the whole chrome contract: toolkit css/js
+  with `data-tool="<slug>"`, meta description, canonical, `og:image`, a
+  `data-tk-ld` JSON-LD block, and the `tk-fallback` link containing
+  `../tools/`. Inject before `</head>` and right after `<body>`. The toolkit
+  bar overlays a full-bleed canvas fine — that is how the existing exhibits
+  behave — and it draws its own breadcrumb and a Write-up button from the
+  registry.
+- **Thumbnails**: 1280×800 shot → 640×400 WebP, light and dark, in
+  `static/toolkit/thumbs/<slug>-{light,dark}.webp`. `scripts/shoot_tools.py`
+  does this but needs the Python `playwright` package (not installed on
+  optiplex); drive the same capture through the browser harness and convert
+  with PIL (`feature.check('webp')` is true) instead of installing browsers.
+- The repeatable packager lives outside the repo at
+  `~/hermes/work/experiments/package_artifacts.py` — re-run it when Nik
+  re-uploads a refined artifact, then re-shoot its thumbnails.
+
 ## Verification ladder
 
 Same ladder as live-artifact-pages: CI run whose headSha matches your commit →

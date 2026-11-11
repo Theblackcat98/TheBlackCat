@@ -74,6 +74,8 @@ so the links below point at the repo copies. The gist is inline here.
 
 ## Notes
 
+**2026-11-11 (v1.8.1):** `static-tool-pages.md` gained "Packaging a self-contained Three.js artifact (Showcase)": the registry category, the vendored `static/vendor/three/` copy that replaces the CDN script tags the artifacts ship with, the full `check_tools.py` chrome contract a showcase page still has to satisfy, and the thumbnail route when Python `playwright` is not installed.
+
 **2026-11-11 (v1.8.0):** the repo grew a second hub: `/showcase/` holds art and visual artifacts (figures built to be *looked at*), while `/tools/` keeps everything you *use*. Same registry — a showcase item is a `data/tools.yaml` entry with `category: showcase`, which the tools section view filters out of its chips, counts and grids, so `check_tools.py` keeps validating the entry and its `static/<slug>/` page. `site-model.md` gained the section and the corrected menu order, and `SKILL.md` states the split as a standing fact.
 
 **2026-11-08 (v1.7.1):** rule 15 added ("a tool URL is not a bookmark"): a third-party interactive tool Nik wants on the site defaults to a page under `static/<slug>/`, with one question to settle host-vs-save unless the request names the destination; `static-tool-pages.md` grew the reimplementation contract and `bookmark-workflow.md` now explains how to enumerate client-routed gallery routes so a saved SPA gets a real description and a listed set of demos.

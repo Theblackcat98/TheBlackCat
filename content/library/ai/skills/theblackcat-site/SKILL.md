@@ -1,14 +1,14 @@
 ---
 name: theblackcat-site
 description: "Operate Nik's TheBlackCat site: save bookmarks, write blog posts (draft-flag flow), weekly triage, and maintain the Hugo repo safely."
-version: 1.8.0
+version: 1.9.0
 author: Hermes Agent
 license: MIT
 platforms: [linux]
 metadata:
   hermes:
     tags: [GitHub, bookmarks, blog, Hugo, TheBlackCat, knowledge-base]
-    related_skills: [hugo-site-maintenance, github]
+    related_skills: [github]
 ---
 
 # The BlackCat Site
@@ -51,7 +51,7 @@ includes personal/private context, confirm before writing it into the repo.
 | Publish an HTML artifact as a live page (sent file → `static/<slug>/`) | `references/live-artifact-pages.md` |
 | Build a static tool page — a new tool, a reimplementation of a third-party tool, or a rework (registry, thumbs, generator, local test loop) | `references/static-tool-pages.md` |
 | Past build/rendering incidents (context for debugging) | `references/theblackcat-*.md` |
-| Generic Hugo debugging on any site (local builds, bisect) | `hugo-site-maintenance` skill |
+| Build/preview the site locally, or debug a template/section/CSS change before pushing | `references/local-preview.md` |
 
 ## Hard rules (every task)
 
@@ -75,9 +75,11 @@ includes personal/private context, confirm before writing it into the repo.
    `success`, then live URL 200. Never gate on `gh run list -L 1` alone — right
    after a push the newest visible run can still be the previous commit's green
    one, a false pass (hit 2026-10-07). Template/CSS changes additionally
-   need `css_coverage.py` + pixel screenshots (see hugo-site-maintenance).
-8. Don't run `hugo` locally except for debugging per hugo-site-maintenance
-   (same version as CI, extracted without root). CI owns deploys.
+   need the preview loop + pixel screenshots: `references/local-preview.md`.
+8. Don't run `hugo` locally except for debugging, at CI's exact version
+   (0.147.4 extended, extracted without root). CI owns deploys. Install, the
+   `-b http://127.0.0.1:PORT/` trap and the minified-HTML grep traps:
+   `references/local-preview.md`.
 9. Never commit `public/` or `resources/` (gitignored 2026-09-04 — CI builds
    fresh; tracked build output shipped stale hextra-era files until purged).
 10. **Dead references are content debt, not issue debt.** When Nik says "amend
@@ -148,7 +150,10 @@ includes personal/private context, confirm before writing it into the repo.
   "unregister" an artifact to move it. The showcase section is written as an
   article: the prose lives in `content/showcase/_index.md`, and
   `layouts/partials/lists/showcase.html` adds a card grid only past one item.
-  New art → showcase. Anything with a job to do → tools.
+  New art → showcase. Anything with a job to do → tools. Caveat: a registry
+  `writeup:` cannot point at a section `_index.md` (the checker probes only
+  `content/<w>.md` and `content/<w>/index.md`), so a section-index-as-writeup
+  needs a real page or an existing write-up path instead.
 
 - Custom layouts only (b7661b6 redesign); `hugo.yaml` has NO theme key;
   `themes/hextra` was removed 2026-09-04. Details: `references/site-model.md`.
@@ -215,8 +220,7 @@ current, full version. So:
   pre-authorized; a mixed commit makes that claim harder to audit, and rule 6
   already forbids mixing kinds. One push for both is fine — gate CI on the
   final `headSha`, which covers every commit in it.
-- **Hugo page bundles do not serve non-index `.md`** (verified 2026-09-05 —
-  see hugo-site-maintenance `references/page-bundle-markdown-not-served.md`):
+- **Hugo page bundles do not serve non-index `.md`** (verified 2026-09-05):
   the mirror's SKILL.md/references are browsable on GitHub only. Never
   "fix" the index.md's GitHub-blob links into site-relative links — that
   ships live 404s.

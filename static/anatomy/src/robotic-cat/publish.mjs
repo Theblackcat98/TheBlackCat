@@ -29,16 +29,16 @@ const UX_STYLE = `
   font-size: 13px; color: var(--anatomy-muted);
 }
 .anatomy-back {
-  color: var(--anatomy-ink); text-decoration: none;
-  border-bottom: 1px solid var(--anatomy-border); padding-bottom: 1px;
+  color: var(--anatomy-strong); text-decoration: none;
+  border-bottom: 1px solid var(--anatomy-lo); padding-bottom: 1px;
 }
 .anatomy-back:hover { border-bottom-color: var(--anatomy-lit); color: var(--anatomy-lit); }
 .anatomy-pos { font-variant-numeric: tabular-nums; }
 .anatomy-nav { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
 .anatomy-nav a { color: var(--anatomy-muted); text-decoration: none; }
-.anatomy-nav a:hover { color: var(--anatomy-ink); }
+.anatomy-nav a:hover { color: var(--anatomy-strong); }
 .anatomy-themes {
-  display: inline-flex; border: 1px solid var(--anatomy-border);
+  display: inline-flex; border: 1px solid var(--anatomy-lo);
   border-radius: 999px; padding: 2px; gap: 2px;
 }
 .anatomy-theme {
@@ -46,17 +46,14 @@ const UX_STYLE = `
   border-radius: 999px; padding: 3px 10px; font: inherit; font-size: 12px; cursor: pointer;
 }
 .anatomy-theme[aria-pressed="true"] {
-  background: var(--anatomy-surface, rgba(255,255,255,0.08));
-  color: var(--anatomy-ink);
-}
-body[data-theme="light"] .anatomy-theme[aria-pressed="true"] {
-  background: rgba(15, 23, 32, 0.08);
+  background: var(--anatomy-strong);
+  color: var(--anatomy-paper);
 }
 .anatomy-help { margin: 12px 0 10px; font-size: 13px; color: var(--anatomy-muted); line-height: 1.5; }
 .anatomy-controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
 .anatomy-btn {
-  appearance: none; background: transparent; color: var(--anatomy-ink);
-  border: 1px solid var(--anatomy-border); border-radius: 6px;
+  appearance: none; background: transparent; color: var(--anatomy-strong);
+  border: 1px solid var(--anatomy-lo); border-radius: 6px;
   padding: 5px 10px; font: inherit; font-size: 12px; cursor: pointer;
   line-height: 1.3;
 }
@@ -65,7 +62,7 @@ body[data-theme="light"] .anatomy-theme[aria-pressed="true"] {
   background: var(--anatomy-lit); color: var(--anatomy-page); border-color: var(--anatomy-lit);
   font-weight: 600;
 }
-.anatomy-sep { width: 1px; height: 18px; background: var(--anatomy-border); margin: 0 2px; }
+.anatomy-sep { width: 1px; height: 18px; background: var(--anatomy-lo); margin: 0 2px; }
 @media (max-width: 560px) {
   .iso-page { margin: 16px auto 52px !important; }
   .anatomy-head { font-size: 12px; }
@@ -181,6 +178,34 @@ html = html.replace("</figure>", `</figure>\n${CONTROLS_HTML}`);
 const bodyClose = html.lastIndexOf("</body>");
 if (bodyClose === -1) throw new Error("Missing closing </body> tag in source HTML");
 html = `${html.slice(0, bodyClose)}${UX_SCRIPT}\n${html.slice(bodyClose)}`;
+
+const SEPIA_DARK = `.iso{
+  --anatomy-page:#14100c;--anatomy-card:#1c1712;--anatomy-text:#c2b39a;--anatomy-strong:#ede0c8;--anatomy-muted:#96846d;
+  --anatomy-paper:#1c1712;--anatomy-face:#262019;--anatomy-top:#2a231b;
+  --anatomy-shade-0:#15110d;--anatomy-shade-1:#1a1510;--anatomy-shade-2:#201a14;--anatomy-shade-3:#241e17;
+  --anatomy-lit-top:#362d22;--anatomy-lit-shade:#29221a;
+  --anatomy-hi:#dccab0;--anatomy-mid:#806f59;--anatomy-lo:#524536;--anatomy-faint:#362d23;--anatomy-lit:#fbf1dd;
+  --anatomy-halo:#080604;--anatomy-halo-opacity:.9;--anatomy-dot:#e6d7bd;
+  --anatomy-red:#e07a5f;--anatomy-green:#8ab87c;--anatomy-blue:#7ca1bd;
+  --anatomy-weight:.6px;--anatomy-ease:cubic-bezier(.32,.72,0,1);
+  --anatomy-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --anatomy-lift:inset 0 1px 0 0 #f5e6c80f,inset 0 0 0 1px #f5e6c808,0 0 0 1px #00000033,0 1px 1px -.5px #0000001a,0 3px 3px -1.5px #0000001a,0 6px 6px -3px #0000001a,0 12px 12px -6px #0000001a;
+}`;
+
+const SEPIA_LIGHT = `.iso[data-theme="light"]{
+  --anatomy-page:#efe5d0;--anatomy-card:#f7efe0;--anatomy-text:#52402f;--anatomy-strong:#2c1e12;--anatomy-muted:#6b5743;
+  --anatomy-paper:#f7efe0;--anatomy-face:#fbf6ea;--anatomy-top:#fdf9ef;
+  --anatomy-shade-0:#cfc0a3;--anatomy-shade-1:#ddd0b6;--anatomy-shade-2:#e9dec7;--anatomy-shade-3:#f2e9d6;
+  --anatomy-lit-top:#fffdf7;--anatomy-lit-shade:#eadec5;
+  --anatomy-hi:#3f2c1b;--anatomy-mid:#8a7359;--anatomy-lo:#b59e81;--anatomy-faint:#d8cbb2;--anatomy-lit:#23170c;
+  --anatomy-halo:#786145;--anatomy-halo-opacity:.32;--anatomy-dot:#4a3623;
+  --anatomy-red:#a93e28;--anatomy-green:#3f6a3c;--anatomy-blue:#355b78;
+  --anatomy-lift:inset 0 1px 0 0 #fffdf7,0 0 0 1px #2c1e1212,0 1px 1px -.5px #2c1e120d,0 3px 3px -1.5px #2c1e120d,0 6px 6px -3px #2c1e120d,0 12px 12px -6px #2c1e120d;
+}`;
+
+html = html
+  .replace(/\.iso\{\s*--anatomy-page:#0b0b0b;[\s\S]*?--anatomy-lift:[^;]+;\s*\}/g, SEPIA_DARK)
+  .replace(/\.iso\[data-theme="light"\]\{\s*--anatomy-page:#f2f2ef;[\s\S]*?--anatomy-lift:[^;]+;\s*\}/g, SEPIA_LIGHT);
 
 mkdirSync(dirname(OUT_HTML), { recursive: true });
 writeFileSync(OUT_HTML, html, "utf8");

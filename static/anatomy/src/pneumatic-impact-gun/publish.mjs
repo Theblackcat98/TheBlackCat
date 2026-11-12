@@ -221,6 +221,34 @@ html = replaceOnce(html, '<main class="iso-page">', `${THEME_INIT}<main class="i
 html = replaceOnce(html, '<figcaption class="iso-legend">', `${CONTROLS_HTML}\n<figcaption class="iso-legend">`);
 html = replaceOnce(html, "</body></html>", `\n${UX_SCRIPT}\n</body></html>`, true);
 
+const SEPIA_DARK = `.iso{
+  --anatomy-page:#14100c;--anatomy-card:#1c1712;--anatomy-text:#c2b39a;--anatomy-strong:#ede0c8;--anatomy-muted:#96846d;
+  --anatomy-paper:#1c1712;--anatomy-face:#262019;--anatomy-top:#2a231b;
+  --anatomy-shade-0:#15110d;--anatomy-shade-1:#1a1510;--anatomy-shade-2:#201a14;--anatomy-shade-3:#241e17;
+  --anatomy-lit-top:#362d22;--anatomy-lit-shade:#29221a;
+  --anatomy-hi:#dccab0;--anatomy-mid:#806f59;--anatomy-lo:#524536;--anatomy-faint:#362d23;--anatomy-lit:#fbf1dd;
+  --anatomy-halo:#080604;--anatomy-halo-opacity:.9;--anatomy-dot:#e6d7bd;
+  --anatomy-red:#e07a5f;--anatomy-green:#8ab87c;--anatomy-blue:#7ca1bd;
+  --anatomy-weight:.6px;--anatomy-ease:cubic-bezier(.32,.72,0,1);
+  --anatomy-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --anatomy-lift:inset 0 1px 0 0 #f5e6c80f,inset 0 0 0 1px #f5e6c808,0 0 0 1px #00000033,0 1px 1px -.5px #0000001a,0 3px 3px -1.5px #0000001a,0 6px 6px -3px #0000001a,0 12px 12px -6px #0000001a;
+}`;
+
+const SEPIA_LIGHT = `.iso[data-theme="light"]{
+  --anatomy-page:#efe5d0;--anatomy-card:#f7efe0;--anatomy-text:#52402f;--anatomy-strong:#2c1e12;--anatomy-muted:#6b5743;
+  --anatomy-paper:#f7efe0;--anatomy-face:#fbf6ea;--anatomy-top:#fdf9ef;
+  --anatomy-shade-0:#cfc0a3;--anatomy-shade-1:#ddd0b6;--anatomy-shade-2:#e9dec7;--anatomy-shade-3:#f2e9d6;
+  --anatomy-lit-top:#fffdf7;--anatomy-lit-shade:#eadec5;
+  --anatomy-hi:#3f2c1b;--anatomy-mid:#8a7359;--anatomy-lo:#b59e81;--anatomy-faint:#d8cbb2;--anatomy-lit:#23170c;
+  --anatomy-halo:#786145;--anatomy-halo-opacity:.32;--anatomy-dot:#4a3623;
+  --anatomy-red:#a93e28;--anatomy-green:#3f6a3c;--anatomy-blue:#355b78;
+  --anatomy-lift:inset 0 1px 0 0 #fffdf7,0 0 0 1px #2c1e1212,0 1px 1px -.5px #2c1e120d,0 3px 3px -1.5px #2c1e120d,0 6px 6px -3px #2c1e120d,0 12px 12px -6px #2c1e120d;
+}`;
+
+html = html
+  .replace(/\.iso\{\s*--anatomy-page:#0b0b0b;[\s\S]*?--anatomy-lift:[^;]+;\s*\}/g, SEPIA_DARK)
+  .replace(/\.iso\[data-theme="light"\]\{\s*--anatomy-page:#f2f2ef;[\s\S]*?--anatomy-lift:[^;]+;\s*\}/g, SEPIA_LIGHT);
+
 fs.mkdirSync(path.dirname(OUT_HTML), { recursive: true });
 fs.writeFileSync(OUT_HTML, html, "utf8");
 console.log(`published ${path.relative(process.cwd(), OUT_HTML)} · ${(Buffer.byteLength(html) / 1024).toFixed(0)} KB`);

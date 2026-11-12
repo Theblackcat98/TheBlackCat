@@ -1,6 +1,6 @@
 ---
 title: "Anatomy"
-description: "Six machines as interactive isometric figures: a quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine, a quadruped robot and a pneumatic impact wrench."
+description: "Seven machines as interactive isometric figures: a quadcopter on a gimbal rig, a pair of monitor speakers, a limited-slip differential, a flame-licker engine, a quadruped robot, a pneumatic impact wrench and a robot dog with a manipulator arm."
 contenttype: article
 tool: anatomy
 topics:
@@ -12,12 +12,12 @@ tags:
   - creative-coding
   - vector-graphics
 created: 2026-10-27
-updated: 2026-11-11
+updated: 2026-11-12
 ---
 
-Tools are things that run. This is the other half of the workshop: artifacts built to be looked at. Right now it holds one set — six machines, each drawn as an interactive isometric figure on a test rig, with the mechanism live underneath.
+Tools are things that run. This is the other half of the workshop: artifacts built to be looked at. Right now it holds one set — seven machines, each drawn as an interactive isometric figure on a test rig, with the mechanism live underneath.
 
-Most diagrams of a mechanism are a picture of a mechanism. They show you the parts and then stop, because a picture cannot answer the question you actually have: what happens when this moves. These six figures answer it. Each one runs as an interactive isometric SVG figure sitting on a test rig, with the mechanism live underneath: no plugin, no install, and no request to anyone else's server. Each figure is also a standalone file if you would rather have it full width — the whole set lives at [Anatomy](/anatomy/).
+Most diagrams of a mechanism are a picture of a mechanism. They show you the parts and then stop, because a picture cannot answer the question you actually have: what happens when this moves. These seven figures answer it. Each one runs as an interactive isometric SVG figure sitting on a test rig, with the mechanism live underneath: no plugin, no install, and no request to anyone else's server. Each figure is also a standalone file if you would rather have it full width — the whole set lives at [Anatomy](/anatomy/).
 
 ## How a quadcopter flies
 
@@ -72,6 +72,16 @@ An impact wrench does not tighten a bolt with steady torque. Compressed air spin
 {{< anatomy slug="pneumatic-impact-gun" title="Pneumatic impact wrench" height="700" >}}
 
 Watch the anvil lag the hammer through each cycle: the hammer accelerates on its own, strikes, and the anvil takes the torque in bursts.
+
+## How Spot works
+
+A walking machine does not balance by bracing itself; it balances by putting the next foot where the body is already going. Boston Dynamics' Spot is a 1,100 × 500 × 840 mm quadruped — 40.5 kg with the Spot Arm fitted, or about 397 N across the ground — driven by 12 electric leg actuators, a swappable 605 Wh battery, and a 1.6 m/s top speed. Five stereo depth camera pairs watch a full 360° out to 4 m so the planner can pick footholds over ±30° slopes and steps up to 300 mm.
+
+The figure puts Spot on an instrumented gait bench over four strain-gauge force plates, facing a 300 mm step block and a depth target on a rail. Diagonal pairs (`FL + RR`, `FR + RL`) trade stance and swing in a trot while the bench console plots all four foot forces and a dial turns once per cycle; up top, the 6-DoF, 984 mm Spot Arm rides on the front payload port with its 175 mm gripper cycling open and closed.
+
+{{< anatomy slug="spot" title="How Spot works" height="940" >}}
+
+Drag across the figure (or use the speed and height controls) to push the trot up to 1.6 m/s or bring it to a stand — stance feet share the ~397 N load, while swing feet drop to zero on the force bars.
 
 ## How they are built
 

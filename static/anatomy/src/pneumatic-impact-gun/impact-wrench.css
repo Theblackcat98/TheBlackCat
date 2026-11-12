@@ -1,0 +1,49 @@
+.iw-stage {
+  cursor: ew-resize;
+  outline: none;
+  touch-action: pan-y;
+}
+.iw-stage:focus-visible {
+  outline: 1px solid var(--anatomy-muted);
+  outline-offset: 6px;
+}
+
+/* Recessed cutaway motor & clutch interior cavity tokens (dark default, light override) */
+.iso .iw-cavity {
+  --anatomy-paper: #0e0e0e;
+  --anatomy-face: #161616;
+  --anatomy-top: #171717;
+  --anatomy-shade-0: #090909;
+  --anatomy-shade-1: #0b0b0b;
+  --anatomy-shade-2: #0e0e0e;
+  --anatomy-shade-3: #111111;
+}
+.iso[data-theme="light"] .iw-cavity {
+  --anatomy-paper: #e8e8e4;
+  --anatomy-face: #eeeeea;
+  --anatomy-top: #f0f0ec;
+  --anatomy-shade-0: #c4c4c0;
+  --anatomy-shade-1: #cfcfcb;
+  --anatomy-shade-2: #d9d9d5;
+  --anatomy-shade-3: #e2e2de;
+}
+
+/* Twin-hammer impact flash pulse */
+.iw-impact-flash {
+  fill: none;
+  stroke: var(--anatomy-lit);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Screen-reader status helper */
+.iw-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

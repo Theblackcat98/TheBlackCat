@@ -61,6 +61,7 @@
     const toolMap = Object.fromEntries(tools.map((t) => [t.id, t]));
     const cur = toolMap[toolId] || { id: toolId, name: document.title.split("·")[0].trim() };
     const cat = catMap[cur.category];
+    const isShowcase = cur.category === "showcase" || (cat && cat.id === "showcase");
     const siblings = cur.category ? tools.filter((t) => t.category === cur.category) : [];
     const hostedSiblings = siblings.filter((t) => !t.external && !/^https?:\/\//i.test(t.url));
     const curIdx = hostedSiblings.findIndex((t) => t.id === cur.id);
@@ -76,8 +77,9 @@
         <div class="tk-crumbs">
           <a class="tk-crumbs__brand" href="${esc(siteRoot)}">${CAT_SVG}<span>The BlackCat</span></a>
           <span class="tk-crumbs__sep" aria-hidden="true">/</span>
-          <a href="${esc(siteRoot + "tools/")}">Tools</a>
-          ${cat ? `<span class="tk-crumbs__sep" aria-hidden="true">/</span><a href="${esc(siteRoot + "tools/#" + cat.id)}">${esc(cat.name)}</a>` : ""}
+          ${isShowcase
+            ? `<a href="${esc(siteRoot + "showcase/")}">${esc((cat && cat.name) || "Showcase")}</a>`
+            : `<a href="${esc(siteRoot + "tools/")}">Tools</a>${cat ? `<span class="tk-crumbs__sep" aria-hidden="true">/</span><a href="${esc(siteRoot + "tools/#" + cat.id)}">${esc(cat.name)}</a>` : ""}`}
         </div>
         <div class="tk-actions">
           ${prevTool && nextTool ? `
@@ -122,7 +124,7 @@
 
       const foot = document.createElement("footer");
       foot.className = "tk-foot";
-      foot.setAttribute("aria-label", "Related tools");
+      foot.setAttribute("aria-label", isShowcase ? "Related showcase" : "Related tools");
       foot.innerHTML = `
         <div class="tk-foot__inner">
           <div class="tk-foot__groups">
@@ -139,7 +141,7 @@
               </div>
             ` : ""}
           </div>
-          <a class="tk-foot__all" href="${esc(siteRoot + "tools/")}">All tools &rarr;</a>
+          <a class="tk-foot__all" href="${esc(siteRoot + (isShowcase ? "showcase/" : "tools/"))}">${isShowcase ? "All showcase &rarr;" : "All tools &rarr;"}</a>
         </div>
       `;
       document.body.appendChild(foot);

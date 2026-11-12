@@ -1,0 +1,415 @@
+/* Shared chrome for all standalone & embedded Anatomy figures.
+   Expects figure tokens on body.iso (.iso / .iso[data-theme="light"]), with safe fallbacks. */
+
+.iso {
+  --anatomy-ink: var(--anatomy-strong);
+}
+
+html[data-anatomy-theme="dark"] {
+  color-scheme: dark;
+  background: #14100c;
+}
+
+html[data-anatomy-theme="light"] {
+  color-scheme: light;
+  background: #efe5d0;
+}
+
+/* ---- Page width & embedded mode --------------------------------------- */
+
+body.iso .iso-page {
+  width: min(1140px, 100% - clamp(24px, 4vw, 64px)) !important;
+  max-width: none !important;
+  margin: clamp(18px, 3vw, 32px) auto clamp(44px, 6vw, 72px) !important;
+}
+
+html.anatomy-embedded .anatomy-head {
+  display: none !important;
+}
+
+html.anatomy-embedded body.iso .iso-page {
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+html.anatomy-embedded body.iso .iso-figure {
+  margin: 0 !important;
+}
+
+/* ---- Top bar (matches robotic-cat reference) --------------------------- */
+
+.anatomy-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--anatomy-muted);
+}
+
+.anatomy-back {
+  color: var(--anatomy-strong);
+  text-decoration: none;
+  border-bottom: 1px solid var(--anatomy-lo);
+  padding-bottom: 1px;
+  white-space: nowrap;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.anatomy-back:hover {
+  border-bottom-color: var(--anatomy-lit);
+  color: var(--anatomy-lit);
+}
+
+.anatomy-pos {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.anatomy-nav {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.anatomy-nav a {
+  color: var(--anatomy-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 140ms ease;
+}
+
+.anatomy-nav a:hover {
+  color: var(--anatomy-strong);
+}
+
+.anatomy-themes {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--anatomy-lo);
+  border-radius: 999px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.anatomy-theme {
+  appearance: none;
+  background: transparent;
+  color: var(--anatomy-muted);
+  border: 0;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.3;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.anatomy-theme:hover {
+  color: var(--anatomy-strong);
+}
+
+.anatomy-theme[aria-pressed="true"] {
+  background: var(--anatomy-strong);
+  color: var(--anatomy-paper, var(--anatomy-page));
+}
+
+.anatomy-head a:focus-visible,
+.anatomy-theme:focus-visible,
+.anatomy-btn:focus-visible,
+input.anatomy-range:focus-visible,
+.iso-stage:focus-visible,
+.rc-stage:focus-visible {
+  outline: 2px solid var(--anatomy-lit);
+  outline-offset: 2px;
+}
+
+/* ---- Figure plate, SVG scaling & corner labels ------------------------ */
+
+body.iso .iso-figure {
+  margin: 0 0 28px;
+}
+
+body.iso .iso-plate {
+  position: relative;
+  padding: clamp(40px, 4.5vw, 52px) clamp(16px, 2.5vw, 28px);
+  --anatomy-paper: var(--anatomy-card, var(--anatomy-page));
+}
+
+body.iso .iso-plate .iso-svg,
+body.iso .iso-plate .rc-stage svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: min(74vh, 760px);
+  margin-inline: auto;
+  overflow: visible;
+}
+
+/* Preserve exact overlay height alignment in multi-layer figures like drone */
+body.iso .iso-plate .iso-turn > .iso-layer {
+  height: 100%;
+}
+
+body.iso .iso-plate-corners {
+  position: absolute;
+  inset: clamp(12px, 1.8vw, 18px) clamp(14px, 2vw, 20px);
+  pointer-events: none;
+}
+
+body.iso .iso-plate-corner {
+  font-size: clamp(10px, 1vw, 11.5px);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.iso .iso-plate-corner[data-corner="fig"] {
+  max-width: 24%;
+}
+
+body.iso .iso-plate-corner[data-corner="title"] {
+  max-width: 72%;
+  text-align: right;
+}
+
+body.iso .iso-plate-corner[data-corner="hint"] {
+  max-width: 48%;
+}
+
+body.iso .iso-plate-corner[data-corner="readout"] {
+  max-width: 50%;
+  text-align: right;
+}
+
+/* ---- Legend ------------------------------------------------------------ */
+
+body.iso .iso-legend {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  color: var(--anatomy-muted);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+/* ---- Standardized bottom controls panel ------------------------------- */
+
+.anatomy-panel {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--anatomy-faint, var(--anatomy-lo));
+}
+
+.anatomy-panel__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.anatomy-help {
+  margin: 0;
+  color: var(--anatomy-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  flex: 1 1 280px;
+}
+
+.anatomy-status {
+  margin: 0;
+  margin-left: auto;
+  color: var(--anatomy-strong);
+  font-family: var(--anatomy-mono, ui-monospace, monospace);
+  font-size: 12px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+.anatomy-status:empty {
+  display: none;
+}
+
+.anatomy-phase-note {
+  margin: 8px 0 0;
+  color: var(--anatomy-muted);
+  font-family: var(--anatomy-mono, ui-monospace, monospace);
+  font-size: 12px;
+  line-height: 1.5;
+  flex-basis: 100%;
+}
+
+.anatomy-phase-note:empty {
+  display: none;
+}
+
+.anatomy-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+  font-family: var(--anatomy-mono, ui-monospace, monospace);
+}
+
+.anatomy-controls__label {
+  color: var(--anatomy-muted);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-right: 2px;
+  white-space: nowrap;
+}
+
+.anatomy-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 5px 11px;
+  border-radius: 6px;
+  border: 1px solid var(--anatomy-lo);
+  background: var(--anatomy-paper, var(--anatomy-card, var(--anatomy-page)));
+  color: var(--anatomy-strong);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.anatomy-btn:hover {
+  border-color: var(--anatomy-lit);
+  color: var(--anatomy-lit);
+  background: var(--anatomy-face, var(--anatomy-paper, var(--anatomy-page)));
+}
+
+.anatomy-btn[aria-pressed="true"],
+.anatomy-btn.active {
+  background: var(--anatomy-lit);
+  border-color: var(--anatomy-lit);
+  color: var(--anatomy-page);
+  font-weight: 600;
+}
+
+.anatomy-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--anatomy-lo);
+  margin: 0 4px;
+  flex: none;
+}
+
+.anatomy-slider-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 3px 10px;
+  border: 1px solid var(--anatomy-lo);
+  border-radius: 6px;
+  background: var(--anatomy-paper, var(--anatomy-card, var(--anatomy-page)));
+  color: var(--anatomy-muted);
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.anatomy-slider-wrap label {
+  color: var(--anatomy-muted);
+  cursor: pointer;
+}
+
+input.anatomy-range {
+  width: clamp(92px, 14vw, 140px);
+  margin: 0;
+  accent-color: var(--anatomy-lit);
+  cursor: pointer;
+}
+
+output.anatomy-range-out,
+.anatomy-range-out {
+  min-width: 6.5ch;
+  text-align: right;
+  color: var(--anatomy-strong);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---- Narrow screens ---------------------------------------------------- */
+
+@media (max-width: 600px) {
+  .anatomy-head {
+    font-size: 12px;
+    gap: 8px 12px;
+  }
+
+  body.iso .iso-plate {
+    padding: 58px 12px 72px;
+  }
+
+  body.iso .iso-plate-corners {
+    inset: 12px 14px;
+  }
+
+  body.iso .iso-plate-corner {
+    max-width: 100%;
+    white-space: nowrap;
+  }
+
+  body.iso .iso-plate-corner[data-corner="fig"] {
+    top: 0;
+    left: 0;
+    max-width: 100%;
+  }
+
+  body.iso .iso-plate-corner[data-corner="title"] {
+    top: 16px;
+    left: 0;
+    right: auto;
+    max-width: 100%;
+    text-align: left;
+  }
+
+  body.iso .iso-plate-corner[data-corner="hint"] {
+    bottom: 18px;
+    left: 0;
+    right: auto;
+    max-width: 100%;
+  }
+
+  body.iso .iso-plate-corner[data-corner="readout"] {
+    bottom: 0;
+    left: 0;
+    right: auto;
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .anatomy-status {
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anatomy-back,
+  .anatomy-nav a,
+  .anatomy-theme,
+  .anatomy-btn {
+    transition: none;
+  }
+}

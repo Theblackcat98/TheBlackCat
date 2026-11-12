@@ -203,8 +203,13 @@ details.toc-mobile[open] summary { margin-bottom: var(--s-3); }
   transition: color .15s var(--ease), border-color .15s var(--ease);
 }
 .anatomy-embed__open:hover { color: var(--accent); border-color: currentColor; }
-/* Break the 40 rem measure to the width of the article column so the figure is legible. */
+/* Break the 40 rem measure to fill the article column without overlapping the TOC rail. */
+@media (min-width: 48rem) {
+  .prose:has(.anatomy-embed) { max-width: none; }
+  .prose:has(.anatomy-embed) > :not(.anatomy-embed) { max-width: var(--measure); }
+  .prose .anatomy-embed { width: 100%; margin-inline: 0; }
+}
 @media (min-width: 64rem) {
-  .prose .anatomy-embed { width: calc(100% + 3rem); margin-inline: -1.5rem; }
+  .article-layout:has(.anatomy-embed) { max-width: none; }
 }
 @media (prefers-reduced-motion: reduce) { .anatomy-embed__open { transition: none; } }

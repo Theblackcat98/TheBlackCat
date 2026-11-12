@@ -1,6 +1,6 @@
 ---
 title: "Taj Mahal"
-description: "The Taj Mahal drawn as an axonometric on drafting paper: white marble on the charbagh axis — the great onion dome over a chamfered block of iwans, four minarets leaning a degree outward, and the reflecting channel running down the garden to the gate."
+description: "An interactive ink-and-wash axonometric cutaway of the Taj Mahal on the banks of the Yamuna River: marble mausoleum, four outward-leaning minarets, red-sandstone Mosque and Jawab, formal Charbagh garden axis, and Agra alluvial strata."
 contenttype: article
 tool: taj-mahal
 topics:
@@ -11,14 +11,16 @@ tags:
   - creative-coding
   - architecture
 created: 2026-11-11
-updated: 2026-11-11
+updated: 2026-11-12
 ---
 
 ## What it is
 
-The tomb Shah Jahan built for Mumtaz Mahal, drawn on its garden axis so the famous symmetry does the compositional work: plinth, mausoleum, dome, four minarets, and the charbagh running away in front with the mosque and its mirror jawab in red sandstone at the sides.
+The tomb Shah Jahan built for Mumtaz Mahal along the southern bend of the Yamuna River in Agra: white Makrana marble plinth and mausoleum rising above the red sandstone *chameli farsh* waterfront terrace, backed by the broad river channel and approached through the symmetrical four-part *Charbagh* garden.
 
 ## What was drawn
+
+- **Yamuna Riverfront & Agra alluvial cutaway**: sandstone retaining embankment along the north terrace edge dropping to the curving Yamuna River channel, sandy river shoals, sliced waterlines on the section faces, opposite *Mehtab Bagh* riverbank hint, perimeter cypress orchards, and Indo-Gangetic sedimentary strata skirts.
 
 - The mausoleum block with chamfered corners: a large central iwan on each face — a framed arch bay with a teal jali screen set into the recess — flanked by two-storey niche bays that wrap around the chamfers, with slender guldasta pinnacles standing along the roofline.
 - The great dome as a bulbous profile lofted on its ringed drum: swelling past the drum, an inverted lotus collar at the neck, and a tall finial. Four chhatris sit at the roof corners, each a miniature of the same drum-and-dome idea.

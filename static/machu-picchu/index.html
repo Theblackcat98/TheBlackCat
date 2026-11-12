@@ -1,1044 +1,509 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Machu Picchu — Axonometric Architectural Diagram</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Machu Picchu — Axonometric Study</title>
+  <meta name="description" content="Interactive ink-and-wash axonometric cutaway of Machu Picchu perched above the Urubamba River canyon: detailed battered granite ashlar temples, the curved Torreón, Intihuatana sundial ridge, trapezoidal doorways, agricultural andenes, and Huayna Picchu.">
+  <link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/machu-picchu/">
+  <meta property="og:title" content="Machu Picchu">
+  <meta property="og:description" content="Interactive ink-and-wash axonometric cutaway of Machu Picchu perched above the Urubamba River canyon: detailed battered granite ashlar temples, the curved Torreón, Intihuatana sundial ridge, trapezoidal doorways, agricultural andenes, and Huayna Picchu.">
+  <meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/machu-picchu-light.webp">
+  <script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "VisualArtwork", "name": "Machu Picchu", "description": "Interactive ink-and-wash axonometric cutaway of Machu Picchu perched above the Urubamba River canyon: detailed battered granite ashlar temples, the curved Torre\u00f3n, Intihuatana sundial ridge, trapezoidal doorways, agricultural andenes, and Huayna Picchu.", "url": "https://theblackcat98.github.io/TheBlackCat/machu-picchu/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/machu-picchu-light.webp", "creator": {"@type": "Person", "name": "Nik"}}</script>
+  <link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+  <script src="../toolkit/toolkit.js?v=1" defer data-tool="machu-picchu"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background-color: #e3ded4;
-    }
-    #canvas-container {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-    }
-    canvas {
-      display: block;
-    }
-    #hint {
-      position: absolute; left: 18px; right: 18px; bottom: 14px; z-index: 2;
-      color: rgba(65,53,43,.68); font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
-      letter-spacing: .08em; text-transform: uppercase; pointer-events: none;
-    }
-    #paper-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      mix-blend-mode: multiply;
-      opacity: 0.55;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #e3ded4; }
+    #wrap { position: relative; width: 100vw; height: 100vh; }
+    canvas { display: block; }
+    #paper { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; mix-blend-mode: multiply; opacity: .55; }
+    #lab { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+    #lab text { font: 10px 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .08em; fill: #41352b; paint-order: stroke; stroke: #ede9e0; stroke-width: 3px; text-transform: uppercase; }
+    #lab line { stroke: #41352b; stroke-width: .8; opacity: .7; }
+    #lab circle { fill: #ede9e0; stroke: #41352b; stroke-width: 1; }
+    .tag { position: absolute; z-index: 3; color: rgba(65, 53, 43, .82); font: 11px/1.45 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .08em; text-transform: uppercase; pointer-events: none; background: rgba(237, 233, 224, .92); padding: 4px 8px; border-radius: 3px; }
+    #hint { left: max(18px, env(safe-area-inset-left)); bottom: max(14px, env(safe-area-inset-bottom)); color: rgba(65, 53, 43, .68); padding: 3px 6px; max-width: calc(100% - 48px); }
+    #ttl { left: max(18px, env(safe-area-inset-left)); top: 56px; border-left: 3px solid #8c4531; }
+    #ttl b { display: block; font-size: 14px; letter-spacing: .28em; font-weight: 600; }
   </style>
-<meta name="description" content="Machu Picchu drawn as an axonometric on drafting paper: the citadel on its ridge saddle — ten agricultural terrace courses, rows of gabled dry-stone houses with trapezoidal doorways, the curved Temple of the Sun, the Intihuatana stone, and Huayna Picchu standing behind.">
-<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/machu-picchu/">
-<meta property="og:title" content="Machu Picchu">
-<meta property="og:description" content="Machu Picchu drawn as an axonometric on drafting paper: the citadel on its ridge saddle — ten agricultural terrace courses, rows of gabled dry-stone houses with trapezoidal doorways, the curved Temple of the Sun, the Intihuatana stone, and Huayna Picchu standing behind.">
-<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/machu-picchu-light.webp">
-<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "VisualArtwork", "name": "Machu Picchu", "description": "Machu Picchu drawn as an axonometric on drafting paper: the citadel on its ridge saddle — ten agricultural terrace courses, rows of gabled dry-stone houses with trapezoidal doorways, the curved Temple of the Sun, the Intihuatana stone, and Huayna Picchu standing behind.", "url": "https://theblackcat98.github.io/TheBlackCat/machu-picchu/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/machu-picchu-light.webp", "creator": {"@type": "Person", "name": "Nik"} }</script>
-<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
-<script src="../toolkit/toolkit.js?v=1" defer data-tool="machu-picchu"></script>
-
 </head>
 <body>
-<a class="back tk-fallback" href="../tools/">&#8592; All tools</a>
-  <div id="canvas-container">
-    <canvas id="paper-overlay"></canvas>
-    <div id="hint">MACHU PICCHU &middot; AXONOMETRIC STUDY &nbsp; / &nbsp; DRAG TO ORBIT &middot; DOUBLE-CLICK TO RESET</div>
+  <a class="back tk-fallback" href="../tools/">&#8592; All tools</a>
+  <div id="wrap">
+    <canvas id="paper"></canvas>
+    <svg id="lab"></svg>
+    <div class="tag" id="ttl"><b>Machu Picchu</b>Citadel above the Urubamba &middot; 2,430 m &middot; c. 1450</div>
+    <div class="tag" id="hint">Axonometric study &nbsp;/&nbsp; drag to orbit &middot; scroll to zoom &middot; double-click to reset</div>
   </div>
-
   <script src="../vendor/three/three.min.js"></script>
   <script src="../vendor/three/OrbitControls.js"></script>
   <script>
-    // =========================================================================
-    // 1. DETERMINISTIC PRNG & DRAFTING PAPER TEXTURE OVERLAY
-    // =========================================================================
-    function mulberry32(a) {
-      return function () {
-        let t = (a += 0x6d2b79f5);
-        t = Math.imul(t ^ (t >>> 15), t | 1);
-        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-      };
+function mb(a){return()=>{let t=(a+=0x6d2b79f5);t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+const rng=mb(1911); // year Hiram Bingham reached the site
+const hs=(i,j)=>{let h=Math.imul(i,374761393)+Math.imul(j,668265263);h=Math.imul(h^h>>>13,1274126177);return((h^h>>>16)>>>0)/4294967296};
+const sm=t=>t*t*(3-2*t),ss=(a,b,x)=>{x=Math.min(1,Math.max(0,(x-a)/(b-a)));return x*x*(3-2*x)};
+function vn(x,y){const i=Math.floor(x),j=Math.floor(y),u=sm(x-i),v=sm(y-j);return(hs(i,j)*(1-u)+hs(i+1,j)*u)*(1-v)+(hs(i,j+1)*(1-u)+hs(i+1,j+1)*u)*v}
+const fbm=(x,y)=>vn(x,y)*.5+vn(x*2.1,y*2.1)*.27+vn(x*4.3,y*4.3)*.15+vn(x*8.7,y*8.7)*.08;
+
+// ---------- terrain field ----------
+const P=9.5,W=-2.2,S2=Math.SQRT1_2,B=34,N=100;
+const terrZone=(p0,t,y)=>p0<-5&&t>-16&&t<8&&y<P-.3&&y>-1.5;
+function H(x,z){
+  const t=-(x+z)*S2,p0=(x-z)*S2,p=p0+2.8*Math.sin(.22*t+1);
+  let pf=t<-10?P-(-t-10)*.5:P; if(t>26)pf-=(t-26)*.4;
+  const w=p<0?13:8.5;
+  let h=-3.5+(pf+3.5)*Math.exp(-Math.pow(Math.abs(p)/w,3));
+  h=Math.max(h,-3.5+10*ss(p<0?22:15,p<0?33:26,Math.abs(p)));
+  const pk=(cx,cz,hh,rr,e)=>-3.5+(hh+3.5)*Math.exp(-Math.pow(Math.hypot(x-cx,z-cz)/rr,e));
+  h=Math.max(h,pk(-17,-17,25,6,1.6),pk(-27,-4,15,8,1.7),pk(8,-27,12,7,1.7));
+  const m=1-ss(11.5,17,Math.hypot(x,z));
+  const amp=(3+Math.min(3,Math.max(0,(h-6)*.18)))*(.3+.7*ss(-3,1,h));
+  h+=(fbm(x*.16,z*.16)-.45)*amp*(1-m);
+  h=h*(1-m)+P*m;
+  const tz=ss(-3,-6,p0)*ss(-17,-13,t)*ss(10,6,t)*ss(P-.2,P-1.5,h)*ss(-1.6,-.6,h);
+  return h*(1-tz)+Math.floor(h)*tz;
+}
+
+// ---------- ink / wash engine ----------
+const wp=[],wc=[],ink={bold:[],med:[],fine:[],rust:[],teal:[],faint:[]},tc=new THREE.Color();
+const ld={x:-.354,y:.253,z:.91};
+function tri(a,b,c,hex,s=0){tc.setHex(hex);tc.offsetHSL(0,0,s+(rng()-.5)*.014);wp.push(...a,...b,...c);for(let i=0;i<3;i++)wc.push(tc.r,tc.g,tc.b)}
+const quad=(a,b,c,d,h,s)=>{tri(a,b,c,h,s);tri(a,c,d,h,s)};
+const pick=(p,o)=>{const d=o[0]*ld.x+o[1]*ld.y+o[2]*ld.z;return o[1]>.65?p[3]:o[1]<-.65?p[1]:d>.28?p[0]:d>-.18?p[1]:p[2]};
+const qn=(a,b,c,d,p,o)=>quad(a,b,c,d,pick(p,o)),tn=(a,b,c,p,o)=>tri(a,b,c,pick(p,o));
+function ln(a,b,k='med',ov=.02){
+  const d=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],L=Math.hypot(...d);if(L<1e-5)return;
+  const u=d.map(v=>v/L*ov),j=k==='faint'||!ov?0:.007,r=()=>(rng()-.5)*j,o=ink[k];
+  const A=[a[0]-u[0]+r(),a[1]-u[1]+r(),a[2]-u[2]+r()],C=[b[0]+u[0]+r(),b[1]+u[1]+r(),b[2]+u[2]+r()];
+  o.push(...A,...C);
+  if(k==='bold'){o.push(A[0]+.017,A[1],A[2]-.017,C[0]+.017,C[1],C[2]-.017)}
+}
+const PAL={stone:[0xe6dfd2,0xd5ccbc,0xbeb4a2,0xece6da],thatch:[0xdcc78c,0xcbb37a,0xa9945f,0xe4d29b],rock:[0xc9bea9,0xb4a892,0x978b77,0xd3cab8],
+ lawn:[0xb9cf86,0xb9cf86,0xa5bb74,0xc4d891],cream:[0xf0e6d0,0xe2d6bc,0xc9bca0,0xf4ecda],brown:[0xb08a62,0x9c7852,0x82613f,0xbf9a72],dark:[0x6a5646,0x5a4a3c,0x483b30,0x7a6656],
+ pine:[0x6f8f5c,0x5f7e4f,0x4b6640,0x7c9c68]};
+function box(x,y,z,w,h,d,pn,k='med',c=0){
+  const p=PAL[pn],X=x+w,Y=y+h,Z=z+d,q=(a,b,e,f,o)=>qn(a,b,e,f,p,o);
+  q([X,y,z],[X,Y,z],[X,Y,Z],[X,y,Z],[1,0,0]);q([x,y,z],[x,y,Z],[x,Y,Z],[x,Y,z],[-1,0,0]);
+  q([x,y,Z],[X,y,Z],[X,Y,Z],[x,Y,Z],[0,0,1]);q([x,y,z],[x,Y,z],[X,Y,z],[X,y,z],[0,0,-1]);q([x,Y,z],[x,Y,Z],[X,Y,Z],[X,Y,z],[0,1,0]);
+  const V=[[x,y,z],[X,y,z],[X,y,Z],[x,y,Z],[x,Y,z],[X,Y,z],[X,Y,Z],[x,Y,Z]];
+  [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]].forEach(([i,j])=>ln(V[i],V[j],k));
+  for(let i=1;i<c;i++){const yy=y+h*i/c;ln([x,yy,Z],[X,yy,Z],'fine',0);ln([X,yy,Z],[X,yy,z],'fine',0)}
+}
+function house(x,z,w,d,h,rh,rz,y=P){
+  box(x,y,z,w,h,d,'stone','med',3);
+  const dx=x+w/2;quad([dx-.2,y,z+d+.01],[dx+.2,y,z+d+.01],[dx+.14,y+.55,z+d+.01],[dx-.14,y+.55,z+d+.01],0x4a4039);
+  const ov=.14,Y=y+h,cx=x+w/2,cz=z+d/2,a=(rz?w:d)/2+ov,l=(rz?d:w)/2+ov;
+  const m=rz?(u,yy,v)=>[cx+u,yy,cz+v]:(u,yy,v)=>[cx+v,yy,cz+u],n=rz?(p,q,r)=>[p,q,r]:(p,q,r)=>[r,q,p];
+  const T0=m(0,Y+rh,-l),T1=m(0,Y+rh,l);
+  qn(m(-a,Y,-l),m(-a,Y,l),T1,T0,PAL.thatch,n(-.7,.7,0));qn(m(a,Y,l),m(a,Y,-l),T0,T1,PAL.thatch,n(.7,.7,0));
+  tn(m(-a,Y,l),m(a,Y,l),T1,PAL.stone,n(0,0,1));tn(m(-a,Y,-l),m(a,Y,-l),T0,PAL.stone,n(0,0,-1));
+  ln(T0,T1,'bold');[[-a,-l,-a,l],[a,-l,a,l],[-a,l,a,l],[-a,-l,a,-l]].forEach(e=>ln(m(e[0],Y,e[1]),m(e[2],Y,e[3]),'med'));
+  [[-a,l],[a,l],[-a,-l],[a,-l]].forEach(e=>ln(m(e[0],Y,e[1]),e[1]>0?T1:T0,'med'));
+  for(let i=1;i<9;i++){const v=-l+2*l*i/9;ln(m(-a,Y,v),m(0,Y+rh,v),'fine',0);ln(m(a,Y,v),m(0,Y+rh,v),'fine',0)}
+}
+function cyl(cx,y,cz,r,h,n,p,top,c=6){
+  for(let i=0;i<n;i++){
+    const a0=i/n*6.2832,a1=(i+1)/n*6.2832,am=(a0+a1)/2,p0=[cx+Math.cos(a0)*r,y,cz+Math.sin(a0)*r],p1=[cx+Math.cos(a1)*r,y,cz+Math.sin(a1)*r];
+    const q0=[p0[0],y+h,p0[2]],q1=[p1[0],y+h,p1[2]];
+    qn(p0,p1,q1,q0,p,[Math.cos(am),0,Math.sin(am)]);tri([cx,y+h,cz],q0,q1,top);
+    ln(p0,q0,'fine',0);ln(q0,q1,'med');ln(p0,p1,'fine',0);
+    for(let k=1;k<c;k++)ln([p0[0],y+h*k/c,p0[2]],[p1[0],y+h*k/c,p1[2]],'fine',0)
+  }
+}
+function tree(x,y,z,s){
+  const r=.34*s,h=1.25*s,b=[[x+r,y+.2,z],[x,y+.2,z+r],[x-r,y+.2,z],[x,y+.2,z-r]],T=[x,y+.2+h,z];
+  for(let i=0;i<4;i++){const j=(i+1)%4,o=[(b[i][0]+b[j][0])/2-x,.5,(b[i][2]+b[j][2])/2-z];tn(b[i],b[j],T,PAL.pine,o);ln(b[i],T,'fine',0)}
+  ln([x,y-.05,z],[x,y+.25,z],'med',0)
+}
+function llama(x,y,z,k,f){
+  const s=f?-1:1,p=k;
+  box(x,y+.42,z,.8,.34,.3,p,'fine');[[.05,.04],[.65,.04],[.05,.2],[.65,.2]].forEach(l=>box(x+l[0],y,z+l[1],.09,.42,.09,p,'fine'));
+  const nx=f?x-.02:x+.62;box(nx,y+.76,z+.07,.16,.6,.16,p,'fine');box(f?nx-.14:nx+.04,y+1.3,z+.05,.26,.18,.2,p,'fine');
+}
+
+// ---------- terrain mesh ----------
+const st=2*B/N,hg=[],V=(i,j)=>[-B+i*st,hg[j*(N+1)+i],-B+j*st];
+for(let j=0;j<=N;j++)for(let i=0;i<=N;i++)hg.push(H(-B+i*st,-B+j*st));
+function tcol(x,z,y,n){
+  const L=n[0]*ld.x+n[1]*ld.y+n[2]*ld.z,ny=n[1],r=Math.hypot(x,z),p0=(x-z)*S2,t=-(x+z)*S2,q=fbm(x*.5+9,z*.5);let c;
+  if(y<W+.3)c=0x8f9a82;
+  else if(r<11.6&&ny>.9)c=q>.5?0xc6c698:0xbbbf8c;
+  else if(ny<(y>12?.62:.52))c=L>.2?0xb9ad98:L>-.2?0xa1957f:0x877c6c;
+  else if(terrZone(p0,t,y)&&ny<.82)c=L>0?0xd6cdb8:0xbcb29c;
+  else if(terrZone(p0,t,y))c=Math.floor(y)%2?0xb7cc82:0xa5bd74;
+  else if(ny<.78)c=L>.1?0x80a06b:0x6c8a59;
+  else c=y>14?0xbab47c:q>.5?0xa8bf7a:0x95b06c;
+  return[c,L*.04]
+}
+for(let j=0;j<N;j++)for(let i=0;i<N;i++){
+  const a=V(i,j),b=V(i+1,j),c=V(i+1,j+1),d=V(i,j+1);
+  [[a,b,c],[a,c,d]].forEach(T=>{
+    const u=[T[1][0]-T[0][0],T[1][1]-T[0][1],T[1][2]-T[0][2]],v=[T[2][0]-T[0][0],T[2][1]-T[0][1],T[2][2]-T[0][2]];
+    let n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];const l=Math.hypot(...n)||1;n=n.map(q=>q/l);if(n[1]<0)n=n.map(q=>-q);
+    const cx=(T[0][0]+T[1][0]+T[2][0])/3,cz=(T[0][2]+T[1][2]+T[2][2])/3,cy=(T[0][1]+T[1][1]+T[2][1])/3,[hx,s]=tcol(cx,cz,cy,n);
+    tri(T[0],T[1],T[2],hx,s);
+    const lo=Math.min(T[0][1],T[1][1],T[2][1]),hi=Math.max(T[0][1],T[1][1],T[2][1]);
+    for(let L=Math.ceil(lo-.5)+.5;L<hi;L++){
+      if(L<W+.1)continue;const pts=[];
+      [[0,1],[1,2],[2,0]].forEach(([e,f])=>{const A=T[e],C=T[f];if((A[1]-L)*(C[1]-L)<0){const w=(L-A[1])/(C[1]-A[1]);pts.push([A[0]+(C[0]-A[0])*w,L+.015,A[2]+(C[2]-A[2])*w])}});
+      if(pts.length==2)ink[Math.abs(Math.round(L-.5))%5===0?'med':'fine'].push(...pts[0],...pts[1])
     }
-    const rng = mulberry32(1450); // c. 1450: the citadel is built under the Inca Pachacuti
+  })
+}
+// river
+quad([-B,W,-B],[B,W,-B],[B,W,B],[-B,W,B],0xa9cdc8);
+for(let pp=-44;pp<=44;pp+=.8){let prev=null;
+  for(let t=-52;t<=52;t+=1.2){const p=pp-2.8*Math.sin(.22*t+1),x=(p-t)*S2,z=-(p+t)*S2;
+    const ok=Math.abs(x)<B-.3&&Math.abs(z)<B-.3&&H(x,z)<W-.15,cur=ok?[x,W+.02,z]:null;
+    if(prev&&cur&&rng()>.22)ink.teal.push(...prev,...cur);prev=cur}}
+// strata skirts
+const Ys=[-8,-6.6,-5.4,-4.3,-3.3,-2.2,0,2.4,4.8,7.2,9.6,12.4,15.6,19.5,26,40],
+STR=[0x8d7f6b,0xa4917a,0x97846a,0xb39d7a,0xa08c70,0xb8a47f,0xc0ab86,0xa99577,0xb9a784,0x9f8d73,0xb4a283,0xa3926f,0xb7a582,0x9d8c72,0xaa9a7c],SH=[0,-.07,-.07,0];
+for(let s=0;s<4;s++){
+  const E=i=>{const u=-B+i*st,xz=[[u,B],[B,u],[u,-B],[-B,u]][s],hh=hg[s==0?N*(N+1)+i:s==1?i*(N+1)+N:s==2?i:i*(N+1)];return{x:xz[0],z:xz[1],h:hh}};
+  for(let i=0;i<N;i++){
+    const a=E(i),b=E(i+1);
+    for(let j=0;j<15;j++){const y0=Ys[j],y1=Ys[j+1],ta=Math.min(Math.max(a.h,y0),y1),tb=Math.min(Math.max(b.h,y0),y1);
+      if(ta<=y0&&tb<=y0)continue;quad([a.x,y0,a.z],[b.x,y0,b.z],[b.x,tb,b.z],[a.x,ta,a.z],STR[j],SH[s]);
+      if(ta>=y1&&tb>=y1)ln([a.x,y1,a.z],[b.x,y1,b.z],'fine',0)}
+    if(Math.min(a.h,b.h)<W){quad([a.x,Math.min(a.h,W),a.z],[b.x,Math.min(b.h,W),b.z],[b.x,W,b.z],[a.x,W,a.z],0x9cc3c0,SH[s]);ln([a.x,W,a.z],[b.x,W,b.z],'teal',0)}
+    ln([a.x,a.h,a.z],[b.x,b.h,b.z],'bold',0);ln([a.x,-8,a.z],[b.x,-8,b.z],'bold',0);
+    if(i==0)ln([a.x,-8,a.z],[a.x,a.h,a.z],'bold',0);if(i==N-1)ln([b.x,-8,b.z],[b.x,b.h,b.z],'bold',0)
+  }
+}
 
-    function generatePaperOverlay() {
-      const canvas = document.getElementById('paper-overlay');
-      const w = (canvas.width = window.innerWidth);
-      const h = (canvas.height = window.innerHeight);
-      const ctx = canvas.getContext('2d');
+// ---------- vegetation ----------
+let nt=0;
+for(let k=0;k<5000&&nt<300;k++){
+  const x=(rng()*2-1)*(B-1.5),z=(rng()*2-1)*(B-1.5),y=H(x,z),p0=(x-z)*S2,t=-(x+z)*S2;
+  if(y<-1.2||y>15||Math.hypot(x,z)<12||terrZone(p0,t,y)||fbm(x*.3,z*.3)<.45)continue;
+  const e=.5,dx=(H(x+e,z)-H(x-e,z))/(2*e),dz=(H(x,z+e)-H(x,z-e))/(2*e),ny=1/Math.hypot(dx,1,dz);
+  if(ny<.55||ny>.93)continue;tree(x,y,z,.7+rng()*.8);nt++
+}
 
-      ctx.fillStyle = '#ede9e0';
-      ctx.fillRect(0, 0, w, h);
 
-      // Subtle orthogonal drafting grid
-      ctx.strokeStyle = 'rgba(130, 120, 108, 0.09)';
-      ctx.lineWidth = 1;
-      const step = 28;
-      ctx.beginPath();
-      for (let x = 0; x < w; x += step) {
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, h);
-      }
-      for (let y = 0; y < h; y += step) {
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-      }
-      ctx.stroke();
+// ---------- detailed Inca citadel ----------
+// Battered trapezoidal stone volume helper
+function incaWallBox(x, y, z, w, h, d, opts = {}) {
+  const b = opts.batter !== undefined ? opts.batter : 0.06;
+  const pal = PAL[opts.pal || 'stone'];
+  const edge = opts.edge || 'med';
+  const courses = opts.courses !== undefined ? opts.courses : 3;
+  const x0 = x, x1 = x + w, z0 = z, z1 = z + d;
+  const tx0 = x + b, tx1 = x + w - b, tz0 = z + b, tz1 = z + d - b;
+  const Y = y + h;
+  // Sides shaded properly
+  qn([x0, y, z1], [x1, y, z1], [tx1, Y, tz1], [tx0, Y, tz1], pal, [0, 0.1, 1]);
+  qn([x1, y, z0], [x0, y, z0], [tx0, Y, tz0], [tx1, Y, tz0], pal, [0, 0.1, -1]);
+  qn([x1, y, z1], [x1, y, z0], [tx1, Y, tz0], [tx1, Y, tz1], pal, [1, 0.1, 0]);
+  qn([x0, y, z0], [x0, y, z1], [tx0, Y, tz1], [tx0, Y, tz0], pal, [-1, 0.1, 0]);
+  if (opts.cap !== false) qn([tx0, Y, tz0], [tx0, Y, tz1], [tx1, Y, tz1], [tx1, Y, tz0], pal, [0, 1, 0]);
+  const B = [[x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z1]], T = [[tx0,Y,tz0],[tx1,Y,tz0],[tx1,Y,tz1],[tx0,Y,tz1]];
+  for (let i = 0; i < 4; i++) {
+    const j = (i + 1) % 4;
+    ln(B[i], B[j], edge, 0.01);
+    ln(T[i], T[j], edge, 0.01);
+    ln(B[i], T[i], edge, 0.01);
+  }
+  for (let c = 1; c < courses; c++) {
+    const t = c / courses, yy = y + h * t;
+    const cx0 = x0 + b * t, cx1 = x1 - b * t, cz0 = z0 + b * t, cz1 = z1 - b * t;
+    ln([cx0, yy, cz1], [cx1, yy, cz1], 'fine', 0);
+    ln([cx1, yy, cz1], [cx1, yy, cz0], 'fine', 0);
+    ln([cx0, yy, cz0], [cx0, yy, cz1], 'fine', 0);
+    ln([cx1, yy, cz0], [cx0, yy, cz0], 'fine', 0);
+  }
+}
 
-      // Organic rough paper fiber grain
-      const imgData = ctx.getImageData(0, 0, w, h);
-      const data = imgData.data;
-      const localRng = mulberry32(8841);
-      for (let i = 0; i < data.length; i += 4) {
-        const grain = (localRng() - 0.5) * 18;
-        data[i] = Math.min(255, Math.max(0, data[i] + grain));
-        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + grain));
-        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + grain));
-      }
-      ctx.putImageData(imgData, 0, 0);
+// Recessed trapezoidal opening on a wall face (face: 'z+', 'z-', 'x+', 'x-')
+function trapOpening(cx, y, cz, bw, tw, h, face, lintel = true) {
+  const rec = 0.025;
+  let b0, b1, t0, t1, l0, l1;
+  if (face === 'z+' || face === 'z-') {
+    const s = face === 'z+' ? 1 : -1;
+    const zf = cz + s * rec;
+    b0 = [cx - bw/2, y, zf]; b1 = [cx + bw/2, y, zf];
+    t0 = [cx - tw/2, y + h, zf]; t1 = [cx + tw/2, y + h, zf];
+    quad(b0, b1, t1, t0, 0x3b322b);
+    l0 = [cx - tw*0.72, y + h + 0.06, zf + s*0.01]; l1 = [cx + tw*0.72, y + h + 0.06, zf + s*0.01];
+  } else {
+    const s = face === 'x+' ? 1 : -1;
+    const xf = cx + s * rec;
+    b0 = [xf, y, cz - bw/2]; b1 = [xf, y, cz + bw/2];
+    t0 = [xf, y + h, cz - tw/2]; t1 = [xf, y + h, cz + tw/2];
+    quad(b0, b1, t1, t0, 0x3b322b);
+    l0 = [xf + s*0.01, y + h + 0.06, cz - tw*0.72]; l1 = [xf + s*0.01, y + h + 0.06, cz + tw*0.72];
+  }
+  ln(b0, t0, 'med', 0); ln(b1, t1, 'med', 0); ln(t0, t1, 'med', 0);
+  if (lintel) ln(l0, l1, 'bold', 0.005);
+}
+
+// Detailed Inca Kancha hall: battered ashlar walls, trapezoidal door & side windows, gabled mud-mortar ends, layered ichu thatch roof
+function kanchaHouse(x, z, w, d, h, rh, orientZ, y = P, opts = {}) {
+  const b = 0.065;
+  incaWallBox(x, y, z, w, h, d, { batter: b, pal: 'stone', edge: 'med', courses: 4, cap: false });
+  const cx = x + w / 2, cz = z + d / 2;
+  const frontFace = opts.doorFace || (orientZ ? 'x+' : 'z+');
+  if (frontFace === 'z+' || frontFace === 'z-') {
+    const fz = frontFace === 'z+' ? z + d - b*0.4 : z + b*0.4;
+    const doors = opts.doors || 1;
+    for (let i = 0; i < doors; i++) {
+      const dx = doors === 1 ? cx : x + w * (0.30 + 0.40 * i);
+      trapOpening(dx, y + 0.02, fz, 0.34, 0.24, h * 0.68, frontFace);
     }
-    generatePaperOverlay();
-
-    // =========================================================================
-    // 2. THREE.JS SCENE & AXONOMETRIC ORTHOGRAPHIC CAMERA
-    // =========================================================================
-    const container = document.getElementById('canvas-container');
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0xe5e0d6, 1);
-    container.insertBefore(renderer.domElement, document.getElementById('paper-overlay'));
-
-    const scene = new THREE.Scene();
-
-    const frustumSize = 72; // SUBJECT FIT: peak apex to terrace toe spans ~88% of frame height
-    const aspect = window.innerWidth / window.innerHeight;
-    const camera = new THREE.OrthographicCamera(
-      (-frustumSize * aspect) / 2,
-      (frustumSize * aspect) / 2,
-      frustumSize / 2,
-      -frustumSize / 2,
-      -200,
-      300
-    );
-
-    const targetY = 15.9; // SUBJECT FIT: balances Huayna's apex (y=33) against the terrace toe
-    const camDist = 74;
-    const defaultCamPos = new THREE.Vector3(camDist, targetY + camDist * 0.78, camDist);
-    camera.position.copy(defaultCamPos);
-    camera.lookAt(-5, targetY, 0);
-
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.target.set(-5, targetY, 0);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.update();
-
-    window.addEventListener('dblclick', () => {
-      camera.position.copy(defaultCamPos);
-      controls.target.set(-5, targetY, 0);
-      camera.zoom = 1;
-      camera.updateProjectionMatrix();
-      controls.update();
-    });
-
-    // =========================================================================
-    // 3. COLOR WASH PALETTE & MULTI-WEIGHT INK ENGINE
-    // =========================================================================
-    const PALETTE = {
-      cream:      { lit: 0xefe9de, mid: 0xe4ddd1, shade: 0xd2c9b9, top: 0xf4f0e6, bot: 0x8f8274 },
-      stone:      { lit: 0xe3dcd0, mid: 0xd6cec0, shade: 0xc2b9a9, top: 0xeae4da, bot: 0x807467 },
-      coreWall:   { lit: 0xc9bfb0, mid: 0xb5aa9a, shade: 0x998e7e, top: 0xd6cec0, bot: 0x695e53 },
-      terracotta: { lit: 0xc27a63, mid: 0xb06851, shade: 0x94513d, top: 0xd4947e, bot: 0x6b3829 },
-      brickDark:  { lit: 0x9e5b47, mid: 0x8a4c3a, shade: 0x703b2c, top: 0xb36f5b, bot: 0x4f271c },
-      teal:       { lit: 0x94b9bb, mid: 0x82a8aa, shade: 0x6b9092, top: 0xa8c8ca, bot: 0x517072 },
-      tealDeep:   { lit: 0x789fa2, mid: 0x668c8f, shade: 0x527477, top: 0x8eb2b5, bot: 0x3e595b },
-      dark:       { lit: 0x73675e, mid: 0x5e534b, shade: 0x4a4039, top: 0x85786e, bot: 0x332c27 },
-      plaza:      { lit: 0xe8e3d9, mid: 0xdfd9ce, shade: 0xd2ccc0, top: 0xebe6dc, bot: 0xa69e91 },
-      ghost:      { lit: 0xe6e1d7, mid: 0xdfd9ce, shade: 0xd8d2c6, top: 0xebe6dc, bot: 0xc2bbb0 },
-      grass:    { lit: 0xa4a98e, mid: 0x8e9675, shade: 0x758063, top: 0xb3b99f, bot: 0x5e674f },
-      grassDry: { lit: 0xaca88c, mid: 0x9b967b, shade: 0x827d67, top: 0xbcb79d, bot: 0x66624e },
-      granite:  { lit: 0xbfb9ad, mid: 0xaca59a, shade: 0x8f887b, top: 0xcdc8be, bot: 0x666055 },
-      thatch:   { lit: 0xc9a86d, mid: 0xb9975a, shade: 0x9c7c44, top: 0xd8bc82, bot: 0x77603a },
-      peak:     { lit: 0xe3ded2, mid: 0xdbd5c8, shade: 0xcfc9ba, top: 0xeae6de, bot: 0xb5b0a2 }
-    };
-
-    const washPositions = [];
-    const washColors = [];
-
-    const inkLayers = {
-      bold:   [], // Primary structural silhouettes, arch rings, column shafts
-      medium: [], // Secondary architectural edges, capitals, stone courses
-      fine:   [], // Directional shadow hatching, roof & stone texture
-      rust:   [], // Terracotta course hatching & ornamental inlays
-      teal:   [], // Intarsia & window reflection strokes
-      faint:  []  // Plumb-line diagram & site grid context
-    };
-
-    const tempColor = new THREE.Color();
-    // Light vector from upper front-left (matches axonometric sun convention)
-    const lightDir = new THREE.Vector3(-0.35, 0.25, 0.90).normalize();
-
-    function computeDirectionalHex(palName, nx, ny, nz) {
-      const pal = PALETTE[palName] || PALETTE.cream;
-      if (ny > 0.65) return pal.top;
-      if (ny < -0.65) return pal.bot;
-      const dot = nx * lightDir.x + ny * lightDir.y + nz * lightDir.z;
-      if (dot > 0.28) return pal.lit;
-      if (dot > -0.18) return pal.mid;
-      return pal.shade;
+    if (opts.windows) {
+      trapOpening(x + b*0.4, y + h*0.36, cz, 0.22, 0.16, 0.28, 'x-');
+      trapOpening(x + w - b*0.4, y + h*0.36, cz, 0.22, 0.16, 0.28, 'x+');
     }
-
-    function pushQuadWorld(p0, p1, p2, p3, hexColor, shadeShift = 0) {
-      tempColor.setHex(hexColor);
-      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
-      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
-      washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
-      washPositions.push(p0[0], p0[1], p0[2], p2[0], p2[1], p2[2], p3[0], p3[1], p3[2]);
-      for (let i = 0; i < 6; i++) washColors.push(r, g, b);
+  } else {
+    const fx = frontFace === 'x+' ? x + w - b*0.4 : x + b*0.4;
+    const doors = opts.doors || 1;
+    for (let i = 0; i < doors; i++) {
+      const dz = doors === 1 ? cz : z + d * (0.30 + 0.40 * i);
+      trapOpening(fx, y + 0.02, dz, 0.34, 0.24, h * 0.68, frontFace);
     }
+  }
+  if (opts.open) return; // roofless ruin (wayrana / ceremonial enclosure)
 
-    function pushTriWorld(p0, p1, p2, hexColor, shadeShift = 0) {
-      tempColor.setHex(hexColor);
-      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
-      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
-      washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
-      for (let i = 0; i < 3; i++) washColors.push(r, g, b);
+  const Y = y + h, ov = 0.16;
+  const a = (orientZ ? w - 2*b : d - 2*b) / 2 + ov;
+  const l = (orientZ ? d - 2*b : w - 2*b) / 2 + ov;
+  const m = orientZ ? (u, yy, v) => [cx + u, yy, cz + v] : (u, yy, v) => [cx + v, yy, cz + u];
+  const n = orientZ ? (px, py, pz) => [px, py, pz] : (px, py, pz) => [pz, py, px];
+
+  // Masonry end-gables (pignon walls) slightly inset inside overhang
+  const gi = l - ov + 0.02, ga = a - ov;
+  tn(m(-ga, Y, gi), m(ga, Y, gi), m(0, Y + rh - 0.04, gi), PAL.stone, n(0, 0, 1));
+  tn(m(ga, Y, -gi), m(-ga, Y, -gi), m(0, Y + rh - 0.04, -gi), PAL.stone, n(0, 0, -1));
+  ln(m(-ga, Y, gi), m(0, Y + rh - 0.04, gi), 'med', 0); ln(m(ga, Y, gi), m(0, Y + rh - 0.04, gi), 'med', 0);
+  ln(m(-ga, Y, -gi), m(0, Y + rh - 0.04, -gi), 'med', 0); ln(m(ga, Y, -gi), m(0, Y + rh - 0.04, -gi), 'med', 0);
+
+  // Thick thatched roof slopes + eaves
+  const T0 = m(0, Y + rh, -l), T1 = m(0, Y + rh, l);
+  const E00 = m(-a, Y - 0.04, -l), E01 = m(-a, Y - 0.04, l);
+  const E10 = m(a, Y - 0.04, -l), E11 = m(a, Y - 0.04, l);
+  qn(E00, E01, T1, T0, PAL.thatch, n(-0.7, 0.7, 0));
+  qn(E11, E10, T0, T1, PAL.thatch, n(0.7, 0.7, 0));
+  ln(T0, T1, 'bold', 0.015);
+  ln(E00, E01, 'med', 0.01); ln(E10, E11, 'med', 0.01);
+  ln(E01, T1, 'med', 0.01); ln(E11, T1, 'med', 0.01);
+  ln(E00, T0, 'med', 0.01); ln(E10, T0, 'med', 0.01);
+  // Horizontal thatch courses & bundle striations
+  for (let i = 1; i <= 7; i++) {
+    const v = -l + 2 * l * i / 8;
+    ln(m(-a, Y - 0.04, v), m(0, Y + rh, v), 'fine', 0);
+    ln(m(a, Y - 0.04, v), m(0, Y + rh, v), 'fine', 0);
+  }
+  for (let row of [0.35, 0.68]) {
+    const ry = Y - 0.04 + (rh + 0.04) * row, rx = a * (1 - row);
+    ln(m(-rx, ry, -l), m(-rx, ry, l), 'fine', 0);
+    ln(m(rx, ry, -l), m(rx, ry, l), 'fine', 0);
+  }
+}
+
+function stoneStair(x, y0, z, w, d, h, dir, steps = 5) {
+  for (let i = 0; i < steps; i++) {
+    const t = i / steps, sh = h / steps;
+    if (dir === 'x+') box(x + w * t, y0 + h * t, z, w / steps + 0.02, sh, d, 'stone', 'fine');
+    else if (dir === 'x-') box(x + w * (1 - t) - w/steps, y0 + h * t, z, w / steps + 0.02, sh, d, 'stone', 'fine');
+    else if (dir === 'z+') box(x, y0 + h * t, z + d * t, w, sh, d / steps + 0.02, 'stone', 'fine');
+    else box(x, y0 + h * t, z + d * (1 - t) - d/steps, w, sh, d / steps + 0.02, 'stone', 'fine');
+  }
+}
+
+// 1. GREAT PLAZA: sunken multi-terrace greensward with low perimeter dry-stone kerbs & ceremonial stairs
+box(-2.8, P, -3.5, 5.6, 0.08, 6.9, 'stone', 'fine');
+box(-2.45, P + 0.08, -3.15, 4.9, 0.08, 6.2, 'lawn', 'fine');
+box(-2.1, P + 0.16, -2.8, 4.2, 0.06, 5.5, 'lawn', 'fine');
+// Cross-plaza ceremonial sunken walkway and mid retaining step
+box(-2.45, P + 0.15, -0.35, 4.9, 0.07, 0.55, 'stone', 'fine');
+stoneStair(-0.45, P + 0.08, 2.85, 0.9, 0.4, 0.14, 'z-', 3);
+stoneStair(-0.45, P + 0.08, -3.15, 0.9, 0.4, 0.14, 'z+', 3);
+
+// 2. TEMPLE OF THE SUN (TORREON) — Horseshoe curved ashlar drum on natural sculpted outcrop plinth
+{
+  const cx = -5.4, cz = -5.4;
+  // Stepped outcrop bedrock foundation + Princess Palace retaining sub-court
+  incaWallBox(cx - 2.1, P, cz - 2.0, 4.2, 0.48, 4.1, { batter: 0.12, pal: 'rock', edge: 'med', courses: 2 });
+  incaWallBox(cx - 1.65, P + 0.48, cz - 1.6, 3.3, 0.36, 3.25, { batter: 0.08, pal: 'rock', edge: 'med', courses: 2 });
+  // Curved apse wall (240 deg horseshoe) + flat rectilinear south closing wall
+  const rOut = 1.42, rIn = 1.04, yb = P + 0.84, yh = 1.55, segs = 14;
+  const aStart = -Math.PI * 0.15, aEnd = Math.PI * 1.25;
+  for (let i = 0; i < segs; i++) {
+    const a0 = aStart + (aEnd - aStart) * i / segs;
+    const a1 = aStart + (aEnd - aStart) * (i + 1) / segs;
+    const am = (a0 + a1) / 2;
+    const bat = 0.05;
+    const ox0 = cx + Math.cos(a0) * rOut, oz0 = cz - Math.sin(a0) * rOut;
+    const ox1 = cx + Math.cos(a1) * rOut, oz1 = cz - Math.sin(a1) * rOut;
+    const tx0 = cx + Math.cos(a0) * (rOut - bat), tz0 = cz - Math.sin(a0) * (rOut - bat);
+    const tx1 = cx + Math.cos(a1) * (rOut - bat), tz1 = cz - Math.sin(a1) * (rOut - bat);
+    const ix0 = cx + Math.cos(a0) * rIn, iz0 = cz - Math.sin(a0) * rIn;
+    const ix1 = cx + Math.cos(a1) * rIn, iz1 = cz - Math.sin(a1) * rIn;
+    qn([ox0, yb, oz0], [ox1, yb, oz1], [tx1, yb + yh, tz1], [tx0, yb + yh, tz0], PAL.stone, [Math.cos(am), 0.1, -Math.sin(am)]);
+    qn([ix1, yb, iz1], [ix0, yb, iz0], [ix0, yb + yh, iz0], [ix1, yb + yh, iz1], PAL.stone, [-Math.cos(am), 0, Math.sin(am)]);
+    qn([ix0, yb + yh, iz0], [tx0, yb + yh, tz0], [tx1, yb + yh, tz1], [ix1, yb + yh, iz1], PAL.stone, [0, 1, 0]);
+    ln([tx0, yb + yh, tz0], [tx1, yb + yh, tz1], 'bold', 0.008);
+    ln([ix0, yb + yh, iz0], [ix1, yb + yh, iz1], 'med', 0);
+    ln([ox0, yb, oz0], [ox1, yb, oz1], 'med', 0);
+    for (let c = 1; c < 5; c++) {
+      const yy = yb + yh * c / 5, rr = rOut - bat * c / 5;
+      ln([cx + Math.cos(a0)*rr, yy, cz - Math.sin(a0)*rr], [cx + Math.cos(a1)*rr, yy, cz - Math.sin(a1)*rr], 'fine', 0);
     }
-
-    function addLineWorld(p1, p2, layer = 'medium', overshoot = 0.022) {
-      const x1 = p1[0], y1 = p1[1], z1 = p1[2];
-      const x2 = p2[0], y2 = p2[1], z2 = p2[2];
-      const dx = x2 - x1, dy = y2 - y1, dz = z2 - z1;
-      const len = Math.hypot(dx, dy, dz);
-      if (len < 1e-5) return;
-      const ux = (dx / len) * overshoot;
-      const uy = (dy / len) * overshoot;
-      const uz = (dz / len) * overshoot;
-
-      const j = layer === 'faint' ? 0 : 0.007;
-      const ax = x1 - ux + (rng() - 0.5) * j;
-      const ay = y1 - uy + (rng() - 0.5) * j;
-      const az = z1 - uz + (rng() - 0.5) * j;
-      const bx = x2 + ux + (rng() - 0.5) * j;
-      const by = y2 + uy + (rng() - 0.5) * j;
-      const bz = z2 + uz + (rng() - 0.5) * j;
-
-      const target = inkLayers[layer] || inkLayers.medium;
-      target.push(ax, ay, az, bx, by, bz);
-
-      if (layer === 'bold') {
-        const off = 0.017;
-        target.push(ax + off, ay, az - off, bx + off, by, bz - off);
-        target.push(ax - off * 0.7, ay + off * 0.7, az + off * 0.7, bx - off * 0.7, by + off * 0.7, bz + off * 0.7);
-      }
+    // Two solar solstice windows cut as dark recesses on East / South-East arc
+    if (i === 3 || i === 7) {
+      const wx = cx + Math.cos(am) * (rOut + 0.015), wz = cz - Math.sin(am) * (rOut + 0.015);
+      quad([wx - Math.sin(am)*0.16, yb + 0.45, wz - Math.cos(am)*0.16],
+           [wx + Math.sin(am)*0.16, yb + 0.45, wz + Math.cos(am)*0.16],
+           [wx + Math.sin(am)*0.11, yb + 1.05, wz + Math.cos(am)*0.11],
+           [wx - Math.sin(am)*0.11, yb + 1.05, wz - Math.cos(am)*0.11], 0x382f28);
     }
+  }
+  // Royal Tomb carved altar stone inside the curve
+  box(cx - 0.55, yb, cz - 0.45, 0.9, 0.35, 0.85, 'rock', 'med', 2);
+  // Flanking Princess Palace lower rooms
+  kanchaHouse(cx - 2.0, cz + 1.1, 1.5, 1.35, 0.95, 0.6, 0, P + 0.48, { doorFace: 'z+' });
+  stoneStair(cx + 0.5, P, cz + 1.7, 0.7, 0.85, 0.84, 'z-', 4);
+}
 
-    // =========================================================================
-    // SUBJECT TRANSFORM — every builder emits points through subjectPoint().
-    // Identity for an upright subject. Pisa overrides it with a curved leaning
-    // spine; keep the hook so warped subjects stay possible. Builders that work
-    // in plain world space (addWorldBox, dashed lines, shrubs) bypass it.
-    // =========================================================================
-    function subjectPoint(x, y, z) { return [x, y, z]; }
+// 3. SACRED PLAZA CLUSTER (West Ridge): Principal Temple & Temple of the Three Windows
+{
+  const px = -5.6, pz = -2.2, py = P + 0.25;
+  incaWallBox(px - 1.9, P, pz - 1.5, 4.1, 0.25, 3.2, { batter: 0.06, pal: 'rock', edge: 'med', courses: 2 });
+  // Principal Temple (three high ashlar walls, open south-east front, stepped altar stone)
+  incaWallBox(px - 1.65, py, pz - 1.25, 2.2, 1.35, 0.28, { batter: 0.04, courses: 5 });
+  incaWallBox(px - 1.65, py, pz - 1.25, 0.28, 1.35, 1.55, { batter: 0.04, courses: 5 });
+  incaWallBox(px + 0.27, py, pz - 1.25, 0.28, 1.35, 1.55, { batter: 0.04, courses: 5 });
+  box(px - 1.2, py, pz - 0.92, 1.3, 0.38, 0.45, 'stone', 'med', 2);
+  // Temple of the Three Windows overlooking the plaza
+  incaWallBox(px + 0.75, py, pz - 1.0, 0.32, 1.38, 2.35, { batter: 0.04, courses: 5 });
+  for (let k = -1; k <= 1; k++) {
+    trapOpening(px + 1.07, py + 0.42, pz + 0.18 + k * 0.68, 0.34, 0.25, 0.56, 'x+');
+  }
+}
 
+// 4. INTIHUATANA PYRAMID MOUND & ASTRONOMICAL GNOMON (North-East Ridge)
+{
+  const ix = 5.7, iz = -5.8;
+  incaWallBox(ix - 2.1, P, iz - 2.0, 4.2, 0.55, 4.0, { batter: 0.14, pal: 'rock', edge: 'med', courses: 2 });
+  incaWallBox(ix - 1.65, P + 0.55, iz - 1.55, 3.3, 0.52, 3.1, { batter: 0.10, pal: 'rock', edge: 'med', courses: 2 });
+  incaWallBox(ix - 1.15, P + 1.07, iz - 1.1, 2.3, 0.46, 2.2, { batter: 0.08, pal: 'stone', edge: 'med', courses: 2 });
+  incaWallBox(ix - 0.65, P + 1.53, iz - 0.65, 1.3, 0.28, 1.3, { batter: 0.05, pal: 'stone', edge: 'med', courses: 1 });
+  // Carved monolithic Intihuatana altar & compass pillar
+  box(ix - 0.36, P + 1.81, iz - 0.32, 0.72, 0.22, 0.64, 'stone', 'bold');
+  box(ix - 0.14, P + 2.03, iz - 0.14, 0.28, 0.48, 0.28, 'stone', 'bold');
+  stoneStair(ix - 2.05, P, iz - 0.35, 1.4, 0.75, 1.53, 'x+', 6);
+}
 
-    // =========================================================================
-    // 4. BUILDERS (cylinder / cornice / column, generalised from Pisa)
-    // =========================================================================
-    /**
-     * Builds a cylindrical or polygonal drum/ring between rInner and rOuter, y0 and y1
-     */
-    function addCylinder(y0, y1, rOuter, rInner, segs, palName = 'cream', opts = {}) {
-      const dTheta = (Math.PI * 2) / segs;
-      const startAngle = opts.angleOffset || 0;
-      const edgeLayer = opts.edgeLayer || 'medium';
+// 5. SACRED ROCK & FLANKING WAYRANA PAVILIONS (North Saddle)
+{
+  const p = PAL.rock, a = -1.9, b = 1.9, f = -5.5, r = -7.1;
+  incaWallBox(a - 0.3, P, r - 0.2, (b - a) + 0.6, 0.28, (f - r) + 0.5, { batter: 0.05, pal: 'stone', courses: 2 });
+  qn([a, P + 0.35, f], [b, P + 0.35, f], [b, P + 1.85, r], [a, P + 1.85, r], p, [0, 0.8, 0.5]);
+  qn([a, P + 0.28, f], [b, P + 0.28, f], [b, P + 0.35, f], [a, P + 0.35, f], p, [0, 0, 1]);
+  qn([b, P + 0.28, f], [b, P + 0.28, r], [b, P + 1.85, r], [b, P + 0.35, f], p, [1, 0, 0]);
+  qn([a, P + 0.28, f], [a, P + 0.35, f], [a, P + 1.85, r], [a, P + 0.28, r], p, [-1, 0, 0]);
+  ln([a, P + 0.35, f], [b, P + 0.35, f], 'bold'); ln([a, P + 1.85, r], [b, P + 1.85, r], 'bold');
+  ln([a, P + 0.35, f], [a, P + 1.85, r], 'bold'); ln([b, P + 0.35, f], [b, P + 1.85, r], 'bold');
+  kanchaHouse(-3.7, -5.6, 1.45, 1.35, 0.92, 0.68, 0, P, { doors: 2, doorFace: 'z+' });
+  kanchaHouse(2.3, -5.6, 1.45, 1.35, 0.92, 0.68, 0, P, { doors: 2, doorFace: 'z+' });
+}
 
-      for (let i = 0; i < segs; i++) {
-        const a0 = startAngle + i * dTheta;
-        const a1 = startAngle + (i + 1) * dTheta;
-        const aMid = (a0 + a1) * 0.5;
+// 6. UPPER & LOWER KANCHA COMPOUNDS (Industrial & Noble Quarters)
+const KANCHAS = [
+  // West Upper Compound around Temple of the Sun
+  [-7.7, -0.3, 1.85, 1.55, 0.96, 0.72, 1, P, { doorFace: 'x+', doors: 2, windows: true }],
+  [-7.7,  1.65, 1.85, 1.65, 0.96, 0.74, 1, P, { doorFace: 'x+', doors: 2 }],
+  [-7.7,  3.75, 1.75, 1.45, 0.92, 0.70, 0, P, { doorFace: 'z+' }],
+  [-5.45,  0.4, 1.60, 1.65, 0.95, 0.72, 1, P, { doorFace: 'x+', doors: 2 }],
+  [-5.45,  2.45, 1.60, 1.60, 0.95, 0.72, 1, P, { doorFace: 'x-' }],
+  [-5.25,  4.45, 1.75, 1.40, 0.88, 0.66, 0, P, { doorFace: 'z+' }],
+  // East Lower Kanchas (Temple of the Condor & Artisans Quarter)
+  [3.45, -2.5, 1.80, 1.65, 0.98, 0.75, 1, P, { doorFace: 'x-', doors: 2, windows: true }],
+  [3.45, -0.35, 1.80, 1.60, 0.95, 0.72, 1, P, { doorFace: 'x-', doors: 2 }],
+  [3.45,  1.75, 1.80, 1.65, 0.95, 0.72, 1, P, { doorFace: 'x-' }],
+  [3.45,  3.85, 1.75, 1.45, 0.90, 0.68, 0, P, { doorFace: 'z+' }],
+  [5.75, -1.7, 1.75, 1.65, 0.94, 0.70, 0, P, { doorFace: 'z+' }],
+  [5.75,  0.5, 1.75, 1.70, 0.94, 0.72, 1, P, { doorFace: 'x-', doors: 2 }],
+  [5.75,  2.7, 1.75, 1.65, 0.92, 0.70, 0, P, { doorFace: 'z-', windows: true }],
+  // Southern Terrace Houses flanking main gateway
+  [-2.6, 4.75, 1.95, 1.45, 0.95, 0.72, 0, P, { doorFace: 'z+', doors: 2 }],
+  [ 0.3, 4.75, 1.95, 1.45, 0.95, 0.72, 0, P, { doorFace: 'z+', doors: 2 }]
+];
+KANCHAS.forEach(([x, z, w, d, h, rh, rz, yy, o]) => kanchaHouse(x, z, w, d, h, rh, rz, yy, o));
 
-        const c0 = Math.cos(a0), s0 = Math.sin(a0);
-        const c1 = Math.cos(a1), s1 = Math.sin(a1);
-        const nx = Math.cos(aMid), nz = Math.sin(aMid);
+// Courtyard compound walls separating Kancha alleys
+incaWallBox(-3.2, P, 3.6, 6.4, 0.65, 0.24, { batter: 0.03, courses: 2 });
+incaWallBox(2.9, P, -3.2, 0.24, 0.58, 6.8, { batter: 0.03, courses: 2 });
+incaWallBox(-3.1, P, -3.2, 0.24, 0.58, 6.8, { batter: 0.03, courses: 2 });
 
-        // Outer wall quad
-        const p00 = subjectPoint(c0 * rOuter, y0, s0 * rOuter);
-        const p10 = subjectPoint(c1 * rOuter, y0, s1 * rOuter);
-        const p11 = subjectPoint(c1 * rOuter, y1, s1 * rOuter);
-        const p01 = subjectPoint(c0 * rOuter, y1, s0 * rOuter);
+// 7. CASA DEL GUARDIAN (South-West Upper Terrace) & HUAYNA PICCHU SUMMIT SHRINE
+{
+  let hm = -9;
+  [[-9.2, 3.8], [-7.6, 3.8], [-9.2, 5.2], [-7.6, 5.2]].forEach(c => hm = Math.max(hm, H(...c)));
+  incaWallBox(-9.35, hm - 1.5, 3.65, 2.0, 0.45, 1.7, { batter: 0.08, pal: 'rock', courses: 2 });
+  kanchaHouse(-9.2, 3.8, 1.65, 1.4, 1.0, 0.76, 0, hm - 1.05, { doorFace: 'z+', doors: 2 });
+}
+{
+  const hy = H(-17, -17);
+  incaWallBox(-17.85, hy - 0.35, -17.85, 1.7, 0.55, 1.7, { batter: 0.08, pal: 'rock', edge: 'bold', courses: 2 });
+  incaWallBox(-17.5, hy + 0.2, -17.5, 1.0, 0.45, 1.0, { batter: 0.05, pal: 'stone', edge: 'med', courses: 2 });
+}
 
-        const colOuter = computeDirectionalHex(palName, nx, 0, nz);
-        const shift = (rng() - 0.5) * 0.018;
-        pushQuadWorld(p00, p10, p11, p01, colOuter, shift);
+// Llamas grazing on the Great Plaza
+llama(-1.6, P + 0.22, -1.0, 'cream', 0);
+llama( 1.1, P + 0.22,  1.3, 'brown', 1);
+llama(-0.2, P + 0.22, -2.4, 'dark',  0);
+llama( 0.9, P + 0.22, -0.3, 'cream', 1);
 
-        // Top & bottom perimeter ink rings
-        addLineWorld(p00, p10, edgeLayer, 0.015);
-        addLineWorld(p01, p11, edgeLayer, 0.015);
+// trails
+function trail(pts){for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1],n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/.3);
+  for(let j=0;j<n;j+=2){const u=j/n,v=Math.min(1,(j+.6)/n),x0=a[0]+(b[0]-a[0])*u,z0=a[1]+(b[1]-a[1])*u,x1=a[0]+(b[0]-a[0])*v,z1=a[1]+(b[1]-a[1])*v;ink.rust.push(x0,H(x0,z0)+.09,z0,x1,H(x1,z1)+.09,z1)}}}
+{const q=[];for(let t=-9;t>-27;t-=1){const p0=-(2.8*Math.sin(.22*t+1))+Math.sin(t*1.3)*.5;q.push([(p0-t)*S2,-(p0+t)*S2])}trail(q)}
+trail([[-6,-6],[-9,-8],[-10.5,-11],[-9,-12.5],[-12,-13.5],[-14.5,-12.3],[-14,-15],[-16.2,-16.3],[-17,-17]]);
+// drafting construction rays in the sky
+for(let i=0;i<14;i++)ink.faint.push(-60,52,-18,-18,10+i*2.1,-6-i*.4);
 
-        // Silhouette and periodic vertical joint lines
-        const viewDot = nx * 0.707 + nz * 0.707;
-        const CrossSilhouette = Math.abs(nx * 0.707 - nz * 0.707);
-        if (CrossSilhouette > 0.96) {
-          addLineWorld(p00, p01, 'bold', 0.02);
-        } else if (opts.verticalJoints && i % opts.verticalJoints === 0) {
-          addLineWorld(p00, p01, 'fine', 0.01);
-        }
-
-        // Directional right-side shadow hatching on cylindrical surfaces
-        const lightDot = nx * lightDir.x + nz * lightDir.z;
-        if (opts.shadeHatch !== false && lightDot < -0.12 && viewDot > -0.35) {
-          const hatchCount = lightDot < -0.5 ? 3 : 2;
-          for (let h = 1; h <= hatchCount; h++) {
-            const t = h / (hatchCount + 1);
-            const ha = a0 + (a1 - a0) * t;
-            const hc = Math.cos(ha) * (rOuter + 0.015);
-            const hs = Math.sin(ha) * (rOuter + 0.015);
-            addLineWorld(
-              subjectPoint(hc, y0 + 0.04, hs),
-              subjectPoint(hc, y1 - 0.04, hs),
-              opts.hatchLayer || 'fine',
-              0
-            );
-          }
-        }
-
-        // Optional horizontal stone/brick courses
-        if (opts.courses) {
-          const cLayer = palName === 'terracotta' || palName === 'brickDark' ? 'rust' : 'fine';
-          for (let c = 1; c < opts.courses; c++) {
-            const cy = y0 + ((y1 - y0) * c) / opts.courses;
-            addLineWorld(
-              subjectPoint(c0 * (rOuter + 0.012), cy, s0 * (rOuter + 0.012)),
-              subjectPoint(c1 * (rOuter + 0.012), cy, s1 * (rOuter + 0.012)),
-              cLayer,
-              0.01
-            );
-          }
-        }
-
-        // Top and bottom caps (and inner wall if hollow)
-        if (rInner > 0) {
-          const q00 = subjectPoint(c0 * rInner, y0, s0 * rInner);
-          const q10 = subjectPoint(c1 * rInner, y0, s1 * rInner);
-          const q11 = subjectPoint(c1 * rInner, y1, s1 * rInner);
-          const q01 = subjectPoint(c0 * rInner, y1, s0 * rInner);
-
-          // Inner wall
-          const colInner = computeDirectionalHex(palName, -nx, 0, -nz);
-          pushQuadWorld(q10, q00, q01, q11, colInner, -0.04);
-          // Top annular ring
-          pushQuadWorld(p01, p11, q11, q01, computeDirectionalHex(palName, 0, 1, 0), shift);
-          // Bottom annular soffit
-          pushQuadWorld(q00, q10, p10, p00, computeDirectionalHex(palName, 0, -1, 0), shift);
-
-          if (opts.innerEdges) {
-            addLineWorld(q01, q11, 'medium', 0.01);
-            addLineWorld(q00, q10, 'medium', 0.01);
-          }
-        } else {
-          const centerTop = subjectPoint(0, y1, 0);
-          const centerBot = subjectPoint(0, y0, 0);
-          pushTriWorld(p01, p11, centerTop, computeDirectionalHex(palName, 0, 1, 0), shift);
-          pushTriWorld(p10, p00, centerBot, computeDirectionalHex(palName, 0, -1, 0), shift);
-        }
-      }
-    }
-    /**
-     * Adds a multi-course Romanesque overhanging circular cornice band (COURSES)
-     */
-    function addCircularCornice(y, h, rBase, segs = 36, opts = {}) {
-      const over = opts.overhang || 0.28;
-      const rInner = opts.rInner || 0;
-      const h1 = h * 0.24;
-      const h2 = h * 0.48;
-      const h3 = h * 0.28;
-
-      // Lower stone astragal ring
-      addCylinder(y, y + h1, rBase + over * 0.35, rInner, segs, 'cream', { edgeLayer: 'medium' });
-      // Middle terracotta polychrome frieze with brick courses
-      addCylinder(y + h1, y + h1 + h2, rBase + over * 0.65, rInner, segs, opts.dark ? 'brickDark' : 'terracotta', {
-        edgeLayer: 'medium',
-        courses: 2,
-        hatchLayer: 'rust'
-      });
-      // Upper overhanging corona slab
-      addCylinder(y + h1 + h2, y + h, rBase + over, rInner, segs, 'cream', {
-        edgeLayer: 'bold'
-      });
-
-      // Radial dentil brackets under the cornice overhang
-      const bracketCount = segs * 2;
-      for (let i = 0; i < bracketCount; i++) {
-        const ang = (i * Math.PI * 2) / bracketCount;
-        const c = Math.cos(ang), s = Math.sin(ang);
-        addLineWorld(
-          subjectPoint(c * rBase, y + h1, s * rBase),
-          subjectPoint(c * (rBase + over * 0.92), y + h1 + h2, s * (rBase + over * 0.92)),
-          'medium',
-          0
-        );
-      }
-    }
-    /**
-     * Adds a classical Romanesque column with base plinth, fluted shaft, and capital
-     */
-    function addColumn(angle, radius, y0, y1, colRadius = 0.22, opts = {}) {
-      const cx = Math.cos(angle) * radius;
-      const cz = Math.sin(angle) * radius;
-      const h = y1 - y0;
-      const baseH = Math.min(0.42, h * 0.12);
-      const capH = Math.min(0.52, h * 0.15);
-      const shaftY0 = y0 + baseH;
-      const shaftY1 = y1 - capH;
-
-      // Helper for small local prism around (cx, cz) aligned radially
-      function addLocalPrism(py0, py1, halfW, halfD, palName, lyr = 'medium') {
-        const uX = Math.cos(angle), uZ = Math.sin(angle); // Radial outward
-        const vX = -uZ, vZ = uX;                          // Tangential
-
-        const corners = [
-          [cx + uX * halfD - vX * halfW, cz + uZ * halfD - vZ * halfW],
-          [cx + uX * halfD + vX * halfW, cz + uZ * halfD + vZ * halfW],
-          [cx - uX * halfD + vX * halfW, cz - uZ * halfD + vZ * halfW],
-          [cx - uX * halfD - vX * halfW, cz - uZ * halfD - vZ * halfW]
-        ];
-        const normals = [
-          [uX, uZ],
-          [vX, vZ],
-          [-uX, -uZ],
-          [-vX, -vZ]
-        ];
-
-        const botPts = corners.map(c => subjectPoint(c[0], py0, c[1]));
-        const topPts = corners.map(c => subjectPoint(c[0], py1, c[1]));
-
-        for (let f = 0; f < 4; f++) {
-          const nf = (f + 1) % 4;
-          const col = computeDirectionalHex(palName, normals[f][0], 0, normals[f][1]);
-          pushQuadWorld(botPts[f], botPts[nf], topPts[nf], topPts[f], col, 0);
-          addLineWorld(botPts[f], botPts[nf], lyr, 0.015);
-          addLineWorld(topPts[f], topPts[nf], lyr, 0.015);
-          addLineWorld(botPts[f], topPts[f], lyr, 0.015);
-        }
-        pushQuadWorld(topPts[0], topPts[1], topPts[2], topPts[3], PALETTE[palName].top, 0);
-        pushQuadWorld(botPts[3], botPts[2], botPts[1], botPts[0], PALETTE[palName].bot, 0);
-      }
-
-      // 1. Moulded column base pedestal
-      addLocalPrism(y0, y0 + baseH * 0.55, colRadius * 1.45, colRadius * 1.45, 'stone', 'medium');
-      addLocalPrism(y0 + baseH * 0.55, shaftY0, colRadius * 1.2, colRadius * 1.2, 'terracotta', 'medium');
-
-      // 2. Octagonal/cylindrical column shaft with vertical ink fluting
-      const shaftSegs = 6;
-      for (let s = 0; s < shaftSegs; s++) {
-        const a0 = angle + (s * Math.PI * 2) / shaftSegs;
-        const a1 = angle + ((s + 1) * Math.PI * 2) / shaftSegs;
-        const nx = Math.cos((a0 + a1) * 0.5), nz = Math.sin((a0 + a1) * 0.5);
-
-        const p00 = subjectPoint(cx + Math.cos(a0) * colRadius, shaftY0, cz + Math.sin(a0) * colRadius);
-        const p10 = subjectPoint(cx + Math.cos(a1) * colRadius, shaftY0, cz + Math.sin(a1) * colRadius);
-        const p11 = subjectPoint(cx + Math.cos(a1) * colRadius, shaftY1, cz + Math.sin(a1) * colRadius);
-        const p01 = subjectPoint(cx + Math.cos(a0) * colRadius, shaftY1, cz + Math.sin(a0) * colRadius);
-
-        pushQuadWorld(p00, p10, p11, p01, computeDirectionalHex(opts.shaftPalette || 'cream', nx, 0, nz), 0.02);
-        addLineWorld(p00, p01, s % 2 === 0 ? 'bold' : 'fine', 0.01);
-      }
-
-      // 3. Corinthian bell capital & terracotta/cream abacus block
-      addLocalPrism(shaftY1, shaftY1 + capH * 0.58, colRadius * 1.32, colRadius * 1.32, 'cream', 'medium');
-      addLocalPrism(shaftY1 + capH * 0.58, y1, colRadius * 1.58, colRadius * 1.58, 'terracotta', 'bold');
-    }
-    // =========================================================================
-    // 5. SITE FURNITURE HELPERS
-    // =========================================================================
-    function addWorldBox(x, y, z, w, h, d, palName = 'plaza', lyr = 'bold') {
-      const pal = PALETTE[palName] || PALETTE.plaza;
-      const x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
-      const p000 = [x0, y0, z0], p100 = [x1, y0, z0], p110 = [x1, y1, z0], p010 = [x0, y1, z0];
-      const p001 = [x0, y0, z1], p101 = [x1, y0, z1], p111 = [x1, y1, z1], p011 = [x0, y1, z1];
-
-      pushQuadWorld(p001, p101, p111, p011, pal.lit, 0);
-      pushQuadWorld(p101, p100, p110, p111, pal.shade, 0);
-      pushQuadWorld(p011, p111, p110, p010, pal.top, 0);
-      pushQuadWorld(p000, p100, p101, p001, pal.bot, 0);
-      pushQuadWorld(p100, p000, p010, p110, pal.shade, 0);
-      pushQuadWorld(p000, p001, p011, p010, pal.mid, 0);
-
-      const edges = [
-        [p000, p100], [p100, p101], [p101, p001], [p001, p000],
-        [p010, p110], [p110, p111], [p111, p011], [p011, p010],
-        [p000, p010], [p100, p110], [p101, p111], [p001, p011]
-      ];
-      edges.forEach(e => addLineWorld(e[0], e[1], lyr, 0.02));
-    }
-
-    function addDashedLineWorld(p1, p2, dashLen = 0.5, gapLen = 0.4) {
-      const dx = p2[0] - p1[0], dy = p2[1] - p1[1], dz = p2[2] - p1[2];
-      const dist = Math.hypot(dx, dy, dz);
-      const ux = dx / dist, uy = dy / dist, uz = dz / dist;
-      let cur = 0;
-      while (cur < dist) {
-        const end = Math.min(dist, cur + dashLen);
-        addLineWorld(
-          [p1[0] + ux * cur, p1[1] + uy * cur, p1[2] + uz * cur],
-          [p1[0] + ux * end, p1[1] + uy * end, p1[2] + uz * end],
-          'faint',
-          0
-        );
-        cur += dashLen + gapLen;
-      }
-    }
-
-    function addSketchShrub(sx, sz) {
-      const r = 0.24 + rng() * 0.09;
-      const h = 0.35 + rng() * 0.12;
-      addLineWorld([sx, -0.45, sz], [sx, -0.45 + h * 0.4, sz], 'medium', 0);
-      addLineWorld([sx - r * 0.8, -0.44, sz + r * 0.5], [sx + r * 0.9, -0.44, sz - r * 0.5], 'fine', 0);
-      const cy = -0.45 + h;
-      addLineWorld([sx - r, cy, sz], [sx, cy + r * 0.7, sz - r], 'medium', 0.01);
-      addLineWorld([sx, cy + r * 0.7, sz - r], [sx + r, cy, sz], 'medium', 0.01);
-      addLineWorld([sx + r, cy, sz], [sx, cy - r * 0.4, sz + r], 'medium', 0.01);
-      addLineWorld([sx, cy - r * 0.4, sz + r], [sx - r, cy, sz], 'medium', 0.01);
-    }
-
-
-    // =========================================================================
-    // 5. SUBJECT BUILDERS — stone box, ridge loft, terraces, houses, peak
-    // =========================================================================
-    /** Axis-aligned dry-stone box with optional course lines (from Petra). */
-    function addBox(x, y, z, w, h, d, palName = 'granite', opts = {}) {
-      const pal = PALETTE[palName] || PALETTE.granite;
-      const shift = (rng() - 0.5) * 0.015;
-      const x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
-      const p000 = [x0, y0, z0], p100 = [x1, y0, z0], p110 = [x1, y1, z0], p010 = [x0, y1, z0];
-      const p001 = [x0, y0, z1], p101 = [x1, y0, z1], p111 = [x1, y1, z1], p011 = [x0, y1, z1];
-
-      pushQuadWorld(p001, p101, p111, p011, pal.lit, shift);
-      pushQuadWorld(p101, p100, p110, p111, pal.shade, shift);
-      pushQuadWorld(p011, p111, p110, p010, pal.top, shift);
-      pushQuadWorld(p000, p100, p101, p001, pal.bot, shift);
-      pushQuadWorld(p100, p000, p010, p110, pal.shade, shift);
-      pushQuadWorld(p000, p001, p011, p010, pal.mid, shift);
-
-      const lyr = opts.edgeLayer || 'medium';
-      const edges = [
-        [p000, p100], [p100, p101], [p101, p001], [p001, p000],
-        [p010, p110], [p110, p111], [p111, p011], [p011, p010],
-        [p000, p010], [p100, p110], [p101, p111], [p001, p011]
-      ];
-      edges.forEach(e => addLineWorld(e[0], e[1], lyr, 0.02));
-
-      if (opts.courses) {
-        for (let i = 1; i < opts.courses; i++) {
-          const cy = y0 + (h * i) / opts.courses;
-          addLineWorld([x0, cy, z1 + 0.012], [x1, cy, z1 + 0.012], 'fine', 0.01);
-          addLineWorld([x1 + 0.012, cy, z0], [x1 + 0.012, cy, z1], 'fine', 0.01);
-        }
-      }
-    }
-
-    // Ridge profile: [z, y] pairs, back (-Z) to front (+Z). The crest plateau
-    // (z -9..9, set by the buildings' footprints) breaks straight into steep
-    // convex flanks — 33-47 degrees on the upper slope — easing to a low toe,
-    // so the citadel sits on a mountain saddle, not a table.
-    const RIDGE_PROFILE = [
-      [-31, 0.2], [-27, 0.75], [-23, 1.5], [-19, 2.6], [-15.5, 4.3], [-12.5, 6.9], [-10.6, 8.95], [-9, 10.0],
-      [9, 10.0], [10.6, 8.95], [12.5, 6.9], [15.5, 4.3], [19, 2.6], [23, 1.5], [27, 0.75], [31, 0.2]
-    ];
-    // Stations along X: the ridge keeps full height under the whole citadel,
-    // dips to the saddle at the west end and plunges at the east end.
-    const RIDGE_STATIONS = [
-      { x: -46, sy: 0.42 }, { x: -40, sy: 0.55 }, { x: -34, sy: 0.78 }, { x: -30, sy: 1.0 },
-      { x: -14, sy: 1.0 }, { x: 0, sy: 1.0 }, { x: 14, sy: 1.0 }, { x: 30, sy: 1.0 },
-      { x: 36, sy: 0.8 }, { x: 42, sy: 0.45 }, { x: 47, sy: 0.16 }
-    ];
-    function ridgePoint(st, pi) {
-      const p = RIDGE_PROFILE[pi];
-      return [st.x, p[1] * st.sy, p[0]];
-    }
-
-    /** Lofts the ridge cross-section along its stations. */
-    function addRidge() {
-      const nP = RIDGE_PROFILE.length;
-      for (let s = 0; s < RIDGE_STATIONS.length - 1; s++) {
-        const stA = RIDGE_STATIONS[s], stB = RIDGE_STATIONS[s + 1];
-        for (let i = 0; i < nP - 1; i++) {
-          const A = RIDGE_PROFILE[i], B = RIDGE_PROFILE[i + 1];
-          const dz = B[0] - A[0], dy = B[1] - A[1];
-          const L = Math.hypot(dz, dy) || 1;
-          const nz = -dy / L, ny = dz / L; // outward normal in the (z, y) plane
-          const palName = ny > 0.8 ? 'grass' : (ny > 0.35 ? 'grassDry' : 'granite');
-          const col = computeDirectionalHex(palName, 0, ny, nz);
-          const shift = (rng() - 0.5) * 0.012;
-          pushQuadWorld(ridgePoint(stA, i), ridgePoint(stA, i + 1), ridgePoint(stB, i + 1), ridgePoint(stB, i), col, shift);
-        }
-      }
-      // End caps (west cap wound for -X, east cap for +X)
-      const stW = RIDGE_STATIONS[0], stE = RIDGE_STATIONS[RIDGE_STATIONS.length - 1];
-      const cenW = [stW.x, 4.2 * stW.sy, 0], cenE = [stE.x, 4.2 * stE.sy, 0];
-      for (let i = 0; i < nP - 1; i++) {
-        pushTriWorld(ridgePoint(stW, i), cenW, ridgePoint(stW, i + 1), PALETTE.granite.shade, 0);
-        pushTriWorld(ridgePoint(stE, i), ridgePoint(stE, i + 1), cenE, PALETTE.granite.shade, 0);
-      }
-      // Ink: crest edges (profile points 7 and 8) in medium, contour lines along the slopes, a few cross-sections
-      const longInk = { 1: 'faint', 2: 'faint', 3: 'faint', 4: 'fine', 5: 'fine', 6: 'fine', 7: 'medium', 8: 'medium', 9: 'fine', 10: 'fine', 11: 'fine', 12: 'faint', 13: 'faint', 14: 'faint' };
-      for (const key of Object.keys(longInk)) {
-        const pi = +key;
-        for (let s = 0; s < RIDGE_STATIONS.length - 1; s++) {
-          addLineWorld(ridgePoint(RIDGE_STATIONS[s], pi), ridgePoint(RIDGE_STATIONS[s + 1], pi), longInk[key], 0.01);
-        }
-      }
-      for (const si of [1, 4, 7, 9]) {
-        const st = RIDGE_STATIONS[si];
-        for (let i = 0; i < nP - 1; i++) addLineWorld(ridgePoint(st, i), ridgePoint(st, i + 1), 'faint', 0.005);
-      }
-    }
-
-    // Front-flank slope height (full-size profile) for nesting the terraces
-    function slopeY(z) {
-      const pts = [[9, 10.0], [10.6, 8.95], [12.5, 6.9], [15.5, 4.3], [19, 2.6], [23, 1.5], [27, 0.75], [31, 0.2]];
-      for (let i = 0; i < pts.length - 1; i++) {
-        if (z <= pts[i + 1][0]) {
-          const t = (z - pts[i][0]) / (pts[i + 1][0] - pts[i][0]);
-          return pts[i][1] + t * (pts[i + 1][1] - pts[i][1]);
-        }
-      }
-      return 0.2;
-    }
-
-    /** A run of agricultural terraces (andenes) down the front flank. */
-    function addTerraces(x0, x1, zStart, count, tread) {
-      const levels = [];
-      for (let i = 0; i <= count; i++) {
-        const z = zStart + i * tread;
-        levels.push({ z, y: i === count ? 0.55 : slopeY(z) - 0.12 });
-      }
-      for (let i = 0; i < count; i++) {
-        const a = levels[i], b = levels[i + 1];
-        const xa = x0 + i * 0.12, xb = x1 - i * 0.45;
-        // Grass tread
-        pushQuadWorld([xa, a.y, b.z], [xb, a.y, b.z], [xb, a.y, a.z], [xa, a.y, a.z],
-          PALETTE.grass.top, (rng() - 0.5) * 0.014);
-        // Granite retaining wall (front face, +Z)
-        pushQuadWorld([xa, b.y, b.z], [xb, b.y, b.z], [xb, a.y, b.z], [xa, a.y, b.z],
-          computeDirectionalHex('granite', 0, 0, 1), (rng() - 0.5) * 0.012);
-        // End cheeks
-        pushQuadWorld([xb, b.y, b.z], [xb, b.y, a.z], [xb, a.y, a.z], [xb, a.y, b.z], PALETTE.granite.shade, 0);
-        pushQuadWorld([xa, b.y, a.z], [xa, b.y, b.z], [xa, a.y, b.z], [xa, a.y, a.z], PALETTE.granite.mid, 0);
-        // Ink: tread edges + wall courses
-        addLineWorld([xa, a.y, b.z], [xb, a.y, b.z], 'medium', 0.015);
-        addLineWorld([xa, a.y, a.z], [xb, a.y, a.z], 'fine', 0.01);
-        addLineWorld([xa, b.y, b.z], [xb, b.y, b.z], 'fine', 0.01);
-        const wallMid = b.y + (a.y - b.y) * 0.5;
-        addLineWorld([xa, wallMid, b.z + 0.012], [xb, wallMid, b.z + 0.012], 'fine', 0.01);
-        addLineWorld([xb, a.y, a.z], [xb, a.y, b.z], 'medium', 0.01);
-        addLineWorld([xb, a.y, b.z], [xb, b.y, b.z], 'medium', 0.01);
-      }
-    }
-
-    /** Trapezoidal doorway inset (wider at the base — the Inca signature) on a +Z wall face. */
-    function addDoorway(cx, y0, zFace, wBot = 0.95, wTop = 0.6, h = 1.55) {
-      const z = zFace + 0.03;
-      const p0 = [cx - wBot / 2, y0, z], p1 = [cx + wBot / 2, y0, z];
-      const p2 = [cx + wTop / 2, y0 + h, z], p3 = [cx - wTop / 2, y0 + h, z];
-      pushQuadWorld(p0, p1, p2, p3, PALETTE.dark.shade, -0.03);
-      addLineWorld(p0, p3, 'bold', 0.01);
-      addLineWorld(p1, p2, 'bold', 0.01);
-      addLineWorld(p3, p2, 'bold', 0.01);
-    }
-
-    /**
-     * A dry-stone house: rectangular granite walls, steep thatched gable roof.
-     * axis 'x' = ridge runs along X (gable ends at ±X); axis 'z' swaps it.
-     * opts.roof false leaves a roofless ruin at opts.wallH.
-     */
-    function addHouse(cx, cz, w, d, wallH, opts = {}) {
-      const y0 = 10.0;
-      const axis = opts.axis || 'x';
-      const W = axis === 'x' ? w : d;   // extent along X
-      const D = axis === 'x' ? d : w;   // extent along Z
-      const x0 = cx - W / 2, x1 = cx + W / 2, z0 = cz - D / 2, z1 = cz + D / 2;
-      // Stone base slab
-      addBox(x0 - 0.22, y0, z0 - 0.22, W + 0.44, 0.3, D + 0.44, 'granite', { edgeLayer: 'medium' });
-      const wy = y0 + 0.3, wy1 = wy + wallH;
-      // Walls (four thin boxes so the interior reads as a shell from above)
-      const t = 0.42;
-      addBox(x0, wy, z0, W, wallH, t, 'granite', { edgeLayer: 'medium', courses: 2 });
-      addBox(x0, wy, z1 - t, W, wallH, t, 'granite', { edgeLayer: 'medium', courses: 2 });
-      addBox(x0, wy, z0, t, wallH, D, 'granite', { edgeLayer: 'medium', courses: 2 });
-      addBox(x1 - t, wy, z0, t, wallH, D, 'granite', { edgeLayer: 'medium', courses: 2 });
-      // Doorway on the front (+Z) wall
-      addDoorway(cx, wy, z1 - t, 0.95, 0.6, Math.min(1.55, wallH - 0.35));
-      if (!opts.roof) {
-        // Ruin: a few fine stones along the broken top edge
-        for (let i = 0; i < 4; i++) {
-          const sx = x0 + 0.4 + rng() * (W - 0.8);
-          addLineWorld([sx, wy1 + 0.02, z1 - t / 2], [sx + 0.3 + rng() * 0.2, wy1 + 0.02, z1 - t / 2], 'medium', 0);
-        }
-        return;
-      }
-      // Steep gable roof in thatch: two slabs + two granite gable triangles
-      const over = 0.38, rise = (axis === 'x' ? D : W) * 0.52;
-      const ridgeY = wy1 + rise;
-      const shift = (rng() - 0.5) * 0.012;
-      if (axis === 'x') {
-        const ra = [x0 - over, wy1, cz], rb = [x1 + over, wy1, cz]; // eave line at ridge z? no: ridge endpoints
-        const r0 = [x0 - over, ridgeY, cz], r1 = [x1 + over, ridgeY, cz];
-        const e0a = [x0 - over, wy1, z0 - over], e0b = [x1 + over, wy1, z0 - over];
-        const e1a = [x0 - over, wy1, z1 + over], e1b = [x1 + over, wy1, z1 + over];
-        pushQuadWorld(r0, r1, e0b, e0a, computeDirectionalHex('thatch', 0, 0.45, -0.89), shift);
-        pushQuadWorld(e1a, e1b, r1, r0, computeDirectionalHex('thatch', 0, 0.45, 0.89), shift);
-        pushTriWorld([x0, wy1, z0], [x0, wy1, z1], [x0, ridgeY, cz], PALETTE.granite.mid, 0);
-        pushTriWorld([x1, wy1, z1], [x1, wy1, z0], [x1, ridgeY, cz], PALETTE.granite.mid, 0);
-        addLineWorld(r0, r1, 'bold', 0.02);
-        addLineWorld(e1a, e1b, 'medium', 0.015);
-        addLineWorld(e0a, e0b, 'medium', 0.015);
-        addLineWorld([x0, wy1, z0], [x0, ridgeY, cz], 'medium', 0.01);
-        addLineWorld([x0, ridgeY, cz], [x0, wy1, z1], 'medium', 0.01);
-        addLineWorld([x1, wy1, z1], [x1, ridgeY, cz], 'medium', 0.01);
-        addLineWorld([x1, ridgeY, cz], [x1, wy1, z0], 'medium', 0.01);
-        // Thatch texture: sparse fine strokes down the front slope
-        for (let i = 0; i < 5; i++) {
-          const fx = x0 + 0.5 + rng() * (W - 1.0);
-          const t0 = 0.25 + rng() * 0.2;
-          const top = [fx, ridgeY - rise * t0, cz + (z1 + over - cz) * t0];
-          const bot = [fx, wy1 + 0.06, z1 + over - 0.05];
-          addLineWorld(top, bot, 'fine', 0);
-        }
-      } else {
-        const r0 = [cx, ridgeY, z0 - over], r1 = [cx, ridgeY, z1 + over];
-        const e0a = [x0 - over, wy1, z0 - over], e0b = [x0 - over, wy1, z1 + over];
-        const e1a = [x1 + over, wy1, z0 - over], e1b = [x1 + over, wy1, z1 + over];
-        pushQuadWorld(e0a, e0b, r1, r0, computeDirectionalHex('thatch', -0.89, 0.45, 0), shift);
-        pushQuadWorld(r0, r1, e1b, e1a, computeDirectionalHex('thatch', 0.89, 0.45, 0), shift);
-        pushTriWorld([x1, wy1, z0], [x0, wy1, z0], [cx, ridgeY, z0], PALETTE.granite.mid, 0);
-        pushTriWorld([x0, wy1, z1], [x1, wy1, z1], [cx, ridgeY, z1], PALETTE.granite.mid, 0);
-        addLineWorld(r0, r1, 'bold', 0.02);
-        addLineWorld(e1a, e1b, 'medium', 0.015);
-        addLineWorld(e0a, e0b, 'medium', 0.015);
-        for (let i = 0; i < 5; i++) {
-          const fz = z0 + 0.5 + rng() * (D - 1.0);
-          const t0 = 0.25 + rng() * 0.2;
-          const top = [cx + (x1 + over - cx) * t0, ridgeY - rise * t0, fz];
-          const bot = [x1 + over - 0.05, wy1 + 0.06, fz];
-          addLineWorld(top, bot, 'fine', 0);
-        }
-      }
-    }
-
-    /** The Torreón (Temple of the Sun): semicircular tower wall, slightly battered. */
-    function addTorreon(cx, cz, r, h) {
-      const y0 = 10.0;
-      // Base platform + rectangular block behind the curve
-      addBox(cx - r - 0.7, y0, cz - r - 0.9, (r + 0.7) * 2, 0.4, r + 2.6, 'granite', { edgeLayer: 'medium' });
-      addBox(cx - r * 0.92, y0 + 0.4, cz - r - 0.55, r * 1.84, h * 0.82, r * 0.95, 'granite', { edgeLayer: 'medium', courses: 3 });
-      const segs = 18, rTop = r * 0.93;
-      const yb = y0 + 0.4, yt = yb + h;
-      for (let i = 0; i < segs; i++) {
-        const a0 = (i / segs) * Math.PI, a1 = ((i + 1) / segs) * Math.PI; // +Z semicircle
-        const am = (a0 + a1) / 2;
-        const nx = Math.cos(am), nz = Math.sin(am);
-        const p00 = [cx + Math.cos(a0) * r, yb, cz + Math.sin(a0) * r];
-        const p10 = [cx + Math.cos(a1) * r, yb, cz + Math.sin(a1) * r];
-        const p11 = [cx + Math.cos(a1) * rTop, yt, cz + Math.sin(a1) * rTop];
-        const p01 = [cx + Math.cos(a0) * rTop, yt, cz + Math.sin(a0) * rTop];
-        pushQuadWorld(p00, p10, p11, p01, computeDirectionalHex('granite', nx, 0, nz), (rng() - 0.5) * 0.01);
-        addLineWorld(p00, p10, 'medium', 0.012);
-        addLineWorld(p01, p11, 'bold', 0.012);
-        for (let c = 1; c <= 3; c++) {
-          const cy = yb + (h * c) / 4;
-          const rr = r + (rTop - r) * (c / 4);
-          addLineWorld(
-            [cx + Math.cos(a0) * (rr + 0.012), cy, cz + Math.sin(a0) * (rr + 0.012)],
-            [cx + Math.cos(a1) * (rr + 0.012), cy, cz + Math.sin(a1) * (rr + 0.012)],
-            'fine', 0.008);
-        }
-      }
-      // Trapezoidal window, dark inset on the curve (faces the winter solstice)
-      const wa = Math.PI * 0.38;
-      const wx = cx + Math.cos(wa) * (r + 0.03), wz = cz + Math.sin(wa) * (r + 0.03);
-      const wy0 = yb + h * 0.42, wy1 = wy0 + 0.95;
-      pushQuadWorld([wx - 0.3, wy0, wz], [wx + 0.3, wy0, wz], [wx + 0.22, wy1, wz], [wx - 0.22, wy1, wz], PALETTE.dark.shade, -0.03);
-      addLineWorld([wx - 0.3, wy0, wz], [wx - 0.22, wy1, wz], 'bold', 0.008);
-      addLineWorld([wx + 0.3, wy0, wz], [wx + 0.22, wy1, wz], 'bold', 0.008);
-      addLineWorld([wx - 0.22, wy1, wz], [wx + 0.22, wy1, wz], 'bold', 0.008);
-    }
-
-    /** The Intihuatana: a carved stone post on a small three-step pyramid. */
-    function addIntihuatana(cx, cz) {
-      const y0 = 10.0;
-      addBox(cx - 2.3, y0, cz - 2.3, 4.6, 0.55, 4.6, 'granite', { edgeLayer: 'medium' });
-      addBox(cx - 1.7, y0 + 0.55, cz - 1.7, 3.4, 0.55, 3.4, 'granite', { edgeLayer: 'medium' });
-      addBox(cx - 1.15, y0 + 1.1, cz - 1.15, 2.3, 0.5, 2.3, 'granite', { edgeLayer: 'medium' });
-      const ty = y0 + 1.6;
-      addBox(cx - 0.55, ty, cz - 0.5, 1.1, 0.32, 1.0, 'granite', { edgeLayer: 'bold' });
-      addBox(cx - 0.24, ty + 0.32, cz - 0.26, 0.48, 0.78, 0.52, 'granite', { edgeLayer: 'bold' });
-      addBox(cx - 0.24, ty + 1.1, cz - 0.26, 0.34, 0.22, 0.52, 'granite', { edgeLayer: 'bold' });
-    }
-
-    /**
-     * Huayna Picchu as a crag, not a cone: a loft of 11 rings × 16 segments
-     * where EVERY point carries its own seeded radius noise (±15%), so the
-     * silhouette is jagged at segment scale — no smooth arc survives. The
-     * radius profile steps and shoulders instead of tapering evenly: a ledge
-     * low on the massif (0.20 → 0.28), a shoulder that swells back out at
-     * 0.54, a notch above it (0.62). The centre drifts as it rises, so the
-     * whole massif leans slightly off vertical. Faint ink only; the wash is
-     * the palest in the scene after the ghosts, so the citadel keeps the eye.
-     */
-    function addPeak(cx, cz, baseRx, baseRz, height) {
-      // [heightT, radiusScale] — uneven spacing, stepped profile
-      const profile = [
-        [0.00, 1.00], [0.09, 0.94], [0.20, 0.86], [0.28, 0.68], [0.38, 0.64],
-        [0.47, 0.57], [0.54, 0.63], [0.62, 0.47], [0.72, 0.42], [0.83, 0.28],
-        [0.92, 0.15]
-      ];
-      const segs = 16;
-      const leanX = 2.3, leanZ = -1.1; // total centre drift by the top ring
-      const rings = profile.map(([ty, ts]) => {
-        const ox = cx + leanX * Math.pow(ty, 1.25);
-        const oz = cz + leanZ * Math.pow(ty, 1.25);
-        const pts = [];
-        for (let i = 0; i < segs; i++) {
-          const a = (i / segs) * Math.PI * 2;
-          // Per-segment radius noise, ±15% — the crag itself. A whisper of
-          // low-frequency wobble keeps the facets from reading as static.
-          const jr = (1 + (rng() - 0.5) * 0.30) * (1 + 0.05 * Math.sin(a * 3 + ty * 9.0));
-          pts.push([ox + Math.cos(a) * baseRx * ts * jr, ty * height, oz + Math.sin(a) * baseRz * ts * jr]);
-        }
-        return pts;
-      });
-      for (let l = 0; l < rings.length - 1; l++) {
-        for (let i = 0; i < segs; i++) {
-          const ni = (i + 1) % segs;
-          const am = ((i + 0.5) / segs) * Math.PI * 2;
-          pushQuadWorld(rings[l][i], rings[l + 1][i], rings[l + 1][ni], rings[l][ni],
-            computeDirectionalHex('peak', Math.cos(am), 0.25, Math.sin(am)), (rng() - 0.5) * 0.008);
-          addLineWorld(rings[l][i], rings[l][ni], 'faint', 0);
-        }
-      }
-      // Craggy summit: the top ring closes onto a small, very irregular cap
-      // ring at uneven heights, then a fan to a low apex — a broken crest,
-      // not a cone point.
-      const topT = profile[profile.length - 1][0];
-      const capOx = cx + leanX * 1.06, capOz = cz + leanZ * 1.06;
-      const cap = [];
-      for (let i = 0; i < segs; i++) {
-        const a = (i / segs) * Math.PI * 2;
-        const jr = 1 + (rng() - 0.5) * 0.44;
-        cap.push([capOx + Math.cos(a) * baseRx * 0.075 * jr,
-          (topT + (1 - topT) * (0.35 + rng() * 0.4)) * height,
-          capOz + Math.sin(a) * baseRz * 0.075 * jr]);
-      }
-      const topRing = rings[rings.length - 1];
-      for (let i = 0; i < segs; i++) {
-        const ni = (i + 1) % segs;
-        const am = ((i + 0.5) / segs) * Math.PI * 2;
-        pushQuadWorld(topRing[i], cap[i], cap[ni], topRing[ni],
-          computeDirectionalHex('peak', Math.cos(am), 0.3, Math.sin(am)), (rng() - 0.5) * 0.008);
-        addLineWorld(topRing[i], cap[i], 'faint', 0);
-      }
-      const apex = [capOx + 0.25, height, capOz - 0.15];
-      for (let i = 0; i < segs; i++) {
-        const ni = (i + 1) % segs;
-        pushTriWorld(cap[i], apex, cap[ni], PALETTE.peak.mid, 0);
-      }
-      // Sparse vertical seams following the crag
-      for (let i = 0; i < segs; i += 3) {
-        for (let l = 0; l < rings.length - 1; l++) addLineWorld(rings[l][i], rings[l + 1][i], 'faint', 0);
-      }
-      return apex;
-    }
-
-    /**
-     * A low shoulder ridge behind Huayna: a half-section loft swept along a
-     * horizontal spine, elongated and gently humped — it must never read as
-     * a second peak. Same per-point seeded noise, same pale wash, faint ink.
-     * The spine runs (x0, z0) → (x1, z1); height humps to hMid mid-spine.
-     */
-    function addShoulderRidge(x0, z0, x1, z1, halfW, hMid) {
-      const stations = 9, segs = 12;
-      const dx = x1 - x0, dz = z1 - z0, dl = Math.hypot(dx, dz) || 1;
-      const px = -dz / dl, pz = dx / dl; // horizontal perpendicular to spine
-      const rings = [];
-      for (let s = 0; s < stations; s++) {
-        const u = s / (stations - 1);
-        const hump = 0.35 + 0.65 * Math.sin(u * Math.PI);
-        const sx = x0 + dx * u, sz = z0 + dz * u;
-        const ring = [];
-        for (let i = 0; i <= segs; i++) {
-          const phi = (i / segs) * Math.PI; // 0..π across the half-section
-          const jr = 1 + (rng() - 0.5) * 0.24;
-          ring.push([
-            sx + px * Math.cos(phi) * halfW * jr,
-            Math.sin(phi) * hMid * hump * (1 + (rng() - 0.5) * 0.18),
-            sz + pz * Math.cos(phi) * halfW * jr
-          ]);
-        }
-        rings.push(ring);
-      }
-      for (let s = 0; s < stations - 1; s++) {
-        for (let i = 0; i < segs; i++) {
-          const A = rings[s][i], B = rings[s][i + 1], C = rings[s + 1][i + 1], D = rings[s + 1][i];
-          const mx = (B[0] - A[0]) + (C[0] - D[0]), mz = (B[2] - A[2]) + (C[2] - D[2]);
-          const ml = Math.hypot(mx, mz) || 1;
-          pushQuadWorld(A, B, C, D, computeDirectionalHex('peak', mx / ml, 0.3, mz / ml), (rng() - 0.5) * 0.008);
-        }
-      }
-      // Contour rings at a few spine stations + the crest line, faint only
-      for (const s of [1, 3, 5, 7]) {
-        for (let i = 0; i < segs; i++) addLineWorld(rings[s][i], rings[s][i + 1], 'faint', 0);
-      }
-      for (let s = 0; s < stations - 1; s++) addLineWorld(rings[s][segs / 2], rings[s + 1][segs / 2], 'faint', 0);
-    }
-
-    function addShrubAt(sx, sy, sz) {
-      const r = 0.26 + rng() * 0.1;
-      const h = 0.38 + rng() * 0.14;
-      addLineWorld([sx, sy, sz], [sx, sy + h * 0.4, sz], 'medium', 0);
-      const cy = sy + h;
-      addLineWorld([sx - r, cy, sz], [sx, cy + r * 0.7, sz - r], 'medium', 0.01);
-      addLineWorld([sx, cy + r * 0.7, sz - r], [sx + r, cy, sz], 'medium', 0.01);
-      addLineWorld([sx + r, cy, sz], [sx, cy - r * 0.4, sz + r], 'medium', 0.01);
-      addLineWorld([sx, cy - r * 0.4, sz + r], [sx - r, cy, sz], 'medium', 0.01);
-    }
-
-    // =========================================================================
-    // 6. SUBJECT ASSEMBLY — Machu Picchu, c. 1450
-    // =========================================================================
-    addRidge();
-
-    // Backdrop first (drawn into the same buffers; depth sorting is by geometry).
-    // Huayna Picchu, shrunk and pushed back: at 60% of its former height and
-    // in the palest wash, it is a craggy backdrop the citadel stands in front
-    // of, not a rival subject. Behind its shoulder, a low ridge — never a
-    // second peak.
-    const apex = addPeak(-38, -27, 11, 9, 19.8);
-    addShoulderRidge(-62, -33, -38, -31, 4.2, 6.5);
-    // Tiny ruin on Huayna's summit — a whisper of ink only
-    addBox(apex[0] - 0.7, apex[1] - 0.75, apex[2] - 0.5, 1.4, 0.75, 1.1, 'peak', { edgeLayer: 'faint' });
-
-    // Agricultural terraces down the front flank, below the plaza
-    addTerraces(2.5, 26.5, 9.6, 10, 1.8);
-    // A shorter run wrapping the slope below the sacred sector
-    addTerraces(-26.5, -6.5, 9.6, 6, 1.8);
-
-    // The Torreón (Temple of the Sun) on the front edge of the sacred sector
-    addTorreon(-21.5, 5.0, 3.1, 3.3);
-
-    // Temple of the Three Windows: one long granite wall, three trapezoidal openings
-    addBox(-28.6, 10.3, -7.9, 6.4, 3.0, 0.7, 'granite', { edgeLayer: 'medium', courses: 3 });
-    for (let i = 0; i < 3; i++) {
-      const wx = -27.3 + i * 2.0;
-      const wz = -7.9 + 0.7;
-      pushQuadWorld([wx - 0.42, 11.1, wz + 0.03], [wx + 0.42, 11.1, wz + 0.03], [wx + 0.3, 12.7, wz + 0.03], [wx - 0.3, 12.7, wz + 0.03], PALETTE.dark.shade, -0.03);
-      addLineWorld([wx - 0.42, 11.1, wz + 0.03], [wx - 0.3, 12.7, wz + 0.03], 'bold', 0.008);
-      addLineWorld([wx + 0.42, 11.1, wz + 0.03], [wx + 0.3, 12.7, wz + 0.03], 'bold', 0.008);
-      addLineWorld([wx - 0.3, 12.7, wz + 0.03], [wx + 0.3, 12.7, wz + 0.03], 'bold', 0.008);
-    }
-    addBox(-28.9, 10.0, -8.2, 7.0, 0.3, 1.6, 'granite', { edgeLayer: 'medium' });
-
-    // Intihuatana on its pyramid, high point of the urban sector
-    addIntihuatana(-25.6, -2.6);
-
-    // Rows of dry-stone houses on the crest
-    addHouse(-18.0, -4.3, 5.4, 3.8, 2.3, { roof: true });
-    addHouse(-11.5, -4.5, 5.0, 3.8, 2.3, { roof: true });
-    addHouse(-5.0, -4.3, 5.6, 3.8, 2.1, { roof: false });
-    addHouse(-16.5, 4.7, 5.2, 3.8, 2.3, { roof: true });
-    addHouse(-9.8, 4.9, 5.0, 3.8, 2.0, { roof: true });
-    addHouse(-3.4, 4.7, 5.4, 3.8, 2.3, { roof: false });
-    addHouse(0.8, -4.6, 4.6, 3.6, 2.2, { roof: true, axis: 'z' });
-    // Guardian houses watching over the terraces
-    addHouse(6.2, 6.6, 3.8, 3.0, 2.0, { roof: true });
-    addHouse(11.4, 7.0, 3.6, 3.0, 1.9, { roof: true });
-
-    // =========================================================================
-    // 7. SITE FURNITURE — survey grid on the valley floor, shrubs, quiet context
-    // =========================================================================
-    const gridLimX = [-66, 52], gridLimZ = [-40, 40];
-    for (let gx = gridLimX[0]; gx <= gridLimX[1]; gx += 4.0) {
-      addDashedLineWorld([gx, 0.02, gridLimZ[0]], [gx, 0.02, gridLimZ[1]], 0.55, 0.45);
-    }
-    for (let gz = gridLimZ[0]; gz <= gridLimZ[1]; gz += 4.0) {
-      addDashedLineWorld([gridLimX[0], 0.02, gz], [gridLimX[1], 0.02, gz], 0.55, 0.45);
-    }
-    for (let i = 0; i < 46; i++) {
-      const sx = gridLimX[0] + rng() * (gridLimX[1] - gridLimX[0]);
-      const sz = gridLimZ[0] + rng() * (gridLimZ[1] - gridLimZ[0]);
-      const onRidge = sx > -50 && sx < 49 && Math.abs(sz) < 31;
-      if (!onRidge) addShrubAt(sx, 0.02, sz);
-    }
-    // A couple of shrubs on the lower front slope, clear of the terraces
-    // (y re-seated onto the steepened flank: slopeY(z), scaled by the station at x=33)
-    addShrubAt(-14, 1.25, 24.5);
-    addShrubAt(-24, 0.7, 27.5);
-    addShrubAt(33, 2.1, 20.0);
-
-    // =========================================================================
-    // 6. BUILD THREE.JS GEOMETRIES & RENDER LOOP
-    // =========================================================================
-    const washGeo = new THREE.BufferGeometry();
-    washGeo.setAttribute('position', new THREE.Float32BufferAttribute(washPositions, 3));
-    washGeo.setAttribute('color', new THREE.Float32BufferAttribute(washColors, 3));
-
-    const washMat = new THREE.MeshBasicMaterial({
-      vertexColors: true,
-      polygonOffset: true,
-      polygonOffsetFactor: 1.4,
-      polygonOffsetUnits: 1.4
-    });
-    scene.add(new THREE.Mesh(washGeo, washMat));
-
-    function createInkSegmentMesh(vertices, hexColor, opacity) {
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-      const mat = new THREE.LineBasicMaterial({
-        color: hexColor,
-        transparent: true,
-        opacity: opacity
-      });
-      return new THREE.LineSegments(geo, mat);
-    }
-
-    scene.add(createInkSegmentMesh(inkLayers.bold,   0x211b17, 0.92));
-    scene.add(createInkSegmentMesh(inkLayers.medium, 0x332a24, 0.80));
-    scene.add(createInkSegmentMesh(inkLayers.fine,   0x4a3f37, 0.44));
-    scene.add(createInkSegmentMesh(inkLayers.rust,   0x8c4531, 0.64));
-    scene.add(createInkSegmentMesh(inkLayers.teal,   0x527d80, 0.52));
-    scene.add(createInkSegmentMesh(inkLayers.faint,  0x6b6157, 0.32));
-
-    window.addEventListener('resize', () => {
-      const newAspect = window.innerWidth / window.innerHeight;
-      camera.left = (-frustumSize * newAspect) / 2;
-      camera.right = (frustumSize * newAspect) / 2;
-      camera.top = frustumSize / 2;
-      camera.bottom = -frustumSize / 2;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      generatePaperOverlay();
-    });
-
-    function animate() {
-      requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
-    }
-    animate();
-</script>
-</body>
-</html>
+/*==RENDER==*/
+const paper=document.getElementById('paper');
+function paperGen(){
+  const w=paper.width=innerWidth,h=paper.height=innerHeight,c=paper.getContext('2d');
+  c.fillStyle='#ede9e0';c.fillRect(0,0,w,h);c.strokeStyle='rgba(130,120,108,.09)';c.beginPath();
+  for(let x=0;x<w;x+=28){c.moveTo(x,0);c.lineTo(x,h)}for(let y=0;y<h;y+=28){c.moveTo(0,y);c.lineTo(w,y)}c.stroke();
+  const im=c.getImageData(0,0,w,h),d=im.data,r=mb(7731);
+  for(let i=0;i<d.length;i+=4){const g=(r()-.5)*18;d[i]+=g;d[i+1]+=g;d[i+2]+=g}c.putImageData(im,0,0)
+}
+paperGen();
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.setClearColor(0xe5e0d6,1);
+document.getElementById('wrap').insertBefore(renderer.domElement,paper);
+const scene=new THREE.Scene(),cam=new THREE.OrthographicCamera(-1,1,1,-1,-300,500),tgt=new THREE.Vector3(0,3,0);
+const home=new THREE.Vector3(100,78,100).add(tgt);
+function fit(){const a=innerWidth/innerHeight,fs=Math.max(72,104/a);cam.left=-fs*a/2;cam.right=fs*a/2;cam.top=fs/2;cam.bottom=-fs/2;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}
+cam.position.copy(home);cam.lookAt(tgt);fit();
+const ctl=new THREE.OrbitControls(cam,renderer.domElement);ctl.target.copy(tgt);ctl.enableDamping=true;ctl.dampingFactor=.08;ctl.maxPolarAngle=Math.PI*.47;ctl.minZoom=.6;ctl.maxZoom=3.5;ctl.update();
+addEventListener('dblclick',()=>{cam.position.copy(home);ctl.target.copy(tgt);cam.zoom=1;cam.updateProjectionMatrix();ctl.update()});
+const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(wp,3));g.setAttribute('color',new THREE.Float32BufferAttribute(wc,3));
+scene.add(new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:1.4,polygonOffsetUnits:1.4})));
+[['bold',0x211b17,.92],['med',0x332a24,.8],['fine',0x4a3f37,.42],['rust',0x8c4531,.8],['teal',0x527d80,.5],['faint',0x6b6157,.3]].forEach(([k,c,o])=>{
+  const gg=new THREE.BufferGeometry();gg.setAttribute('position',new THREE.Float32BufferAttribute(ink[k],3));
+  scene.add(new THREE.LineSegments(gg,new THREE.LineBasicMaterial({color:c,transparent:true,opacity:o})))});
+// drifting mist
+const mist=[];
+[[-19,20,-6],[12,23,-21]].forEach(([cx,cy,cz],n)=>{const grp=new THREE.Group();
+  for(let i=0;i<3;i++){const m=new THREE.Mesh(new THREE.CircleGeometry(1,28),new THREE.MeshBasicMaterial({color:0xf6f3ec,transparent:true,opacity:.62,depthWrite:false}));
+    m.rotation.x=-Math.PI/2;m.scale.set(4+i*1.4,2.3+i*.5,1);m.position.set(i*3.2-3,i*.15,i*1.1);grp.add(m)}
+  grp.position.set(cx,cy,cz);grp.userData={x:cx,n};scene.add(grp);mist.push(grp)});
+// labels
+const lab=document.getElementById('lab'),NS='http://www.w3.org/2000/svg',mk=t=>document.createElementNS(NS,t);
+const LB=[['Huayna Picchu · 2,693 m',[-17,26,-17],70,-26],['Intihuatana',[5.8,P+2.1,-5.9],95,-62],['Temple of the Sun',[-5.2,P+2.2,-5.5],-85,-72],
+ ['Great Plaza',[0,P+.3,.4],110,70],['Agricultural terraces',[-11,H(-11,7)+.3,7],-120,38],['Urubamba river',[20,W,0],80,46],['Inca Trail',[11,H(11,11)+.2,11],-100,60]]
+ .map(([t,p,dx,dy])=>{const l=mk('line'),c=mk('circle'),x=mk('text');c.setAttribute('r',2.6);x.textContent=t;x.setAttribute('text-anchor',dx>0?'start':'end');lab.append(l,c,x);return{p:new THREE.Vector3(...p),dx,dy,l,c,x}});
+const pv=new THREE.Vector3();
+function place(){LB.forEach(o=>{pv.copy(o.p).project(cam);const x=(pv.x*.5+.5)*innerWidth,y=(-pv.y*.5+.5)*innerHeight,tx=x+o.dx,ty=y+o.dy;
+  o.l.setAttribute('x1',x);o.l.setAttribute('y1',y);o.l.setAttribute('x2',tx);o.l.setAttribute('y2',ty);o.c.setAttribute('cx',x);o.c.setAttribute('cy',y);
+  o.x.setAttribute('x',tx+(o.dx>0?4:-4));o.x.setAttribute('y',ty+3)})}
+addEventListener('resize',()=>{fit();paperGen()});
+(function loop(t){requestAnimationFrame(loop);mist.forEach(m=>m.position.x=m.userData.x+Math.sin(t*.00012+m.userData.n*2)*3);ctl.update();renderer.render(scene,cam);place()})(0);
+</script></body></html>

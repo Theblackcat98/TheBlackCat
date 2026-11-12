@@ -3,7 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>El Castillo, Chichén Itzá — Axonometric Diagram</title>
+  <title>Chichén Itzá — Axonometric Diagram</title>
+  <meta name="description" content="Interactive ink-and-wash axonometric cutaway of Chichén Itzá on a Yucatán karst terrain block showing El Castillo, Temple of the Warriors, Great Ball Court, El Caracol, and Cenote Sagrado.">
+  <link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/chichen-itza/">
+  <meta property="og:title" content="Chichén Itzá — Axonometric Diagram">
+  <meta property="og:description" content="Interactive ink-and-wash axonometric cutaway of Chichén Itzá on a Yucatán karst terrain block showing El Castillo, Temple of the Warriors, Great Ball Court, El Caracol, and Cenote Sagrado.">
+  <meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/chichen-itza-light.webp">
+  <script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "VisualArtwork", "name": "Chich\u00e9n Itz\u00e1", "description": "Interactive ink-and-wash axonometric cutaway of Chich\u00e9n Itz\u00e1 on a Yucat\u00e1n karst terrain block showing El Castillo, Temple of the Warriors, Great Ball Court, El Caracol, and Cenote Sagrado.", "url": "https://theblackcat98.github.io/TheBlackCat/chichen-itza/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/chichen-itza-light.webp", "creator": {"@type": "Person", "name": "Nik"}}</script>
+  <link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+  <script src="../toolkit/toolkit.js?v=1" defer data-tool="chichen-itza"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -24,11 +32,6 @@
     canvas {
       display: block;
     }
-    #hint {
-      position: absolute; left: 18px; right: 18px; bottom: 14px; z-index: 2;
-      color: rgba(65,53,43,.68); font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
-      letter-spacing: .08em; text-transform: uppercase; pointer-events: none;
-    }
     #paper-overlay {
       position: absolute;
       top: 0;
@@ -40,28 +43,18 @@
       opacity: 0.55;
     }
   </style>
-<meta name="description" content="El Castillo at Chichén Itzá drawn as an axonometric on drafting paper: a nine-terrace stepped pyramid with four stairways — ninety-one steps each in the real stone, 365 with the platform — a temple on top, and serpent heads at the foot of the northern balustrades.">
-<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/chichen-itza/">
-<meta property="og:title" content="Chichén Itzá — El Castillo">
-<meta property="og:description" content="El Castillo at Chichén Itzá drawn as an axonometric on drafting paper: a nine-terrace stepped pyramid with four stairways — ninety-one steps each in the real stone, 365 with the platform — a temple on top, and serpent heads at the foot of the northern balustrades.">
-<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/chichen-itza-light.webp">
-<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "VisualArtwork", "name": "Chichén Itzá — El Castillo", "description": "El Castillo at Chichén Itzá drawn as an axonometric on drafting paper: a nine-terrace stepped pyramid with four stairways — ninety-one steps each in the real stone, 365 with the platform — a temple on top, and serpent heads at the foot of the northern balustrades.", "url": "https://theblackcat98.github.io/TheBlackCat/chichen-itza/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/chichen-itza-light.webp", "creator": {"@type": "Person", "name": "Nik"} }</script>
-<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
-<script src="../toolkit/toolkit.js?v=1" defer data-tool="chichen-itza"></script>
-
 </head>
 <body>
-<a class="back tk-fallback" href="../tools/">&#8592; All tools</a>
+  <a class="back tk-fallback" href="../tools/">&#8592; All tools</a>
   <div id="canvas-container">
     <canvas id="paper-overlay"></canvas>
-    <div id="hint">CHICH&Eacute;N ITZ&Aacute; &middot; EL CASTILLO &middot; AXONOMETRIC STUDY &nbsp; / &nbsp; DRAG TO ORBIT &middot; DOUBLE-CLICK TO RESET</div>
   </div>
 
   <script src="../vendor/three/three.min.js"></script>
   <script src="../vendor/three/OrbitControls.js"></script>
   <script>
     // =========================================================================
-    // 1. DETERMINISTIC PRNG & DRAFTING PAPER TEXTURE OVERLAY
+    // 1. DETERMINISTIC PRNG, NOISE HELPERS & DRAFTING PAPER OVERLAY
     // =========================================================================
     function mulberry32(a) {
       return function () {
@@ -71,7 +64,31 @@
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
       };
     }
-    const rng = mulberry32(900); // c. AD 900: El Castillo built c. 800-900 AD, Terminal Classic Chichén Itzá
+    const rng = mulberry32(987); // c. 987 AD: Toltec-Maya renaissance of Chichén Itzá
+
+    const hash2 = (i, j) => {
+      let h = Math.imul(i, 374761393) + Math.imul(j, 668265263);
+      h = Math.imul(h ^ (h >>> 13), 1274126177);
+      return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    };
+    const smooth = t => t * t * (3 - 2 * t);
+    const smoothstep = (a, b, x) => {
+      x = Math.min(1, Math.max(0, (x - a) / (b - a)));
+      return x * x * (3 - 2 * x);
+    };
+    function vnoise(x, y) {
+      const i = Math.floor(x), j = Math.floor(y);
+      const u = smooth(x - i), v = smooth(y - j);
+      return (
+        (hash2(i, j) * (1 - u) + hash2(i + 1, j) * u) * (1 - v) +
+        (hash2(i, j + 1) * (1 - u) + hash2(i + 1, j + 1) * u) * v
+      );
+    }
+    const fbm = (x, y) =>
+      vnoise(x, y) * 0.5 +
+      vnoise(x * 2.1, y * 2.1) * 0.27 +
+      vnoise(x * 4.3, y * 4.3) * 0.15 +
+      vnoise(x * 8.7, y * 8.7) * 0.08;
 
     function generatePaperOverlay() {
       const canvas = document.getElementById('paper-overlay');
@@ -100,7 +117,7 @@
       // Organic rough paper fiber grain
       const imgData = ctx.getImageData(0, 0, w, h);
       const data = imgData.data;
-      const localRng = mulberry32(8841);
+      const localRng = mulberry32(7731);
       for (let i = 0; i < data.length; i += 4) {
         const grain = (localRng() - 0.5) * 18;
         data[i] = Math.min(255, Math.max(0, data[i] + grain));
@@ -122,73 +139,80 @@
     container.insertBefore(renderer.domElement, document.getElementById('paper-overlay'));
 
     const scene = new THREE.Scene();
-
-    const frustumSize = 60; // SUBJECT FIT: frame the subject ~70% of height
-    const aspect = window.innerWidth / window.innerHeight;
-    const camera = new THREE.OrthographicCamera(
-      (-frustumSize * aspect) / 2,
-      (frustumSize * aspect) / 2,
-      frustumSize / 2,
-      -frustumSize / 2,
-      -200,
-      300
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -300, 500);
+    const targetCenter = new THREE.Vector3(0.5, 2.0, -1.0);
+    const camDist = 100;
+    const defaultCamPos = new THREE.Vector3(
+      targetCenter.x + camDist,
+      targetCenter.y + camDist * 0.78,
+      targetCenter.z + camDist
     );
 
-    const targetY = 7.6; // SUBJECT FIT: vertical centre of the subject
-    const camDist = 72;
-    const defaultCamPos = new THREE.Vector3(camDist, targetY + camDist * 0.78, camDist);
+    function fitCamera() {
+      const aspect = window.innerWidth / window.innerHeight;
+      const fs = Math.max(70, 102 / aspect);
+      camera.left = (-fs * aspect) / 2;
+      camera.right = (fs * aspect) / 2;
+      camera.top = fs / 2;
+      camera.bottom = -fs / 2;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
     camera.position.copy(defaultCamPos);
-    camera.lookAt(0, targetY, 0);
+    camera.lookAt(targetCenter);
+    fitCamera();
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, targetY, 0);
+    controls.target.copy(targetCenter);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
+    controls.maxPolarAngle = Math.PI * 0.485;
+    controls.minZoom = 0.55;
+    controls.maxZoom = 4.2;
     controls.update();
 
     window.addEventListener('dblclick', () => {
       camera.position.copy(defaultCamPos);
-      controls.target.set(0, targetY, 0);
+      controls.target.copy(targetCenter);
       camera.zoom = 1;
       camera.updateProjectionMatrix();
       controls.update();
     });
 
     // =========================================================================
-    // 3. COLOR WASH PALETTE & MULTI-WEIGHT INK ENGINE
+    // 3. ARCHITECTURAL PALETTE & 6-LAYER MULTI-WEIGHT INK ENGINE
     // =========================================================================
     const PALETTE = {
-      cream:      { lit: 0xefe9de, mid: 0xe4ddd1, shade: 0xd2c9b9, top: 0xf4f0e6, bot: 0x8f8274 },
-      stone:      { lit: 0xe3dcd0, mid: 0xd6cec0, shade: 0xc2b9a9, top: 0xeae4da, bot: 0x807467 },
-      coreWall:   { lit: 0xc9bfb0, mid: 0xb5aa9a, shade: 0x998e7e, top: 0xd6cec0, bot: 0x695e53 },
+      cream:      { lit: 0xf0e9dc, mid: 0xe3dac9, shade: 0xd0c4ae, top: 0xf6f2e8, bot: 0x8d8071 },
+      stone:      { lit: 0xe6dfd1, mid: 0xd7cebe, shade: 0xc2b7a4, top: 0xede7db, bot: 0x807466 },
+      limestone:  { lit: 0xdbd1be, mid: 0xcbc0aa, shade: 0xb3a790, top: 0xe3dac9, bot: 0x766b5b },
+      coreWall:   { lit: 0xc2b7a7, mid: 0xab9f8e, shade: 0x8f8373, top: 0xd1c7b8, bot: 0x5e5348 },
       terracotta: { lit: 0xc27a63, mid: 0xb06851, shade: 0x94513d, top: 0xd4947e, bot: 0x6b3829 },
-      brickDark:  { lit: 0x9e5b47, mid: 0x8a4c3a, shade: 0x703b2c, top: 0xb36f5b, bot: 0x4f271c },
-      teal:       { lit: 0x94b9bb, mid: 0x82a8aa, shade: 0x6b9092, top: 0xa8c8ca, bot: 0x517072 },
-      tealDeep:   { lit: 0x789fa2, mid: 0x668c8f, shade: 0x527477, top: 0x8eb2b5, bot: 0x3e595b },
-      dark:       { lit: 0x73675e, mid: 0x5e534b, shade: 0x4a4039, top: 0x85786e, bot: 0x332c27 },
-      plaza:      { lit: 0xe8e3d9, mid: 0xdfd9ce, shade: 0xd2ccc0, top: 0xebe6dc, bot: 0xa69e91 },
-      lime:       { lit: 0xe9e1cf, mid: 0xdbd1ba, shade: 0xc2b696, top: 0xf3edde, bot: 0x877c62 },
-      ghost:      { lit: 0xe6e1d7, mid: 0xdfd9ce, shade: 0xd8d2c6, top: 0xebe6dc, bot: 0xc2bbb0 }
+      dark:       { lit: 0x6f6359, mid: 0x5c5148, shade: 0x483f37, top: 0x82756a, bot: 0x332c27 },
+      plaza:      { lit: 0xe7e1d5, mid: 0xddd6c9, shade: 0xd0c8b9, top: 0xebe5da, bot: 0xa49c8f },
+      lawn:       { lit: 0xb9cf86, mid: 0xa7be74, shade: 0x91a862, top: 0xc4d792, bot: 0x6f8449 },
+      foliage:    { lit: 0x84a16c, mid: 0x708d59, shade: 0x5a7346, top: 0x95b17d, bot: 0x455a36 },
+      teal:       { lit: 0x88b3b2, mid: 0x75a1a0, shade: 0x5e8888, top: 0x9ac1c0, bot: 0x476b6b },
+      tealDeep:   { lit: 0x6f9999, mid: 0x5d8687, shade: 0x4a7071, top: 0x82abab, bot: 0x385758 }
     };
 
     const washPositions = [];
     const washColors = [];
 
     const inkLayers = {
-      bold:   [], // Primary structural silhouettes, arch rings, column shafts
-      medium: [], // Secondary architectural edges, capitals, stone courses
-      fine:   [], // Directional shadow hatching, roof & stone texture
-      rust:   [], // Terracotta course hatching & ornamental inlays
-      teal:   [], // Intarsia & window reflection strokes
-      faint:  []  // Plumb-line diagram & site grid context
+      bold:   [], // Primary pyramid edges, staircase balustrades, temple crowns, cutaway rim
+      medium: [], // Tier moldings, column shafts, ball court benches, 4th contours, tree frames
+      fine:   [], // Talud-tablero panels, stair risers, shadow hatching, paving, strata bedding
+      rust:   [], // Ochre/stucco frieze inlays, sacbe trails, hanging cenote vines
+      teal:   [], // Underground water-table horizon, cenote water ripples
+      faint:  []  // Upper-left diagonal drafting construction rays & grid extensions
     };
 
     const tempColor = new THREE.Color();
-    // Light vector from upper front-left (matches axonometric sun convention)
     const lightDir = new THREE.Vector3(-0.35, 0.25, 0.90).normalize();
 
     function computeDirectionalHex(palName, nx, ny, nz) {
-      const pal = PALETTE[palName] || PALETTE.cream;
+      const pal = PALETTE[palName] || PALETTE.stone;
       if (ny > 0.65) return pal.top;
       if (ny < -0.65) return pal.bot;
       const dot = nx * lightDir.x + ny * lightDir.y + nz * lightDir.z;
@@ -197,21 +221,17 @@
       return pal.shade;
     }
 
-    function pushQuadWorld(p0, p1, p2, p3, hexColor, shadeShift = 0) {
-      tempColor.setHex(hexColor);
-      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
-      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
-      washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
-      washPositions.push(p0[0], p0[1], p0[2], p2[0], p2[1], p2[2], p3[0], p3[1], p3[2]);
-      for (let i = 0; i < 6; i++) washColors.push(r, g, b);
-    }
-
     function pushTriWorld(p0, p1, p2, hexColor, shadeShift = 0) {
       tempColor.setHex(hexColor);
-      if (shadeShift !== 0) tempColor.offsetHSL(0, 0, shadeShift);
+      tempColor.offsetHSL(0, 0, shadeShift + (rng() - 0.5) * 0.012);
       const r = tempColor.r, g = tempColor.g, b = tempColor.b;
       washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
       for (let i = 0; i < 3; i++) washColors.push(r, g, b);
+    }
+
+    function pushQuadWorld(p0, p1, p2, p3, hexColor, shadeShift = 0) {
+      pushTriWorld(p0, p1, p2, hexColor, shadeShift);
+      pushTriWorld(p0, p2, p3, hexColor, shadeShift);
     }
 
     function addLineWorld(p1, p2, layer = 'medium', overshoot = 0.022) {
@@ -224,7 +244,7 @@
       const uy = (dy / len) * overshoot;
       const uz = (dz / len) * overshoot;
 
-      const j = layer === 'faint' ? 0 : 0.007;
+      const j = layer === 'faint' || overshoot === 0 ? 0 : 0.007;
       const ax = x1 - ux + (rng() - 0.5) * j;
       const ay = y1 - uy + (rng() - 0.5) * j;
       const az = z1 - uz + (rng() - 0.5) * j;
@@ -243,554 +263,875 @@
     }
 
     // =========================================================================
-    // SUBJECT TRANSFORM — every builder emits points through subjectPoint().
-    // Identity for an upright subject. Pisa overrides it with a curved leaning
-    // spine; keep the hook so warped subjects stay possible. Builders that work
-    // in plain world space (addWorldBox, dashed lines, shrubs) bypass it.
+    // 4. YUCATÁN KARST TOPOGRAPHY, GRAN NIVELACIÓN & DEEP AQUIFER CENOTES
+    //    Orientation: North = -X, South = +X, East = -Z, West = +Z
+    //    Scale: 1 unit ≈ 5.0 meters | Underground Water Table W = -4.2
     // =========================================================================
-    function subjectPoint(x, y, z) { return [x, y, z]; }
+    const B = 40;
+    const N = 128; // High resolution for crisp circular karst cenote sinkhole walls
+    const W = -4.2; // Underground Yucatán Aquifer water level (~21-25m below ground rim)
+    const Y_BOT = -8.5;
 
+    // Two Real-Life Karst Water Sinkholes (aligned along Chichén Itzá's North-South water axis)
+    const CENOTE_SAGRADO = { x: -29.2, z: -3.8, rx: 5.7, rz: 6.1, floorY: -6.5 }; // ~60m diam, 12m water depth
+    const CENOTE_XTOLOC  = { x:  21.5, z: -6.2, rx: 4.3, rz: 4.8, floorY: -6.1 }; // ~45m diam, 10m water depth
 
-    // =========================================================================
-    // 4. BUILDERS (cylinder / cornice / column, generalised from Pisa)
-    // =========================================================================
-    /**
-     * Builds a cylindrical or polygonal drum/ring between rInner and rOuter, y0 and y1
-     */
-    function addCylinder(y0, y1, rOuter, rInner, segs, palName = 'cream', opts = {}) {
-      const dTheta = (Math.PI * 2) / segs;
-      const startAngle = opts.angleOffset || 0;
-      const edgeLayer = opts.edgeLayer || 'medium';
+    // Ceremonial Grid Orientation: 17° clockwise East of North (real-life El Castillo / Great Terrace bearing)
+    const YAW_MAIN = (17.0 * Math.PI) / 180;
+    const COS_M = Math.cos(YAW_MAIN), SIN_M = Math.sin(YAW_MAIN);
+    function toMainLocal(x, z) {
+      return [x * COS_M + z * SIN_M, -x * SIN_M + z * COS_M];
+    }
 
-      for (let i = 0; i < segs; i++) {
-        const a0 = startAngle + i * dTheta;
-        const a1 = startAngle + (i + 1) * dTheta;
-        const aMid = (a0 + a1) * 0.5;
+    function cenoteSinkFactor(x, z, c) {
+      const dx = (x - c.x) / c.rx;
+      const dz = (z - c.z) / c.rz;
+      const ang = Math.atan2(dz, dx);
+      // Slight organic limestone fracture wobble around sinkhole rim
+      const wobble = 1.0 + 0.055 * Math.sin(ang * 3 + 0.8) + 0.035 * Math.cos(ang * 5 - 0.4);
+      const r = Math.hypot(dx, dz) / wobble;
+      return { r, mask: 1 - smoothstep(0.76, 1.04, r) };
+    }
 
-        const c0 = Math.cos(a0), s0 = Math.sin(a0);
-        const c1 = Math.cos(a1), s1 = Math.sin(a1);
-        const nx = Math.cos(aMid), nz = Math.sin(aMid);
+    function H(x, z) {
+      // Gentle Yucatán karst limestone plain (avg ~27m AHD -> y ≈ 0.7 - 1.35)
+      const baseUndulation =
+        0.85 +
+        (fbm(x * 0.065 + 3.2, z * 0.065 - 1.7) - 0.45) * 0.95 +
+        0.25 * smoothstep(16, 38, Math.hypot(x * 0.8, z * 0.8));
 
-        // Outer wall quad
-        const p00 = subjectPoint(c0 * rOuter, y0, s0 * rOuter);
-        const p10 = subjectPoint(c1 * rOuter, y0, s1 * rOuter);
-        const p11 = subjectPoint(c1 * rOuter, y1, s1 * rOuter);
-        const p01 = subjectPoint(c0 * rOuter, y1, s0 * rOuter);
+      // Slight level apron beneath the Great North Terrace (Gran Nivelación)
+      const [lx, lz] = toMainLocal(x, z);
+      const terraceMask =
+        (1 - smoothstep(10.5, 14.5, Math.max(-13.2 - lx, lx - 10.6))) *
+        (1 - smoothstep(0.5, 3.5, Math.max(-24.8 - lz, lz - 20.4)));
+      let y = baseUndulation * (1 - terraceMask) + 1.05 * terraceMask;
 
-        const colOuter = computeDirectionalHex(palName, nx, 0, nz);
-        const shift = (rng() - 0.5) * 0.018;
-        pushQuadWorld(p00, p10, p11, p01, colOuter, shift);
+      // Subtle clearing level around South Group (El Osario & El Caracol)
+      const southClear = 1 - smoothstep(10, 17, Math.hypot(x - 24, z - 8));
+      y = y * (1 - southClear * 0.55) + 0.92 * (southClear * 0.55);
 
-        // Top & bottom perimeter ink rings
-        addLineWorld(p00, p10, edgeLayer, 0.015);
-        addLineWorld(p01, p11, edgeLayer, 0.015);
+      // Carve deep vertical karst sinkhole for Cenote Sagrado (North)
+      const sag = cenoteSinkFactor(x, z, CENOTE_SAGRADO);
+      if (sag.mask > 0.001) {
+        // Raised weathered limestone lip right around the rim
+        const rimLip = Math.exp(-Math.pow((sag.r - 1.06) / 0.14, 2)) * 0.35;
+        const innerFloor = CENOTE_SAGRADO.floorY + (fbm(x * 0.3, z * 0.3) - 0.5) * 0.35;
+        y = (y + rimLip) * (1 - sag.mask) + innerFloor * sag.mask;
+      } else if (sag.r < 1.3) {
+        y += Math.exp(-Math.pow((sag.r - 1.06) / 0.14, 2)) * 0.35;
+      }
 
-        // Silhouette and periodic vertical joint lines
-        const viewDot = nx * 0.707 + nz * 0.707;
-        const CrossSilhouette = Math.abs(nx * 0.707 - nz * 0.707);
-        if (CrossSilhouette > 0.96) {
-          addLineWorld(p00, p01, 'bold', 0.02);
-        } else if (opts.verticalJoints && i % opts.verticalJoints === 0) {
-          addLineWorld(p00, p01, 'fine', 0.01);
-        }
+      // Carve deep karst sinkhole for Cenote Xtoloc (South)
+      const xto = cenoteSinkFactor(x, z, CENOTE_XTOLOC);
+      if (xto.mask > 0.001) {
+        const rimLipX = Math.exp(-Math.pow((xto.r - 1.08) / 0.15, 2)) * 0.28;
+        const innerFloorX = CENOTE_XTOLOC.floorY + (fbm(x * 0.35 + 4, z * 0.35) - 0.5) * 0.3;
+        y = (y + rimLipX) * (1 - xto.mask) + innerFloorX * xto.mask;
+      } else if (xto.r < 1.3) {
+        y += Math.exp(-Math.pow((xto.r - 1.08) / 0.15, 2)) * 0.28;
+      }
 
-        // Directional right-side shadow hatching on cylindrical surfaces
-        const lightDot = nx * lightDir.x + nz * lightDir.z;
-        if (opts.shadeHatch !== false && lightDot < -0.12 && viewDot > -0.35) {
-          const hatchCount = lightDot < -0.5 ? 3 : 2;
-          for (let h = 1; h <= hatchCount; h++) {
-            const t = h / (hatchCount + 1);
-            const ha = a0 + (a1 - a0) * t;
-            const hc = Math.cos(ha) * (rOuter + 0.015);
-            const hs = Math.sin(ha) * (rOuter + 0.015);
-            addLineWorld(
-              subjectPoint(hc, y0 + 0.04, hs),
-              subjectPoint(hc, y1 - 0.04, hs),
-              opts.hatchLayer || 'fine',
-              0
-            );
-          }
-        }
+      return y;
+    }
 
-        // Optional horizontal stone/brick courses
-        if (opts.courses) {
-          const cLayer = palName === 'terracotta' || palName === 'brickDark' ? 'rust' : 'fine';
-          for (let c = 1; c < opts.courses; c++) {
-            const cy = y0 + ((y1 - y0) * c) / opts.courses;
-            addLineWorld(
-              subjectPoint(c0 * (rOuter + 0.012), cy, s0 * (rOuter + 0.012)),
-              subjectPoint(c1 * (rOuter + 0.012), cy, s1 * (rOuter + 0.012)),
-              cLayer,
-              0.01
-            );
-          }
-        }
+    // Sample Terrain Height Grid
+    const stepT = (2 * B) / N;
+    const heights = [];
+    const tVert = (i, j) => [-B + i * stepT, heights[j * (N + 1) + i], -B + j * stepT];
+    for (let j = 0; j <= N; j++) {
+      for (let i = 0; i <= N; i++) {
+        heights.push(H(-B + i * stepT, -B + j * stepT));
+      }
+    }
 
-        // Top and bottom caps (and inner wall if hollow)
-        if (rInner > 0) {
-          const q00 = subjectPoint(c0 * rInner, y0, s0 * rInner);
-          const q10 = subjectPoint(c1 * rInner, y0, s1 * rInner);
-          const q11 = subjectPoint(c1 * rInner, y1, s1 * rInner);
-          const q01 = subjectPoint(c0 * rInner, y1, s0 * rInner);
+    function terrainColor(x, z, y, n) {
+      const L = n[0] * lightDir.x + n[1] * lightDir.y + n[2] * lightDir.z;
+      const ny = n[1];
+      const q = fbm(x * 0.4 + 9, z * 0.4);
+      let hex;
 
-          // Inner wall
-          const colInner = computeDirectionalHex(palName, -nx, 0, -nz);
-          pushQuadWorld(q10, q00, q01, q11, colInner, -0.04);
-          // Top annular ring
-          pushQuadWorld(p01, p11, q11, q01, computeDirectionalHex(palName, 0, 1, 0), shift);
-          // Bottom annular soffit
-          pushQuadWorld(q00, q10, p10, p00, computeDirectionalHex(palName, 0, -1, 0), shift);
-
-          if (opts.innerEdges) {
-            addLineWorld(q01, q11, 'medium', 0.01);
-            addLineWorld(q00, q10, 'medium', 0.01);
-          }
+      if (y < W + 0.08) {
+        hex = 0x5d8280; // Submerged dark karst limestone floor under cenote water
+      } else if (ny < 0.72) {
+        // Sheer exposed pale Yucatecan limestone karst cliff walls inside both cenotes
+        hex = L > 0.15 ? 0xd9cdb8 : L > -0.2 ? 0xc2b59d : 0x9c8e78;
+      } else {
+        // Surface vegetation vs cleared ceremonial plaza edge
+        const [lx, lz] = toMainLocal(x, z);
+        const onPlaza = lx > -14 && lx < 12 && lz > -26 && lz < 21;
+        const onSouthPlaza = Math.hypot(x - 22.5, z - 6.0) < 11.5;
+        const onSacbeCorridor = x < -10 && x > -24 && Math.abs(z + 3.8) < 2.2;
+        if (onPlaza || onSouthPlaza || onSacbeCorridor) {
+          hex = q > 0.5 ? 0xbdcf8e : 0xb0c47f;
         } else {
-          const centerTop = subjectPoint(0, y1, 0);
-          const centerBot = subjectPoint(0, y0, 0);
-          pushTriWorld(p01, p11, centerTop, computeDirectionalHex(palName, 0, 1, 0), shift);
-          pushTriWorld(p10, p00, centerBot, computeDirectionalHex(palName, 0, -1, 0), shift);
+          // Surrounding Yucatán selva baja scrub/grassland
+          hex = q > 0.54 ? 0xa5bc73 : q > 0.34 ? 0x95ad67 : 0x869e5d;
+        }
+      }
+      return [hex, L * 0.035];
+    }
+
+    // Build Terrain Mesh & Elevation Contours
+    for (let j = 0; j < N; j++) {
+      for (let i = 0; i < N; i++) {
+        const a = tVert(i, j);
+        const b = tVert(i + 1, j);
+        const c = tVert(i + 1, j + 1);
+        const d = tVert(i, j + 1);
+        [[a, b, c], [a, c, d]].forEach(tri => {
+          const u = [tri[1][0] - tri[0][0], tri[1][1] - tri[0][1], tri[1][2] - tri[0][2]];
+          const v = [tri[2][0] - tri[0][0], tri[2][1] - tri[0][1], tri[2][2] - tri[0][2]];
+          let n = [
+            u[1] * v[2] - u[2] * v[1],
+            u[2] * v[0] - u[0] * v[2],
+            u[0] * v[1] - u[1] * v[0]
+          ];
+          const len = Math.hypot(n[0], n[1], n[2]) || 1;
+          n = [n[0] / len, n[1] / len, n[2] / len];
+          if (n[1] < 0) n = [-n[0], -n[1], -n[2]];
+
+          const cx = (tri[0][0] + tri[1][0] + tri[2][0]) / 3;
+          const cy = (tri[0][1] + tri[1][1] + tri[2][1]) / 3;
+          const cz = (tri[0][2] + tri[1][2] + tri[2][2]) / 3;
+          const [hx, shift] = terrainColor(cx, cz, cy, n);
+          pushTriWorld(tri[0], tri[1], tri[2], hx, shift);
+
+          // Topographic contours (every 0.45 units across surface & down steep cenote cliff strata!)
+          const lo = Math.min(tri[0][1], tri[1][1], tri[2][1]);
+          const hi = Math.max(tri[0][1], tri[1][1], tri[2][1]);
+          const contourStep = 0.45;
+          const kStart = Math.ceil(Math.max(W + 0.1, lo) / contourStep);
+          const kEnd = Math.floor(hi / contourStep);
+          for (let k = kStart; k <= kEnd; k++) {
+            const L = k * contourStep;
+            const pts = [];
+            [[0, 1], [1, 2], [2, 0]].forEach(([e, f]) => {
+              const A = tri[e], C = tri[f];
+              if ((A[1] - L) * (C[1] - L) < 0) {
+                const w = (L - A[1]) / (C[1] - A[1]);
+                pts.push([A[0] + (C[0] - A[0]) * w, L + 0.015, A[2] + (C[2] - A[2]) * w]);
+              }
+            });
+            if (pts.length === 2) {
+              inkLayers[Math.abs(k) % 4 === 0 ? 'medium' : 'fine'].push(...pts[0], ...pts[1]);
+            }
+          }
+        });
+      }
+    }
+
+    // Cenote Water Disks at Exact Underground Yucatán Aquifer Level (W = -4.2)
+    function addCenoteWater(c) {
+      const segs = 32;
+      const rxW = c.rx * 0.94;
+      const rzW = c.rz * 0.94;
+      const center = [c.x, W, c.z];
+      for (let i = 0; i < segs; i++) {
+        const a0 = (i * Math.PI * 2) / segs;
+        const a1 = ((i + 1) * Math.PI * 2) / segs;
+        const p0 = [c.x + Math.cos(a0) * rxW, W, c.z + Math.sin(a0) * rzW];
+        const p1 = [c.x + Math.cos(a1) * rxW, W, c.z + Math.sin(a1) * rzW];
+        pushTriWorld(center, p0, p1, PALETTE.tealDeep.lit, 0);
+
+        // Concentric water ripple rings in teal ink
+        [0.45, 0.72].forEach(rf => {
+          addLineWorld(
+            [c.x + Math.cos(a0) * rxW * rf, W + 0.03, c.z + Math.sin(a0) * rzW * rf],
+            [c.x + Math.cos(a1) * rxW * rf, W + 0.03, c.z + Math.sin(a1) * rzW * rf],
+            'teal',
+            0
+          );
+        });
+      }
+      // Subtle hanging cenote tree roots / liana vines draping down the karst cliff walls
+      for (let v = 0; v < 12; v++) {
+        const ang = (v * Math.PI * 2) / 12 + (rng() - 0.5) * 0.25;
+        const vr = 0.96;
+        const vx = c.x + Math.cos(ang) * c.rx * vr;
+        const vz = c.z + Math.sin(ang) * c.rz * vr;
+        const dropTop = H(c.x + Math.cos(ang) * c.rx * 1.05, c.z + Math.sin(ang) * c.rz * 1.05);
+        const dropBot = W + 0.4 + rng() * 1.4;
+        addLineWorld([vx, dropTop, vz], [vx * 0.98 + c.x * 0.02, dropBot, vz * 0.98 + c.z * 0.02], 'rust', 0);
+      }
+    }
+    addCenoteWater(CENOTE_SAGRADO);
+    addCenoteWater(CENOTE_XTOLOC);
+
+    // Sliced Geological Limestone Karst & Aquifer Strata Skirts around all 4 cut walls
+    const STRATA_Y = [-8.5, -7.3, -6.3, -5.2, -4.2, -3.1, -2.0, -0.9, 0.2, 1.2, 2.4];
+    const STRATA_HEX = [
+      0x8e8373, // Deep basal limestone
+      0x9d917f, // Lower dolomitic limestone
+      0x7c9796, // Saturated Yucatán Aquifer zone (lower)
+      0x88a3a2, // Saturated Yucatán Aquifer zone (upper, right below water table W = -4.2)
+      0xbeb198, // Pale porous Carrillo Puerto karst limestone
+      0xcfc3aa, // Buff limestone bed
+      0xc2b59b, // Caliche / sascab marl band
+      0xd6cbb3, // Pale Yucatecan surface limestone
+      0xc7ba9f, // Root-weathered limestone cap
+      0xbcb096
+    ];
+    const FACE_SHADE = [0.0, -0.07, -0.07, 0.0];
+
+    for (let s = 0; s < 4; s++) {
+      const edgePt = i => {
+        const u = -B + i * stepT;
+        const xz = [[u, B], [B, u], [u, -B], [-B, u]][s];
+        const idx =
+          s === 0 ? N * (N + 1) + i :
+          s === 1 ? i * (N + 1) + N :
+          s === 2 ? i :
+          i * (N + 1);
+        return { x: xz[0], z: xz[1], h: heights[idx] };
+      };
+
+      for (let i = 0; i < N; i++) {
+        const a = edgePt(i);
+        const b = edgePt(i + 1);
+
+        for (let k = 0; k < STRATA_Y.length - 1; k++) {
+          const y0 = STRATA_Y[k], y1 = STRATA_Y[k + 1];
+          const ta = Math.min(Math.max(a.h, y0), y1);
+          const tb = Math.min(Math.max(b.h, y0), y1);
+          if (ta <= y0 && tb <= y0) continue;
+
+          pushQuadWorld([a.x, y0, a.z], [b.x, y0, b.z], [b.x, tb, b.z], [a.x, ta, a.z], STRATA_HEX[k], FACE_SHADE[s]);
+          if (ta >= y1 && tb >= y1) {
+            // Mark the subterranean Yucatán Aquifer water table horizon (W = -4.2) in crisp teal ink!
+            const isWaterTable = Math.abs(y1 - W) < 0.05;
+            addLineWorld([a.x, y1, a.z], [b.x, y1, b.z], isWaterTable ? 'teal' : 'fine', 0);
+          }
+        }
+
+        // Bold cutaway silhouette lines along top edge, bottom floor, and vertical corners
+        addLineWorld([a.x, a.h, a.z], [b.x, b.h, b.z], 'bold', 0);
+        addLineWorld([a.x, Y_BOT, a.z], [b.x, Y_BOT, b.z], 'bold', 0);
+        if (i === 0) addLineWorld([a.x, Y_BOT, a.z], [a.x, a.h, a.z], 'bold', 0);
+        if (i === N - 1) addLineWorld([b.x, Y_BOT, b.z], [b.x, b.h, b.z], 'bold', 0);
+      }
+    }
+
+    // =========================================================================
+    // 5. MAYA-TOLTEC ARCHITECTURAL KIT-OF-PARTS (TALUD-TABLERO, STAIRS, TEMPLES)
+    // =========================================================================
+    function makeFrame(ox, oy, oz, yaw = 0) {
+      const c = Math.cos(yaw), s = Math.sin(yaw);
+      return {
+        pt(lx, ly, lz) {
+          return [ox + lx * c - lz * s, oy + ly, oz + lx * s + lz * c];
+        },
+        nrm(nx, ny, nz) {
+          return [nx * c - nz * s, ny, nx * s + nz * c];
+        }
+      };
+    }
+
+    /**
+     * Oriented rectangular masonry box inside a local frame
+     */
+    function addFrameBox(fr, x, y, z, w, h, d, palName = 'stone', opts = {}) {
+      const x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
+      const p000 = fr.pt(x0, y0, z0), p100 = fr.pt(x1, y0, z0), p110 = fr.pt(x1, y1, z0), p010 = fr.pt(x0, y1, z0);
+      const p001 = fr.pt(x0, y0, z1), p101 = fr.pt(x1, y0, z1), p111 = fr.pt(x1, y1, z1), p011 = fr.pt(x0, y1, z1);
+
+      const nFront = fr.nrm(0, 0, 1);
+      const nBack  = fr.nrm(0, 0, -1);
+      const nRight = fr.nrm(1, 0, 0);
+      const nLeft  = fr.nrm(-1, 0, 0);
+
+      pushQuadWorld(p001, p101, p111, p011, computeDirectionalHex(palName, ...nFront), 0);
+      pushQuadWorld(p101, p100, p110, p111, computeDirectionalHex(palName, ...nRight), 0);
+      pushQuadWorld(p011, p111, p110, p010, PALETTE[palName].top, 0);
+      pushQuadWorld(p000, p100, p101, p001, PALETTE[palName].bot, 0);
+      pushQuadWorld(p100, p000, p010, p110, computeDirectionalHex(palName, ...nBack), 0);
+      pushQuadWorld(p000, p001, p011, p010, computeDirectionalHex(palName, ...nLeft), 0);
+
+      const lyr = opts.edgeLayer || 'medium';
+      const ov = opts.overshoot !== undefined ? opts.overshoot : 0.018;
+      if (opts.edges !== false) {
+        const edges = [
+          [p000, p100], [p100, p101], [p101, p001], [p001, p000],
+          [p010, p110], [p110, p111], [p111, p011], [p011, p010],
+          [p000, p010], [p100, p110], [p101, p111], [p001, p011]
+        ];
+        edges.forEach(e => addLineWorld(e[0], e[1], lyr, ov));
+      }
+      if (opts.courses) {
+        const cLayer = palName === 'terracotta' ? 'rust' : 'fine';
+        for (let i = 1; i < opts.courses; i++) {
+          const cy = y0 + (h * i) / opts.courses;
+          addLineWorld(fr.pt(x0, cy, z1 + 0.01), fr.pt(x1, cy, z1 + 0.01), cLayer, 0);
+          addLineWorld(fr.pt(x1 + 0.01, cy, z0), fr.pt(x1 + 0.01, cy, z1), cLayer, 0);
+          addLineWorld(fr.pt(x0, cy, z0 - 0.01), fr.pt(x1, cy, z0 - 0.01), cLayer, 0);
+          addLineWorld(fr.pt(x0 - 0.01, cy, z0), fr.pt(x0 - 0.01, cy, z1), cLayer, 0);
         }
       }
     }
-    /**
-     * Adds a multi-course Romanesque overhanging circular cornice band (COURSES)
-     */
-    function addCircularCornice(y, h, rBase, segs = 36, opts = {}) {
-      const over = opts.overhang || 0.28;
-      const rInner = opts.rInner || 0;
-      const h1 = h * 0.24;
-      const h2 = h * 0.48;
-      const h3 = h * 0.28;
 
-      // Lower stone astragal ring
-      addCylinder(y, y + h1, rBase + over * 0.35, rInner, segs, 'cream', { edgeLayer: 'medium' });
-      // Middle terracotta polychrome frieze with brick courses
-      addCylinder(y + h1, y + h1 + h2, rBase + over * 0.65, rInner, segs, opts.dark ? 'brickDark' : 'terracotta', {
-        edgeLayer: 'medium',
-        courses: 2,
-        hatchLayer: 'rust'
+    /**
+     * Sloped Maya Talud-Tablero Pyramid Tier centered at (cx, y0, cz)
+     * Includes recessed Maya tablero wall panels + directional right-side ink hatching
+     */
+    function addTaludTier(fr, cx, y0, cz, wBot, dBot, wTop, dTop, h, palName = 'stone', opts = {}) {
+      const y1 = y0 + h;
+      const hw0 = wBot * 0.5, hd0 = dBot * 0.5;
+      const hw1 = wTop * 0.5, hd1 = dTop * 0.5;
+
+      const b0 = fr.pt(cx - hw0, y0, cz - hd0);
+      const b1 = fr.pt(cx + hw0, y0, cz - hd0);
+      const b2 = fr.pt(cx + hw0, y0, cz + hd0);
+      const b3 = fr.pt(cx - hw0, y0, cz + hd0);
+
+      const t0 = fr.pt(cx - hw1, y1, cz - hd1);
+      const t1 = fr.pt(cx + hw1, y1, cz - hd1);
+      const t2 = fr.pt(cx + hw1, y1, cz + hd1);
+      const t3 = fr.pt(cx - hw1, y1, cz + hd1);
+
+      const faces = [
+        [b3, b2, t2, t3, fr.nrm(0, 0.35, 1),  'z+', wBot],
+        [b2, b1, t1, t2, fr.nrm(1, 0.35, 0),  'x+', dBot],
+        [b1, b0, t0, t1, fr.nrm(0, 0.35, -1), 'z-', wBot],
+        [b0, b3, t3, t0, fr.nrm(-1, 0.35, 0), 'x-', dBot]
+      ];
+
+      const lyr = opts.edgeLayer || 'medium';
+      faces.forEach(([p0, p1, p2, p3, nrm, tag, span]) => {
+        const hex = computeDirectionalHex(palName, nrm[0], nrm[1], nrm[2]);
+        pushQuadWorld(p0, p1, p2, p3, hex, 0);
+        addLineWorld(p0, p1, lyr, 0.015);
+        addLineWorld(p2, p3, lyr, 0.015);
+        addLineWorld(p0, p3, lyr, 0.015);
+
+        // Recessed Maya Tablero frieze frames along sloped face
+        if (opts.panels && span > 2.2) {
+          const nPan = Math.max(2, Math.floor(span / 2.2));
+          for (let k = 0; k < nPan; k++) {
+            const u0 = (k + 0.16) / nPan;
+            const u1 = (k + 0.84) / nPan;
+            const interp = (A, B, C, D, u, v) => [
+              (A[0] * (1 - u) + B[0] * u) * (1 - v) + (D[0] * (1 - u) + C[0] * u) * v,
+              (A[1] * (1 - u) + B[1] * u) * (1 - v) + (D[1] * (1 - u) + C[1] * u) * v,
+              (A[2] * (1 - u) + B[2] * u) * (1 - v) + (D[2] * (1 - u) + C[2] * u) * v
+            ];
+            const q0 = interp(p0, p1, p2, p3, u0, 0.24);
+            const q1 = interp(p0, p1, p2, p3, u1, 0.24);
+            const q2 = interp(p0, p1, p2, p3, u1, 0.78);
+            const q3 = interp(p0, p1, p2, p3, u0, 0.78);
+            addLineWorld(q0, q1, 'fine', 0);
+            addLineWorld(q1, q2, 'fine', 0);
+            addLineWorld(q2, q3, 'fine', 0);
+            addLineWorld(q3, q0, 'fine', 0);
+          }
+        }
+
+        // Right-side shadow hatching on shaded slopes
+        const dotL = nrm[0] * lightDir.x + nrm[1] * lightDir.y + nrm[2] * lightDir.z;
+        if (dotL < -0.1) {
+          const hCount = Math.max(3, Math.floor(span * 1.4));
+          for (let hIdx = 1; hIdx < hCount; hIdx++) {
+            const u = hIdx / hCount;
+            const hb = [p0[0] + (p1[0] - p0[0]) * u, p0[1] + (p1[1] - p0[1]) * u, p0[2] + (p1[2] - p0[2]) * u];
+            const ht = [p3[0] + (p2[0] - p3[0]) * u, p3[1] + (p2[1] - p3[1]) * u, p3[2] + (p2[2] - p3[2]) * u];
+            addLineWorld(hb, ht, 'fine', 0);
+          }
+        }
       });
-      // Upper overhanging corona slab
-      addCylinder(y + h1 + h2, y + h, rBase + over, rInner, segs, 'cream', {
+
+      // Top platform cap
+      pushQuadWorld(t3, t2, t1, t0, PALETTE[palName].top, 0);
+    }
+
+    /**
+     * Builds a projecting Maya Pyramid Staircase with sloped alfarda balustrades and crisp stone steps
+     */
+    function addMayaStairway(fr, cx, y0, cz, dirX, dirZ, run, rise, width, nSteps, opts = {}) {
+      // Orthogonal tangent along stair width
+      const tx = -dirZ, tz = dirX;
+      const hw = width * 0.5;
+      const alfW = opts.alfardaW || 0.26;
+      const stepHalf = hw - alfW;
+
+      function spt(fwd, up, lat) {
+        return fr.pt(cx + dirX * fwd + tx * lat, y0 + up, cz + dirZ * fwd + tz * lat);
+      }
+
+      // Solid sloped stair core + individual crisp horizontal treads & risers
+      for (let i = 0; i < nSteps; i++) {
+        const f0 = (i / nSteps) * run;
+        const f1 = ((i + 1) / nSteps) * run;
+        const yBot = (i / nSteps) * rise;
+        const yTop = ((i + 1) / nSteps) * rise;
+
+        const rL0 = spt(f0, yBot, -stepHalf), rR0 = spt(f0, yBot, stepHalf);
+        const rR1 = spt(f0, yTop, stepHalf),  rL1 = spt(f0, yTop, -stepHalf);
+        const tR2 = spt(f1, yTop, stepHalf),  tL2 = spt(f1, yTop, -stepHalf);
+
+        const nRiser = fr.nrm(-dirX, 0, -dirZ);
+        pushQuadWorld(rL0, rR0, rR1, rL1, computeDirectionalHex('cream', ...nRiser), 0);
+        pushQuadWorld(rL1, rR1, tR2, tL2, PALETTE.cream.top, 0);
+        addLineWorld(rL1, rR1, i % 4 === 0 ? 'medium' : 'fine', 0);
+      }
+
+      // Flanking Sloped Balustrades (Alfardas)
+      [-1, 1].forEach(side => {
+        const latIn = side * stepHalf;
+        const latOut = side * hw;
+        const hAlf = 0.28;
+        const p00 = spt(0, 0, latIn), p01 = spt(0, 0, latOut);
+        const p10 = spt(0, hAlf, latIn), p11 = spt(0, hAlf, latOut);
+        const q00 = spt(run, rise, latIn), q01 = spt(run, rise, latOut);
+        const q10 = spt(run, rise + hAlf, latIn), q11 = spt(run, rise + hAlf, latOut);
+
+        const nSide = fr.nrm(tx * side, 0.3, tz * side);
+        pushQuadWorld(p01, q01, q11, p11, computeDirectionalHex('stone', ...nSide), 0);
+        pushQuadWorld(p10, p11, q11, q10, PALETTE.stone.top, 0);
+        pushQuadWorld(p00, p01, p11, p10, computeDirectionalHex('stone', ...fr.nrm(-dirX, 0, -dirZ)), 0);
+
+        addLineWorld(p11, q11, 'bold', 0.015);
+        addLineWorld(p10, q10, 'bold', 0.015);
+        addLineWorld(p01, q01, 'medium', 0);
+        addLineWorld(p01, p11, 'bold', 0.015);
+        addLineWorld(p10, p11, 'bold', 0.015);
+      });
+
+      // Optional Feathered Serpent Heads (Kukulcán) at the foot of the balustrades!
+      if (opts.serpents) {
+        [-1, 1].forEach(side => {
+          const latMid = side * (stepHalf + alfW * 0.5);
+          const spBase = spt(-0.32, 0, latMid);
+          addFrameBox(
+            fr,
+            cx + dirX * -0.45 + tx * (latMid - 0.25),
+            y0,
+            cz + dirZ * -0.45 + tz * (latMid - 0.25),
+            0.52,
+            0.46,
+            0.52,
+            'terracotta',
+            { edgeLayer: 'bold' }
+          );
+          addLineWorld(spt(-0.48, 0.2, latMid - 0.16), spt(-0.48, 0.2, latMid + 0.16), 'bold', 0);
+        });
+      }
+    }
+
+    /**
+     * Builds a classic Maya-Toltec Upper Sanctuary Temple with battered base,
+     * recessed dark doorway, twin serpent columns & projecting roof frieze cornice
+     */
+    function addMayaSanctuary(fr, cx, y0, cz, w, d, h, doorDir = 'x-') {
+      // Lower slightly battered limestone wall body
+      addTaludTier(fr, cx, y0, cz, w, d, w * 0.96, d * 0.96, h * 0.58, 'cream', { edgeLayer: 'bold' });
+      // Overhanging carved Maya frieze & terracotta molding cornice
+      addFrameBox(fr, cx - w * 0.52, y0 + h * 0.58, cz - d * 0.52, w * 1.04, h * 0.10, d * 1.04, 'terracotta', {
+        edgeLayer: 'bold'
+      });
+      addFrameBox(fr, cx - w * 0.50, y0 + h * 0.68, cz - d * 0.50, w * 1.00, h * 0.24, d * 1.00, 'stone', {
+        edgeLayer: 'bold',
+        courses: 2
+      });
+      // Upper roof cornice & roof almenas (crest)
+      addFrameBox(fr, cx - w * 0.53, y0 + h * 0.92, cz - d * 0.53, w * 1.06, h * 0.08, d * 1.06, 'cream', {
         edgeLayer: 'bold'
       });
 
-      // Radial dentil brackets under the cornice overhang
-      const bracketCount = segs * 2;
-      for (let i = 0; i < bracketCount; i++) {
-        const ang = (i * Math.PI * 2) / bracketCount;
-        const c = Math.cos(ang), s = Math.sin(ang);
-        addLineWorld(
-          subjectPoint(c * rBase, y + h1, s * rBase),
-          subjectPoint(c * (rBase + over * 0.92), y + h1 + h2, s * (rBase + over * 0.92)),
-          'medium',
-          0
-        );
+      // Recessed dark entrance portals on specified side(s)
+      const doorH = h * 0.48;
+      if (doorDir === 'all4' || doorDir === 'x-') {
+        addFrameBox(fr, cx - w * 0.50, y0, cz - d * 0.22, 0.18, doorH, d * 0.44, 'dark', { edgeLayer: 'bold' });
+      }
+      if (doorDir === 'all4' || doorDir === 'x+') {
+        addFrameBox(fr, cx + w * 0.32, y0, cz - d * 0.22, 0.18, doorH, d * 0.44, 'dark', { edgeLayer: 'bold' });
+      }
+      if (doorDir === 'all4' || doorDir === 'z+') {
+        addFrameBox(fr, cx - w * 0.22, y0, cz + d * 0.32, w * 0.44, doorH, 0.18, 'dark', { edgeLayer: 'bold' });
+      }
+      if (doorDir === 'all4' || doorDir === 'z-') {
+        addFrameBox(fr, cx - w * 0.22, y0, cz - d * 0.50, w * 0.44, doorH, 0.18, 'dark', { edgeLayer: 'bold' });
       }
     }
+
     /**
-     * Adds a classical Romanesque column with base plinth, fluted shaft, and capital
+     * Builds a radial Maya Step Pyramid (like El Castillo or El Osario)
      */
-    function addColumn(angle, radius, y0, y1, colRadius = 0.22, opts = {}) {
-      const cx = Math.cos(angle) * radius;
-      const cz = Math.sin(angle) * radius;
-      const h = y1 - y0;
-      const baseH = Math.min(0.42, h * 0.12);
-      const capH = Math.min(0.52, h * 0.15);
-      const shaftY0 = y0 + baseH;
-      const shaftY1 = y1 - capH;
+    function addMayaRadialPyramid(fr, cx, y0, cz, baseW, totalH, nTiers, opts = {}) {
+      const templeH = totalH * 0.22;
+      const pyrH = totalH - templeH;
+      const tierH = pyrH / nTiers;
+      const topW = baseW * 0.38;
 
-      // Helper for small local prism around (cx, cz) aligned radially
-      function addLocalPrism(py0, py1, halfW, halfD, palName, lyr = 'medium') {
-        const uX = Math.cos(angle), uZ = Math.sin(angle); // Radial outward
-        const vX = -uZ, vZ = uX;                          // Tangential
+      for (let t = 0; t < nTiers; t++) {
+        const f0 = t / nTiers;
+        const f1 = (t + 1) / nTiers;
+        const wBot = baseW - (baseW - topW) * f0;
+        const wTop = wBot - (baseW - topW) / (nTiers * 1.35);
+        addTaludTier(fr, cx, y0 + t * tierH, cz, wBot, wBot, wTop, wTop, tierH, t % 3 === 1 ? 'limestone' : 'stone', {
+          edgeLayer: t === 0 || t === nTiers - 1 ? 'bold' : 'medium',
+          panels: opts.panels !== false
+        });
+      }
 
-        const corners = [
-          [cx + uX * halfD - vX * halfW, cz + uZ * halfD - vZ * halfW],
-          [cx + uX * halfD + vX * halfW, cz + uZ * halfD + vZ * halfW],
-          [cx - uX * halfD + vX * halfW, cz - uZ * halfD + vZ * halfW],
-          [cx - uX * halfD - vX * halfW, cz - uZ * halfD - vZ * halfW]
-        ];
-        const normals = [
-          [uX, uZ],
-          [vX, vZ],
-          [-uX, -uZ],
-          [-vX, -vZ]
-        ];
+      // Four Cardinal Radial Stairways climbing from plaza base up to summit platform!
+      const stairW = baseW * 0.21;
+      const stairRun = (baseW - topW) * 0.52 + 0.65;
+      const nSteps = opts.nSteps || 18;
+      // North (-X), South (+X), East (-Z), West (+Z)
+      addMayaStairway(fr, cx - baseW * 0.5 - 0.55, y0, cz, +1, 0, stairRun, pyrH, stairW, nSteps, {
+        serpents: opts.serpents
+      });
+      addMayaStairway(fr, cx + baseW * 0.5 + 0.55, y0, cz, -1, 0, stairRun, pyrH, stairW, nSteps);
+      addMayaStairway(fr, cx, y0, cz - baseW * 0.5 - 0.55, 0, +1, stairRun, pyrH, stairW, nSteps);
+      addMayaStairway(fr, cx, y0, cz + baseW * 0.5 + 0.55, 0, -1, stairRun, pyrH, stairW, nSteps);
 
-        const botPts = corners.map(c => subjectPoint(c[0], py0, c[1]));
-        const topPts = corners.map(c => subjectPoint(c[0], py1, c[1]));
+      // Summit Temple of Kukulcán
+      addMayaSanctuary(fr, cx, y0 + pyrH, cz, topW * 0.78, topW * 0.78, templeH, 'all4');
+    }
 
-        for (let f = 0; f < 4; f++) {
-          const nf = (f + 1) % 4;
-          const col = computeDirectionalHex(palName, normals[f][0], 0, normals[f][1]);
-          pushQuadWorld(botPts[f], botPts[nf], topPts[nf], topPts[f], col, 0);
-          addLineWorld(botPts[f], botPts[nf], lyr, 0.015);
-          addLineWorld(topPts[f], topPts[nf], lyr, 0.015);
-          addLineWorld(botPts[f], topPts[f], lyr, 0.015);
+    // =========================================================================
+    // 6. ASSEMBLING CHICHÉN ITZÁ'S CEREMONIAL MONUMENTS
+    // =========================================================================
+    const yTerrace = 2.05; // Leveled surface of Gran Nivelación (Great North Terrace)
+    const frMain = makeFrame(0, 0, 0, YAW_MAIN);
+
+    // -------------------------------------------------------------------------
+    // 6A. GRAN NIVELACIÓN (THE GREAT NORTH TERRACE RETAINING WALLS & DECK)
+    // -------------------------------------------------------------------------
+    const tLx0 = -13.0, tLx1 = 10.6;
+    const tLz0 = -24.6, tLz1 = 20.2;
+    // Lower stepped stone foundation skirt rising out of natural karst plain
+    addFrameBox(frMain, tLx0 - 0.45, 0.4, tLz0 - 0.45, (tLx1 - tLx0) + 0.9, yTerrace - 0.8, (tLz1 - tLz0) + 0.9, 'limestone', {
+      edgeLayer: 'bold'
+    });
+    // Main Great Terrace masonry deck
+    addFrameBox(frMain, tLx0, 0.6, tLz0, tLx1 - tLx0, yTerrace - 0.6, tLz1 - tLz0, 'plaza', {
+      edgeLayer: 'bold'
+    });
+    // Subtle limestone flagstone grid across Great North Terrace
+    for (let px = tLx0 + 2.0; px < tLx1; px += 2.6) {
+      addLineWorld(frMain.pt(px, yTerrace + 0.02, tLz0 + 0.4), frMain.pt(px, yTerrace + 0.02, tLz1 - 0.4), 'fine', 0);
+    }
+    for (let pz = tLz0 + 2.0; pz < tLz1; pz += 2.6) {
+      addLineWorld(frMain.pt(tLx0 + 0.4, yTerrace + 0.02, pz), frMain.pt(tLx1 - 0.4, yTerrace + 0.02, pz), 'fine', 0);
+    }
+
+    // -------------------------------------------------------------------------
+    // 6B. EL CASTILLO (TEMPLE OF KUKULCÁN) — 9 TIERS + 4 STAIRWAYS + SERPENTS
+    // -------------------------------------------------------------------------
+    addMayaRadialPyramid(frMain, 0.0, yTerrace, 0.0, 11.2, 6.25, 9, {
+      nSteps: 22,
+      panels: true,
+      serpents: true
+    });
+
+    // -------------------------------------------------------------------------
+    // 6C. PLATFORM OF VENUS, EAGLES & JAGUARS, & TZOMPANTLI
+    // -------------------------------------------------------------------------
+    // Platform of Venus (on North axis facing Sacbé 1)
+    addTaludTier(frMain, -9.5, yTerrace, 0.0, 3.8, 3.8, 3.3, 3.3, 0.72, 'stone', {
+      edgeLayer: 'bold',
+      panels: true
+    });
+    addMayaStairway(frMain, -11.6, yTerrace, 0.0, +1, 0, 0.65, 0.72, 1.0, 5);
+    addMayaStairway(frMain, -7.4, yTerrace, 0.0, -1, 0, 0.65, 0.72, 1.0, 5);
+    addMayaStairway(frMain, -9.5, yTerrace, -2.1, 0, +1, 0.65, 0.72, 1.0, 5);
+    addMayaStairway(frMain, -9.5, yTerrace, +2.1, 0, -1, 0.65, 0.72, 1.0, 5);
+
+    // Platform of the Eagles and Jaguars (NW of El Castillo)
+    addTaludTier(frMain, -5.2, yTerrace, 6.6, 3.1, 3.1, 2.7, 2.7, 0.68, 'terracotta', {
+      edgeLayer: 'bold',
+      panels: true
+    });
+    addMayaStairway(frMain, -5.2, yTerrace, 4.85, 0, +1, 0.55, 0.68, 0.9, 4);
+    addMayaStairway(frMain, -5.2, yTerrace, 8.35, 0, -1, 0.55, 0.68, 0.9, 4);
+
+    // Tzompantli (Platform of the Skulls) right beside the Great Ball Court
+    addTaludTier(frMain, -5.0, yTerrace, 10.3, 4.2, 2.2, 3.8, 1.9, 0.62, 'limestone', {
+      edgeLayer: 'bold',
+      panels: true
+    });
+
+    // -------------------------------------------------------------------------
+    // 6D. THE GREAT BALL COURT (GRAN JUEGO DE PELOTA) & TEMPLE OF THE JAGUARS
+    // -------------------------------------------------------------------------
+    const bcX = -3.8, bcZ = 15.6;
+    const bcLen = 17.6, bcWallH = 1.85;
+    // West & East massive parallel ball-court walls
+    [-1, 1].forEach(side => {
+      const wz = bcZ + side * 2.55;
+      addFrameBox(frMain, bcX - bcLen * 0.42, yTerrace, wz - 0.85, bcLen * 0.84, bcWallH, 1.7, 'stone', {
+        edgeLayer: 'bold',
+        courses: 4
+      });
+      // Sloped inner playing bench apron (talud) along alley floor
+      const benchIn = wz - side * 1.45;
+      const benchEdge = wz - side * 0.85;
+      const pB0 = frMain.pt(bcX - bcLen * 0.42, yTerrace, benchIn);
+      const pB1 = frMain.pt(bcX + bcLen * 0.42, yTerrace, benchIn);
+      const pT1 = frMain.pt(bcX + bcLen * 0.42, yTerrace + 0.55, benchEdge);
+      const pT0 = frMain.pt(bcX - bcLen * 0.42, yTerrace + 0.55, benchEdge);
+      pushQuadWorld(pB0, pB1, pT1, pT0, computeDirectionalHex('cream', ...frMain.nrm(0, 0.5, -side)), 0);
+      addLineWorld(pB0, pB1, 'medium', 0);
+      addLineWorld(pT0, pT1, 'medium', 0);
+
+      // Carved stone ball-court scoring ring jutting from center of inner wall!
+      const ringZ = wz - side * 1.05;
+      addFrameBox(frMain, bcX - 0.16, yTerrace + 1.25, ringZ - 0.16, 0.32, 0.34, 0.32, 'terracotta', {
+        edgeLayer: 'bold'
+      });
+    });
+
+    // North Temple (Temple of the Bearded Man) & South Temple closing the I-shaped court
+    addTaludTier(frMain, bcX - bcLen * 0.48, yTerrace, bcZ, 1.6, 5.2, 1.4, 4.8, 0.65, 'stone', { edgeLayer: 'bold' });
+    addMayaSanctuary(frMain, bcX - bcLen * 0.48, yTerrace + 0.65, bcZ, 1.2, 2.8, 1.15, 'x+');
+
+    addTaludTier(frMain, bcX + bcLen * 0.48, yTerrace, bcZ, 1.8, 6.8, 1.5, 6.4, 0.65, 'stone', { edgeLayer: 'bold' });
+    addMayaSanctuary(frMain, bcX + bcLen * 0.48, yTerrace + 0.65, bcZ, 1.3, 4.8, 1.15, 'x-');
+
+    // Upper & Lower Temple of the Jaguars perched on the SE corner of the East Wall!
+    addMayaSanctuary(frMain, bcX + 5.8, yTerrace + bcWallH, bcZ - 2.55, 2.5, 1.75, 1.65, 'z-');
+    addMayaSanctuary(frMain, bcX + 5.8, yTerrace, bcZ - 1.05, 1.9, 1.2, 1.25, 'z-');
+
+    // -------------------------------------------------------------------------
+    // 6E. TEMPLE OF THE WARRIORS & GROUP OF A THOUSAND COLUMNS (EAST PLAZA)
+    // -------------------------------------------------------------------------
+    const twX = -2.2, twZ = -13.8;
+    // 4-Tier Stepped Pyramid
+    for (let t = 0; t < 4; t++) {
+      const wT = 7.4 - t * 0.95;
+      const dT = 7.4 - t * 0.95;
+      addTaludTier(frMain, twX, yTerrace + t * 0.72, twZ, wT, dT, wT * 0.94, dT * 0.94, 0.72, 'stone', {
+        edgeLayer: t === 0 || t === 3 ? 'bold' : 'medium',
+        panels: true
+      });
+    }
+    // Grand West Stairway facing El Castillo across the Northwest Colonnade
+    addMayaStairway(frMain, twX, yTerrace, twZ + 4.4, 0, -1, 2.55, 2.88, 1.85, 11);
+    // Summit Temple of the Warriors with sculpted serpent-column portal
+    addMayaSanctuary(frMain, twX, yTerrace + 2.88, twZ - 0.3, 3.6, 3.4, 1.65, 'z+');
+
+    // Group of a Thousand Columns (Northwest Colonnade + South/East Colonnades + El Mercado)
+    function addColumnHall(x0, z0, nx, nz, spacing, colH = 0.92, hasLintel = false) {
+      for (let ix = 0; ix < nx; ix++) {
+        for (let iz = 0; iz < nz; iz++) {
+          const cx = x0 + ix * spacing;
+          const cz = z0 + iz * spacing;
+          addFrameBox(frMain, cx - 0.13, yTerrace + 0.15, cz - 0.13, 0.26, colH, 0.26, 'cream', {
+            edgeLayer: 'medium',
+            overshoot: 0
+          });
         }
-        pushQuadWorld(topPts[0], topPts[1], topPts[2], topPts[3], PALETTE[palName].top, 0);
-        pushQuadWorld(botPts[3], botPts[2], botPts[1], botPts[0], PALETTE[palName].bot, 0);
       }
-
-      // 1. Moulded column base pedestal
-      addLocalPrism(y0, y0 + baseH * 0.55, colRadius * 1.45, colRadius * 1.45, 'stone', 'medium');
-      addLocalPrism(y0 + baseH * 0.55, shaftY0, colRadius * 1.2, colRadius * 1.2, 'terracotta', 'medium');
-
-      // 2. Octagonal/cylindrical column shaft with vertical ink fluting
-      const shaftSegs = 6;
-      for (let s = 0; s < shaftSegs; s++) {
-        const a0 = angle + (s * Math.PI * 2) / shaftSegs;
-        const a1 = angle + ((s + 1) * Math.PI * 2) / shaftSegs;
-        const nx = Math.cos((a0 + a1) * 0.5), nz = Math.sin((a0 + a1) * 0.5);
-
-        const p00 = subjectPoint(cx + Math.cos(a0) * colRadius, shaftY0, cz + Math.sin(a0) * colRadius);
-        const p10 = subjectPoint(cx + Math.cos(a1) * colRadius, shaftY0, cz + Math.sin(a1) * colRadius);
-        const p11 = subjectPoint(cx + Math.cos(a1) * colRadius, shaftY1, cz + Math.sin(a1) * colRadius);
-        const p01 = subjectPoint(cx + Math.cos(a0) * colRadius, shaftY1, cz + Math.sin(a0) * colRadius);
-
-        pushQuadWorld(p00, p10, p11, p01, computeDirectionalHex(opts.shaftPalette || 'cream', nx, 0, nz), 0.02);
-        addLineWorld(p00, p01, s % 2 === 0 ? 'bold' : 'fine', 0.01);
-      }
-
-      // 3. Corinthian bell capital & terracotta/cream abacus block
-      addLocalPrism(shaftY1, shaftY1 + capH * 0.58, colRadius * 1.32, colRadius * 1.32, 'cream', 'medium');
-      addLocalPrism(shaftY1 + capH * 0.58, y1, colRadius * 1.58, colRadius * 1.58, 'terracotta', 'bold');
-    }
-    // =========================================================================
-    // 5. SITE FURNITURE HELPERS
-    // =========================================================================
-    function addWorldBox(x, y, z, w, h, d, palName = 'plaza', lyr = 'bold') {
-      const pal = PALETTE[palName] || PALETTE.plaza;
-      const x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
-      const p000 = [x0, y0, z0], p100 = [x1, y0, z0], p110 = [x1, y1, z0], p010 = [x0, y1, z0];
-      const p001 = [x0, y0, z1], p101 = [x1, y0, z1], p111 = [x1, y1, z1], p011 = [x0, y1, z1];
-
-      pushQuadWorld(p001, p101, p111, p011, pal.lit, 0);
-      pushQuadWorld(p101, p100, p110, p111, pal.shade, 0);
-      pushQuadWorld(p011, p111, p110, p010, pal.top, 0);
-      pushQuadWorld(p000, p100, p101, p001, pal.bot, 0);
-      pushQuadWorld(p100, p000, p010, p110, pal.shade, 0);
-      pushQuadWorld(p000, p001, p011, p010, pal.mid, 0);
-
-      const edges = [
-        [p000, p100], [p100, p101], [p101, p001], [p001, p000],
-        [p010, p110], [p110, p111], [p111, p011], [p011, p010],
-        [p000, p010], [p100, p110], [p101, p111], [p001, p011]
-      ];
-      edges.forEach(e => addLineWorld(e[0], e[1], lyr, 0.02));
-    }
-
-    function addDashedLineWorld(p1, p2, dashLen = 0.5, gapLen = 0.4) {
-      const dx = p2[0] - p1[0], dy = p2[1] - p1[1], dz = p2[2] - p1[2];
-      const dist = Math.hypot(dx, dy, dz);
-      const ux = dx / dist, uy = dy / dist, uz = dz / dist;
-      let cur = 0;
-      while (cur < dist) {
-        const end = Math.min(dist, cur + dashLen);
-        addLineWorld(
-          [p1[0] + ux * cur, p1[1] + uy * cur, p1[2] + uz * cur],
-          [p1[0] + ux * end, p1[1] + uy * end, p1[2] + uz * end],
-          'faint',
-          0
+      // Low stepped colonnade dais base
+      addFrameBox(frMain, x0 - 0.45, yTerrace, z0 - 0.45, (nx - 1) * spacing + 0.9, 0.15, (nz - 1) * spacing + 0.9, 'stone', {
+        edgeLayer: 'medium'
+      });
+      if (hasLintel) {
+        addFrameBox(
+          frMain,
+          x0 - 0.3,
+          yTerrace + 0.15 + colH,
+          z0 - 0.3,
+          (nx - 1) * spacing + 0.6,
+          0.22,
+          (nz - 1) * spacing + 0.6,
+          'limestone',
+          { edgeLayer: 'bold' }
         );
-        cur += dashLen + gapLen;
       }
     }
 
-    function addSketchShrub(sx, sz) {
-      const r = 0.24 + rng() * 0.09;
-      const h = 0.35 + rng() * 0.12;
-      addLineWorld([sx, -0.45, sz], [sx, -0.45 + h * 0.4, sz], 'medium', 0);
-      addLineWorld([sx - r * 0.8, -0.44, sz + r * 0.5], [sx + r * 0.9, -0.44, sz - r * 0.5], 'fine', 0);
-      const cy = -0.45 + h;
-      addLineWorld([sx - r, cy, sz], [sx, cy + r * 0.7, sz - r], 'medium', 0.01);
-      addLineWorld([sx, cy + r * 0.7, sz - r], [sx + r, cy, sz], 'medium', 0.01);
-      addLineWorld([sx + r, cy, sz], [sx, cy - r * 0.4, sz + r], 'medium', 0.01);
-      addLineWorld([sx, cy - r * 0.4, sz + r], [sx - r, cy, sz], 'medium', 0.01);
+    // Northwest Colonnade right in front of Temple of the Warriors
+    addColumnHall(-5.6, -9.6, 10, 4, 0.72, 0.96, false);
+    // West & North Thousand Columns Grid south of the pyramid
+    addColumnHall(2.4, -18.2, 8, 11, 0.75, 0.88, false);
+    // El Mercado (Sunken Courtyard Colonnade on SE corner of Great Terrace)
+    addTaludTier(frMain, 7.6, yTerrace, -21.4, 4.4, 4.4, 4.0, 4.0, 0.45, 'stone', { edgeLayer: 'bold' });
+    addColumnHall(6.2, -22.8, 5, 5, 0.72, 0.78, true);
+
+    // -------------------------------------------------------------------------
+    // 6F. SACBÉ 1 (WHITE CAUSEWAY) & OFFERING PLATFORM AT SACRED CENOTE
+    // -------------------------------------------------------------------------
+    const sacbeX0 = -12.2, sacbeZ0 = -3.7;
+    const sacbeX1 = -23.0, sacbeZ1 = -3.8;
+    const sacbeSteps = 12;
+    for (let s = 0; s < sacbeSteps; s++) {
+      const t0 = s / sacbeSteps, t1 = (s + 1) / sacbeSteps;
+      const sx0 = sacbeX0 + (sacbeX1 - sacbeX0) * t0;
+      const sx1 = sacbeX0 + (sacbeX1 - sacbeX0) * t1;
+      const sz = sacbeZ0 + (sacbeZ1 - sacbeZ0) * ((t0 + t1) * 0.5);
+      const yGround = Math.max(0.85, H((sx0 + sx1) * 0.5, sz));
+      const yTopRoad = yGround + 0.35 + (1 - t0) * 0.3 * (s < 2 ? 1 : 0);
+      const minX = Math.min(sx0, sx1), lenX = Math.abs(sx1 - sx0);
+      pushQuadWorld(
+        [minX, yTopRoad, sz - 0.85],
+        [minX + lenX, yTopRoad, sz - 0.85],
+        [minX + lenX, yTopRoad, sz + 0.85],
+        [minX, yTopRoad, sz + 0.85],
+        PALETTE.cream.top,
+        0
+      );
+      // Raised white stone causeway curbs
+      addLineWorld([minX, yTopRoad + 0.02, sz - 0.85], [minX + lenX, yTopRoad + 0.02, sz - 0.85], 'bold', 0);
+      addLineWorld([minX, yTopRoad + 0.02, sz + 0.85], [minX + lenX, yTopRoad + 0.02, sz + 0.85], 'bold', 0);
     }
 
+    // Ceremonial Rim Platform & Temazcal (Sweatbath) overlooking South edge of Sacred Cenote!
+    const rimY = H(-23.0, -3.8);
+    const frRim = makeFrame(-23.0, rimY, -3.8, 0.05);
+    addFrameBox(frRim, -0.7, -0.3, -1.6, 1.5, 0.65, 3.2, 'cream', { edgeLayer: 'bold' });
+    addMayaSanctuary(frRim, 0.9, 0.0, -1.8, 1.6, 1.8, 1.15, 'x-'); // Temazcal purification shrine
+
+    // -------------------------------------------------------------------------
+    // 6G. SOUTHERN PRECINCT: EL OSARIO, CENOTE XTOLOC SHRINE, & EL CARACOL
+    // -------------------------------------------------------------------------
+    // 1. El Osario (High Priest's Grave) — smaller 7-tier radial step pyramid
+    const yOsario = H(19.2, 6.5) - 0.1;
+    const frOsario = makeFrame(19.2, yOsario, 6.5, YAW_MAIN);
+    addMayaRadialPyramid(frOsario, 0, 0, 0, 6.4, 3.55, 7, { nSteps: 14, panels: true });
+
+    // 2. Temple of Xtoloc overlooking West rim of Cenote Xtoloc
+    const yXtolocT = H(21.5, -0.6) - 0.1;
+    const frXtoT = makeFrame(21.5, yXtolocT, -0.6, YAW_MAIN);
+    addTaludTier(frXtoT, 0, 0, 0, 2.8, 3.4, 2.5, 3.1, 0.55, 'stone', { edgeLayer: 'bold' });
+    addMayaSanctuary(frXtoT, 0, 0.55, 0, 2.1, 2.6, 1.25, 'z-');
+
+    // 3. El Caracol (The Maya Observatory) — Skewed at real-life 27.5° North of West!
+    const yCaracol = H(29.8, 11.2) - 0.15;
+    const yawCaracol = (27.5 * Math.PI) / 180;
+    const frCaracol = makeFrame(29.8, yCaracol, 11.2, yawCaracol);
+
+    // Broad Lower Rectangular Platform & Grand Western Stairway
+    addTaludTier(frCaracol, 0, 0, 0, 6.6, 8.2, 6.2, 7.8, 1.15, 'stone', { edgeLayer: 'bold', panels: true });
+    addMayaStairway(frCaracol, 0, 0, 4.5, 0, -1, 0.85, 1.15, 2.2, 8, { serpents: false });
+
+    // Upper Square Terrace Platform & Second Stair Flight
+    addTaludTier(frCaracol, 0, 1.15, -0.4, 4.4, 4.4, 4.1, 4.1, 0.95, 'limestone', { edgeLayer: 'bold', panels: true });
+    addMayaStairway(frCaracol, 0, 1.15, 2.15, 0, -1, 0.65, 0.95, 1.5, 6);
+
+    // Cylindrical Observatory Tower Drum + Double Cornice + Broken Observation Cupola!
+    const yTower0 = 2.10;
+    function addCaracolCylinder(yA, yB, r, segs, palName, opts = {}) {
+      const dA = (Math.PI * 2) / segs;
+      for (let i = 0; i < segs; i++) {
+        const a0 = i * dA, a1 = (i + 1) * dA, aM = (a0 + a1) * 0.5;
+        const p00 = frCaracol.pt(Math.cos(a0) * r, yA, -0.4 + Math.sin(a0) * r);
+        const p10 = frCaracol.pt(Math.cos(a1) * r, yA, -0.4 + Math.sin(a1) * r);
+        const p11 = frCaracol.pt(Math.cos(a1) * r, yB, -0.4 + Math.sin(a1) * r);
+        const p01 = frCaracol.pt(Math.cos(a0) * r, yB, -0.4 + Math.sin(a0) * r);
+        const nw = frCaracol.nrm(Math.cos(aM), 0, Math.sin(aM));
+        pushQuadWorld(p00, p10, p11, p01, computeDirectionalHex(palName, ...nw), 0);
+
+        addLineWorld(p00, p10, opts.edgeLayer || 'medium', 0.01);
+        addLineWorld(p01, p11, opts.edgeLayer || 'medium', 0.01);
+
+        const crossSil = Math.abs(nw[0] * 0.707 - nw[2] * 0.707);
+        if (crossSil > 0.95) addLineWorld(p00, p01, 'bold', 0.015);
+        else if (i % 2 === 0) addLineWorld(p00, p01, 'fine', 0);
+
+        const dotL = nw[0] * lightDir.x + nw[2] * lightDir.z;
+        if (dotL < -0.15) {
+          addLineWorld(
+            frCaracol.pt(Math.cos(aM) * (r + 0.015), yA + 0.04, -0.4 + Math.sin(aM) * (r + 0.015)),
+            frCaracol.pt(Math.cos(aM) * (r + 0.015), yB - 0.04, -0.4 + Math.sin(aM) * (r + 0.015)),
+            'fine',
+            0
+          );
+        }
+
+        // Top disk cap
+        pushTriWorld(p01, p11, frCaracol.pt(0, yB, -0.4), PALETTE[palName].top, 0);
+      }
+    }
+
+    addCaracolCylinder(yTower0, yTower0 + 1.35, 1.85, 20, 'cream', { edgeLayer: 'medium' });
+    addCaracolCylinder(yTower0 + 1.35, yTower0 + 1.56, 2.02, 20, 'terracotta', { edgeLayer: 'bold' }); // 5-member Maya cornice
+    addCaracolCylinder(yTower0 + 1.56, yTower0 + 1.76, 1.98, 20, 'stone', { edgeLayer: 'bold' });
+    // Upper recessed observation chamber with astronomical window slits
+    addCaracolCylinder(yTower0 + 1.76, yTower0 + 2.65, 1.48, 16, 'cream', { edgeLayer: 'bold' });
+    addCaracolCylinder(yTower0 + 2.65, yTower0 + 2.90, 1.32, 16, 'limestone', { edgeLayer: 'medium' });
+    // Astronomical viewing slits on upper turret
+    [0.2, 1.7, 3.3, 4.8].forEach(ang => {
+      const sx = Math.cos(ang) * 1.50, sz = -0.4 + Math.sin(ang) * 1.50;
+      addFrameBox(frCaracol, sx - 0.11, yTower0 + 1.95, sz - 0.11, 0.22, 0.42, 0.22, 'dark', { edgeLayer: 'bold' });
+    });
+
+    // Sacbé connecting South edge of Gran Nivelación -> El Osario -> Caracol
+    for (let st = 0; st < 6; st++) {
+      const px = 11.2 + st * 2.2;
+      const pz = 6.2 + st * 0.4;
+      const py = H(px, pz) + 0.08;
+      addLineWorld([px, py, pz - 0.6], [px + 1.8, H(px + 1.8, pz) + 0.08, pz - 0.6], 'rust', 0);
+      addLineWorld([px, py, pz + 0.6], [px + 1.8, H(px + 1.8, pz) + 0.08, pz + 0.6], 'rust', 0);
+    }
 
     // =========================================================================
-    // 5. EL CASTILLO — nine terraces, four stairways, summit temple
+    // 7. YUCATÁN LOWLAND TROPICAL JUNGLE CANOPY & DRAFTING CONTEXT
     // =========================================================================
-    // Real proportions: base 55.3 m square, pyramid body 24 m, temple to 30 m.
-    // World units: base half-width 15.5, nine terraces of 1.45 each = 13.05.
-    // Each real stairway has 91 steps: 4 x 91 + the top platform = 365, the
-    // days of the year. Drawn steps are representative (30 per stairway);
-    // all four stairways are present and read from any orbit angle.
-    const TERR = 9;              // nine terraces
-    const TH = 1.45;             // terrace height
-    const BASE_HALF = 15.5;      // half-width of the pyramid base
-    const INSET = 1.15;          // horizontal inset per terrace
-    const PYR_H = TERR * TH;     // 13.05 — top platform height
-    const STAIR_N = 30;          // drawn steps per stairway (91 real)
-    const STAIR_HALF = 2.3;      // stairway half-width
-    const STAIR_D0 = 18.35;      // ground distance of first riser from centre
+    function addJungleTree(tx, tz, scale = 1.0) {
+      const ty = H(tx, tz);
+      if (ty < 0.35) return;
+      const r = 0.68 * scale;
+      const h = 1.45 * scale;
+      const trunkH = 0.48 * scale;
 
-    // face: 0 = +z (north), 1 = +x (east), 2 = -z (south), 3 = -x (west)
-    // u = distance out from centre along the face normal, s = lateral offset
-    function facePoint(f, u, y, s) {
-      if (f === 0) return [s, y, u];
-      if (f === 1) return [u, y, s];
-      if (f === 2) return [s, y, -u];
-      return [-u, y, s];
-    }
-    function faceNormal(f) {
-      if (f === 0) return [0, 0, 1];
-      if (f === 1) return [1, 0, 0];
-      if (f === 2) return [0, 0, -1];
-      return [-1, 0, 0];
-    }
+      addLineWorld([tx, ty, tz], [tx, ty + trunkH + 0.15, tz], 'bold', 0);
+      addLineWorld([tx - r * 0.7, ty + 0.03, tz + r * 0.5], [tx + r * 0.85, ty + 0.03, tz - r * 0.4], 'fine', 0);
 
-    // pushQuadWorld with automatic winding so the front face points along n
-    function pushQuadN(p0, p1, p2, p3, hex, nx, ny, nz, shift = 0) {
-      const ux = p1[0] - p0[0], uy = p1[1] - p0[1], uz = p1[2] - p0[2];
-      const vx = p2[0] - p0[0], vy = p2[1] - p0[1], vz = p2[2] - p0[2];
-      const cx = uy * vz - uz * vy, cy = uz * vx - ux * vz, cz = ux * vy - uy * vx;
-      if (cx * nx + cy * ny + cz * nz < 0) pushQuadWorld(p0, p3, p2, p1, hex, shift);
-      else pushQuadWorld(p0, p1, p2, p3, hex, shift);
-    }
-
-    // ---- one terrace: sloped talud, recessed ledge, vertical tablero panel --
-    function addTerrace(k) {
-      const y0 = k * TH, y1 = y0 + TH;
-      const Wk = BASE_HALF - k * INSET;   // face half-width at terrace base
-      const Wk1 = Wk - INSET;             // face half-width at terrace top
-      const talTop = Wk - INSET * 0.5;    // talud top edge half-width
-      const yTal = y0 + TH * 0.60;        // talud top height
-      for (let f = 0; f < 4; f++) {
-        const n = faceNormal(f);
-        const shift = (rng() - 0.5) * 0.014;
-        // talud (battered slope), normal tilted up-slope
-        const talHex = computeDirectionalHex('lime', n[0] * 0.835, 0.55, n[2] * 0.835);
-        pushQuadN(
-          facePoint(f, Wk, y0, -Wk), facePoint(f, Wk, y0, Wk),
-          facePoint(f, talTop, yTal, talTop), facePoint(f, talTop, yTal, -talTop),
-          talHex, n[0] * 0.835, 0.55, n[2] * 0.835, shift);
-        // recessed ledge between talud top and tablero
-        pushQuadN(
-          facePoint(f, talTop, yTal, -talTop), facePoint(f, talTop, yTal, talTop),
-          facePoint(f, Wk1, yTal, Wk1), facePoint(f, Wk1, yTal, -Wk1),
-          PALETTE.lime.top, 0, 1, 0, shift);
-        // tablero (vertical panel)
-        const tabHex = computeDirectionalHex('lime', n[0], n[1], n[2]);
-        pushQuadN(
-          facePoint(f, Wk1, yTal, -Wk1), facePoint(f, Wk1, yTal, Wk1),
-          facePoint(f, Wk1, y1, Wk1), facePoint(f, Wk1, y1, -Wk1),
-          tabHex, n[0], n[1], n[2], shift);
-        // ink: talud top edge + tablero top edge
-        addLineWorld(facePoint(f, talTop, yTal, -talTop), facePoint(f, talTop, yTal, talTop), 'medium', 0.012);
-        addLineWorld(facePoint(f, Wk1, y1, -Wk1), facePoint(f, Wk1, y1, Wk1), 'medium', 0.012);
-        // recessed panel rectangle on the tablero
-        const pu = Wk1 + 0.02, py0 = yTal + 0.09, py1 = y1 - 0.07, ps = Wk1 - 0.42;
-        addLineWorld(facePoint(f, pu, py0, -ps), facePoint(f, pu, py0, ps), 'fine', 0);
-        addLineWorld(facePoint(f, pu, py1, -ps), facePoint(f, pu, py1, ps), 'fine', 0);
-        addLineWorld(facePoint(f, pu, py0, -ps), facePoint(f, pu, py1, -ps), 'fine', 0);
-        addLineWorld(facePoint(f, pu, py0, ps), facePoint(f, pu, py1, ps), 'fine', 0);
-        // shade-side hatching on the talud
-        const lightDot = n[0] * lightDir.x + n[2] * lightDir.z;
-        if (lightDot < -0.12) {
-          for (let j = 0; j < 4; j++) {
-            const s0 = -Wk * 0.62 + j * Wk * 0.38;
-            const a = facePoint(f, Wk - 0.05, y0 + 0.07, s0);
-            const b = facePoint(f, talTop + 0.03, yTal - 0.05, s0 + Wk * 0.10);
-            a[0] += n[0] * 0.02; a[2] += n[2] * 0.02;
-            b[0] += n[0] * 0.02; b[2] += n[2] * 0.02;
-            addLineWorld(a, b, 'fine', 0);
-          }
-        }
+      const yMid = ty + trunkH;
+      const yTop = yMid + h;
+      const pts = [];
+      const segs = 6;
+      for (let i = 0; i < segs; i++) {
+        const ang = (i * Math.PI * 2) / segs + (rng() - 0.5) * 0.32;
+        const rad = r * (0.82 + rng() * 0.34);
+        pts.push([tx + Math.cos(ang) * rad, yMid + rad * 0.2, tz + Math.sin(ang) * rad]);
       }
-      // bold corner profile: talud slope, ledge, tablero rise
-      for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
-        const A = [sx * Wk, y0, sz * Wk];
-        const B = [sx * talTop, yTal, sz * talTop];
-        const C = [sx * Wk1, yTal, sz * Wk1];
-        const D = [sx * Wk1, y1, sz * Wk1];
-        addLineWorld(A, B, 'bold', 0.015);
-        addLineWorld(B, C, 'bold', 0.015);
-        addLineWorld(C, D, 'bold', 0.015);
+      const apex = [tx + (rng() - 0.5) * 0.16, yTop, tz + (rng() - 0.5) * 0.16];
+      for (let i = 0; i < segs; i++) {
+        const p0 = pts[i];
+        const p1 = pts[(i + 1) % segs];
+        const nx = (p0[0] + p1[0]) * 0.5 - tx;
+        const nz = (p0[2] + p1[2]) * 0.5 - tz;
+        const nl = Math.hypot(nx, 0.7, nz) || 1;
+        pushTriWorld(p0, p1, apex, computeDirectionalHex('foliage', nx / nl, 0.7 / nl, nz / nl), 0);
+        addLineWorld(p0, p1, 'medium', 0.01);
+        addLineWorld(p0, apex, i % 2 === 0 ? 'medium' : 'fine', 0);
       }
     }
 
-    // ---- balustrade (alfarda): sloped slab flanking a stairway --------------
-    function addBalustrade(f, side) {
-      const n = faceNormal(f);
-      const sIn = side * STAIR_HALF;
-      const sOut = side * (STAIR_HALF + 0.6);
-      const uF = STAIR_D0 + 0.2;                 // front (ground) end
-      const uB = STAIR_D0 - PYR_H + 0.1;         // top end
-      const HB = 0.95;                           // slab height above slope
-      const yBot = u => STAIR_D0 + 0.2 - u;      // slope line (45 degrees)
-      // lateral outward direction (unit) for shading/winding
-      const pa = facePoint(f, 5, 0, sOut), pb = facePoint(f, 5, 0, sIn);
-      let ln = [pa[0] - pb[0], 0, pa[2] - pb[2]];
-      const ll = Math.hypot(ln[0], ln[2]) || 1; ln = [ln[0] / ll, 0, ln[2] / ll];
-      const sideHex = computeDirectionalHex('lime', ln[0], 0, ln[2]);
-      const topHex = computeDirectionalHex('lime', n[0] * 0.707, 0.707, n[2] * 0.707);
-      // outer side face
-      pushQuadN(facePoint(f, uF, yBot(uF), sOut), facePoint(f, uB, yBot(uB), sOut),
-                facePoint(f, uB, yBot(uB) + HB, sOut), facePoint(f, uF, yBot(uF) + HB, sOut),
-                sideHex, ln[0], 0, ln[2], 0);
-      // inner side face
-      pushQuadN(facePoint(f, uF, yBot(uF), sIn), facePoint(f, uB, yBot(uB), sIn),
-                facePoint(f, uB, yBot(uB) + HB, sIn), facePoint(f, uF, yBot(uF) + HB, sIn),
-                sideHex, -ln[0], 0, -ln[2], -0.02);
-      // sloped top face
-      pushQuadN(facePoint(f, uF, yBot(uF) + HB, sIn), facePoint(f, uF, yBot(uF) + HB, sOut),
-                facePoint(f, uB, yBot(uB) + HB, sOut), facePoint(f, uB, yBot(uB) + HB, sIn),
-                topHex, n[0] * 0.707, 0.707, n[2] * 0.707, 0);
-      // front cap
-      pushQuadN(facePoint(f, uF, yBot(uF), sIn), facePoint(f, uF, yBot(uF), sOut),
-                facePoint(f, uF, yBot(uF) + HB, sOut), facePoint(f, uF, yBot(uF) + HB, sIn),
-                computeDirectionalHex('lime', n[0], 0, n[2]), n[0], 0, n[2], 0);
-      // ink: bold top edge, medium bottom edge on the outer face
-      addLineWorld(facePoint(f, uF, yBot(uF) + HB, sOut), facePoint(f, uB, yBot(uB) + HB, sOut), 'bold', 0.015);
-      addLineWorld(facePoint(f, uF, yBot(uF), sOut), facePoint(f, uB, yBot(uB), sOut), 'medium', 0.01);
-      addLineWorld(facePoint(f, uF, yBot(uF), sOut), facePoint(f, uF, yBot(uF) + HB, sOut), 'medium', 0.01);
-    }
+    // Scatter lush Yucatán forest canopy cleanly outside all plazas, causeways, & cenote pools
+    for (let k = 0; k < 1800; k++) {
+      const tx = (rng() * 2 - 1) * (B - 1.5);
+      const tz = (rng() * 2 - 1) * (B - 1.5);
+      const ty = H(tx, tz);
+      if (ty < 0.45) continue;
 
-    // ---- one stairway: stepped ramp at 45 degrees + two balustrades ---------
-    function addStairway(f) {
-      const n = faceNormal(f);
-      const sh = PYR_H / STAIR_N;
-      const riserHex = computeDirectionalHex('lime', n[0], n[1], n[2]);
-      for (let i = 0; i < STAIR_N; i++) {
-        const uR = STAIR_D0 - i * sh;
-        const yB = i * sh, yT = (i + 1) * sh;
-        pushQuadN(facePoint(f, uR, yB, -STAIR_HALF), facePoint(f, uR, yB, STAIR_HALF),
-                  facePoint(f, uR, yT, STAIR_HALF), facePoint(f, uR, yT, -STAIR_HALF),
-                  riserHex, n[0], n[1], n[2], (rng() - 0.5) * 0.01);
-        pushQuadN(facePoint(f, uR, yT, -STAIR_HALF), facePoint(f, uR, yT, STAIR_HALF),
-                  facePoint(f, uR - sh, yT, STAIR_HALF), facePoint(f, uR - sh, yT, -STAIR_HALF),
-                  PALETTE.lime.top, 0, 1, 0, 0);
-        addLineWorld(facePoint(f, uR, yT, -STAIR_HALF), facePoint(f, uR, yT, STAIR_HALF), 'medium', 0.01);
-      }
-      addBalustrade(f, -1);
-      addBalustrade(f, +1);
-    }
+      // Exclusion zones so ceremonial architecture & sightlines remain razor sharp
+      const [lx, lz] = toMainLocal(tx, tz);
+      const inGreatTerrace = lx > -14.8 && lx < 12.2 && lz > -26.4 && lz < 21.8;
+      const inSacbe = tx < -10.5 && tx > -24.5 && Math.abs(tz + 3.8) < 2.4;
+      const inSagrado = cenoteSinkFactor(tx, tz, CENOTE_SAGRADO).r < 1.15;
+      const inXtoloc = cenoteSinkFactor(tx, tz, CENOTE_XTOLOC).r < 1.18;
+      const inOsario = Math.hypot(tx - 19.2, tz - 6.5) < 5.2;
+      const inCaracol = Math.hypot(tx - 29.8, tz - 11.2) < 6.4;
+      const inSouthAxis = tx > 11.0 && tx < 25.0 && tz > -3.5 && tz < 10.0;
 
-    // ---- serpent head at the foot of a north balustrade ----------------------
-    function addSerpentHead(side) {
-      const sC = side * (STAIR_HALF + 0.3);   // balustrade centre line
-      const u0 = STAIR_D0 + 0.2;              // balustrade front plane (z)
-      // skull block
-      addWorldBox(sC - 0.58, 0.34, u0, 1.16, 0.68, 1.55, 'lime', 'medium');
-      // lower jaw, thrust forward under the skull
-      addWorldBox(sC - 0.50, 0.0, u0 + 0.28, 1.00, 0.26, 1.55, 'lime', 'medium');
-      // dark mouth slit between jaw and skull
-      addWorldBox(sC - 0.52, 0.265, u0 + 0.30, 1.04, 0.085, 1.42, 'dark', 'fine');
-    }
+      if (inGreatTerrace || inSacbe || inSagrado || inXtoloc || inOsario || inCaracol || inSouthAxis) continue;
 
-    // ---- summit temple --------------------------------------------------------
-    function addTemple() {
-      const yB = PYR_H;
-      const HW = 3.9;              // temple half-width
-      const H = 3.1;               // wall height
-      addWorldBox(-HW, yB, -HW, HW * 2, H, HW * 2, 'lime', 'medium');
-      // flat roof slab with overhang
-      addWorldBox(-HW - 0.4, yB + H, -HW - 0.4, (HW + 0.4) * 2, 0.38, (HW + 0.4) * 2, 'lime', 'bold');
-      // doorways: one per face, the north one wider with two column ticks
-      for (let f = 0; f < 4; f++) {
-        const n = faceNormal(f);
-        const wDoor = f === 0 ? 1.5 : 0.95;
-        const hDoor = 2.1;
-        const u = HW + 0.015;
-        pushQuadN(facePoint(f, u, yB + 0.02, -wDoor), facePoint(f, u, yB + 0.02, wDoor),
-                  facePoint(f, u, yB + hDoor, wDoor), facePoint(f, u, yB + hDoor, -wDoor),
-                  PALETTE.dark.shade, n[0], n[1], n[2], 0);
-        addLineWorld(facePoint(f, u + 0.01, yB + 0.02, -wDoor), facePoint(f, u + 0.01, yB + hDoor, -wDoor), 'medium', 0.005);
-        addLineWorld(facePoint(f, u + 0.01, yB + 0.02, wDoor), facePoint(f, u + 0.01, yB + hDoor, wDoor), 'medium', 0.005);
-        addLineWorld(facePoint(f, u + 0.01, yB + hDoor, -wDoor), facePoint(f, u + 0.01, yB + hDoor, wDoor), 'medium', 0.005);
-        if (f === 0) {
-          for (const cs of [-0.5, 0.5]) {
-            addLineWorld(facePoint(f, u + 0.01, yB + 0.02, cs), facePoint(f, u + 0.01, yB + hDoor, cs), 'medium', 0.005);
-          }
-        }
+      if (fbm(tx * 0.25, tz * 0.25) > 0.42) {
+        addJungleTree(tx, tz, 0.8 + rng() * 0.85);
       }
     }
 
-    // ---- assemble the pyramid --------------------------------------------------
-    for (let k = 0; k < TERR; k++) addTerrace(k);
-    // top platform (the +1 that makes 365)
-    const W9 = BASE_HALF - TERR * INSET;
-    pushQuadN([-W9, PYR_H, -W9], [W9, PYR_H, -W9], [W9, PYR_H, W9], [-W9, PYR_H, W9],
-              PALETTE.lime.top, 0, 1, 0, 0);
-    for (let f = 0; f < 4; f++) {
-      addStairway(f);
-      // landing strip bridging platform edge (W9) to the stair's top tread
-      pushQuadN(facePoint(f, W9, PYR_H, -STAIR_HALF), facePoint(f, W9, PYR_H, STAIR_HALF),
-                facePoint(f, STAIR_D0 - PYR_H, PYR_H, STAIR_HALF),
-                facePoint(f, STAIR_D0 - PYR_H, PYR_H, -STAIR_HALF),
-                PALETTE.lime.top, 0, 1, 0, 0);
+    // Faint Diagonal Drafting Construction Rays in the Upper-Left Sky
+    for (let i = 0; i < 15; i++) {
+      const spread = (i / 14) * 30;
+      addLineWorld([-62, 54, -18], [-15.0, 2.0 + spread * 0.45, 5.0 - spread * 0.25], 'faint', 0);
     }
-    addSerpentHead(-1);
-    addSerpentHead(+1);
-    addTemple();
 
     // =========================================================================
-    // 6. SITE FURNITURE — limestone plaza, survey grid, scrub, ghost ruins
-    // =========================================================================
-    const pMinX = -21, pMaxX = 21, pMinZ = -21, pMaxZ = 21;
-    addWorldBox(pMinX, -0.45, pMinZ, pMaxX - pMinX, 0.45, pMaxZ - pMinZ, 'plaza', 'bold');
-    addWorldBox(pMinX - 0.45, -0.48, pMinZ - 0.45, pMaxX - pMinX + 0.9, 0.06, pMaxZ - pMinZ + 0.9, 'plaza', 'bold');
-
-    // plaza stone tile grid (fine), kept off the pyramid footprint
-    const tileStep = 2.6;
-    for (let gx = pMinX + tileStep; gx < pMaxX; gx += tileStep) {
-      for (let gz = pMinZ; gz < pMaxZ - 0.1; gz += 0.65) {
-        const zNext = Math.min(pMaxZ, gz + 0.65);
-        if (Math.max(Math.abs(gx), Math.abs((gz + zNext) * 0.5)) > 17.4) {
-          addLineWorld([gx, 0.02, gz], [gx, 0.02, zNext], 'fine', 0);
-        }
-      }
-    }
-    for (let gz = pMinZ + tileStep; gz < pMaxZ; gz += tileStep) {
-      for (let gx = pMinX; gx < pMaxX - 0.1; gx += 0.65) {
-        const xNext = Math.min(pMaxX, gx + 0.65);
-        if (Math.max(Math.abs((gx + xNext) * 0.5), Math.abs(gz)) > 17.4) {
-          addLineWorld([gx, 0.02, gz], [xNext, 0.02, gz], 'fine', 0);
-        }
-      }
-    }
-
-    // low, wide Yucatan scrub — flatter and sparser than the template shrub
-    function addSketchScrub(sx, sz) {
-      const r = 0.42 + rng() * 0.26;
-      const h = 0.15 + rng() * 0.12;
-      const cy = -0.45 + h;
-      addLineWorld([sx, -0.45, sz], [sx, cy, sz], 'medium', 0);
-      addLineWorld([sx - r, -0.45 + h * 0.35, sz + r * 0.3], [sx - r * 0.3, cy + h * 0.55, sz - r * 0.35], 'fine', 0.01);
-      addLineWorld([sx - r * 0.3, cy + h * 0.55, sz - r * 0.35], [sx + r * 0.35, cy, sz + r * 0.25], 'fine', 0.01);
-      addLineWorld([sx + r * 0.35, cy, sz + r * 0.25], [sx + r, -0.45 + h * 0.3, sz - r * 0.3], 'fine', 0.01);
-      addLineWorld([sx - r * 0.7, -0.44, sz + r * 0.55], [sx + r * 0.7, -0.44, sz - r * 0.5], 'fine', 0);
-    }
-
-    const siteLim = 30.0;
-    for (let s = -29.0; s <= 29.0; s += 3.5) {
-      addDashedLineWorld([s, -0.45, -siteLim], [s, -0.45, siteLim]);
-      addDashedLineWorld([-siteLim, -0.45, s], [siteLim, -0.45, s]);
-    }
-    for (let sx = -28.5; sx <= 29.5; sx += 3.0) {
-      for (let sz = -27.5; sz <= 28.5; sz += 3.0) {
-        const inside = Math.abs(sx) < 22.6 && Math.abs(sz) < 22.6;
-        if (!inside && Math.hypot(sx, sz) < 31 && rng() > 0.38) {
-          addSketchScrub(sx, sz);
-        }
-      }
-    }
-
-    // ghost context at the back corners: distant platform edges and ruins, kept low
-    addWorldBox(-27.5, -0.45, -13, 7, 2.4, 9, 'ghost', 'faint');
-    addWorldBox(16, -0.45, -27.5, 9, 3.2, 6.5, 'ghost', 'faint');
-    addWorldBox(-20, -0.45, -24.5, 24, 1.0, 3, 'ghost', 'faint');
-
-    // faint plumb line over the pyramid axis
-    addDashedLineWorld([0, 0, 0], [0, 19.5, 0], 0.65, 0.45);
-
-    // =========================================================================
-    // 6. BUILD THREE.JS GEOMETRIES & RENDER LOOP
+    // 8. BUILD THREE.JS GEOMETRIES & RENDER LOOP
     // =========================================================================
     const washGeo = new THREE.BufferGeometry();
     washGeo.setAttribute('position', new THREE.Float32BufferAttribute(washPositions, 3));
@@ -798,6 +1139,7 @@
 
     const washMat = new THREE.MeshBasicMaterial({
       vertexColors: true,
+      side: THREE.DoubleSide,
       polygonOffset: true,
       polygonOffsetFactor: 1.4,
       polygonOffsetUnits: 1.4
@@ -819,17 +1161,11 @@
     scene.add(createInkSegmentMesh(inkLayers.medium, 0x332a24, 0.80));
     scene.add(createInkSegmentMesh(inkLayers.fine,   0x4a3f37, 0.44));
     scene.add(createInkSegmentMesh(inkLayers.rust,   0x8c4531, 0.64));
-    scene.add(createInkSegmentMesh(inkLayers.teal,   0x527d80, 0.52));
-    scene.add(createInkSegmentMesh(inkLayers.faint,  0x6b6157, 0.32));
+    scene.add(createInkSegmentMesh(inkLayers.teal,   0x527d80, 0.56));
+    scene.add(createInkSegmentMesh(inkLayers.faint,  0x6b6157, 0.30));
 
     window.addEventListener('resize', () => {
-      const newAspect = window.innerWidth / window.innerHeight;
-      camera.left = (-frustumSize * newAspect) / 2;
-      camera.right = (frustumSize * newAspect) / 2;
-      camera.top = frustumSize / 2;
-      camera.bottom = -frustumSize / 2;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      fitCamera();
       generatePaperOverlay();
     });
 
@@ -839,6 +1175,6 @@
       renderer.render(scene, camera);
     }
     animate();
-</script>
+  </script>
 </body>
 </html>

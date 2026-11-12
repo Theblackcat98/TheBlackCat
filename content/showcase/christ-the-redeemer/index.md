@@ -1,6 +1,6 @@
 ---
 title: "Christ the Redeemer"
-description: "Christ the Redeemer drawn as an axonometric on drafting paper: the Art Deco statue with outstretched arms on its octagonal pedestal — fluted soapstone robe, diagonal mantle and the Sacred Heart on its chest — above the stepped sanctuary terrace on Corcovado."
+description: "Christ the Redeemer drawn atop Mount Corcovado: the Art Deco soapstone statue and stepped sanctuary belvedere rising out of Rio's steep augen-gneiss granite dome and surrounding Tijuca Atlantic rainforest slopes."
 contenttype: article
 tool: christ-the-redeemer
 topics:
@@ -11,14 +11,16 @@ tags:
   - creative-coding
   - architecture
 created: 2026-11-11
-updated: 2026-11-11
+updated: 2026-11-12
 ---
 
 ## What it is
 
-Cristo Redentor above Rio de Janeiro, drawn as the piece of Art Deco engineering it is: a reinforced-concrete statue skinned in soapstone, built as a stack of lofted cross-sections — robe, mantle, arms, head — on an octagonal pedestal that holds a chapel.
+Cristo Redentor above Rio de Janeiro, grounded atop the steep granite exfoliation dome of Mount Corcovado (`710 m`): a reinforced-concrete Art Deco monument skinned in soapstone above an octagonal sanctuary chapel, descending sharply into the forested ridges of Tijuca National Park.
 
 ## What was drawn
+
+- **Mount Corcovado granite massif**: continuous elevation field falling sharply away from the octagonal summit terrace, showing exposed gray gneiss cliff shoulders, forested Tijuca canopy slopes, the rack-railway / stair ridge approach from the saddle, topographic contours, and stratified bedrock cutaway skirts.
 
 - The Corcovado sanctuary: an octagonal terrace deck on a granite peak platform, its parapet left open on two faces for the monumental staircases, each flanked by pylons with terracotta caps.
 - The eight-metre pedestal in three parts — stepped plinth, the chapel level with its entrance portal and teal relief panels, and a tapered upper shaft — separated by terracotta cornice bands.

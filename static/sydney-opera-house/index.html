@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sydney Opera House — Axonometric Diagram</title>
+  <meta name="description" content="Interactive ink-and-wash axonometric cutaway of the Sydney Opera House on Bennelong Point, showing Jørn Utzon's precast concrete sail vaults, granite podium, Sydney Harbour strata, and Farm Cove.">
+  <link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/sydney-opera-house/">
+  <meta property="og:title" content="Sydney Opera House — Axonometric Diagram">
+  <meta property="og:description" content="Interactive ink-and-wash axonometric cutaway of the Sydney Opera House on Bennelong Point, showing Jørn Utzon's precast concrete sail vaults, granite podium, Sydney Harbour strata, and Farm Cove.">
+  <meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/sydney-opera-house-light.webp">
+  <script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "VisualArtwork", "name": "Sydney Opera House", "description": "Interactive ink-and-wash axonometric cutaway of the Sydney Opera House on Bennelong Point, showing J\u00f8rn Utzon's precast concrete sail vaults, granite podium, Sydney Harbour strata, and Farm Cove.", "url": "https://theblackcat98.github.io/TheBlackCat/sydney-opera-house/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/sydney-opera-house-light.webp", "creator": {"@type": "Person", "name": "Nik"}}</script>
+  <link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+  <script src="../toolkit/toolkit.js?v=1" defer data-tool="sydney-opera-house"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #e3ded4;
+    }
+    #canvas-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+    }
+    #paper-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      opacity: 0.55;
+    }
+  </style>
+</head>
+<body>
+  <a class="back tk-fallback" href="../tools/">&#8592; All tools</a>
+  <div id="canvas-container">
+    <canvas id="paper-overlay"></canvas>
+  </div>
+
+  <script src="../vendor/three/three.min.js"></script>
+  <script src="../vendor/three/OrbitControls.js"></script>
+  <script>
+    // =========================================================================
+    // 1. DETERMINISTIC PRNG, NOISE HELPERS & DRAFTING PAPER OVERLAY
+    // =========================================================================
+    function mulberry32(a) {
+      return function () {
+        let t = (a += 0x6d2b79f5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    const rng = mulberry32(1973); // 1973 AD: Year the Sydney Opera House opened
+
+    const hash2 = (i, j) => {
+      let h = Math.imul(i, 374761393) + Math.imul(j, 668265263);
+      h = Math.imul(h ^ (h >>> 13), 1274126177);
+      return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    };
+    const smooth = t => t * t * (3 - 2 * t);
+    const smoothstep = (a, b, x) => {
+      x = Math.min(1, Math.max(0, (x - a) / (b - a)));
+      return x * x * (3 - 2 * x);
+    };
+    function vnoise(x, y) {
+      const i = Math.floor(x), j = Math.floor(y);
+      const u = smooth(x - i), v = smooth(y - j);
+      return (
+        (hash2(i, j) * (1 - u) + hash2(i + 1, j) * u) * (1 - v) +
+        (hash2(i, j + 1) * (1 - u) + hash2(i + 1, j + 1) * u) * v
+      );
+    }
+    const fbm = (x, y) =>
+      vnoise(x, y) * 0.5 +
+      vnoise(x * 2.1, y * 2.1) * 0.27 +
+      vnoise(x * 4.3, y * 4.3) * 0.15 +
+      vnoise(x * 8.7, y * 8.7) * 0.08;
+
+    function generatePaperOverlay() {
+      const canvas = document.getElementById('paper-overlay');
+      const w = (canvas.width = window.innerWidth);
+      const h = (canvas.height = window.innerHeight);
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#ede9e0';
+      ctx.fillRect(0, 0, w, h);
+
+      // Subtle orthogonal drafting grid
+      ctx.strokeStyle = 'rgba(130, 120, 108, 0.09)';
+      ctx.lineWidth = 1;
+      const step = 28;
+      ctx.beginPath();
+      for (let x = 0; x < w; x += step) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+      }
+      for (let y = 0; y < h; y += step) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+      }
+      ctx.stroke();
+
+      // Organic rough paper fiber grain
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+      const localRng = mulberry32(7731);
+      for (let i = 0; i < data.length; i += 4) {
+        const grain = (localRng() - 0.5) * 18;
+        data[i] = Math.min(255, Math.max(0, data[i] + grain));
+        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + grain));
+        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + grain));
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+    generatePaperOverlay();
+
+    // =========================================================================
+    // 2. THREE.JS SCENE & AXONOMETRIC ORTHOGRAPHIC CAMERA
+    // =========================================================================
+    const container = document.getElementById('canvas-container');
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0xe5e0d6, 1);
+    container.insertBefore(renderer.domElement, document.getElementById('paper-overlay'));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -300, 500);
+    const targetCenter = new THREE.Vector3(1.0, 2.8, 0.0);
+    const camDist = 96;
+    const defaultCamPos = new THREE.Vector3(
+      targetCenter.x + camDist,
+      targetCenter.y + camDist * 0.78,
+      targetCenter.z + camDist
+    );
+
+    function fitCamera() {
+      const aspect = window.innerWidth / window.innerHeight;
+      const fs = Math.max(66, 98 / aspect);
+      camera.left = (-fs * aspect) / 2;
+      camera.right = (fs * aspect) / 2;
+      camera.top = fs / 2;
+      camera.bottom = -fs / 2;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    camera.position.copy(defaultCamPos);
+    camera.lookAt(targetCenter);
+    fitCamera();
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.target.copy(targetCenter);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.maxPolarAngle = Math.PI * 0.485;
+    controls.minZoom = 0.55;
+    controls.maxZoom = 4.2;
+    controls.update();
+
+    window.addEventListener('dblclick', () => {
+      camera.position.copy(defaultCamPos);
+      controls.target.copy(targetCenter);
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controls.update();
+    });
+
+    // =========================================================================
+    // 3. ARCHITECTURAL PALETTE & 6-LAYER MULTI-WEIGHT INK ENGINE
+    // =========================================================================
+    const PALETTE = {
+      cream:      { lit: 0xf2ede3, mid: 0xe6dfd3, shade: 0xd4cbbd, top: 0xf7f4ec, bot: 0x918476 },
+      stone:      { lit: 0xe5ded2, mid: 0xd8d0c2, shade: 0xc4bba9, top: 0xebe5dc, bot: 0x827668 },
+      granite:    { lit: 0xd6bfb0, mid: 0xc7afa0, shade: 0xad9384, top: 0xe0cbc0, bot: 0x7d6558 },
+      coreWall:   { lit: 0xc2b7a7, mid: 0xab9f8e, shade: 0x8f8373, top: 0xd1c7b8, bot: 0x5e5348 },
+      terracotta: { lit: 0xc27a63, mid: 0xb06851, shade: 0x94513d, top: 0xd4947e, bot: 0x6b3829 },
+      brickDark:  { lit: 0x9e5b47, mid: 0x8a4c3a, shade: 0x703b2c, top: 0xb36f5b, bot: 0x4f271c },
+      teal:       { lit: 0x94b9bb, mid: 0x82a8aa, shade: 0x6b9092, top: 0xa8c8ca, bot: 0x517072 },
+      tealDeep:   { lit: 0x789fa2, mid: 0x668c8f, shade: 0x527477, top: 0x8eb2b5, bot: 0x3e595b },
+      dark:       { lit: 0x73675e, mid: 0x5e534b, shade: 0x4a4039, top: 0x85786e, bot: 0x332c27 },
+      plaza:      { lit: 0xe8e3d9, mid: 0xdfd9ce, shade: 0xd2ccc0, top: 0xebe6dc, bot: 0xa69e91 },
+      lawn:       { lit: 0xb7cc84, mid: 0xa5bc73, shade: 0x8fa661, top: 0xc2d590, bot: 0x6d8247 },
+      foliage:    { lit: 0x86a36e, mid: 0x728f5b, shade: 0x5c7548, top: 0x97b37f, bot: 0x475c38 },
+      ghost:      { lit: 0xe6e1d7, mid: 0xdfd9ce, shade: 0xd8d2c6, top: 0xebe6dc, bot: 0xc2bbb0 }
+    };
+
+    const washPositions = [];
+    const washColors = [];
+
+    const inkLayers = {
+      bold:   [], // Structural shell ridges, arch rims, podium cornices, terrain block frame
+      medium: [], // Rib seams, stair risers, seawalls, 5th terrain contours, trees
+      fine:   [], // Tile courses, shadow hatching, paving grids, fine contours, strata bedding
+      rust:   [], // Pink-granite courses, bronze louvre mullions, garden trails, seawall trim
+      teal:   [], // Glass curtain mullions, harbour ripples, sliced waterline
+      faint:  []  // Sky drafting rays, dashed site grid, ghost Circular Quay massings
+    };
+
+    const tempColor = new THREE.Color();
+    const lightDir = new THREE.Vector3(-0.35, 0.25, 0.90).normalize();
+
+    function computeDirectionalHex(palName, nx, ny, nz) {
+      const pal = PALETTE[palName] || PALETTE.cream;
+      if (ny > 0.65) return pal.top;
+      if (ny < -0.65) return pal.bot;
+      const dot = nx * lightDir.x + ny * lightDir.y + nz * lightDir.z;
+      if (dot > 0.28) return pal.lit;
+      if (dot > -0.18) return pal.mid;
+      return pal.shade;
+    }
+
+    function pushTriWorld(p0, p1, p2, hexColor, shadeShift = 0) {
+      tempColor.setHex(hexColor);
+      tempColor.offsetHSL(0, 0, shadeShift + (rng() - 0.5) * 0.012);
+      const r = tempColor.r, g = tempColor.g, b = tempColor.b;
+      washPositions.push(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+      for (let i = 0; i < 3; i++) washColors.push(r, g, b);
+    }
+
+    function pushQuadWorld(p0, p1, p2, p3, hexColor, shadeShift = 0) {
+      pushTriWorld(p0, p1, p2, hexColor, shadeShift);
+      pushTriWorld(p0, p2, p3, hexColor, shadeShift);
+    }
+
+    function addLineWorld(p1, p2, layer = 'medium', overshoot = 0.022) {
+      const x1 = p1[0], y1 = p1[1], z1 = p1[2];
+      const x2 = p2[0], y2 = p2[1], z2 = p2[2];
+      const dx = x2 - x1, dy = y2 - y1, dz = z2 - z1;
+      const len = Math.hypot(dx, dy, dz);
+      if (len < 1e-5) return;
+      const ux = (dx / len) * overshoot;
+      const uy = (dy / len) * overshoot;
+      const uz = (dz / len) * overshoot;
+
+      const j = layer === 'faint' || overshoot === 0 ? 0 : 0.007;
+      const ax = x1 - ux + (rng() - 0.5) * j;
+      const ay = y1 - uy + (rng() - 0.5) * j;
+      const az = z1 - uz + (rng() - 0.5) * j;
+      const bx = x2 + ux + (rng() - 0.5) * j;
+      const by = y2 + uy + (rng() - 0.5) * j;
+      const bz = z2 + uz + (rng() - 0.5) * j;
+
+      const target = inkLayers[layer] || inkLayers.medium;
+      target.push(ax, ay, az, bx, by, bz);
+
+      if (layer === 'bold') {
+        const off = 0.017;
+        target.push(ax + off, ay, az - off, bx + off, by, bz - off);
+        target.push(ax - off * 0.7, ay + off * 0.7, az + off * 0.7, bx - off * 0.7, by + off * 0.7, bz + off * 0.7);
+      }
+    }
+
+    function addWorldBox(x, y, z, w, h, d, palName = 'stone', opts = {}) {
+      const pal = PALETTE[palName] || PALETTE.stone;
+      const shift = opts.shadeShift || 0;
+      const x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
+      const p000 = [x0, y0, z0], p100 = [x1, y0, z0], p110 = [x1, y1, z0], p010 = [x0, y1, z0];
+      const p001 = [x0, y0, z1], p101 = [x1, y0, z1], p111 = [x1, y1, z1], p011 = [x0, y1, z1];
+
+      pushQuadWorld(p001, p101, p111, p011, pal.lit, shift);
+      pushQuadWorld(p101, p100, p110, p111, pal.shade, shift);
+      pushQuadWorld(p011, p111, p110, p010, pal.top, shift);
+      pushQuadWorld(p000, p100, p101, p001, pal.bot, shift);
+      pushQuadWorld(p100, p000, p010, p110, pal.shade, shift);
+      pushQuadWorld(p000, p001, p011, p010, pal.mid, shift);
+
+      const lyr = opts.edgeLayer || 'medium';
+      const ov = opts.overshoot !== undefined ? opts.overshoot : 0.02;
+      if (opts.edges !== false) {
+        const edges = [
+          [p000, p100], [p100, p101], [p101, p001], [p001, p000],
+          [p010, p110], [p110, p111], [p111, p011], [p011, p010],
+          [p000, p010], [p100, p110], [p101, p111], [p001, p011]
+        ];
+        edges.forEach(e => addLineWorld(e[0], e[1], lyr, ov));
+      }
+      if (opts.courses) {
+        const cLayer = palName === 'terracotta' || palName === 'granite' ? 'rust' : 'fine';
+        for (let i = 1; i < opts.courses; i++) {
+          const cy = y0 + (h * i) / opts.courses;
+          addLineWorld([x0, cy, z1 + 0.01], [x1, cy, z1 + 0.01], cLayer, 0);
+          addLineWorld([x1 + 0.01, cy, z0], [x1 + 0.01, cy, z1], cLayer, 0);
+        }
+      }
+    }
+
+    // =========================================================================
+    // 4. REAL-LIFE BENNELONG POINT & SYDNEY HARBOUR TERRAIN FIELD
+    //    Orientation: North = -X, South = +X, East = -Z, West = +Z
+    //    Scale: 1 unit ≈ 4.5 meters | Sea Level W = 0.0 | Block [-38, 38]^2
+    // =========================================================================
+    const B = 38;
+    const N = 112;
+    const W = 0.0;
+    const Y_BOT = -7.5;
+
+    // Bennelong Point peninsula half-width tapers gently toward the North harbour tip (-X)
+    function bennelongHalfW(x) {
+      if (x > 12) return 12.6;
+      const t = smoothstep(-22.2, 12.0, x);
+      return 9.2 + 3.4 * t;
+    }
+
+    // Farm Cove curved seawall shoreline X(z) for East side (z < -12.5)
+    function farmCoveShoreX(z) {
+      // Sweeps gracefully south-eastward from Bennelong Point east flank (x ≈ 9, z = -12.5)
+      const dz = Math.max(0, -12.5 - z);
+      return 9.2 + 16.5 * smoothstep(0, 26, dz);
+    }
+
+    function terrainMaskLand(x, z) {
+      // 1. Bennelong Point peninsula (-22.2 <= x <= 26, |z| <= bennelongHalfW)
+      const hw = bennelongHalfW(x);
+      const penX = smoothstep(-22.6, -20.6, x);
+      const penZ = 1 - smoothstep(hw - 1.2, hw + 0.4, Math.abs(z));
+      const peninsula = penX * penZ;
+
+      // 2. Mainland South shore:
+      //    - West side (Sydney Cove / East Circular Quay): shoreline around x = 27.5
+      //    - East side (Farm Cove curved bay): shoreline along farmCoveShoreX(z)
+      const eastMask = z < -12.0 ? farmCoveShoreX(z) : 26.8;
+      const southMask = smoothstep(eastMask - 1.2, eastMask + 0.8, x);
+
+      return Math.max(peninsula, southMask);
+    }
+
+    function H(x, z) {
+      const land = terrainMaskLand(x, z);
+
+      // Harbour bathymetry (Sydney Harbour channel deeper toward North -X and West +Z)
+      const distOffPen = Math.max(0, Math.max(-20.5 - x, Math.abs(z) - bennelongHalfW(x)));
+      const channelDeep = -0.65 - 2.6 * smoothstep(0.5, 16.0, distOffPen) - 0.85 * smoothstep(0, -35, x);
+      const seabed = channelDeep + (fbm(x * 0.14, z * 0.14) - 0.5) * 0.45;
+
+      // Bennelong Point flat engineered bedrock terrace (~2.5m - 3.6m AHD -> 0.55 - 0.78)
+      const forecourtBand = smoothstep(11.0, 15.0, x) * (1 - smoothstep(24.0, 27.0, x));
+      const penElev = 0.55 + 0.22 * forecourtBand;
+
+      // East Circular Quay low waterfront plaza (South-West: x > 26.5, z > 2)
+      const quayElev = 0.65 + 0.85 * smoothstep(26.5, 38.0, x) * smoothstep(1.0, 12.0, z);
+
+      // Tarpeian Rock sandstone escarpment & Royal Botanic Gardens plateau (South-East: z < 3.5)
+      // Rises abruptly from Forecourt/Tarpeian Way (~22.5) up to ~14.6m AHD (3.25 units),
+      // and curves cleanly along the Farm Cove Botanic Gardens lawns (~15m-20m AHD -> 3.4 - 4.4 units).
+      const cliffEdgeX = z > -12.0 ? 22.8 - 0.25 * z : farmCoveShoreX(z) + 3.2;
+      const cliffRise = smoothstep(cliffEdgeX - 0.4, cliffEdgeX + 2.8, x);
+      const gardenDomainBias = 1 - smoothstep(-1.5, 6.5, z);
+      const tarpeianCliff = cliffRise * gardenDomainBias * 2.55;
+      const botanicSlope =
+        smoothstep(cliffEdgeX + 1.5, 38.0, x) * gardenDomainBias * 1.15 +
+        smoothstep(-14.0, -36.0, z) * smoothstep(farmCoveShoreX(z), farmCoveShoreX(z) + 12.0, x) * 0.65;
+      const organicHill = (fbm(x * 0.16 + 4.1, z * 0.16 - 2.3) - 0.45) * 0.55 * gardenDomainBias * cliffRise;
+
+      const landElev = Math.max(penElev, quayElev) + tarpeianCliff + botanicSlope + organicHill;
+
+      // Blend cleanly across seawalls
+      return seabed * (1 - land) + landElev * land;
+    }
+
+    // Sample terrain height grid
+    const stepT = (2 * B) / N;
+    const heights = [];
+    const tVert = (i, j) => [-B + i * stepT, heights[j * (N + 1) + i], -B + j * stepT];
+    for (let j = 0; j <= N; j++) {
+      for (let i = 0; i <= N; i++) {
+        heights.push(H(-B + i * stepT, -B + j * stepT));
+      }
+    }
+
+    function terrainColor(x, z, y, n) {
+      const L = n[0] * lightDir.x + n[1] * lightDir.y + n[2] * lightDir.z;
+      const ny = n[1];
+      const q = fbm(x * 0.45 + 7, z * 0.45);
+      let hex;
+
+      if (y < W + 0.05) {
+        hex = 0x8d9f94; // Submerged harbour sandstone shelf
+      } else if (ny < 0.78) {
+        // Steep Tarpeian Rock sandstone cliff & coastal seawall faces
+        hex = L > 0.15 ? 0xcab99e : L > -0.2 ? 0xb4a288 : 0x96856e;
+      } else if (z < 3.0 && x > 21.8 && y > 1.25) {
+        // Royal Botanic Gardens & Tarpeian Lawn (soft sage-olive botanical wash)
+        hex = q > 0.52 ? 0xb7cc84 : 0xa5bc73;
+      } else if (z < -12.0 && x > farmCoveShoreX(z) - 0.5 && y > 0.55) {
+        // Sloping Royal Botanic Gardens lawn bordering Farm Cove
+        hex = q > 0.48 ? 0xb4c981 : 0xa1b870;
+      } else if (x > 25.5 && z >= 2.0) {
+        // East Circular Quay stone plaza & Macquarie St edge
+        hex = q > 0.5 ? 0xe4ddd0 : 0xd9d1c3;
+      } else {
+        // Bennelong Point sandstone/granite bedrock bench under Opera House
+        hex = 0xd9d0c0;
+      }
+      return [hex, L * 0.035];
+    }
+
+    // Build terrain triangles + topographic contour lines
+    for (let j = 0; j < N; j++) {
+      for (let i = 0; i < N; i++) {
+        const a = tVert(i, j);
+        const b = tVert(i + 1, j);
+        const c = tVert(i + 1, j + 1);
+        const d = tVert(i, j + 1);
+        [[a, b, c], [a, c, d]].forEach(tri => {
+          const u = [tri[1][0] - tri[0][0], tri[1][1] - tri[0][1], tri[1][2] - tri[0][2]];
+          const v = [tri[2][0] - tri[0][0], tri[2][1] - tri[0][1], tri[2][2] - tri[0][2]];
+          let n = [
+            u[1] * v[2] - u[2] * v[1],
+            u[2] * v[0] - u[0] * v[2],
+            u[0] * v[1] - u[1] * v[0]
+          ];
+          const len = Math.hypot(n[0], n[1], n[2]) || 1;
+          n = [n[0] / len, n[1] / len, n[2] / len];
+          if (n[1] < 0) n = [-n[0], -n[1], -n[2]];
+
+          const cx = (tri[0][0] + tri[1][0] + tri[2][0]) / 3;
+          const cy = (tri[0][1] + tri[1][1] + tri[2][1]) / 3;
+          const cz = (tri[0][2] + tri[1][2] + tri[2][2]) / 3;
+          const [hx, shift] = terrainColor(cx, cz, cy, n);
+          pushTriWorld(tri[0], tri[1], tri[2], hx, shift);
+
+          // Topographic contour lines above sea level (every 0.45 units ≈ 2m real elevation!)
+          const lo = Math.min(tri[0][1], tri[1][1], tri[2][1]);
+          const hi = Math.max(tri[0][1], tri[1][1], tri[2][1]);
+          const contourStep = 0.45;
+          const kStart = Math.ceil(Math.max(0.18, lo) / contourStep);
+          const kEnd = Math.floor(hi / contourStep);
+          for (let k = kStart; k <= kEnd; k++) {
+            const L = k * contourStep;
+            const pts = [];
+            [[0, 1], [1, 2], [2, 0]].forEach(([e, f]) => {
+              const A = tri[e], C = tri[f];
+              if ((A[1] - L) * (C[1] - L) < 0) {
+                const w = (L - A[1]) / (C[1] - A[1]);
+                pts.push([A[0] + (C[0] - A[0]) * w, L + 0.015, A[2] + (C[2] - A[2]) * w]);
+              }
+            });
+            if (pts.length === 2) {
+              inkLayers[k % 4 === 0 ? 'medium' : 'fine'].push(...pts[0], ...pts[1]);
+            }
+          }
+        });
+      }
+    }
+
+    // Harbour Water Sheet (Sydney Harbour, Sydney Cove, Farm Cove) at sea level W = 0.0
+    pushQuadWorld([-B, W, -B], [B, W, -B], [B, W, B], [-B, W, B], 0xa5cac7, 0);
+
+    // Harbour Wave & Current Ripple Strokes in Canal Teal across Sydney Harbour, Sydney Cove & Farm Cove
+    for (let zLine = -B + 1.4; zLine < B - 1.0; zLine += 1.45) {
+      let prev = null;
+      for (let xLine = -B + 0.6; xLine <= B - 0.6; xLine += 1.35) {
+        const waveZ = zLine + 0.55 * Math.sin(xLine * 0.24 + zLine * 0.12);
+        const ok =
+          Math.abs(waveZ) < B - 0.4 &&
+          H(xLine, waveZ) < -0.18 &&
+          !(xLine > -23.6 && xLine < 26.5 && Math.abs(waveZ) < bennelongHalfW(xLine) + 1.2);
+        const cur = ok ? [xLine, W + 0.02, waveZ] : null;
+        if (prev && cur && rng() > 0.26) {
+          addLineWorld(prev, cur, 'teal', 0);
+        }
+        prev = cur;
+      }
+    }
+
+    // Sliced Geological Strata Skirts around all 4 cut faces (Hawkesbury Sandstone & Ashfield Shale)
+    const STRATA_Y = [-7.5, -6.3, -5.2, -4.1, -3.1, -2.1, -1.1, 0.0, 0.9, 1.8, 2.7, 3.6, 5.2];
+    const STRATA_HEX = [
+      0x897b67, 0x9f8d76, 0x917f67, 0xae9879, 0x9c886e, 0xb5a07c,
+      0xbda884, 0xa89476, 0xb9a684, 0x9f8d72, 0xb3a181, 0xa59476
+    ];
+    const FACE_SHADE = [0.0, -0.07, -0.07, 0.0];
+
+    for (let s = 0; s < 4; s++) {
+      const edgePt = i => {
+        const u = -B + i * stepT;
+        const xz = [[u, B], [B, u], [u, -B], [-B, u]][s];
+        const idx =
+          s === 0 ? N * (N + 1) + i :
+          s === 1 ? i * (N + 1) + N :
+          s === 2 ? i :
+          i * (N + 1);
+        return { x: xz[0], z: xz[1], h: heights[idx] };
+      };
+
+      for (let i = 0; i < N; i++) {
+        const a = edgePt(i);
+        const b = edgePt(i + 1);
+
+        // Sedimentary bedrock strata slices
+        for (let k = 0; k < STRATA_Y.length - 1; k++) {
+          const y0 = STRATA_Y[k], y1 = STRATA_Y[k + 1];
+          const ta = Math.min(Math.max(a.h, y0), y1);
+          const tb = Math.min(Math.max(b.h, y0), y1);
+          if (ta <= y0 && tb <= y0) continue;
+          pushQuadWorld([a.x, y0, a.z], [b.x, y0, b.z], [b.x, tb, b.z], [a.x, ta, a.z], STRATA_HEX[k], FACE_SHADE[s]);
+          if (ta >= y1 && tb >= y1) {
+            addLineWorld([a.x, y1, a.z], [b.x, y1, b.z], 'fine', 0);
+          }
+        }
+
+        // Sliced water volume cross-section along perimeter edges below sea level
+        if (Math.min(a.h, b.h) < W) {
+          pushQuadWorld(
+            [a.x, Math.min(a.h, W), a.z],
+            [b.x, Math.min(b.h, W), b.z],
+            [b.x, W, b.z],
+            [a.x, W, a.z],
+            0x95bebc,
+            FACE_SHADE[s]
+          );
+          addLineWorld([a.x, W, a.z], [b.x, W, b.z], 'teal', 0);
+        }
+
+        // Bold cutaway silhouette lines along top edge, bottom floor, and vertical corners
+        addLineWorld([a.x, a.h, a.z], [b.x, b.h, b.z], 'bold', 0);
+        addLineWorld([a.x, Y_BOT, a.z], [b.x, Y_BOT, b.z], 'bold', 0);
+        if (i === 0) addLineWorld([a.x, Y_BOT, a.z], [a.x, a.h, a.z], 'bold', 0);
+        if (i === N - 1) addLineWorld([b.x, Y_BOT, b.z], [b.x, b.h, b.z], 'bold', 0);
+      }
+    }
+
+    // =========================================================================
+    // 5. SEAWALLS, BROADWALKS, MONUMENTAL STEPS & PINK-GRANITE PODIUM
+    // =========================================================================
+    const yBroad = 0.65;
+    const yFore  = 0.82;
+    const yPod   = 3.05;
+
+    // 5A. Cantilevered Seawall Broadwalk Perimeter wrapping Bennelong Point (over harbour piers)
+    const broadPts = [
+      [-23.2, -3.5],
+      [-21.2, -9.2],
+      [ -9.0, -11.4],
+      [  9.2, -12.5],
+      [ 15.8, -12.2],
+      [ 15.8,  12.6],
+      [  9.2,  12.8],
+      [ -9.0,  11.8],
+      [-21.2,   9.4],
+      [-23.2,   3.5]
+    ];
+
+    // Broadwalk deck polygon & crisp concrete apron walls dipping into harbour water
+    const bCenter = [-3.5, yBroad, 0.0];
+    for (let i = 0; i < broadPts.length; i++) {
+      const p0 = broadPts[i];
+      const p1 = broadPts[(i + 1) % broadPts.length];
+      pushTriWorld(bCenter, [p0[0], yBroad, p0[1]], [p1[0], yBroad, p1[1]], PALETTE.stone.top, 0);
+
+      // Vertical seawall fascia down below waterline (-0.35)
+      const dx = p1[0] - p0[0], dz = p1[1] - p0[1];
+      const len = Math.hypot(dx, dz) || 1;
+      const nx = -dz / len, nz = dx / len;
+      pushQuadWorld(
+        [p0[0], -0.35, p0[1]],
+        [p1[0], -0.35, p1[1]],
+        [p1[0], yBroad, p1[1]],
+        [p0[0], yBroad, p0[1]],
+        computeDirectionalHex('coreWall', nx, 0, nz),
+        0
+      );
+      addLineWorld([p0[0], yBroad, p0[1]], [p1[0], yBroad, p1[1]], 'bold', 0.02);
+      addLineWorld([p0[0], 0.05, p0[1]], [p1[0], 0.05, p1[1]], 'teal', 0);
+
+      // Concrete seawall pilings along the cantilevered broadwalk edges
+      const nPiers = Math.max(2, Math.floor(len / 2.2));
+      for (let k = 1; k < nPiers; k++) {
+        const t = k / nPiers;
+        const px = p0[0] + dx * t, pz = p0[1] + dz * t;
+        addLineWorld([px, -0.4, pz], [px, yBroad, pz], 'medium', 0);
+      }
+    }
+
+    // Subtle paving slab grid on Northern & Western Broadwalks
+    for (let bx = -20.5; bx <= 13.5; bx += 2.1) {
+      const hw = bennelongHalfW(bx) - 0.5;
+      if (bx < -19.5 || bx > 9.5) {
+        addLineWorld([bx, yBroad + 0.02, -hw], [bx, yBroad + 0.02, hw], 'fine', 0);
+      } else {
+        addLineWorld([bx, yBroad + 0.02, -hw], [bx, yBroad + 0.02, -10.8], 'fine', 0);
+        addLineWorld([bx, yBroad + 0.02, 10.8], [bx, yBroad + 0.02, hw], 'fine', 0);
+      }
+    }
+
+    // Man O' War Steps projecting into Farm Cove on East side (around x = 8.5, z = -12.5)
+    for (let st = 0; st < 4; st++) {
+      addWorldBox(
+        7.6 + st * 0.25,
+        -0.1 + st * 0.18,
+        -13.8 + st * 0.3,
+        2.6 - st * 0.5,
+        0.18,
+        1.4,
+        'stone',
+        { edgeLayer: 'medium' }
+      );
+    }
+
+    // 5B. Southern Forecourt Plaza & East Circular Quay Seawall
+    addWorldBox(14.6, 0.0, -11.8, 10.2, yFore, 24.4, 'plaza', { edgeLayer: 'bold' });
+    for (let fx = 16.0; fx < 24.5; fx += 1.9) {
+      addLineWorld([fx, yFore + 0.02, -11.5], [fx, yFore + 0.02, 12.2], 'fine', 0);
+    }
+    for (let fz = -10.5; fz < 12.0; fz += 2.1) {
+      addLineWorld([14.8, yFore + 0.02, fz], [24.4, yFore + 0.02, fz], 'fine', 0);
+    }
+
+    // Circular Quay Promenade & Ferry Wharf Pier along South-West waterfront (x = 27.6, z > 12.8)
+    addWorldBox(27.2, -0.35, 12.8, 10.5, 1.02, 24.8, 'stone', { edgeLayer: 'bold' });
+    addWorldBox(27.0, 0.35, 16.5, 2.2, 0.32, 8.2, 'terracotta', { edgeLayer: 'bold' }); // Ferry Wharf finger jetty
+    for (let qz = 14.0; qz < 36.5; qz += 2.2) {
+      addLineWorld([27.4, 0.69, qz], [37.4, 0.69, qz], 'fine', 0);
+    }
+
+    // Farm Cove Curved Stone Seawall Cap along Botanic Gardens shoreline
+    for (let fz = -12.5; fz >= -37.2; fz -= 1.2) {
+      const fx0 = farmCoveShoreX(fz);
+      const fx1 = farmCoveShoreX(fz - 1.2);
+      pushQuadWorld(
+        [fx0 - 0.35, 0.52, fz],
+        [fx1 - 0.35, 0.52, fz - 1.2],
+        [fx1 + 0.45, 0.58, fz - 1.2],
+        [fx0 + 0.45, 0.58, fz],
+        PALETTE.stone.top,
+        0
+      );
+      addLineWorld([fx0 - 0.35, 0.55, fz], [fx1 - 0.35, 0.55, fz - 1.2], 'bold', 0.01);
+      addLineWorld([fx0 - 0.35, 0.05, fz], [fx1 - 0.35, 0.05, fz - 1.2], 'teal', 0);
+    }
+
+    // 5C. Tarpeian Way Sandstone Retaining Wall & Stairway climbing Tarpeian Rock (East of Forecourt)
+    for (let st = 0; st < 8; st++) {
+      addWorldBox(
+        21.5 + st * 0.42,
+        yFore + st * 0.28,
+        -5.8,
+        0.55,
+        0.30,
+        1.9,
+        'stone',
+        { edgeLayer: 'medium' }
+      );
+    }
+    addWorldBox(22.2, yFore, -11.4, 1.4, 2.35, 5.2, 'granite', { edgeLayer: 'bold', courses: 4 });
+
+    // 5D. The Monumental Pink-Granite Podium (x = -19.2 .. +10.2) & 90m-wide Monumental Steps
+    // Main solid structural podium core clad in reconstituted Tarana pink granite
+    addWorldBox(-19.2, yBroad, -10.8, 29.4, yPod - yBroad, 21.6, 'granite', {
+      edgeLayer: 'bold',
+      courses: 4
+    });
+
+    // Cantilevered Granite Colonnade Hoods & Recessed Shadowed Glass Bays along West (+Z) & East (-Z)
+    [-1, 1].forEach(side => {
+      const flankZ = side === 1 ? 10.6 : -11.45;
+      // Overhanging granite roof-deck fascia hood
+      addWorldBox(-18.6, yPod - 0.48, flankZ, 28.4, 0.48, 0.85, 'stone', { edgeLayer: 'bold' });
+      // Vertical structural granite piers & recessed dark/teal gallery glass bays underneath
+      for (let px = -17.5; px <= 7.5; px += 3.2) {
+        addWorldBox(px, yBroad, flankZ + (side === 1 ? -0.15 : 0.25), 0.72, yPod - yBroad - 0.48, 0.72, 'granite', {
+          edgeLayer: 'bold'
+        });
+        addWorldBox(px + 0.72, yBroad + 0.05, flankZ + (side === 1 ? -0.32 : 0.48), 2.48, yPod - yBroad - 0.55, 0.35, 'tealDeep', {
+          edgeLayer: 'medium'
+        });
+      }
+      // Subtle terracotta/pink-granite horizontal stringcourse band
+      addLineWorld([-18.6, yPod - 0.48, flankZ + (side === 1 ? 0.86 : -0.01)], [9.8, yPod - 0.48, flankZ + (side === 1 ? 0.86 : -0.01)], 'rust', 0);
+    });
+
+    // Northern Harbour-Facing Terrace Balconies & Twin Stair Flights (x = -20.8 .. -19.2)
+    addWorldBox(-20.4, yBroad, -9.2, 1.2, yPod - yBroad - 0.35, 18.4, 'stone', { edgeLayer: 'bold' });
+    [-4.6, 4.6].forEach(zHall => {
+      // Twin recessed dark/teal northern harbour foyer doors beneath the northern podium terrace
+      addWorldBox(-20.55, yBroad + 0.05, zHall - 2.4, 0.25, 1.55, 4.8, 'tealDeep', { edgeLayer: 'bold' });
+      // Northern terrace parapet handrail
+      addWorldBox(-20.45, yPod - 0.35, zHall - 3.6, 0.22, 0.35, 7.2, 'granite', { edgeLayer: 'medium' });
+    });
+
+    // Bennelong Restaurant Raised Podium Wing (South-West terrace flanking Monumental Steps)
+    addWorldBox(9.2, yBroad, 5.4, 5.4, yPod - yBroad, 5.8, 'granite', { edgeLayer: 'bold', courses: 4 });
+    addWorldBox(9.2, yPod - 0.48, 11.0, 5.4, 0.48, 0.65, 'stone', { edgeLayer: 'bold' });
+    // Recessed Western Lower Concourse / Opera Bar glass frontage under Bennelong wing
+    addWorldBox(9.6, yBroad + 0.05, 10.65, 4.5, yPod - yBroad - 0.58, 0.35, 'tealDeep', { edgeLayer: 'medium' });
+
+    // MONUMENTAL STEPS (Ascending South -> North from Forecourt yFore = 0.82 to yPod = 3.05!)
+    // Spans z = -9.6 to +5.4 (nearly 70–90m full podium sweep!)
+    const nSteps = 12;
+    const stepX0 = 15.2;
+    const stepX1 = 10.2;
+    const stepW = 15.0; // z from -9.6 to +5.4
+    for (let st = 0; st < nSteps; st++) {
+      const t0 = st / nSteps;
+      const t1 = (st + 1) / nSteps;
+      // Add central mid-landing terrace pause around step 5–6
+      const landingShift = st >= 6 ? 0.85 : 0.0;
+      const sx = stepX0 - (stepX0 - stepX1) * t1 - landingShift * 0.25;
+      const sy = yFore + (yPod - yFore) * t0;
+      const sh = (yPod - yFore) / nSteps;
+      const depth = ((stepX0 - stepX1) / nSteps) + (st === 5 ? 0.95 : 0.25);
+
+      addWorldBox(sx, sy, -9.6, depth, sh, stepW, st % 4 === 0 ? 'granite' : 'stone', {
+        edgeLayer: st % 2 === 0 ? 'medium' : 'fine',
+        overshoot: 0.01
+      });
+    }
+    // East & West stepped granite cheek balustrades flanking the Monumental Steps
+    addWorldBox(10.2, yFore, -10.2, 5.0, yPod - yFore + 0.15, 0.65, 'granite', { edgeLayer: 'bold' });
+    addWorldBox(10.2, yFore, 5.15, 4.4, yPod - yFore + 0.15, 0.65, 'granite', { edgeLayer: 'bold' });
+    // Monumental Step handrail dividers
+    [-5.8, -2.0, 1.8].forEach(hz => {
+      addLineWorld([15.2, yFore + 0.38, hz], [10.2, yPod + 0.38, hz], 'medium', 0.01);
+    });
+
+    // Subtle Pink-Granite Paver Grid across the Upper Podium Concourse Deck (y = yPod)
+    for (let px = -18.4; px <= 9.6; px += 2.0) {
+      addLineWorld([px, yPod + 0.02, -10.4], [px, yPod + 0.02, 10.4], 'fine', 0);
+    }
+    for (let pz = -9.6; pz <= 9.6; pz += 2.0) {
+      addLineWorld([-18.6, yPod + 0.02, pz], [10.0, yPod + 0.02, pz], 'fine', 0);
+    }
+
+    // =========================================================================
+    // 6. UTZON'S SPHERICAL VAULT SHELLS, CURTAIN WALLS & BRONZE LOUVRE BRIDGES
+    // =========================================================================
+    /**
+     * Builds one complete paired Sydney Opera House spherical vault shell ("wing pair")
+     * using exact SLERP great-circle arcs on a sphere of radius Rs!
+     *
+     * Local coordinate frame:
+     *   centerX, centerZ: podium origin for this hall cluster
+     *   yaw: slight outward hall splay angle around Y
+     *   dir: -1 = opens North (-X), +1 = opens South (+X)
+     */
+    function buildSphericalShell(cfg) {
+      const {
+        originX, originZ, yaw = 0, dir = -1,
+        sPed, yPed = yPod, halfW,
+        sPeak, yPeak,
+        sRear, yRear,
+        targetRPlane = 15.5,
+        pedSpread = 1.45,
+        shellThick = 0.24,
+        nRibs = 9,
+        nArcSteps = 10,
+        glassWall = false,
+        louvreWall = false,
+        louvreFloorY = yPod
+      } = cfg;
+
+      const cosY = Math.cos(yaw), sinY = Math.sin(yaw);
+
+      // Map canonical shell coords (s, y, zWing) -> 3D world coords
+      function toWorld(s, y, z) {
+        const lx = s * dir;
+        const lz = z;
+        return [
+          originX + lx * cosY - lz * sinY,
+          y,
+          originZ + lx * sinY + lz * cosY
+        ];
+      }
+
+      // 1. Solve circle center (cs, cy) in the z = 0 spine plane passing through (sRear, yRear) and (sPeak, yPeak)
+      const ms = (sRear + sPeak) * 0.5;
+      const my = (yRear + yPeak) * 0.5;
+      const ds = sPeak - sRear;
+      const dy = yPeak - yRear;
+      const chordLen = Math.hypot(ds, dy) || 1;
+      const RPlane = Math.max(chordLen * 0.72, targetRPlane);
+      const hDist = Math.sqrt(Math.max(0.1, RPlane * RPlane - (chordLen * 0.5) * (chordLen * 0.5)));
+
+      // Normal pointing (+s, -y) so the spine bulges convexly upward & backward (-s, +y)
+      const nPlaneS = dy / chordLen;
+      const nPlaneY = -ds / chordLen;
+      const cs = ms + nPlaneS * hDist;
+      const cy = my + nPlaneY * hDist;
+
+      // 2. Solve lateral sphere center offset cz = -offZ so sphere passes through (sPed, yPed, +halfW)
+      const dPedPlaneSq = (sPed - cs) * (sPed - cs) + (yPed - cy) * (yPed - cy);
+      let offZ = (RPlane * RPlane - (dPedPlaneSq + halfW * halfW)) / (2 * halfW);
+      let adjRPlane = RPlane;
+      let adjCs = cs, adjCy = cy;
+      if (offZ < 0.8) {
+        // Ensure sphere center always sits cleanly behind the ridge plane for convex lateral billowing
+        const targetOffZ = 1.6;
+        const reqRPlaneSq = dPedPlaneSq + halfW * halfW + 2 * halfW * targetOffZ;
+        adjRPlane = Math.sqrt(Math.max(reqRPlaneSq, chordLen * chordLen * 0.52));
+        const h2 = Math.sqrt(Math.max(0.1, adjRPlane * adjRPlane - (chordLen * 0.5) * (chordLen * 0.5)));
+        adjCs = ms + nPlaneS * h2;
+        adjCy = my + nPlaneY * h2;
+        offZ = (adjRPlane * adjRPlane - ((sPed - adjCs) ** 2 + (yPed - adjCy) ** 2 + halfW * halfW)) / (2 * halfW);
+      }
+      const cz = -offZ;
+      const Rs = Math.hypot(adjRPlane, offZ);
+
+      // Angles along ridge circle in z = 0 plane from (sRear, yRear) to (sPeak, yPeak)
+      const angRear = Math.atan2(yRear - adjCy, sRear - adjCs);
+      let angPeak = Math.atan2(yPeak - adjCy, sPeak - adjCs);
+      // Ensure shortest convex arc
+      if (angPeak - angRear > Math.PI) angPeak -= Math.PI * 2;
+      if (angRear - angPeak > Math.PI) angPeak += Math.PI * 2;
+
+      // Evaluate spherical surface point for right wing (+z), parameter u in [0,1] (pedestal -> ridge), v in [0,1] (rear -> front mouth)
+      function evalWingPoint(u, v) {
+        // Ridge point R(v) along circle z = 0
+        const aR = angRear + (angPeak - angRear) * v;
+        const rS = adjCs + Math.cos(aR) * adjRPlane;
+        const rY = adjCy + Math.sin(aR) * adjRPlane;
+        const rZ = 0;
+
+        // Pedestal base fan point P(v) constrained strictly to the sphere (adjCs, adjCy, cz, Rs)
+        const sBase = sPed + (v - 0.5) * pedSpread;
+        const yBase = yPed + v * 0.14;
+        const rem = Rs * Rs - (sBase - adjCs) ** 2 - (yBase - adjCy) ** 2;
+        const zBase = cz + Math.sqrt(Math.max(0.05, rem));
+
+        // Unit radial vectors from sphere center C
+        let ux0 = zBase - cz, us0 = sBase - adjCs, uy0 = yBase - adjCy;
+        const l0 = Math.hypot(us0, uy0, ux0) || 1;
+        us0 /= l0; uy0 /= l0; ux0 /= l0;
+
+        let us1 = rS - adjCs, uy1 = rY - adjCy, ux1 = rZ - cz;
+        const l1 = Math.hypot(us1, uy1, ux1) || 1;
+        us1 /= l1; uy1 /= l1; ux1 /= l1;
+
+        // SLERP great-circle interpolation on sphere Rs
+        const dot = Math.min(0.9999, Math.max(-0.9999, us0 * us1 + uy0 * uy1 + ux0 * ux1));
+        const omega = Math.acos(dot);
+        let k0, k1;
+        if (omega < 1e-4) {
+          k0 = 1 - u; k1 = u;
+        } else {
+          const sinO = Math.sin(omega);
+          k0 = Math.sin((1 - u) * omega) / sinO;
+          k1 = Math.sin(u * omega) / sinO;
+        }
+
+        const ns = k0 * us0 + k1 * us1;
+        const ny = k0 * uy0 + k1 * uy1;
+        const nz = k0 * ux0 + k1 * ux1;
+
+        return {
+          s: adjCs + ns * Rs,
+          y: adjCy + ny * Rs,
+          z: cz + nz * Rs,
+          ns, ny, nz
+        };
+      }
+
+      // Transform local normal (ns, ny, nz_signed) to world space for directional ink & lighting
+      function normalWorld(ns, ny, nzSigned) {
+        const lx = ns * dir;
+        const lz = nzSigned;
+        return [lx * cosY - lz * sinY, ny, lx * sinY + lz * cosY];
+      }
+
+      // Build Concrete Pedestal Block catching the bottom hinge of both wings
+      [-1, 1].forEach(side => {
+        const pedP0 = evalWingPoint(0, 0.5);
+        const pw = toWorld(pedP0.s, yPod, side * pedP0.z);
+        addWorldBox(pw[0] - 0.52, yPod - 0.1, pw[2] - 0.52, 1.04, 0.65, 1.04, 'stone', {
+          edgeLayer: 'bold'
+        });
+      });
+
+      // Build Right (+1) and Left (-1) Spherical Shell Wings with Real Thickness
+      const outerGrid = { 1: [], '-1': [] };
+      const innerGrid = { 1: [], '-1': [] };
+
+      [-1, 1].forEach(side => {
+        for (let iv = 0; iv <= nRibs; iv++) {
+          const v = iv / nRibs;
+          outerGrid[side][iv] = [];
+          innerGrid[side][iv] = [];
+          for (let iu = 0; iu <= nArcSteps; iu++) {
+            const u = iu / nArcSteps;
+            const pt = evalWingPoint(u, v);
+            const sz = pt.z * side;
+            const nsz = pt.nz * side;
+            const pOut = toWorld(pt.s, pt.y, sz);
+            const pIn = toWorld(pt.s - pt.ns * shellThick, pt.y - pt.ny * shellThick, sz - nsz * shellThick);
+            const nw = normalWorld(pt.ns, pt.ny, nsz);
+            outerGrid[side][iv][iu] = { p: pOut, n: nw, s: pt.s, y: pt.y, z: sz };
+            innerGrid[side][iv][iu] = { p: pIn, n: [-nw[0], -nw[1], -nw[2]] };
+          }
+        }
+
+        // Fill exterior tiled spherical skin + interior precast ribbed soffit
+        for (let iv = 0; iv < nRibs; iv++) {
+          for (let iu = 0; iu < nArcSteps; iu++) {
+            const o00 = outerGrid[side][iv][iu];
+            const o10 = outerGrid[side][iv][iu + 1];
+            const o11 = outerGrid[side][iv + 1][iu + 1];
+            const o01 = outerGrid[side][iv + 1][iu];
+
+            const nx = (o00.n[0] + o11.n[0]) * 0.5;
+            const ny = (o00.n[1] + o11.n[1]) * 0.5;
+            const nz = (o00.n[2] + o11.n[2]) * 0.5;
+
+            const hexOut = computeDirectionalHex('cream', nx, ny, nz);
+            if (side === 1) {
+              pushQuadWorld(o00.p, o10.p, o11.p, o01.p, hexOut, 0);
+            } else {
+              pushQuadWorld(o00.p, o01.p, o11.p, o10.p, hexOut, 0);
+            }
+
+            // Inner structural concrete soffit
+            const i00 = innerGrid[side][iv][iu];
+            const i10 = innerGrid[side][iv][iu + 1];
+            const i11 = innerGrid[side][iv + 1][iu + 1];
+            const i01 = innerGrid[side][iv + 1][iu];
+            const hexIn = computeDirectionalHex('coreWall', -nx, -ny, -nz);
+            if (side === 1) {
+              pushQuadWorld(i00.p, i01.p, i11.p, i10.p, hexIn, -0.05);
+            } else {
+              pushQuadWorld(i00.p, i10.p, i11.p, i01.p, hexIn, -0.05);
+            }
+
+            // Radiating precast concrete rib lines & chevron ceramic tile seams
+            addLineWorld(o00.p, o10.p, 'fine', 0);
+            if (iu > 0 && iu < nArcSteps && iu % 2 === 0) {
+              addLineWorld(o00.p, o01.p, 'fine', 0);
+            }
+            // Inner rib emphasis visible inside glass foyers
+            if (iv % 2 === 0) {
+              addLineWorld(i00.p, i10.p, 'medium', 0);
+            }
+
+            // Right-side architectural ink shadow hatching on shaded ceramic shells
+            const lightDot = nx * lightDir.x + ny * lightDir.y + nz * lightDir.z;
+            if (lightDot < -0.14) {
+              const midA = [
+                (o00.p[0] + o01.p[0]) * 0.5,
+                (o00.p[1] + o01.p[1]) * 0.5,
+                (o00.p[2] + o01.p[2]) * 0.5
+              ];
+              const midB = [
+                (o10.p[0] + o11.p[0]) * 0.5,
+                (o10.p[1] + o11.p[1]) * 0.5,
+                (o10.p[2] + o11.p[2]) * 0.5
+              ];
+              addLineWorld(midA, midB, 'fine', 0);
+            }
+          }
+        }
+
+        // Crisp front arch rim thickness (v = nRibs) + rear edge thickness (v = 0)
+        for (let iu = 0; iu < nArcSteps; iu++) {
+          const fO0 = outerGrid[side][nRibs][iu].p;
+          const fO1 = outerGrid[side][nRibs][iu + 1].p;
+          const fI0 = innerGrid[side][nRibs][iu].p;
+          const fI1 = innerGrid[side][nRibs][iu + 1].p;
+          pushQuadWorld(fO0, fO1, fI1, fI0, PALETTE.stone.mid, 0);
+          addLineWorld(fO0, fO1, 'bold', 0.015);
+          addLineWorld(fI0, fI1, 'medium', 0.01);
+
+          const rO0 = outerGrid[side][0][iu].p;
+          const rO1 = outerGrid[side][0][iu + 1].p;
+          const rI0 = innerGrid[side][0][iu].p;
+          const rI1 = innerGrid[side][0][iu + 1].p;
+          pushQuadWorld(rO0, rI0, rI1, rO1, PALETTE.stone.shade, 0);
+          addLineWorld(rO0, rO1, 'medium', 0.01);
+        }
+      });
+
+      // Bold Gothic Central Spine Ridge Line where Left & Right spherical wings meet!
+      for (let iv = 0; iv < nRibs; iv++) {
+        addLineWorld(
+          outerGrid[1][iv][nArcSteps].p,
+          outerGrid[1][iv + 1][nArcSteps].p,
+          'bold',
+          0.02
+        );
+      }
+
+      // 3. Fanned Conoid Glass Curtain Wall (A1, A4, B1, B4, C11, C12) OR Bronze Louvre Wall (A2, A3, B2, B3)
+      // Assemble unified left-pedestal -> apex -> right-pedestal arch rim list
+      const archRim = [];
+      for (let iu = 0; iu <= nArcSteps; iu++) archRim.push(innerGrid[-1][nRibs][iu]);
+      for (let iu = nArcSteps - 1; iu >= 0; iu--) archRim.push(innerGrid[1][nRibs][iu]);
+
+      if (glassWall) {
+        const sillPts = archRim.map((pt, idx) => {
+          const t = idx / (archRim.length - 1); // 0 = left ped, 0.5 = center, 1 = right ped
+          const fanFlare = Math.sin(Math.PI * t);
+          const sSill = sPed + (sPeak - sPed) * 0.56 * fanFlare;
+          const zNorm = (t - 0.5) * 2; // -1 to +1
+          const zSill = zNorm * halfW * (0.98 + 0.08 * (1 - fanFlare));
+          return toWorld(sSill, yPed, zSill);
+        });
+
+        for (let k = 0; k < archRim.length - 1; k++) {
+          const top0 = archRim[k].p;
+          const top1 = archRim[k + 1].p;
+          const bot0 = sillPts[k];
+          const bot1 = sillPts[k + 1];
+
+          const gCol = k % 2 === 0 ? PALETTE.tealDeep.lit : PALETTE.teal.mid;
+          pushQuadWorld(bot0, bot1, top1, top0, gCol, 0);
+
+          // Splayed steel/bronze vertical mullion fins
+          addLineWorld(bot0, top0, k % 2 === 0 ? 'medium' : 'teal', 0.01);
+          addLineWorld(bot0, bot1, 'bold', 0.015);
+
+          // Curved horizontal transom glazing bars
+          [0.28, 0.56, 0.80].forEach(hf => {
+            const hL = [
+              bot0[0] + (top0[0] - bot0[0]) * hf,
+              bot0[1] + (top0[1] - bot0[1]) * hf,
+              bot0[2] + (top0[2] - bot0[2]) * hf
+            ];
+            const hR = [
+              bot1[0] + (top1[0] - bot1[0]) * hf,
+              bot1[1] + (top1[1] - bot1[1]) * hf,
+              bot1[2] + (top1[2] - bot1[2]) * hf
+            ];
+            addLineWorld(hL, hR, 'teal', 0);
+          });
+        }
+        addLineWorld(sillPts[archRim.length - 1], archRim[archRim.length - 1].p, 'medium', 0.01);
+      } else if (louvreWall) {
+        // Recessed vertical Bronze Louvre bridge wall connecting upper shell mouth down to lower shell back
+        const dropPts = archRim.map((pt, idx) => {
+          const t = idx / (archRim.length - 1);
+          const sLoc = sPed + (sPeak - sPed) * 0.72 * Math.sin(Math.PI * t);
+          const yLow = Math.min(pt.p[1] - 0.15, yPod + (louvreFloorY - yPod) * Math.sin(Math.PI * t));
+          const zLoc = (t - 0.5) * 2 * halfW * 0.94;
+          return toWorld(sLoc, Math.max(yPod, yLow), zLoc);
+        });
+
+        for (let k = 0; k < archRim.length - 1; k++) {
+          const top0 = archRim[k].p;
+          const top1 = archRim[k + 1].p;
+          const bot0 = dropPts[k];
+          const bot1 = dropPts[k + 1];
+          pushQuadWorld(bot0, bot1, top1, top0, PALETTE.dark.mid, 0);
+          addLineWorld(bot0, top0, 'rust', 0);
+          const midX0 = (bot0[0] + top0[0]) * 0.5, midY0 = (bot0[1] + top0[1]) * 0.5, midZ0 = (bot0[2] + top0[2]) * 0.5;
+          const midX1 = (bot1[0] + top1[0]) * 0.5, midY1 = (bot1[1] + top1[1]) * 0.5, midZ1 = (bot1[2] + top1[2]) * 0.5;
+          addLineWorld([midX0, midY0, midZ0], [midX1, midY1, midZ1], 'medium', 0);
+        }
+      }
+    }
+
+    /**
+     * Builds the arched Side Shells & recessed auditorium flank walls connecting pedestals along each hall's East & West sides
+     */
+    function buildSideEnclosure(originX, originZ, yaw, halfW, sStart, sEnd, ridgeH) {
+      const cosY = Math.cos(yaw), sinY = Math.sin(yaw);
+      function toW(lx, ly, lz) {
+        return [originX + lx * cosY - lz * sinY, ly, originZ + lx * sinY + lz * cosY];
+      }
+
+      const nSeg = 5;
+      const ds = (sEnd - sStart) / nSeg;
+      [-1, 1].forEach(side => {
+        const zOuter = side * (halfW + 0.18);
+        const zInner = side * (halfW - 0.55);
+        for (let i = 0; i < nSeg; i++) {
+          const s0 = sStart + i * ds;
+          const s1 = s0 + ds;
+          const sMid = (s0 + s1) * 0.5;
+
+          // Concrete side-vault spandrel shell leaning gently inward over the auditorium side wall
+          const yBot = yPod + 0.6;
+          const yArch = yPod + ridgeH * (0.65 + 0.35 * Math.sin((i + 0.5) / nSeg * Math.PI));
+
+          const pL0 = toW(s0, yBot, zOuter);
+          const pR0 = toW(s1, yBot, zOuter);
+          const pPeak = toW(sMid, yArch, zInner);
+
+          const nw = [side * -sinY, 0.55, side * cosY];
+          pushTriWorld(pL0, pR0, pPeak, computeDirectionalHex('cream', nw[0], nw[1], nw[2]), 0);
+          addLineWorld(pL0, pPeak, 'bold', 0.015);
+          addLineWorld(pR0, pPeak, 'bold', 0.015);
+          addLineWorld(pL0, pR0, 'medium', 0.01);
+
+          // Recessed flank auditorium glass/granite wall beneath side shell
+          const w0 = toW(s0 + 0.15, yPod, zOuter * 0.96);
+          const w1 = toW(s1 - 0.15, yPod, zOuter * 0.96);
+          const w2 = toW(s1 - 0.15, yBot + 0.4, zOuter * 0.96);
+          const w3 = toW(s0 + 0.15, yBot + 0.4, zOuter * 0.96);
+          pushQuadWorld(w0, w1, w2, w3, PALETTE.tealDeep.shade, 0);
+          addLineWorld(w0, w3, 'medium', 0);
+          addLineWorld(w1, w2, 'medium', 0);
+        }
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // GROUP A: CONCERT HALL SHELLS (Western Main Hall, z ≈ +4.5, yaw = -4.2°)
+    // -------------------------------------------------------------------------
+    const yawA = (-4.2 * Math.PI) / 180;
+    const origAX = 0.0, origAZ = 4.55;
+    const halfWA = 4.25;
+
+    // A4 (Northmost low shell, mouth opens North with fanned glass wall)
+    buildSphericalShell({
+      originX: origAX, originZ: origAZ, yaw: yawA, dir: -1,
+      sPed: 11.4, yPed: yPod, halfW: halfWA * 0.92,
+      sPeak: 17.8, yPeak: yPod + 5.55,
+      sRear: 9.2,  yRear: yPod + 1.85,
+      targetRPlane: 14.5, pedSpread: 1.4,
+      glassWall: true
+    });
+    // A3 (2nd north-facing shell, bronze louvre wall down to A4)
+    buildSphericalShell({
+      originX: origAX, originZ: origAZ, yaw: yawA, dir: -1,
+      sPed: 5.8,  yPed: yPod, halfW: halfWA * 0.98,
+      sPeak: 12.8, yPeak: yPod + 8.75,
+      sRear: 3.4,  yRear: yPod + 2.55,
+      targetRPlane: 15.8, pedSpread: 1.5,
+      louvreWall: true, louvreFloorY: yPod + 4.35
+    });
+    // A2 (3rd north-facing shell — THE TALLEST 67m PEAK! Bronze louvre wall down to A3)
+    buildSphericalShell({
+      originX: origAX, originZ: origAZ, yaw: yawA, dir: -1,
+      sPed: -0.4, yPed: yPod, halfW: halfWA,
+      sPeak: 7.2, yPeak: yPod + 11.85,
+      sRear: -2.6, yRear: yPod + 3.25,
+      targetRPlane: 16.8, pedSpread: 1.6,
+      louvreWall: true, louvreFloorY: yPod + 6.95
+    });
+    // A1 (South-facing shell opening over Monumental Steps with soaring glass wall)
+    buildSphericalShell({
+      originX: origAX, originZ: origAZ, yaw: yawA, dir: +1,
+      sPed: 2.3,  yPed: yPod, halfW: halfWA * 0.96,
+      sPeak: 8.4, yPeak: yPod + 6.65,
+      sRear: 0.2, yRear: yPod + 2.85,
+      targetRPlane: 15.0, pedSpread: 1.45,
+      glassWall: true
+    });
+    // Side Shells A5–A8 enclosing Concert Hall East & West flanks
+    buildSideEnclosure(origAX, origAZ, yawA, halfWA, -11.5, 2.4, 3.3);
+
+    // -------------------------------------------------------------------------
+    // GROUP B: JOAN SUTHERLAND THEATRE (Eastern Main Hall, z ≈ -4.75, yaw = +4.2°)
+    // -------------------------------------------------------------------------
+    const yawB = (4.2 * Math.PI) / 180;
+    const origBX = 0.2, origBZ = -4.75;
+    const halfWB = 3.65;
+
+    // B4 (Northmost low shell with fanned glass wall)
+    buildSphericalShell({
+      originX: origBX, originZ: origBZ, yaw: yawB, dir: -1,
+      sPed: 10.6, yPed: yPod, halfW: halfWB * 0.92,
+      sPeak: 16.0, yPeak: yPod + 4.65,
+      sRear: 8.6,  yRear: yPod + 1.55,
+      targetRPlane: 13.0, pedSpread: 1.25,
+      glassWall: true
+    });
+    // B3 (2nd north-facing shell with bronze louvre wall)
+    buildSphericalShell({
+      originX: origBX, originZ: origBZ, yaw: yawB, dir: -1,
+      sPed: 5.4,  yPed: yPod, halfW: halfWB * 0.98,
+      sPeak: 11.4, yPeak: yPod + 7.25,
+      sRear: 3.3,  yRear: yPod + 2.25,
+      targetRPlane: 14.0, pedSpread: 1.35,
+      louvreWall: true, louvreFloorY: yPod + 3.65
+    });
+    // B2 (Tallest Opera Theatre shell ~58m peak with bronze louvre wall)
+    buildSphericalShell({
+      originX: origBX, originZ: origBZ, yaw: yawB, dir: -1,
+      sPed: -0.2, yPed: yPod, halfW: halfWB,
+      sPeak: 6.2, yPeak: yPod + 9.75,
+      sRear: -2.2, yRear: yPod + 2.85,
+      targetRPlane: 14.8, pedSpread: 1.45,
+      louvreWall: true, louvreFloorY: yPod + 5.65
+    });
+    // B1 (South-facing shell opening over Monumental Steps with glass wall)
+    buildSphericalShell({
+      originX: origBX, originZ: origBZ, yaw: yawB, dir: +1,
+      sPed: 2.0,  yPed: yPod, halfW: halfWB * 0.96,
+      sPeak: 7.4, yPeak: yPod + 5.45,
+      sRear: 0.2, yRear: yPod + 2.35,
+      targetRPlane: 13.5, pedSpread: 1.3,
+      glassWall: true
+    });
+    // Side Shells B5–B8 enclosing Opera Theatre East & West flanks
+    buildSideEnclosure(origBX, origBZ, yawB, halfWB, -10.8, 2.2, 2.75);
+
+    // -------------------------------------------------------------------------
+    // GROUP C: BENNELONG RESTAURANT SHELLS (South-West Terrace Wing, x ≈ +11.6, z ≈ +8.0)
+    // -------------------------------------------------------------------------
+    const yawC = (-14.0 * Math.PI) / 180;
+    const origCX = 11.6, origCZ = 8.1;
+    const halfWC = 2.25;
+
+    // C12 (North-West facing restaurant shell with glass wall)
+    buildSphericalShell({
+      originX: origCX, originZ: origCZ, yaw: yawC, dir: -1,
+      sPed: -0.2, yPed: yPod, halfW: halfWC,
+      sPeak: 3.4, yPeak: yPod + 4.35,
+      sRear: -1.4, yRear: yPod + 1.45,
+      targetRPlane: 9.5, pedSpread: 0.9,
+      nRibs: 7, nArcSteps: 8,
+      glassWall: true
+    });
+    // C11 (South-West facing restaurant shell back-to-back with C12, glass wall)
+    buildSphericalShell({
+      originX: origCX, originZ: origCZ, yaw: yawC, dir: +1,
+      sPed: -0.2, yPed: yPod, halfW: halfWC * 0.92,
+      sPeak: 2.9, yPeak: yPod + 3.45,
+      sRear: -1.3, yRear: yPod + 1.25,
+      targetRPlane: 9.0, pedSpread: 0.85,
+      nRibs: 7, nArcSteps: 8,
+      glassWall: true
+    });
+
+    // =========================================================================
+    // 7. BOTANIC GARDEN TREES, HARBOUR SAILBOATS & ARCHITECTURAL CONTEXT
+    // =========================================================================
+    // 7A. Sketched Australian Fig & Eucalyptus Trees on Tarpeian Rock & Royal Botanic Gardens
+    function addGardenTree(tx, tz, scale = 1.0) {
+      const ty = H(tx, tz);
+      if (ty < 0.75) return;
+      const r = 0.62 * scale;
+      const h = 1.45 * scale;
+      const trunkH = 0.45 * scale;
+
+      // Trunk & ground shadow ticks
+      addLineWorld([tx, ty, tz], [tx, ty + trunkH + 0.2, tz], 'bold', 0);
+      addLineWorld([tx - r * 0.7, ty + 0.03, tz + r * 0.5], [tx + r * 0.9, ty + 0.03, tz - r * 0.5], 'fine', 0);
+
+      // Organic multi-faceted leafy canopy in botanical green wash + ink outline
+      const yMid = ty + trunkH;
+      const yTop = yMid + h;
+      const pts = [];
+      const segs = 6;
+      for (let i = 0; i < segs; i++) {
+        const ang = (i * Math.PI * 2) / segs + (rng() - 0.5) * 0.3;
+        const rad = r * (0.85 + rng() * 0.3);
+        pts.push([tx + Math.cos(ang) * rad, yMid + rad * 0.25, tz + Math.sin(ang) * rad]);
+      }
+      const apex = [tx + (rng() - 0.5) * 0.15, yTop, tz + (rng() - 0.5) * 0.15];
+      for (let i = 0; i < segs; i++) {
+        const p0 = pts[i];
+        const p1 = pts[(i + 1) % segs];
+        const nx = (p0[0] + p1[0]) * 0.5 - tx;
+        const nz = (p0[2] + p1[2]) * 0.5 - tz;
+        const nl = Math.hypot(nx, 0.7, nz) || 1;
+        pushTriWorld(p0, p1, apex, computeDirectionalHex('foliage', nx / nl, 0.7 / nl, nz / nl), 0);
+        addLineWorld(p0, p1, 'medium', 0.01);
+        addLineWorld(p0, apex, i % 2 === 0 ? 'medium' : 'fine', 0);
+      }
+    }
+
+    // Scatter trees organically across the Royal Botanic Gardens & Tarpeian plateau (South-East)
+    for (let k = 0; k < 420; k++) {
+      const tx = 14.0 + rng() * 22.5;
+      const tz = -36.0 + rng() * 40.0;
+      const ty = H(tx, tz);
+      // Keep Forecourt & steep cliff vertical face clear
+      if (tx < 23.8 && tz > -11.5) continue;
+      if (ty > 1.35 && fbm(tx * 0.28, tz * 0.28) > 0.44) {
+        addGardenTree(tx, tz, 0.75 + rng() * 0.75);
+      }
+    }
+
+    // Winding Botanic Gardens Gravel Promenade Paths along Tarpeian Rock & Farm Cove (rust ink)
+    function addGardenPath(points) {
+      for (let i = 0; i < points.length - 1; i++) {
+        const a = points[i], b = points[i + 1];
+        const dist = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        const steps = Math.max(2, Math.ceil(dist / 0.5));
+        for (let s = 0; s < steps; s++) {
+          const u = s / steps, v = (s + 0.75) / steps;
+          const x0 = a[0] + (b[0] - a[0]) * u, z0 = a[1] + (b[1] - a[1]) * u;
+          const x1 = a[0] + (b[0] - a[0]) * v, z1 = a[1] + (b[1] - a[1]) * v;
+          addLineWorld([x0, H(x0, z0) + 0.06, z0], [x1, H(x1, z1) + 0.06, z1], 'rust', 0);
+        }
+      }
+    }
+    addGardenPath([[25.2, -5.0], [27.0, -9.5], [27.5, -16.0], [26.2, -23.0], [25.8, -32.0], [27.0, -37.2]]);
+    addGardenPath([[27.0, -9.5], [31.5, -8.0], [36.5, -6.5]]);
+
+    // 7B. Minimalist Architectural Sailboats in Sydney Cove & Farm Cove (scale reference)
+    function addSailboat(bx, bz, heading, scale = 1.0) {
+      const ch = Math.cos(heading), sh = Math.sin(heading);
+      function bp(lx, ly, lz) {
+        return [bx + (lx * ch - lz * sh) * scale, W + ly * scale, bz + (lx * sh + lz * ch) * scale];
+      }
+      // Slender crisp hull
+      const hF = bp(0.95, 0.16, 0);
+      const hBL = bp(-0.75, 0.12, -0.24);
+      const hBR = bp(-0.75, 0.12, 0.24);
+      const hBase = bp(0, 0.02, 0);
+      pushTriWorld(hF, hBR, hBL, PALETTE.dark.lit, 0);
+      addLineWorld(hF, hBL, 'bold', 0.01);
+      addLineWorld(hF, hBR, 'bold', 0.01);
+      addLineWorld(hBL, hBR, 'bold', 0.01);
+      // Mast & billowing triangular mainsail + jib
+      const mBase = bp(0.05, 0.14, 0);
+      const mTop  = bp(0.0, 2.35, 0);
+      const boom  = bp(-0.72, 0.45, 0.08);
+      const jib   = bp(0.82, 0.22, -0.05);
+      pushTriWorld(mBase, boom, mTop, PALETTE.cream.top, 0);
+      pushTriWorld(mBase, mTop, jib, PALETTE.cream.lit, 0);
+      addLineWorld(mBase, mTop, 'bold', 0.01);
+      addLineWorld(mTop, boom, 'medium', 0);
+      addLineWorld(boom, mBase, 'medium', 0);
+      addLineWorld(mTop, jib, 'medium', 0);
+      // Subtle teal wake chevron behind stern
+      addLineWorld(bp(-0.85, 0.03, 0.1), bp(-2.2, 0.03, 0.65), 'teal', 0);
+      addLineWorld(bp(-0.85, 0.03, -0.1), bp(-2.2, 0.03, -0.65), 'teal', 0);
+    }
+    addSailboat(-14.5, 21.5, -0.55, 1.05); // Sailboat in Sydney Cove (West)
+    addSailboat(-11.0, -23.5, 0.85, 0.92); // Sailboat in Farm Cove (North-East)
+
+    // 7C. Subtle Ghost Wireframe Urban Context along East Circular Quay (South-West edge)
+    addWorldBox(29.8, 0.72, 16.5, 6.2, 5.4, 9.5, 'ghost', { edgeLayer: 'faint' });
+    addWorldBox(30.5, 0.72, 27.5, 5.8, 7.2, 8.8, 'ghost', { edgeLayer: 'faint' });
+
+    // 7D. Faint Diagonal Drafting Construction Rays in Upper-Left Sky
+    for (let i = 0; i < 15; i++) {
+      const spread = (i / 14) * 28;
+      addLineWorld([-58, 52, -16], [-16.0, 4.0 + spread * 0.55, 6.0 - spread * 0.25], 'faint', 0);
+    }
+
+    // =========================================================================
+    // 8. BUILD THREE.JS GEOMETRIES & RENDER LOOP
+    // =========================================================================
+    const washGeo = new THREE.BufferGeometry();
+    washGeo.setAttribute('position', new THREE.Float32BufferAttribute(washPositions, 3));
+    washGeo.setAttribute('color', new THREE.Float32BufferAttribute(washColors, 3));
+
+    const washMat = new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      side: THREE.DoubleSide,
+      polygonOffset: true,
+      polygonOffsetFactor: 1.4,
+      polygonOffsetUnits: 1.4
+    });
+    scene.add(new THREE.Mesh(washGeo, washMat));
+
+    function createInkSegmentMesh(vertices, hexColor, opacity) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      const mat = new THREE.LineBasicMaterial({
+        color: hexColor,
+        transparent: true,
+        opacity: opacity
+      });
+      return new THREE.LineSegments(geo, mat);
+    }
+
+    scene.add(createInkSegmentMesh(inkLayers.bold,   0x211b17, 0.92));
+    scene.add(createInkSegmentMesh(inkLayers.medium, 0x332a24, 0.80));
+    scene.add(createInkSegmentMesh(inkLayers.fine,   0x4a3f37, 0.44));
+    scene.add(createInkSegmentMesh(inkLayers.rust,   0x8c4531, 0.64));
+    scene.add(createInkSegmentMesh(inkLayers.teal,   0x527d80, 0.52));
+    scene.add(createInkSegmentMesh(inkLayers.faint,  0x6b6157, 0.30));
+
+    window.addEventListener('resize', () => {
+      fitCamera();
+      generatePaperOverlay();
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>

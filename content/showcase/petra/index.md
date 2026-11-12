@@ -1,6 +1,6 @@
 ---
 title: "Petra — Al-Khazneh (The Treasury)"
-description: "Al-Khazneh at Petra drawn as an axonometric on drafting paper: the two-storey Treasury facade carved into a stratified rose-red cliff — six columns and relief figures below, a broken pediment, tholos and urn above, the Siq slit in the spur beside it."
+description: "Al-Khazneh at Petra drawn inside a geological Nubian sandstone canyon block: the two-storey Treasury carved into living rock beside the winding Al-Siq gorge, exposed Cambrian strata along all four cutaway faces, and desert scrub."
 contenttype: article
 tool: petra
 topics:
@@ -11,14 +11,16 @@ tags:
   - creative-coding
   - architecture
 created: 2026-11-11
-updated: 2026-11-11
+updated: 2026-11-12
 ---
 
 ## What it is
 
-The Treasury at Petra, drawn the way it actually exists: not a building put up in front of a cliff, but a classical temple facade cut into one — a pale carved panel standing slightly proud of the darker, banded rock it was carved from, at the end of the Siq.
+The Treasury at Petra, drawn inside the mountain canyon that holds it: a classical temple facade cut out of living Nubian sandstone where the winding narrow *Siq* gorge opens onto the sandy wadi forecourt.
 
 ## What was drawn
+
+- **Nubian sandstone canyon block**: banded rose, ochre, violet, and Um Ishrin sandstone strata carried around all four vertical cutaway faces with topographic plateau contours, the winding Al-Siq gorge approach with caravan trail ticks, sandy wadi floor, and desert scrub.
 
 - The cliff first: seven sandstone strata in rose, ochre, rust and violet, each band's face set at a slightly different depth, with weathering cracks running down the exposed rock and a broken, stepped crest.
 - The lower order: six Corinthian columns with a wider central gap for the doorway, the tall door itself in deep shadow, and the Dioscuri relief figures standing between the outer columns.

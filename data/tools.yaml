@@ -574,15 +574,15 @@ tools:
     related: [hermes-harness-flow, anatomy]
     added: "2026-10-31"
 
-  # ── Showcase (5) ───────────────────────────────────────────────────────────
+  # ── Showcase (12) ──────────────────────────────────────────────────────────
   - id: colosseum
     name: Colosseum
     url: colosseum/
     writeup: showcase/colosseum/
     category: showcase
     kind: exhibit
-    short: "The Flavian amphitheatre cut open: 80 bays, three arcades, the hypogeum exposed."
-    desc: "The Colosseum as a cutaway axonometric at true proportions (4.5 m unit, 188 x 156 m ellipse, 80 bays): three arcaded storeys and the attic, the cavea stepped back to the arena wall, and the two-level hypogeum exposed under the sand."
+    short: "Remade Flavian amphitheatre cutaway in the Colosseum Valley: arcades, cavea, hypogeum & Roman tufa strata."
+    desc: "Clean architectural remake of the Colosseum set inside a Colosseum Valley cutaway block: travertine arcaded orders, attic wall with velarium corbels, brick-vaulted ambulatories, marble cavea seating, sunken two-level hypogeum, and Velian Ridge."
     tags: [svg, isometric, creative-coding, architecture]
     related: [pisa, hanging-gardens]
     added: "2026-11-11"
@@ -593,22 +593,10 @@ tools:
     writeup: showcase/hanging-gardens/
     category: showcase
     kind: exhibit
-    short: Six planted terraces, a double corner cascade and a walled basin at every landing.
-    desc: "The Hanging Gardens as a ziggurat of six planted terraces: hedged parapets, palms and cypresses overhanging the edges, a double cascade down the near corner into walled basins, and a brick cistern at the summit. Built closed from every orbit angle."
+    short: "Unified reconstructions with UI toggle: closed six-tier vaulted ziggurat vs. earlier stepped-pass terrace study."
+    desc: "Two axonometric hypotheses unified with an interactive toggle: Reconstruction II (closed six-tier vaulted ziggurat with cascading corner channels) and Reconstruction I (earlier stepped-pass study with front arcades and water rills)."
     tags: [svg, isometric, creative-coding, architecture]
-    related: [colosseum, hanging-gardens-reconstruction]
-    added: "2026-11-11"
-
-  - id: hanging-gardens-reconstruction
-    name: Hanging Gardens, earlier reconstruction
-    url: hanging-gardens-reconstruction/
-    writeup: showcase/hanging-gardens-reconstruction/
-    category: showcase
-    kind: exhibit
-    short: An earlier pass at the same subject, kept for comparison with the finished piece.
-    desc: "An earlier reconstruction of the Hanging Gardens as a stepped axonometric: terraced planting on every level, waterfalls down the tiers, drawn for a front view rather than a full orbit. Kept alongside the finished piece because the difference between them is the point."
-    tags: [svg, isometric, creative-coding, architecture]
-    related: [hanging-gardens]
+    related: [colosseum, petra]
     added: "2026-11-11"
 
   - id: hoogbouw
@@ -629,8 +617,8 @@ tools:
     writeup: showcase/pisa/
     category: showcase
     kind: exhibit
-    short: Eight tiers, fifteen blind arches at ground level, and a lean carried on a curved spine.
-    desc: "The Leaning Tower of Pisa as a cutaway axonometric: a stepped marble base, fifteen blind arches round the ground tier, six open colonnades and the belfry, all carried on a spine that eases from 5.65 to 3.65 degrees where the masons corrected the lean."
+    short: Eight tiers on Piazza dei Miracoli over a subterranean cutaway showing the compressible Pancone clay strata.
+    desc: "The Leaning Tower of Pisa on a Piazza dei Miracoli terrain cutaway: eight masonry tiers on a curved spine, the sunken marble catino basin, Tuscan Prato lawn, northern city wall, and dipping Arno marine clay strata below."
     tags: [svg, isometric, creative-coding, architecture]
     related: [colosseum, hoogbouw]
     added: "2026-11-11"
@@ -641,10 +629,10 @@ tools:
     writeup: showcase/petra/
     category: showcase
     kind: exhibit
-    short: The Treasury carved into a rose-red cliff — six columns, a broken pediment, the tholos and its urn.
-    desc: "Al-Khazneh at Petra drawn as an axonometric on drafting paper: the two-storey Treasury facade carved into a stratified rose-red cliff — six columns and relief figures below, a broken pediment, tholos and urn above, the Siq slit in the spur beside it."
+    short: The Treasury carved into a full Nubian sandstone canyon block beside the winding Al-Siq gorge.
+    desc: "Al-Khazneh at Petra inside a stratified Nubian sandstone canyon block: the two-storey facade cut into banded rose-ochre living rock beside the winding Al-Siq gorge, sandy wadi floor, desert scrub, and four-sided strata skirts."
     tags: [svg, isometric, creative-coding, architecture]
-    related: [colosseum, hanging-gardens]
+    related: [colosseum, taj-mahal]
     added: "2026-11-11"
 
   - id: christ-the-redeemer
@@ -653,12 +641,11 @@ tools:
     writeup: showcase/christ-the-redeemer/
     category: showcase
     kind: exhibit
-    short: The Art Deco Christ above Rio — octagonal pedestal, fluted robe, arms outstretched over the terrace.
-    desc: "Christ the Redeemer drawn as an axonometric on drafting paper: the Art Deco statue with outstretched arms on its octagonal pedestal — fluted soapstone robe, diagonal mantle and the Sacred Heart on its chest — above the stepped sanctuary terrace on Corcovado."
+    short: Art Deco statue atop Mount Corcovado's steep augen-gneiss dome and Tijuca rainforest slopes.
+    desc: "Christ the Redeemer anchored atop Mount Corcovado: the soapstone-clad statue and octagonal sanctuary belvedere rising out of Rio's steep granite dome, rack-railway ridge approach, Tijuca forest canopy, and bedrock strata."
     tags: [svg, isometric, creative-coding, architecture]
-    related: [pisa, colosseum]
+    related: [pisa, sydney-opera-house]
     added: "2026-11-11"
-
 
   - id: great-wall
     name: Great Wall of China
@@ -666,8 +653,8 @@ tools:
     writeup: showcase/great-wall/
     category: showcase
     kind: exhibit
-    short: A Ming watchtower where the wall turns on the ridge — crenellated parapets, a stepped walk, a beacon terrace behind.
-    desc: "A Ming-dynasty section of the Great Wall drawn as an axonometric on drafting paper: a two-storey watchtower where the wall turns on the ridge, crenellated parapets on both sides, the walk stepped down the grades, and a beacon terrace on the spur behind."
+    short: Remade Ming curtain wall and watchtowers cresting a continuous Yan Mountains ridgeline cutaway.
+    desc: "Full architectural remake of a Ming-dynasty section of the Great Wall on a continuous Yan Mountains ridgeline block: mitered stone and grey-brick curtain walls, stepped walks, three two-storey watchtowers, peak beacon, and granite strata."
     tags: [svg, isometric, creative-coding, architecture]
     related: [machu-picchu, taj-mahal]
     added: "2026-11-11"
@@ -678,20 +665,20 @@ tools:
     writeup: showcase/machu-picchu/
     category: showcase
     kind: exhibit
-    short: The citadel on its saddle — terrace courses, gabled stone houses, the Temple of the Sun, Huayna Picchu behind.
-    desc: "Machu Picchu drawn as an axonometric on drafting paper: the citadel on its ridge saddle — ten agricultural terrace courses, rows of gabled dry-stone houses with trapezoidal doorways, the curved Temple of the Sun, the Intihuatana stone, and Huayna Picchu standing behind."
+    short: Citadel remade in battered Inca ashlar above the Urubamba canyon, agricultural andenes & Huayna Picchu.
+    desc: "Machu Picchu on the Urubamba River canyon terrain block with rebuilt Inca architecture: curved Temple of the Sun Torreón, Intihuatana stepped mound, Temple of the Three Windows, battered Kancha halls, agricultural terraces, and drifting mist."
     tags: [svg, isometric, creative-coding, architecture]
     related: [chichen-itza, great-wall]
     added: "2026-11-11"
 
   - id: chichen-itza
-    name: Chichén Itzá — El Castillo
+    name: Chichén Itzá — Yucatán Karst & El Castillo
     url: chichen-itza/
     writeup: showcase/chichen-itza/
     category: showcase
     kind: exhibit
-    short: "Nine terraces, four stairways of ninety-one steps: a calendar in stone, serpent heads at the northern stair."
-    desc: "El Castillo at Chichén Itzá drawn as an axonometric on drafting paper: a nine-terrace stepped pyramid with four stairways — ninety-one steps each in the real stone, 365 with the platform — a temple on top, and serpent heads at the foot of the northern balustrades."
+    short: El Castillo and the Gran Nivelación precinct set on a Yucatán karst terrain cutaway with Cenote Sagrado.
+    desc: "Interactive axonometric cutaway of Chichén Itzá on a Yucatán karst block: El Castillo at the centre of the Gran Nivelación plaza beside the Temple of the Warriors, Great Ball Court, El Caracol observatory, and Cenote Sagrado."
     tags: [svg, isometric, creative-coding, architecture]
     related: [machu-picchu, colosseum]
     added: "2026-11-11"
@@ -702,8 +689,20 @@ tools:
     writeup: showcase/taj-mahal/
     category: showcase
     kind: exhibit
-    short: White marble on the garden axis — the great onion dome, four minarets, the reflecting channel leading in.
-    desc: "The Taj Mahal drawn as an axonometric on drafting paper: white marble on the charbagh axis — the great onion dome over a chamfered block of iwans, four minarets leaning a degree outward, and the reflecting channel running down the garden to the gate."
+    short: White marble mausoleum & Charbagh garden above the Chameli Farsh terrace and Yamuna River bend.
+    desc: "The Taj Mahal grounded on the Yamuna Riverfront in Agra: white marble onion dome, four tilted minarets, red-sandstone Mosque and Jawab, formal Charbagh garden axis, Chameli Farsh retaining wall, and curving Yamuna channel."
     tags: [svg, isometric, creative-coding, architecture]
     related: [great-wall, petra]
     added: "2026-11-11"
+
+  - id: sydney-opera-house
+    name: Sydney Opera House
+    url: sydney-opera-house/
+    writeup: showcase/sydney-opera-house/
+    category: showcase
+    kind: exhibit
+    short: Utzon's precast concrete sail vaults and granite podium projecting into Sydney Harbour on Bennelong Point.
+    desc: "Axonometric cutaway of the Sydney Opera House on Bennelong Point: three groups of spherical-geometry concrete sail roofs over the massive stepped granite podium, Tarpeian Rock sandstone strata, Farm Cove seawall, and harbour sailboats."
+    tags: [svg, isometric, creative-coding, architecture]
+    related: [christ-the-redeemer, chichen-itza]
+    added: "2026-11-12"

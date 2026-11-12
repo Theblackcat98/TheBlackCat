@@ -124,7 +124,7 @@
 
     const scene = new THREE.Scene();
 
-    const frustumSize = 54;
+    const frustumSize = 78;
     const aspect = window.innerWidth / window.innerHeight;
     const camera = new THREE.OrthographicCamera(
       (-frustumSize * aspect) / 2,
@@ -135,8 +135,8 @@
       300
     );
 
-    const targetCenter = new THREE.Vector3(0, 13.5, 2.2);
-    const camDist = 68;
+    const targetCenter = new THREE.Vector3(0, 10.5, -2.5);
+    const camDist = 92;
     const defaultCamPos = new THREE.Vector3(
       targetCenter.x + camDist,
       targetCenter.y + camDist * 0.78,
@@ -1241,10 +1241,11 @@
       addSketchCypress( chanW / 2 + 0.85, cz, true);
     }
 
-    // Dashed Perspective Street Grid & Surrounding Shrubs outside the plinth
+    // YAMUNA RIVERFRONT & AGRA ALLUVIAL FLOODPLAIN CUTAWAY BLOCK (B = 42)
     function addDashedLineWorld(p1, p2, dashLen = 0.5, gapLen = 0.4) {
       const dx = p2[0] - p1[0], dy = p2[1] - p1[1], dz = p2[2] - p1[2];
       const dist = Math.hypot(dx, dy, dz);
+      if (dist < 1e-5) return;
       const ux = dx / dist, uy = dy / dist, uz = dz / dist;
       let cur = 0;
       while (cur < dist) {
@@ -1252,37 +1253,161 @@
         addLineWorld(
           [p1[0] + ux * cur, p1[1] + uy * cur, p1[2] + uz * cur],
           [p1[0] + ux * end, p1[1] + uy * end, p1[2] + uz * end],
-          'faint',
-          0
+          'faint', 0
         );
         cur += dashLen + gapLen;
       }
     }
 
-    const lim = 26.5;
-    for (let s = -24.5; s <= 24.5; s += 3.8) {
-      if (s < siteMinX - 0.6 || s > siteMaxX + 0.6) {
-        addDashedLineWorld([s, -0.45, -lim], [s, -0.45, lim]);
-      } else {
-        addDashedLineWorld([s, -0.45, siteMaxZ + 0.6], [s, -0.45, lim + 2.5]);
+    const thash = (i, j) => {
+      let h = Math.imul(i, 374761393) + Math.imul(j, 668265263);
+      h = Math.imul(h ^ (h >>> 13), 1274126177);
+      return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    };
+    const tsmooth = t => t * t * (3 - 2 * t);
+    const tss = (a, b, x) => {
+      const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+      return t * t * (3 - 2 * t);
+    };
+    function tval(x, z) {
+      const i = Math.floor(x), j = Math.floor(z), u = tsmooth(x - i), v = tsmooth(z - j);
+      return (thash(i, j) * (1 - u) + thash(i + 1, j) * u) * (1 - v) +
+             (thash(i, j + 1) * (1 - u) + thash(i + 1, j + 1) * u) * v;
+    }
+    const tfbm = (x, z) => tval(x, z) * 0.54 + tval(x * 2.1, z * 2.1) * 0.28 + tval(x * 4.2, z * 4.2) * 0.18;
+
+    const B_TER = 42, N_TER = 98, Y_BOT = -8.0, W_YAMUNA = -2.85;
+    function H_taj(x, z) {
+      // Riverfront Chameli Farsh terrace retains the Taj against the Yamuna at z ≈ -19.8
+      const zBank = (Math.abs(x) < 26.5) ? -20.2 : (-19.8 + Math.sin(x * 0.08) * 1.1);
+      // Opposite Mehtab Bagh bank emerging gently on the far northern edge (z < -35)
+      const zNorthBank = -35.5 + Math.cos(x * 0.07) * 1.2;
+      if (z < zBank) {
+        const dropSouth = tss(zBank, zBank - 3.6, z);
+        const riseNorth = tss(zNorthBank + 2.6, zNorthBank - 2.2, z);
+        // Channel dips down to river bed (-4.6) between riverfront retaining edge and Mehtab Bagh sandy bank
+        let bed = -0.45 - 4.15 * dropSouth * (1 - riseNorth);
+        bed += (tfbm(x * 0.18, z * 0.18) - 0.5) * 0.65;
+        return bed;
       }
-      if (s < siteMinZ - 0.6 || s > siteMaxZ + 0.6) {
-        addDashedLineWorld([-lim, -0.45, s], [lim, -0.45, s]);
-      } else {
-        addDashedLineWorld([siteMaxX + 0.6, -0.45, s], [lim + 2.5, -0.45, s]);
-        addDashedLineWorld([-lim, -0.45, s], [siteMinX - 0.6, -0.45, s]);
+      // Keep flat under the built Taj compound [-26, 26] x [-19.8, 25.5]
+      const inComplex = (1 - tss(23, 27, Math.abs(x))) * tss(-20.2, -18.5, z) * (1 - tss(23.5, 27.5, z));
+      let h = -0.48 + (tfbm(x * 0.14, z * 0.14) - 0.5) * 0.85 * (1 - inComplex);
+      return h * (1 - inComplex) + (-0.48) * inComplex;
+    }
+
+    const st = (2 * B_TER) / N_TER;
+    const hGrid = [];
+    for (let j = 0; j <= N_TER; j++) {
+      for (let i = 0; i <= N_TER; i++) {
+        hGrid.push(H_taj(-B_TER + i * st, -B_TER + j * st));
+      }
+    }
+    const gPt = (i, j) => [-B_TER + i * st, hGrid[j * (N_TER + 1) + i], -B_TER + j * st];
+
+    for (let j = 0; j < N_TER; j++) {
+      for (let i = 0; i < N_TER; i++) {
+        const a = gPt(i, j), b = gPt(i + 1, j), c = gPt(i + 1, j + 1), d = gPt(i, j + 1);
+        [[a, b, c], [a, c, d]].forEach(tri => {
+          const p0 = tri[0], p1 = tri[1], p2 = tri[2];
+          const ux = p1[0] - p0[0], uy = p1[1] - p0[1], uz = p1[2] - p0[2];
+          const vx = p2[0] - p0[0], vy = p2[1] - p0[1], vz = p2[2] - p0[2];
+          let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+          const l = Math.hypot(nx, ny, nz) || 1;
+          nx /= l; ny /= l; nz /= l;
+          if (ny < 0) { nx = -nx; ny = -ny; nz = -nz; }
+          const cx = (p0[0] + p1[0] + p2[0]) / 3;
+          const cy = (p0[1] + p1[1] + p2[1]) / 3;
+          const cz = (p0[2] + p1[2] + p2[2]) / 3;
+          const dot = nx * lightDir.x + ny * lightDir.y + nz * lightDir.z;
+          const sh = dot * 0.04;
+          let colHex = 0xdfd8c7;
+          if (cy < W_YAMUNA + 0.35) colHex = 0xcbb89b; // Sandy alluvial shoal beneath Yamuna water
+          else if (ny < 0.72) colHex = PALETTE.terracotta.mid; // Steep Chameli Farsh river embankment
+          else {
+            const gq = tfbm(cx * 0.25 + 7, cz * 0.25);
+            colHex = gq > 0.50 ? 0xc2d09c : 0xb3c48c; // Mughal gardens & opposite Mehtab Bagh greensward
+          }
+          pushTriWorld(p0, p1, p2, colHex, sh);
+        });
       }
     }
 
-    for (let sx = -23.5; sx <= 23.5; sx += 3.4) {
-      for (let sz = -22.5; sz <= 24.5; sz += 3.4) {
-        const inPlinth = sx > siteMinX - 1.0 && sx < siteMaxX + 1.0 && sz > siteMinZ - 1.0 && sz < siteMaxZ + 1.0;
-        if (!inPlinth && Math.hypot(sx, sz) < 27.5 && rng() > 0.32) {
-          addSketchCypress(sx, sz - 0.45, false);
+    // Translucent-wash Yamuna River channel along z ∈ [-36, -19] where H_taj < W_YAMUNA
+    for (let j = 0; j < N_TER; j++) {
+      const z0 = -B_TER + j * st, z1 = z0 + st;
+      if (z0 > -18.5 || z1 < -38.5) continue;
+      for (let i = 0; i < N_TER; i++) {
+        const a = gPt(i, j), b = gPt(i + 1, j), c = gPt(i + 1, j + 1), d = gPt(i, j + 1);
+        if (Math.min(a[1], b[1], c[1], d[1]) < W_YAMUNA - 0.05) {
+          pushQuadWorld([a[0], W_YAMUNA, a[2]], [d[0], W_YAMUNA, d[2]], [c[0], W_YAMUNA, c[2]], [b[0], W_YAMUNA, b[2]], PALETTE.teal.top, 0);
         }
       }
     }
+    // River ripples along Yamuna flow direction
+    for (let k = 0; k < 48; k++) {
+      const rx = -B_TER + 3 + (k % 8) * 9.5 + (rng() - 0.5) * 3.0;
+      const rz = -33.5 + Math.floor(k / 8) * 2.1 + (rng() - 0.5) * 0.8;
+      if (H_taj(rx, rz) < W_YAMUNA - 0.3) {
+        addLineWorld([rx - 1.4, W_YAMUNA + 0.03, rz], [rx + 1.4, W_YAMUNA + 0.03, rz], 'teal', 0);
+      }
+    }
 
+    // Sandstone retaining ghat wall along the north Chameli Farsh riverfront edge
+    addWorldBox(siteMinX - 8.5, -2.9, siteMinZ - 0.6, (siteMaxX - siteMinX) + 17.0, 2.55, 0.85, 'terracotta', { edgeLayer: 'bold', courses: 4 });
+
+    // Stratified Yamuna Alluvium & Agra Vindhyan Sandstone cutaway skirts
+    const ysAgra = [Y_BOT, -5.8, -3.6, -1.6, 2.0];
+    const agraHexes = [0xb58669, 0xc7a385, 0xd8c3a5, 0xbfa98e];
+    function addTajSkirt(isX, fixedVal, nSign) {
+      const fDot = isX ? nSign * lightDir.x : nSign * lightDir.z;
+      for (let i = 0; i < N_TER; i++) {
+        const u0 = -B_TER + i * st, u1 = u0 + st;
+        const x0 = isX ? fixedVal : u0, z0 = isX ? u0 : fixedVal;
+        const x1 = isX ? fixedVal : u1, z1 = isX ? u1 : fixedVal;
+        const h0 = H_taj(x0, z0), h1 = H_taj(x1, z1);
+        for (let s = 0; s < ysAgra.length - 1; s++) {
+          const yA = ysAgra[s], yB = ysAgra[s + 1];
+          const top0 = Math.min(h0, yB), top1 = Math.min(h1, yB);
+          const bot0 = Math.min(h0, yA), bot1 = Math.min(h1, yA);
+          if (top0 - bot0 < 0.02 && top1 - bot1 < 0.02) continue;
+          pushQuadWorld([x0, bot0, z0], [x1, bot1, z1], [x1, top1, z1], [x0, top0, z0], agraHexes[s], fDot * 0.04);
+          if (s > 0 && h0 > yA && h1 > yA) addLineWorld([x0, yA, z0], [x1, yA, z1], s === 1 ? 'rust' : 'fine', 0);
+        }
+        // Sliced Yamuna water column on -X and +X section walls
+        if (isX && (h0 < W_YAMUNA || h1 < W_YAMUNA)) {
+          pushQuadWorld([x0, h0, z0], [x1, h1, z1], [x1, W_YAMUNA, z1], [x0, W_YAMUNA, z0], PALETTE.teal.mid, fDot * 0.03);
+          addLineWorld([x0, W_YAMUNA, z0], [x1, W_YAMUNA, z1], 'teal', 0);
+        }
+        addLineWorld([x0, h0, z0], [x1, h1, z1], 'bold', 0);
+        addLineWorld([x0, Y_BOT, z0], [x1, Y_BOT, z1], 'bold', 0);
+        if (i === 0) addLineWorld([x0, Y_BOT, z0], [x0, h0, z0], 'bold', 0);
+        if (i === N_TER - 1) addLineWorld([x1, Y_BOT, z1], [x1, h1, z1], 'bold', 0);
+      }
+    }
+    addTajSkirt(false,  B_TER,  1);
+    addTajSkirt(false, -B_TER, -1);
+    addTajSkirt(true,   B_TER,  1);
+    addTajSkirt(true,  -B_TER, -1);
+
+    // Garden cypress & fruit orchard trees around Charbagh perimeter & opposite Mehtab Bagh bank
+    for (let k = 0; k < 44; k++) {
+      const tx = (rng() * 2 - 1) * (B_TER - 3);
+      const tz = (rng() * 2 - 1) * (B_TER - 3);
+      const inPlaza = tx > -27 && tx < 27 && tz > -20 && tz < 25;
+      const inRiver = tz < -17.5 && tz > -36.5;
+      if (inPlaza || inRiver) continue;
+      const ty = H_taj(tx, tz);
+      addLineWorld([tx, ty, tz], [tx, ty + 0.85, tz], 'bold', 0);
+      const r = 0.65, h = 2.6 + rng() * 0.9;
+      const pts = [[tx + r, ty + 0.7, tz], [tx, ty + 0.7, tz + r], [tx - r, ty + 0.7, tz], [tx, ty + 0.7, tz - r]];
+      const top = [tx, ty + h, tz];
+      for (let q = 0; q < 4; q++) {
+        const qn = (q + 1) % 4;
+        pushTriWorld(pts[q], pts[qn], top, q < 2 ? 0x6f8b5a : 0x566f47, 0);
+        addLineWorld(pts[q], top, 'medium', 0);
+      }
+    }
     // Flanking Mosque (west) & Jawab (east), modelled properly in red sandstone
     // with white marble domes — they stood here as blank ghost blocks in the
     // first build of this plate; the real buildings are near-mirror twins whose

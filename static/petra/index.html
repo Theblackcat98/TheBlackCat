@@ -122,7 +122,7 @@
 
     const scene = new THREE.Scene();
 
-    const frustumSize = 60;
+    const frustumSize = 80;
     const aspect = window.innerWidth / window.innerHeight;
     const camera = new THREE.OrthographicCamera(
       (-frustumSize * aspect) / 2,
@@ -133,8 +133,8 @@
       300
     );
 
-    const targetY = 13.8;
-    const camDist = 66;
+    const targetY = 10.2;
+    const camDist = 84;
     const defaultCamPos = new THREE.Vector3(camDist, targetY + camDist * 0.78, camDist);
     camera.position.copy(defaultCamPos);
     camera.lookAt(0, targetY, 0);
@@ -664,82 +664,170 @@
     }
 
     // =========================================================================
-    // 9. FORECOURT PLAZA, SITE GRID, SHRUBS & GHOST ROCK MESAS
     // =========================================================================
-    const pMinX = -21, pMaxX = 21, pMinZ = -3, pMaxZ = 19;
-    addBox(pMinX, -0.55, pMinZ, pMaxX - pMinX, 0.55, pMaxZ - pMinZ, 'plaza', { edgeLayer: 'bold' });
-    addBox(pMinX - 0.45, -0.58, pMinZ - 0.45, pMaxX - pMinX + 0.9, 0.06, pMaxZ - pMinZ + 0.9, 'plaza', { edgeLayer: 'bold' });
-
-    // Sandy forecourt joints — sparse radial paving lines in front of the facade
-    for (let gx = -18; gx <= 18; gx += 3.0) {
-      addLineWorld([gx, 0.02, 4.2], [gx, 0.02, 18.4], 'fine', 0);
+    // 9. AL-SIQ CANYON & NUBIAN SANDSTONE GEOLOGICAL CUTAWAY BLOCK (B = 38)
+    // =========================================================================
+    const thash = (i, j) => {
+      let h = Math.imul(i, 374761393) + Math.imul(j, 668265263);
+      h = Math.imul(h ^ (h >>> 13), 1274126177);
+      return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    };
+    const tsmooth = t => t * t * (3 - 2 * t);
+    const tss = (a, b, x) => {
+      const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+      return t * t * (3 - 2 * t);
+    };
+    function tval(x, z) {
+      const i = Math.floor(x), j = Math.floor(z), u = tsmooth(x - i), v = tsmooth(z - j);
+      return (thash(i, j) * (1 - u) + thash(i + 1, j) * u) * (1 - v) +
+             (thash(i, j + 1) * (1 - u) + thash(i + 1, j + 1) * u) * v;
     }
-    for (let gz = 6.0; gz <= 18.0; gz += 3.0) {
-      addLineWorld([-20.4, 0.02, gz], [20.4, 0.02, gz], 'fine', 0);
+    const tfbm = (x, z) => tval(x, z) * 0.52 + tval(x * 2.1, z * 2.1) * 0.28 + tval(x * 4.3, z * 4.3) * 0.20;
+
+    const B_TER = 38, N_TER = 104, Y_BOT = -7.5;
+    function siqCenterX(z) {
+      return 19.5 + 3.2 * Math.sin(z * 0.17 - 0.5);
+    }
+    function H_petra(x, z) {
+      // Open sandy forecourt amphitheatre in front of Al-Khazneh (x in [-22, 16], z > -1) so facade stays unobstructed
+      const inCourt = tss(-26, -16, x) * (1 - tss(14, 21, x)) * tss(-2.2, 0.8, z);
+      // Winding Al-Siq canyon gorge slicing dramatically through the RIGHT cliff mass (x > 13, z > 5)
+      const sx = siqCenterX(z);
+      const siqDist = Math.abs(x - sx);
+      const inSiq = tss(4, 9, z) * (1 - tss(2.6, 5.4, siqDist));
+      // Taper down foreground canyon lip along +Z/-X so the Treasury plinth & visitors are cleanly visible from (+X,+Y,+Z)
+      const foreViewOpen = tss(5.5, 13.5, z) * (1 - tss(10, 17, x));
+
+      // Towering rose sandstone massif behind the Treasury (z < -1.5) & flanking West spur + East Siq cliffs
+      let h = 21.5 + (tfbm(x * 0.08, z * 0.08) - 0.5) * 8.5;
+      h += tss(1, -10, z) * 11.5;
+      const openMask = Math.max(inCourt, inSiq, foreViewOpen * 0.94);
+      h = h * (1 - openMask) + (-0.05 + (tfbm(x * 0.25, z * 0.25) - 0.5) * 0.35) * openMask;
+      if (Math.abs(x) < 22.8 && z > -10.8 && z < 0.2) h = Math.min(h, 29.0);
+      if (Math.abs(x) < 8.6 && z > -1.0 && z < 4.5) h = Math.min(h, -0.05);
+      return h;
     }
 
-    // Two visitors on the plaza, for scale against the 39-metre facade
-    addFigure(-3.6, 7.5, 0, 1.85, 'dark');
-    addFigure(4.4, 9.5, 0, 1.85, 'dark');
+    const st = (2 * B_TER) / N_TER;
+    const hGrid = [];
+    for (let j = 0; j <= N_TER; j++) {
+      for (let i = 0; i <= N_TER; i++) {
+        hGrid.push(H_petra(-B_TER + i * st, -B_TER + j * st));
+      }
+    }
+    const gPt = (i, j) => [-B_TER + i * st, hGrid[j * (N_TER + 1) + i], -B_TER + j * st];
 
-    function addDashedLineWorld(p1, p2, dashLen = 0.52, gapLen = 0.42) {
-      const dx = p2[0] - p1[0], dy = p2[1] - p1[1], dz = p2[2] - p1[2];
-      const dist = Math.hypot(dx, dy, dz);
-      const ux = dx / dist, uy = dy / dist, uz = dz / dist;
-      let cur = 0;
-      while (cur < dist) {
-        const end = Math.min(dist, cur + dashLen);
-        addLineWorld(
-          [p1[0] + ux * cur, p1[1] + uy * cur, p1[2] + uz * cur],
-          [p1[0] + ux * end, p1[1] + uy * end, p1[2] + uz * end],
-          'faint', 0
-        );
-        cur += dashLen + gapLen;
+    function petraColor(cx, cz, cy, nx, ny, nz) {
+      const dot = nx * lightDir.x + ny * lightDir.y + nz * lightDir.z;
+      const sh = dot * 0.045;
+      if (cy < 1.2) {
+        // Sandy pink-ochre wadi alluvial wash floor
+        const q = tfbm(cx * 0.3, cz * 0.3);
+        return [q > 0.52 ? 0xe6d4bc : 0xdac4a8, sh];
+      }
+      // Banded Cambrian/Nubian sandstone stratified by elevation!
+      const band = Math.sin(cy * 0.65 + tfbm(cx * 0.14, cz * 0.14) * 2.2);
+      if (ny < 0.62) {
+        if (band > 0.35) return [PALETTE.ochre.mid, sh];
+        if (band < -0.35) return [PALETTE.violetRock.mid, sh];
+        return [PALETTE.rose.lit, sh];
+      }
+      return [band > 0.2 ? PALETTE.ochre.top : PALETTE.rose.top, sh];
+    }
+
+    for (let j = 0; j < N_TER; j++) {
+      for (let i = 0; i < N_TER; i++) {
+        const a = gPt(i, j), b = gPt(i + 1, j), c = gPt(i + 1, j + 1), d = gPt(i, j + 1);
+        [[a, b, c], [a, c, d]].forEach(tri => {
+          const p0 = tri[0], p1 = tri[1], p2 = tri[2];
+          const ux = p1[0] - p0[0], uy = p1[1] - p0[1], uz = p1[2] - p0[2];
+          const vx = p2[0] - p0[0], vy = p2[1] - p0[1], vz = p2[2] - p0[2];
+          let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+          const l = Math.hypot(nx, ny, nz) || 1;
+          nx /= l; ny /= l; nz /= l;
+          if (ny < 0) { nx = -nx; ny = -ny; nz = -nz; }
+          const cx = (p0[0] + p1[0] + p2[0]) / 3;
+          const cy = (p0[1] + p1[1] + p2[1]) / 3;
+          const cz = (p0[2] + p1[2] + p2[2]) / 3;
+          const [colHex, sh] = petraColor(cx, cz, cy, nx, ny, nz);
+          pushTriWorld(p0, p1, p2, colHex, sh);
+        });
       }
     }
 
-    function addSketchShrub(sx, sz) {
-      const r = 0.26 + rng() * 0.10;
-      const h = 0.38 + rng() * 0.14;
-      const baseY = -0.55;
-      addLineWorld([sx, baseY, sz], [sx, baseY + h * 0.4, sz], 'medium', 0);
-      addLineWorld([sx - r * 0.8, baseY + 0.01, sz + r * 0.5], [sx + r * 0.9, baseY + 0.01, sz - r * 0.5], 'fine', 0);
-      const cy = baseY + h;
-      addLineWorld([sx - r, cy, sz], [sx, cy + r * 0.7, sz - r], 'medium', 0.01);
-      addLineWorld([sx, cy + r * 0.7, sz - r], [sx + r, cy, sz], 'medium', 0.01);
-      addLineWorld([sx + r, cy, sz], [sx, cy - r * 0.4, sz + r], 'medium', 0.01);
-      addLineWorld([sx, cy - r * 0.4, sz + r], [sx - r, cy, sz], 'medium', 0.01);
-    }
-
-    const siteLim = 30;
-    for (let s = -28.5; s <= 28.5; s += 3.8) {
-      if (s < pMinX - 0.6 || s > pMaxX + 0.6) {
-        addDashedLineWorld([s, -0.55, -siteLim], [s, -0.55, siteLim]);
-      } else {
-        addDashedLineWorld([s, -0.55, pMaxZ + 0.6], [s, -0.55, siteLim + 3.0]);
+    // Geological cutaway skirts on all 4 canyon block sides
+    const ysStrata = [-7.5, -5.0, -2.5, 0.0, 3.5, 7.5, 12.0, 16.5, 21.5, 26.5, 34.0];
+    const rockHexes = [0x8c7b70, 0xa86b5e, 0xc98a74, 0xd8a87e, 0xc47b69, 0x9b7074, 0xd49b80, 0xddb68e, 0xb87564, 0xd8c09c];
+    function addPetraSkirtSide(isX, fixedVal, nSign) {
+      const fDot = isX ? nSign * lightDir.x : nSign * lightDir.z;
+      for (let i = 0; i < N_TER; i++) {
+        const u0 = -B_TER + i * st, u1 = u0 + st;
+        const x0 = isX ? fixedVal : u0, z0 = isX ? u0 : fixedVal;
+        const x1 = isX ? fixedVal : u1, z1 = isX ? u1 : fixedVal;
+        const h0 = H_petra(x0, z0), h1 = H_petra(x1, z1);
+        for (let s = 0; s < ysStrata.length - 1; s++) {
+          const yA0 = ysStrata[s], yB0 = ysStrata[s + 1];
+          const top0 = Math.min(h0, yB0), top1 = Math.min(h1, yB0);
+          const bot0 = Math.min(h0, yA0), bot1 = Math.min(h1, yA0);
+          if (top0 - bot0 < 0.02 && top1 - bot1 < 0.02) continue;
+          pushQuadWorld([x0, bot0, z0], [x1, bot1, z1], [x1, top1, z1], [x0, top0, z0], rockHexes[s], fDot * 0.04);
+          if (s > 0 && h0 > yA0 && h1 > yA0) {
+            addLineWorld([x0, yA0, z0], [x1, yA0, z1], s % 3 === 0 ? 'rust' : 'fine', 0);
+          }
+        }
+        addLineWorld([x0, h0, z0], [x1, h1, z1], 'bold', 0);
+        addLineWorld([x0, Y_BOT, z0], [x1, Y_BOT, z1], 'bold', 0);
+        if (i === 0) addLineWorld([x0, Y_BOT, z0], [x0, h0, z0], 'bold', 0);
+        if (i === N_TER - 1) addLineWorld([x1, Y_BOT, z1], [x1, h1, z1], 'bold', 0);
       }
-      if (s < pMinZ - 0.6 || s > pMaxZ + 0.6) {
-        addDashedLineWorld([-siteLim, -0.55, s], [siteLim, -0.55, s]);
-      } else {
-        addDashedLineWorld([pMaxX + 0.6, -0.55, s], [siteLim + 3.0, -0.55, s]);
-        addDashedLineWorld([-siteLim, -0.55, s], [pMinX - 0.6, -0.55, s]);
-      }
     }
+    addPetraSkirtSide(false,  B_TER,  1);
+    addPetraSkirtSide(false, -B_TER, -1);
+    addPetraSkirtSide(true,   B_TER,  1);
+    addPetraSkirtSide(true,  -B_TER, -1);
 
-    for (let sx = -27.5; sx <= 27.5; sx += 3.2) {
-      for (let sz = -24; sz <= 27; sz += 3.2) {
-        const inside = sx > pMinX - 1.0 && sx < pMaxX + 1.0 && sz > pMinZ - 1.0 && sz < pMaxZ + 1.0;
-        const inCliff = sx > -24 && sx < 24 && sz < -0.5;
-        if (!inside && !inCliff && Math.hypot(sx, sz) < 33 && rng() > 0.30) {
-          addSketchShrub(sx, sz);
+    // Topographic contours along upper sandstone massif plateaus & cliffs
+    for (let lv = 2; lv <= 30; lv += 2.5) {
+      const lyr = lv % 5 === 0 ? 'medium' : 'fine';
+      for (let j = 0; j < N_TER; j++) {
+        for (let i = 0; i < N_TER; i++) {
+          const a = gPt(i, j), b = gPt(i + 1, j), c = gPt(i + 1, j + 1), d = gPt(i, j + 1);
+          [[a, b, c], [a, c, d]].forEach(T => {
+            const p0 = T[0], p1 = T[1], p2 = T[2], cr = [];
+            [[p0, p1], [p1, p2], [p2, p0]].forEach(([u, v]) => {
+              if ((u[1] < lv) !== (v[1] < lv)) {
+                const t = (lv - u[1]) / (v[1] - u[1]);
+                cr.push([u[0] + (v[0] - u[0]) * t, lv + 0.04, u[2] + (v[2] - u[2]) * t]);
+              }
+            });
+            if (cr.length === 2) addLineWorld(cr[0], cr[1], lyr, 0);
+          });
         }
       }
     }
 
-    // Ghost wireframe rock mesas at the diagram edges — the wider canyon system
-    addBox(pMaxX + 1.4, -0.55, -6.5, 5.2, 9.0, 9.0, 'ghost', { edgeLayer: 'faint' });
-    addBox(pMinX - 7.0, -0.55, -5.5, 5.6, 11.5, 8.5, 'ghost', { edgeLayer: 'faint' });
+    // Winding camel caravan trail through the Siq gorge onto the sandy forecourt
+    for (let z = 36; z >= 4.0; z -= 1.2) {
+      const x0 = z > 12 ? siqCenterX(z) : 19.5 * (z - 4.0) / 8.0 + 1.0;
+      const x1 = (z - 0.7) > 12 ? siqCenterX(z - 0.7) : 19.5 * (z - 4.7) / 8.0 + 1.0;
+      addLineWorld([x0, H_petra(x0, z) + 0.08, z], [x1, H_petra(x1, z - 0.7) + 0.08, z - 0.7], 'rust', 0);
+    }
 
+    // Desert acacia & juniper scrub anchored to real terrain height H_petra(sx, sz)
+    function addDesertScrub(sx, sz) {
+      const by = H_petra(sx, sz);
+      const r = 0.34 + rng() * 0.22;
+      addLineWorld([sx, by, sz], [sx, by + r * 0.9, sz], 'bold', 0);
+      addLineWorld([sx - r, by + r * 0.85, sz], [sx + r, by + r * 0.9, sz - r * 0.3], 'medium', 0.01);
+      addLineWorld([sx - r * 0.4, by + r * 1.1, sz + r * 0.7], [sx + r * 0.5, by + r * 0.75, sz - r * 0.7], 'medium', 0.01);
+    }
+    for (let k = 0; k < 55; k++) {
+      const sx = (rng() * 2 - 1) * (B_TER - 2.5), sz = (rng() * 2 - 1) * (B_TER - 2.5);
+      if (Math.abs(sx) < 16 && sz < 8) continue;
+      if (H_petra(sx, sz) < 2.2 || H_petra(sx, sz) > 20) {
+        addDesertScrub(sx, sz);
+      }
+    }
     // Faint diagonal drafting construction rays from top-left sky
     for (let i = 0; i < 16; i++) {
       const spread = (i / 15) * 34;

@@ -116,7 +116,7 @@
 
     const scene = new THREE.Scene();
 
-    const frustumSize = 55;
+    const frustumSize = 84;
     const aspect = window.innerWidth / window.innerHeight;
     const camera = new THREE.OrthographicCamera(
       (-frustumSize * aspect) / 2,
@@ -127,8 +127,8 @@
       300
     );
 
-    const targetY = 19.2;
-    const camDist = 66;
+    const targetY = 9.0;
+    const camDist = 90;
     const defaultCamPos = new THREE.Vector3(camDist, targetY + camDist * 0.78, camDist);
     camera.position.copy(defaultCamPos);
     camera.lookAt(0, targetY, 0);
@@ -905,29 +905,162 @@
     // =========================================================================
     // 9. GROUND PLINTH, COURTYARD PAVEMENT, SHRUBS, & SACRED GEOMETRY RAYS
     // =========================================================================
-    const pMinX = -15.2, pMaxX = 15.2;
-    const pMinZ = -14.2, pMaxZ = 14.8;
-    addBox(pMinX, -3.65, pMinZ, pMaxX - pMinX, 0.45, pMaxZ - pMinZ, 'plaza', { edgeLayer: 'bold' });
-    addBox(pMinX - 0.45, -3.68, pMinZ - 0.45, pMaxX - pMinX + 0.9, 0.06, pMaxZ - pMinZ + 0.9, 'plaza', { edgeLayer: 'bold' });
+    // MOUNT CORCOVADO GRANITE DOME & TIJUCA RAINFOREST CUTAWAY (B = 38)
+    const thash = (i, j) => {
+      let h = Math.imul(i, 374761393) + Math.imul(j, 668265263);
+      h = Math.imul(h ^ (h >>> 13), 1274126177);
+      return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    };
+    const tsmooth = t => t * t * (3 - 2 * t);
+    const tss = (a, b, x) => {
+      const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+      return t * t * (3 - 2 * t);
+    };
+    function tval(x, z) {
+      const i = Math.floor(x), j = Math.floor(z), u = tsmooth(x - i), v = tsmooth(z - j);
+      return (thash(i, j) * (1 - u) + thash(i + 1, j) * u) * (1 - v) +
+             (thash(i, j + 1) * (1 - u) + thash(i + 1, j + 1) * u) * v;
+    }
+    const tfbm = (x, z) => tval(x, z) * 0.54 + tval(x * 2.1, z * 2.1) * 0.28 + tval(x * 4.3, z * 4.3) * 0.18;
 
-    // Courtyard pavement grid around the octagonal Corcovado base
-    const tileStep = 2.4;
-    for (let gx = pMinX + tileStep; gx < pMaxX; gx += tileStep) {
-      for (let gz = pMinZ; gz < pMaxZ - 0.2; gz += 0.6) {
-        if (Math.hypot(gx, gz) > 13.8) {
-          addLineWorld([gx, -3.18, gz], [gx, -3.18, Math.min(pMaxZ, gz + 0.6)], 'fine', 0);
+    const B_TER = 38, N_TER = 96, Y_BOT = -26.5, SUMMIT_Y = -3.22;
+    function H_corcovado(x, z) {
+      // Elliptical granite dome peaking under the Belvedere at SUMMIT_Y = -3.22
+      const rx = x * 0.92, rz = (z + 2.5) * 0.78;
+      const rPeak = Math.hypot(rx, rz);
+      // Flat summit Belvedere sanctuary crest within r < 14.2
+      const mFlat = 1 - tss(12.2, 16.0, Math.hypot(x, z));
+      let dome = -21.0 + 18.4 * Math.exp(-Math.pow(rPeak / 26.5, 1.85));
+      // Secondary eastern shoulder cliff + cog-railway approach ridge along -X/-Z
+      dome = Math.max(dome, -19.5 + 11.0 * Math.exp(-Math.pow(Math.hypot(x + 21, z + 15) / 14, 1.7)));
+      // Sheer exfoliation face on the south/east face
+      const cliffSteep = tss(10, 26, x + z * 0.6) * 2.4;
+      dome -= cliffSteep;
+      dome += (tfbm(x * 0.12, z * 0.12) - 0.5) * 3.8 * (1 - mFlat);
+      return dome * (1 - mFlat) + SUMMIT_Y * mFlat;
+    }
+
+    const st = (2 * B_TER) / N_TER;
+    const hGrid = [];
+    for (let j = 0; j <= N_TER; j++) {
+      for (let i = 0; i <= N_TER; i++) {
+        hGrid.push(H_corcovado(-B_TER + i * st, -B_TER + j * st));
+      }
+    }
+    const gPt = (i, j) => [-B_TER + i * st, hGrid[j * (N_TER + 1) + i], -B_TER + j * st];
+
+    function corcovadoColor(cx, cz, cy, nx, ny, nz) {
+      const dot = nx * lightDir.x + ny * lightDir.y + nz * lightDir.z;
+      const sh = dot * 0.045;
+      if (Math.hypot(cx, cz) < 13.8) return [PALETTE.plaza.top, sh * 0.5];
+      // Exposed sheer Pao de Acucar gneiss cliff faces on steep slopes vs lush Tijuca Atlantic rainforest canopy on shoulders
+      if (ny < 0.76 || cy > -7.2) {
+        const band = tfbm(cx * 0.25, cz * 0.25);
+        return [dot > 0.15 ? PALETTE.granite.lit : dot > -0.15 ? PALETTE.granite.mid : PALETTE.granite.shade, sh + (band - 0.5) * 0.04];
+      }
+      const gq = tfbm(cx * 0.35 + 5, cz * 0.35);
+      return [gq > 0.54 ? 0x829f6b : gq > 0.34 ? 0x6f8c5b : 0x5c784c, sh];
+    }
+
+    for (let j = 0; j < N_TER; j++) {
+      for (let i = 0; i < N_TER; i++) {
+        const a = gPt(i, j), b = gPt(i + 1, j), c = gPt(i + 1, j + 1), d = gPt(i, j + 1);
+        [[a, b, c], [a, c, d]].forEach(tri => {
+          const p0 = tri[0], p1 = tri[1], p2 = tri[2];
+          const ux = p1[0] - p0[0], uy = p1[1] - p0[1], uz = p1[2] - p0[2];
+          const vx = p2[0] - p0[0], vy = p2[1] - p0[1], vz = p2[2] - p0[2];
+          let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+          const l = Math.hypot(nx, ny, nz) || 1;
+          nx /= l; ny /= l; nz /= l;
+          if (ny < 0) { nx = -nx; ny = -ny; nz = -nz; }
+          const cx = (p0[0] + p1[0] + p2[0]) / 3;
+          const cy = (p0[1] + p1[1] + p2[1]) / 3;
+          const cz = (p0[2] + p1[2] + p2[2]) / 3;
+          const [colHex, sh] = corcovadoColor(cx, cz, cy, nx, ny, nz);
+          pushTriWorld(p0, p1, p2, colHex, sh);
+        });
+      }
+    }
+
+    // Stratified Rio de Janeiro augen-gneiss & biotite granite cutaway skirts
+    const ysGneiss = [Y_BOT, -23.5, -20.0, -16.5, -13.0, -9.5, -6.0, -2.5];
+    const gneissHexes = [0x6e665f, 0x837a71, 0x9b9084, 0x8b8177, 0xae9f90, 0x9c8f82, 0xc2b6a6];
+    function addCorcovadoSkirt(isX, fixedVal, nSign) {
+      const fDot = isX ? nSign * lightDir.x : nSign * lightDir.z;
+      for (let i = 0; i < N_TER; i++) {
+        const u0 = -B_TER + i * st, u1 = u0 + st;
+        const x0 = isX ? fixedVal : u0, z0 = isX ? u0 : fixedVal;
+        const x1 = isX ? fixedVal : u1, z1 = isX ? u1 : fixedVal;
+        const h0 = H_corcovado(x0, z0), h1 = H_corcovado(x1, z1);
+        for (let s = 0; s < ysGneiss.length - 1; s++) {
+          const yA = ysGneiss[s], yB = ysGneiss[s + 1];
+          const top0 = Math.min(h0, yB), top1 = Math.min(h1, yB);
+          const bot0 = Math.min(h0, yA), bot1 = Math.min(h1, yA);
+          if (top0 - bot0 < 0.02 && top1 - bot1 < 0.02) continue;
+          pushQuadWorld([x0, bot0, z0], [x1, bot1, z1], [x1, top1, z1], [x0, top0, z0], gneissHexes[s], fDot * 0.04);
+          if (s > 0 && h0 > yA && h1 > yA) {
+            addLineWorld([x0, yA, z0], [x1, yA, z1], 'fine', 0);
+          }
+        }
+        addLineWorld([x0, h0, z0], [x1, h1, z1], 'bold', 0);
+        addLineWorld([x0, Y_BOT, z0], [x1, Y_BOT, z1], 'bold', 0);
+        if (i === 0) addLineWorld([x0, Y_BOT, z0], [x0, h0, z0], 'bold', 0);
+        if (i === N_TER - 1) addLineWorld([x1, Y_BOT, z1], [x1, h1, z1], 'bold', 0);
+      }
+    }
+    addCorcovadoSkirt(false,  B_TER,  1);
+    addCorcovadoSkirt(false, -B_TER, -1);
+    addCorcovadoSkirt(true,   B_TER,  1);
+    addCorcovadoSkirt(true,  -B_TER, -1);
+
+    // Topographic contours along Mount Corcovado gneiss flanks
+    for (let lv = -20; lv <= -4; lv += 2) {
+      const lyr = lv % 4 === 0 ? 'medium' : 'fine';
+      for (let j = 0; j < N_TER; j++) {
+        for (let i = 0; i < N_TER; i++) {
+          const a = gPt(i, j), b = gPt(i + 1, j), c = gPt(i + 1, j + 1), d = gPt(i, j + 1);
+          [[a, b, c], [a, c, d]].forEach(T => {
+            const p0 = T[0], p1 = T[1], p2 = T[2], cr = [];
+            [[p0, p1], [p1, p2], [p2, p0]].forEach(([u, v]) => {
+              if ((u[1] < lv) !== (v[1] < lv)) {
+                const t = (lv - u[1]) / (v[1] - u[1]);
+                cr.push([u[0] + (v[0] - u[0]) * t, lv + 0.04, u[2] + (v[2] - u[2]) * t]);
+              }
+            });
+            if (cr.length === 2) addLineWorld(cr[0], cr[1], lyr, 0);
+          });
         }
       }
     }
-    for (let gz = pMinZ + tileStep; gz < pMaxZ; gz += tileStep) {
-      for (let gx = pMinX; gx < pMaxX - 0.2; gx += 0.6) {
-        if (Math.hypot(gx, gz) > 13.8) {
-          addLineWorld([gx, -3.18, gz], [Math.min(pMaxX, gx + 0.6), -3.18, gz], 'fine', 0);
-        }
-      }
+
+    // Corcovado rack railway & ceremonial access stairway climbing up from the NW saddle
+    for (let k = 0; k < 24; k++) {
+      const t0 = k / 24, t1 = (k + 0.65) / 24;
+      const sx0 = -34 + t0 * 21.5, sz0 = -22 + t0 * 17.5;
+      const sx1 = -34 + t1 * 21.5, sz1 = -22 + t1 * 17.5;
+      addLineWorld([sx0, H_corcovado(sx0, sz0) + 0.14, sz0], [sx1, H_corcovado(sx1, sz1) + 0.14, sz1], 'rust', 0);
     }
 
-    // Dashed Site Grid Lines & Sketched Corcovado Forest Shrubs
+    // Tijuca tropical forest trees on forested mid/lower slopes
+    for (let k = 0; k < 140; k++) {
+      const sx = (rng() * 2 - 1) * (B_TER - 2.2), sz = (rng() * 2 - 1) * (B_TER - 2.2);
+      if (Math.hypot(sx, sz) < 15.0) continue;
+      const sy = H_corcovado(sx, sz);
+      if (sy > -7.2) continue;
+      const ny = (sy - H_corcovado(sx + 0.8, sz));
+      if (Math.abs(ny) > 0.72) continue;
+      const s = 0.75 + rng() * 0.85, r = 0.7 * s, h = 1.9 * s;
+      const pts = [[sx + r, sy + 0.2, sz], [sx, sy + 0.2, sz + r], [sx - r, sy + 0.2, sz], [sx, sy + 0.2, sz - r]];
+      const top = [sx, sy + 0.2 + h, sz];
+      for (let q = 0; q < 4; q++) {
+        const qn = (q + 1) % 4;
+        pushTriWorld(pts[q], pts[qn], top, q < 2 ? 0x6f8d58 : 0x546e43, 0);
+        addLineWorld(pts[q], top, 'fine', 0);
+      }
+      addLineWorld([sx, sy - 0.1, sz], [sx, sy + 0.25, sz], 'medium', 0);
+    }
+
+    // Faint construction grid frame outside mountain corner diagonals
     function addDashedLineWorld(p1, p2, dashLen = 0.52, gapLen = 0.42) {
       const dx = p2[0] - p1[0], dy = p2[1] - p1[1], dz = p2[2] - p1[2];
       const dist = Math.hypot(dx, dy, dz);
@@ -938,56 +1071,11 @@
         addLineWorld(
           [p1[0] + ux * cur, p1[1] + uy * cur, p1[2] + uz * cur],
           [p1[0] + ux * end, p1[1] + uy * end, p1[2] + uz * end],
-          'faint',
-          0
+          'faint', 0
         );
         cur += dashLen + gapLen;
       }
     }
-
-    function addSketchShrub(sx, sz) {
-      const r = 0.26 + rng() * 0.10;
-      const h = 0.38 + rng() * 0.14;
-      const baseY = -3.65;
-      addLineWorld([sx, baseY, sz], [sx, baseY + h * 0.4, sz], 'medium', 0);
-      addLineWorld([sx - r * 0.8, baseY + 0.01, sz + r * 0.5], [sx + r * 0.9, baseY + 0.01, sz - r * 0.5], 'fine', 0);
-      const cy = baseY + h;
-      addLineWorld([sx - r, cy, sz], [sx, cy + r * 0.7, sz - r], 'medium', 0.01);
-      addLineWorld([sx, cy + r * 0.7, sz - r], [sx + r, cy, sz], 'medium', 0.01);
-      addLineWorld([sx + r, cy, sz], [sx, cy - r * 0.4, sz + r], 'medium', 0.01);
-      addLineWorld([sx, cy - r * 0.4, sz + r], [sx - r, cy, sz], 'medium', 0.01);
-    }
-
-    const siteLim = 23.5;
-    for (let s = -21.5; s <= 21.5; s += 3.8) {
-      if (s < pMinX - 0.6 || s > pMaxX + 0.6) {
-        addDashedLineWorld([s, -3.65, -siteLim], [s, -3.65, siteLim]);
-      } else {
-        addDashedLineWorld([s, -3.65, pMaxZ + 0.6], [s, -3.65, siteLim + 3.0]);
-      }
-      if (s < pMinZ - 0.6 || s > pMaxZ + 0.6) {
-        addDashedLineWorld([-siteLim, -3.65, s], [siteLim, -3.65, s]);
-      } else {
-        addDashedLineWorld([pMaxX + 0.6, -3.65, s], [siteLim + 3.0, -3.65, s]);
-        addDashedLineWorld([-siteLim, -3.65, s], [pMinX - 0.6, -3.65, s]);
-      }
-    }
-
-    for (let sx = -20.5; sx <= 20.5; sx += 3.2) {
-      for (let sz = -19.5; sz <= 20.5; sz += 3.2) {
-        const inside = sx > pMinX - 1.0 && sx < pMaxX + 1.0 && sz > pMinZ - 1.0 && sz < pMaxZ + 1.0;
-        if (!inside && Math.hypot(sx, sz) < 25.0 && rng() > 0.28) {
-          addSketchShrub(sx, sz);
-        }
-      }
-    }
-
-    // Ghost Wireframe Corcovado Elevator/Escalator Annex Towers at Perimeter
-    addBox(pMaxX + 1.2, -3.65, -7.5, 4.6, 5.5, 8.0, 'ghost', { edgeLayer: 'faint' });
-    addBox(pMinX - 6.5, -3.65, -6.5, 5.2, 7.2, 8.5, 'ghost', { edgeLayer: 'faint' });
-    addBox(1.4, -3.65, pMaxZ + 2.0, 2.8, 7.8, 2.8, 'ghost', { edgeLayer: 'medium' });
-    addBox(1.85, -3.65, pMaxZ + 2.9, 1.8, 10.2, 1.8, 'ghost', { edgeLayer: 'medium' });
-
     // Vitruvian / Art Deco Sacred-Geometry Halo & Proportion Circles in Faint Drafting Ink
     const haloSegs = 48;
     [3.8, 5.2, 14.25].forEach((rad, rIdx) => {

@@ -1,6 +1,6 @@
 ---
 title: "Hanging Gardens of Babylon"
-description: "Six planted terraces on a vaulted base: hedged parapets, palms and cypresses overhanging the edges, and a double cascade down the near corner."
+description: "Two interactive axonometric reconstructions unified with an in-canvas switch: a closed six-tier vaulted ziggurat with cascading corner channels and an earlier stepped-pass terrace study with front arcades and water rills."
 contenttype: article
 tool: hanging-gardens
 topics:
@@ -11,20 +11,18 @@ tags:
   - creative-coding
   - architecture
 created: 2026-11-11
-updated: 2026-11-11
+updated: 2026-11-12
 ---
 
 ## What it is
 
-The Hanging Gardens rebuilt as a ziggurat of planted terraces — the version where the "hanging" is literal: the planting sits on the terraces and spills over their edges.
+Two architectural hypotheses for the Hanging Gardens of Babylon unified into one interactive drawing plate (`II · Vaulted Ziggurat` and `I · Earlier Stepped Pass`, toggled via the selector at top-left). Both explore terraced stonework, water-lifting cisterns, and planting spilling past parapets without fabricating an archaeological topography: because the Gardens have never been conclusively located — either on Babylon's flat Euphrates floodplain or at an alternative site near Nineveh — both views remain grounded on a clean drafting plate rather than a geological cutaway.
 
 ## What was drawn
 
-- Six tiers, each with a solid core, four arcade walls with real arch openings, a parapet, a hedge ring and two rows of planting. Canopies overhang the parapet rather than sitting politely behind it.
-- Water as an event rather than a texture: a double cascade down the near corner (one sheet on each adjacent face, meeting at the angle), plus three secondary falls on the far sides so every orbit angle has water.
-- Walled catch basins with concentric ripples at each landing, mist puffs and splash fans at the impact, and a brick cistern at the summit feeding the corner fall.
-- A crenellated precinct wall, a gate, a paved courtyard with a reflecting pool, and the terraced mass's own shadow swept across it.
+- **II · Vaulted Ziggurat**: Six planted tiers built closed on every face — solid rubble cores, four arcaded walls per level, hedged parapets, overhanging palms and cypresses, a double cascade down the near corner into walled basins, and a summit brick cistern within a crenellated precinct wall.
+- **I · Earlier Stepped Pass**: The earlier stepped-arcade composition featuring polychrome glazed-brick and limestone bays, diagonal ceremonial stairs with cheek walls, stepped cascades down the central axis, date palms, and forecourt water rills framed by ghosted mud-brick city enclosures.
 
-## Verified closed
+## How it works
 
-This is meant to be orbited, so it is built as a closed object: no cutaways, no blank rear walls. Tested by rendering with a magenta clear colour at eight orientations — including a low 10° and a near-top-down 60° — and counting background pixels inside the ground plate's projected outline. Zero at every angle.
+Both reconstructions compile into independent `THREE.Group` wash-and-ink hierarchies inside a single Three.js scene. Switching between them toggles group visibility and resets the camera frustum and polar orbit bounds cleanly without reloading the page. Drag to orbit, scroll to zoom, double-click to reset.

@@ -116,7 +116,7 @@
 
     const scene = new THREE.Scene();
 
-    const frustumSize = 58;
+    const frustumSize = 74;
     const aspect = window.innerWidth / window.innerHeight;
     const camera = new THREE.OrthographicCamera(
       (-frustumSize * aspect) / 2,
@@ -127,8 +127,8 @@
       300
     );
 
-    const targetY = 21.0;
-    const camDist = 68;
+    const targetY = 15.5;
+    const camDist = 80;
     const defaultCamPos = new THREE.Vector3(camDist, targetY + camDist * 0.78, camDist);
     camera.position.copy(defaultCamPos);
     camera.lookAt(1.5, targetY, 0);
@@ -947,20 +947,18 @@
       if (i % 2 === 0) addLineWorld(r1, r2, 'medium', 0);
     }
 
-    // 2. Axis-aligned helper for Ground Plinth, Gridded Courtyard, & Ghost Context
+    // 2. Axis-aligned helper & PIAZZA DEI MIRACOLI TERRAIN CUTAWAY (B = 34)
     function addWorldBox(x, y, z, w, h, d, palName = 'plaza', lyr = 'bold') {
       const pal = PALETTE[palName] || PALETTE.plaza;
       const x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
       const p000 = [x0, y0, z0], p100 = [x1, y0, z0], p110 = [x1, y1, z0], p010 = [x0, y1, z0];
       const p001 = [x0, y0, z1], p101 = [x1, y0, z1], p111 = [x1, y1, z1], p011 = [x0, y1, z1];
-
       pushQuadWorld(p001, p101, p111, p011, pal.lit, 0);
       pushQuadWorld(p101, p100, p110, p111, pal.shade, 0);
       pushQuadWorld(p011, p111, p110, p010, pal.top, 0);
       pushQuadWorld(p000, p100, p101, p001, pal.bot, 0);
       pushQuadWorld(p100, p000, p010, p110, pal.shade, 0);
       pushQuadWorld(p000, p001, p011, p010, pal.mid, 0);
-
       const edges = [
         [p000, p100], [p100, p101], [p101, p001], [p001, p000],
         [p010, p110], [p110, p111], [p111, p011], [p011, p010],
@@ -969,38 +967,172 @@
       edges.forEach(e => addLineWorld(e[0], e[1], lyr, 0.02));
     }
 
-    const pMinX = -12.5, pMaxX = 13.5;
-    const pMinZ = -12.5, pMaxZ = 12.5;
-    addWorldBox(pMinX, -0.45, pMinZ, pMaxX - pMinX, 0.45, pMaxZ - pMinZ, 'plaza', 'bold');
-    addWorldBox(pMinX - 0.45, -0.48, pMinZ - 0.45, pMaxX - pMinX + 0.9, 0.06, pMaxZ - pMinZ + 0.9, 'plaza', 'bold');
+    const thash = (i, j) => {
+      let h = Math.imul(i, 374761393) + Math.imul(j, 668265263);
+      h = Math.imul(h ^ (h >>> 13), 1274126177);
+      return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    };
+    const tsmooth = t => t * t * (3 - 2 * t);
+    const tss = (a, b, x) => {
+      const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+      return t * t * (3 - 2 * t);
+    };
+    function tval(x, z) {
+      const i = Math.floor(x), j = Math.floor(z), u = tsmooth(x - i), v = tsmooth(z - j);
+      return (thash(i, j) * (1 - u) + thash(i + 1, j) * u) * (1 - v) +
+             (thash(i, j + 1) * (1 - u) + thash(i + 1, j + 1) * u) * v;
+    }
+    const tfbm = (x, z) => tval(x, z) * 0.55 + tval(x * 2.1, z * 2.1) * 0.30 + tval(x * 4.4, z * 4.4) * 0.15;
 
-    // Orthogonal courtyard stone tile grid on the plaza deck around the circular basin
-    const tileStep = 2.15;
-    for (let gx = pMinX + tileStep; gx < pMaxX; gx += tileStep) {
-      for (let gz = pMinZ; gz < pMaxZ - 0.1; gz += 0.5) {
-        const zNext = Math.min(pMaxZ, gz + 0.5);
-        if (Math.hypot(gx, (gz + zNext) * 0.5) > catinoR3 + 0.15) {
-          addLineWorld([gx, 0.02, gz], [gx, 0.02, zNext], 'fine', 0);
+    const B_TER = 34, N_TER = 88, Y_BOT = -7.5;
+    function inPiazzaStone(x, z) {
+      if (Math.hypot(x, z) < 13.8) return true;
+      if (x > -24 && x < 16 && z > -14 && z < 8) return true;
+      if (Math.abs(z - 12.2) < 1.8 && x > -22 && x < 24) return true;
+      if (Math.abs(x - 16.5) < 1.6 && z > -20 && z < 26) return true;
+      return false;
+    }
+    function H_pisa(x, z) {
+      const r = Math.hypot(x, z);
+      // Recessed dish under sunken Catino basin so it never z-fights
+      if (r < 9.3) return -0.34;
+      if (r < 10.4) return -0.05;
+      // Flat Piazza dei Miracoli stone apron + gentle Tuscan Prato greensward rise
+      let h = -0.04;
+      const outsideWalk = inPiazzaStone(x, z) ? 0 : 1;
+      h += outsideWalk * (0.14 + (tfbm(x * 0.12, z * 0.12) - 0.5) * 0.45);
+      // Slight northern rise up toward the medieval Pisa city walls (z < -24)
+      h += tss(-22, -31, z) * (1.2 + tfbm(x * 0.15, z * 0.15) * 0.6);
+      // Slight gentle depression toward Arno alluvial plain (SW/NW outer rim)
+      h -= tss(21, 33, r) * 0.9 * tss(-10, 26, z);
+      return h;
+    }
+
+    const st = (2 * B_TER) / N_TER;
+    const hGrid = [];
+    for (let j = 0; j <= N_TER; j++) {
+      for (let i = 0; i <= N_TER; i++) {
+        hGrid.push(H_pisa(-B_TER + i * st, -B_TER + j * st));
+      }
+    }
+    const gPt = (i, j) => [-B_TER + i * st, hGrid[j * (N_TER + 1) + i], -B_TER + j * st];
+
+    function pisaGroundColor(cx, cz, cy, nx, ny, nz) {
+      const dot = nx * lightDir.x + ny * lightDir.y + nz * lightDir.z;
+      const sh = dot * 0.04;
+      if (Math.hypot(cx, cz) < 10.35) return [PALETTE.stone.mid, 0];
+      if (inPiazzaStone(cx, cz)) {
+        const checker = ((Math.floor((cx + 40) / 2.2) + Math.floor((cz + 40) / 2.2)) & 1) ? 0.012 : -0.012;
+        return [dot > 0.1 ? PALETTE.plaza.lit : PALETTE.plaza.top, checker + sh];
+      }
+      // Lush Tuscan Prato dei Miracoli lawn with mottled wash
+      const q = tfbm(cx * 0.28 + 3, cz * 0.28);
+      if (cz < -26.5) return [q > 0.5 ? 0xd2c8b6 : 0xc2b7a4, sh];
+      return [q > 0.55 ? 0xb5c989 : q > 0.35 ? 0xa4ba77 : 0x93aa69, sh];
+    }
+
+    for (let j = 0; j < N_TER; j++) {
+      for (let i = 0; i < N_TER; i++) {
+        const a = gPt(i, j), b = gPt(i + 1, j), c = gPt(i + 1, j + 1), d = gPt(i, j + 1);
+        [[a, b, c], [a, c, d]].forEach(tri => {
+          const p0 = tri[0], p1 = tri[1], p2 = tri[2];
+          const ux = p1[0] - p0[0], uy = p1[1] - p0[1], uz = p1[2] - p0[2];
+          const vx = p2[0] - p0[0], vy = p2[1] - p0[1], vz = p2[2] - p0[2];
+          let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+          const l = Math.hypot(nx, ny, nz) || 1;
+          nx /= l; ny /= l; nz /= l;
+          if (ny < 0) { nx = -nx; ny = -ny; nz = -nz; }
+          const cx = (p0[0] + p1[0] + p2[0]) / 3;
+          const cy = (p0[1] + p1[1] + p2[1]) / 3;
+          const cz = (p0[2] + p1[2] + p2[2]) / 3;
+          const [colHex, shift] = pisaGroundColor(cx, cz, cy, nx, ny, nz);
+          pushTriWorld(p0, p2, p1, colHex, shift);
+        });
+      }
+    }
+
+    // Geological cutaway skirts on all 4 vertical sides exposing compressible "Pancone" marine clay lens
+    // Note: soft Horizon B clay dips deeper under +X/+Z (south-east lean direction)
+    function pisaStratumColor(sIdx, faceDot) {
+      // 0: Roman fill/silt, 1: Upper Sand-Silt (Horizon A), 2: Compressible Pancone Clay (Horizon B), 3: Lower Bearing Sand (Horizon C)
+      const base = [0xc9bba6, 0xd8c8ac, 0x8ea39e, 0xbda886][sIdx];
+      return [base, faceDot * 0.045];
+    }
+    const strataDefs = [
+      (x, z, top) => top,
+      (x, z, top) => -1.35 + 0.15 * Math.sin(x * 0.09 + z * 0.06),
+      (x, z, top) => -3.75 - 1.15 * tss(-18, 22, x * 0.65 + z * 0.75) + 0.22 * Math.sin(x * 0.12 - z * 0.1),
+      (x, z, top) => Y_BOT
+    ];
+    function addPisaSkirtSide(isX, fixedVal, nSign) {
+      const fDot = (isX ? nSign * lightDir.x : nSign * lightDir.z);
+      for (let i = 0; i < N_TER; i++) {
+        const u0 = -B_TER + i * st, u1 = u0 + st;
+        const x0 = isX ? fixedVal : u0, z0 = isX ? u0 : fixedVal;
+        const x1 = isX ? fixedVal : u1, z1 = isX ? u1 : fixedVal;
+        const h0 = H_pisa(x0, z0), h1 = H_pisa(x1, z1);
+        for (let s = 0; s < 3; s++) {
+          const yA0 = s === 0 ? h0 : Math.min(h0, strataDefs[s](x0, z0, h0));
+          const yA1 = s === 0 ? h1 : Math.min(h1, strataDefs[s](x1, z1, h1));
+          const yB0 = s === 2 ? Y_BOT : Math.min(yA0, strataDefs[s + 1](x0, z0, h0));
+          const yB1 = s === 2 ? Y_BOT : Math.min(yA1, strataDefs[s + 1](x1, z1, h1));
+          if (yA0 - yB0 < 0.02 && yA1 - yB1 < 0.02) continue;
+          const [colHex, sh] = pisaStratumColor(s, fDot);
+          pushQuadWorld([x0, yB0, z0], [x1, yB1, z1], [x1, yA1, z1], [x0, yA0, z0], colHex, sh);
+          if (s > 0) {
+            addLineWorld([x0, yA0, z0], [x1, yA1, z1], s === 2 ? 'teal' : 'rust', 0);
+          }
+        }
+        addLineWorld([x0, h0, z0], [x1, h1, z1], 'bold', 0);
+        addLineWorld([x0, Y_BOT, z0], [x1, Y_BOT, z1], 'bold', 0);
+        if (i === 0) addLineWorld([x0, Y_BOT, z0], [x0, h0, z0], 'bold', 0);
+        if (i === N_TER - 1) addLineWorld([x1, Y_BOT, z1], [x1, h1, z1], 'bold', 0);
+      }
+    }
+    addPisaSkirtSide(false,  B_TER,  1);
+    addPisaSkirtSide(false, -B_TER, -1);
+    addPisaSkirtSide(true,   B_TER,  1);
+    addPisaSkirtSide(true,  -B_TER, -1);
+
+    // Subtle stone paving lines across the Piazza square & contour ink lines
+    for (let gx = -22; gx <= 15; gx += 3.0) {
+      for (let gz = -13; gz < 7.5; gz += 1.0) {
+        if (Math.hypot(gx, gz) > 10.6) {
+          addLineWorld([gx, H_pisa(gx, gz) + 0.015, gz], [gx, H_pisa(gx, gz + 1) + 0.015, gz + 1], 'fine', 0);
         }
       }
     }
-    for (let gz = pMinZ + tileStep; gz < pMaxZ; gz += tileStep) {
-      for (let gx = pMinX; gx < pMaxX - 0.1; gx += 0.5) {
-        const xNext = Math.min(pMaxX, gx + 0.5);
-        if (Math.hypot((gx + xNext) * 0.5, gz) > catinoR3 + 0.15) {
-          addLineWorld([gx, 0.02, gz], [xNext, 0.02, gz], 'fine', 0);
-        }
+
+    // Pisa medieval northern city wall & Tuscan cypress trees along the Prato rim
+    addWorldBox(-32.5, 0.3, -29.2, 65.0, 3.6, 1.35, 'stone', 'bold');
+    for (let mx = -31.5; mx <= 30.5; mx += 2.2) {
+      addWorldBox(mx, 3.9, -29.1, 1.1, 0.65, 1.15, 'stone', 'medium');
+    }
+    function addCypress(cx, cz, h = 4.6) {
+      const cy = H_pisa(cx, cz);
+      const r = 0.62;
+      addLineWorld([cx, cy, cz], [cx, cy + 0.9, cz], 'bold', 0);
+      const pts = [[cx + r, cy + 0.85, cz], [cx, cy + 0.85, cz + r], [cx - r, cy + 0.85, cz], [cx, cy + 0.85, cz - r]];
+      const top = [cx, cy + h, cz];
+      for (let k = 0; k < 4; k++) {
+        const kn = (k + 1) % 4;
+        pushTriWorld(pts[k], pts[kn], top, k < 2 ? 0x6f8b5a : 0x566f47, 0);
+        addLineWorld(pts[k], top, 'medium', 0);
       }
     }
+    [[-26, -24], [-21, -24.5], [-16, -24], [19, -23.5], [24, -24], [28, -23.5],
+     [-27, 17], [-24, 21], [-18, 24], [22, 18], [26, 22]].forEach(([tx, tz], k) => {
+      addCypress(tx, tz, 4.2 + (k % 3) * 0.7);
+    });
 
-    // Small isometric monument bench in the front-left plaza corner
-    addWorldBox(-7.8, 0.0, 9.2, 1.8, 0.12, 1.8, 'plaza', 'medium');
-    addWorldBox(-7.35, 0.12, 9.5, 0.9, 0.45, 0.7, 'cream', 'bold');
+    // Small monument plaza bench & inscription marker
+    addWorldBox(-8.2, 0.0, 9.2, 1.9, 0.14, 1.8, 'plaza', 'medium');
+    addWorldBox(-7.75, 0.14, 9.5, 0.95, 0.45, 0.7, 'cream', 'bold');
 
-    // 3. Dashed Site Grid Lines, Sketched Shrubs, & Plumb-Line Tilt Diagram
     function addDashedLineWorld(p1, p2, dashLen = 0.5, gapLen = 0.4) {
       const dx = p2[0] - p1[0], dy = p2[1] - p1[1], dz = p2[2] - p1[2];
       const dist = Math.hypot(dx, dy, dz);
+      if (dist < 1e-5) return;
       const ux = dx / dist, uy = dy / dist, uz = dz / dist;
       let cur = 0;
       while (cur < dist) {
@@ -1008,54 +1140,17 @@
         addLineWorld(
           [p1[0] + ux * cur, p1[1] + uy * cur, p1[2] + uz * cur],
           [p1[0] + ux * end, p1[1] + uy * end, p1[2] + uz * end],
-          'faint',
-          0
+          'faint', 0
         );
         cur += dashLen + gapLen;
       }
     }
-
-    function addSketchShrub(sx, sz) {
-      const r = 0.24 + rng() * 0.09;
-      const h = 0.35 + rng() * 0.12;
-      addLineWorld([sx, -0.45, sz], [sx, -0.45 + h * 0.4, sz], 'medium', 0);
-      addLineWorld([sx - r * 0.8, -0.44, sz + r * 0.5], [sx + r * 0.9, -0.44, sz - r * 0.5], 'fine', 0);
-      const cy = -0.45 + h;
-      addLineWorld([sx - r, cy, sz], [sx, cy + r * 0.7, sz - r], 'medium', 0.01);
-      addLineWorld([sx, cy + r * 0.7, sz - r], [sx + r, cy, sz], 'medium', 0.01);
-      addLineWorld([sx + r, cy, sz], [sx, cy - r * 0.4, sz + r], 'medium', 0.01);
-      addLineWorld([sx, cy - r * 0.4, sz + r], [sx - r, cy, sz], 'medium', 0.01);
-    }
-
-    const siteLim = 21.0;
-    for (let s = -19.5; s <= 19.5; s += 3.5) {
-      if (s < pMinX - 0.6 || s > pMaxX + 0.6) {
-        addDashedLineWorld([s, -0.45, -siteLim], [s, -0.45, siteLim]);
-      } else {
-        addDashedLineWorld([s, -0.45, pMaxZ + 0.6], [s, -0.45, siteLim + 3.0]);
-      }
-      if (s < pMinZ - 0.6 || s > pMaxZ + 0.6) {
-        addDashedLineWorld([-siteLim, -0.45, s], [siteLim, -0.45, s]);
-      } else {
-        addDashedLineWorld([pMaxX + 0.6, -0.45, s], [siteLim + 3.0, -0.45, s]);
-        addDashedLineWorld([-siteLim, -0.45, s], [pMinX - 0.6, -0.45, s]);
-      }
-    }
-
-    for (let sx = -18.5; sx <= 19.5; sx += 3.0) {
-      for (let sz = -17.5; sz <= 18.5; sz += 3.0) {
-        const inside = sx > pMinX - 1.0 && sx < pMaxX + 1.0 && sz > pMinZ - 1.0 && sz < pMaxZ + 1.0;
-        if (!inside && Math.hypot(sx, sz) < 22.5 && rng() > 0.30) {
-          addSketchShrub(sx, sz);
-        }
-      }
-    }
-
+    const pMinX = -13.5, pMaxX = 14.5, pMaxZ = 12.5;
     // Ghost wireframe low-rise Piazza context massings at outer corners
-    addWorldBox(pMaxX + 1.2, -0.45, -6.5, 4.8, 5.2, 8.2, 'ghost', 'faint');
-    addWorldBox(pMinX - 6.8, -0.45, -5.5, 5.8, 7.8, 9.0, 'ghost', 'faint');
-    addWorldBox(1.2, -0.45, pMaxZ + 2.2, 2.6, 7.6, 2.6, 'ghost', 'medium');
-    addWorldBox(1.65, -0.45, pMaxZ + 3.1, 1.7, 9.8, 1.7, 'ghost', 'medium');
+    addWorldBox(pMaxX + 1.2, -0.02, -6.5, 4.8, 5.2, 8.2, 'ghost', 'faint');
+    addWorldBox(pMinX - 6.8, -0.02, -5.5, 5.8, 7.8, 9.0, 'ghost', 'faint');
+    addWorldBox(1.2, -0.02, pMaxZ + 2.2, 2.6, 7.6, 2.6, 'ghost', 'medium');
+    addWorldBox(1.65, -0.02, pMaxZ + 3.1, 1.7, 9.8, 1.7, 'ghost', 'medium');
 
     // Architectural diagram plumb line vs lean centerline & upper-left construction rays
     addDashedLineWorld([0, 0, 0], [0, 51.5, 0], 0.65, 0.45);
@@ -1074,6 +1169,7 @@
 
     const washMat = new THREE.MeshBasicMaterial({
       vertexColors: true,
+      side: THREE.DoubleSide,
       polygonOffset: true,
       polygonOffsetFactor: 1.4,
       polygonOffsetUnits: 1.4

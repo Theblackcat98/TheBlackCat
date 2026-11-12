@@ -1,6 +1,6 @@
 ---
 title: "Colosseum"
-description: "The Flavian amphitheatre cut open: an 80-bay travertine arcade, the cavea stepped back to the arena, and the hypogeum exposed under the sand."
+description: "An interactive axonometric cutaway remake of the Flavian Amphitheatre set inside the Colosseum Valley: three travertine arcaded orders, attic composite storey, brick-vaulted ambulatories, marble cavea seating, sunken hypogeum, Velian Ridge, and Roman tufa strata."
 contenttype: article
 tool: colosseum
 topics:
@@ -11,21 +11,20 @@ tags:
   - creative-coding
   - architecture
 created: 2026-11-11
-updated: 2026-11-11
+updated: 2026-11-12
 ---
 
 ## What it is
 
-The Colosseum as a section-and-elevation at once: the outer arcade stands on the north side where it survives, and the rest is opened down to the seating and the service structure beneath the arena floor.
+A complete remake of the Flavian Amphitheatre diagram with watertight radial bay section-cuts and living Roman topography: the monument sits in the drained Stagnum basin surrounded by the rising slopes of the Velian, Oppian, and Palatine ridges rather than a bare floating board.
 
 ## What was drawn
 
-- One unit is 4.5 m, the ellipse is 188 × 156 m, and the facade is 80 bays — so the arcade proportions are the real ones, not eyeballed.
-- Three arcaded storeys plus the attic, with the half-columns and the entablature bands that separate them.
-- The cavea: seating risers stepped back in their real rings to the arena wall, with the vomitoria aisles cutting through.
-- The hypogeum below the sand — the two-level service corridors and lift shafts — drawn as a pit the ground plate opens around rather than a slab over it.
-- The ruin is modelled honestly: the surviving facade runs only part of the circuit, and the broken edge snaps to whole bays so the stonework still makes sense.
+- **Elliptical Travertine Facade**: three arcaded classical storeys plus the solid attic tier with alternating windows, bronze shield reliefs, and *velarium* mast corbels, sliced cleanly along structural radial bay boundaries so no masonry planes intersect or overhang.
+- **Interior Ambulatories & Cavea**: concentric Roman brick (`opus latericium`) and tufa vault rings supporting twelve stepped marble seating tiers down to the arena podium wall.
+- **Sunken Hypogeum**: the timber-and-sand arena floor is cut in half to expose subterranean axial animal corridors and winch chambers dropped cleanly into the underlying tufa bed.
+- **Colosseum Valley Terrain**: Piazza del Colosseo travertine apron, rising slopes lined with stone umbrella pines (`Pinus pinea`), the ghosted Temple of Venus and Roma podium on the Velian Ridge, the Arch of Constantine silhouette along the Via Triumphalis, and stratified Anio tufa cutaway skirts.
 
 ## How it works
 
-Self-contained HTML, one file, no network. Flat vertex-coloured surfaces with a single light direction, ink linework in six weights, and a ground plate built with an elliptical hole so the arena is genuinely open. Drag to orbit, scroll to zoom, double-click to reset.
+A single HTML file loaded with the site's vendored Three.js and no external requests. Surfaces use flat directional vertex-colour washes paired with six depth-tested ink layers and a procedural paper-grain overlay. Drag to orbit, scroll to zoom, double-click to reset.

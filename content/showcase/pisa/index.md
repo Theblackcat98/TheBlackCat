@@ -1,6 +1,6 @@
 ---
 title: "Leaning Tower of Pisa"
-description: "The tower as a cutaway axonometric: eight masonry tiers on a stepped base, drawn with the lean carried through the whole stack rather than pasted on top."
+description: "An interactive ink-and-wash axonometric cutaway of the Leaning Tower of Pisa on Piazza dei Miracoli: eight masonry tiers with the curve carried cleanly through every gallery over the sunken catino basin and compressible Pancone clay strata below."
 contenttype: article
 tool: pisa
 topics:
@@ -11,14 +11,16 @@ tags:
   - creative-coding
   - architecture
 created: 2026-11-11
-updated: 2026-11-11
+updated: 2026-11-12
 ---
 
 ## What it is
 
-The campanile of Pisa, drawn the way a mason would have wanted to see it: every tier in place, the arcades open, and the lean visible as a geometry rather than a tilt applied to a finished model.
+The campanile of Pisa, drawn the way a mason would have wanted to see it: every tier in place, the arcades open, the gradual construction-correction curve carried through every gallery, and the Arno marine clay strata exposed right beneath Piazza dei Miracoli.
 
 ## What was drawn
+
+- **Piazza dei Miracoli terrain cutaway**: stone courtyard walkways, the sunken circular *catino* basin, Prato greensward with Tuscan cypresses, the battlemented northern medieval city wall, ghosted Duomo apse massing, and a four-sided subsurface section exposing the dipping compressible *Pancone* clay horizon beneath the south-east leaning side.
 
 - The ground tier is a blind arcade — fifteen engaged columns against a solid drum, with lozenge intarsia between them, because at ground level the arches are wall, not opening.
 - Six open colonnades above it, each with its own cornice, its own setback and its own count of columns, so the silhouette narrows as it rises.

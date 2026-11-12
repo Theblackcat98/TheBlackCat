@@ -1,1137 +1,1037 @@
-import { readFileSync, writeFileSync } from "node:fs";
+// FELIS-09 v2 · Bionic Feline Quadruped anatomy figure builder.
+// Run:
+//   node static/anatomy/src/robotic-cat/build.mjs --audit
+//   node static/anatomy/src/robotic-cat/build.mjs --light
+
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-import * as k from "/home/nick/.gemini/config/skills/anatomy/kit/iso-kit.mjs";
-import * as G from "/home/nick/.gemini/config/skills/anatomy/kit/lathe.mjs";
-import * as A from "/home/nick/.gemini/config/skills/anatomy/kit/audit.mjs";
-import { tubePieces, tubeSvg } from "/home/nick/.gemini/config/skills/anatomy/kit/tube.mjs";
-import { kitScript } from "/home/nick/.gemini/config/skills/anatomy/scripts/inline-kit.mjs";
-import * as M from "./model.mjs";
+import { homedir } from "node:os";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const argv = process.argv.slice(2);
-const theme = argv.includes("--light") ? "light" : "dark";
+function findSkillDir() {
+  const candidates = [
+    process.env.ANATOMY_SKILL,
+    join(homedir(), ".gemini", "config", "skills", "anatomy"),
+    "/home/nick/.gemini/config/skills/anatomy",
+  ].filter(Boolean);
+  for (const dir of candidates) {
+    if (existsSync(join(dir, "kit", "iso-kit.mjs"))) return dir;
+  }
+  throw new Error("Could not locate anatomy skill kit directory.");
+}
+
+const SKILL_DIR = findSkillDir();
+const k = await import(pathToFileURL(join(SKILL_DIR, "kit", "iso-kit.mjs")).href);
+const G = await import(pathToFileURL(join(SKILL_DIR, "kit", "lathe.mjs")).href);
+const A = await import(pathToFileURL(join(SKILL_DIR, "kit", "audit.mjs")).href);
+const { tubePieces, tubeSvg } = await import(pathToFileURL(join(SKILL_DIR, "kit", "tube.mjs")).href);
+const { kitScript } = await import(pathToFileURL(join(SKILL_DIR, "scripts", "inline-kit.mjs")).href);
+const M = await import(pathToFileURL(join(HERE, "model.mjs")).href);
 
 const WIDTH = 720;
 const HEIGHT = 500;
-const AZIMUTH = 42;
+const AZIMUTH = 43;
 const ELEVATION = 30;
-const D2R = Math.PI / 180;
 
-// ── World plan (1 unit ≈ 3.5 mm) ──
-const BASE = { x: -136, y: -86, w: 272, d: 172, r: 9 };
-const BASE_H = 12;
-const FOOT_H = 5;
+// Bounding envelope covering console [-122, 40] through front rail [+92, -58..+74] and head/ears [z=78].
+const WORLD_CORNERS = k.boxCorners({ x: -122, y: -58, w: 214, d: 132 }, 0, 78);
+const P = k.fitProjection(WORLD_CORNERS, WIDTH, HEIGHT, {
+  azimuth: AZIMUTH,
+  elevation: ELEVATION,
+  pad: 18,
+  headroom: 10,
+});
 
-// Telemetry console at rear-left (+Y, -X)
-const CONSOLE = { x: -122, y: 24, w: 44, d: 44, r: 4.5 };
-const CON_Z0 = 1.2;
-const CON_Z1 = 10.5;
-const SCREEN = { x: CONSOLE.x + 7, y: CONSOLE.y + 6, w: 30, d: 20, r: 1.5 };
+const FIG = "FIG. 05";
+const TITLE = "FELIS-09 · Bionic Feline Quadruped";
+const HINT = "drag to aim · click or space to pounce · keys 1–4";
+const MODEL_PATH = join(HERE, "model.mjs");
+const CSS_PATH = join(HERE, "robotic-cat.css");
+const LIVE_PATH = join(HERE, "live.js");
+const OUT_DARK = join(HERE, "robotic-cat.html");
+const OUT_LIGHT = join(HERE, "robotic-cat-light.html");
 
-// Dial torque gauge in the open foreground (+Y, near X = -22)
-const GAUGE = [-24, 52];
-const GAUGE_R = 16.0;
-const GAUGE_Z = 8.6;
-const GAUGE_SPAN = M.MAX_TORQUE_NM; // 0..25 N·m
-const GAUGE_SWEEP = 240; // total sweep degrees
+const ORDER = [
+  "stand.pad.RL",
+  "stand.pad.RR",
+  "stand.console",
+  "stand.manifold",
+  "stand.gauge",
+  "stand.pad.FL",
+  "stand.pad.FR",
+  "stand.rail",
+  "cable.console",
+  "cable.gauge",
+  "cat.tail",
+  "cat.leg.RL",
+  "cat.pelvis",
+  "cat.leg.RR",
+  "cat.battery.L",
+  "cat.spine",
+  "cat.battery.R",
+  "cat.thorax",
+  "cat.leg.FL",
+  "cat.leg.FR",
+  "cat.head",
+  "target.carriage",
+  "sight.beam",
+];
 
-// Central force-plate manifold
-const MANIFOLD = { x: -12, y: -7, w: 16, d: 14, r: 1.8 };
-const MAN_H = 4.6;
+// ---------------------------------------------------------------------------
+// Shared Pure Helpers (serialized into the interactive browser bundle)
+// ---------------------------------------------------------------------------
 
-// Front optical target rail & collimator carriage (+X)
-const RAIL_BED = { x: 82, y: -54, w: 14, d: 108, r: 2.2 };
-const RAIL_BAR = { x: 85.5, y: -48, w: 7, d: 96, r: 1.0 };
-const CARRIAGE = { x: 83.5, y: -9, w: 11, d: 18, r: 1.8 };
-const BEACON_X = 83.5;
-const BEACON_Z = 34;
-
-export const P = k.fitProjection(
-  [
-    ...k.boxCorners(BASE, -BASE_H - FOOT_H, 0),
-    [-110, 0, 88],
-    [102, -56, 52],
-    [102, 56, 52],
-    [68, 0, 88],
-  ],
-  WIDTH,
-  HEIGHT,
-  { pad: 20, azimuth: AZIMUTH, elevation: ELEVATION },
-);
-
-const at = (p) => k.iso(p, P);
-const S = (paths, style) => k.solidSvg(paths, style);
-const L = (d, style) => k.lineSvg(d, style);
-const D = (points, style) => k.dotsSvg(points, style);
-const Faded = (list, style) => k.fadedSvg(list, style);
-const byDepth = (pts) => [...pts].sort((a, b) => k.depthOf([a[0], a[1], 0], P) - k.depthOf([b[0], b[1], 0], P));
-
-const VERT = (x, y, z = 0) => G.frameOf([x, y, z], [0, 0, 1], [1, 0, 0], [0, 1, 0]);
-const frameOf = (o, a, u) => {
+export const frameOf = (o, a, u) => {
   const axis = G.unit3(a);
-  const uu = u ? G.unit3(G.sub3(u, G.mul3(axis, G.dot3(u, axis)))) : G.frameAlong(o, axis).u;
+  const uu = u
+    ? G.unit3(G.sub3(u, G.mul3(axis, G.dot3(u, axis))))
+    : G.frameAlong(o, axis).u;
   return { o, a: axis, u: uu, v: G.cross3(axis, uu) };
 };
 
-export const R = A.recorder(P);
-function put({ name, at: ref, bias = 0, part = null, tailIdx = null, legStage = null, svg, shapes }) {
-  const recorded = shapes.map((shape, index) =>
-    R.solid(Object.assign(shape, { name: shape.name ?? (index ? `${name}#${index + 1}` : name) })),
+export const framePt = (F, s, x, y) => [
+  F.o[0] + F.a[0] * s + F.u[0] * x + F.v[0] * y,
+  F.o[1] + F.a[1] * s + F.u[1] * x + F.v[1] * y,
+  F.o[2] + F.a[2] * s + F.u[2] * x + F.v[2] * y,
+];
+
+export const crSample = (pts, segs = 5, closed = true) => {
+  const out = [];
+  const n = pts.length;
+  const at = (i) =>
+    closed
+      ? pts[((i % n) + n) % n]
+      : pts[Math.max(0, Math.min(n - 1, i))];
+  const count = closed ? n : n - 1;
+  for (let i = 0; i < count; i++) {
+    const p0 = at(i - 1);
+    const p1 = at(i);
+    const p2 = at(i + 1);
+    const p3 = at(i + 2);
+    for (let s = 0; s < segs; s++) {
+      const t = s / segs;
+      const t2 = t * t;
+      const t3 = t2 * t;
+      out.push([
+        0.5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
+        0.5 * ((2 * p1[1]) + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3),
+      ]);
+    }
+  }
+  if (!closed) out.push(pts[n - 1]);
+  return out;
+};
+
+const D = (pts, { size = 0.28, tone = "lo" } = {}) =>
+  pts.map(([x, y]) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${size}" fill="var(--anatomy-${tone === "lo" ? "ink" : "face-" + tone})" stroke="none"/>`).join("");
+
+const solidPart = (res, { hi = "hi", edge = null, crease = "faint", lit = false, halo = false, inner = "" } = {}) =>
+  k.solidSvg(res, { tone: edge ?? hi, crease, lit, halo, inner });
+
+// ---------------------------------------------------------------------------
+// Live-Rebuildable Assembly 1: 3-Link Digitigrade Pantograph Leg + Achilles
+// ---------------------------------------------------------------------------
+
+export const legSvg = (leg, P) => {
+  const H = leg.hip;
+  const K = leg.knee;
+  const HK = leg.hock;
+  const HL = leg.heel;
+  const PW = leg.paw;
+  const side = leg.side; // -1 = left (-Y), +1 = right (+Y)
+  const fore = leg.fore; // +1 = fore, -1 = hind
+
+  const upDir = G.sub3(K, H);
+  const upLen = G.len3(upDir);
+  const upF = frameOf(H, [0, 1, 0], upDir);
+
+  const loDir = G.sub3(HK, K);
+  const loLen = G.len3(loDir);
+  const loF = frameOf(K, [0, 1, 0], loDir);
+
+  const metaDir = G.sub3(PW, HK);
+  const metaLen = G.len3(metaDir);
+  const metaF = frameOf(HK, [0, 1, 0], metaDir);
+
+  const heelDir = G.sub3(HL, HK);
+  const heelLen = G.len3(heelDir);
+  const heelF = frameOf(HK, [0, 1, 0], heelDir);
+
+  const tVec = G.sub3(HL, leg.tendonTop);
+  const tLen = G.len3(tVec);
+  const tendonF = G.frameAlong(leg.tendonTop, tVec);
+
+  // 1. Outboard Hip QDD Harmonic Actuator Dome
+  const coverOrigin = [H[0], side * 12.2, H[2]];
+  const coverF = frameOf(coverOrigin, [0, side, 0], [1, 0, 0]);
+  const domeProf = [
+    [0, 2.2],
+    [0.9, 5.2, 1],
+    [2.5, 6.4, 1],
+    [4.4, 6.5, 1],
+    [6.0, 5.1, 1],
+    [6.9, 2.8, 1],
+    [7.2, 0.2],
+  ];
+  const hipDome = G.solidOf(domeProf, coverF, P);
+  const hipBolts = G.dotsOf(coverF, 6.95, 3.6, 6, P, { fade: [0.05, 0.45] });
+  const hipSeam = G.arcOf(coverF, 3.5, 6.52, P, { least: 0.01, trim: 0 });
+
+  // 2. Sculpted 5-slice Biomimetic Femur
+  const bulgeF = fore > 0 ? -3.4 : -3.8;
+  const bulgeB = fore > 0 ? 3.2 : 3.6;
+  const upPoly = crSample([
+    [-1.2, 0.0],
+    [1.8, bulgeF * 0.92],
+    [upLen * 0.36, bulgeF * 1.1],
+    [upLen * 0.72, bulgeF * 0.72],
+    [upLen + 0.8, -1.5],
+    [upLen + 0.8, 1.5],
+    [upLen * 0.68, bulgeB * 0.68],
+    [upLen * 0.30, bulgeB * 1.0],
+    [1.2, bulgeB * 0.86],
+  ], 3, true);
+  const femurSlices = [
+    [-1.9, -1.2, 0.78],
+    [-1.2, -0.5, 0.94],
+    [-0.5, 0.5, 1.0],
+    [0.5, 1.2, 0.94],
+    [1.2, 1.9, 0.78],
+  ];
+  const femurParts = femurSlices.map(([s0, s1, sc]) =>
+    solidPart(G.prismOf(upF, upPoly.map(([x, y]) => [x, y * sc]), s0, s1, P), { hi: "hi", mid: "mid", lo: "lo" })
   );
-  let attrs = "";
-  if (part) attrs += ` data-part="${part}"`;
-  if (tailIdx !== null) attrs += ` data-tail="${tailIdx}"`;
-  if (legStage) attrs += ` data-leg-stage="${legStage}"`;
-  return R.put({ name, at: ref, bias, attrs, svg, shapes: recorded });
-}
 
-// ─────────────────────── 1. Metrology Base Plate & Feet ───────────────────────
-function buildBench() {
-  for (const [x, y] of byDepth(k.corners(BASE, 22))) {
-    const svg =
-      S(k.cylinder(x, y, 8, -BASE_H - FOOT_H, 1.8, P, 28), { tone: "lo" }) +
-      S(k.cylinder(x, y, 6.2, -BASE_H - FOOT_H + 1.8, FOOT_H - 1.8, P, 28), { tone: "mid" }) +
-      L(k.knurl(x, y, 6.2, -BASE_H - FOOT_H + 1.8, -BASE_H, 20, P), { tone: "lo" });
-    put({
-      name: `stand.foot.${x}.${y}`,
-      at: [x, y, -BASE_H - FOOT_H],
-      svg,
-      shapes: [
-        A.cylinder(x, y, 8, -BASE_H - FOOT_H, 1.8, { ground: true }),
-        A.cylinder(x, y, 6.2, -BASE_H - FOOT_H + 1.8, FOOT_H - 1.8),
-      ],
-    });
-  }
+  // Tendon clevis lug behind knee
+  const clevisPts = crSample([
+    [upLen - 2.6, 0.8],
+    [upLen - 1.2, 3.4],
+    [upLen + 0.4, 3.2],
+    [upLen + 0.6, 1.2],
+  ], 2, true);
+  const kneeClevis = solidPart(G.prismOf(upF, clevisPts, -0.9, 0.9, P), { hi: "mid", mid: "mid", lo: "lo" });
 
-  const screws = k.corners(BASE, 9);
-  const strip = { x: BASE.x + 18, y: BASE.y + BASE.d - 12, w: 168, d: 6.5, r: 1 };
-  const ticks = k.topTicks(strip.x + 4, strip.x + strip.w - 4, 4, 5, strip.y + 0.6, 0.6, [1.8, 3.4], P);
-  const badge = { x: BASE.x + BASE.w - 72, y: BASE.y + BASE.d - 16, w: 54, d: 11, r: 1.5 };
+  // 3. Stifle (Knee) Harmonic Drum
+  const kneeF = frameOf(K, [0, 1, 0], [1, 0, 0]);
+  const kneeDrum = solidPart(G.disc(-2.1, 2.1, 3.2, kneeF, P), { hi: "mid", mid: "mid", lo: "lo" });
+  const kneeCapDots = G.dotsOf(kneeF, side > 0 ? 2.12 : -2.12, 1.9, 6, P, { fade: [0.04, 0.45] });
 
-  const svg = [
-    S(k.slabOf(BASE, -BASE_H, BASE_H, P, 9, 1.6), {
-      tone: "lo",
-      inner: L(k.sideSeam(BASE, -BASE_H + 4, P, 9), { tone: "faint" }),
-    }),
-    L(k.planOutline(k.insetPlan(BASE, 5), 0, P, 9), { tone: "faint" }),
-    L(screws.map(([x, y]) => k.ring(x, y, 2.3, 0, P, 16)).join(""), { tone: "lo" }),
-    D(screws.map(([x, y]) => at([x, y, 0])), { size: 0.5, tone: "mid" }),
-    // Ruler strip
-    S(k.slabOf(strip, 0, 0.6, P, 3), { tone: "lo", crease: "none" }),
-    L(ticks.minor, { tone: "lo" }),
-    L(ticks.major, { tone: "mid" }),
-    D([at([strip.x + 2, strip.y + 3.2, 0.6]), at([strip.x + strip.w - 2, strip.y + 3.2, 0.6])], { size: 0.45 }),
-    // Identification plaque
-    S(k.slabOf(badge, 0, 0.7, P, 3, 0.3), { tone: "lo" }),
-    L(k.planOutline(k.insetPlan(badge, 1.4), 0.7, P, 3), { tone: "faint" }),
-    L(
-      [3.2, 5.6, 8.0]
-        .map((dy, i) => k.lineOnTop([badge.x + 4, badge.y + dy], [badge.x + (i === 0 ? 46 : i === 1 ? 36 : 28), badge.y + dy], 0.7, P))
-        .join(""),
-      { tone: "lo", free: true },
-    ),
-    D(
-      [
-        [badge.x + 2, badge.y + 2],
-        [badge.x + badge.w - 2, badge.y + 2],
-        [badge.x + 2, badge.y + badge.d - 2],
-        [badge.x + badge.w - 2, badge.y + badge.d - 2],
-      ].map(([x, y]) => at([x, y, 0.7])),
-      { size: 0.4 },
-    ),
-  ].join("");
+  // 4. Bowed Tibia Blade (3 slices) + Calcaneal Heel Spur
+  const bow = fore > 0 ? 1.8 : -2.1;
+  const loPoly = crSample([
+    [-0.5, -2.0],
+    [loLen * 0.42, -1.8 + bow * 0.55],
+    [loLen + 0.4, -1.35],
+    [loLen + 0.4, 1.35],
+    [loLen * 0.45, 2.2 + bow * 0.35],
+    [-0.5, 2.1],
+  ], 3, true);
+  const tibiaParts = [
+    [-1.45, -0.55, 0.84],
+    [-0.55, 0.55, 1.0],
+    [0.55, 1.45, 0.84],
+  ].map(([s0, s1, sc]) => solidPart(G.prismOf(loF, loPoly.map(([x, y]) => [x, y * sc]), s0, s1, P)));
 
-  put({
-    name: "stand.base",
-    at: [0, 0, -BASE_H],
-    svg,
-    shapes: [A.slab(BASE, -BASE_H, BASE_H, { ground: true })],
-  });
-}
+  const heelPoly = [
+    [-0.8, -1.6],
+    [heelLen + 0.9, -1.1],
+    [heelLen + 0.9, 1.1],
+    [-0.8, 1.6],
+  ];
+  const heelSpur = solidPart(G.prismOf(heelF, heelPoly, -1.0, 1.0, P), { hi: "mid", mid: "mid", lo: "lo" });
 
-// ─────────────── 2. Four Strain-Gauge Force Pads & Manifold ───────────────
-function buildForcePads() {
-  for (const pad of M.PADS) {
-    const { id, x, y } = pad;
-    const F = VERT(x, y, 0);
-    const svg = [
-      S(G.disc(0, 1.5, 11.2, F, P), { tone: "lo" }),
-      D(G.dotsOf(F, 1.5, 9.4, 6, P, { all: true, phase: 0.3 }), { size: 0.42, tone: "mid" }),
-      S(G.disc(1.5, 3.6, 8.6, F, P), {
-        tone: "mid",
-        inner: L(G.arcOf(F, 2.5, 8.6, P, { least: 0 }), { tone: "faint" }),
-      }),
-      S(G.disc(3.6, 4.5, 7.2, F, P), { tone: "lo" }),
-      L(G.circleOf(F, 4.5, 5.8, P, 36), { tone: "faint" }),
-    ].join("");
-    put({
-      name: `stand.pad.${id}`,
-      at: [x, y, 0],
-      bias: 0.5,
-      svg,
-      shapes: [
-        A.disc(F, 0, 1.5, 11.2, { name: `stand.pad.${id}.base`, ground: true }),
-        A.disc(F, 1.5, 3.6, 8.6, { name: `stand.pad.${id}.cell` }),
-        A.disc(F, 3.6, 4.5, 7.2, { name: `stand.pad.${id}.top` }),
-      ],
-    });
-  }
+  // 5. Achilles Parallel Elastic Tendon Spring-Damper + Rod-End Balls
+  const topBall = solidPart(G.sphereOf(leg.tendonTop, 1.15, P, { steps: 24 }), { hi: "mid", mid: "lo", lo: "lo" });
+  const botBall = solidPart(G.sphereOf(HL, 1.15, P, { steps: 24 }), { hi: "mid", mid: "lo", lo: "lo" });
+  const sleeveLen = Math.min(tLen * 0.48, 6.8);
+  const damperSleeve = solidPart(G.disc(0.85, sleeveLen, 1.0, tendonF, P), { hi: "mid", mid: "mid", lo: "lo" });
+  const innerRod = solidPart(G.disc(sleeveLen - 0.2, tLen - 0.85, 0.56, tendonF, P), { hi: "hi", mid: "hi", lo: "mid" });
 
-  // Central sensor manifold block + 4 floor sensor bus strips to the 4 force pads
-  const manScrews = k.corners(MANIFOLD, 2.2);
-  const busChannels = M.PADS.map((p) => {
-    const sx = p.fore > 0 ? MANIFOLD.x + MANIFOLD.w : MANIFOLD.x;
-    const sy = p.side > 0 ? MANIFOLD.y + MANIFOLD.d - 2.5 : MANIFOLD.y + 2.5;
-    const ex = p.x - p.fore * 9.5;
-    const ey = p.y - p.side * 6.0;
-    return k.wireSvg(at([sx, sy, 0.4]), at([ex, ey, 0.4]), {
-      via: [at([(sx + ex) * 0.5, sy, 0.4])],
-      tone: "lo",
-      ends: "both",
-      size: 0.7,
-    });
+  // 6. Hock Joint Drum
+  const hockF = frameOf(HK, [0, 1, 0], [1, 0, 0]);
+  const hockDrum = solidPart(G.disc(-1.7, 1.7, 2.55, hockF, P), { hi: "mid", mid: "mid", lo: "lo" });
+
+  // 7. Angled Metatarsal Strut
+  const metaPoly = crSample([
+    [-0.4, -1.45],
+    [metaLen * 0.5, -1.35],
+    [metaLen + 0.2, -1.05],
+    [metaLen + 0.2, 1.05],
+    [metaLen * 0.5, 1.55],
+    [-0.4, 1.45],
+  ], 2, true);
+  const metaStrut = solidPart(G.prismOf(metaF, metaPoly, -1.15, 1.15, P));
+
+  // 8. Sculpted 3-Lobed Clawed Paw Pad resting FLUSH at z = PAD_TOP (4.5)
+  const pawF = frameOf([PW[0], PW[1], M.PAD_TOP], [0, 0, 1], [1, 0, 0]);
+  const ankleBall = solidPart(G.sphereOf(PW, 1.65, P, { steps: 24 }), { hi: "mid", mid: "lo", lo: "lo" });
+  const pawCore = solidPart(
+    G.prismOf(pawF, crSample([
+      [-3.4, -3.2],
+      [1.2, -3.8],
+      [3.8, -2.5],
+      [4.5, 0.0],
+      [3.8, 2.5],
+      [1.2, 3.8],
+      [-3.4, 3.2],
+    ], 3, true), 0, 1.7, P),
+    { hi: "mid", mid: "lo", lo: "lo" }
+  );
+  const toeOffsets = [-2.25, 0, 2.25];
+  const toes = toeOffsets.map((ty, idx) => {
+    const reach = idx === 1 ? 5.6 : 4.7;
+    const base = idx === 1 ? 2.6 : 2.1;
+    const toePoly = crSample([
+      [base, ty - 1.05],
+      [reach, ty - 0.85],
+      [reach + 0.9, ty],
+      [reach, ty + 0.85],
+      [base, ty + 1.05],
+    ], 2, true);
+    const clawPoly = [
+      [reach + 0.3, ty - 0.32],
+      [reach + 2.1, ty],
+      [reach + 0.3, ty + 0.32],
+    ];
+    return (
+      solidPart(G.prismOf(pawF, toePoly, 0, 1.45, P), { hi: "hi", mid: "mid", lo: "lo" }) +
+      solidPart(G.prismOf(pawF, clawPoly, 0, 0.75, P), { hi: "hi", mid: "hi", lo: "mid" })
+    );
   }).join("");
 
-  const manSvg = [
-    busChannels,
-    S(k.slabOf(MANIFOLD, 0, MAN_H, P, 4, 0.5), {
-      tone: "mid",
-      inner: L(k.sideSeam(MANIFOLD, 2.2, P, 4), { tone: "faint" }),
-    }),
-    L(k.planOutline(k.insetPlan(MANIFOLD, 2.0), MAN_H, P, 3), { tone: "faint" }),
-    D(manScrews.map(([x, y]) => at([x, y, MAN_H])), { size: 0.45, tone: "hi" }),
-    k.faceTextSvg(k.topMatrix([MANIFOLD.x + 8, MANIFOLD.y + 8.2], MAN_H, P, "x"), "LC-4", {
-      size: 2.4,
-      tone: "lo",
-      anchor: "middle",
-    }),
-  ].join("");
-  put({
-    name: "stand.manifold",
-    at: [-4, 0, 0],
-    bias: 0.5,
-    svg: manSvg,
-    shapes: [
-      A.slab(MANIFOLD, 0, MAN_H, { name: "stand.manifold", ground: true }, 4),
-      ...M.PADS.map((p) =>
-        A.tube(
-          [
-            [p.fore > 0 ? MANIFOLD.x + MANIFOLD.w : MANIFOLD.x, p.side > 0 ? MANIFOLD.y + MANIFOLD.d - 2.5 : MANIFOLD.y + 2.5, 0.4],
-            [p.x - p.fore * 9.5, p.y - p.side * 6.0, 0.4],
-          ],
-          0.4,
-          { name: `stand.bus.${p.id}`, owner: "stand.manifold", ground: true },
-        ),
-      ),
-    ],
-  });
+  const hipDomeSvg = solidPart(hipDome) + (hipSeam ? `<path class="iso-line" data-tone="faint" data-free="both" d="${hipSeam}"/>` : "") + D(hipBolts, { size: 0.3, tone: "lo" });
+  const tendonSvg = topBall + botBall + damperSleeve + innerRod;
+  const pawSvg = pawCore + toes + ankleBall;
+  const kneeSvg = kneeClevis + kneeDrum + D(kneeCapDots, { size: 0.28, tone: "lo" });
 
-  // Two cable glands on the manifold:
-  // 1) +X/+Y side (at x = 4, y = 3.5) for gauge in foreground
-  // 2) -X face (at x = -12, y = 3.5) for console at rear-left
-  const GF1 = frameOf([MANIFOLD.x + MANIFOLD.w, 3.5, 2.6], [1, 0, 0], [0, 0, 1]);
-  const GF2 = frameOf([MANIFOLD.x, 3.5, 2.6], [-1, 0, 0], [0, 0, 1]);
-  const glandProf = [
-    [0, 1.8],
-    [1.4, 1.8],
-    [1.4, 1.35],
-    [2.8, 1.2],
-  ];
-  put({
-    name: "stand.gland.gauge",
-    at: G.pointOf(GF1, 1.4, 0, 0),
-    bias: 0.6,
-    svg: S(G.solidOf(glandProf, GF1, P), { tone: "mid" }),
-    shapes: [A.solid(GF1, glandProf, { name: "stand.gland.gauge", owner: "cable.gauge" })],
-  });
-  put({
-    name: "stand.gland.console",
-    at: G.pointOf(GF2, 1.4, 0, 0),
-    bias: 0.6,
-    svg: S(G.solidOf(glandProf, GF2, P), { tone: "mid" }),
-    shapes: [A.solid(GF2, glandProf, { name: "stand.gland.console", owner: "cable.console" })],
-  });
-}
-
-// ─────────────── 3. Dial Torque Indicator Gauge & Console ───────────────
-export const gaugeNeedle = (torqueNm) => {
-  const v = Math.max(0, Math.min(GAUGE_SPAN * 1.05, torqueNm));
-  const startAng = (-120 * Math.PI) / 180 + Math.PI;
-  const a = startAng + (v / GAUGE_SPAN) * (GAUGE_SWEEP * D2R);
-  const [x, y] = GAUGE;
-  const dir = [Math.sin(a), -Math.cos(a)];
-  return k.lineOnTop(
-    [x - dir[0] * 3.2, y - dir[1] * 3.2],
-    [x + dir[0] * (GAUGE_R - 4.4), y + dir[1] * (GAUGE_R - 4.4)],
-    GAUGE_Z + 2.2,
-    P,
-  );
+  return pawSvg + tendonSvg + metaStrut + hockDrum + heelSpur + tibiaParts.join("") + kneeSvg + femurParts.join("") + hipDomeSvg;
 };
 
-function buildGauge() {
-  const [x, y] = GAUGE;
-  const F = VERT(x, y, 0);
-  const z1 = GAUGE_Z + 2.0;
-  const from = (-120 * Math.PI) / 180 + Math.PI;
-  const ticks = k.radialTicks(x, y, GAUGE_R - 2.4, 25, 5, z1, [1.2, 2.6], P, from, GAUGE_SWEEP * D2R);
-  // Flat terminal boss on +X side of gauge body (facing toward x = 14)
-  const bossPlan = { x: x + GAUGE_R - 1.5, y: y - 3.2, w: 3.5, d: 6.4, r: 0.6 };
+// ---------------------------------------------------------------------------
+// Live-Rebuildable Assembly 2: 3-Vertebra Lumbar Spine & Dorsal Coil Spring
+// ---------------------------------------------------------------------------
 
-  const svg = [
-    `<path class="iso-halo" d="${k.haloOf({ x: x - GAUGE_R, y: y - GAUGE_R, w: 2 * GAUGE_R, d: 2 * GAUGE_R, r: GAUGE_R }, 0, 0.1, P)}" style="filter:blur(3px)"/>`,
-    S(G.disc(0, 1.6, GAUGE_R + 2.2, F, P), { tone: "lo" }),
-    S(G.disc(1.6, GAUGE_Z, GAUGE_R + 0.8, F, P), {
-      tone: "mid",
-      inner: L(G.arcOf(F, 4.8, GAUGE_R + 0.8, P, { least: 0 }), { tone: "faint" }),
-    }),
-    S(k.slabOf(bossPlan, 1.6, 4.2, P, 2, 0.2), { tone: "mid" }),
-    S(G.disc(GAUGE_Z, z1, GAUGE_R, F, P), { tone: "hi", crease: "lo" }),
-    Faded(G.ribsOf(F, GAUGE_Z + 0.2, z1 - 0.2, GAUGE_R, 84, P, { fade: [0.08, 0.5], seams: false }), { tone: "lo" }),
-    L(G.circleOf(F, z1, GAUGE_R - 1.6, P, 84), { tone: "lo" }),
-    L(ticks.minor, { tone: "lo" }),
-    L(ticks.major, { tone: "mid" }),
-    k.faceTextSvg(k.topMatrix([x, y + 6.2], z1, P, "x"), "N·m", { size: 2.8, tone: "lo", anchor: "middle" }),
-    L(G.circleOf(F, z1, 1.8, P, 20), { tone: "mid" }),
-  ].join("");
+export const spineSvg = (st, P) => {
+  const dy = st.torsoDy * 0.45;
+  const zAt = (u) => {
+    const baseZ = 47.0 + st.pelvisDz * (1 - u) + st.thoraxDz * u;
+    return baseZ + st.spineArchZ * Math.sin(Math.PI * u);
+  };
+  const p0 = [-26 + st.torsoDx, dy, zAt(0)];
+  const p1 = [-7 + st.torsoDx, dy, zAt(0.5)];
+  const p2 = [12 + st.torsoDx, dy, zAt(1)];
 
-  put({
-    name: "stand.gauge",
-    at: [x, y, 0],
-    svg,
-    shapes: [
-      A.disc(F, 0, 1.6, GAUGE_R + 2.2, { name: "stand.gauge.foot", owner: "stand.gauge", ground: true }),
-      A.disc(F, 1.6, GAUGE_Z, GAUGE_R + 0.8, { name: "stand.gauge.body", owner: "stand.gauge" }),
-      A.slab(bossPlan, 1.6, 4.2, { name: "stand.gauge.boss", owner: "stand.gauge" }, 2),
-      A.disc(F, GAUGE_Z, z1, GAUGE_R, { name: "stand.gauge.bezel", owner: "stand.gauge" }),
-    ],
-  });
+  const guideA = solidPart(G.disc(0, G.len3(G.sub3(p1, p0)), 1.9, G.frameAlong(p0, G.sub3(p1, p0)), P), { hi: "mid", mid: "mid", lo: "lo" });
+  const guideB = solidPart(G.disc(0, G.len3(G.sub3(p2, p1)), 1.9, G.frameAlong(p1, G.sub3(p2, p1)), P), { hi: "mid", mid: "mid", lo: "lo" });
 
-  // Cable boot on the flat +X face of stand.gauge.boss at z = 3.6
-  const BF = frameOf([bossPlan.x + bossPlan.w, y, 3.6], [1, 0, 0], [0, 0, 1]);
-  const boot = [
-    [0, 1.6],
-    [1.4, 1.6],
-    [3.0, 1.2],
-  ];
-  put({
-    name: "stand.gauge.boot",
-    at: G.pointOf(BF, 1.5, 0, 0),
-    svg: S(G.solidOf(boot, BF, P), { tone: "mid" }),
-    shapes: [A.solid(BF, boot, { name: "stand.gauge.boot", owner: "cable.gauge" })],
-  });
-}
+  const vertUs = [0.22, 0.50, 0.78];
+  const verts = vertUs.map((u) => {
+    const vx = -26 + u * 38 + st.torsoDx;
+    const vz = zAt(u);
+    const vf = frameOf([vx, dy, vz], [1, 0, 0], [0, 1, 0]);
+    const vDisc = solidPart(G.disc(-2.3, 2.3, 4.4, vf, P), { hi: "hi", mid: "mid", lo: "lo" });
+    const collar = solidPart(G.disc(-1.1, 1.1, 5.1, vf, P), { hi: "mid", mid: "lo", lo: "lo" });
+    const finF = frameOf([vx, dy, vz + 2.2], [0, 1, 0], [1, 0, 0]);
+    const finPoly = [[-1.6, 0], [1.4, 0], [0.8, 3.8], [-2.2, 3.4]];
+    const fin = solidPart(G.prismOf(finF, finPoly, -0.7, 0.7, P), { hi: "hi", mid: "mid", lo: "lo" });
+    return vDisc + collar + fin;
+  }).join("");
 
-// Console 4-channel force bar helper
-export const BAR = {
-  x0: SCREEN.x + 6.5,
-  len: SCREEN.w - 9.0,
-  rows: [SCREEN.y + 3.6, SCREEN.y + 8.0, SCREEN.y + 12.4, SCREEN.y + 16.8],
-  w: 2.0,
-};
-export const barPath = (i, forceN) => {
-  const f = Math.max(0.06, Math.min(1, forceN / 42));
-  const y = BAR.rows[i];
-  return k.onTop(
-    [
-      [BAR.x0, y - BAR.w / 2],
-      [BAR.x0 + BAR.len * f, y - BAR.w / 2],
-      [BAR.x0 + BAR.len * f, y + BAR.w / 2],
-      [BAR.x0, y + BAR.w / 2],
-    ],
-    CON_Z1 + 0.35,
-    P,
-    true,
-  );
+  const cMidZ = zAt(0.5) + 6.5;
+  const coilStart = [-23 + st.torsoDx, dy, zAt(0.08) + 6.2];
+  const coilEnd = [9 + st.torsoDx, dy, zAt(0.92) + 6.2];
+  const rodVec = G.sub3(coilEnd, coilStart);
+  const rodF = G.frameAlong(coilStart, rodVec);
+  const rodLen = G.len3(rodVec);
+  const rodRearCollar = solidPart(G.disc(-1.6, 0.2, 2.6, rodF, P), { hi: "mid", mid: "lo", lo: "lo" });
+  const rodFrontCollar = solidPart(G.disc(rodLen - 0.2, rodLen + 1.6, 2.6, rodF, P), { hi: "mid", mid: "lo", lo: "lo" });
+  const innerRod = solidPart(G.disc(0, rodLen, 0.85, rodF, P), { hi: "hi", mid: "mid", lo: "lo" });
+  const springCoil = k.coil(-23 + st.torsoDx, 9 + st.torsoDx, [dy, (coilStart[2] + cMidZ) * 0.5], 2.2, 8.5, "x", P, 14);
+  const coilBack = springCoil.back ? k.lineSvg(springCoil.back, { tone: "lo", free: true }) : "";
+  const coilFront = springCoil.front ? k.lineSvg(springCoil.front, { tone: "hi", free: true }) : "";
+
+  return guideA + guideB + verts + coilBack + rodRearCollar + innerRod + rodFrontCollar + coilFront;
 };
 
-function buildConsole() {
-  const out = [];
-  out.push(`<path class="iso-halo" d="${k.haloOf(CONSOLE, CON_Z0, 0.1, P)}" style="filter:blur(3px)"/>`);
-  for (const [x, y] of byDepth(k.corners(CONSOLE, 5))) {
-    out.push(S(k.cylinder(x, y, 2.4, 0, CON_Z0, P, 16), { tone: "lo" }));
-  }
-  out.push(
-    S(k.slabOf(CONSOLE, CON_Z0, CON_Z1 - CON_Z0, P, 6, 0.9), {
-      tone: "mid",
-      inner: L(k.sideSeam(CONSOLE, CON_Z0 + 3.2, P, 6), { tone: "faint" }),
-    }),
-  );
-  out.push(L(k.planOutline(k.insetPlan(CONSOLE, 2.4), CON_Z1, P, 5), { tone: "faint" }));
-  out.push(D(k.corners(CONSOLE, 4.2).map(([x, y]) => at([x, y, CON_Z1])), { size: 0.45, tone: "lo" }));
+// ---------------------------------------------------------------------------
+// Live-Rebuildable Assembly 3: Feline Wedge Skull, Slit Pupils, Pinnae & Whiskers
+// ---------------------------------------------------------------------------
 
-  // Recessed OLED telemetry window
-  out.push(S(k.slabOf(k.insetPlan(SCREEN, -1), CON_Z1, 0.3, P, 3), { tone: "lo", crease: "none" }));
-  out.push(`<path class="rc-screen" d="${k.planOutline(SCREEN, CON_Z1 + 0.32, P, 3)}"/>`);
-  out.push(
-    ...BAR.rows.map((y) =>
-      L(k.lineOnTop([BAR.x0, y], [BAR.x0 + BAR.len, y], CON_Z1 + 0.33, P), { tone: "faint", free: true }),
-    ),
-  );
-  out.push(BAR.rows.map((_, i) => `<path class="rc-bar" data-bar="${i}" d="${barPath(i, 22.5)}"/>`).join(""));
-  M.PADS.forEach((pad, i) =>
-    out.push(
-      k.faceTextSvg(k.topMatrix([SCREEN.x + 3.2, BAR.rows[i] + 0.6], CON_Z1 + 0.34, P, "x"), pad.label, {
-        size: 1.9,
-        tone: "lo",
-        anchor: "middle",
-      }),
-    ),
-  );
+export const headSvg = (st, P) => {
+  const o = [48.5 + st.headDx, st.headDy, 62.5 + st.headDz];
+  const yawRad = st.yaw * 0.22;
+  const pitchRad = -st.pitch * 0.16;
+  const fwd = G.unit3([
+    Math.cos(yawRad) * Math.cos(pitchRad),
+    Math.sin(yawRad) * Math.cos(pitchRad),
+    Math.sin(pitchRad),
+  ]);
+  const lat = G.unit3([-Math.sin(yawRad), Math.cos(yawRad), 0]);
+  const HF = frameOf(o, G.mul3(lat, -1), fwd);
 
-  // Knurled gain dial & two toggle switches on front strip of console
-  const kx = CONSOLE.x + 13;
-  const ky = CONSOLE.y + 34.5;
-  out.push(S(k.cylinder(kx, ky, 5.2, CON_Z1, 3.6, P, 28, 0.4), { tone: "hi", crease: "lo" }));
-  out.push(L(k.knurl(kx, ky, 5.2, CON_Z1 + 0.2, CON_Z1 + 3.4, 24, P), { tone: "lo" }));
-  out.push(L(k.lineOnTop([kx, ky], [kx + 4.2, ky], CON_Z1 + 3.6, P), { tone: "hi", free: "start" }));
+  // Articulated cervical neck gimbal collar
+  const neckBase = [43 + st.torsoDx, st.torsoDy * 0.45, 54.0 + st.thoraxDz];
+  const neckTop = framePt(HF, 0, 0, -2.5);
+  const neckVec = G.sub3(neckTop, neckBase);
+  const neckF = G.frameAlong(neckBase, neckVec);
+  const neckCol = solidPart(G.disc(0, G.len3(neckVec), 3.6, neckF, P), { hi: "mid", mid: "lo", lo: "lo" });
+  const neckRing = solidPart(G.disc(1.2, 3.2, 4.4, neckF, P), { hi: "hi", mid: "mid", lo: "lo" });
 
-  for (const sx of [CONSOLE.x + 27, CONSOLE.x + 35]) {
-    const sy = CONSOLE.y + 34.5;
-    out.push(S(k.cylinder(sx, sy, 1.8, CON_Z1, 1.0, P, 16), { tone: "lo" }));
-    out.push(S(k.cylinder(sx, sy, 0.65, CON_Z1 + 1.0, 3.0, P, 12), { tone: "hi", crease: "none" }));
-    out.push(D([at([sx, sy, CON_Z1 + 4.0])], { size: 0.55, tone: "hi" }));
-  }
+  // Multi-slice Wedge Cranium & Tapered Muzzle
+  const skullPoly = crSample([
+    [-5.5, -3.5],
+    [-4.0, 5.8],
+    [1.8, 7.6],
+    [7.2, 5.8],
+    [12.4, 2.2],
+    [15.6, -0.4],
+    [14.2, -3.2],
+    [6.5, -4.4],
+    [-2.0, -4.4],
+  ], 3, true);
+  const cranium = [
+    [-7.6, -4.2, 0.76],
+    [-4.2, 4.2, 1.0],
+    [4.2, 7.6, 0.76],
+  ].map(([s0, s1, sc]) =>
+    solidPart(G.prismOf(HF, skullPoly.map(([x, y]) => [x, y * sc]), s0, s1, P), { hi: "hi", mid: "mid", lo: "lo" })
+  ).join("");
 
-  put({
-    name: "stand.console",
-    at: [CONSOLE.x + CONSOLE.w / 2, CONSOLE.y + CONSOLE.d / 2, CON_Z0],
-    svg: out.join(""),
-    shapes: [
-      A.slab(CONSOLE, CON_Z0, CON_Z1 - CON_Z0, { name: "stand.console.case" }, 6),
-      A.cylinder(kx, ky, 5.2, CON_Z1, 3.6, { name: "stand.console.knob" }),
-      ...k.corners(CONSOLE, 5).map(([x, y], i) => A.cylinder(x, y, 2.4, 0, CON_Z0, { name: `stand.console.foot.${i}`, ground: true })),
-    ],
-  });
-
-  // Cable boot on the +X face of the console at z = 3.6
-  const BF = frameOf([CONSOLE.x + CONSOLE.w, CONSOLE.y + 18, 3.6], [1, 0, 0], [0, 0, 1]);
-  const boot = [
-    [0, 1.6],
-    [1.4, 1.6],
-    [3.0, 1.2],
+  const jawDrop = st.crouch * 1.1;
+  const jawPoly = [
+    [1.5, -4.2 - jawDrop],
+    [13.4, -3.0 - jawDrop],
+    [14.0, -4.8 - jawDrop],
+    [3.5, -5.8 - jawDrop],
   ];
-  put({
-    name: "stand.console.boot",
-    at: G.pointOf(BF, 1.5, 0, 0),
-    svg: S(G.solidOf(boot, BF, P), { tone: "mid" }),
-    shapes: [A.solid(BF, boot, { name: "stand.console.boot", owner: "cable.console" })],
-  });
-}
+  const mandible = solidPart(G.prismOf(HF, jawPoly, -4.4, 4.4, P), { hi: "mid", mid: "lo", lo: "lo" });
 
-function buildCables() {
-  const r = 0.9;
-  const gaugeBossX = GAUGE[0] + GAUGE_R + 2.0;
-  // 1. Manifold (+X gland at [4, 3.5, 2.6]) to Dial Gauge (+X boss at [gaugeBossX, 52, 3.6])
-  const r1 = G.fillet(
-    [
-      [MANIFOLD.x + MANIFOLD.w, 3.5, 2.6],
-      [14, 3.5, 3.6],
-      [14, GAUGE[1], 3.6],
-      [gaugeBossX, GAUGE[1], 3.6],
-    ],
-    8,
-    12,
-    { P, tube: r },
-  );
-  const len1 = G.pathLength(r1);
-  const gaps1 = [
-    [0, 2.8],
-    [len1 - 3.0, len1],
+  const nosePoly = [
+    [13.5, 1.2],
+    [16.2, 0.4],
+    [16.0, -1.3],
+    [13.2, -1.1],
   ];
-  tubePieces(r1, r, P, { maxLength: 14, gaps: gaps1, caps: [false, false] }).forEach((piece, idx) => {
-    put({
-      name: `cable.gauge:${idx}`,
-      at: piece.mid,
-      svg: tubeSvg(piece, { tone: "mid" }),
-      shapes: [A.tube(piece.points, r, { owner: "cable.gauge" })],
-    });
-  });
-  R.route("cable.gauge", r1, r, {
-    owner: "cable.gauge",
-    gaps: gaps1,
-    limp: true,
-    touch: ["stand.base", "stand.manifold", "stand.gland.gauge", "stand.gauge.boot", "stand.gauge.boss", "stand.gauge.body", "stand.gauge.foot"],
-  });
+  const noseTip = solidPart(G.prismOf(HF, nosePoly, -1.9, 1.9, P), { hi: "mid", mid: "mid", lo: "lo" });
 
-  // 2. Manifold (-X gland at [-12, 3.5, 2.6]) to Telemetry Console (+X boot at [CONSOLE.x + CONSOLE.w, CONSOLE.y + 18, 3.6])
-  const r2 = G.fillet(
-    [
-      [MANIFOLD.x, 3.5, 2.6],
-      [-60, 3.5, 3.6],
-      [-60, CONSOLE.y + 18, 3.6],
-      [CONSOLE.x + CONSOLE.w, CONSOLE.y + 18, 3.6],
-    ],
-    5,
-    12,
-    { P, tube: r },
-  );
-  const len2 = G.pathLength(r2);
-  const gaps2 = [
-    [0, 2.8],
-    [len2 - 3.0, len2],
-  ];
-  tubePieces(r2, r, P, {
-    maxLength: 14,
-    gaps: gaps2,
-    caps: [false, false],
-    rings: { pitch: 2.2, twist: 0.7, cross: true, fade: [0.1, 0.55] },
-  }).forEach((piece, idx) => {
-    put({
-      name: `cable.console:${idx}`,
-      at: piece.mid,
-      svg: tubeSvg(piece, { tone: "mid" }),
-      shapes: [A.tube(piece.points, r, { owner: "cable.console" })],
-    });
-  });
-  R.route("cable.console", r2, r, {
-    owner: "cable.console",
-    gaps: gaps2,
-    limp: true,
-    touch: ["stand.base", "stand.manifold", "stand.gland.console", "stand.console.boot", "stand.console.case"],
-  });
-}
+  const buildEye = (sideLat) => {
+    const eyePos = framePt(HF, -sideLat * 4.4, 9.2, 2.3);
+    const eyeFwd = G.unit3(G.add3(fwd, G.mul3(lat, sideLat * 0.20)));
+    const EF = frameOf(eyePos, eyeFwd, HF.v);
+    const barrel = solidPart(G.disc(-2.2, 0.8, 2.55, EF, P), { hi: "mid", mid: "lo", lo: "lo" });
+    const glowCenter = k.iso(framePt(EF, 0.84, 0, 0), P);
+    const glowRing = `<circle cx="${glowCenter[0].toFixed(1)}" cy="${glowCenter[1].toFixed(1)}" r="${(1.92 * G.scaleOf(P)).toFixed(2)}" fill="var(--anatomy-lit)" stroke="var(--anatomy-ink)" stroke-width="0.65"/>`;
+    const pw = 0.32 + 1.05 * st.pupilDilate;
+    const ph = 1.65;
+    const slitPts = [
+      framePt(EF, 0.88, ph, 0),
+      framePt(EF, 0.88, 0, pw),
+      framePt(EF, 0.88, -ph, 0),
+      framePt(EF, 0.88, 0, -pw),
+    ].map((pt) => k.iso(pt, P));
+    const pupil = `<path class="rc-pupil" d="${k.pathOf(slitPts, true)}"/>`;
+    return barrel + glowRing + pupil;
+  };
 
-// ─────────────── 4. Front Optical Target Rail & Collimator ───────────────
-function buildTargetRail() {
-  const bedSvg = [
-    S(k.slabOf(RAIL_BED, 0, 3.2, P, 4, 0.6), {
-      tone: "lo",
-      inner: L(k.sideSeam(RAIL_BED, 1.6, P, 4), { tone: "faint" }),
-    }),
-    D(k.corners(RAIL_BED, 3.0).map(([x, y]) => at([x, y, 3.2])), { size: 0.45, tone: "mid" }),
-  ].join("");
-
-  put({
-    name: "stand.rail.bed",
-    at: [89, 0, 0],
-    svg: bedSvg,
-    shapes: [A.slab(RAIL_BED, 0, 3.2, { name: "stand.rail.bed", ground: true }, 4)],
-  });
-
-  const railTicks = k.topTicks(RAIL_BAR.y + 4, RAIL_BAR.y + RAIL_BAR.d - 4, 4, 5, RAIL_BAR.x + 0.6, 5.6, [1.5, 2.8], P, "y");
-  const barSvg = [
-    S(k.slabOf(RAIL_BAR, 3.2, 2.4, P, 3, 0.35), { tone: "mid" }),
-    L(railTicks.minor, { tone: "lo" }),
-    L(railTicks.major, { tone: "mid" }),
-  ].join("");
-
-  put({
-    name: "stand.rail.bar",
-    at: [89, 0, 3.2],
-    svg: barSvg,
-    shapes: [A.slab(RAIL_BAR, 3.2, 2.4, { name: "stand.rail.bar" }, 3)],
-  });
-
-  // End stops at y = -52.5..-48 and y = +48..+52.5
-  for (const [tag, y0] of [
-    ["L", -52.5],
-    ["R", 48.0],
-  ]) {
-    const plan = { x: 83.5, y: y0, w: 11, d: 4.5, r: 1.0 };
-    const svg =
-      S(k.slabOf(plan, 3.2, 5.2, P, 3, 0.4), { tone: "mid" }) +
-      D([at([89, y0 + 2.25, 8.4])], { size: 0.48, tone: "hi" });
-    put({
-      name: `stand.rail.stop.${tag}`,
-      at: [89, y0 + 2.25, 3.2],
-      svg,
-      shapes: [A.slab(plan, 3.2, 5.2, { name: `stand.rail.stop.${tag}` }, 3)],
-    });
-  }
-
-  // Sliding Target Collimator Carriage (moves along Y with data-part="target")
-  const postX = 89;
-  const postY = 0;
-  const MF = VERT(postX, postY, 0);
-  const BF = frameOf([BEACON_X, 0, BEACON_Z], [-1, 0, 0], [0, 0, 1]);
-  const beaconProf = [
-    [-7.5, 4.4],
-    [-2.0, 4.4],
-    [-2.0, 5.8],
-    [0, 5.8],
-  ];
-  const carSvg = [
-    S(k.slabOf(CARRIAGE, 5.6, 4.4, P, 4, 0.5), {
-      tone: "hi",
-      crease: "lo",
-      inner: L(k.sideSeam(CARRIAGE, 7.8, P, 4), { tone: "faint" }),
-    }),
-    D(k.corners(CARRIAGE, 2.2).map(([x, y]) => at([x, y, 10.0])), { size: 0.45, tone: "mid" }),
-    // Vertical collimator mast using G.disc so inner seam arcs meet the outline exactly
-    S(G.disc(10.0, BEACON_Z - 4.4, 2.2, MF, P), {
-      tone: "mid",
-      crease: "none",
-      inner: L([16, 23].map((z) => G.arcOf(MF, z, 2.2, P, { least: 0 })).join(""), { tone: "faint" }),
-    }),
-    // Collimator housing pointing at FELIS-09's stereo cameras (-X): rear barrel + front lens hood
-    S(G.disc(-7.5, -2.0, 4.4, BF, P), {
-      tone: "mid",
-      crease: "lo",
-      inner: L(G.arcOf(BF, -4.75, 4.4, P), { tone: "faint" }),
-    }),
-    S(G.disc(-2.0, 0, 5.8, BF, P), {
-      tone: "hi",
-      crease: "lo",
-      lit: true,
-    }),
-    L(G.circleOf(BF, 0, 3.8, P, 28), { tone: "lit" }),
-    D([at([BEACON_X, 0, BEACON_Z])], { size: 0.75, tone: "lit", pulse: true }),
-  ].join("");
-
-  put({
-    name: "target.carriage",
-    at: [89, 0, 5.6],
-    part: "target",
-    svg: carSvg,
-    shapes: [
-      A.slab(CARRIAGE, 5.6, 4.4, { name: "target.carriage.block" }, 4),
-      A.disc(MF, 10.0, BEACON_Z - 4.4, 2.2, { name: "target.carriage.mast" }),
-      A.disc(BF, -7.5, -2.0, 4.4, { name: "target.carriage.barrel" }),
-      A.disc(BF, -2.0, 0, 5.8, { name: "target.carriage.hood" }),
-    ],
-  });
-}
-
-// ─────────────── 5. FELIS-09 Quadruped Robot (Legs, Torso, Head, Tail) ───────────────
-function buildLegs() {
-  for (const pad of M.PADS) {
-    const { id, x, y, side } = pad;
-    const owner = `leg.${id}`;
-
-    // 1. Compliant paw & ankle clevis sitting flush on force pad at z = 4.5
-    const pawPlan = { x: x - 4.8, y: y - 4.4, w: 11.4, d: 8.8, r: 2.2 };
-    const anklePlan = { x: x - 3.2, y: y - 3.0, w: 6.4, d: 6.0, r: 1.2 };
-    const pawSvg = [
-      S(k.slabOf(pawPlan, 4.5, 3.5, P, 4, 0.5), {
-        tone: "hi",
-        crease: "lo",
-        inner: L(k.sideSeam(pawPlan, 5.8, P, 4), { tone: "faint" }),
-      }),
-      D(
-        [
-          [pawPlan.x + 2.2, y - 2.2],
-          [pawPlan.x + 2.2, y + 2.2],
-          [pawPlan.x + pawPlan.w - 2.2, y - 2.2],
-          [pawPlan.x + pawPlan.w - 2.2, y + 2.2],
-        ].map(([px, py]) => at([px, py, 8.0])),
-        { size: 0.42, tone: "mid" },
-      ),
-      S(k.slabOf(anklePlan, 8.0, 4.0, P, 3, 0.4), { tone: "mid" }),
-      D([at([x, y + side * 3.0, 10.0])], { size: 0.5, tone: "hi" }),
-    ].join("");
-
-    put({
-      name: `cat.${id}.paw`,
-      at: [x, y, 4.5],
-      svg: pawSvg,
-      shapes: [
-        A.slab(pawPlan, 4.5, 3.5, { name: `cat.${id}.paw`, owner }, 4),
-        A.slab(anklePlan, 8.0, 4.0, { name: `cat.${id}.ankle`, owner }, 3),
-      ],
-    });
-
-    // 2. Lower leg (Tibia) from z = 12.0 to z = 24.0
-    const tibiaPlan = { x: x - 2.5, y: y - 2.2, w: 5.0, d: 4.4, r: 1.0 };
-    const tibiaSvg = S(k.slabOf(tibiaPlan, 12.0, 12.0, P, 3, 0.35), {
-      tone: "hi",
-      crease: "lo",
-      inner: L(k.sideSeam(tibiaPlan, 15.0, P, 3) + k.sideSeam(tibiaPlan, 21.0, P, 3), { tone: "faint" }),
-    });
-
-    put({
-      name: `cat.${id}.tibia`,
-      at: [x, y, 18.0],
-      legStage: "tibia",
-      svg: tibiaSvg,
-      shapes: [A.slab(tibiaPlan, 12.0, 12.0, { name: `cat.${id}.tibia`, owner }, 3)],
-    });
-
-    // 3a. Knee Joint Housing Block (z = 24.0..30.0)
-    const kneePlan = { x: x - 3.8, y: y - 3.0, w: 7.6, d: 6.0, r: 1.4 };
-    put({
-      name: `cat.${id}.knee.box`,
-      at: [x, y, 27.0],
-      legStage: "knee",
-      svg: S(k.slabOf(kneePlan, 24.0, 6.0, P, 3, 0.4), { tone: "mid" }),
-      shapes: [A.slab(kneePlan, 24.0, 6.0, { name: `cat.${id}.knee.box`, owner }, 3)],
-    });
-
-    // 3b. Outboard Knee Harmonic Drive Drum along Y axis (separate item so it sorts cleanly!)
-    const KF = frameOf([x, y + side * 3.0, 27.0], [0, side, 0], [0, 0, 1]);
-    const kneeDrumProf = [
-      [0, 4.6],
-      [3.4, 4.6],
-      [3.4, 3.6],
-      [4.2, 3.6],
+  const buildEar = (sideLat) => {
+    const swivel = sideLat < 0 ? st.earSwivelL : st.earSwivelR;
+    const flatRad = st.earFlatten * 0.56;
+    const basePos = framePt(HF, -sideLat * 5.0, -0.6, 6.2);
+    const earUp = G.unit3(G.add3(
+      G.mul3(HF.v, Math.cos(flatRad)),
+      G.add3(G.mul3(fwd, -Math.sin(flatRad) * 0.92 - 0.10), G.mul3(lat, sideLat * (0.34 + st.earFlatten * 0.24)))
+    ));
+    const openFwd = G.unit3(G.add3(
+      G.mul3(fwd, Math.cos(swivel)),
+      G.mul3(lat, sideLat * Math.sin(swivel) + sideLat * 0.20)
+    ));
+    const baseTurret = solidPart(G.disc(-0.6, 0.9, 2.0, frameOf(basePos, earUp, openFwd), P), { hi: "mid", mid: "lo", lo: "lo" });
+    // Sleek pointed triangular feline pinna blade extruded along openFwd (thin ear dish!)
+    const bladeF = frameOf(basePos, openFwd, earUp);
+    const pinnaTri = [
+      [0.6, -2.7],
+      [9.4, -0.35],
+      [9.4, 0.35],
+      [0.6, 2.7],
     ];
-    const kneeDrumSvg = [
-      S(G.solidOf(kneeDrumProf, KF, P), { tone: "hi", crease: "lo" }),
-      Faded(G.ribsOf(KF, 0.4, 3.0, 4.6, 20, P, { fade: [0.08, 0.5], seams: true }), { tone: "lo" }),
-      D(G.dotsOf(KF, 4.2, 2.4, 6, P, { fade: [0.06, 0.45] }), { size: 0.4, tone: "mid" }),
-    ].join("");
-
-    put({
-      name: `cat.${id}.knee.drum`,
-      at: [x, y + side * 5.0, 27.0],
-      legStage: "knee",
-      svg: kneeDrumSvg,
-      shapes: [A.solid(KF, kneeDrumProf, { name: `cat.${id}.knee.drum`, owner })],
-    });
-
-    // 4. Upper leg (Femur) from z = 30.0 to z = 41.5
-    const femurPlan = { x: x - 3.2, y: y - 2.4, w: 6.4, d: 4.8, r: 1.2 };
-    const femurSvg = S(k.slabOf(femurPlan, 30.0, 11.5, P, 3, 0.4), {
-      tone: "hi",
-      crease: "lo",
-      inner: L(k.sideSeam(femurPlan, 33.0, P, 3) + k.sideSeam(femurPlan, 38.5, P, 3), { tone: "faint" }),
-    });
-
-    put({
-      name: `cat.${id}.femur`,
-      at: [x, y, 35.8],
-      legStage: "femur",
-      svg: femurSvg,
-      shapes: [A.slab(femurPlan, 30.0, 11.5, { name: `cat.${id}.femur`, owner }, 3)],
-    });
-
-    // 5a. Hip Carrier Housing (z = 41.5..51.5) + Inboard Stator Bridge
-    const hipPlan = { x: x - 5.2, y: y - 3.0, w: 10.4, d: 6.0, r: 1.6 };
-    const SF = frameOf([x, side * 13.0, 46.5], [0, side, 0], [0, 0, 1]);
-    const hipBoxSvg = [
-      S(G.disc(0, 6.0, 4.8, SF, P), { tone: "lo" }),
-      S(k.slabOf(hipPlan, 41.5, 10.0, P, 4, 0.5), { tone: "mid" }),
-    ].join("");
-
-    put({
-      name: `cat.${id}.hip.box`,
-      at: [x, y, 46.5],
-      part: "torso",
-      svg: hipBoxSvg,
-      shapes: [
-        A.disc(SF, 0, 6.0, 4.8, { name: `cat.${id}.hip.stator`, owner }),
-        A.slab(hipPlan, 41.5, 10.0, { name: `cat.${id}.hip.box`, owner }, 4),
-      ],
-    });
-
-    // 5b. Outboard Hip QDD Harmonic Actuator Drum (separate item)
-    const HF = frameOf([x, y + side * 3.0, 46.5], [0, side, 0], [0, 0, 1]);
-    const hipDrumProf = [
-      [0, 7.2],
-      [4.2, 7.2],
-      [4.2, 5.8],
-      [5.4, 5.8],
+    const outerPinna = solidPart(G.prismOf(bladeF, pinnaTri, -1.6, 0.6, P), { hi: "hi", mid: "mid", lo: "lo" });
+    const dishTri = [
+      [1.4, -1.6],
+      [7.4, -0.15],
+      [7.4, 0.15],
+      [1.4, 1.6],
     ];
-    const hipDrumSvg = [
-      S(G.solidOf(hipDrumProf, HF, P), {
-        tone: "hi",
-        crease: "lo",
-        inner: L(G.arcOf(HF, 2.1, 7.2, P), { tone: "faint" }),
-      }),
-      Faded(G.ribsOf(HF, 0.5, 3.7, 7.2, 28, P, { fade: [0.08, 0.5], seams: true }), { tone: "lo" }),
-      D(G.dotsOf(HF, 5.4, 4.2, 8, P, { fade: [0.06, 0.45] }), { size: 0.45, tone: "mid" }),
-    ].join("");
+    const innerDish = solidPart(G.prismOf(bladeF, dishTri, 0.6, 1.45, P), { hi: "mid", mid: "lo", lo: "lo" });
+    return baseTurret + outerPinna + innerDish;
+  };
 
-    put({
-      name: `cat.${id}.hip.drum`,
-      at: [x, y + side * 5.7, 46.5],
-      part: "torso",
-      svg: hipDrumSvg,
-      shapes: [A.solid(HF, hipDrumProf, { name: `cat.${id}.hip.drum`, owner })],
-    });
-  }
-}
-
-export const SPINE_SPRING = { x0: -26, x1: 16, y: 0, z: 52.5, r: 3.4, turns: 8 };
-
-function buildTorso() {
-  const owner = "cat.torso";
-
-  // 1. Rear Pelvis Block (x: -54..-26, y: -13..13, z: 40.0..54.5)
-  const pelvisPlan = { x: -54, y: -13, w: 28, d: 26, r: 3.0 };
-  const pelvisScrews = k.corners(pelvisPlan, 3.2);
-  const pelvisSvg = [
-    S(k.slabOf(pelvisPlan, 40.0, 14.5, P, 5, 0.8), {
-      tone: "hi",
-      crease: "lo",
-      inner: L(k.sideSeam(pelvisPlan, 44.5, P, 5) + k.sideSeam(pelvisPlan, 50.5, P, 5), { tone: "faint" }),
-    }),
-    L(k.planOutline(k.insetPlan(pelvisPlan, 2.8), 54.5, P, 4), { tone: "faint" }),
-    D(pelvisScrews.map(([x, y]) => at([x, y, 54.5])), { size: 0.48, tone: "mid" }),
-  ].join("");
-
-  put({
-    name: "cat.pelvis",
-    at: [-40, 0, 47.2],
-    part: "torso",
-    svg: pelvisSvg,
-    shapes: [A.slab(pelvisPlan, 40.0, 14.5, { name: "cat.pelvis", owner }, 5)],
+  const whiskers = [-1, 1].map((sideLat) => {
+    const angles = [-0.22, 0.0, 0.24];
+    const boss = framePt(HF, -sideLat * 4.5, 11.4, -1.8);
+    const bossF = frameOf(boss, G.mul3(lat, sideLat), fwd);
+    const bossCap = solidPart(G.disc(-0.4, 0.65, 1.0, bossF, P), { hi: "mid", mid: "lo", lo: "lo" });
+    const hairs = angles.map((a, idx) => {
+      const tip = framePt(
+        HF,
+        -sideLat * (10.5 + idx * 1.1),
+        12.5 - idx * 0.6,
+        -1.5 + a * 5.2
+      );
+      return k.wireSvg(k.iso(boss, P), k.iso(tip, P), { tone: "lo", ends: "both", size: 0.45 });
+    }).join("");
+    return bossCap + hairs;
   });
 
-  // 2. Central Spinal Core Beam (x: -26..16, y: -7.5..7.5, z: 41.5..50.0)
-  // + 2 Side LiPo Battery Pods (y: -14.5..-7.5 and y: 7.5..14.5, z: 40.5..50.5)
-  const spineCore = { x: -26, y: -7.5, w: 42, d: 15, r: 1.5 };
-  const spineRodPlan = { x: -26, y: -2.0, w: 42, d: 4.0, r: 1.2 };
-  const coil = k.coil(SPINE_SPRING.x0 + 2, SPINE_SPRING.x1 - 2, [SPINE_SPRING.y, SPINE_SPRING.z], SPINE_SPRING.r, SPINE_SPRING.turns, "x", P);
+  const leftSide = whiskers[0] + buildEye(-1) + buildEar(-1);
+  const rightSide = whiskers[1] + buildEye(1) + buildEar(1);
+  return neckCol + neckRing + mandible + cranium + noseTip + leftSide + rightSide;
+};
 
-  const spineSvg = [
-    S(k.slabOf(spineCore, 41.5, 8.5, P, 3, 0.4), { tone: "mid" }),
-    `<path data-part="spine-coil-back" class="iso-line" data-tone="lo" data-free="both" d="${coil.back}"/>`,
-    S(k.slabOf(spineRodPlan, 50.0, 4.2, P, 3, 0.35), { tone: "hi", crease: "lo" }),
-    `<path data-part="spine-coil-front" class="iso-line" data-tone="mid" data-free="both" d="${coil.front}"/>`,
-  ].join("");
+// ---------------------------------------------------------------------------
+// Live-Rebuildable Assembly 4: 7-Link 3D Spline Whip Tail
+// ---------------------------------------------------------------------------
 
-  put({
-    name: "cat.spine",
-    at: [-5, 0, 46.5],
-    part: "torso",
-    svg: spineSvg,
-    shapes: [
-      A.slab(spineCore, 41.5, 8.5, { name: "cat.spine.core", owner }, 3),
-      A.slab(spineRodPlan, 50.0, 4.2, { name: "cat.spine.rod", owner }, 3),
-    ],
-  });
-
-  for (const [tag, y0] of [
-    ["L", -14.5],
-    ["R", 7.5],
-  ]) {
-    const podPlan = { x: -23, y: y0, w: 36, d: 7.0, r: 1.8 };
-    const podSvg = [
-      S(k.slabOf(podPlan, 40.5, 10.5, P, 4, 0.5), {
-        tone: "mid",
-        inner: L(k.sideSeam(podPlan, 44.0, P, 4) + k.sideSeam(podPlan, 47.5, P, 4), { tone: "faint" }),
-      }),
-      L(k.planOutline(k.insetPlan(podPlan, 1.4), 51.0, P, 3), { tone: "faint" }),
-      D(
-        [
-          [podPlan.x + 3, y0 + 3.5],
-          [podPlan.x + podPlan.w - 3, y0 + 3.5],
-        ].map(([px, py]) => at([px, py, 51.0])),
-        { size: 0.42, tone: "lo" },
-      ),
-    ].join("");
-    put({
-      name: `cat.battery.${tag}`,
-      at: [-5, y0 + 3.5, 45.8],
-      part: "torso",
-      svg: podSvg,
-      shapes: [A.slab(podPlan, 40.5, 10.5, { name: `cat.battery.${tag}`, owner }, 4)],
-    });
-  }
-
-  // 3. Front Thorax & Compute Cage (x: 16..52, y: -13..13, z: 39.5..55.5)
-  // + Dorsal IMU / LiDAR Turret at [29, 0, 55.5..59.5]
-  const thoraxPlan = { x: 16, y: -13, w: 36, d: 26, r: 3.2 };
-  const thoraxScrews = k.corners(thoraxPlan, 3.2);
-  const IF = VERT(29, 0, 55.5);
-  const imuProf = [
-    [0, 6.4],
-    [1.6, 6.4],
-    [1.6, 5.2],
-    [3.8, 5.2],
-  ];
-  const thoraxSvg = [
-    S(k.slabOf(thoraxPlan, 39.5, 16.0, P, 5, 0.9), {
-      tone: "hi",
-      crease: "lo",
-      inner: L(k.sideSeam(thoraxPlan, 44.5, P, 5) + k.sideSeam(thoraxPlan, 50.5, P, 5), { tone: "faint" }),
-    }),
-    L(k.planOutline(k.insetPlan(thoraxPlan, 2.8), 55.5, P, 4), { tone: "faint" }),
-    D(thoraxScrews.map(([x, y]) => at([x, y, 55.5])), { size: 0.48, tone: "mid" }),
-    k.faceTextSvg(k.topMatrix([29, 9.2], 55.5, P, "x"), "FELIS-09", { size: 2.2, tone: "lo", anchor: "middle" }),
-    // IMU turret
-    S(G.solidOf(imuProf, IF, P), { tone: "mid", inner: L(G.arcOf(IF, 2.6, 5.2, P, { least: 0 }), { tone: "faint" }) }),
-    D(G.dotsOf(IF, 3.8, 3.6, 6, P, { all: true, phase: 0.4 }), { size: 0.42, tone: "hi" }),
-    // Cervical neck gimbal collar at [45, 0, 55.5..59.5]
-    S(k.cylinder(45, 0, 5.8, 55.5, 4.0, P, 28, 0.4), { tone: "mid" }),
-    L(k.knurl(45, 0, 5.8, 56.0, 59.0, 24, P), { tone: "lo" }),
-  ].join("");
-
-  put({
-    name: "cat.thorax",
-    at: [34, 0, 48.0],
-    part: "torso",
-    svg: thoraxSvg,
-    shapes: [
-      A.slab(thoraxPlan, 39.5, 16.0, { name: "cat.thorax", owner }, 5),
-      A.solid(IF, imuProf, { name: "cat.imu", owner }),
-      A.cylinder(45, 0, 5.8, 55.5, 4.0, { name: "cat.neck", owner }),
-    ],
-  });
-}
-
-function buildHead() {
-  const owner = "cat.head";
-  const craniumPlan = { x: 38, y: -11.5, w: 22, d: 23, r: 3.2 };
-  const muzzlePlan = { x: 60, y: -6.5, w: 7.5, d: 13, r: 1.8 };
-
-  // Dual forward-facing stereo optical camera barrels at x = 60, y = ±5.8, z = 68.4
-  const eyeBarrels = [-5.8, 5.8].map((ey, idx) => {
-    const EF = frameOf([60, ey, 68.4], [1, 0, 0], [0, 0, 1]);
-    const prof = [
-      [0, 2.7],
-      [2.8, 2.7],
-      [2.8, 2.2],
-      [3.6, 2.2],
-    ];
-    const pCenter = at([63.65, ey, 68.4]);
-    return {
-      shape: A.solid(EF, prof, { name: `cat.eye.${idx ? "R" : "L"}`, owner }),
-      svg: [
-        S(G.solidOf(prof, EF, P), { tone: "hi", crease: "lo", lit: true }),
-        L(G.circleOf(EF, 3.6, 1.8, P, 24), { tone: "lit" }),
-        `<circle class="rc-pupil" data-part="pupil" cx="${pCenter[0].toFixed(2)}" cy="${pCenter[1].toFixed(2)}" r="1.45"/>`,
-      ].join(""),
-    };
-  });
-
-  // 6 tactile whisker probes with terminal dots at both ends (zero floating ends!)
-  const whiskerRoutes = [
-    [
-      [64.5, -6.5, 64.2],
-      [69.5, -18.5, 65.8],
-    ],
-    [
-      [65.5, -6.5, 62.6],
-      [71.0, -19.5, 62.4],
-    ],
-    [
-      [64.5, -6.5, 61.0],
-      [68.5, -17.5, 59.0],
-    ],
-    [
-      [64.5, 6.5, 64.2],
-      [69.5, 18.5, 65.8],
-    ],
-    [
-      [65.5, 6.5, 62.6],
-      [71.0, 19.5, 62.4],
-    ],
-    [
-      [64.5, 6.5, 61.0],
-      [68.5, 17.5, 59.0],
-    ],
-  ];
-  const whiskers = whiskerRoutes.map(([a, b]) => k.wireSvg(at(a), at(b), { tone: "lo", ends: "both", size: 0.7 })).join("");
-  const whiskerShapes = whiskerRoutes.map((pts, i) => A.tube(pts, 0.35, { name: `cat.whisker.${i}`, owner }));
-
-  const headSvg = [
-    S(k.slabOf(craniumPlan, 59.5, 12.2, P, 5, 0.8), {
-      tone: "hi",
-      crease: "lo",
-      inner: L(k.sideSeam(craniumPlan, 65.0, P, 5), { tone: "faint" }),
-    }),
-    L(k.planOutline(k.insetPlan(craniumPlan, 2.4), 71.7, P, 4), { tone: "faint" }),
-    D(k.corners(craniumPlan, 2.8).map(([x, y]) => at([x, y, 71.7])), { size: 0.45, tone: "mid" }),
-    // Muzzle / LiDAR snout
-    S(k.slabOf(muzzlePlan, 59.8, 6.2, P, 3, 0.5), {
-      tone: "mid",
-      inner: L(k.sideSeam(muzzlePlan, 62.8, P, 3), { tone: "faint" }),
-    }),
-    S(k.cylinder(65.5, 0, 1.8, 66.0, 1.2, P, 18, 0.2), { tone: "hi" }),
-    eyeBarrels[0].svg,
-    eyeBarrels[1].svg,
-    whiskers,
-  ].join("");
-
-  put({
-    name: "cat.head",
-    at: [51, 0, 65.5],
-    part: "head",
-    svg: headSvg,
-    shapes: [
-      A.slab(craniumPlan, 59.5, 12.2, { name: "cat.head.cranium", owner }, 5),
-      A.slab(muzzlePlan, 59.8, 6.2, { name: "cat.head.muzzle", owner }, 3),
-      A.cylinder(65.5, 0, 1.8, 66.0, 1.2, { name: "cat.head.nose", owner }),
-      eyeBarrels[0].shape,
-      eyeBarrels[1].shape,
-      ...whiskerShapes,
-    ],
-  });
-
-  // Left & Right Articulated Acoustic Pinnae (Ears) sitting flush on z = 71.7
-  for (const [tag, ey, partName] of [
-    ["L", -7.2, "ear-l"],
-    ["R", 7.2, "ear-r"],
-  ]) {
-    const earPlan = { x: 41.5, y: ey - 2.6, w: 6.0, d: 5.2, r: 1.2 };
-    const earSvg = [
-      S(k.cylinder(44.5, ey, 3.4, 71.7, 1.5, P, 20), { tone: "mid" }),
-      S(k.slabOf(earPlan, 73.2, 10.5, P, 3, 0.45), {
-        tone: "hi",
-        crease: "lo",
-        inner: L(k.sideSeam(earPlan, 78.4, P, 3), { tone: "faint" }),
-      }),
-      D([at([44.5, ey, 83.7])], { size: 0.45, tone: "mid" }),
-    ].join("");
-
-    put({
-      name: `cat.ear.${tag}`,
-      at: [44.5, ey, 77.5],
-      part: partName,
-      svg: earSvg,
-      shapes: [
-        A.cylinder(44.5, ey, 3.4, 71.7, 1.5, { name: `cat.ear.${tag}.base`, owner }),
-        A.slab(earPlan, 73.2, 10.5, { name: `cat.ear.${tag}.blade`, owner }, 3),
-      ],
-    });
-  }
-}
-
-// 5-Segment Articulated Counterbalance Tail along a true 3D curve (rim-on-sphere joints!)
-function buildTail() {
-  const owner = "cat.tail";
-  // Root gimbal boss on rear face of pelvis (x = -54..-56.5)
-  const RF = frameOf([-54, 0, 48.5], [-1, 0, 0], [0, 0, 1]);
-  put({
-    name: "cat.tail.root",
-    at: [-55.2, 0, 48.5],
-    part: "torso",
-    svg: S(G.disc(0, 2.5, 4.4, RF, P), { tone: "mid" }),
-    shapes: [A.disc(RF, 0, 2.5, 4.4, { name: "cat.tail.root", owner })],
-  });
-
-  const nodes = [
-    [-59.8, 0, 48.5],
-    [-69.5, 0, 51.0],
-    [-78.0, 0, 56.0],
-    [-85.0, 0, 63.0],
-    [-90.2, 0, 71.2],
-    [-93.5, 0, 80.2],
-  ];
-  const ballR = [3.4, 3.1, 2.8, 2.5, 2.3];
-  const segR = [2.6, 2.35, 2.1, 1.9, 1.75];
-
-  for (let i = 0; i < 5; i++) {
+export const tailFrames = (nodes) => {
+  const ballR = [3.0, 2.75, 2.5, 2.25, 2.0, 1.75, 1.55];
+  const segR0 = [2.4, 2.2, 2.0, 1.8, 1.62, 1.45, 1.28];
+  const segR1 = [2.2, 2.0, 1.8, 1.62, 1.45, 1.28, 1.08];
+  const links = [];
+  for (let i = 0; i < 7; i++) {
     const p0 = nodes[i];
     const p1 = nodes[i + 1];
     const diff = G.sub3(p1, p0);
     const len = G.len3(diff);
-    const F = frameOf(p0, diff, [0, 1, 0]);
+    const F = G.frameAlong(p0, diff);
     const R0 = ballR[i];
-    const r = segR[i];
-    // Tangent contact at s0 = R0 and s1 = len - R1 so sphere and cylinder are 100% disjoint!
-    const s0 = R0;
-    const isLast = i === 4;
+    const isLast = i === 6;
     const R1 = isLast ? 0 : ballR[i + 1];
-    const s1 = isLast ? len : len - R1;
-
-    // Joint ball at p0
-    put({
-      name: `cat.tail.joint.${i}`,
-      at: p0,
-      tailIdx: i,
-      svg: S(G.sphereOf(p0, R0, P, { steps: 28 }), { tone: "mid" }),
-      shapes: [A.ball(p0, R0, { name: `cat.tail.joint.${i}`, owner })],
-    });
-
-    const prof = [
-      [s0, r],
-      [s1, r],
-    ];
-
-    const segSvg = [
-      S(G.solidOf(prof, F, P), {
-        tone: "hi",
-        crease: "lo",
-        inner: L(G.arcOf(F, (s0 + s1) * 0.5, r, P), { tone: "faint" }),
-      }),
-      isLast ? D([at(p1)], { size: 0.75, tone: "lit" }) : "",
-    ].join("");
-
-    put({
-      name: `cat.tail.seg.${i}`,
-      at: G.lerp3(p0, p1, 0.5),
-      tailIdx: i,
-      svg: segSvg,
-      shapes: [A.solid(F, prof, { name: `cat.tail.seg.${i}`, owner })],
-    });
+    const s0 = R0 * 0.92;
+    const s1 = isLast ? Math.max(s0 + 1.2, len) : Math.max(s0 + 1.2, len - R1 * 0.92);
+    const prof = [[s0, segR0[i]], [s1, segR1[i]]];
+    links.push({ p0, p1, R0, F, prof, sMid: (s0 + s1) * 0.5, rMid: (segR0[i] + segR1[i]) * 0.5, isLast });
   }
-}
-
-buildBench();
-buildForcePads();
-buildGauge();
-buildConsole();
-buildCables();
-buildTargetRail();
-buildLegs();
-buildTorso();
-buildHead();
-buildTail();
-
-A.settle(R, P);
-R.items.sort((a, b) => a.key - b.key);
-
-if (argv.includes("--audit")) {
-  A.auditOrExit(R, P);
-}
-
-// Optical tracking sight line between stereo ocular array and target beacon
-const sightStart = at([63.6, 0, 68.4]);
-const sightEnd = at([BEACON_X, 0, BEACON_Z]);
-const sightInitial = k.wireSvg(sightStart, sightEnd, {
-  tone: "lit",
-  dashed: true,
-  ends: "both",
-  size: 0.85,
-});
-
-const groups = R.items.map((item) => `<g class="it" data-name="${item.name}"${item.attrs ?? ""}>${item.svg}</g>`);
-const bodySvg = [
-  `<path class="iso-halo" d="${k.haloOf(BASE, -BASE_H - FOOT_H, BASE_H, P)}"/>`,
-  ...groups,
-  `<path data-part="gauge-needle" class="iso-line" data-tone="lit" data-free="both" d="${gaugeNeedle(6.8)}" style="stroke-width:1.1px"/>`,
-  `<g data-part="sight-beam">${sightInitial}</g>`,
-];
-
-const LABEL =
-  "FELIS-09 quadruped robotic cat on a four-cell force-plate and optical target test bench. A sliding collimator beacon on the front rail steers the cat's gimbaled stereo camera head, while its five-segment counterbalance tail sweeps the opposite way and its harmonic-drive leg joints flex on four load cells. A dial torque gauge and a four-channel console display ground reaction forces and joint torque.";
-
-const svg = k.figureSvg({ width: WIDTH, height: HEIGHT, label: LABEL, body: bodySvg });
-const stage = `<div class="iso-stage rc-stage" tabindex="0" role="slider" aria-label="FELIS-09 Robotic Cat on compliance test bench: move pointer or press Left and Right arrows to slide the optical target carriage, Up and Down arrows to adjust posture crouch and pitch, Space to trigger a dynamic pounce impulse, keys 1 to 4 for test presets" aria-valuemin="-26" aria-valuemax="26" aria-valuenow="0" aria-valuetext="idle scan · yaw +0.0° · crouch 0 mm · torque 6.8 N·m">${svg}<span class="rc-sr" role="status" aria-live="polite" data-status></span></div>`;
-
-const DATA = {
-  P,
-  gauge: { at: GAUGE, r: GAUGE_R, z: GAUGE_Z, span: GAUGE_SPAN, sweep: GAUGE_SWEEP },
-  bar: BAR,
-  conZ1: CON_Z1,
-  beacon: [BEACON_X, 0, BEACON_Z],
-  eyes: [63.6, 0, 68.4],
-  spine: SPINE_SPRING,
+  return links;
 };
 
-const modelSrc = readFileSync(join(HERE, "model.mjs"), "utf8").replace(/^export /gm, "");
-const FUNCS = `const gaugeNeedle = ${gaugeNeedle.toString()};\nconst barPath = ${barPath.toString()};\nconst D2R = Math.PI / 180;\nconst GAUGE = DATA.gauge.at, GAUGE_R = DATA.gauge.r, GAUGE_Z = DATA.gauge.z, GAUGE_SPAN = DATA.gauge.span, GAUGE_SWEEP = DATA.gauge.sweep;\nconst BAR = DATA.bar, CON_Z1 = DATA.conZ1, SPINE_SPRING = DATA.spine;\nconst k = { lineOnTop, onTop, translateAlong, coil, wireSvg, iso };\n`;
-const CSS = readFileSync(join(HERE, "robotic-cat.css"), "utf8");
-const LIVE = `const DATA = ${JSON.stringify(DATA)};\nconst P = DATA.P;\n${modelSrc}\n${FUNCS}\n${readFileSync(join(HERE, "live.js"), "utf8")}`;
+export const tailSvg = (nodes, P) => {
+  const links = tailFrames(nodes);
+  const V = G.viewOf(P);
+  const ordered = links.map((lk, i) => ({
+    lk,
+    i,
+    depth: G.dot3(lk.p0, V),
+  })).sort((a, b) => a.depth - b.depth);
 
-const init = M.computeState({});
-const plate = k.plateHtml({
-  fig: "Fig 1",
-  title: "FELIS-09 Robotic Cat · Balance Rig",
-  hint: "Hover or ←/→ target · ↑/↓ crouch · Space pounce",
-  readout: `yaw +0.0° · crouch 0 mm · ${init.kneeTorqueNm.toFixed(1)} N·m · IDLE`,
-  keys: [
-    { mark: "lit", label: "Optical lock: front collimator beacon, stereo ocular array, and peak knee torque" },
-    { mark: "raised", label: "80:1 harmonic-drive actuators, dorsal suspension coil, and 5-link counterbalance tail" },
-    { mark: "dim", label: "Four strain-gauge load pads (FL, FR, RL, RR) feeding the bench telemetry console" },
-  ],
-  caption: `A ${M.MASS_KG} kg quadruped robot (${M.WEIGHT_N.toFixed(1)} N static weight, ~${(M.WEIGHT_N / 4).toFixed(1)} N per foot at rest) standing on four strain-gauge load cells. Moving the optical collimator along the front rail commands up to ±${M.MAX_YAW_DEG}° of cervical gaze yaw; the five-segment ${M.TAIL_MASS_KG} kg tail sweeps in opposition to cancel lateral center-of-mass drift. Crouching or pressing Space compresses the dorsal suspension up to ${M.MAX_CROUCH_MM} mm across the 80:1 harmonic-drive knee actuators, driving peak joint torque on the dial indicator and shifting ground reaction forces across the four console bar meters.`,
-  body: `<style>${CSS}</style>${stage}`,
-});
+  return ordered.map(({ lk }) => {
+    const ball = solidPart(G.sphereOf(lk.p0, lk.R0, P, { steps: 26 }), { hi: "mid", mid: "lo", lo: "lo" });
+    const seg = solidPart(G.solidOf(lk.prof, lk.F, P, { rims: "all" }), { hi: "hi", mid: "mid", lo: "lo" });
+    const band = G.arcOf(lk.F, lk.sMid, lk.rMid + 0.04, P, { least: 0.01, trim: 0 });
+    const ring = band ? `<path class="iso-line" data-tone="faint" data-free="both" d="${band}"/>` : "";
+    let tip = "";
+    if (lk.isLast) {
+      const tipS = k.iso(lk.p1, P);
+      tip = `<circle class="rc-beacon" cx="${tipS[0].toFixed(1)}" cy="${tipS[1].toFixed(1)}" r="${(1.55 * G.scaleOf(P)).toFixed(2)}" stroke="var(--anatomy-ink)" stroke-width="0.65"/>`;
+    }
+    return ball + seg + ring + tip;
+  }).join("");
+};
 
-const page = k.pageHtml({
-  title: "FELIS-09 Cybernetic Feline // Anatomy Figure",
-  theme,
-  body: plate,
-  script: kitScript() + LIVE,
-  width: 740,
-});
+// ---------------------------------------------------------------------------
+// Live-Rebuildable Target Carriage, Decoy Whip Lure, Bars & Dial Needle
+// ---------------------------------------------------------------------------
 
-const outName = theme === "light" ? "robotic-cat-light.html" : "robotic-cat.html";
-writeFileSync(join(HERE, outName), page);
-// Also update the gallery path in ../flamelicker/ so existing links point to the improved build
-writeFileSync(join(HERE, "..", "flamelicker", outName), page);
-console.log(`wrote ${outName} · ${(page.length / 1024).toFixed(0)} KB · ${R.items.length} items`);
+export const targetSvg = (y, dz, whip, P) => {
+  const cx = 84;
+  const zBase = 7.5;
+  const blockF = frameOf([cx, y, zBase], [0, 0, 1], [1, 0, 0]);
+  const block = solidPart(G.prismOf(blockF, [[-3.6, -4.6], [3.6, -4.6], [3.6, 4.6], [-3.6, 4.6]], 0, 3.4, P), { hi: "mid", mid: "mid", lo: "lo" });
+
+  const mastH = 7.5 + dz;
+  const mastF = frameOf([cx, y, zBase + 3.4], [0, 0, 1], [1, 0, 0]);
+  const mast = solidPart(G.disc(0, mastH, 1.35, mastF, P), { hi: "mid", mid: "lo", lo: "lo" });
+
+  const colCenter = [cx, y, zBase + 3.4 + mastH + 1.8];
+  const colF = frameOf(colCenter, [-1, 0, 0], [0, 0, 1]);
+  const hood = solidPart(G.disc(-2.4, 3.0, 2.5, colF, P), { hi: "hi", mid: "mid", lo: "lo" });
+  const emitter = k.iso(framePt(colF, 3.05, 0, 0), P);
+  const glow = `<circle cx="${emitter[0].toFixed(1)}" cy="${emitter[1].toFixed(1)}" r="${(1.8 * G.scaleOf(P)).toFixed(2)}" fill="var(--anatomy-lit)" stroke="var(--anatomy-ink)" stroke-width="0.65"/>`;
+
+  const baseA = [cx + 0.5, y, colCenter[2] + 2.2];
+  const midA = [cx + 2.5, y + whip * 0.45, colCenter[2] + 7.2];
+  const tipA = [cx + 0.2, y + whip, colCenter[2] + 11.4];
+  const whipWire = k.wireSvg(k.iso(baseA, P), k.iso(tipA, P), {
+    via: [k.iso(midA, P)],
+    tone: "hi",
+    ends: "from",
+    size: 0.7,
+  });
+  const tipP = k.iso(tipA, P);
+  const lureBall = `<circle cx="${tipP[0].toFixed(1)}" cy="${tipP[1].toFixed(1)}" r="${(2.2 * G.scaleOf(P)).toFixed(2)}" fill="var(--anatomy-lit)" stroke="var(--anatomy-ink)" stroke-width="0.7"/>`;
+
+  return block + mast + hood + glow + whipWire + lureBall;
+};
+
+export const sightBeamSvg = (st, P) => {
+  const from = [81.0, st.targetY, 19.6 + st.targetDz];
+  const to = [59.0 + st.headDx, st.headDy, 63.5 + st.headDz];
+  const d = k.pathOf([k.iso(from, P), k.iso(to, P)]);
+  return k.lineSvg(d, { tone: "lit", dashed: true, dotted: true, free: "both" });
+};
+
+export const barPath = (ox, oy, oz, width, frac, P) => {
+  const maxH = 9.2;
+  const h = Math.max(0.8, Math.min(1, frac) * maxH);
+  const p = [
+    [ox, oy, oz],
+    [ox + h, oy, oz],
+    [ox + h, oy + width, oz],
+    [ox, oy + width, oz],
+  ].map((pt) => k.iso(pt, P));
+  return k.pathOf(p, true);
+};
+
+export const gaugeNeedleSvg = (torqueNm, P) => {
+  const cx = -24;
+  const cy = 58;
+  const z = 7.45;
+  const frac = Math.max(0, Math.min(1, torqueNm / 25));
+  const ang = -Math.PI * 0.78 + frac * Math.PI * 1.56;
+  const tip = [cx + Math.cos(ang) * 11.2, cy + Math.sin(ang) * 11.2, z];
+  const tail = [cx - Math.cos(ang) * 3.2, cy - Math.sin(ang) * 3.2, z];
+  const d = k.pathOf([k.iso(tail, P), k.iso(tip, P)]);
+  const pivot = k.iso([cx, cy, z], P);
+  return (
+    `<path class="iso-line" data-tone="lit" data-free="both" d="${d}"/>` +
+    `<circle cx="${pivot[0].toFixed(1)}" cy="${pivot[1].toFixed(1)}" r="2.2" fill="var(--anatomy-lit)" stroke="var(--anatomy-ink)" stroke-width="0.65"/>`
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Scene Assembly & Audit
+// ---------------------------------------------------------------------------
+
+function buildScene(theme) {
+  const R = A.recorder(P, { order: ORDER });
+  const initSt = M.computeState({});
+
+  const putSolid = (piece, name, spec, svgStr, attrs = "") => {
+    const shapes = Array.isArray(spec) ? spec : [spec];
+    for (const s of shapes) R.solid(s);
+    return R.put({ piece, name, shapes, svg: svgStr, attrs });
+  };
+
+  // 1. 4× Machined Piezo Force Plates
+  for (const pad of M.PADS) {
+    const id = pad.id;
+    const owner = `stand.pad.${id}`;
+    const pf = frameOf([pad.x, pad.y, 0], [0, 0, 1], [1, 0, 0]);
+    const basePoly = [[-9.2, -9.2], [9.2, -9.2], [9.2, 9.2], [-9.2, 9.2]];
+    const topPoly = [[-7.6, -7.6], [7.6, -7.6], [7.6, 7.6], [-7.6, 7.6]];
+    const basePr = G.prismOf(pf, basePoly, 0, 3.2, P);
+    const topPr = G.prismOf(pf, topPoly, 3.2, M.PAD_TOP, P);
+    const bolts = [[-6.0, -6.0], [6.0, -6.0], [6.0, 6.0], [-6.0, 6.0]].map(([bx, by]) =>
+      k.iso([pad.x + bx, pad.y + by, M.PAD_TOP + 0.04], P)
+    );
+    const padLabel = k.faceTextSvg(k.topMatrix([pad.x + 1.8, pad.y + 5.8], M.PAD_TOP + 0.05, P, "x"), id, {
+      size: 4.2,
+      tone: "faint",
+    });
+    const svg =
+      solidPart(basePr, { hi: "mid", mid: "lo", lo: "lo" }) +
+      solidPart(topPr, { hi: "hi", mid: "mid", lo: "lo" }) +
+      D(bolts, { size: 0.34, tone: "lo" }) +
+      padLabel;
+    putSolid(owner, owner, [
+      A.prism(pf, basePoly, 0, 3.2, { owner, name: `${owner}.base`, ground: true }),
+      A.prism(pf, topPoly, 3.2, M.PAD_TOP, { owner, name: `${owner}.top`, top: true }),
+    ], svg);
+  }
+
+  // 2. Front Motorized Prey-Lure Linear Rail + Stepper Motor + Target Carriage
+  {
+    const bedF = frameOf([84, 0, 0], [0, 0, 1], [1, 0, 0]);
+    const bedPoly = [[-5.6, -54], [5.6, -54], [5.6, 54], [-5.6, 54]];
+    const barPoly = [[-3.1, -48], [3.1, -48], [3.1, 48], [-3.1, 48]];
+    const bedPr = G.prismOf(bedF, bedPoly, 0, 4.5, P);
+    const barPr = G.prismOf(bedF, barPoly, 4.5, 7.5, P);
+
+    const pedF = frameOf([84, -57.5, 0], [0, 0, 1], [1, 0, 0]);
+    const pedPoly = [[-4.8, -3.5], [4.8, -3.5], [4.8, 3.5], [-4.8, 3.5]];
+    const pedPr = G.prismOf(pedF, pedPoly, 0, 4.4, P);
+    const motorF = frameOf([84, -61.0, 8.2], [0, 1, 0], [1, 0, 0]);
+    const motorProf = [[0, 3.8], [7.0, 3.8], [7.4, 2.2], [10.0, 2.2], [10.0, 0.2]];
+    const motorSolid = G.solidOf(motorProf, motorF, P);
+    const cradleF = frameOf([84, -57.5, 4.4], [0, 0, 1], [1, 0, 0]);
+    const cradlePr = G.prismOf(cradleF, [[-3.4, -3.0], [3.4, -3.0], [3.4, 3.0], [-3.4, 3.0]], 0, 3.8, P);
+    const rt = k.topTicks(-44, 44, 4, 4, 80.9, 7.53, [1.2, 2.0], P, "y");
+    const railTicks =
+      `<path class="iso-line" data-tone="faint" data-free="both" d="${rt.minor}"/>` +
+      `<path class="iso-line" data-tone="lo" data-free="both" d="${rt.major}"/>`;
+    const railText = k.faceTextSvg(k.topMatrix([80.8, 30], 4.55, P, "y"), "PREY LURE STAGE", { size: 4.5, tone: "faint" });
+
+    const svg =
+      solidPart(bedPr, { hi: "mid", mid: "lo", lo: "lo" }) +
+      solidPart(pedPr, { hi: "mid", mid: "lo", lo: "lo" }) +
+      solidPart(cradlePr, { hi: "mid", mid: "lo", lo: "lo" }) +
+      solidPart(barPr, { hi: "hi", mid: "mid", lo: "lo" }) +
+      solidPart(motorSolid, { hi: "mid", mid: "lo", lo: "lo" }) +
+      railTicks +
+      railText;
+
+    putSolid("stand.rail", "stand.rail", [
+      A.prism(bedF, bedPoly, 0, 4.5, { owner: "stand.rail", name: "stand.rail.bed", ground: true }),
+      A.prism(bedF, barPoly, 4.5, 7.5, { owner: "stand.rail", name: "stand.rail.bar", top: true }),
+      A.prism(pedF, pedPoly, 0, 4.4, { owner: "stand.rail", name: "stand.rail.ped", ground: true }),
+      A.solid(motorF, motorProf, { owner: "stand.rail", name: "stand.rail.motor" }),
+    ], svg);
+
+    const tgF = frameOf([84, initSt.targetY, 7.5], [0, 0, 1], [1, 0, 0]);
+    const mastF = frameOf([84, initSt.targetY, 10.9], [0, 0, 1], [1, 0, 0]);
+    const colF = frameOf([84, initSt.targetY, 20.2], [-1, 0, 0], [0, 0, 1]);
+    putSolid("target.carriage", "target.carriage", [
+      A.prism(tgF, [[-3.6, -4.6], [3.6, -4.6], [3.6, 4.6], [-3.6, 4.6]], 0, 3.4, { owner: "target.carriage", name: "target.carriage.block" }),
+      A.disc(mastF, 0, 7.5, 1.35, { owner: "target.carriage", name: "target.carriage.mast" }),
+      A.disc(colF, -2.4, 3.0, 2.5, { owner: "target.carriage", name: "target.carriage.hood" }),
+      A.disc(frameOf([84.2, initSt.targetY, 22.4], [0, 0, 1], [1, 0, 0]), 0, 9.2, 0.7, { owner: "target.carriage", name: "target.carriage.whip" }),
+      A.ball([84.2, initSt.targetY + initSt.lureWhip, 31.6], 2.2, { owner: "target.carriage", name: "target.carriage.lure" }),
+    ], targetSvg(initSt.targetY, initSt.targetDz, initSt.lureWhip, P), ' data-part="target"');
+  }
+
+  // 3. Central Strain Manifold Junction (stand.manifold)
+  {
+    const mf = frameOf([-2, 42, 0], [0, 0, 1], [1, 0, 0]);
+    const poly = [[-7.2, -5.8], [7.2, -5.8], [7.2, 5.8], [-7.2, 5.8]];
+    const pr = G.prismOf(mf, poly, 0, 5.2, P);
+    const turret = G.disc(5.2, 6.6, 2.0, frameOf([-5.2, 40.5, 0], [0, 0, 1], [1, 0, 0]), P);
+    const portAF = frameOf([-2, 47.8, 2.8], [0, 1, 0], [1, 0, 0]);
+    const portBF = frameOf([-9.2, 42, 2.8], [-1, 0, 0], [0, 1, 0]);
+    const portA = G.disc(0, 1.2, 1.4, portAF, P);
+    const portB = G.disc(0, 1.2, 1.4, portBF, P);
+    const lbl = k.faceTextSvg(k.topMatrix([-2.8, 44.6], 5.25, P, "x"), "LC-4", { size: 4.0, tone: "lo" });
+    const svg =
+      solidPart(pr, { hi: "hi", mid: "mid", lo: "lo" }) +
+      solidPart(turret, { hi: "mid", mid: "lo", lo: "lo" }) +
+      solidPart(portA, { hi: "mid", mid: "lo", lo: "lo" }) +
+      solidPart(portB, { hi: "mid", mid: "lo", lo: "lo" }) +
+      lbl;
+    putSolid("stand.manifold", "stand.manifold", [
+      A.prism(mf, poly, 0, 5.2, { owner: "stand.manifold", name: "stand.manifold.box", ground: true }),
+      A.disc(portAF, 0, 1.2, 1.4, { owner: "stand.manifold", name: "stand.manifold.portA" }),
+      A.disc(portBF, 0, 1.2, 1.4, { owner: "stand.manifold", name: "stand.manifold.portB" }),
+    ], svg);
+  }
+
+  // 4. Foreground Torque & Elastic Energy Dial Gauge (stand.gauge)
+  {
+    const gf = frameOf([-24, 58, 0], [0, 0, 1], [1, 0, 0]);
+    const puck = G.solidOf([[0, 15.8], [5.8, 15.8], [7.2, 14.2], [7.2, 0.2]], gf, P);
+    const bezel = G.disc(5.6, 7.2, 13.8, gf, P);
+    const face = G.disc(7.15, 7.32, 12.2, gf, P);
+    const portGF = frameOf([-8.2, 58, 2.8], [1, 0, 0], [0, 1, 0]);
+    const portG = G.disc(0, 1.2, 1.4, portGF, P);
+    const rTicks = k.radialTicks(-24, 58, 11.6, 10, 2, 7.36, [1.2, 2.2], P, -Math.PI * 0.78, Math.PI * 1.56);
+    const ticks =
+      `<path class="iso-line" data-tone="faint" data-free="both" d="${rTicks.minor}"/>` +
+      `<path class="iso-line" data-tone="lo" data-free="both" d="${rTicks.major}"/>`;
+    const unitLbl = k.faceTextSvg(k.topMatrix([-24, 62.6], 7.38, P, "x"), "N·m·J", { size: 3.8, tone: "lo", anchor: "middle" });
+    const needle = `<g data-part="gauge-needle">${gaugeNeedleSvg(initSt.kneeTorqueNm, P)}</g>`;
+    const svg =
+      solidPart(puck, { hi: "mid", mid: "lo", lo: "lo" }) +
+      solidPart(portG, { hi: "mid", mid: "lo", lo: "lo" }) +
+      solidPart(bezel, { hi: "hi", mid: "mid", lo: "lo" }) +
+      solidPart(face, { hi: "hi", mid: "hi", lo: "mid" }) +
+      ticks +
+      unitLbl +
+      needle;
+    putSolid("stand.gauge", "stand.gauge", [
+      A.disc(gf, 0, 7.3, 15.8, { owner: "stand.gauge", name: "stand.gauge.puck", ground: true }),
+      A.disc(portGF, 0, 1.2, 1.4, { owner: "stand.gauge", name: "stand.gauge.port" }),
+    ], svg);
+  }
+
+  // 5. Rear-Left 4-Channel GRF & CoM Telemetry Console (stand.console)
+  {
+    const cf = frameOf([-106, 26, 0], [0, 0, 1], [1, 0, 0]);
+    const casePoly = [[-16, -12], [16, -12], [16, 12], [-16, 12]];
+    const casePr = G.prismOf(cf, casePoly, 0, 8.2, P);
+    const topBezel = G.prismOf(cf, [[-14.5, -10.5], [14.5, -10.5], [14.5, 10.5], [-14.5, 10.5]], 8.2, 9.2, P);
+    const portCF = frameOf([-90.0, 28, 2.8], [1, 0, 0], [0, 1, 0]);
+    const portC = G.disc(0, 1.2, 1.4, portCF, P);
+
+    const scrPts = [[-11.5, -8.5], [6.5, -8.5], [6.5, 8.5], [-11.5, 8.5]].map(([x, y]) =>
+      k.iso([-106 + x, 26 + y, 9.24], P)
+    );
+    const screen = `<path class="rc-screen" d="${k.pathOf(scrPts, true)}"/>`;
+
+    const barYs = [-6.4, -2.6, 1.2, 5.0];
+    const bars = barYs.map((by, idx) =>
+      `<path class="rc-bar" data-bar="${idx}" d="${barPath(-115.2, 26 + by, 9.28, 2.5, initSt.forces[idx] / 52, P)}"/>`
+    ).join("");
+    const chLabels = ["FL", "FR", "RL", "RR"].map((lb, idx) =>
+      k.faceTextSvg(k.topMatrix([-105.2, 26 + barYs[idx] + 1.8], 9.3, P, "x"), lb, { size: 3.4, tone: "lo" })
+    ).join("");
+
+    const dialF = frameOf([-94.5, 29.0, 9.2], [0, 0, 1], [1, 0, 0]);
+    const dial = solidPart(G.disc(0, 1.8, 2.8, dialF, P), { hi: "hi", mid: "mid", lo: "lo" });
+    const titleLbl = k.faceTextSvg(k.topMatrix([-118.5, 36.5], 9.26, P, "x"), "GRF · 4CH", { size: 3.6, tone: "lo" });
+
+    const svg =
+      solidPart(casePr, { hi: "mid", mid: "lo", lo: "lo" }) +
+      solidPart(portC, { hi: "mid", mid: "lo", lo: "lo" }) +
+      solidPart(topBezel, { hi: "hi", mid: "mid", lo: "lo" }) +
+      screen +
+      bars +
+      chLabels +
+      dial +
+      titleLbl;
+    putSolid("stand.console", "stand.console", [
+      A.prism(cf, casePoly, 0, 9.2, { owner: "stand.console", name: "stand.console.case", ground: true }),
+      A.disc(portCF, 0, 1.2, 1.4, { owner: "stand.console", name: "stand.console.port" }),
+    ], svg);
+  }
+
+  // 6. Braided Cables: Manifold -> Gauge & Manifold -> Console
+  {
+    const ptsGauge = G.fillet([
+      [-2, 49.0, 2.8],
+      [-2, 51.4, 2.8],
+      [-2, 56.8, 0.72],
+      [-4.2, 58, 0.72],
+      [-5.0, 58, 2.8],
+      [-7.0, 58, 2.8],
+    ], 1.2, 5, { P, tube: 0.72 });
+    const piecesGauge = tubePieces(ptsGauge, 0.72, P, { rings: { step: 5.5, tone: "faint" } });
+    R.route("cable.gauge", ptsGauge, 0.72, { owner: "cable.gauge", piece: "cable.gauge", limp: true });
+    R.put({
+      piece: "cable.gauge",
+      name: "cable.gauge",
+      shapes: [A.tube(ptsGauge, 0.72, { owner: "cable.gauge", name: "cable.gauge" })],
+      svg: piecesGauge.map((pc) => tubeSvg(pc, { tone: "mid" })).join(""),
+    });
+
+    const ptsConsole = G.fillet([
+      [-10.4, 42, 2.8],
+      [-12.6, 42, 2.8],
+      [-24, 37.5, 0.72],
+      [-72, 32.5, 0.72],
+      [-86.6, 28, 2.8],
+      [-88.8, 28, 2.8],
+    ], 2.5, 5, { P, tube: 0.72 });
+    const piecesConsole = tubePieces(ptsConsole, 0.72, P, { rings: { step: 6.5, tone: "faint" } });
+    R.route("cable.console", ptsConsole, 0.72, { owner: "cable.console", piece: "cable.console", limp: true });
+    R.put({
+      piece: "cable.console",
+      name: "cable.console",
+      shapes: [A.tube(ptsConsole, 0.72, { owner: "cable.console", name: "cable.console" })],
+      svg: piecesConsole.map((pc) => tubeSvg(pc, { tone: "mid" })).join(""),
+    });
+  }
+
+  // 7. Static Keeled Thoracic Ribcage (cat.thorax)
+  {
+    const x0 = 12, x1 = 46;
+    const txF = frameOf([x0, 0, 0], [1, 0, 0], [0, 1, 0]);
+    const chestPoly = crSample([
+      [-6.8, 38.0],
+      [-11.8, 43.2],
+      [-12.2, 51.5],
+      [-7.4, 54.8],
+      [7.4, 54.8],
+      [12.2, 51.5],
+      [11.8, 43.2],
+      [6.8, 38.0],
+    ], 2, true);
+    const mainChest = solidPart(G.prismOf(txF, chestPoly, 0, x1 - x0, P), { hi: "hi", mid: "mid", lo: "lo" });
+
+    const ribs = [5, 12, 19, 26].map((rx) =>
+      solidPart(G.prismOf(txF, chestPoly.map(([y, z]) => [y * 1.05, z === 38 ? 37.5 : z + (z > 46 ? 0.55 : -0.45)]), rx, rx + 1.8, P), {
+        hi: "mid",
+        mid: "lo",
+        lo: "lo",
+      })
+    ).join("");
+
+    const lidarF = frameOf([28, 0, 54.8], [0, 0, 1], [1, 0, 0]);
+    const lidarProf = [[0, 5.2], [1.4, 5.2], [2.4, 4.4, 1], [3.4, 2.2, 1], [3.7, 0.2]];
+    const lidarDome = solidPart(G.solidOf(lidarProf, lidarF, P), { hi: "mid", mid: "lo", lo: "lo" });
+    const lidarRing = k.faceTextSvg(k.topMatrix([14.0, -4.5], 54.9, P, "x"), "IMU·360", { size: 3.6, tone: "lo" });
+
+    const gillPts = [];
+    for (let gx = 19; gx <= 34; gx += 3.0) {
+      for (let gz = 43.5; gz <= 49.0; gz += 2.2) {
+        gillPts.push(k.iso([gx, 12.3, gz], P));
+      }
+    }
+    const gills = D(gillPts, { size: 0.34, tone: "lo" });
+
+    putSolid("cat.thorax", "cat.thorax", [
+      A.prism(txF, chestPoly, 0, x1 - x0, { owner: "cat.thorax", name: "cat.thorax.chest" }),
+      A.solid(lidarF, lidarProf, { owner: "cat.thorax", name: "cat.thorax.lidar" }),
+    ], mainChest + ribs + gills + lidarDome + lidarRing, ' data-part="thorax"');
+  }
+
+  // 8. Left & Right Tapered Chamfered LiPo Battery Saddle Pods (cat.battery.L / .R)
+  for (const [sideName, sy] of [["L", -1], ["R", 1]]) {
+    const owner = `cat.battery.${sideName}`;
+    const bf = frameOf([-7, sy * 8.2, 44.8], [1, 0, 0], [0, 1, 0]);
+    const bPoly = [[-2.6, -2.8], [2.6, -2.8], [3.2, 1.8], [1.8, 3.0], [-1.8, 3.0], [-3.2, 1.8]];
+    const pr = G.prismOf(bf, bPoly, -12.0, 12.0, P);
+    const bolts = [[-8.5, -1.2], [8.5, -1.2], [8.5, 1.2], [-8.5, 1.2]].map(([dx, dz]) =>
+      k.iso([-7 + dx, sy * 11.4, 44.8 + dz], P)
+    );
+    const svg = solidPart(pr, { hi: "mid", mid: "lo", lo: "lo" }) + (sy > 0 ? D(bolts, { size: 0.28, tone: "lo" }) : "");
+    putSolid(owner, owner, [
+      A.prism(bf, bPoly, -12.0, 12.0, { owner, name: `${owner}.pod` }),
+      A.disc(frameOf([-7, sy * 4.2, 44.8], [0, sy, 0], [1, 0, 0]), 0, 1.8, 1.8, { owner, name: `${owner}.strut` }),
+    ], svg, ` data-part="battery-${sideName}"`);
+  }
+
+  // 9. Canted Haunch Pelvis (cat.pelvis) + Rear Caudal Tail Gimbal Housing
+  {
+    const pf = frameOf([-54, 0, 0], [1, 0, 0], [0, 1, 0]);
+    const pelPoly = crSample([
+      [-8.5, 39.5],
+      [-12.5, 44.5],
+      [-11.8, 51.8],
+      [-6.5, 53.8],
+      [6.5, 53.8],
+      [11.8, 51.8],
+      [12.5, 44.5],
+      [8.5, 39.5],
+    ], 2, true);
+    const hull = solidPart(G.prismOf(pf, pelPoly, 0, 28, P), { hi: "hi", mid: "mid", lo: "lo" });
+    const hatchF = frameOf([-40, 0, 53.8], [0, 0, 1], [1, 0, 0]);
+    const hatchPoly = [[-7.2, -5.2], [7.2, -5.2], [7.2, 5.2], [-7.2, 5.2]];
+    const hatch = solidPart(G.prismOf(hatchF, hatchPoly, 0, 0.9, P), { hi: "mid", mid: "lo", lo: "lo" });
+    const bolts = [[-5.6, -3.6], [5.6, -3.6], [5.6, 3.6], [-5.6, 3.6]].map(([dx, dy]) =>
+      k.iso([-40 + dx, dy, 54.75], P)
+    );
+    const gimbalF = frameOf([-54, 0, 47.0], [-1, 0, 0], [0, 0, 1]);
+    const gimbal = solidPart(G.disc(-1.2, 2.2, 3.9, gimbalF, P), { hi: "mid", mid: "lo", lo: "lo" });
+    const badge = k.faceTextSvg(k.topMatrix([-45.8, 3.8], 54.78, P, "x"), "FELIS·09", { size: 3.6, tone: "lo" });
+
+    putSolid("cat.pelvis", "cat.pelvis", [
+      A.prism(pf, pelPoly, 0, 28, { owner: "cat.pelvis", name: "cat.pelvis.hull" }),
+      A.disc(gimbalF, 0, 2.2, 3.9, { owner: "cat.pelvis", name: "cat.pelvis.gimbal" }),
+    ], hull + hatch + D(bolts, { size: 0.3, tone: "lo" }) + badge + gimbal, ' data-part="pelvis"');
+  }
+
+  // 10. Live-Rebuildable Assemblies
+  putSolid("cat.spine", "cat.spine", [
+    A.disc(frameOf([-26, 0, 47.0], [1, 0, 0], [0, 1, 0]), 0, 38, 4.4, { owner: "cat.spine", name: "cat.spine.core" }),
+  ], spineSvg(initSt, P), ' data-part="spine"');
+
+  for (const leg of initSt.legs) {
+    const owner = `cat.leg.${leg.id}`;
+    const upDir = G.sub3(leg.knee, leg.hip);
+    const loDir = G.sub3(leg.hock, leg.knee);
+    const metaDir = G.sub3(leg.paw, leg.hock);
+    const fH = frameOf(leg.hip, [0, 1, 0], upDir);
+    const fK = frameOf(leg.knee, [0, 1, 0], loDir);
+    const fM = frameOf(leg.hock, [0, 1, 0], metaDir);
+    const pawBoxF = frameOf([leg.padX, leg.padY, M.PAD_TOP], [0, 0, 1], [1, 0, 0]);
+    const wallY = leg.isFore ? 12.2 : 12.5;
+    const hipBridgeF = frameOf([leg.hip[0], leg.side * wallY, leg.hip[2]], [0, leg.side, 0], [1, 0, 0]);
+    putSolid(owner, owner, [
+      A.prism(pawBoxF, [[-3.4, -3.6], [4.5, -3.6], [4.5, 3.6], [-3.4, 3.6]], 0, 1.7, { owner, name: `${owner}.paw` }),
+      A.prism(fM, [[0, -1.2], [G.len3(metaDir), -1.0], [G.len3(metaDir), 1.0], [0, 1.2]], -1.1, 1.1, { owner, name: `${owner}.meta` }),
+      A.prism(fK, [[0, -1.6], [G.len3(loDir), -1.2], [G.len3(loDir), 1.2], [0, 1.6]], -1.4, 1.4, { owner, name: `${owner}.tibia` }),
+      A.prism(fH, [[0, -2.4], [G.len3(upDir), -1.4], [G.len3(upDir), 1.4], [0, 2.4]], -1.8, 1.8, { owner, name: `${owner}.femur` }),
+      A.disc(hipBridgeF, 0, Math.abs(leg.hip[1]) - wallY + 0.5, 3.5, { owner, name: `${owner}.hipBridge` }),
+    ], legSvg(leg, P), ` data-leg="${leg.id}"`);
+  }
+
+  putSolid("cat.tail", "cat.tail", initSt.tailNodes.slice(0, 7).map((n, idx) => {
+    const p1 = initSt.tailNodes[idx + 1];
+    const startPt = idx === 0 ? [-56.2, 0, 47.0] : n;
+    const diff = G.sub3(p1, startPt);
+    return A.disc(G.frameAlong(startPt, diff), idx === 0 ? 1.2 : 0, G.len3(diff), 2.5 - idx * 0.18, {
+      owner: "cat.tail",
+      name: `cat.tail.s${idx}`,
+    });
+  }), tailSvg(initSt.tailNodes, P), ' data-part="tail"');
+
+  putSolid("cat.head", "cat.head", [
+    A.disc(frameOf([43, 0, 54.8], [0, 0, 1], [1, 0, 0]), 0, 3.5, 3.6, { owner: "cat.head", name: "cat.head.neck" }),
+    A.prism(frameOf([48.5, 0, 62.5], [0, -1, 0], [1, 0, 0]), [[-5.5, -4.4], [15.5, -4.4], [15.5, 7.6], [-5.5, 7.6]], -7.6, 7.6, { owner: "cat.head", name: "cat.head.skull" }),
+  ], headSvg(initSt, P), ' data-part="head"');
+
+  R.settled = A.settle(R, P);
+  A.auditOrExit(R, P);
+
+  const bodyGroups =
+    R.items
+      .slice()
+      .sort((a, b) => a.key - b.key)
+      .map((item) => `<g data-piece="${item.piece}"${item.attrs || ""}>${item.svg}</g>`)
+      .join("") +
+    `<g data-piece="sight.beam" data-part="sight-beam">${sightBeamSvg(initSt, P)}</g>`;
+
+  const readoutText = `yaw ${initSt.yawDeg.toFixed(1)}° · crouch ${Math.round(initSt.crouchMm)}mm · ${initSt.strainEnergyJ.toFixed(1)}J · ${initSt.kneeTorqueNm.toFixed(1)}N·m`;
+
+  const svg = `<svg viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-label="${TITLE}">${bodyGroups}</svg>`;
+  const stage = `<div class="rc-stage" tabindex="0" data-live>${svg}</div>`;
+  const body = k.plateHtml({
+    fig: FIG,
+    title: TITLE,
+    hint: HINT,
+    readout: readoutText,
+    keys: [
+      { mark: "lit", label: "Optics · Prey Lure · Torque" },
+      { mark: "hi", label: "Ribcage · Skull · Tendons" },
+      { mark: "mid", label: "Harmonic QDDs · Spine · Tail" },
+    ],
+    body: stage,
+  });
+
+  const LATHE = readFileSync(join(SKILL_DIR, "kit", "lathe.mjs"), "utf8")
+    .replace(/^import .*$/gm, "")
+    .replace(/^export /gm, "")
+    .replaceAll("runsOf", "latheRunsOf")
+    .replaceAll("signedArea", "latheSignedArea")
+    .replaceAll("oriented", "latheOriented")
+    .replaceAll("frameOf", "latheFrameOf");
+
+  const MODEL_SRC = readFileSync(MODEL_PATH, "utf8").replace(/^export /gm, "");
+  const stripNS = (fn) =>
+    fn.toString().replace(/\b(?:G|k|M)\./g, "");
+
+  const FUNCS = [
+    `const frameOf = ${stripNS(frameOf)};`,
+    `const framePt = ${stripNS(framePt)};`,
+    `const crSample = ${stripNS(crSample)};`,
+    `const D = ${stripNS(D)};`,
+    `const solidPart = ${stripNS(solidPart)};`,
+    `const legSvg = ${stripNS(legSvg)};`,
+    `const spineSvg = ${stripNS(spineSvg)};`,
+    `const headSvg = ${stripNS(headSvg)};`,
+    `const tailFrames = ${stripNS(tailFrames)};`,
+    `const tailSvg = ${stripNS(tailSvg)};`,
+    `const targetSvg = ${stripNS(targetSvg)};`,
+    `const sightBeamSvg = ${stripNS(sightBeamSvg)};`,
+    `const barPath = ${stripNS(barPath)};`,
+    `const gaugeNeedleSvg = ${stripNS(gaugeNeedleSvg)};`,
+  ].join("\n");
+
+  const DATA = JSON.stringify({ P });
+  const LIVE_SRC = existsSync(LIVE_PATH) ? readFileSync(LIVE_PATH, "utf8") : "";
+
+  const script = [
+    `const DATA = ${DATA};`,
+    kitScript(),
+    LATHE,
+    MODEL_SRC,
+    FUNCS,
+    LIVE_SRC,
+  ].join("\n");
+
+  const css = readFileSync(CSS_PATH, "utf8");
+  const wrappedBody = `<style>${css}</style>${body}`;
+  return k.pageHtml({ title: TITLE, theme, body: wrappedBody, script, width: WIDTH });
+}
+
+const isLight = process.argv.includes("--light");
+const outPath = isLight ? OUT_LIGHT : OUT_DARK;
+writeFileSync(outPath, buildScene(isLight ? "light" : "dark"), "utf8");
+console.log(`wrote ${outPath}`);

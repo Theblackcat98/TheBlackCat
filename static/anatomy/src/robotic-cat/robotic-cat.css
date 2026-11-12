@@ -35,7 +35,8 @@
 }
 .rc-pupil {
   fill: var(--anatomy-green);
-  stroke: none;
+  stroke: var(--anatomy-lit);
+  stroke-width: 0.45px;
 }
 .rc-beacon {
   fill: var(--anatomy-lit-top);

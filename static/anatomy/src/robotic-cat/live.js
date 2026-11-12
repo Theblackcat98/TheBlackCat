@@ -1,356 +1,264 @@
-const stage = document.querySelector(".rc-stage");
-const svg = stage.querySelector("svg");
-const readout = document.querySelector("[data-readout]");
-const statusEl = stage.querySelector("[data-status]");
-const needleEl = svg.querySelector('[data-part="gauge-needle"]');
-const sightEl = svg.querySelector('[data-part="sight-beam"]');
-const coilBackEl = svg.querySelector('[data-part="spine-coil-back"]');
-const coilFrontEl = svg.querySelector('[data-part="spine-coil-front"]');
-const barEls = [0, 1, 2, 3].map((i) => svg.querySelector(`[data-bar="${i}"]`));
+// Interactive animation loop, 4-phase predatory tour, spring dynamics, and DOM updates
+// for FELIS-09 v2. Inlined into the built SVG figure by build.mjs.
 
-const targetEls = svg.querySelectorAll('[data-part="target"]');
-const torsoEls = svg.querySelectorAll('[data-part="torso"]');
-const headEls = svg.querySelectorAll('[data-part="head"]');
-const earLEls = svg.querySelectorAll('[data-part="ear-l"]');
-const earREls = svg.querySelectorAll('[data-part="ear-r"]');
-const pupilEls = svg.querySelectorAll('[data-part="pupil"]');
-const tibiaEls = svg.querySelectorAll('[data-leg-stage="tibia"]');
-const kneeEls = svg.querySelectorAll('[data-leg-stage="knee"]');
-const femurEls = svg.querySelectorAll('[data-leg-stage="femur"]');
-const tailEls = Array.from(svg.querySelectorAll("[data-tail]")).map((el) => ({
-  el,
-  idx: Number(el.getAttribute("data-tail")),
-}));
+(() => {
+  const stage = document.querySelector("[data-live]");
+  if (!stage) return;
+  const svg = stage.querySelector("svg");
+  const plate = stage.closest(".iso-plate");
+  const readoutEl = plate ? plate.querySelector("[data-readout]") : null;
+  if (!svg) return;
 
-const still = matchMedia("(prefers-reduced-motion: reduce)");
+  const P = DATA.P;
+  const legsEl = {
+    FL: svg.querySelector('[data-leg="FL"]'),
+    FR: svg.querySelector('[data-leg="FR"]'),
+    RL: svg.querySelector('[data-leg="RL"]'),
+    RR: svg.querySelector('[data-leg="RR"]'),
+  };
+  const spineEl = svg.querySelector('[data-part="spine"]');
+  const thoraxEl = svg.querySelector('[data-part="thorax"]');
+  const pelvisEl = svg.querySelector('[data-part="pelvis"]');
+  const batLEl = svg.querySelector('[data-part="battery-L"]');
+  const batREl = svg.querySelector('[data-part="battery-R"]');
+  const headEl = svg.querySelector('[data-part="head"]');
+  const tailEl = svg.querySelector('[data-part="tail"]');
+  const targetEl = svg.querySelector('[data-part="target"]');
+  const sightEl = svg.querySelector('[data-part="sight-beam"]');
+  const needleEl = svg.querySelector('[data-part="gauge-needle"]');
+  const barEls = [0, 1, 2, 3].map((i) => svg.querySelector(`[data-bar="${i}"]`));
+  const BAR_YS = [-6.4, -2.6, 1.2, 5.0];
 
-let visible = false;
-let frame = 0;
-let last = 0;
-let clock = 0;
-let idleTimer = 0;
-let announceTimer = 0;
-let touring = !still.matches;
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const spring = (value) => ({ x: value, v: 0, target: value });
+  const stepSpring = (s, dt, k = 150, d = 17) => {
+    const a = -k * (s.x - s.target) - d * s.v;
+    s.v += a * dt;
+    s.x += s.v * dt;
+  };
 
-let targetYaw = 0;
-let targetPitch = 0;
-let targetCrouch = 0;
+  const yawS = spring(0);
+  const pitchS = spring(0);
+  const crouchS = spring(0);
 
-let curYaw = 0;
-let curPitch = 0;
-const crouchSpring = { x: 0, v: 0 };
-let tailPhase = 0;
+  let mode = reduced ? "manual" : "tour";
+  let tourTime = 0;
+  let lastT = performance.now();
+  let visible = true;
+  let pounceTimer = null;
+  let lastDigest = "";
 
-function stepSpring(state, target, dt, stiffness, damping, calm) {
-  if (calm) {
-    state.x = target;
-    state.v = 0;
-    return true;
-  }
-  const steps = 4;
-  const h = dt / steps;
-  for (let i = 0; i < steps; i++) {
-    const a = stiffness * (target - state.x) - damping * state.v;
-    state.v += a * h;
-    state.x += state.v * h;
-  }
-  if (Math.abs(target - state.x) < 1e-3 && Math.abs(state.v) < 1e-3) {
-    state.x = target;
-    state.v = 0;
-    return true;
-  }
-  return false;
-}
+  const PRESETS = {
+    "1": { yaw: 0, pitch: 0, crouch: 0.12 },
+    "2": { yaw: -0.82, pitch: 0.25, crouch: 0.22 },
+    "3": { yaw: 0.78, pitch: -0.30, crouch: 0.58 },
+    "4": { yaw: 0.18, pitch: -0.48, crouch: 0.92 },
+  };
 
-function tourAt(t) {
-  const c = t % 16;
-  if (c < 4.5) {
-    // Smooth lateral optical tracking sweep
-    const phase = (c / 4.5) * Math.PI * 2;
+  function tourAt(t) {
+    const u = t % 16.0;
+    if (u < 4.5) {
+      // Phase 1: Optical stalk scan
+      const ph = u / 4.5;
+      return {
+        yaw: 0.82 * Math.sin(ph * Math.PI * 2),
+        pitch: 0.14 * Math.sin(ph * Math.PI * 3),
+        crouch: 0.14,
+        tracking: true,
+      };
+    }
+    if (u < 8.5) {
+      // Phase 2: Low ambush crouch & ear flatten
+      const s = (u - 4.5) / 4.0;
+      const e = s * s * (3 - 2 * s);
+      return {
+        yaw: 0.58 * (1 - 0.55 * e),
+        pitch: -0.38 * e,
+        crouch: 0.14 + 0.78 * e,
+        tracking: true,
+      };
+    }
+    if (u < 11.5) {
+      // Phase 3: Explosive pounce impulse & lunge extension
+      const s = (u - 8.5) / 3.0;
+      const punch = Math.min(1, s * 2.2);
+      return {
+        yaw: 0.26 * (1 - punch),
+        pitch: -0.38 + 0.82 * Math.sin(punch * Math.PI * 0.8),
+        crouch: Math.max(0.08, 0.92 * (1 - Math.pow(punch, 0.65))),
+        tracking: true,
+      };
+    }
+    // Phase 4: Tail-whip counterbalance sweep & reset
+    const s = (u - 11.5) / 4.5;
     return {
-      yaw: Math.sin(phase) * 0.78,
-      pitch: Math.cos(phase * 0.5) * 0.22,
-      crouch: 0.05,
-    };
-  } else if (c < 8.0) {
-    // Low stalk crouch while tracking right
-    const u = Math.sin(((c - 4.5) / 3.5) * Math.PI);
-    return {
-      yaw: 0.45 * u,
-      pitch: -0.35 * u,
-      crouch: 0.72 * u,
-    };
-  } else if (c < 11.5) {
-    // Counter-sweep left and elevate gaze
-    const u = Math.sin(((c - 8.0) / 3.5) * Math.PI);
-    return {
-      yaw: -0.68 * u,
-      pitch: 0.55 * u,
-      crouch: 0.12 * u,
-    };
-  } else {
-    // Pounce readiness cycle
-    const u = Math.sin(((c - 11.5) / 4.5) * Math.PI);
-    return {
-      yaw: Math.sin((c - 11.5) * 1.6) * 0.3,
-      pitch: -0.2 * u,
-      crouch: 0.55 * Math.pow(u, 2),
+      yaw: -0.72 * Math.sin(s * Math.PI),
+      pitch: 0.45 * Math.sin(s * Math.PI),
+      crouch: 0.10 + 0.04 * (1 - s),
+      tracking: true,
     };
   }
-}
 
-function describeA11y(st) {
-  const ySign = st.yawDeg >= 0 ? "+" : "";
-  const text = `${st.modeLabel} · yaw ${ySign}${st.yawDeg.toFixed(1)}° · crouch ${Math.round(st.crouchMm)} mm · knee torque ${st.kneeTorqueNm.toFixed(1)} N·m`;
-  stage.setAttribute("aria-valuenow", String(Math.round(st.yawDeg)));
-  stage.setAttribute("aria-valuetext", text);
-  if (statusEl) statusEl.textContent = text;
-}
+  function applyState(st) {
+    const digest = `${st.yaw.toFixed(3)}|${st.pitch.toFixed(3)}|${st.crouch.toFixed(3)}|${st.crouchMm.toFixed(1)}|${st.tailNodes[7][1].toFixed(2)}`;
+    if (digest === lastDigest) return;
+    lastDigest = digest;
 
-function scheduleAnnounce(st) {
-  clearTimeout(announceTimer);
-  announceTimer = setTimeout(() => describeA11y(st), 450);
-}
+    for (const leg of st.legs) {
+      const el = legsEl[leg.id];
+      if (el) el.innerHTML = legSvg(leg, P);
+    }
+    if (spineEl) spineEl.innerHTML = spineSvg(st, P);
+    if (thoraxEl) thoraxEl.setAttribute("transform", translateAlong(P, [st.torsoDx, st.torsoDy * 0.45, st.thoraxDz]));
+    if (pelvisEl) pelvisEl.setAttribute("transform", translateAlong(P, [st.torsoDx, st.torsoDy * 0.45, st.pelvisDz]));
+    if (batLEl) batLEl.setAttribute("transform", translateAlong(P, [st.torsoDx, st.torsoDy * 0.45, st.torsoDz]));
+    if (batREl) batREl.setAttribute("transform", translateAlong(P, [st.torsoDx, st.torsoDy * 0.45, st.torsoDz]));
+    if (headEl) headEl.innerHTML = headSvg(st, P);
+    if (tailEl) tailEl.innerHTML = tailSvg(st.tailNodes, P);
+    if (targetEl) targetEl.innerHTML = targetSvg(st.targetY, st.targetDz, st.lureWhip, P);
+    if (sightEl) sightEl.innerHTML = sightBeamSvg(st, P);
+    if (needleEl) needleEl.innerHTML = gaugeNeedleSvg(st.kneeTorqueNm, P);
 
-function draw(st) {
-  // 1. Target collimator carriage along front rail
-  const targetTr = k.translateAlong(P, [0, st.targetY, st.targetDz * 0.25]);
-  targetEls.forEach((el) => el.setAttribute("transform", targetTr));
-
-  // 2. Torso & hip assembly crouch + lean
-  const torsoTr = k.translateAlong(P, [st.torsoDx, st.torsoDy, st.torsoDz]);
-  torsoEls.forEach((el) => el.setAttribute("transform", torsoTr));
-
-  // 3. Articulated leg stages (paws remain planted at 0 on force pads!)
-  const tibiaTr = k.translateAlong(P, [st.torsoDx * 0.22, st.torsoDy * 0.2, st.torsoDz * 0.25]);
-  tibiaEls.forEach((el) => el.setAttribute("transform", tibiaTr));
-
-  const kneeTr = k.translateAlong(P, [st.torsoDx * 0.5 + st.crouch * 1.4, st.torsoDy * 0.45, st.torsoDz * 0.52]);
-  kneeEls.forEach((el) => el.setAttribute("transform", kneeTr));
-
-  const femurTr = k.translateAlong(P, [st.torsoDx * 0.78 + st.crouch * 0.7, st.torsoDy * 0.75, st.torsoDz * 0.78]);
-  femurEls.forEach((el) => el.setAttribute("transform", femurTr));
-
-  // 4. Dorsal spine suspension spring compression
-  const springShift = st.crouch * 2.2;
-  const sp = k.coil(
-    SPINE_SPRING.x0 + 2 + springShift * 0.4,
-    SPINE_SPRING.x1 - 2 - springShift * 0.4,
-    [SPINE_SPRING.y, SPINE_SPRING.z],
-    SPINE_SPRING.r,
-    SPINE_SPRING.turns,
-    "x",
-    P,
-  );
-  if (coilBackEl) coilBackEl.setAttribute("d", sp.back);
-  if (coilFrontEl) coilFrontEl.setAttribute("d", sp.front);
-
-  // 5. Gimbaled head, stereo ocular pupils & differential acoustic pinnae (ears)
-  const headTr = k.translateAlong(P, [st.headDx, st.headDy, st.headDz]);
-  headEls.forEach((el) => el.setAttribute("transform", headTr));
-
-  const earLTr = k.translateAlong(P, [
-    st.headDx - st.yaw * 0.9,
-    st.headDy + st.yaw * 0.8,
-    st.headDz + Math.max(0, -st.yaw) * 0.8,
-  ]);
-  earLEls.forEach((el) => el.setAttribute("transform", earLTr));
-
-  const earRTr = k.translateAlong(P, [
-    st.headDx + st.yaw * 0.9,
-    st.headDy + st.yaw * 0.8,
-    st.headDz + Math.max(0, st.yaw) * 0.8,
-  ]);
-  earREls.forEach((el) => el.setAttribute("transform", earRTr));
-
-  const pupilOx = st.yaw * 1.4;
-  const pupilOy = -st.pitch * 1.1;
-  pupilEls.forEach((el) => {
-    el.setAttribute("transform", `translate(${pupilOx.toFixed(2)} ${pupilOy.toFixed(2)})`);
-  });
-
-  // 6. 5-Segment Counterbalance Tail (progressive multi-link 3D bending curve)
-  tailEls.forEach(({ el, idx }) => {
-    const u = (idx + 1) / 5;
-    const bend = Math.pow(u, 1.55);
-    const wave = Math.sin(tailPhase - idx * 0.55) * 1.8 * bend;
-    const dx = st.torsoDx - Math.abs(st.yaw) * 1.5 * bend;
-    const dy = st.torsoDy + st.counterYaw * bend + wave;
-    const dz = st.torsoDz + st.counterLift * bend;
-    el.setAttribute("transform", k.translateAlong(P, [dx, dy, dz]));
-  });
-
-  // 7. Optical sight lock line between stereo cameras and target beacon
-  const eyeWorld = [DATA.eyes[0] + st.headDx, DATA.eyes[1] + st.headDy, DATA.eyes[2] + st.headDz];
-  const beaconWorld = [DATA.beacon[0], DATA.beacon[1] + st.targetY, DATA.beacon[2] + st.targetDz * 0.25];
-  if (sightEl) {
-    sightEl.innerHTML = k.wireSvg(k.iso(eyeWorld, P), k.iso(beaconWorld, P), {
-      tone: "lit",
-      dashed: true,
-      ends: "both",
-      size: 0.85,
+    barEls.forEach((el, idx) => {
+      if (el) el.setAttribute("d", barPath(-115.2, 26 + BAR_YS[idx], 9.28, 2.5, st.forces[idx] / 52, P));
     });
+
+    if (readoutEl) {
+      readoutEl.textContent = `yaw ${st.yawDeg.toFixed(1)}° · crouch ${Math.round(st.crouchMm)}mm · ${st.strainEnergyJ.toFixed(1)}J · ${st.kneeTorqueNm.toFixed(1)}N·m`;
+    }
   }
 
-  // 8. Dial torque indicator needle & 4-channel load-cell console bars
-  if (needleEl) {
-    needleEl.setAttribute("d", gaugeNeedle(st.kneeTorqueNm));
-  }
-  for (let i = 0; i < 4; i++) {
-    if (barEls[i]) barEls[i].setAttribute("d", barPath(i, st.forces[i]));
-  }
-
-  // 9. Live corner readout
-  const ySign = st.yawDeg >= 0 ? "+" : "";
-  const statusTag = touring ? "SCAN" : st.crouch > 0.35 ? "CROUCH" : "LOCK";
-  const text = `yaw ${ySign}${st.yawDeg.toFixed(1)}° · crouch ${Math.round(st.crouchMm)} mm · ${st.kneeTorqueNm.toFixed(1)} N·m · ${statusTag}`;
-  if (readout.textContent !== text) readout.textContent = text;
-}
-
-function tick(now) {
-  const dt = last ? Math.min((now - last) / 1000, 1 / 30) : 1 / 60;
-  last = now;
-  clock += dt;
-
-  const calm = still.matches;
-  if (touring && !calm) {
-    const t = tourAt(clock);
-    targetYaw = t.yaw;
-    targetPitch = t.pitch;
-    targetCrouch = t.crouch;
-    tailPhase = clock * 1.85;
-  } else if (!calm) {
-    tailPhase += dt * 1.35;
+  function triggerPounce() {
+    mode = "manual";
+    if (pounceTimer) {
+      clearTimeout(pounceTimer);
+      pounceTimer = null;
+    }
+    if (crouchS.x < 0.45) {
+      crouchS.target = 0.92;
+      pitchS.target = -0.45;
+      pounceTimer = setTimeout(() => {
+        crouchS.target = 0.08;
+        crouchS.v = -4.2;
+        pitchS.target = 0.45;
+        pounceTimer = null;
+      }, 220);
+    } else {
+      crouchS.target = 0.06;
+      crouchS.v = -4.6;
+      pitchS.target = 0.48;
+    }
   }
 
-  const rate = calm ? 1 : 1 - Math.exp(-dt / 0.15);
-  curYaw += (targetYaw - curYaw) * rate;
-  curPitch += (targetPitch - curPitch) * rate;
-  const springSettled = stepSpring(crouchSpring, targetCrouch, dt, 180, 16, calm);
+  function setFromPointer(ev) {
+    const rect = svg.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const nx = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+    const ny = ((ev.clientY - rect.top) / rect.height) * 2 - 1;
+    mode = "manual";
+    yawS.target = Math.max(-1, Math.min(1, nx * 1.15));
+    pitchS.target = Math.max(-1, Math.min(1, -ny * 1.15));
+    crouchS.target = Math.max(0.05, Math.min(0.95, Math.max(0, ny * 0.85)));
+  }
 
-  const st = computeState({
-    yaw: curYaw,
-    pitch: curPitch,
-    crouch: crouchSpring.x,
-    crouchVel: crouchSpring.v,
-    tailPhase,
-    tracking: !touring,
+  stage.addEventListener("pointermove", setFromPointer);
+  stage.addEventListener("pointerdown", (ev) => {
+    setFromPointer(ev);
+    triggerPounce();
   });
 
-  draw(st);
+  stage.addEventListener("keydown", (ev) => {
+    const key = ev.key;
+    if (PRESETS[key]) {
+      ev.preventDefault();
+      mode = "manual";
+      const p = PRESETS[key];
+      yawS.target = p.yaw;
+      pitchS.target = p.pitch;
+      crouchS.target = p.crouch;
+      if (reduced) applyState(computeState({ yaw: p.yaw, pitch: p.pitch, crouch: p.crouch, tailPhase: 0.4, tracking: true }));
+      return;
+    }
+    if (key === " " || key === "Enter") {
+      ev.preventDefault();
+      triggerPounce();
+      return;
+    }
+    if (key === "ArrowLeft") {
+      ev.preventDefault();
+      mode = "manual";
+      yawS.target = Math.max(-1, yawS.target - 0.25);
+      return;
+    }
+    if (key === "ArrowRight") {
+      ev.preventDefault();
+      mode = "manual";
+      yawS.target = Math.min(1, yawS.target + 0.25);
+      return;
+    }
+    if (key === "ArrowUp") {
+      ev.preventDefault();
+      mode = "manual";
+      crouchS.target = Math.max(0, crouchS.target - 0.18);
+      return;
+    }
+    if (key === "ArrowDown") {
+      ev.preventDefault();
+      mode = "manual";
+      crouchS.target = Math.min(1, crouchS.target + 0.18);
+      return;
+    }
+    if (key === "Escape" || key === "Home") {
+      ev.preventDefault();
+      if (pounceTimer) {
+        clearTimeout(pounceTimer);
+        pounceTimer = null;
+      }
+      yawS.target = 0;
+      pitchS.target = 0;
+      crouchS.target = 0;
+      mode = reduced ? "manual" : "tour";
+      tourTime = 0;
+      if (reduced) applyState(computeState({}));
+    }
+  });
 
-  const settled =
-    !touring &&
-    springSettled &&
-    Math.abs(targetYaw - curYaw) < 0.003 &&
-    Math.abs(targetPitch - curPitch) < 0.003 &&
-    calm;
-
-  frame = visible && !settled ? requestAnimationFrame(tick) : 0;
-}
-
-const run = () => {
-  if (!frame && visible) {
-    last = 0;
-    frame = requestAnimationFrame(tick);
+  if (typeof IntersectionObserver !== "undefined") {
+    new IntersectionObserver((entries) => {
+      visible = entries[0]?.isIntersecting ?? true;
+    }).observe(stage);
   }
-};
 
-const hold = () => {
-  touring = false;
-  clearTimeout(idleTimer);
-  idleTimer = setTimeout(() => {
-    touring = !still.matches;
-    run();
-  }, 3600);
-};
+  function tick(now) {
+    const dt = Math.min(0.05, Math.max(0.001, (now - lastT) / 1000));
+    lastT = now;
 
-const steer = (ny, np, nc = targetCrouch) => {
-  hold();
-  targetYaw = Math.max(-1, Math.min(1, ny));
-  targetPitch = Math.max(-1, Math.min(1, np));
-  targetCrouch = Math.max(0, Math.min(1, nc));
-  run();
-  scheduleAnnounce(
-    computeState({
-      yaw: targetYaw,
-      pitch: targetPitch,
-      crouch: targetCrouch,
-      tracking: true,
-    }),
-  );
-};
+    if (visible) {
+      if (mode === "tour") {
+        tourTime += dt;
+        const g = tourAt(tourTime);
+        yawS.target = g.yaw;
+        pitchS.target = g.pitch;
+        crouchS.target = g.crouch;
+      }
+      stepSpring(yawS, dt, 145, 16);
+      stepSpring(pitchS, dt, 155, 17);
+      stepSpring(crouchS, dt, 170, 16);
 
-const triggerPounce = () => {
-  hold();
-  targetCrouch = 0.85;
-  crouchSpring.v = 3.2;
-  setTimeout(() => {
-    targetCrouch = 0;
-    run();
-  }, 260);
-  run();
-  scheduleAnnounce(
-    computeState({
-      yaw: targetYaw,
-      pitch: targetPitch,
-      crouch: 0.85,
-      tracking: true,
-    }),
-  );
-};
-
-stage.addEventListener("pointermove", (e) => {
-  const box = svg.getBoundingClientRect();
-  const nx = ((e.clientX - box.left) / box.width - 0.5) * 2.2;
-  const ny = -((e.clientY - box.top) / box.height - 0.5) * 2.2;
-  const crouchCmd = Math.max(0, -ny * 0.65);
-  steer(nx, ny, crouchCmd);
-});
-
-stage.addEventListener("pointerdown", () => {
-  triggerPounce();
-});
-
-stage.addEventListener("pointerleave", () => {
-  steer(0, 0, 0);
-});
-
-stage.addEventListener("keydown", (e) => {
-  const step = e.shiftKey ? 0.35 : 0.18;
-  let handled = true;
-  if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
-    steer(targetYaw - step, targetPitch, targetCrouch);
-  } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
-    steer(targetYaw + step, targetPitch, targetCrouch);
-  } else if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
-    steer(targetYaw, targetPitch + step, Math.max(0, targetCrouch - step));
-  } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
-    steer(targetYaw, targetPitch - step, Math.min(1, targetCrouch + step));
-  } else if (e.key === " " || e.key === "Enter") {
-    triggerPounce();
-  } else if (e.key === "Escape" || e.key === "Home") {
-    steer(0, 0, 0);
-  } else if (e.key === "1" || e.code === "Digit1") {
-    steer(0, 0, 0);
-  } else if (e.key === "2" || e.code === "Digit2") {
-    steer(-0.8, 0.25, 0.1);
-  } else if (e.key === "3" || e.code === "Digit3") {
-    steer(0.8, -0.2, 0.45);
-  } else if (e.key === "4" || e.code === "Digit4") {
-    steer(0.2, -0.45, 0.9);
-  } else {
-    handled = false;
+      const st = computeState({
+        yaw: yawS.x,
+        pitch: pitchS.x,
+        crouch: crouchS.x,
+        crouchVel: crouchS.v,
+        tailPhase: now * 0.0024,
+        tracking: mode === "tour" || Math.abs(yawS.x) > 0.1 || crouchS.x > 0.2,
+      });
+      applyState(st);
+    }
+    requestAnimationFrame(tick);
   }
-  if (handled) e.preventDefault();
-});
 
-new IntersectionObserver(
-  (entries) => {
-    visible = entries[entries.length - 1].isIntersecting;
-    if (visible) run();
-  },
-  { rootMargin: "120px 0px" },
-).observe(stage);
-
-draw(computeState({}));
+  // Initial synchronous render & loop start
+  applyState(computeState({}));
+  if (!reduced) requestAnimationFrame(tick);
+})();

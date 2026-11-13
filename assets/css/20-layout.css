@@ -188,6 +188,7 @@
 @media (hover: hover) and (min-width: 46rem) { .search__foot { display: flex; } }
 
 /* ---- Logo mark (inline SVG, follows the theme) --------------------------- */
+.logo-mark { display: block; }
 .logo-mark--light { --tile: #efe9db; --cat: #1c1915; --eye: #efe9db; --slit: #1c1915; }
 .logo-mark--dark  { --tile: #15120f; --cat: #ede7db; --eye: #15120f; --slit: #ede7db; }
 .lm-tile  { fill: var(--tile); }

@@ -1,6 +1,6 @@
 languageCode: en-us
 baseURL: "https://theblackcat98.github.io/TheBlackCat/"
-title: "The BlackCat"
+title: "TheBlackCat"
 enableRobotsTXT: true
 enableGitInfo: false   # dates come from front matter (created/updated), not from commits
 

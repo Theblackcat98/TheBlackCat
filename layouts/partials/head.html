@@ -24,6 +24,8 @@
 <meta name="twitter:card" content="summary_large_image">
 {{ range .AlternativeOutputFormats }}{{ if eq .Name "RSS" }}<link rel="alternate" type="application/rss+xml" href="{{ .Permalink }}" title="{{ site.Title }}">{{ end }}{{ end }}
 <link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
+<link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="{{ "favicon-dark.svg" | relURL }}" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 {{ partial "theme-init.html" . }}
 <link rel="preload" href="{{ "fonts/newsreader-latin-opsz-normal.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{ "fonts/jetbrains-mono-latin-wght-normal.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>

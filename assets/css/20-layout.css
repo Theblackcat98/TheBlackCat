@@ -188,7 +188,17 @@
 @media (hover: hover) and (min-width: 46rem) { .search__foot { display: flex; } }
 
 /* ---- Logo mark (inline SVG, follows the theme) --------------------------- */
-.logo-bg   { fill: var(--paper-3); stroke: var(--rule-2); stroke-width: 1; }
-.logo-cat  { fill: light-dark(#1c1915, #080605); }
-.logo-eye  { fill: var(--accent); }
-.logo-slit { fill: light-dark(#1c1915, #080605); }
+.logo-mark--light { --tile: #efe9db; --cat: #1c1915; --eye: #efe9db; --slit: #1c1915; }
+.logo-mark--dark  { --tile: #15120f; --cat: #ede7db; --eye: #15120f; --slit: #ede7db; }
+.lm-tile  { fill: var(--tile); }
+.lm-cat   { fill: var(--cat); }
+.lm-eye   { fill: var(--eye); }
+.lm-slit  { fill: var(--slit); }
+.lm-whisk { stroke: var(--cat); stroke-width: 5.5; stroke-linecap: round; fill: none; }
+.logo-mark--dark { display: none; }
+:root[data-theme="dark"] .logo-mark--light { display: none; }
+:root[data-theme="dark"] .logo-mark--dark  { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo-mark--light { display: none; }
+  :root:not([data-theme="light"]) .logo-mark--dark  { display: block; }
+}

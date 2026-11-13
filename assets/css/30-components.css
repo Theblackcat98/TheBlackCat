@@ -114,6 +114,24 @@
 .card__link:hover { color: var(--accent); }
 .card__link svg { width: .85rem; height: .85rem; }
 .card[hidden] { display: none; }
+/* Card thumbnails (project banners; light/dark swap mirrors .tool-card__img) */
+.card__thumb {
+  margin: calc(-1 * var(--s-4)) calc(-1 * var(--s-4)) 0;
+  aspect-ratio: 16 / 10;
+  background: var(--paper-3);
+  border-bottom: 1px solid var(--rule);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  overflow: hidden;
+}
+.card__img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.card__img--light { display: block; }
+.card__img--dark  { display: none; }
+:root[data-theme="dark"] .card__img--light { display: none; }
+:root[data-theme="dark"] .card__img--dark  { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .card__img--light { display: none; }
+  :root:not([data-theme="light"]) .card__img--dark  { display: block; }
+}
 @media (prefers-reduced-motion: reduce) { .card, .btn { transition: none; } .card:hover { transform: none; } }
 
 /* ---- Filter toolbar (progressive enhancement) --------------------------- */

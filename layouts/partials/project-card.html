@@ -3,6 +3,13 @@
 {{- $tags := .Params.tags | default slice -}}
 {{- $tl := slice -}}{{- range $tags -}}{{- $tl = $tl | append (lower (string .)) -}}{{- end -}}
 <li class="card" data-title="{{ lower (partial "title.html" .) }}" data-tags="{{ delimit $tl " " }}" data-stars="{{ .Params.stars | default 0 }}" data-lang="{{ lower $lang }}">
+  {{- $slug := .File.ContentBaseName -}}
+  {{- if fileExists (printf "static/projects/thumbs/%s-light.webp" $slug) }}
+  <div class="card__thumb">
+    <img class="card__img card__img--light" src="{{ printf "projects/thumbs/%s-light.webp" $slug | relURL }}" width="640" height="400" alt="" loading="lazy" decoding="async">
+    <img class="card__img card__img--dark" src="{{ printf "projects/thumbs/%s-dark.webp" $slug | relURL }}" width="640" height="400" alt="" loading="lazy" decoding="async">
+  </div>
+  {{- end }}
   <div class="meta">
     {{- with $lang }}<span class="type">{{ . }}</span>{{ end }}
     {{- with .Params.stars }}<span>★ {{ . }}</span>{{ end }}

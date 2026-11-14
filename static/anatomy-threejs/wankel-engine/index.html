@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Anatomy · Helicopter Swashplate & Rotor Hub (Three.js Isometric)</title>
-  <script src="../vendor/three/three.min.js"></script>
+  <title>Anatomy · Wankel Rotary Engine (Three.js Isometric)</title>
+  <script src="../../vendor/three/three.min.js"></script>
   <style>
     :root {
       --anatomy-bg: #f3f2ee;
@@ -513,19 +513,19 @@
       }
     }
   </style>
-<meta name="description" content="A helicopter rotor head drawn in interactive 3D: a two-part swashplate on a uniball, three CCPM servos at 120 degrees, pitch links and anti-rotation scissors driving three feathering blades over a cutaway 4:1 bevel gearbox. Grab the swashplate, cyclic stick or collective lever and watch every blade change pitch.">
-<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/helicopter-swashplate/">
-<meta property="og:title" content="Helicopter Swashplate & Rotor Hub">
-<meta property="og:description" content="A helicopter rotor head drawn in interactive 3D: a two-part swashplate on a uniball, three CCPM servos at 120 degrees, pitch links and anti-rotation scissors driving three feathering blades over a cutaway 4:1 bevel gearbox. Grab the swashplate, cyclic stick or collective lever and watch every blade change pitch.">
-<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/helicopter-swashplate-light.webp">
-<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "VisualArtwork", "name": "Helicopter Swashplate & Rotor Hub", "description": "A helicopter rotor head drawn in interactive 3D: a two-part swashplate on a uniball, three CCPM servos at 120 degrees, pitch links and anti-rotation scissors driving three feathering blades over a cutaway 4:1 bevel gearbox. Grab the swashplate, cyclic stick or collective lever and watch every blade change pitch.", "url": "https://theblackcat98.github.io/TheBlackCat/helicopter-swashplate/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/helicopter-swashplate-light.webp", "creator": {"@type": "Person", "name": "Nik"}}</script>
-<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
-<script src="../toolkit/toolkit.js?v=1" defer data-tool="helicopter-swashplate"></script>
+<meta name="description" content="A Wankel rotary engine drawn in interactive 3D: a triangular rotor with apex seals orbiting inside an epitrochoid housing on a 34:51 phasing gearset, eccentric output shaft, dual spark plugs and a Bourdon chamber-pressure gauge, with the four-stroke cycle shaded inside the working chambers.">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/anatomy-threejs/wankel-engine/">
+<meta property="og:title" content="Wankel Rotary Engine">
+<meta property="og:description" content="A Wankel rotary engine drawn in interactive 3D: a triangular rotor with apex seals orbiting inside an epitrochoid housing on a 34:51 phasing gearset, eccentric output shaft, dual spark plugs and a Bourdon chamber-pressure gauge, with the four-stroke cycle shaded inside the working chambers.">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/anatomy-threejs/thumbs/wankel-engine.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "VisualArtwork", "name": "Wankel Rotary Engine", "description": "A Wankel rotary engine drawn in interactive 3D: a triangular rotor with apex seals orbiting inside an epitrochoid housing on a 34:51 phasing gearset, eccentric output shaft, dual spark plugs and a Bourdon chamber-pressure gauge, with the four-stroke cycle shaded inside the working chambers.", "url": "https://theblackcat98.github.io/TheBlackCat/anatomy-threejs/wankel-engine/", "image": "https://theblackcat98.github.io/TheBlackCat/anatomy-threejs/thumbs/wankel-engine.webp", "creator": {"@type": "Person", "name": "Nik"}}</script>
+<link rel="stylesheet" href="../../toolkit/toolkit.css?v=1">
+<script src="../../toolkit/toolkit.js?v=1" defer data-tool="wankel-engine"></script>
 </head>
 <body>
-<a class="back tk-fallback" href="../tools/">&#8592; All tools</a>
+<a class="back tk-fallback" href="../../tools/">&#8592; All tools</a>
   <div class="wrapper iso-plate">
-    <div class="figure-card" id="figure-card" tabindex="0" aria-label="Interactive helicopter swashplate and articulated rotor hub test rig">
+    <div class="figure-card" id="figure-card" tabindex="0" aria-label="Interactive Wankel rotary engine test rig">
       <div id="canvas-host"></div>
 
       <button type="button" class="hud-quick-btn active" id="hud-quick-btn" title="Toggle Floating Details (H)" aria-label="Toggle Floating Details">
@@ -536,16 +536,16 @@
       </button>
 
       <div class="engraved-layer hud-detail" id="engraved-layer">
-        <div class="engraved-tag" id="tag-plate">MRH-3 · CCPM 120° · 4:1</div>
-        <div class="engraved-tag" id="tag-pitch">BLADE 1 PITCH°</div>
+        <div class="engraved-tag" id="tag-plate">13B · R 105 · e 15 · 34:51</div>
+        <div class="engraved-tag" id="tag-gauge">BAR</div>
       </div>
 
       <div class="corner top-left hud-detail">
         <span class="accent-dot"></span>
-        <span>Fig 05 · Rotor Swashplate</span>
+        <span>Fig 04 · Wankel Rotary Engine</span>
       </div>
       <div class="views-group hud-detail" id="camera-views-group" aria-label="Camera views"></div>
-      <div class="corner top-right hud-detail" id="phase-corner">FORWARD CYCLIC</div>
+      <div class="corner top-right hud-detail" id="phase-corner">CHAMBER A · INTAKE</div>
 
       <div class="corner bottom-left hud-detail">
         <span class="desktop-hint">
@@ -557,7 +557,7 @@
       </div>
 
       <div class="corner bottom-right hud-detail" id="readout" data-readout aria-live="polite">
-        ψ 323° · COLL 8.5° · CYC +6.5°/-4.5° · B1 12.2° · 120 rpm
+        θ 000° · α 000° · 720 rpm · P 1.0 bar
       </div>
     </div>
 
@@ -582,11 +582,12 @@
     </div>
 
     <div class="caption-bar hud-detail">
-      <div><strong>The object is the explanation.</strong> Drag the swashplate, cyclic stick, or collective lever directly: three 120° actuators tilt and lift the non-rotating lower swashplate while the bearing-mounted upper ring rotates with the mast so pitch links feather all three blades.</div>
+      <div><strong>The object is the explanation.</strong> A 34-tooth fixed reaction gear inside a 51-tooth rotor bore locks the triangular rotor to <strong>⅓ eccentric shaft speed</strong>, sweeping three crescent chambers simultaneously through Intake, Compression, Ignition, and Exhaust.</div>
       <div class="legend-strip">
-        <span class="legend-item"><span class="legend-swatch" id="leg-lit"></span>Lit Rotor Hub &amp; Blades</span>
-        <span class="legend-item"><span class="legend-swatch" id="leg-intake"></span>Swept Rotor-Disc Blur</span>
-        <span class="legend-item"><span class="legend-swatch" id="leg-comb"></span>Pitch Links &amp; Conduits</span>
+        <span class="legend-item"><span class="legend-swatch" id="leg-lit"></span>Lit Rotor (1/3 ω)</span>
+        <span class="legend-item"><span class="legend-swatch" id="leg-intake"></span>Intake</span>
+        <span class="legend-item"><span class="legend-swatch" id="leg-comb"></span>Ignition</span>
+        <span class="legend-item"><span class="legend-swatch" id="leg-exh"></span>Exhaust</span>
       </div>
     </div>
   </div>
@@ -3282,384 +3283,111 @@ const SPEC = {
   archetype: "bench",
   simulationMode: "continuous",
   toneMode: "single-lit",
-  // Rotor & Swashplate dimensions (world units ~ 1m scaled bench instrument)
-  numBlades: 3,
-  rotorR: 2.45,
-  flapHingeR: 0.28,
-  featherR: 0.44,
-  pitchHornR: 0.52,
-  pitchHornZ: 0.21,          // Tangential leading offset of feathering pitch horn
-  swashServoR: 0.86,
-  swashPitchR: 0.56,         // Matches hypot(0.52, 0.21) = 0.561 for vertical pitch links
-  pitchHornPhase: Math.atan2(0.21, 0.52),
-  servoMountR: 0.92,
-  mastZ: -0.15,
-  gearboxTopY: -0.745,
-  swashY0: -0.10,
-  hubY: 0.96,
-  gearRatio: 4,              // 4:1 bevel drive reduction (motor input RPM -> rotor RPM)
-
-  // Feature flags: open articulated linkage — no exploded view
-  features: {
-    explode: false,
-    cutaway: true,
-    shader: true,
-    crank: true
-  },
-
-  interactionHint: "Drag swashplate, cyclic stick, or collective lever",
-
-  // Domain-authentic operator controls
-  controls: [
-    {
-      id: "collective",
-      label: "COLL",
-      min: 2,
-      max: 14,
-      step: 0.2,
-      initial: 8.5,
-      title: "Collective blade pitch angle (deg)"
-    },
-    {
-      id: "cyclicPitch",
-      label: "PITCH",
-      min: -10,
-      max: 10,
-      step: 0.2,
-      initial: 6.5,
-      title: "Fore/aft cyclic swashplate tilt (deg)"
-    },
-    {
-      id: "cyclicRoll",
-      label: "ROLL",
-      min: -10,
-      max: 10,
-      step: 0.2,
-      initial: -4.5,
-      title: "Left/right cyclic swashplate tilt (deg)"
-    },
-    {
-      id: "rpm",
-      label: "RPM",
-      min: 0,
-      max: 1600,
-      step: 20,
-      initial: 480,
-      title: "Drive motor speed (set 0 to pause & inspect blade pitch)"
-    }
-  ],
-
-  // Audit poses across collective & cyclic extremes (no exploded pose)
-  auditPoses: [
-    {
-      name: "rest (θ=0°)",
-      theta: 0,
-      explode: 0,
-      params: { collective: 8.5, cyclicPitch: 6.5, cyclicRoll: -4.5, rpm: 480 }
-    },
-    {
-      name: "low-coll + fwd-pitch (θ=90°)",
-      theta: Math.PI * 0.5,
-      explode: 0,
-      params: { collective: 2.0, cyclicPitch: 10.0, cyclicRoll: 0, rpm: 0 }
-    },
-    {
-      name: "high-coll + aft-pitch (θ=180°)",
-      theta: Math.PI,
-      explode: 0,
-      params: { collective: 14.0, cyclicPitch: -10.0, cyclicRoll: 0, rpm: 0 }
-    },
-    {
-      name: "roll-left (θ=270°)",
-      theta: Math.PI * 1.5,
-      explode: 0,
-      params: { collective: 8.5, cyclicPitch: 0, cyclicRoll: -10.0, rpm: 480 }
-    },
-    {
-      name: "roll-right + max-coll",
-      theta: 0.65,
-      explode: 0,
-      params: { collective: 14.0, cyclicPitch: 8.0, cyclicRoll: 10.0, rpm: 1600 }
-    }
-  ],
-
-  // 8-state interactive contact sheet poses for scripts/drive.mjs
-  drivePoses: [
-    {
-      label: "1. REST · COLLECTIVE 8.5°",
-      pose: {
-        theta: 0.65,
-        explode: 0,
-        cutaway: true,
-        shader: true,
-        hud: true,
-        theme: "light",
-        params: { collective: 8.5, cyclicPitch: 6.5, cyclicRoll: -4.5, rpm: 480 }
-      }
-    },
-    {
-      label: "2. PAUSED · LOW COLL 2°",
-      pose: {
-        theta: 0.65,
-        explode: 0,
-        cutaway: true,
-        shader: false,
-        hud: true,
-        theme: "light",
-        params: { collective: 2.0, cyclicPitch: 0, cyclicRoll: 0, rpm: 0 }
-      }
-    },
-    {
-      label: "3. PAUSED · HIGH COLL 14°",
-      pose: {
-        theta: 0.65,
-        explode: 0,
-        cutaway: true,
-        shader: false,
-        hud: true,
-        theme: "light",
-        params: { collective: 14.0, cyclicPitch: 0, cyclicRoll: 0, rpm: 0 }
-      }
-    },
-    {
-      label: "4. CYCLIC FWD (+10° PITCH)",
-      pose: {
-        theta: 0.65,
-        explode: 0,
-        cutaway: true,
-        shader: false,
-        hud: true,
-        theme: "light",
-        params: { collective: 8.5, cyclicPitch: 10.0, cyclicRoll: 0, rpm: 0 }
-      }
-    },
-    {
-      label: "5. CYCLIC ROLL (-10° LEFT)",
-      pose: {
-        theta: 0.65,
-        explode: 0,
-        cutaway: true,
-        shader: false,
-        hud: true,
-        theme: "light",
-        params: { collective: 8.5, cyclicPitch: 0, cyclicRoll: -10.0, rpm: 0 }
-      }
-    },
-    {
-      label: "6. CUTAWAY OFF (C = 0)",
-      pose: {
-        theta: 0.65,
-        explode: 0,
-        cutaway: false,
-        shader: true,
-        hud: true,
-        theme: "light",
-        params: { collective: 8.5, cyclicPitch: 6.5, cyclicRoll: -4.5, rpm: 480 }
-      }
-    },
-    {
-      label: "7. DARK THEME",
-      pose: {
-        theta: 1.9,
-        explode: 0,
-        cutaway: true,
-        shader: true,
-        hud: true,
-        theme: "dark",
-        params: { collective: 11.5, cyclicPitch: -6.0, cyclicRoll: 6.0, rpm: 960 }
-      }
-    },
-    {
-      label: "8. BLUEPRINT THEME",
-      pose: {
-        theta: 3.1,
-        explode: 0,
-        cutaway: true,
-        shader: true,
-        hud: true,
-        theme: "blueprint",
-        params: { collective: 6.0, cyclicPitch: 7.5, cyclicRoll: -6.0, rpm: 480 }
-      }
-    }
-  ],
-
-  // Kinematic defaults & camera framing
+  R: 1.33,
+  e: 0.19,
+  depth: 0.72,
+  stationaryTeeth: 34,
+  rotorTeeth: 51,
   initialTheta: 0.65,
-  initialRpm: 480,
+  initialRpm: 720,
   isoElevDeg: 30,
   isoAzimDeg: -36,
-  initialZoom: 0.86,
-  initialPanY: 0.50,
-  minVertSpan: 5.6,
-  minHorizSpan: 7.2,
+  initialZoom: 0.95,
+  initialPanY: 0.22,
+  minVertSpan: 5.3,
+  minHorizSpan: 6.9,
+  section: {
+    axis: "z",
+    min: -0.65,
+    max: 0.95,
+    initial: 0.95,
+    label: "SECT",
+    title: "Slice epitrochoid stator & endplates along shaft Z axis"
+  },
   cameraViews: [
-    { id: "iso", label: "ISO", elev: 30, azim: -36, zoom: 0.86, pan: [0, 0.50] },
-    { id: "swash", label: "SWASH", elev: 18, azim: -24, zoom: 1.45, pan: [0, 0.12] },
-    { id: "hub", label: "HUB", elev: 24, azim: -32, zoom: 1.48, pan: [0, -0.58] },
-    { id: "top", label: "TOP", elev: 88, azim: 0, zoom: 0.88, pan: [0, 0] }
+    { id: "iso", label: "ISO", elev: 30, azim: -36, zoom: 0.95, pan: [0, 0.22] },
+    { id: "bore", label: "BORE", elev: 8, azim: -8, zoom: 1.32, pan: [0, 0.08] },
+    { id: "top", label: "TOP", elev: 85, azim: 0, zoom: 0.96, pan: [0, 0] },
+    { id: "gauge", label: "GAUGE", elev: 22, azim: -22, zoom: 1.48, pan: [1.55, 0.22] }
   ],
-
-  // Heavy datum bedplate
   BASE_W: 5.4,
-  BASE_D: 3.8,
+  BASE_D: 3.5,
   BASE_H: 0.24,
-  BASE_Y: -2.06,
-  topSurfaceY: -2.06 + 0.24 + 0.025 // Account for 0.025 top bevel of baseplate
+  BASE_Y: -2.12,
+  topSurfaceY: -2.12 + 0.24 + 0.025 // Account for top bevel of baseplate
 };
-const SERVO_ANGLES = [
-  -Math.PI / 2,              // Servo 0: Aft cyclic pitch
-  (5 * Math.PI) / 6,         // Servo 1: Forward-left CCPM
-  Math.PI / 6                // Servo 2: Forward-right CCPM
-];
 const ANCHORS = {
   baseTop: [0, SPEC.topSurfaceY, 0],
-  mastCenter: [0, SPEC.topSurfaceY, SPEC.mastZ],
-  servo0Mount: [
-    Math.cos(SERVO_ANGLES[0]) * SPEC.servoMountR,
-    SPEC.topSurfaceY,
-    SPEC.mastZ + Math.sin(SERVO_ANGLES[0]) * SPEC.servoMountR
-  ],
-  servo1Mount: [
-    Math.cos(SERVO_ANGLES[1]) * SPEC.servoMountR,
-    SPEC.topSurfaceY,
-    SPEC.mastZ + Math.sin(SERVO_ANGLES[1]) * SPEC.servoMountR
-  ],
-  servo2Mount: [
-    Math.cos(SERVO_ANGLES[2]) * SPEC.servoMountR,
-    SPEC.topSurfaceY,
-    SPEC.mastZ + Math.sin(SERVO_ANGLES[2]) * SPEC.servoMountR
-  ],
-  plaqueCenter: [-1.40, SPEC.topSurfaceY, SPEC.BASE_D * 0.5 - 0.44],
-  rulerCenter: [0.15, SPEC.topSurfaceY, SPEC.BASE_D * 0.5 - 0.44],
-  cyclicMount: [1.76, SPEC.topSurfaceY, 1.06],
-  collectiveMount: [-1.78, SPEC.topSurfaceY, 0.68],
-  pitchScaleMount: [1.94, SPEC.topSurfaceY, -0.88],
-  motorMount: [1.34, SPEC.topSurfaceY, SPEC.mastZ]
+  pedestalRear: [0, SPEC.topSurfaceY, -0.98],
+  pedestalFront: [0, SPEC.topSurfaceY, 0.98],
+  plaqueCenter: [-1.72, SPEC.topSurfaceY, SPEC.BASE_D * 0.5 - 0.48],
+  rulerCenter: [0.22, SPEC.topSurfaceY, SPEC.BASE_D * 0.5 - 0.42],
+  knobMount: [SPEC.BASE_W * 0.5 - 0.85, SPEC.topSurfaceY, SPEC.BASE_D * 0.5 - 0.58],
+  coilMount: [2.02, SPEC.topSurfaceY, -0.52],
+  gaugeMount: [-2.32, SPEC.topSurfaceY, 0.62]
 };
-
-function resolveControls(paramsOrRpm) {
-  if (typeof paramsOrRpm === "number") {
-    return {
-      collective: 8.5,
-      cyclicPitch: 6.5,
-      cyclicRoll: -4.5,
-      rpm: paramsOrRpm
-    };
-  }
-  const p = paramsOrRpm || {};
-  return {
-    collective: p.collective !== undefined ? p.collective : 8.5,
-    cyclicPitch: p.cyclicPitch !== undefined ? p.cyclicPitch : 6.5,
-    cyclicRoll: p.cyclicRoll !== undefined ? p.cyclicRoll : -4.5,
-    rpm: p.rpm !== undefined ? p.rpm : SPEC.initialRpm
-  };
+function epitrochoidPoint(t, clearance = 0) {
+  const R = SPEC.R + clearance;
+  const e = SPEC.e;
+  return [
+    e * Math.cos(3 * t) + R * Math.cos(t),
+    e * Math.sin(3 * t) + R * Math.sin(t)
+  ];
 }
 
 /**
- * Computes swashplate collective lift, cyclic tilt around X and Z, blade pitch,
- * and aerodynamic coning angle for a given shaft azimuth `theta` and control params.
+ * Computes signed radial clearance between a 3D point (x, y, z) in stator coordinates
+ * and the inner epitrochoid bore wall. Positive = inside bore (clear), Negative = wall collision.
  */
-function getRotorState(theta, paramsOrRpm = SPEC.initialRpm) {
-  const { collective, cyclicPitch, cyclicRoll, rpm } = resolveControls(paramsOrRpm);
-  const rpmNorm = Math.max(0, Math.min(1, rpm / 1600));
-
-  const collNorm = Math.max(0, Math.min(1, (collective - 2.0) / 12.0));
-  const collLift = (collNorm - 0.5) * 0.24; // -0.12 .. +0.12 world units
-
-  // Positive cyclicPitch tilts +Y normal forward (+Z) -> rotation.x > 0
-  // Positive cyclicRoll tilts +Y normal right (+X) -> rotation.z < 0
-  const tiltX = (cyclicPitch * Math.PI) / 180;
-  const tiltZ = -(cyclicRoll * Math.PI) / 180;
-  const cyclicAmpRad = Math.hypot(tiltX, tiltZ);
-  const cyclicAzim = Math.atan2(tiltX, -tiltZ);
-
-  const swashCenterY = SPEC.swashY0 + collLift;
-  const collPitchDeg = collective;
-
-  // Aerodynamic coning angle increases with collective lift and centrifugal RPM
-  const coningDeg = 1.6 + 2.4 * rpmNorm + 4.4 * collNorm;
-  const coningRad = (coningDeg * Math.PI) / 180;
-
-  let phase = "LEVEL HOVER";
-  if (Math.abs(cyclicPitch) > 3.0 || Math.abs(cyclicRoll) > 3.0) {
-    if (Math.abs(cyclicPitch) >= Math.abs(cyclicRoll)) {
-      phase = cyclicPitch > 0 ? "FORWARD CYCLIC" : "AFT CYCLIC";
-    } else {
-      phase = cyclicRoll > 0 ? "RIGHT CYCLIC" : "LEFT CYCLIC";
-    }
-  } else if (collPitchDeg > 10.5) {
-    phase = "HIGH COLLECTIVE";
-  } else if (collPitchDeg < 5.0) {
-    phase = "FLAT PITCH";
+function epitrochoidBoreClearance(x, y, z) {
+  let t = Math.atan2(y, x);
+  for (let iter = 0; iter < 3; iter++) {
+    const [ex, ey] = epitrochoidPoint(t, 0.018);
+    const err = Math.atan2(y, x) - Math.atan2(ey, ex);
+    t += Math.atan2(Math.sin(err), Math.cos(err)) * 0.65;
   }
-
-  const rotorRpm = rpm / SPEC.gearRatio;
-
-  return {
-    collective,
-    cyclicPitch,
-    cyclicRoll,
-    rpm,
-    rpmNorm,
-    rotorRpm,
-    collNorm,
-    collLift,
-    swashCenterY,
-    tiltX,
-    tiltZ,
-    cyclicAzim,
-    cyclicAmpRad,
-    collPitchDeg,
-    coningDeg,
-    coningRad,
-    phase
-  };
+  const [wx, wy] = epitrochoidPoint(t, 0.018);
+  const rWall = Math.hypot(wx, wy);
+  const rPt = Math.hypot(x, y);
+  return rWall - rPt;
 }
+function getChamberState(theta, k = 0) {
+  const alpha = theta / 3;
+  const flankAngle = alpha + (k * 2 * Math.PI) / 3 + Math.PI / 3;
+  const cyc = (((-flankAngle + Math.PI * 0.68) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+  const deg = (cyc * 180) / Math.PI;
+  let phase = "INTAKE";
+  let pressure = 1.0;
 
-/**
- * Computes individual blade k (0, 1, 2) pitch angle (rad), flapping angle (rad),
- * and upper swashplate horn height offset matching swash.carrier rotation.
- */
-function getBladeKinematics(theta, paramsOrRpm, bladeIndex) {
-  const st = getRotorState(theta, paramsOrRpm);
-  const ry = theta + (bladeIndex * 2 * Math.PI) / SPEC.numBlades;
-  const hornAzim = -ry + SPEC.pitchHornPhase;
-
-  const hx = Math.cos(hornAzim) * SPEC.swashPitchR;
-  const hz = Math.sin(hornAzim) * SPEC.swashPitchR;
-
-  // Under THREE.Euler(tiltX, 0, tiltZ, "XZY"): y' = -z*sin(tiltX) + x*sin(tiltZ)
-  const tiltOffsetY = -hz * Math.sin(st.tiltX) + hx * Math.sin(st.tiltZ);
-
-  // Mechanical pitch change from swashplate vertical displacement at pitch horn
-  const cyclicPitchRad = Math.atan2(tiltOffsetY, SPEC.pitchHornZ * 1.45);
-  const collPitchRad = (st.collPitchDeg * Math.PI) / 180;
-  const totalPitchRad = collPitchRad + cyclicPitchRad;
-
-  // Blade aerodynamic flap responds ~90 deg after cyclic pitch
-  const flapCyclicRad = 0.022 * Math.sin(ry - st.cyclicAzim);
-  const flapAngleRad = st.coningRad + flapCyclicRad;
-
-  return {
-    psi: ry,
-    hornAzim,
-    swashHornLocalY: tiltOffsetY,
-    totalPitchRad,
-    totalPitchDeg: (totalPitchRad * 180) / Math.PI,
-    flapAngleRad,
-    flapAngleDeg: (flapAngleRad * 180) / Math.PI
-  };
+  if (deg < 95) {
+    phase = "INTAKE";
+    pressure = 0.95 + 0.1 * Math.sin((deg / 95) * Math.PI);
+  } else if (deg < 180) {
+    phase = "COMPRESSION";
+    const t = (deg - 95) / 85;
+    pressure = 1.0 + 8.5 * Math.pow(t, 2.1);
+  } else if (deg < 270) {
+    phase = "IGNITION · POWER";
+    const t = (deg - 180) / 90;
+    const ignitionPeak = Math.exp(-Math.pow((t - 0.14) / 0.18, 2));
+    pressure = 9.5 * (1 - 0.72 * t) + 24.5 * ignitionPeak;
+  } else {
+    phase = "EXHAUST";
+    const t = (deg - 270) / 90;
+    pressure = 1.05 + 2.4 * Math.exp(-t * 3.2);
+  }
+  return { cyc, deg, phase, pressure };
 }
-function formatReadout({ theta, effectiveRpm, params }) {
-  const displayRpm = params?.rpm !== undefined ? params.rpm : effectiveRpm;
-  const ctrl = params ? { ...params, rpm: displayRpm } : displayRpm;
-  const st = getRotorState(theta, ctrl);
-  const b0 = getBladeKinematics(theta, ctrl, 0);
-  const azimDeg = Math.round((((-theta * 180) / Math.PI) % 360 + 360) % 360);
-  const rotorRpm = Math.round(st.rotorRpm);
+function formatReadout({ theta, effectiveRpm }) {
+  const alpha = theta / 3;
+  const chA = getChamberState(theta, 0);
+  const shaftDeg = Math.round((((-theta * 180) / Math.PI) % 360 + 360) % 360);
+  const rotorDeg = Math.round((((-alpha * 180) / Math.PI) % 360 + 360) % 360);
+  const dispRpm = Math.round(effectiveRpm);
+
   return {
-    readout: `ψ ${String(azimDeg).padStart(3, "0")}° · COLL ${st.collPitchDeg.toFixed(1)}° · CYC ${st.cyclicPitch >= 0 ? "+" : ""}${st.cyclicPitch.toFixed(1)}°/${st.cyclicRoll >= 0 ? "+" : ""}${st.cyclicRoll.toFixed(1)}° · B1 ${b0.totalPitchDeg.toFixed(1)}° · ${rotorRpm} rpm`,
-    phase: st.phase
+    readout: `θ ${String(shaftDeg).padStart(3, "0")}° · α ${String(rotorDeg).padStart(3, "0")}° · ${dispRpm} rpm · P ${chA.pressure.toFixed(1)} bar`,
+    phase: `CHAMBER A · ${chA.phase}`
   };
 }
 
@@ -3670,19 +3398,19 @@ function buildBase(reg, kit) {
 
   const { BASE_W, BASE_D, BASE_H, BASE_Y, topSurfaceY } = SPEC;
 
-  // Soft ground shadow halo under bedplate
+  // Soft shadow halo under baseplate
   const haloMesh = makeHaloMesh(BASE_W + 0.35, BASE_D + 0.35, 0.38, [0.08, BASE_Y - 0.24, 0.08], kit);
   reg.detail("base.halo", haloMesh, { parent: baseGroup, stage: "base" });
 
-  // Heavy datum instrument bedplate
-  const baseGeo = buildSlabGeometry(BASE_W, BASE_D, BASE_H, {
+  // Heavy instrument bedplate
+  const baseExtrudeGeo = buildSlabGeometry(BASE_W, BASE_D, BASE_H, {
     radius: 0.26,
     bevel: true,
     bevelSize: 0.025,
     bevelThickness: 0.025,
     bevelSegments: 2
   });
-  reg.part("base.plate", baseGeo, {
+  reg.part("base.plate", baseExtrudeGeo, {
     parent: baseGroup,
     pos: [0, BASE_Y + BASE_H, 0],
     ramp: "lo",
@@ -3692,15 +3420,13 @@ function buildBase(reg, kit) {
     mountOn: "ground"
   });
 
-  // Register mounting anchors on base.plate for downstream stages
+  // Register mounting anchors on base.plate
   reg.anchor("base.top", ...ANCHORS.baseTop, baseGroup);
-  reg.anchor("mast.center", ...ANCHORS.mastCenter, baseGroup);
-  reg.anchor("servo.0.mount", ...ANCHORS.servo0Mount, baseGroup);
-  reg.anchor("servo.1.mount", ...ANCHORS.servo1Mount, baseGroup);
-  reg.anchor("servo.2.mount", ...ANCHORS.servo2Mount, baseGroup);
-  reg.anchor("cyclic.mount", ...ANCHORS.cyclicMount, baseGroup);
-  reg.anchor("collective.mount", ...ANCHORS.collectiveMount, baseGroup);
-  reg.anchor("pitchScale.mount", ...ANCHORS.pitchScaleMount, baseGroup);
+  reg.anchor("pedestal.rear.mount", ...ANCHORS.pedestalRear, baseGroup);
+  reg.anchor("pedestal.front.mount", ...ANCHORS.pedestalFront, baseGroup);
+  reg.anchor("knob.mount", ...ANCHORS.knobMount, baseGroup);
+  reg.anchor("coil.mount", ...ANCHORS.coilMount, baseGroup);
+  reg.anchor("gauge.mount", ...ANCHORS.gaugeMount, baseGroup);
 
   // Dual inset perimeter grooves
   reg.detail("base.groove.outer", makePlanOutline(BASE_W - 0.32, BASE_D - 0.32, 0.16, topSurfaceY + 0.003, kit, "faint"), {
@@ -3710,7 +3436,7 @@ function buildBase(reg, kit) {
     parent: baseGroup
   });
 
-  // 4 Turned corner feet with collars, pads, and top counterbored screws
+  // 4 Turned corner feet with collars, pads, and top counterbore screws
   const cornerOffsets = [
     [-BASE_W * 0.5 + 0.38, -BASE_D * 0.5 + 0.38],
     [ BASE_W * 0.5 - 0.38, -BASE_D * 0.5 + 0.38],
@@ -3745,9 +3471,9 @@ function buildBase(reg, kit) {
     );
   });
 
-  // Graduated pitch/azimuth bench scale strip on front apron
-  const rulerW = 1.62;
-  const rulerD = 0.24;
+  // Ruler strip with minor & major ticks
+  const rulerW = 2.2;
+  const rulerD = 0.26;
   const [rulerX, , rulerZ] = ANCHORS.rulerCenter;
   const rulerGeo = new THREE.BoxGeometry(rulerW, 0.03, rulerD);
   reg.part("base.ruler", rulerGeo, {
@@ -3761,13 +3487,13 @@ function buildBase(reg, kit) {
 
   reg.detail(
     "base.ruler.ticks",
-    makeRulerTicks(rulerX, rulerW, rulerZ, rulerD, topSurfaceY + 0.032, 25, 5, kit),
+    makeRulerTicks(rulerX, rulerW, rulerZ, rulerD, topSurfaceY + 0.032, 30, 5, kit),
     { parent: baseGroup }
   );
 
-  // Brass specification plaque on front-left apron with rule lines and corner rivets
-  const plaqueW = 1.12;
-  const plaqueD = 0.42;
+  // Brass specification plaque with rule lines and corner rivets
+  const plaqueW = 1.24;
+  const plaqueD = 0.46;
   const [plaqueX, , plaqueZ] = ANCHORS.plaqueCenter;
   const plaqueGeo = new THREE.BoxGeometry(plaqueW, 0.035, plaqueD);
   reg.part("base.plaque", plaqueGeo, {
@@ -3780,11 +3506,11 @@ function buildBase(reg, kit) {
   });
 
   const rulePts = [
-    new THREE.Vector3(plaqueX - 0.40, topSurfaceY + 0.038, plaqueZ - 0.09),
-    new THREE.Vector3(plaqueX + 0.40, topSurfaceY + 0.038, plaqueZ - 0.09),
-    new THREE.Vector3(plaqueX - 0.40, topSurfaceY + 0.038, plaqueZ + 0.02),
-    new THREE.Vector3(plaqueX + 0.30, topSurfaceY + 0.038, plaqueZ + 0.02),
-    new THREE.Vector3(plaqueX - 0.40, topSurfaceY + 0.038, plaqueZ + 0.12),
+    new THREE.Vector3(plaqueX - 0.44, topSurfaceY + 0.038, plaqueZ - 0.10),
+    new THREE.Vector3(plaqueX + 0.44, topSurfaceY + 0.038, plaqueZ - 0.10),
+    new THREE.Vector3(plaqueX - 0.44, topSurfaceY + 0.038, plaqueZ + 0.02),
+    new THREE.Vector3(plaqueX + 0.32, topSurfaceY + 0.038, plaqueZ + 0.02),
+    new THREE.Vector3(plaqueX - 0.44, topSurfaceY + 0.038, plaqueZ + 0.12),
     new THREE.Vector3(plaqueX + 0.20, topSurfaceY + 0.038, plaqueZ + 0.12)
   ];
   reg.detail(
@@ -3793,14 +3519,14 @@ function buildBase(reg, kit) {
     { parent: baseGroup }
   );
 
-  [[-0.48, -0.15], [0.48, -0.15], [-0.48, 0.15], [0.48, 0.15]].forEach(([rx, rz], idx) => {
+  [[-0.52, -0.16], [0.52, -0.16], [-0.52, 0.16], [0.52, 0.16]].forEach(([rx, rz], idx) => {
     const rDot = new THREE.Mesh(new THREE.CircleGeometry(0.022, 10), kit.dotMaterials.dot);
     rDot.rotation.x = -Math.PI / 2;
     rDot.position.set(plaqueX + rx, topSurfaceY + 0.039, plaqueZ + rz);
     reg.detail(`base.plaque.rivet.${idx}`, rDot, { parent: baseGroup });
   });
 
-  reg.tag("tag-plate", "MRH-3 · CCPM 120° · 4:1", plaqueX, topSurfaceY + 0.05, plaqueZ);
+  reg.tag("tag-plate", "13B · R 105 · e 15 · 34:51", plaqueX, topSurfaceY + 0.05, plaqueZ);
 }
 
 
@@ -3808,315 +3534,424 @@ function buildBase(reg, kit) {
 
 
 
-function buildCutawayArcGeometry(rInner, rOuter, height, aStart, aEnd, segs = 48) {
-  const shape = new THREE.Shape();
+function buildEpitrochoidHousingGeometry(thickness) {
+  const outerShape = new THREE.Shape();
+  const segs = 128;
   for (let i = 0; i <= segs; i++) {
-    const a = aStart + (i / segs) * (aEnd - aStart);
-    const x = Math.cos(a) * rOuter;
-    const y = Math.sin(a) * rOuter;
-    if (i === 0) shape.moveTo(x, y);
-    else shape.lineTo(x, y);
+    const t = (i / segs) * Math.PI * 2;
+    const [ex, ey] = epitrochoidPoint(t, 0.42);
+    if (i === 0) outerShape.moveTo(ex, ey);
+    else outerShape.lineTo(ex, ey);
   }
-  for (let i = segs; i >= 0; i--) {
-    const a = aStart + (i / segs) * (aEnd - aStart);
-    const x = Math.cos(a) * rInner;
-    const y = Math.sin(a) * rInner;
-    shape.lineTo(x, y);
-  }
-  shape.closePath();
 
-  const geo = new THREE.ExtrudeGeometry(shape, {
-    depth: height,
+  const borePath = new THREE.Path();
+  for (let i = 0; i <= segs; i++) {
+    const t = (i / segs) * Math.PI * 2;
+    const [bx, by] = epitrochoidPoint(t, 0.018);
+    if (i === 0) borePath.moveTo(bx, by);
+    else borePath.lineTo(bx, by);
+  }
+  outerShape.holes.push(borePath);
+
+  for (let k = 0; k < 16; k++) {
+    const t = (k / 16) * Math.PI * 2 + 0.1;
+    const deg = ((t * 180) / Math.PI) % 360;
+    if ((deg > 130 && deg < 165) || (deg > 195 && deg < 230) || deg > 335 || deg < 25) continue;
+    const [cx, cy] = epitrochoidPoint(t, 0.22);
+    const hole = new THREE.Path();
+    hole.absarc(cx, cy, 0.055, 0, Math.PI * 2, false);
+    outerShape.holes.push(hole);
+  }
+
+  const geo = new THREE.ExtrudeGeometry(outerShape, {
+    depth: thickness,
     bevelEnabled: true,
     bevelSegments: 1,
     steps: 1,
-    bevelSize: 0.012,
-    bevelThickness: 0.012,
-    curveSegments: segs
+    bevelSize: 0.015,
+    bevelThickness: 0.015,
+    curveSegments: 64
   });
-  // Rotate so shape XY maps to XZ with -Y_shape -> +Z_world, and extrusion depth -> +Y_world
-  geo.rotateX(-Math.PI / 2);
+  geo.translate(0, 0, -thickness * 0.5);
   return geo;
 }
 
-function buildAnnularRingGeometry(rInner, rOuter, height, segs = 48) {
+function buildRearEndPlateGeometry() {
   const shape = new THREE.Shape();
-  shape.absarc(0, 0, rOuter, 0, Math.PI * 2, false);
+  const segs = 96;
+  for (let i = 0; i <= segs; i++) {
+    const t = (i / segs) * Math.PI * 2;
+    const [px, py] = epitrochoidPoint(t, 0.40);
+    if (i === 0) shape.moveTo(px, py);
+    else shape.lineTo(px, py);
+  }
   const hole = new THREE.Path();
-  hole.absarc(0, 0, rInner, 0, Math.PI * 2, true);
+  hole.absarc(0, 0, 0.25, 0, Math.PI * 2, false);
   shape.holes.push(hole);
 
   const geo = new THREE.ExtrudeGeometry(shape, {
-    depth: height,
+    depth: 0.16,
     bevelEnabled: true,
     bevelSegments: 1,
     steps: 1,
     bevelSize: 0.012,
     bevelThickness: 0.012,
-    curveSegments: segs
+    curveSegments: 48
   });
-  geo.rotateX(-Math.PI / 2);
+  geo.translate(0, 0, -0.08);
+  return geo;
+}
+
+function buildFrontCoverRingGeometry() {
+  const shape = new THREE.Shape();
+  const segs = 96;
+  for (let i = 0; i <= segs; i++) {
+    const t = (i / segs) * Math.PI * 2;
+    const [px, py] = epitrochoidPoint(t, 0.40);
+    if (i === 0) shape.moveTo(px, py);
+    else shape.lineTo(px, py);
+  }
+  const windowHole = new THREE.Path();
+  for (let i = 0; i <= segs; i++) {
+    const t = (i / segs) * Math.PI * 2;
+    const [wx, wy] = epitrochoidPoint(t, 0.14);
+    if (i === 0) windowHole.moveTo(wx, wy);
+    else windowHole.lineTo(wx, wy);
+  }
+  shape.holes.push(windowHole);
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.12,
+    bevelEnabled: true,
+    bevelSegments: 1,
+    steps: 1,
+    bevelSize: 0.01,
+    bevelThickness: 0.01,
+    curveSegments: 48
+  });
+  geo.translate(0, 0, -0.06);
   return geo;
 }
 function buildStructure(reg, kit) {
-  const { topSurfaceY, mastZ, gearboxTopY } = SPEC;
+  const { topSurfaceY, depth } = SPEC;
   const baseGroup = reg.groups.get("base.group")?.group || reg.root;
 
-  // 1. Central Main Rotor Gearbox Housing (Cutaway facing +Z)
-  const gearboxGroup = reg.group("gearbox.group", {
-    parent: baseGroup,
-    pos: [0, 0, mastZ],
-    stage: "structure"
-  });
-
-  const flangeH = 0.09;
-  const flangeGeo = buildAnnularRingGeometry(0.18, 0.70, flangeH, 32);
-  reg.part("gearbox.flange", flangeGeo, {
-    parent: gearboxGroup,
-    pos: [0, topSurfaceY + 0.012, 0],
-    ramp: "lo",
-    outline: "lo",
-    crease: "faint",
-    mountOn: "base.plate"
-  });
-
-  for (let i = 0; i < 8; i++) {
-    const a = (i / 8) * Math.PI * 2 + Math.PI / 8;
-    const bx = Math.cos(a) * 0.62;
-    const bz = Math.sin(a) * 0.62;
-    reg.detail(
-      `gearbox.flange.bolt.${i}`,
-      makeScrewDetail(bx, topSurfaceY + flangeH + 0.026, bz, 0.036, "y", kit),
-      { parent: gearboxGroup }
-    );
-  }
-
-  // Hollow C-shaped cutaway transmission housing (-0.18*pi .. +1.12*pi leaves +Z open)
-  const housingBaseY = topSurfaceY + flangeH + 0.024;
-  const housingH = 0.78;
-  const housingGeo = buildCutawayArcGeometry(0.47, 0.59, housingH, -0.18 * Math.PI, 1.12 * Math.PI, 44);
-  reg.part("gearbox.housing", housingGeo, {
-    parent: gearboxGroup,
-    pos: [0, housingBaseY, 0],
-    ramp: "mid",
-    outline: "hi",
-    crease: "lo",
-    creaseAngle: 24,
-    outlineWidth: 0.019,
-    mountOn: "gearbox.flange",
-    allowOverlap: ["gearbox.topDeck", "gearbox.inputBoss", "gearbox.frontCover"]
-  });
-
-  // Cutaway front cover arc (hidden in default cutaway mode; shown when C=0)
-  const frontCoverGeo = buildCutawayArcGeometry(0.47, 0.59, housingH, -0.88 * Math.PI, -0.18 * Math.PI, 28);
-  reg.part("gearbox.frontCover", frontCoverGeo, {
-    parent: gearboxGroup,
-    pos: [0, housingBaseY, 0],
-    ramp: "mid",
-    outline: "mid",
-    crease: "lo",
-    cutawayHide: true,
-    mountOn: "gearbox.flange",
-    allowOverlap: ["gearbox.housing", "gearbox.topDeck"]
-  });
-
-  // Cooling fin loops around the rear housing arc
-  [0.18, 0.39, 0.60].forEach((fy, idx) => {
-    const finPts = [];
-    for (let i = 0; i <= 36; i++) {
-      const a = -0.18 * Math.PI + (i / 36) * (1.30 * Math.PI);
-      finPts.push(new THREE.Vector3(Math.cos(a) * 0.605, housingBaseY + fy, -Math.sin(a) * 0.605));
-    }
-    reg.detail(
-      `gearbox.fin.${idx}`,
-      new THREE.Line(new THREE.BufferGeometry().setFromPoints(finPts), kit.lineMaterials.lo),
-      { parent: gearboxGroup }
-    );
-  });
-
-  // Upper bearing collar & top deck
-  const topDeckH = 0.12;
-  const topDeckY = housingBaseY + housingH + 0.012;
-  const topDeckGeo = buildAnnularRingGeometry(0.18, 0.63, topDeckH, 36);
-  reg.part("gearbox.topDeck", topDeckGeo, {
-    parent: gearboxGroup,
-    pos: [0, topDeckY, 0],
-    ramp: "mid",
-    outline: "hi",
-    crease: "lo",
-    mountOn: "gearbox.housing",
-    allowOverlap: ["mast.shaft", "gearbox.frontCover", "gearbox.mastBearing"]
-  });
-
-  // Top bearing race brass ring
-  const bearingGeo = buildAnnularRingGeometry(0.16, 0.27, 0.055, 28);
-  reg.part("gearbox.mastBearing", bearingGeo, {
-    parent: gearboxGroup,
-    pos: [0, topDeckY + topDeckH + 0.012, 0],
-    ramp: "brass",
-    outline: "mid",
-    crease: "faint",
-    mountOn: "gearbox.topDeck",
-    allowOverlap: ["mast.shaft"]
-  });
-
-  // Stationary anti-rotation scissors anchor bracket on rear-left of topDeck
-  const bracketGeo = new THREE.BoxGeometry(0.16, 0.12, 0.16);
-  const bracketPart = reg.part("scissor.baseBracket", bracketGeo, {
-    parent: gearboxGroup,
-    pos: [-0.36, topDeckY + topDeckH + 0.07, -0.28],
-    ramp: "lo",
-    outline: "mid",
-    crease: "lo",
-    mountOn: "gearbox.topDeck"
-  });
-  reg.anchor("scissor.fixedPivot", 0, 0.04, 0, bracketPart);
-
-  // Input drive boss on +X side of gearbox housing
-  const inputY = housingBaseY + 0.34;
-  const inputBossGeo = buildCylinderGeometry(0.16, 0.19, 0.24, { segments: 24, axis: "x" });
-  reg.part("gearbox.inputBoss", inputBossGeo, {
-    parent: gearboxGroup,
-    pos: [0.60, inputY, 0],
-    ramp: "mid",
-    outline: "mid",
-    crease: "lo",
-    mountOn: "gearbox.housing",
-    allowOverlap: ["gearbox.inputShaft", "gearbox.pinion"]
-  });
-
-  // 2. Electric Drive Motor Pedestal on +X side of bedplate (drives 4:1 bevel gearbox)
-  const [motorX, , motorZ] = ANCHORS.motorMount;
-  const motorGroup = reg.group("motor.group", {
-    parent: baseGroup,
-    pos: [motorX, 0, motorZ],
-    stage: "structure"
-  });
-
-  const motorFootGeo = new THREE.BoxGeometry(0.56, 0.10, 0.48);
-  reg.part("motor.foot", motorFootGeo, {
-    parent: motorGroup,
-    pos: [0, topSurfaceY + 0.05, 0],
-    ramp: "lo",
-    outline: "lo",
-    crease: "faint",
-    mountOn: "base.plate"
-  });
-
-  const motorWebGeo = new THREE.BoxGeometry(0.42, 0.30, 0.30);
-  reg.part("motor.pedestal", motorWebGeo, {
-    parent: motorGroup,
-    pos: [0, topSurfaceY + 0.24, 0],
-    ramp: "mid",
-    outline: "lo",
-    crease: "lo",
-    mountOn: "motor.foot"
-  });
-
-  const motorStatorGeo = buildCylinderGeometry(0.24, 0.24, 0.56, { segments: 28, axis: "x" });
-  reg.part("motor.housing", motorStatorGeo, {
-    parent: motorGroup,
-    pos: [0, inputY, 0],
-    ramp: "lo",
-    outline: "mid",
-    crease: "lo",
-    mountOn: "motor.pedestal",
-    allowOverlap: ["gearbox.inputShaft"]
-  });
-
-  [-0.18, -0.06, 0.06, 0.18].forEach((mx, idx) => {
-    const finRing = makeRingLine(0.244, 28, kit, "lo");
-    finRing.rotation.y = Math.PI / 2;
-    finRing.position.set(mx, inputY, 0);
-    reg.detail(`motor.fin.${idx}`, finRing, { parent: motorGroup });
-  });
-
-  const motorCapGeo = buildCylinderGeometry(0.19, 0.24, 0.14, { segments: 24, axis: "x" });
-  reg.part("motor.endCap", motorCapGeo, {
-    parent: motorGroup,
-    pos: [0.35, inputY, 0],
-    ramp: "mid",
-    outline: "mid",
-    crease: "faint",
-    mountOn: "motor.housing"
-  });
-
-  // 3. Three 120° CCPM Servo Actuators mounted around the gearbox on base.plate
-  SERVO_ANGLES.forEach((ang, idx) => {
-    const sx = Math.cos(ang) * SPEC.servoMountR;
-    const sz = mastZ + Math.sin(ang) * SPEC.servoMountR;
-
-    const servoGroup = reg.group(`servo.${idx}`, {
+  // 1. Support Pedestals (Rear & Front)
+  [
+    { tag: "rear", zPos: -0.98 },
+    { tag: "front", zPos: 0.98 }
+  ].forEach(({ tag, zPos }) => {
+    const pedGroup = reg.group(`pedestal.${tag}`, {
       parent: baseGroup,
-      pos: [sx, 0, sz],
+      pos: [0, 0, zPos],
       stage: "structure"
     });
 
-    const baseFlangeGeo = new THREE.BoxGeometry(0.28, 0.08, 0.28);
-    reg.part(`servo.base.${idx}`, baseFlangeGeo, {
-      parent: servoGroup,
-      pos: [0, topSurfaceY + 0.04, 0],
-      ramp: "lo",
+    const flangeGeo = new THREE.BoxGeometry(1.75, 0.11, 0.42);
+    reg.part(`pedestal.${tag}.flange`, flangeGeo, {
+      parent: pedGroup,
+      pos: [0, topSurfaceY + 0.055, 0],
+      ramp: "mid",
       outline: "lo",
       crease: "faint",
       mountOn: "base.plate"
     });
 
-    const bodyH = 0.66;
-    const bodyGeo = buildCylinderGeometry(0.11, 0.12, bodyH, { segments: 22, axis: "y" });
-    const bodyPart = reg.part(`servo.body.${idx}`, bodyGeo, {
-      parent: servoGroup,
-      pos: [0, topSurfaceY + 0.08 + bodyH * 0.5, 0],
+    [-0.72, -0.35, 0.35, 0.72].forEach((bx, bIdx) => {
+      reg.detail(
+        `pedestal.${tag}.bolt.${bIdx}`,
+        makeScrewDetail(bx, topSurfaceY + 0.112, 0, 0.048, "y", kit),
+        { parent: pedGroup }
+      );
+    });
+
+    const colShape = new THREE.Shape();
+    colShape.moveTo(-0.58, topSurfaceY + 0.11);
+    colShape.lineTo(0.58, topSurfaceY + 0.11);
+    colShape.lineTo(0.34, -0.18);
+    colShape.lineTo(-0.34, -0.18);
+    colShape.closePath();
+
+    const colGeo = new THREE.ExtrudeGeometry(colShape, { depth: 0.22, bevelEnabled: false });
+    colGeo.translate(0, 0, -0.11);
+    reg.part(`pedestal.${tag}.column`, colGeo, {
+      parent: pedGroup,
       ramp: "mid",
       outline: "mid",
       crease: "lo",
-      mountOn: `servo.base.${idx}`,
-      allowOverlap: [`servo.rod.${idx}`]
+      mountOn: `pedestal.${tag}.flange`
     });
 
-    const glandGeo = buildCylinderGeometry(0.085, 0.105, 0.08, { segments: 20, axis: "y" });
-    reg.part(`servo.gland.${idx}`, glandGeo, {
-      parent: servoGroup,
-      pos: [0, topSurfaceY + 0.08 + bodyH + 0.04, 0],
+    const saddleGeo = buildCylinderGeometry(0.38, 0.38, 0.28, { segments: 28, axis: "z" });
+    reg.part(`pedestal.${tag}.saddle`, saddleGeo, {
+      parent: pedGroup,
+      ramp: "mid",
+      outline: "mid",
+      crease: "lo",
+      mountOn: `pedestal.${tag}.column`,
+      allowOverlap: ["shaft.main", "rear.plate", "front.cover", "shaft.rearWeight", "shaft.frontWeight"]
+    });
+  });
+
+  // 2. Main Epitrochoid Stator Housing
+  const statorGroup = reg.group("stator.group", { stage: "structure" });
+  const housingGeo = buildEpitrochoidHousingGeometry(depth);
+  reg.part("stator.housing", housingGeo, {
+    parent: statorGroup,
+    ramp: "mid",
+    outline: "hi",
+    crease: "lo",
+    creaseAngle: 22,
+    outlineWidth: 0.02,
+    clippable: true,
+    mountOn: "ground",
+    allowOverlap: ["rear.plate", "front.cover", "shaft.main", "shaft.journal", "rear.statGear"]
+  });
+
+  // Cooling fin loops around housing perimeter
+  [-0.22, 0, 0.22].forEach((fz, idx) => {
+    const finPts = [];
+    const segs = 96;
+    for (let i = 0; i <= segs; i++) {
+      const t = (i / segs) * Math.PI * 2;
+      const [fx, fy] = epitrochoidPoint(t, 0.435);
+      finPts.push(new THREE.Vector3(fx, fy, fz));
+    }
+    const finLoop = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(finPts), kit.lineMaterials.lo);
+    reg.detail(`stator.fin.${idx}`, finLoop, { parent: statorGroup });
+  });
+
+  // Pressure tap anchor on housing upper-left lobe
+  reg.anchor("stator.pressure.port", -1.35, 0.85, -0.18, statorGroup, {
+    dir: [-0.78, 0.62, 0]
+  });
+
+  // 3. Intake Manifold (top-left lobe, pointing radially up-left)
+  const [inX, inY] = epitrochoidPoint(2.42, 0.42);
+  const intakeGroup = reg.group("stator.intake", {
+    parent: statorGroup,
+    pos: [inX - 0.14, inY + 0.14, 0],
+    rot: [0, 0, 0.68],
+    stage: "structure"
+  });
+
+  const intakeTubeGeo = buildCylinderGeometry(0.22, 0.2, 0.62, { segments: 24, axis: "y" });
+  reg.part("stator.intake.tube", intakeTubeGeo, {
+    parent: intakeGroup,
+    ramp: "mid",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "stator.housing"
+  });
+
+  const intakeFlangeGeo = new THREE.BoxGeometry(0.64, 0.09, 0.62);
+  reg.part("stator.intake.flange", intakeFlangeGeo, {
+    parent: intakeGroup,
+    pos: [0, 0.31, 0],
+    ramp: "hi",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "stator.intake.tube"
+  });
+
+  const intakeBore = new THREE.Mesh(new THREE.CircleGeometry(0.16, 20), kit.dotMaterials.dot);
+  intakeBore.rotation.x = -Math.PI / 2;
+  intakeBore.position.set(0, 0.358, 0);
+  reg.detail("stator.intake.bore", intakeBore, { parent: intakeGroup });
+  reg.anchor("port.intake", 0, 0.35, 0, intakeGroup, { dir: [0, 1, 0] });
+
+  // 4. Exhaust Manifold (bottom-left lobe, pointing radially down-left)
+  const [exX, exY] = epitrochoidPoint(3.62, 0.42);
+  const exhaustGroup = reg.group("stator.exhaust", {
+    parent: statorGroup,
+    pos: [exX - 0.16, exY - 0.08, 0],
+    rot: [0, 0, 1.98],
+    stage: "structure"
+  });
+
+  const exhTubeGeo = buildCylinderGeometry(0.21, 0.19, 0.66, { segments: 24, axis: "y" });
+  reg.part("stator.exhaust.tube", exhTubeGeo, {
+    parent: exhaustGroup,
+    ramp: "lo",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "stator.housing"
+  });
+
+  const exhCollarGeo = buildCylinderGeometry(0.26, 0.26, 0.18, { segments: 24, axis: "y" });
+  reg.part("stator.exhaust.collar", exhCollarGeo, {
+    parent: exhaustGroup,
+    pos: [0, 0.12, 0],
+    ramp: "copper",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "stator.exhaust.tube"
+  });
+
+  const exhFlangeGeo = buildCylinderGeometry(0.32, 0.32, 0.08, { segments: 24, axis: "y" });
+  reg.part("stator.exhaust.flange", exhFlangeGeo, {
+    parent: exhaustGroup,
+    pos: [0, 0.33, 0],
+    ramp: "mid",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "stator.exhaust.tube"
+  });
+  reg.anchor("port.exhaust", 0, 0.35, 0, exhaustGroup, { dir: [0, 1, 0] });
+
+  // 5. Dual Spark Plugs (Leading & Trailing) with registered terminal anchors
+  [
+    { key: "leading", angleParam: -0.28, yOffset: -0.05 },
+    { key: "trailing", angleParam: 0.28, yOffset: 0.05 }
+  ].forEach(({ key, angleParam, yOffset }) => {
+    const [wx, wy] = epitrochoidPoint(angleParam, 0.38);
+    const spGroup = reg.group(`plug.${key}`, {
+      parent: statorGroup,
+      pos: [wx + 0.05, wy + yOffset, 0],
+      rot: [0, 0, -Math.PI / 2 + angleParam * 0.35],
+      stage: "structure"
+    });
+
+    const hexGeo = buildCylinderGeometry(0.14, 0.14, 0.18, { segments: 6, axis: "y" });
+    reg.part(`plug.${key}.hex`, hexGeo, {
+      parent: spGroup,
+      pos: [0, 0.09, 0],
+      ramp: "mid",
+      outline: "mid",
+      crease: "lo",
+      mountOn: "stator.housing",
+      allowOverlap: [`plug.${key === "leading" ? "trailing" : "leading"}.hex`]
+    });
+
+    const insGeo = buildCylinderGeometry(0.1, 0.105, 0.34, { segments: 20, axis: "y" });
+    reg.part(`plug.${key}.insulator`, insGeo, {
+      parent: spGroup,
+      pos: [0, 0.35, 0],
+      ramp: "hi",
+      outline: "mid",
+      crease: "faint",
+      mountOn: `plug.${key}.hex`
+    });
+
+    [0.26, 0.35, 0.44].forEach((ry, rIdx) => {
+      const rLoop = makeRingLine(0.104, 20, kit, "lo");
+      rLoop.rotation.x = Math.PI / 2;
+      rLoop.position.y = ry;
+      reg.detail(`plug.${key}.rib.${rIdx}`, rLoop, { parent: spGroup });
+    });
+
+    const termGeo = buildCylinderGeometry(0.048, 0.048, 0.11, { segments: 16, axis: "y" });
+    reg.part(`plug.${key}.terminal`, termGeo, {
+      parent: spGroup,
+      pos: [0, 0.56, 0],
       ramp: "brass",
       outline: "mid",
       crease: "faint",
-      mountOn: `servo.body.${idx}`,
-      allowOverlap: [`servo.rod.${idx}`]
+      mountOn: `plug.${key}.insulator`
     });
 
-    // Anchor at top of servo gland for piston rod articulation
-    reg.anchor(`servo.${idx}.glandTop`, 0, topSurfaceY + 0.08 + bodyH + 0.06, 0, servoGroup);
-
-    // Mechanical Bowden control conduit fitting pointing cleanly toward pilot input
-    const portAngs = [0.0, Math.PI * 0.86, Math.PI * 0.30];
-    const tubeNames = ["tube.cyclicPitch", "tube.collective", "tube.cyclicRoll"];
-    const pAng = portAngs[idx];
-    const portPart = reg.part(
-      `servo.port.${idx}`,
-      buildCylinderGeometry(0.036, 0.036, 0.07, { segments: 12, axis: "x" }),
-      {
-        parent: bodyPart,
-        pos: [Math.cos(pAng) * 0.12, -0.18, Math.sin(pAng) * 0.12],
-        rot: [0, -pAng, 0],
-        ramp: "brass",
-        outline: "lo",
-        crease: "faint",
-        mountOn: `servo.body.${idx}`,
-        allowOverlap: [tubeNames[idx]]
-      }
-    );
-    reg.anchor(`servo.${idx}.ctrlPort`, 0.025, 0, 0, portPart, {
-      dir: [1, 0.06, 0]
+    const bootGeo = buildCylinderGeometry(0.075, 0.065, 0.12, { segments: 16, axis: "y" });
+    reg.part(`plug.${key}.boot`, bootGeo, {
+      parent: spGroup,
+      pos: [0, 0.62, 0],
+      ramp: "lo",
+      outline: "lo",
+      crease: "faint",
+      mountOn: `plug.${key}.terminal`
     });
 
-    const ring = makeRingLine(0.122, 24, kit, "lo");
-    ring.rotation.x = Math.PI / 2;
-    ring.position.y = topSurfaceY + 0.08 + bodyH * 0.5;
-    reg.detail(`servo.band.${idx}`, ring, { parent: servoGroup });
+    // Register exact 3D tip anchor so mechanism.mjs can route spark cables without magic numbers
+    reg.anchor(`plug.${key}.tip`, 0, 0.68, 0, spGroup, { dir: [0, 1, 0] });
   });
 
-  reg.anchor("gearbox.top", 0, gearboxTopY, 0, gearboxGroup);
+  // 6. Rear Endplate & Stationary 34-Tooth Phasing Gear
+  const rearPlateGroup = reg.group("rear.group", {
+    explode: [0, 0, -0.95],
+    stage: "structure"
+  });
+
+  reg.part("rear.plate", buildRearEndPlateGeometry(), {
+    parent: rearPlateGroup,
+    pos: [0, 0, -depth * 0.5 - 0.09],
+    ramp: "lo",
+    outline: "mid",
+    crease: "lo",
+    clippable: true,
+    mountOn: "stator.housing",
+    allowOverlap: ["shaft.main", "shaft.rearWeight"]
+  });
+
+  const statPitchR = 2 * SPEC.e;
+  const statGearGeo = buildExternalGearGeometry(statPitchR, SPEC.stationaryTeeth, 0.036, 0.34, 0.56);
+  reg.part("rear.statGear", statGearGeo, {
+    parent: rearPlateGroup,
+    pos: [0, 0, -depth * 0.25],
+    ramp: "brass",
+    outline: "mid",
+    crease: "lo",
+    creaseAngle: 35,
+    mountOn: "rear.plate",
+    allowOverlap: [
+      "rotor.body",
+      "rotor.internalGear",
+      "shaft.main",
+      "shaft.journal",
+      "pedestal.rear.saddle",
+      "pedestal.rear.column"
+    ]
+  });
+  reg.anchor("gear.mesh.point", statPitchR, 0, -depth * 0.25, rearPlateGroup);
+
+  // 7. Front Cutaway Cover Ring
+  const frontCoverGroup = reg.group("front.group", {
+    explode: [0, 0, 1.12],
+    stage: "structure"
+  });
+
+  reg.part("front.cover", buildFrontCoverRingGeometry(), {
+    parent: frontCoverGroup,
+    pos: [0, 0, depth * 0.5 + 0.07],
+    ramp: "mid",
+    outline: "mid",
+    crease: "lo",
+    clippable: true,
+    mountOn: "stator.housing",
+    allowOverlap: ["shaft.main", "shaft.frontWeight"]
+  });
+
+  // 8. Perimeter Tie Rods & Front Hex Nuts
+  const tieBoltsGroup = reg.group("tieBolts.group", {
+    explode: [0, 0, 1.38],
+    stage: "structure"
+  });
+
+  const tieRodAngles = [0.38, 1.05, 1.95, 2.88, 3.4, 4.32, 5.22, 5.9];
+  tieRodAngles.forEach((t, idx) => {
+    const [bx, by] = epitrochoidPoint(t, 0.29);
+    const rodGeo = buildCylinderGeometry(0.036, 0.036, depth + 0.44, { segments: 12, axis: "z" });
+    reg.part(`stator.tieRod.${idx}`, rodGeo, {
+      parent: statorGroup,
+      pos: [bx, by, 0],
+      ramp: "mid",
+      outline: "lo",
+      noCrease: true,
+      outlineWidth: 0.01,
+      mountOn: "stator.housing",
+      detail: true
+    });
+
+    const nutGeo = buildCylinderGeometry(0.072, 0.072, 0.07, { segments: 6, axis: "z" });
+    reg.part(`tieBolts.nut.${idx}`, nutGeo, {
+      parent: tieBoltsGroup,
+      pos: [bx, by, depth * 0.5 + 0.16],
+      ramp: "hi",
+      outline: "mid",
+      crease: "lo",
+      outlineWidth: 0.012,
+      mountOn: "front.cover",
+      detail: true
+    });
+  });
 }
 
 
@@ -4124,279 +3959,170 @@ function buildStructure(reg, kit) {
 
 
 
-function buildHubYokeGeometry() {
+function buildWankelRotorGeometry() {
+  const R = SPEC.R - 0.025;
+  const bow = 0.255;
   const shape = new THREE.Shape();
-  const armR = SPEC.flapHingeR + 0.04;
-  const armHalfW = 0.11;
-  const hubR = 0.21;
-  const segs = 36;
+  const segsPerSide = 44;
 
-  // Build 3-arm rounded star yoke in XZ (shape XY -> rotateX(-PI/2) -> XZ)
-  const pts = [];
-  for (let i = 0; i < segs; i++) {
-    const a = (i / segs) * Math.PI * 2;
-    // Smooth 3-lobed radius profile aligned with 0, 120, 240 deg
-    const lobe = Math.pow(Math.max(0, Math.cos(1.5 * a)), 4);
-    const r = hubR + (armR - hubR) * lobe + armHalfW * 0.15 * Math.cos(3 * a);
-    pts.push([Math.cos(a) * r, Math.sin(a) * r]);
-  }
-  pts.forEach(([x, y], idx) => {
-    if (idx === 0) shape.moveTo(x, y);
-    else shape.lineTo(x, y);
-  });
-  shape.closePath();
+  for (let k = 0; k < 3; k++) {
+    const a0 = (k * 2 * Math.PI) / 3;
+    const a1 = ((k + 1) * 2 * Math.PI) / 3;
+    const midA = a0 + Math.PI / 3;
 
-  const bore = new THREE.Path();
-  bore.absarc(0, 0, 0.135, 0, Math.PI * 2, true);
-  shape.holes.push(bore);
+    const p0 = [R * Math.cos(a0), R * Math.sin(a0)];
+    const p1 = [R * Math.cos(a1), R * Math.sin(a1)];
+    const normal = [Math.cos(midA), Math.sin(midA)];
 
-  const geo = new THREE.ExtrudeGeometry(shape, {
-    depth: 0.14,
-    bevelEnabled: true,
-    bevelSegments: 1,
-    steps: 1,
-    bevelSize: 0.012,
-    bevelThickness: 0.012,
-    curveSegments: 24
-  });
-  geo.rotateX(-Math.PI / 2);
-  geo.translate(0, -0.07, 0);
-  return geo;
-}
-
-function buildAirfoilBladeGeometry(spanLen, chord = 0.26, thickness = 0.052) {
-  // Cambered NACA-style cross-section in XY; rotateY(+PI/2) maps -X_shape -> +Z_leading
-  const shape = new THREE.Shape();
-  const halfC = chord * 0.5;
-  const steps = 20;
-
-  // Upper surface from leading edge (-halfC -> +Z_local) to trailing edge (+halfC -> -Z_local)
-  for (let i = 0; i <= steps; i++) {
-    const u = i / steps; // 0 = LE, 1 = TE
-    const x = -halfC + u * chord;
-    const yt = 5 * thickness * (
-      0.2969 * Math.sqrt(u) - 0.126 * u - 0.3516 * u * u + 0.2843 * u * u * u - 0.1015 * u * u * u * u
-    );
-    const camber = 0.014 * Math.sin(u * Math.PI);
-    const y = camber + yt;
-    if (i === 0) shape.moveTo(x, y);
-    else shape.lineTo(x, y);
-  }
-  // Lower surface back from TE to LE
-  for (let i = steps - 1; i >= 0; i--) {
-    const u = i / steps;
-    const x = -halfC + u * chord;
-    const yt = 5 * thickness * (
-      0.2969 * Math.sqrt(u) - 0.126 * u - 0.3516 * u * u + 0.2843 * u * u * u - 0.1015 * u * u * u * u
-    );
-    const camber = 0.014 * Math.sin(u * Math.PI);
-    const y = camber - yt * 0.72;
-    shape.lineTo(x, y);
+    for (let s = 0; s < segsPerSide; s++) {
+      const u = s / segsPerSide;
+      const lx = p0[0] * (1 - u) + p1[0] * u;
+      const ly = p0[1] * (1 - u) + p1[1] * u;
+      const arcOffset = Math.sin(u * Math.PI) * bow;
+      const pocket =
+        u > 0.30 && u < 0.70
+          ? -0.042 * Math.pow(Math.sin(((u - 0.30) / 0.40) * Math.PI), 1.6)
+          : 0;
+      const px = lx + normal[0] * (arcOffset + pocket);
+      const py = ly + normal[1] * (arcOffset + pocket);
+      if (k === 0 && s === 0) shape.moveTo(px, py);
+      else shape.lineTo(px, py);
+    }
   }
   shape.closePath();
 
+  const boreR = 3 * SPEC.e + 0.035;
+  const borePath = new THREE.Path();
+  borePath.absarc(0, 0, boreR, 0, Math.PI * 2, false);
+  shape.holes.push(borePath);
+
+  for (let k = 0; k < 3; k++) {
+    const a = (k * 2 * Math.PI) / 3;
+    const [hx, hy] = [0.84 * Math.cos(a), 0.84 * Math.sin(a)];
+    const pHole = new THREE.Path();
+    pHole.absarc(hx, hy, 0.13, 0, Math.PI * 2, false);
+    shape.holes.push(pHole);
+  }
+
   const geo = new THREE.ExtrudeGeometry(shape, {
-    depth: spanLen,
+    depth: SPEC.depth - 0.04,
     bevelEnabled: true,
-    bevelSegments: 1,
+    bevelSegments: 2,
     steps: 1,
-    bevelSize: 0.006,
-    bevelThickness: 0.008,
-    curveSegments: 16
+    bevelSize: 0.015,
+    bevelThickness: 0.015,
+    curveSegments: 64
   });
-  // Extrude is along +Z_shape; rotateY(+PI/2) maps +Z_shape -> +X_span, -X_shape -> +Z_leading
-  geo.rotateY(Math.PI / 2);
+  geo.translate(0, 0, -(SPEC.depth - 0.04) * 0.5);
   return geo;
 }
 function buildSubject(reg, kit) {
-  const { numBlades, rotorR, flapHingeR, featherR, pitchHornZ, mastZ, hubY } = SPEC;
+  const { R, e, depth, rotorTeeth } = SPEC;
 
-  const hubAssembly = reg.group("hub.assembly", {
-    pos: [0, 0, mastZ],
+  const rotorOrbitGroup = reg.group("rotor.orbit", {
+    explode: [0, 0, 0.25],
     stage: "subject"
   });
 
-  const hubSpinGroup = reg.group("hub.spin", {
-    parent: hubAssembly,
+  const rotorSpinGroup = reg.group("rotor.spin", {
+    parent: rotorOrbitGroup,
     stage: "subject"
   });
 
-  // 1. Central 3-arm Articulated Rotor Hub Yoke
-  reg.part("hub.yoke", buildHubYokeGeometry(), {
-    parent: hubSpinGroup,
-    pos: [0, hubY, 0],
-    ramp: "hi",
-    outline: "hi",
-    crease: "lo",
-    outlineWidth: 0.019,
+  // 1. Primary Lit Subject: Triangular Wankel Rotor
+  reg.part("rotor.body", buildWankelRotorGeometry(), {
+    parent: rotorSpinGroup,
+    ramp: "lit",
+    outline: "lit",
+    crease: "lit",
+    creaseAngle: 24,
+    outlineWidth: 0.022,
+    topBias: 0.55,
     mountOn: "coaxial",
-    allowOverlap: [
-      "mast.shaft",
-      "hub.cap",
-      "blade.flapPin.0",
-      "blade.flapPin.1",
-      "blade.flapPin.2",
-      "blade.clevis.0",
-      "blade.clevis.1",
-      "blade.clevis.2"
-    ]
+    insideBoreOf: "stator.housing",
+    boreClearanceFn: epitrochoidBoreClearance,
+    allowOverlap: ["rear.statGear", "shaft.main", "shaft.journal", "rear.plate", "front.cover"]
   });
 
-  // 2. Domed Brass Rotor Mast Cap & Retention Bolts
-  const capGeo = buildCylinderGeometry(0.14, 0.20, 0.11, { segments: 24, axis: "y" });
-  reg.part("hub.cap", capGeo, {
-    parent: hubSpinGroup,
-    pos: [0, hubY + 0.13, 0],
-    ramp: "brass",
-    outline: "hi",
+  // 2. 51-Tooth Internal Phasing Gear Ring
+  const outerR = 3 * e + 0.042;
+  const pitchR = 3 * e;
+  const internalGearGeo = buildInternalGearRingGeometry(
+    outerR,
+    pitchR,
+    rotorTeeth,
+    0.034,
+    depth * 0.48,
+    -depth * 0.46
+  );
+  reg.part("rotor.internalGear", internalGearGeo, {
+    parent: rotorSpinGroup,
+    ramp: "hi",
+    outline: "lit",
     crease: "lo",
-    mountOn: "hub.yoke",
-    allowOverlap: ["mast.shaft"]
+    creaseAngle: 35,
+    outlineWidth: 0.012,
+    mountOn: "rotor.body",
+    allowOverlap: ["rear.statGear", "shaft.main", "shaft.journal", "stator.housing", "rear.plate"]
   });
 
-  for (let i = 0; i < 6; i++) {
-    const a = (i / 6) * Math.PI * 2;
-    reg.detail(
-      `hub.cap.bolt.${i}`,
-      makeScrewDetail(Math.cos(a) * 0.11, hubY + 0.188, Math.sin(a) * 0.11, 0.022, "y", kit),
-      { parent: hubSpinGroup }
-    );
-  }
+  // 3. Three Apex Seal Blades, Corner Seal Pins & Side Seal Arcs
+  const sideSealPts = [];
+  for (let k = 0; k < 3; k++) {
+    const a0 = (k * 2 * Math.PI) / 3;
+    const a1 = ((k + 1) * 2 * Math.PI) / 3;
 
-  // 3. Three Articulated Rotor Blades (Flapping Hinge -> Feathering Cuff -> Pitch Horn -> Airfoil)
-  const airfoilSpan = rotorR - featherR - 0.34;
-  const airfoilGeo = buildAirfoilBladeGeometry(airfoilSpan, 0.26, 0.052);
-  const tipCapGeo = buildAirfoilBladeGeometry(0.14, 0.23, 0.044);
-
-  for (let k = 0; k < numBlades; k++) {
-    const azimAngle = (k * 2 * Math.PI) / numBlades;
-    const bladeAzimGroup = reg.group(`blade.azimuth.${k}`, {
-      parent: hubSpinGroup,
-      rot: [0, azimAngle, 0],
-      stage: "subject"
-    });
-
-    // Horizontal brass flapping (coning) hinge pin
-    const flapPinGeo = buildCylinderGeometry(0.032, 0.032, 0.21, { segments: 16, axis: "z" });
-    reg.part(`blade.flapPin.${k}`, flapPinGeo, {
-      parent: bladeAzimGroup,
-      pos: [flapHingeR, hubY, 0],
-      ramp: "brass",
-      outline: "mid",
-      crease: "faint",
-      mountOn: "hub.yoke",
-      allowOverlap: [`blade.clevis.${k}`, `blade.grip.${k}`]
-    });
-
-    // Flapping / Coning hinge group (rotates around local Z)
-    const flapGroup = reg.group(`blade.flap.${k}`, {
-      parent: bladeAzimGroup,
-      pos: [flapHingeR, hubY, 0],
-      stage: "subject"
-    });
-
-    // Articulated flapping yoke clevis
-    const clevisGeo = new THREE.BoxGeometry(0.17, 0.11, 0.14);
-    reg.part(`blade.clevis.${k}`, clevisGeo, {
-      parent: flapGroup,
-      pos: [0.06, 0, 0],
-      ramp: "mid",
-      outline: "mid",
-      crease: "lo",
-      mountOn: "hub.yoke",
-      allowOverlap: [`blade.flapPin.${k}`, `blade.grip.${k}`]
-    });
-
-    // Lead-lag elastomeric damper strut beside clevis
-    const damperGeo = buildCylinderGeometry(0.026, 0.026, 0.18, { segments: 12, axis: "x" });
-    reg.part(`blade.damper.${k}`, damperGeo, {
-      parent: flapGroup,
-      pos: [0.08, 0.01, -0.095],
-      ramp: "copper",
-      outline: "lo",
-      crease: "faint",
-      detail: true,
-      mountOn: `blade.clevis.${k}`
-    });
-
-    // Feathering / Pitch-change group (rotates around local X spanwise axis)
-    const pitchGroup = reg.group(`blade.pitch.${k}`, {
-      parent: flapGroup,
-      pos: [featherR - flapHingeR, 0, 0],
-      stage: "subject"
-    });
-
-    // Hero Lit Blade Retention Grip / Feathering Cuff
-    const gripGeo = buildCylinderGeometry(0.064, 0.072, 0.25, { segments: 20, axis: "x" });
-    reg.part(`blade.grip.${k}`, gripGeo, {
-      parent: pitchGroup,
-      pos: [0.10, 0, 0],
-      ramp: "lit",
-      outline: "lit",
-      crease: "lo",
-      outlineWidth: 0.018,
-      mountOn: `blade.clevis.${k}`,
-      allowOverlap: [`blade.pitchHorn.${k}`, `blade.airfoil.${k}`]
-    });
-
-    // Retention bolt details on grip top
-    reg.detail(
-      `blade.gripBolt.${k}`,
-      makeScrewDetail(0.16, 0.068, 0, 0.026, "y", kit),
-      { parent: pitchGroup }
-    );
-
-    // Brass Pitch Horn Arm projecting tangentially (+Z local) to meet Pitch Link
-    const hornGeo = new THREE.BoxGeometry(0.065, 0.055, pitchHornZ + 0.04);
-    reg.part(`blade.pitchHorn.${k}`, hornGeo, {
-      parent: pitchGroup,
-      pos: [0.08, -0.01, pitchHornZ * 0.5],
-      ramp: "brass",
-      outline: "mid",
-      crease: "lo",
-      mountOn: `blade.grip.${k}`,
-      allowOverlap: [`pitchLink.rod.${k}`, `pitchLink.topBall.${k}`]
-    });
-
-    // Anchor at exact pitch horn ball-joint center for Pitch Link kinematics & joint inspection
-    reg.anchor(`blade.${k}.hornBall`, 0.08, -0.01, pitchHornZ, pitchGroup);
-
-    // Hero Lit Swept Rotor Blade Airfoil
-    reg.part(`blade.airfoil.${k}`, airfoilGeo, {
-      parent: pitchGroup,
-      pos: [0.21, 0, 0],
-      ramp: "lit",
-      outline: "lit",
-      crease: "lo",
-      creaseAngle: 30,
-      outlineWidth: 0.020,
-      topBias: 0.24,
-      mountOn: `blade.grip.${k}`,
-      allowOverlap: [`blade.tipCap.${k}`]
-    });
-
-    // High-contrast swept blade tip weight cap
-    reg.part(`blade.tipCap.${k}`, tipCapGeo, {
-      parent: pitchGroup,
-      pos: [0.21 + airfoilSpan - 0.01, 0, 0],
+    const bladeGeo = new THREE.BoxGeometry(0.068, 0.036, depth - 0.01);
+    reg.part(`rotor.apexSeal.${k}`, bladeGeo, {
+      parent: rotorSpinGroup,
+      pos: [Math.cos(a0) * (R - 0.032), Math.sin(a0) * (R - 0.032), 0],
+      rot: [0, 0, a0],
       ramp: "hi",
-      outline: "lit",
+      outline: "hi",
       crease: "lo",
-      outlineWidth: 0.018,
-      mountOn: `blade.airfoil.${k}`
+      outlineWidth: 0.014,
+      mountOn: "rotor.body",
+      insideBoreOf: "stator.housing",
+      boreClearanceFn: epitrochoidBoreClearance,
+      allowOverlap: ["rear.plate", "front.cover"]
     });
 
-    // Spanwise leading-edge spar seam line along blade (+Z leading side)
-    const sparPts = [
-      new THREE.Vector3(0.22, 0.028, 0.062),
-      new THREE.Vector3(0.21 + airfoilSpan + 0.12, 0.025, 0.056)
-    ];
-    reg.detail(
-      `blade.sparLine.${k}`,
-      new THREE.Line(new THREE.BufferGeometry().setFromPoints(sparPts), kit.lineMaterials.lit),
-      { parent: pitchGroup }
+    const cPin = makeScrewDetail(
+      Math.cos(a0) * (R - 0.14),
+      Math.sin(a0) * (R - 0.14),
+      depth * 0.5 + 0.004,
+      0.052,
+      "z",
+      kit
     );
+    reg.detail(`rotor.cornerPin.${k}`, cPin, { parent: rotorSpinGroup });
+
+    const midA = a0 + Math.PI / 3;
+    const p0 = [(R - 0.14) * Math.cos(a0), (R - 0.14) * Math.sin(a0)];
+    const p1 = [(R - 0.14) * Math.cos(a1), (R - 0.14) * Math.sin(a1)];
+    const normal = [Math.cos(midA), Math.sin(midA)];
+    for (let s = 0; s < 24; s++) {
+      const u0 = s / 24;
+      const u1 = (s + 1) / 24;
+      const x0 = p0[0] * (1 - u0) + p1[0] * u0 + normal[0] * Math.sin(u0 * Math.PI) * 0.21;
+      const y0 = p0[1] * (1 - u0) + p1[1] * u0 + normal[1] * Math.sin(u0 * Math.PI) * 0.21;
+      const x1 = p0[0] * (1 - u1) + p1[0] * u1 + normal[0] * Math.sin(u1 * Math.PI) * 0.21;
+      const y1 = p0[1] * (1 - u1) + p1[1] * u1 + normal[1] * Math.sin(u1 * Math.PI) * 0.21;
+      sideSealPts.push(
+        new THREE.Vector3(x0, y0, depth * 0.5 + 0.003),
+        new THREE.Vector3(x1, y1, depth * 0.5 + 0.003)
+      );
+    }
   }
+
+  reg.detail(
+    "rotor.sideSeals",
+    new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(sideSealPts), kit.lineMaterials.lit),
+    { parent: rotorSpinGroup }
+  );
+
+  // Register anchor at Apex 0 for joint inspection
+  reg.anchor("rotor.apex.0", R - 0.02, 0, depth * 0.35, rotorSpinGroup);
 }
 
 
@@ -4404,1229 +4130,545 @@ function buildSubject(reg, kit) {
 
 
 
-const UP_VEC = new THREE.Vector3(0, 1, 0);
-const TMP_A = new THREE.Vector3();
-const TMP_B = new THREE.Vector3();
-const TMP_DIR = new THREE.Vector3();
-const TMP_QUAT = new THREE.Quaternion();
-
-function buildAnnularGeometry(rInner, rOuter, height, segs = 40) {
+function buildCounterweightGeometry() {
   const shape = new THREE.Shape();
-  shape.absarc(0, 0, rOuter, 0, Math.PI * 2, false);
-  const hole = new THREE.Path();
-  hole.absarc(0, 0, rInner, 0, Math.PI * 2, true);
-  shape.holes.push(hole);
+  shape.absarc(0, 0, 0.58, Math.PI * 0.55, Math.PI * 1.45, false);
+  shape.absarc(0, 0, 0.23, Math.PI * 1.45, Math.PI * 0.55, true);
+  shape.closePath();
   const geo = new THREE.ExtrudeGeometry(shape, {
-    depth: height,
+    depth: 0.13,
     bevelEnabled: true,
     bevelSegments: 1,
     steps: 1,
     bevelSize: 0.01,
     bevelThickness: 0.01,
-    curveSegments: segs
+    curveSegments: 28
   });
-  geo.rotateX(-Math.PI / 2);
-  geo.translate(0, -height * 0.5, 0);
-  return geo;
-}
-
-function buildArcBandGeometry(rInner, rOuter, depth, aStart, aEnd, segs = 32) {
-  const shape = new THREE.Shape();
-  for (let i = 0; i <= segs; i++) {
-    const a = aStart + (i / segs) * (aEnd - aStart);
-    const x = Math.cos(a) * rOuter;
-    const y = Math.sin(a) * rOuter;
-    if (i === 0) shape.moveTo(x, y);
-    else shape.lineTo(x, y);
-  }
-  for (let i = segs; i >= 0; i--) {
-    const a = aStart + (i / segs) * (aEnd - aStart);
-    const x = Math.cos(a) * rInner;
-    const y = Math.sin(a) * rInner;
-    shape.lineTo(x, y);
-  }
-  shape.closePath();
-
-  const geo = new THREE.ExtrudeGeometry(shape, {
-    depth,
-    bevelEnabled: true,
-    bevelSegments: 1,
-    steps: 1,
-    bevelSize: 0.008,
-    bevelThickness: 0.008,
-    curveSegments: segs
-  });
-  geo.translate(0, 0, -depth * 0.5);
-  return geo;
-}
-
-function buildProtractorBackingGeometry(radius, depth, segs = 32) {
-  const shape = new THREE.Shape();
-  shape.moveTo(-radius, 0);
-  for (let i = 0; i <= segs; i++) {
-    const a = Math.PI - (i / segs) * Math.PI;
-    shape.lineTo(Math.cos(a) * radius, Math.sin(a) * radius);
-  }
-  shape.closePath();
-
-  const geo = new THREE.ExtrudeGeometry(shape, {
-    depth,
-    bevelEnabled: true,
-    bevelSegments: 1,
-    steps: 1,
-    bevelSize: 0.008,
-    bevelThickness: 0.008,
-    curveSegments: segs
-  });
-  geo.translate(0, 0, -depth * 0.5);
+  geo.translate(0, 0, -0.065);
   return geo;
 }
 function buildMechanism(reg, kit) {
-  const {
-    topSurfaceY,
-    mastZ,
-    swashY0,
-    hubY,
-    numBlades,
-    swashServoR,
-    swashPitchR,
-    pitchHornPhase
-  } = SPEC;
-
+  const { e, depth, topSurfaceY } = SPEC;
   const baseGroup = reg.groups.get("base.group")?.group || reg.root;
-  const housingBaseY = topSurfaceY + 0.09 + 0.024;
-  const inputY = housingBaseY + 0.34;
 
-  // ---------------------------------------------------------------------------
-  // 1. Main Rotor Mast, 4:1 Bevel Drive Gears, Input Shaft & Guide Sleeve
-  // ---------------------------------------------------------------------------
-  const mastAssembly = reg.group("mast.assembly", {
-    pos: [0, 0, mastZ],
+  // 1. Bench Throttle Control Knob
+  const [knobBaseX, , knobBaseZ] = ANCHORS.knobMount;
+  const bossGeo = buildCylinderGeometry(0.32, 0.35, 0.1, { segments: 28, axis: "y" });
+  reg.part("knob.boss", bossGeo, {
+    parent: baseGroup,
+    pos: [knobBaseX, topSurfaceY + 0.05, knobBaseZ],
+    ramp: "mid",
+    outline: "lo",
+    crease: "faint",
+    mountOn: "base.plate"
+  });
+
+  const throttleKnobGroup = reg.group("knob.group", {
+    parent: baseGroup,
+    pos: [knobBaseX, topSurfaceY + 0.22, knobBaseZ],
     stage: "mechanism"
   });
 
-  const mastSpinGroup = reg.group("mast.spin", {
-    parent: mastAssembly,
+  const drumGeo = buildCylinderGeometry(0.25, 0.25, 0.24, { segments: 32, axis: "y" });
+  reg.part("knob.drum", drumGeo, {
+    parent: throttleKnobGroup,
+    ramp: "hi",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "knob.boss"
+  });
+
+  reg.detail(
+    "knob.knurl",
+    makeKnurlLines(0.25, -0.09, 0.09, 28, kit, {
+      tone: "lo",
+      pointer: { y: 0.123, z0: 0.07, z1: 0.23 }
+    }),
+    { parent: throttleKnobGroup }
+  );
+  reg.detail("knob.screw", makeScrewDetail(0, 0.123, 0, 0.07, "y", kit), {
+    parent: throttleKnobGroup
+  });
+  reg.anchor("knob.top", 0, 0.12, 0, throttleKnobGroup);
+
+  // 2. Ignition Coil Pack & Towers
+  const [coilBoxX, , coilBoxZ] = ANCHORS.coilMount;
+  const coilBoxGeo = new THREE.BoxGeometry(0.68, 0.56, 0.58);
+  reg.part("coil.box", coilBoxGeo, {
+    parent: baseGroup,
+    pos: [coilBoxX, topSurfaceY + 0.28, coilBoxZ],
+    ramp: "lo",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "base.plate"
+  });
+
+  ["leading", "trailing"].forEach((key, idx) => {
+    const towerX = coilBoxX - 0.12 + idx * 0.24;
+    const towerY = topSurfaceY + 0.63;
+    const towerZ = coilBoxZ + (idx === 0 ? 0.12 : -0.12);
+
+    const towerGeo = buildCylinderGeometry(0.065, 0.08, 0.14, { segments: 16, axis: "y" });
+    const towerPart = reg.part(`coil.tower.${idx}`, towerGeo, {
+      parent: baseGroup,
+      pos: [towerX, towerY, towerZ],
+      ramp: "copper",
+      outline: "mid",
+      crease: "faint",
+      mountOn: "coil.box",
+      allowOverlap: [`coil.tower.${idx === 0 ? 1 : 0}`]
+    });
+
+    reg.anchor(`coil.tower.${idx}.top`, 0, 0.07, 0, towerPart, { dir: [0, 1, 0] });
+
+    const plugTipWorld = reg.getAnchorWorldPos(`plug.${key}.tip`);
+    const p0y = towerY + 0.07;
+    const waypoints =
+      idx === 0
+        ? [
+            [towerX + 0.25, p0y + 0.42, towerZ * 0.72],
+            [plugTipWorld.x + 0.28, plugTipWorld.y + 0.16, towerZ * 0.35]
+          ]
+        : [
+            [towerX + 0.24, p0y + 0.65, towerZ * 0.72],
+            [plugTipWorld.x + 0.30, plugTipWorld.y - 0.32, towerZ * 0.38]
+          ];
+
+    reg.tube(`cable.spark.${key}`, `coil.tower.${idx}.top`, waypoints, `plug.${key}.tip`, {
+      parent: baseGroup,
+      radius: 0.032,
+      segments: 40,
+      leadOut: idx === 0 ? 0.18 : 0.24,
+      leadIn: 0.22,
+      ramp: idx === 0 ? "copper" : "mid",
+      outline: "lo",
+      fromPart: `coil.tower.${idx}`,
+      toPart: `plug.${key}.boot`,
+      allowOverlap: [
+        "coil.box",
+        "coil.tower.0",
+        "coil.tower.1",
+        "stator.housing",
+        `plug.${key}.terminal`,
+        `plug.${key}.insulator`,
+        `plug.${key}.hex`
+      ]
+    });
+  });
+
+  // 3. Bourdon Chamber Pressure Gauge & Capillary Tube
+  const [gaugeX, , gaugeZ] = ANCHORS.gaugeMount;
+  const postCollarGeo = buildCylinderGeometry(0.18, 0.2, 0.12, { segments: 24, axis: "y" });
+  reg.part("gauge.collar", postCollarGeo, {
+    parent: baseGroup,
+    pos: [gaugeX, topSurfaceY + 0.06, gaugeZ],
+    ramp: "lo",
+    outline: "lo",
+    crease: "faint",
+    mountOn: "base.plate"
+  });
+
+  const postGeo = buildCylinderGeometry(0.075, 0.09, 1.82, { segments: 20, axis: "y" });
+  reg.part("gauge.post", postGeo, {
+    parent: baseGroup,
+    pos: [gaugeX, topSurfaceY + 0.91, gaugeZ],
+    ramp: "mid",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "gauge.collar",
+    allowOverlap: ["base.plate", "gauge.bezel"]
+  });
+
+  reg.anchor("gauge.tap", gaugeX, topSurfaceY + 1.48, gaugeZ, baseGroup, {
+    dir: [0.85, 0.25, -0.45]
+  });
+
+  const gaugeHeadGroup = reg.group("gauge.head", {
+    parent: baseGroup,
+    pos: [gaugeX, topSurfaceY + 1.94, gaugeZ],
     stage: "mechanism"
   });
 
-  const mastBottomY = topSurfaceY + 0.14;
-  const mastTopY = hubY + 0.10;
-  const mastLen = mastTopY - mastBottomY;
-  const mastMidY = (mastBottomY + mastTopY) * 0.5;
+  const bezelGeo = buildCylinderGeometry(0.46, 0.46, 0.18, { segments: 36, axis: "z" });
+  reg.part("gauge.bezel", bezelGeo, {
+    parent: gaugeHeadGroup,
+    ramp: "hi",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "gauge.post"
+  });
+  reg.anchor("gauge.dial", 0, 0, 0.095, gaugeHeadGroup);
 
-  const mastGeo = buildCylinderGeometry(0.125, 0.125, mastLen, { segments: 28, axis: "y" });
-  reg.part("mast.shaft", mastGeo, {
-    parent: mastSpinGroup,
-    pos: [0, mastMidY, 0],
+  const dialTickPts = [];
+  for (let i = 0; i <= 20; i++) {
+    const a = -Math.PI * 0.75 + (i / 20) * (Math.PI * 1.5);
+    const rOuter = 0.37;
+    const rInner = i % 5 === 0 ? 0.27 : 0.31;
+    dialTickPts.push(
+      new THREE.Vector3(Math.sin(a) * rInner, Math.cos(a) * rInner, 0.095),
+      new THREE.Vector3(Math.sin(a) * rOuter, Math.cos(a) * rOuter, 0.095)
+    );
+  }
+  reg.detail(
+    "gauge.ticks",
+    new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(dialTickPts), kit.lineMaterials.mid),
+    { parent: gaugeHeadGroup }
+  );
+
+  const innerDialRing = makeRingLine(0.38, 32, kit, "lo");
+  innerDialRing.position.z = 0.094;
+  reg.detail("gauge.ring", innerDialRing, { parent: gaugeHeadGroup });
+
+  const needleGroup = reg.group("gauge.needle", {
+    parent: gaugeHeadGroup,
+    pos: [0, 0, 0.1],
+    stage: "mechanism"
+  });
+  const needlePts = [new THREE.Vector3(0, -0.07, 0), new THREE.Vector3(0, 0.33, 0)];
+  const needleLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(needlePts), kit.lineMaterials.lit);
+  const needleCap = new THREE.Mesh(new THREE.CircleGeometry(0.045, 16), kit.dotMaterials.lit);
+  needleCap.position.z = 0.002;
+  reg.detail("gauge.needle.line", needleLine, { parent: needleGroup });
+  reg.detail("gauge.needle.cap", needleCap, { parent: needleGroup });
+
+  reg.tag("tag-gauge", "BAR", gaugeX, topSurfaceY + 1.74, gaugeZ + 0.11);
+
+  reg.tube(
+    "tube.pressure.capillary",
+    "gauge.tap",
+    [[-1.92, 0.52, 0.22]],
+    "stator.pressure.port",
+    {
+      parent: baseGroup,
+      radius: 0.024,
+      segments: 24,
+      radialSegments: 10,
+      leadOut: 0.18,
+      leadIn: 0.18,
+      ramp: "brass",
+      outline: "lo",
+      outlineWidth: 0.01,
+      fromPart: "gauge.post",
+      toPart: "stator.housing",
+      allowOverlap: [
+        "gauge.bezel",
+        "rear.plate",
+        "front.cover",
+        "stator.intake.tube",
+        "stator.exhaust.tube",
+        "rotor.body",
+        "rotor.apexSeal.0",
+        "rotor.apexSeal.1",
+        "rotor.apexSeal.2"
+      ]
+    }
+  );
+
+  // 4. Eccentric Output Shaft, Journal, Counterweights & Timing Pulley
+  const shaftAssemblyGroup = reg.group("shaft.assembly", {
+    explode: [0, 0, 0.68],
+    stage: "mechanism"
+  });
+
+  const shaftSpinGroup = reg.group("shaft.spin", {
+    parent: shaftAssemblyGroup,
+    stage: "mechanism"
+  });
+
+  const mainShaftGeo = buildCylinderGeometry(0.18, 0.18, 2.45, { segments: 28, axis: "z" });
+  reg.part("shaft.main", mainShaftGeo, {
+    parent: shaftSpinGroup,
     ramp: "hi",
     outline: "hi",
     crease: "lo",
-    outlineWidth: 0.018,
     mountOn: "coaxial",
     allowOverlap: [
-      "gearbox.flange",
-      "gearbox.topDeck",
-      "gearbox.mastBearing",
-      "hub.yoke",
-      "hub.cap",
-      "swash.uniball",
-      "swash.lower",
-      "swash.upper"
+      "pedestal.rear.saddle",
+      "pedestal.front.saddle",
+      "pedestal.rear.column",
+      "pedestal.front.column",
+      "rear.plate",
+      "rear.statGear",
+      "stator.housing",
+      "rotor.body",
+      "rotor.internalGear",
+      "front.cover"
     ]
   });
 
-  const thrustGeo = buildCylinderGeometry(0.18, 0.19, 0.08, { segments: 24, axis: "y" });
-  reg.part("mast.thrustCollar", thrustGeo, {
-    parent: mastSpinGroup,
-    pos: [0, topSurfaceY + 0.15, 0],
+  const journalRadius = 3 * e - 0.195;
+  const journalGeo = buildCylinderGeometry(journalRadius, journalRadius, depth * 0.62, {
+    segments: 32,
+    axis: "z"
+  });
+  reg.part("shaft.journal", journalGeo, {
+    parent: shaftSpinGroup,
+    pos: [e, 0, 0.06],
     ramp: "brass",
-    outline: "mid",
-    crease: "faint",
-    mountOn: "gearbox.flange",
-    allowOverlap: ["mast.shaft"]
-  });
-
-  const crownGearGeo = buildExternalGearGeometry(0.30, 28, 0.036, 0.075, 0.42);
-  crownGearGeo.rotateX(-Math.PI / 2);
-  reg.part("mast.bevelGear", crownGearGeo, {
-    parent: mastSpinGroup,
-    pos: [0, inputY + 0.09, 0],
-    ramp: "brass",
-    outline: "mid",
-    crease: "lo",
-    creaseAngle: 35,
-    mountOn: "mast.shaft",
-    allowOverlap: ["gearbox.pinion"]
-  });
-
-  const driveCollarGeo = buildCylinderGeometry(0.18, 0.18, 0.10, { segments: 24, axis: "y" });
-  reg.part("mast.driveCollar", driveCollarGeo, {
-    parent: mastSpinGroup,
-    pos: [0, hubY - 0.28, 0],
-    ramp: "mid",
-    outline: "mid",
-    crease: "faint",
-    mountOn: "mast.shaft"
-  });
-  const mastDriveLugGeo = new THREE.BoxGeometry(0.12, 0.07, 0.09);
-  const mastDriveLug = reg.part("mast.driveLug", mastDriveLugGeo, {
-    parent: mastSpinGroup,
-    pos: [Math.cos(Math.PI / 3) * 0.20, hubY - 0.28, Math.sin(Math.PI / 3) * 0.20],
-    rot: [0, -Math.PI / 3, 0],
-    ramp: "hi",
-    outline: "mid",
-    crease: "lo",
-    mountOn: "mast.driveCollar"
-  });
-  reg.anchor("mast.drivePin", 0.05, 0, 0, mastDriveLug);
-
-  const sleeveGeo = buildCylinderGeometry(0.165, 0.165, 0.48, { segments: 24, axis: "y" });
-  reg.part("mast.guideSleeve", sleeveGeo, {
-    parent: mastSpinGroup,
-    pos: [0, swashY0, 0],
-    ramp: "copper",
-    outline: "mid",
-    crease: "faint",
-    mountOn: "mast.shaft",
-    allowOverlap: ["swash.uniball", "swash.lower", "swash.upper"]
-  });
-
-  // Horizontal Input Shaft & Bevel Pinion connecting Motor -> Gearbox
-  const [motorX] = ANCHORS.motorMount;
-  const inputShaftLen = motorX - 0.30;
-  const inputShaftGeo = buildCylinderGeometry(0.065, 0.065, inputShaftLen, { segments: 20, axis: "x" });
-  const inputSpinGroup = reg.group("input.spin", {
-    parent: mastAssembly,
-    pos: [0, inputY, 0],
-    stage: "mechanism"
-  });
-  reg.part("gearbox.inputShaft", inputShaftGeo, {
-    parent: inputSpinGroup,
-    pos: [0.30 + inputShaftLen * 0.5, 0, 0],
-    ramp: "hi",
-    outline: "mid",
-    crease: "faint",
-    mountOn: "gearbox.inputBoss",
-    allowOverlap: ["motor.housing", "gearbox.housing", "gearbox.pinion", "mast.coupling"]
-  });
-
-  const pinionGeo = buildExternalGearGeometry(0.095, 10, 0.028, 0.070, 0.45);
-  pinionGeo.rotateY(Math.PI / 2);
-  reg.part("gearbox.pinion", pinionGeo, {
-    parent: inputSpinGroup,
-    pos: [0.30, 0, 0],
-    ramp: "brass",
-    outline: "mid",
-    crease: "lo",
-    mountOn: "gearbox.inputShaft",
-    allowOverlap: ["mast.bevelGear", "gearbox.inputBoss"]
-  });
-
-  const couplingGeo = buildCylinderGeometry(0.105, 0.105, 0.16, { segments: 20, axis: "x" });
-  reg.part("mast.coupling", couplingGeo, {
-    parent: inputSpinGroup,
-    pos: [0.88, 0, 0],
-    ramp: "brass",
-    outline: "mid",
-    crease: "lo",
-    mountOn: "gearbox.inputShaft"
-  });
-
-  // ---------------------------------------------------------------------------
-  // 2. Two-Part Articulated Swashplate (Uniball + Stationary Lower + Rotating Upper)
-  // ---------------------------------------------------------------------------
-  const swashAssembly = reg.group("swash.assembly", {
-    pos: [0, swashY0, mastZ],
-    stage: "mechanism"
-  });
-
-  const swashCarrier = reg.group("swash.carrier", {
-    parent: swashAssembly,
-    stage: "mechanism"
-  });
-
-  const uniballGeo = new THREE.SphereGeometry(0.185, 24, 18);
-  reg.part("swash.uniball", uniballGeo, {
-    parent: swashCarrier,
-    pos: [0, -0.04, 0],
-    ramp: "brass",
-    outline: "mid",
-    crease: "faint",
-    noCrease: true,
-    mountOn: "mast.guideSleeve",
-    allowOverlap: ["mast.shaft", "mast.guideSleeve", "swash.lower"]
-  });
-
-  const lowerSwashGeo = buildAnnularGeometry(0.185, 0.66, 0.064, 40);
-  reg.part("swash.lower", lowerSwashGeo, {
-    parent: swashCarrier,
-    pos: [0, -0.042, 0],
-    ramp: "mid",
     outline: "hi",
     crease: "lo",
-    outlineWidth: 0.018,
-    mountOn: "swash.uniball",
-    allowOverlap: ["mast.shaft", "mast.guideSleeve"]
+    mountOn: "shaft.main",
+    allowOverlap: [
+      "rotor.body",
+      "rotor.internalGear",
+      "rear.statGear",
+      "stator.housing",
+      "front.cover",
+      "rear.plate",
+      "pedestal.front.saddle",
+      "pedestal.front.column"
+    ]
   });
 
-  SERVO_ANGLES.forEach((ang, idx) => {
-    const lugGeo = new THREE.BoxGeometry(0.26, 0.046, 0.095);
-    const lugPart = reg.part(`swash.servoLug.${idx}`, lugGeo, {
-      parent: swashCarrier,
-      pos: [Math.cos(ang) * 0.74, -0.045, Math.sin(ang) * 0.74],
-      rot: [0, -ang, 0],
-      ramp: "mid",
-      outline: "mid",
-      crease: "lo",
-      mountOn: "swash.lower",
-      allowOverlap: [`servo.rod.${idx}`, `servo.ball.${idx}`]
-    });
-    reg.anchor(`swash.servoPin.${idx}`, swashServoR - 0.74, 0, 0, lugPart);
-  });
+  const oilHole = new THREE.Mesh(new THREE.CircleGeometry(0.055, 16), kit.dotMaterials.dot);
+  oilHole.position.set(e + 0.12, 0, depth * 0.37 + 0.003);
+  reg.detail("shaft.oilHole", oilHole, { parent: shaftSpinGroup });
 
-  const antiRotLugGeo = new THREE.BoxGeometry(0.18, 0.046, 0.095);
-  const antiRotLug = reg.part("swash.antiRotLug", antiRotLugGeo, {
-    parent: swashCarrier,
-    pos: [-0.48, -0.045, -0.48],
-    rot: [0, -Math.PI * 0.75, 0],
+  reg.part("shaft.rearWeight", buildCounterweightGeometry(), {
+    parent: shaftSpinGroup,
+    pos: [0, 0, -depth * 0.5 - 0.25],
     ramp: "lo",
     outline: "mid",
     crease: "lo",
-    mountOn: "swash.lower"
-  });
-  reg.anchor("swash.antiRotPin", 0.07, 0, 0, antiRotLug);
-
-  const raceGeo = buildAnnularGeometry(0.35, 0.56, 0.036, 40);
-  reg.part("swash.bearingRace", raceGeo, {
-    parent: swashCarrier,
-    pos: [0, 0.028, 0],
-    ramp: "brass",
-    outline: "mid",
-    crease: "faint",
-    mountOn: "swash.lower"
-  });
-
-  const upperSpinGroup = reg.group("swash.upperSpin", {
-    parent: swashCarrier,
-    stage: "mechanism"
+    mountOn: "shaft.main",
+    allowOverlap: [
+      "rear.plate",
+      "rear.statGear",
+      "pedestal.rear.saddle",
+      "pedestal.rear.column",
+      "stator.housing",
+      "rotor.body",
+      "rotor.internalGear",
+      "rotor.apexSeal.0",
+      "rotor.apexSeal.1",
+      "rotor.apexSeal.2"
+    ]
   });
 
-  const upperSwashGeo = buildAnnularGeometry(0.265, 0.58, 0.060, 40);
-  reg.part("swash.upper", upperSwashGeo, {
-    parent: upperSpinGroup,
-    pos: [0, 0.098, 0],
-    ramp: "hi",
-    outline: "hi",
-    crease: "lo",
-    outlineWidth: 0.018,
-    mountOn: "swash.bearingRace",
-    allowOverlap: ["mast.shaft", "mast.guideSleeve", "swash.lower"]
-  });
-
-  for (let k = 0; k < numBlades; k++) {
-    const worldA = -((k * 2 * Math.PI) / numBlades) + pitchHornPhase;
-    const lugGeo = new THREE.BoxGeometry(0.15, 0.042, 0.085);
-    const pLug = reg.part(`swash.pitchLug.${k}`, lugGeo, {
-      parent: upperSpinGroup,
-      pos: [Math.cos(worldA) * 0.56, 0.106, Math.sin(worldA) * 0.56],
-      rot: [0, -worldA, 0],
-      ramp: "brass",
-      outline: "mid",
-      crease: "lo",
-      mountOn: "swash.upper",
-      allowOverlap: [`pitchLink.botBall.${k}`, `pitchLink.rod.${k}`]
-    });
-    reg.anchor(`swash.pitchPin.${k}`, swashPitchR - 0.56, 0.022, 0, pLug);
-  }
-
-  const driveLugGeo = new THREE.BoxGeometry(0.14, 0.042, 0.085);
-  const driveLug = reg.part("swash.driveLug", driveLugGeo, {
-    parent: upperSpinGroup,
-    pos: [Math.cos(Math.PI / 3) * 0.52, 0.106, Math.sin(Math.PI / 3) * 0.52],
-    rot: [0, -Math.PI / 3, 0],
-    ramp: "hi",
-    outline: "mid",
-    crease: "lo",
-    mountOn: "swash.upper"
-  });
-  reg.anchor("swash.drivePin", 0.05, 0.02, 0, driveLug);
-
-  // ---------------------------------------------------------------------------
-  // 3. Articulated Linkages: 3 Servo Pushrods, 3 Pitch Links, & Scissors Links
-  // ---------------------------------------------------------------------------
-  const servoRodLen = 1.15;
-  SERVO_ANGLES.forEach((_, idx) => {
-    const rodGroup = reg.group(`servo.rodGroup.${idx}`, {
-      parent: baseGroup,
-      stage: "mechanism"
-    });
-    const rodGeo = buildCylinderGeometry(0.028, 0.028, servoRodLen, { segments: 14, axis: "y" });
-    rodGeo.translate(0, -servoRodLen * 0.5, 0);
-    reg.part(`servo.rod.${idx}`, rodGeo, {
-      parent: rodGroup,
-      ramp: "hi",
-      outline: "lo",
-      crease: "faint",
-      noCrease: true,
-      mountOn: `swash.servoLug.${idx}`,
-      allowOverlap: [`swash.lower`, `swash.servoLug.${idx}`, `servo.gland.${idx}`, `servo.body.${idx}`, `servo.ball.${idx}`]
-    });
-    const ballGeo = new THREE.SphereGeometry(0.044, 14, 10);
-    reg.part(`servo.ball.${idx}`, ballGeo, {
-      parent: rodGroup,
-      ramp: "brass",
-      outline: "lo",
-      crease: "faint",
-      noCrease: true,
-      detail: true,
-      mountOn: `swash.servoLug.${idx}`
-    });
-  });
-
-  const nominalPitchLen = 1.0;
-  for (let k = 0; k < numBlades; k++) {
-    const linkGroup = reg.group(`pitchLink.group.${k}`, {
-      parent: baseGroup,
-      stage: "mechanism"
-    });
-    const botBallGeo = new THREE.SphereGeometry(0.040, 14, 10);
-    reg.part(`pitchLink.botBall.${k}`, botBallGeo, {
-      parent: linkGroup,
-      ramp: "brass",
-      outline: "lo",
-      crease: "faint",
-      noCrease: true,
-      detail: true,
-      mountOn: `swash.pitchLug.${k}`
-    });
-    const rodGeo = buildCylinderGeometry(0.026, 0.026, nominalPitchLen, { segments: 14, axis: "y" });
-    rodGeo.translate(0, nominalPitchLen * 0.5, 0);
-    reg.part(`pitchLink.rod.${k}`, rodGeo, {
-      parent: linkGroup,
-      ramp: "copper",
-      outline: "lo",
-      crease: "faint",
-      noCrease: true,
-      mountOn: `swash.pitchLug.${k}`,
-      allowOverlap: [
-        `swash.pitchLug.${k}`,
-        `swash.upper`,
-        `blade.pitchHorn.${k}`,
-        `blade.grip.${k}`,
-        `pitchLink.botBall.${k}`,
-        `pitchLink.topBall.${k}`
-      ]
-    });
-    const topBallGeo = new THREE.SphereGeometry(0.040, 14, 10);
-    reg.part(`pitchLink.topBall.${k}`, topBallGeo, {
-      parent: linkGroup,
-      pos: [0, nominalPitchLen, 0],
-      ramp: "brass",
-      outline: "lo",
-      crease: "faint",
-      noCrease: true,
-      detail: true,
-      mountOn: `blade.pitchHorn.${k}`
-    });
-  }
-
-  const driveScissorGroup = reg.group("scissors.drive", {
-    parent: baseGroup,
-    stage: "mechanism"
-  });
-  const driveArmGeo = buildCylinderGeometry(0.025, 0.025, 1.0, { segments: 12, axis: "y" });
-  driveArmGeo.translate(0, 0.5, 0);
-  reg.part("scissors.driveArm", driveArmGeo, {
-    parent: driveScissorGroup,
-    ramp: "hi",
-    outline: "lo",
-    crease: "faint",
-    noCrease: true,
-    mountOn: "swash.driveLug",
-    allowOverlap: ["swash.driveLug", "swash.upper", "mast.driveLug", "mast.driveCollar"]
-  });
-
-  // 2-Bar Stationary Anti-Rotation Scissors (arm length 0.50 covers max collective + cyclic span)
-  const scissorArmLen = 0.50;
-  const fixedLowerGroup = reg.group("scissors.fixedLower", {
-    parent: baseGroup,
-    stage: "mechanism"
-  });
-  const fixedLowerGeo = new THREE.BoxGeometry(0.048, scissorArmLen, 0.048);
-  fixedLowerGeo.translate(0, scissorArmLen * 0.5, 0);
-  reg.part("scissors.fixedLowerArm", fixedLowerGeo, {
-    parent: fixedLowerGroup,
-    ramp: "lo",
-    outline: "lo",
-    crease: "lo",
-    mountOn: "scissor.baseBracket",
-    allowOverlap: ["scissor.baseBracket", "scissors.fixedUpperArm", "scissors.kneePin"]
-  });
-
-  const fixedUpperGroup = reg.group("scissors.fixedUpper", {
-    parent: baseGroup,
-    stage: "mechanism"
-  });
-  const fixedUpperGeo = new THREE.BoxGeometry(0.044, scissorArmLen, 0.044);
-  fixedUpperGeo.translate(0, scissorArmLen * 0.5, 0);
-  reg.part("scissors.fixedUpperArm", fixedUpperGeo, {
-    parent: fixedUpperGroup,
-    ramp: "mid",
-    outline: "lo",
-    crease: "lo",
-    mountOn: "swash.antiRotLug",
-    allowOverlap: ["swash.antiRotLug", "swash.lower", "scissors.fixedLowerArm", "scissors.kneePin"]
-  });
-
-  const kneePinGeo = buildCylinderGeometry(0.036, 0.036, 0.09, { segments: 14, axis: "z" });
-  reg.part("scissors.kneePin", kneePinGeo, {
-    parent: baseGroup,
-    ramp: "brass",
-    outline: "lo",
-    crease: "faint",
-    detail: true,
-    mountOn: "scissors.fixedLowerArm"
-  });
-
-  // ---------------------------------------------------------------------------
-  // 4. 2-Axis Gimbal Cyclic Control Stick (Front-Right Apron)
-  // ---------------------------------------------------------------------------
-  const [cycX, , cycZ] = ANCHORS.cyclicMount;
-  const cyclicBaseGroup = reg.group("cyclic.baseGroup", {
-    parent: baseGroup,
-    pos: [cycX, 0, cycZ],
-    stage: "mechanism"
-  });
-
-  const cycBaseGeo = buildCylinderGeometry(0.25, 0.28, 0.09, { segments: 24, axis: "y" });
-  reg.part("cyclic.mountBase", cycBaseGeo, {
-    parent: cyclicBaseGroup,
-    pos: [0, topSurfaceY + 0.045, 0],
-    ramp: "lo",
-    outline: "lo",
-    crease: "faint",
-    mountOn: "base.plate"
-  });
-
-  [
-    [-0.17, -0.17],
-    [ 0.17, -0.17],
-    [-0.17,  0.17],
-    [ 0.17,  0.17]
-  ].forEach(([bx, bz], idx) => {
-    reg.detail(
-      `cyclic.bolt.${idx}`,
-      makeScrewDetail(bx, topSurfaceY + 0.093, bz, 0.025, "y", kit),
-      { parent: cyclicBaseGroup }
-    );
-  });
-
-  const gimbalGeo = buildCylinderGeometry(0.15, 0.17, 0.08, { segments: 20, axis: "y" });
-  reg.part("cyclic.gimbalRing", gimbalGeo, {
-    parent: cyclicBaseGroup,
-    pos: [0, topSurfaceY + 0.125, 0],
+  reg.part("shaft.frontWeight", buildCounterweightGeometry(), {
+    parent: shaftSpinGroup,
+    pos: [0, 0, depth * 0.5 + 0.28],
     ramp: "mid",
     outline: "mid",
     crease: "lo",
-    mountOn: "cyclic.mountBase"
+    mountOn: "shaft.main",
+    cutawayHide: true,
+    allowOverlap: [
+      "front.cover",
+      "pedestal.front.saddle",
+      "pedestal.front.column",
+      "stator.housing"
+    ]
   });
 
-  const bootGeo = new THREE.SphereGeometry(0.098, 18, 12);
-  reg.part("cyclic.boot", bootGeo, {
-    parent: cyclicBaseGroup,
-    pos: [0, topSurfaceY + 0.175, 0],
-    ramp: "brass",
-    outline: "mid",
-    crease: "faint",
-    noCrease: true,
-    mountOn: "cyclic.gimbalRing",
-    allowOverlap: ["cyclic.stick"]
-  });
-
-  const cyclicGroup = reg.group("cyclic.group", {
-    parent: cyclicBaseGroup,
-    pos: [0, topSurfaceY + 0.175, 0],
+  const pulleyGroup = reg.group("shaft.pulleyGroup", {
+    parent: shaftSpinGroup,
+    pos: [0, 0, 1.18],
+    cutawayHide: true,
     stage: "mechanism"
   });
 
-  const stickGeo = buildCylinderGeometry(0.035, 0.042, 0.60, { segments: 16, axis: "y" });
-  reg.part("cyclic.stick", stickGeo, {
-    parent: cyclicGroup,
-    pos: [0, 0.30, 0],
+  const pulleyGeo = buildCylinderGeometry(0.46, 0.46, 0.14, { segments: 36, axis: "z" });
+  reg.part("shaft.pulley", pulleyGeo, {
+    parent: pulleyGroup,
     ramp: "hi",
     outline: "mid",
-    crease: "faint",
-    mountOn: "cyclic.boot",
-    allowOverlap: ["cyclic.gripCollar"]
-  });
-
-  const cycCollarGeo = buildCylinderGeometry(0.060, 0.044, 0.07, { segments: 18, axis: "y" });
-  reg.part("cyclic.gripCollar", cycCollarGeo, {
-    parent: cyclicGroup,
-    pos: [0, 0.62, 0],
-    ramp: "mid",
-    outline: "mid",
-    crease: "faint",
-    mountOn: "cyclic.stick"
-  });
-
-  const cycGripGeo = buildCylinderGeometry(0.066, 0.056, 0.20, { segments: 20, axis: "y" });
-  reg.part("cyclic.grip", cycGripGeo, {
-    parent: cyclicGroup,
-    pos: [0, 0.75, 0],
-    ramp: "copper",
-    outline: "mid",
     crease: "lo",
-    mountOn: "cyclic.gripCollar"
+    mountOn: "shaft.main",
+    cutawayHide: true,
+    allowOverlap: ["pedestal.front.saddle", "pedestal.front.column"]
   });
 
-  const hatGeo = buildCylinderGeometry(0.030, 0.034, 0.045, { segments: 14, axis: "y" });
-  reg.part("cyclic.hatSwitch", hatGeo, {
-    parent: cyclicGroup,
-    pos: [0, 0.865, 0.015],
-    ramp: "brass",
-    outline: "lo",
-    crease: "faint",
-    detail: true,
-    mountOn: "cyclic.grip"
-  });
-
-  // Two conduit ports on cyclic base (roll -> servo 2, pitch -> servo 0)
-  const portRollAng = Math.PI;
-  const cycPortRoll = reg.part(
-    "cyclic.portRoll",
-    buildCylinderGeometry(0.036, 0.036, 0.08, { segments: 12, axis: "x" }),
-    {
-      parent: cyclicBaseGroup,
-      pos: [Math.cos(portRollAng) * 0.25, topSurfaceY + 0.045, Math.sin(portRollAng) * 0.25],
-      rot: [0, -portRollAng, 0],
-      ramp: "brass",
-      outline: "lo",
-      crease: "faint",
-      mountOn: "cyclic.mountBase",
-      allowOverlap: ["tube.cyclicRoll"]
-    }
-  );
-  reg.anchor("cyclic.portRoll", 0.03, 0, 0, cycPortRoll, { dir: [1, 0.06, 0] });
-
-  const portPitchAng = -Math.PI * 0.14;
-  const cycPortPitch = reg.part(
-    "cyclic.portPitch",
-    buildCylinderGeometry(0.036, 0.036, 0.08, { segments: 12, axis: "x" }),
-    {
-      parent: cyclicBaseGroup,
-      pos: [Math.cos(portPitchAng) * 0.25, topSurfaceY + 0.045, Math.sin(portPitchAng) * 0.25],
-      rot: [0, -portPitchAng, 0],
-      ramp: "brass",
-      outline: "lo",
-      crease: "faint",
-      mountOn: "cyclic.mountBase",
-      allowOverlap: ["tube.cyclicPitch"]
-    }
-  );
-  reg.anchor("cyclic.portPitch", 0.03, 0, 0, cycPortPitch, { dir: [1, 0.06, 0] });
-
-  // ---------------------------------------------------------------------------
-  // 5. Collective Pitch Quadrant Lever (Front-Left Apron)
-  // ---------------------------------------------------------------------------
-  const [colX, , colZ] = ANCHORS.collectiveMount;
-  const collBaseGroup = reg.group("collective.baseGroup", {
-    parent: baseGroup,
-    pos: [colX, 0, colZ],
-    stage: "mechanism"
-  });
-
-  const collBaseGeo = new THREE.BoxGeometry(0.46, 0.08, 0.28);
-  reg.part("collective.base", collBaseGeo, {
-    parent: collBaseGroup,
-    pos: [0, topSurfaceY + 0.04, 0],
-    ramp: "lo",
-    outline: "lo",
-    crease: "faint",
-    mountOn: "base.plate"
-  });
-
-  const collPivotPos = [0.14, topSurfaceY + 0.15, 0];
-  const quadGeo = buildArcBandGeometry(0.35, 0.47, 0.044, 0.60 * Math.PI, 1.02 * Math.PI, 28);
-  reg.part("collective.quadrant", quadGeo, {
-    parent: collBaseGroup,
-    pos: collPivotPos,
+  const hubNutGeo = buildCylinderGeometry(0.13, 0.13, 0.19, { segments: 6, axis: "z" });
+  reg.part("shaft.hubNut", hubNutGeo, {
+    parent: pulleyGroup,
     ramp: "brass",
     outline: "mid",
     crease: "lo",
-    mountOn: "collective.base",
-    allowOverlap: ["collective.pivot", "collective.lever"]
+    mountOn: "shaft.pulley",
+    cutawayHide: true,
+    allowOverlap: ["shaft.main", "pedestal.front.saddle"]
   });
 
-  const quadTickPts = [];
-  for (let i = 0; i <= 12; i++) {
-    const a = 0.64 * Math.PI + (i / 12) * (0.34 * Math.PI);
-    const rOut = 0.46;
-    const rIn = i % 3 === 0 ? 0.37 : 0.405;
-    quadTickPts.push(
-      new THREE.Vector3(collPivotPos[0] + Math.cos(a) * rIn, collPivotPos[1] + Math.sin(a) * rIn, 0.032),
-      new THREE.Vector3(collPivotPos[0] + Math.cos(a) * rOut, collPivotPos[1] + Math.sin(a) * rOut, 0.032)
+  const pulleyMinorPts = [];
+  const pulleyMajorPts = [];
+  for (let i = 0; i < 36; i++) {
+    const a = (i / 36) * Math.PI * 2;
+    const rOut = 0.43;
+    const rIn = i % 3 === 0 ? 0.32 : 0.37;
+    const target = i % 3 === 0 ? pulleyMajorPts : pulleyMinorPts;
+    target.push(
+      new THREE.Vector3(Math.cos(a) * rIn, Math.sin(a) * rIn, 0.073),
+      new THREE.Vector3(Math.cos(a) * rOut, Math.sin(a) * rOut, 0.073)
     );
   }
-  reg.detail(
-    "collective.ticks",
-    new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(quadTickPts), kit.lineMaterials.mid),
-    { parent: collBaseGroup }
+  const ticksMinor = new THREE.LineSegments(
+    new THREE.BufferGeometry().setFromPoints(pulleyMinorPts),
+    kit.lineMaterials.lo
   );
-
-  const collPivotGeo = buildCylinderGeometry(0.055, 0.055, 0.14, { segments: 18, axis: "z" });
-  reg.part("collective.pivot", collPivotGeo, {
-    parent: collBaseGroup,
-    pos: collPivotPos,
-    ramp: "brass",
-    outline: "mid",
-    crease: "faint",
-    mountOn: "collective.base",
-    allowOverlap: ["collective.lever", "collective.quadrant"]
-  });
-
-  const collectiveGroup = reg.group("collective.group", {
-    parent: collBaseGroup,
-    pos: [collPivotPos[0], collPivotPos[1], 0.056],
-    stage: "mechanism"
-  });
-
-  const collLeverGeo = new THREE.BoxGeometry(0.64, 0.052, 0.042);
-  collLeverGeo.translate(-0.32, 0, 0);
-  reg.part("collective.lever", collLeverGeo, {
-    parent: collectiveGroup,
-    ramp: "hi",
-    outline: "mid",
-    crease: "lo",
-    mountOn: "collective.pivot"
-  });
-
-  const collGripGeo = buildCylinderGeometry(0.048, 0.044, 0.22, { segments: 18, axis: "x" });
-  reg.part("collective.grip", collGripGeo, {
-    parent: collectiveGroup,
-    pos: [-0.73, 0, 0],
-    ramp: "copper",
-    outline: "mid",
-    crease: "lo",
-    mountOn: "collective.lever"
-  });
-
-  const collPort = reg.part(
-    "collective.port",
-    buildCylinderGeometry(0.036, 0.036, 0.08, { segments: 12, axis: "x" }),
-    {
-      parent: collBaseGroup,
-      pos: [0.22, topSurfaceY + 0.045, -0.02],
-      rot: [0, -0.35, 0],
-      ramp: "brass",
-      outline: "lo",
-      crease: "faint",
-      mountOn: "collective.base",
-      allowOverlap: ["tube.collective"]
-    }
+  const ticksMajor = new THREE.LineSegments(
+    new THREE.BufferGeometry().setFromPoints(pulleyMajorPts),
+    kit.lineMaterials.hi
   );
-  reg.anchor("collective.port", 0.03, 0, 0, collPort, { dir: [1, 0.06, 0] });
-
-  // ---------------------------------------------------------------------------
-  // 6. Blade Pitch Protractor Scale Stand (Right-Rear Apron, Distinct Semi-Circle)
-  // ---------------------------------------------------------------------------
-  const [pitchX, , pitchZ] = ANCHORS.pitchScaleMount;
-  const pitchBaseGroup = reg.group("pitchScale.group", {
-    parent: baseGroup,
-    pos: [pitchX, 0, pitchZ],
-    stage: "mechanism"
-  });
-
-  const pBaseGeo = new THREE.BoxGeometry(0.46, 0.09, 0.32);
-  reg.part("pitchScale.base", pBaseGeo, {
-    parent: pitchBaseGroup,
-    pos: [0, topSurfaceY + 0.045, 0],
-    ramp: "lo",
-    outline: "lo",
-    crease: "faint",
-    mountOn: "base.plate"
-  });
-
-  const pPostH = 0.72;
-  const pPostGeo = new THREE.BoxGeometry(0.11, pPostH, 0.11);
-  reg.part("pitchScale.post", pPostGeo, {
-    parent: pitchBaseGroup,
-    pos: [0, topSurfaceY + 0.09 + pPostH * 0.5, -0.04],
-    ramp: "mid",
-    outline: "mid",
-    crease: "lo",
-    mountOn: "pitchScale.base",
-    allowOverlap: ["pitchScale.backing"]
-  });
-
-  const pitchHeadY = topSurfaceY + 0.80;
-  const pitchHeadGroup = reg.group("pitchScale.head", {
-    parent: pitchBaseGroup,
-    pos: [0, pitchHeadY, 0.02],
-    rot: [0, -0.22, 0],
-    stage: "mechanism"
-  });
-
-  const pBackingGeo = buildProtractorBackingGeometry(0.44, 0.08, 32);
-  reg.part("pitchScale.backing", pBackingGeo, {
-    parent: pitchHeadGroup,
-    ramp: "hi",
-    outline: "mid",
-    crease: "lo",
-    mountOn: "pitchScale.post",
-    allowOverlap: ["pitchScale.rim"]
-  });
-
-  const pRimGeo = buildArcBandGeometry(0.37, 0.45, 0.032, 0, Math.PI, 32);
-  reg.part("pitchScale.rim", pRimGeo, {
-    parent: pitchHeadGroup,
-    pos: [0, 0, 0.032],
-    ramp: "brass",
-    outline: "mid",
-    crease: "faint",
-    mountOn: "pitchScale.backing"
-  });
-  reg.anchor("pitchScale.pivot", 0, 0.05, 0.054, pitchHeadGroup);
-
-  const protTickPts = [];
-  for (let i = 0; i <= 16; i++) {
-    const a = Math.PI * 0.88 - (i / 16) * (Math.PI * 0.76);
-    const rOut = 0.355;
-    const rIn = i % 4 === 0 ? 0.255 : 0.295;
-    protTickPts.push(
-      new THREE.Vector3(Math.cos(a) * rIn, 0.04 + Math.sin(a) * rIn, 0.052),
-      new THREE.Vector3(Math.cos(a) * rOut, 0.04 + Math.sin(a) * rOut, 0.052)
-    );
-  }
-  reg.detail(
-    "pitchScale.ticks",
-    new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(protTickPts), kit.lineMaterials.mid),
-    { parent: pitchHeadGroup }
-  );
-
-  const pitchNeedleGroup = reg.group("pitchScale.needle", {
-    parent: pitchHeadGroup,
-    pos: [0, 0.04, 0.058],
-    stage: "mechanism"
-  });
-  const pNeedlePts = [new THREE.Vector3(0, -0.02, 0), new THREE.Vector3(0, 0.33, 0)];
-  reg.detail(
-    "pitchScale.needle.line",
-    new THREE.Line(new THREE.BufferGeometry().setFromPoints(pNeedlePts), kit.lineMaterials.lit),
-    { parent: pitchNeedleGroup }
-  );
-  const pNeedleCap = new THREE.Mesh(new THREE.CircleGeometry(0.038, 16), kit.dotMaterials.lit);
-  pNeedleCap.position.z = 0.002;
-  reg.detail("pitchScale.needle.cap", pNeedleCap, { parent: pitchNeedleGroup });
-
-  reg.tag("tag-pitch", "BLADE 1 PITCH°", pitchX + 0.10, pitchHeadY + 0.64, pitchZ);
-
-  // ---------------------------------------------------------------------------
-  // 7. Three Bowden Control Conduits (Pilot Controls -> 3 CCPM Servos)
-  // ---------------------------------------------------------------------------
-  // Conduit 1: Collective Lever -> Left CCPM Servo 1
-  reg.tube(
-    "tube.collective",
-    "collective.port",
-    [
-      [-1.32, topSurfaceY + 0.07, 0.72],
-      [-1.16, topSurfaceY + 0.14, 0.68],
-      [-1.06, topSurfaceY + 0.21, 0.50]
-    ],
-    "servo.1.ctrlPort",
-    {
-      parent: baseGroup,
-      radius: 0.024,
-      segments: 36,
-      leadOut: 0.10,
-      leadIn: 0.12,
-      ramp: "copper",
-      outline: "lo",
-      fromPart: "collective.port",
-      toPart: "servo.port.1",
-      allowOverlap: ["collective.base", "servo.body.1"]
-    }
-  );
-
-  // Conduit 2: Cyclic Roll Port -> Right CCPM Servo 2
-  reg.tube(
-    "tube.cyclicRoll",
-    "cyclic.portRoll",
-    [
-      [1.20, topSurfaceY + 0.06, 1.06],
-      [0.96, topSurfaceY + 0.13, 0.94],
-      [0.98, topSurfaceY + 0.20, 0.64]
-    ],
-    "servo.2.ctrlPort",
-    {
-      parent: baseGroup,
-      radius: 0.024,
-      segments: 36,
-      leadOut: 0.12,
-      leadIn: 0.12,
-      ramp: "copper",
-      outline: "lo",
-      fromPart: "cyclic.portRoll",
-      toPart: "servo.port.2",
-      allowOverlap: ["cyclic.mountBase", "servo.body.2"]
-    }
-  );
-
-  // Conduit 3: Cyclic Pitch Port -> Aft CCPM Servo 0 (sweeps around outer right perimeter)
-  reg.tube(
-    "tube.cyclicPitch",
-    "cyclic.portPitch",
-    [
-      [2.26, topSurfaceY + 0.07, 0.62],
-      [2.36, topSurfaceY + 0.10, -0.25],
-      [2.28, topSurfaceY + 0.13, -1.08],
-      [1.86, topSurfaceY + 0.16, -1.26],
-      [1.14, topSurfaceY + 0.21, -1.12],
-      [0.56, topSurfaceY + 0.23, -1.07]
-    ],
-    "servo.0.ctrlPort",
-    {
-      parent: baseGroup,
-      radius: 0.024,
-      segments: 60,
-      leadOut: 0.14,
-      leadIn: 0.14,
-      ramp: "copper",
-      outline: "lo",
-      fromPart: "cyclic.portPitch",
-      toPart: "servo.port.0",
-      allowOverlap: ["cyclic.mountBase", "servo.body.0"]
-    }
-  );
-
-  // ---------------------------------------------------------------------------
-  // 8. Direct 3D Viewport Manipulation (Draggable Swashplate, Cyclic & Collective)
-  // ---------------------------------------------------------------------------
-  reg.interactable("swash.assembly", {
-    cursor: "grab",
-    hint: "Drag swashplate up/down for collective or sideways to tilt cyclic",
-    onDrag: ({ dx, dy, state, setParam }) => {
-      const curColl = state.params.collective ?? 8.5;
-      const curRoll = state.params.cyclicRoll ?? -4.5;
-      setParam("collective", curColl - dy * 0.09);
-      setParam("cyclicRoll", curRoll + dx * 0.13);
-    }
-  });
-
-  reg.interactable("cyclic.group", {
-    cursor: "grab",
-    hint: "Drag cyclic stick in 2 axes to tilt the swashplate",
-    onDrag: ({ dx, dy, state, setParam }) => {
-      const curPitch = state.params.cyclicPitch ?? 6.5;
-      const curRoll = state.params.cyclicRoll ?? -4.5;
-      setParam("cyclicRoll", curRoll + dx * 0.14);
-      setParam("cyclicPitch", curPitch - dy * 0.14);
-    }
-  });
-
-  reg.interactable("collective.group", {
-    cursor: "ns-resize",
-    hint: "Drag collective lever up/down to change collective pitch",
-    onDrag: ({ dy, state, setParam }) => {
-      const curColl = state.params.collective ?? 8.5;
-      setParam("collective", curColl - dy * 0.09);
-    }
-  });
-
-  // Initial kinematic pose
-  updateKinematics(reg, {
-    theta: SPEC.initialTheta,
-    explode: 0,
-    rpm: SPEC.initialRpm,
-    effectiveRpm: SPEC.initialRpm,
-    shaderEnv: 1.0,
-    cutaway: true,
-    params: {
-      collective: 8.5,
-      cyclicPitch: 6.5,
-      cyclicRoll: -4.5,
-      rpm: SPEC.initialRpm
-    }
-  });
-}
-
-function alignSegment(group, pFrom, pTo) {
-  TMP_DIR.subVectors(pTo, pFrom);
-  const len = TMP_DIR.length();
-  group.position.copy(pFrom);
-  if (len > 1e-5) {
-    TMP_DIR.divideScalar(len);
-    TMP_QUAT.setFromUnitVectors(UP_VEC, TMP_DIR);
-    group.quaternion.copy(TMP_QUAT);
-  }
-  return len;
+  ticksMinor.userData.cutawayHide = true;
+  ticksMajor.userData.cutawayHide = true;
+  reg.detail("shaft.pulley.ticksMinor", ticksMinor, { parent: pulleyGroup });
+  reg.detail("shaft.pulley.ticksMajor", ticksMajor, { parent: pulleyGroup });
 }
 function updateKinematics(reg, state) {
-  const { theta, rpm, shaderEnv = 1, params } = state;
-  const ctrlParams = params ? { ...params, rpm: rpm ?? params.rpm } : rpm;
-  const st = getRotorState(theta, ctrlParams);
+  const { theta, rpm, shaderEnv } = state;
+  const alpha = theta / 3;
 
-  // 1. Spin Main Mast, 4:1 Input Shaft, Upper Swashplate & Rotor Hub
-  const mastSpin = reg.groups.get("mast.spin")?.group;
-  if (mastSpin) mastSpin.rotation.y = theta;
-
-  const inputSpin = reg.groups.get("input.spin")?.group;
-  if (inputSpin) inputSpin.rotation.x = theta * SPEC.gearRatio;
-
-  const hubSpin = reg.groups.get("hub.spin")?.group;
-  if (hubSpin) hubSpin.rotation.y = theta;
-
-  const upperSpin = reg.groups.get("swash.upperSpin")?.group;
-  if (upperSpin) upperSpin.rotation.y = theta;
-
-  // 2. Lift & Tilt Swashplate Carrier
-  const swashCarrier = reg.groups.get("swash.carrier")?.group;
-  if (swashCarrier) {
-    swashCarrier.position.y = st.collLift;
-    swashCarrier.rotation.order = "XZY";
-    swashCarrier.rotation.x = st.tiltX;
-    swashCarrier.rotation.z = st.tiltZ;
+  // 1. Update Rotor Orbit & Rotor Spin (exact 1:3 ratio)
+  const rotorOrbit = reg.groups.get("rotor.orbit")?.group;
+  const rotorSpin = reg.groups.get("rotor.spin")?.group;
+  if (rotorOrbit) {
+    rotorOrbit.position.x = SPEC.e * Math.cos(theta);
+    rotorOrbit.position.y = SPEC.e * Math.sin(theta);
+  }
+  if (rotorSpin) {
+    rotorSpin.rotation.z = alpha;
   }
 
-  // 3. Articulate All 3 Rotor Blades (Flapping Coning + Cyclic/Collective Pitch Feathering)
-  let blade0PitchDeg = st.collPitchDeg;
-  for (let k = 0; k < SPEC.numBlades; k++) {
-    const bk = getBladeKinematics(theta, ctrlParams, k);
-    if (k === 0) blade0PitchDeg = bk.totalPitchDeg;
-    const flapGroup = reg.groups.get(`blade.flap.${k}`)?.group;
-    const pitchGroup = reg.groups.get(`blade.pitch.${k}`)?.group;
-    if (flapGroup) flapGroup.rotation.z = bk.flapAngleRad;
-    if (pitchGroup) pitchGroup.rotation.x = -bk.totalPitchRad;
+  // 2. Update Eccentric Shaft & Counterweight rotation
+  const shaftSpin = reg.groups.get("shaft.spin")?.group;
+  if (shaftSpin) {
+    shaftSpin.rotation.z = theta;
   }
 
-  // Sync world matrices of parent assemblies before querying exact pin world positions
-  const baseGroup = reg.groups.get("base.group")?.group || reg.root;
-  reg.root.updateMatrixWorld(true);
-  const invBase = baseGroup.matrixWorld.clone().invert();
-
-  const toBaseLocal = (anchorId, outVec) => {
-    const obj = reg.joints.get(anchorId);
-    if (!obj) return outVec.set(0, 0, 0);
-    return obj.getWorldPosition(outVec).applyMatrix4(invBase);
-  };
-
-  // 4. Articulate 3 Servo Pushrods
-  for (let i = 0; i < 3; i++) {
-    const rodGroup = reg.groups.get(`servo.rodGroup.${i}`)?.group;
-    if (!rodGroup) continue;
-    toBaseLocal(`swash.servoPin.${i}`, TMP_A);
-    toBaseLocal(`servo.${i}.glandTop`, TMP_B);
-    TMP_DIR.subVectors(TMP_A, TMP_B);
-    const len = TMP_DIR.length();
-    rodGroup.position.copy(TMP_A);
-    if (len > 1e-5) {
-      TMP_DIR.divideScalar(len);
-      rodGroup.quaternion.setFromUnitVectors(UP_VEC, TMP_DIR);
-    }
+  // 3. Update Throttle Knob rotation
+  const knobGroup = reg.groups.get("knob.group")?.group;
+  if (knobGroup) {
+    knobGroup.rotation.y = -((rpm / 2400) * Math.PI * 1.5);
   }
 
-  // 5. Articulate 3 Pitch Control Links
-  for (let k = 0; k < SPEC.numBlades; k++) {
-    const linkGroup = reg.groups.get(`pitchLink.group.${k}`)?.group;
-    if (!linkGroup) continue;
-    toBaseLocal(`swash.pitchPin.${k}`, TMP_A);
-    toBaseLocal(`blade.${k}.hornBall`, TMP_B);
-    const dist = alignSegment(linkGroup, TMP_A, TMP_B);
-    const rodPart = reg.parts.get(`pitchLink.rod.${k}`)?.group;
-    const topBall = reg.parts.get(`pitchLink.topBall.${k}`)?.group;
-    if (rodPart) rodPart.scale.y = Math.max(0.2, dist);
-    if (topBall) topBall.position.y = dist;
+  // 4. Update Chamber State, Bourdon Gauge Needle, & Shader Uniforms
+  const chA = getChamberState(theta, 0);
+  const gaugeAngle = Math.PI * 0.72 - Math.min(chA.pressure / 32, 1.0) * (Math.PI * 1.44);
+  const needleGroup = reg.groups.get("gauge.needle")?.group;
+  if (needleGroup) {
+    needleGroup.rotation.z = gaugeAngle;
   }
 
-  // 6. Articulate Rotating Drive Scissors
-  const driveScissor = reg.groups.get("scissors.drive")?.group;
-  if (driveScissor) {
-    toBaseLocal("swash.drivePin", TMP_A);
-    toBaseLocal("mast.drivePin", TMP_B);
-    const dist = alignSegment(driveScissor, TMP_A, TMP_B);
-    const armPart = reg.parts.get("scissors.driveArm")?.group;
-    if (armPart) armPart.scale.y = Math.max(0.2, dist);
-  }
-
-  // 7. Articulate 2-Bar Stationary Anti-Rotation Scissors
-  const lowerArmGroup = reg.groups.get("scissors.fixedLower")?.group;
-  const upperArmGroup = reg.groups.get("scissors.fixedUpper")?.group;
-  const kneePin = reg.parts.get("scissors.kneePin")?.group;
-  if (lowerArmGroup && upperArmGroup && kneePin) {
-    toBaseLocal("scissor.fixedPivot", TMP_A);
-    toBaseLocal("swash.antiRotPin", TMP_B);
-    const span = TMP_A.distanceTo(TMP_B);
-    const L = 0.50;
-    const halfSpan = Math.min(span * 0.5, L - 0.02);
-    const kneeOut = Math.sqrt(Math.max(0.001, L * L - halfSpan * halfSpan));
-    const mid = TMP_A.clone().add(TMP_B).multiplyScalar(0.5);
-    const outDir = new THREE.Vector3(-0.707, 0, -0.707).normalize();
-    const kneePos = mid.addScaledVector(outDir, kneeOut);
-
-    alignSegment(lowerArmGroup, TMP_A, kneePos);
-    alignSegment(upperArmGroup, TMP_B, kneePos);
-    kneePin.position.copy(kneePos);
-    kneePin.rotation.y = Math.PI * 0.25;
-  }
-
-  // 8. Drive Physical Cyclic Stick, Collective Quadrant Lever & Pitch Protractor Needle
-  const cyclicGroup = reg.groups.get("cyclic.group")?.group;
-  if (cyclicGroup) {
-    cyclicGroup.rotation.order = "XZY";
-    cyclicGroup.rotation.x = st.tiltX * 1.5;
-    cyclicGroup.rotation.z = st.tiltZ * 1.5;
-  }
-
-  const collectiveGroup = reg.groups.get("collective.group")?.group;
-  if (collectiveGroup) {
-    collectiveGroup.rotation.z = -(0.22 + st.collNorm * 0.62);
-  }
-
-  const pitchNorm = Math.max(0, Math.min(1, (blade0PitchDeg + 10) / 40));
-  const needleAngle = Math.PI * 0.38 - pitchNorm * (Math.PI * 0.76);
-  const pitchNeedle = reg.groups.get("pitchScale.needle")?.group;
-  if (pitchNeedle) {
-    pitchNeedle.rotation.z = needleAngle;
-  }
-
-  const discShader = reg.root.getObjectByName("rotor.discShader");
-  if (discShader && discShader.material && discShader.material.uniforms) {
-    discShader.material.uniforms.uTheta.value = theta;
-    discShader.material.uniforms.uRpmNorm.value = st.rpmNorm;
-    discShader.material.uniforms.uConeRad.value = st.coningRad;
-    discShader.material.uniforms.uTiltX.value = st.tiltX;
-    discShader.material.uniforms.uTiltZ.value = st.tiltZ;
-    discShader.material.uniforms.uEnvelope.value = shaderEnv;
+  const shaderPlane = reg.root.getObjectByName("chamber.shaderPlane");
+  if (shaderPlane && shaderPlane.material && shaderPlane.material.uniforms) {
+    shaderPlane.material.uniforms.uTheta.value = theta;
+    shaderPlane.material.uniforms.uEnvelope.value = shaderEnv;
   }
 }
 
 
 /* --- figure/shader.mjs --- */
 function buildShader(reg, kit) {
-  const hubAssembly = reg.groups.get("hub.assembly")?.group || reg.root;
+  const statorGroup = reg.groups.get("stator.group")?.group || reg.root;
   const theme = kit.currentTheme;
-  const initSt = getRotorState(SPEC.initialTheta, SPEC.initialRpm);
 
-  const discMat = new THREE.ShaderMaterial({
+  const chamberShaderMat = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
-    side: THREE.DoubleSide,
     uniforms: {
       uTheta: { value: SPEC.initialTheta },
-      uRpmNorm: { value: initSt.rpmNorm },
-      uConeRad: { value: initSt.coningRad },
-      uTiltX: { value: initSt.tiltX },
-      uTiltZ: { value: initSt.tiltZ },
-      uHingeR: { value: SPEC.flapHingeR },
-      uRotorR: { value: SPEC.rotorR },
+      uR: { value: SPEC.R },
+      uE: { value: SPEC.e },
       uEnvelope: { value: 1.0 },
       uIsDark: { value: theme.isDark ? 1.0 : 0.0 },
-      uColWake: { value: new THREE.Color(theme.channels.intake) },
-      uColTip: { value: new THREE.Color(theme.channels.comb) }
+      uCavity: { value: new THREE.Color(theme.channels.cavity) },
+      uColIntake: { value: new THREE.Color(theme.channels.intake) },
+      uColComp: { value: new THREE.Color(theme.channels.comp) },
+      uColComb: { value: new THREE.Color(theme.channels.comb) },
+      uColExh: { value: new THREE.Color(theme.channels.exhaust) }
     },
     vertexShader: `
-      uniform float uConeRad;
-      uniform float uTiltX;
-      uniform float uTiltZ;
-      uniform float uHingeR;
-      varying vec2 vLocalXZ;
-      varying float vRadial;
-
+      varying vec2 vLocalXY;
       void main() {
-        // PlaneGeometry sits in XZ after rotateX(-PI/2)
-        vec3 p = position;
-        float r = length(p.xz);
-        // Track animated blade coning cone & gentle tip-path cyclic tilt
-        float coneLift = max(0.0, r - uHingeR) * tan(uConeRad);
-        float tipTilt = (p.z * uTiltX - p.x * uTiltZ) * 0.14;
-        p.y += coneLift + tipTilt;
-
-        vLocalXZ = p.xz;
-        vRadial = r;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+        vLocalXY = position.xy;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
     `,
     fragmentShader: `
       uniform float uTheta;
-      uniform float uRpmNorm;
-      uniform float uRotorR;
+      uniform float uR;
+      uniform float uE;
       uniform float uEnvelope;
       uniform float uIsDark;
-      uniform vec3 uColWake;
-      uniform vec3 uColTip;
-      varying vec2 vLocalXZ;
-      varying float vRadial;
+      uniform vec3 uCavity;
+      uniform vec3 uColIntake;
+      uniform vec3 uColComp;
+      uniform vec3 uColComb;
+      uniform vec3 uColExh;
+      varying vec2 vLocalXY;
 
       const float PI = 3.14159265359;
-      const float TWO_PI = 6.28318530718;
 
       void main() {
-        float r = vRadial;
-        float rInner = 0.64;
-        float rOuter = uRotorR + 0.05;
+        vec2 p = vLocalXY;
+        float t = atan(p.y, p.x);
+        for (int iter = 0; iter < 2; iter++) {
+          vec2 ep = vec2(uE * cos(3.0 * t) + uR * cos(t), uE * sin(3.0 * t) + uR * sin(t));
+          float err = atan(p.y, p.x) - atan(ep.y, ep.x);
+          t += err * 0.65;
+        }
+        vec2 wallPt = vec2(uE * cos(3.0 * t) + uR * cos(t), uE * sin(3.0 * t) + uR * sin(t));
+        float rWall = length(wallPt);
+        float rPt = length(p);
 
-        // Smooth radial bounds so alpha reaches 0 well inside the plane quad
-        float innerMask = smoothstep(rInner, rInner + 0.24, r);
-        float outerMask = 1.0 - smoothstep(uRotorR - 0.02, rOuter, r);
-        float discMask = innerMask * outerMask;
-        if (discMask < 0.002 || uEnvelope < 0.002) discard;
+        if (rPt > rWall + 0.01) discard;
 
-        float rNorm = clamp((r - rInner) / (uRotorR - rInner), 0.0, 1.0);
+        vec2 rotorCenter = vec2(uE * cos(uTheta), uE * sin(uTheta));
+        vec2 rel = p - rotorCenter;
+        float alpha = uTheta / 3.0;
+        float c = cos(-alpha);
+        float s = sin(-alpha);
+        vec2 rotLocal = vec2(c * rel.x - s * rel.y, s * rel.x + c * rel.y);
 
-        // Angle matches Three.js +Y rotation: blade k at (cos A, -sin A) -> A = atan(-z, x)
-        float fragAng = atan(-vLocalXZ.y, vLocalXZ.x);
+        float angLocal = mod(atan(rotLocal.y, rotLocal.x) + 2.0 * PI, 2.0 * PI);
+        float sector = floor(angLocal / (2.0 * PI / 3.0));
+        float flankWorldAngle = alpha + sector * (2.0 * PI / 3.0) + PI / 3.0;
 
-        // Trailing motion-blur wake behind each of the 3 rotating blades
-        float trailSpan = mix(0.32, 1.48, clamp(uRpmNorm * 1.25, 0.0, 1.0));
-        float wake = 0.0;
-        for (int k = 0; k < 3; k++) {
-          float bladeAng = uTheta + float(k) * (TWO_PI / 3.0);
-          float dAng = mod(fragAng - bladeAng + 8.0 * TWO_PI, TWO_PI);
-          // Soft leading-edge feather + long trailing decay
-          float trail = exp(-dAng / max(0.18, trailSpan * 0.45)) * smoothstep(0.0, 0.06, dAng);
-          float leadGlow = exp(-pow(min(dAng, TWO_PI - dAng) / 0.075, 2.0)) * 0.45;
-          wake = max(wake, trail + leadGlow);
+        float cyc = mod(-flankWorldAngle + PI * 0.68 + 8.0 * PI, 2.0 * PI);
+        float phaseNorm = cyc / (2.0 * PI);
+
+        float wIntake = smoothstep(0.0, 0.06, phaseNorm) * (1.0 - smoothstep(0.22, 0.30, phaseNorm));
+        float wComp   = smoothstep(0.22, 0.30, phaseNorm) * (1.0 - smoothstep(0.47, 0.53, phaseNorm));
+        float wComb   = smoothstep(0.47, 0.52, phaseNorm) * (1.0 - smoothstep(0.72, 0.80, phaseNorm));
+        float wExh    = smoothstep(0.72, 0.80, phaseNorm) * (1.0 - smoothstep(0.94, 1.0, phaseNorm));
+
+        float sparkPulse = exp(-pow((phaseNorm - 0.54) / 0.045, 2.0));
+
+        vec3 gasCol = uColIntake * wIntake
+                    + uColComp * wComp
+                    + uColComb * (wComb + sparkPulse * 0.65)
+                    + uColExh * wExh;
+
+        float radialNorm = clamp(rPt / rWall, 0.0, 1.0);
+        float wave = 0.82 + 0.18 * sin(radialNorm * 18.0 - uTheta * 2.0);
+        float rimFade = smoothstep(1.0, 0.92, radialNorm) * smoothstep(0.35, 0.55, radialNorm);
+
+        float intensity = (wIntake * 0.42 + wComp * 0.55 + wComb * 0.82 + sparkPulse * 0.45 + wExh * 0.48) * wave * rimFade * uEnvelope;
+
+        vec3 finalCol = mix(uCavity, gasCol, clamp(intensity, 0.0, 0.92));
+        if (uIsDark > 0.5 && sparkPulse > 0.1) {
+          finalCol = mix(finalCol, vec3(1.0, 0.97, 0.86), sparkPulse * 0.45 * uEnvelope);
         }
 
-        // Crisp translucent outer rotor-disc blur ring + subtle tip-vortex double track
-        float tipBand = exp(-pow((rNorm - 0.945) / 0.032, 2.0));
-        float subRing = exp(-pow((rNorm - 0.855) / 0.020, 2.0)) * 0.42;
-        float radialSweep = smoothstep(0.08, 0.72, rNorm);
-
-        // Concentric aerodynamic downwash ripples inside swept annulus
-        float ripple = 0.86 + 0.14 * sin(rNorm * 28.0 - uTheta * 2.0);
-
-        float baseDisc = (0.09 + 0.14 * uRpmNorm) * radialSweep;
-        float wakeTerm = wake * (0.24 + 0.34 * uRpmNorm) * radialSweep * ripple;
-        float vortexRing = (tipBand * 0.55 + subRing * 0.35) * (0.45 + 0.55 * uRpmNorm);
-
-        float rawAlpha = (baseDisc + wakeTerm + vortexRing) * discMask * uEnvelope;
-        float alpha = clamp(rawAlpha * (uIsDark > 0.5 ? 0.82 : 0.68), 0.0, 0.62);
-        if (alpha < 0.004) discard;
-
-        vec3 discCol = mix(uColWake, uColTip, clamp(tipBand * 0.75 + wake * 0.18, 0.0, 1.0));
-        if (uIsDark > 0.5) {
-          discCol = mix(discCol, vec3(0.95, 0.98, 1.0), tipBand * 0.28);
-        }
-
-        gl_FragColor = vec4(discCol, alpha);
+        gl_FragColor = vec4(finalCol, 0.95);
       }
     `
   });
 
   kit.onThemeChange((nextTheme) => {
-    discMat.uniforms.uIsDark.value = nextTheme.isDark ? 1.0 : 0.0;
-    discMat.uniforms.uColWake.value.set(nextTheme.channels.intake);
-    discMat.uniforms.uColTip.value.set(nextTheme.channels.comb);
+    chamberShaderMat.uniforms.uIsDark.value = nextTheme.isDark ? 1.0 : 0.0;
+    chamberShaderMat.uniforms.uCavity.value.set(nextTheme.channels.cavity);
+    chamberShaderMat.uniforms.uColIntake.value.set(nextTheme.channels.intake);
+    chamberShaderMat.uniforms.uColComp.value.set(nextTheme.channels.comp);
+    chamberShaderMat.uniforms.uColComb.value.set(nextTheme.channels.comb);
+    chamberShaderMat.uniforms.uColExh.value.set(nextTheme.channels.exhaust);
   });
 
-  const planeSize = (SPEC.rotorR + 0.25) * 2.0;
-  const discGeo = new THREE.PlaneGeometry(planeSize, planeSize, 48, 48);
-  discGeo.rotateX(-Math.PI / 2);
-  const discMesh = new THREE.Mesh(discGeo, discMat);
-  discMesh.position.set(0, SPEC.hubY - 0.012, 0);
-  reg.detail("rotor.discShader", discMesh, { parent: hubAssembly, stage: "shader" });
+  const chamberPlaneGeo = new THREE.PlaneGeometry(3.4, 3.4);
+  const chamberPlane = new THREE.Mesh(chamberPlaneGeo, chamberShaderMat);
+  chamberPlane.position.z = -SPEC.depth * 0.46;
+  reg.detail("chamber.shaderPlane", chamberPlane, { parent: statorGroup, stage: "shader" });
 }
 
 

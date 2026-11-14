@@ -67,6 +67,9 @@ h1{font-size:clamp(2rem,5vw,2.75rem);line-height:1.1;letter-spacing:-.02em;font-
 .card__body{display:flex;flex-direction:column;gap:var(--s-2);padding:var(--s-4) var(--s-4) var(--s-3);flex:1;min-width:0}
 .card__fig{font:500 .68rem/1.3 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);margin:0}
 .card__title{font-size:1.18rem;line-height:1.22;font-weight:600;letter-spacing:-.012em;margin:0}
+.card__title a{color:inherit;text-decoration:none}
+.card__title a:hover,.card__title a:focus-visible{color:var(--accent);text-decoration:underline;text-underline-offset:.14em}
+.card__title a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
 .card__desc{margin:0;font-size:.92rem;line-height:1.48;color:var(--ink-2);flex:1}
 .card__foot{display:flex;align-items:center;justify-content:space-between;gap:var(--s-3);margin-top:var(--s-2);padding-top:var(--s-3);border-top:1px dashed var(--rule)}
 .card__open{
@@ -110,7 +113,7 @@ h1{font-size:clamp(2rem,5vw,2.75rem);line-height:1.1;letter-spacing:-.02em;font-
       </a>
       <div class="card__body">
         <p class="card__fig">Fig 1</p>
-        <h2 class="card__title">How a quadcopter flies</h2>
+        <h2 class="card__title"><a href="drone/">How a quadcopter flies</a></h2>
         <p class="card__desc">A class 450 quadcopter on a two-axis gimbal rig with a universal joint and load-cell sensor. The transmitter drives throttle, pitch, roll and the yaw reaction torques.</p>
         <div class="card__foot">
           <a class="card__open" href="drone/">Open <span aria-hidden="true">→</span></a>
@@ -125,7 +128,7 @@ h1{font-size:clamp(2rem,5vw,2.75rem);line-height:1.1;letter-spacing:-.02em;font-
       </a>
       <div class="card__body">
         <p class="card__fig">Fig 2</p>
-        <h2 class="card__title">Bookshelf speakers · Dome vs AMT</h2>
+        <h2 class="card__title"><a href="bookshelf-speaker/">Bookshelf speakers · Dome vs AMT</a></h2>
         <p class="card__desc">A pair of reference monitors on a slate inspection bench, with an acoustic probe, a laser interferometry beam and a frequency-generator sweep comparing a dome tweeter against an air-motion transformer.</p>
         <div class="card__foot">
           <a class="card__open" href="bookshelf-speaker/">Open <span aria-hidden="true">→</span></a>
@@ -140,7 +143,7 @@ h1{font-size:clamp(2rem,5vw,2.75rem);line-height:1.1;letter-spacing:-.02em;font-
       </a>
       <div class="card__body">
         <p class="card__fig">Fig 3</p>
-        <h2 class="card__title">Limited-slip differential · Clutch vs Torsen</h2>
+        <h2 class="card__title"><a href="limited-slip-differential/">Limited-slip differential · Clutch vs Torsen</a></h2>
         <p class="card__desc">A bench dynamometer with twin roller dynos and a cross-shaft drive, plus a cutaway carrier comparing clutch-pack preload against worm-gear torque biasing across four scenarios.</p>
         <div class="card__foot">
           <a class="card__open" href="limited-slip-differential/">Open <span aria-hidden="true">→</span></a>
@@ -155,7 +158,7 @@ h1{font-size:clamp(2rem,5vw,2.75rem);line-height:1.1;letter-spacing:-.02em;font-
       </a>
       <div class="card__body">
         <p class="card__fig">Fig 4</p>
-        <h2 class="card__title">Flame-licker engine</h2>
+        <h2 class="card__title"><a href="flame-licker/">Flame-licker engine</a></h2>
         <p class="card__desc">An atmospheric vacuum engine: brass cylinder, slide valve, spirit-lamp flame and a heavy flywheel, running through the closed cycle that draws the piston in and drives the wheel round.</p>
         <div class="card__foot">
           <a class="card__open" href="flame-licker/">Open <span aria-hidden="true">→</span></a>
@@ -170,7 +173,7 @@ h1{font-size:clamp(2rem,5vw,2.75rem);line-height:1.1;letter-spacing:-.02em;font-
       </a>
       <div class="card__body">
         <p class="card__fig">Fig 5</p>
-        <h2 class="card__title">FELIS-09 robotic cat</h2>
+        <h2 class="card__title"><a href="robotic-cat/">FELIS-09 robotic cat</a></h2>
         <p class="card__desc">A 9.2 kg quadruped on a balance rig: four strain-gauge load pads, an optical collimator on a front rail commanding gaze yaw, a five-link counterbalance tail, and a 38 mm suspension crouch that moves the torque across the harmonic-drive knees.</p>
         <div class="card__foot">
           <a class="card__open" href="robotic-cat/">Open <span aria-hidden="true">→</span></a>
@@ -185,7 +188,7 @@ h1{font-size:clamp(2rem,5vw,2.75rem);line-height:1.1;letter-spacing:-.02em;font-
       </a>
       <div class="card__body">
         <p class="card__fig">Fig 6</p>
-        <h2 class="card__title">Pneumatic impact wrench</h2>
+        <h2 class="card__title"><a href="pneumatic-impact-gun/">Pneumatic impact wrench</a></h2>
         <p class="card__desc">A cutaway impact wrench on an inspection plate: compressed air spins a vane motor, and a cam-driven hammer accelerates freely before striking the anvil in rapid bursts — high torque with minimal reaction on the user.</p>
         <div class="card__foot">
           <a class="card__open" href="pneumatic-impact-gun/">Open <span aria-hidden="true">→</span></a>
@@ -200,7 +203,7 @@ h1{font-size:clamp(2rem,5vw,2.75rem);line-height:1.1;letter-spacing:-.02em;font-
       </a>
       <div class="card__body">
         <p class="card__fig">Fig 7</p>
-        <h2 class="card__title">How Spot works</h2>
+        <h2 class="card__title"><a href="spot/">How Spot works</a></h2>
         <p class="card__desc">Boston Dynamics' Spot on a gait bench, trotting in diagonal pairs over four force plates. Five stereo camera pairs watch a depth target and a 300 mm step block, while the Spot Arm rides on its back with its gripper cycling open and closed.</p>
         <div class="card__foot">
           <a class="card__open" href="spot/">Open <span aria-hidden="true">→</span></a>

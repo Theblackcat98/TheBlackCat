@@ -1,0 +1,5650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Anatomy · Helicopter Swashplate & Rotor Hub (Three.js Isometric)</title>
+  <script src="../vendor/three/three.min.js"></script>
+  <style>
+    :root {
+      --anatomy-bg: #f3f2ee;
+      --anatomy-card: #faf9f5;
+      --anatomy-paper: #faf9f5;
+      --anatomy-border: #dfddd5;
+      --anatomy-text: #181715;
+      --anatomy-muted: #78746c;
+      --anatomy-strong: #0c0b0a;
+      --anatomy-lit: #d97706;
+      --anatomy-pill-bg: #efede7;
+      --anatomy-pill-hover: #e4e1d8;
+      --anatomy-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      --anatomy-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--anatomy-bg);
+      color: var(--anatomy-text);
+      font-family: var(--anatomy-sans);
+      transition: background-color 0.25s ease, color 0.25s ease;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      height: 100dvh;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 1600px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .figure-card {
+      position: relative;
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
+      background-color: var(--anatomy-card);
+      border: 1px solid var(--anatomy-border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 14px rgba(0, 0, 0, 0.04);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+      outline: none;
+    }
+
+    .figure-card:focus-visible {
+      border-color: var(--anatomy-lit);
+    }
+
+    #canvas-host {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #canvas-host:active {
+      cursor: grabbing;
+    }
+
+    #canvas-host canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
+
+    .hud-detail {
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    body.hud-hidden .figure-card .hud-detail {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translateY(4px);
+    }
+
+    body.hud-hidden .caption-bar {
+      display: none;
+    }
+
+    .corner {
+      position: absolute;
+      z-index: 3;
+      pointer-events: none;
+      font-family: var(--anatomy-mono);
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      line-height: 1.45;
+      color: var(--anatomy-muted);
+      background-color: color-mix(in srgb, var(--anatomy-card) 78%, transparent);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    .corner.top-left {
+      top: 12px;
+      left: 12px;
+      font-weight: 600;
+      color: var(--anatomy-text);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .corner.top-right {
+      top: 12px;
+      right: 52px;
+      text-align: right;
+      text-transform: uppercase;
+    }
+
+    .corner.bottom-left {
+      bottom: 12px;
+      left: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      max-width: calc(100% - 24px);
+    }
+
+    .corner.bottom-right {
+      bottom: 12px;
+      right: 12px;
+      text-align: right;
+      color: var(--anatomy-text);
+      font-variant-numeric: tabular-nums;
+      font-weight: 500;
+    }
+
+    .hud-quick-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 4;
+      width: 32px;
+      height: 28px;
+      border-radius: 7px;
+      border: 1px solid var(--anatomy-border);
+      background-color: color-mix(in srgb, var(--anatomy-card) 85%, transparent);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: var(--anatomy-text);
+      font-family: var(--anatomy-mono);
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .hud-quick-btn:hover {
+      background-color: var(--anatomy-pill-bg);
+    }
+
+    .hud-quick-btn.active {
+      border-color: var(--anatomy-lit);
+      color: var(--anatomy-lit);
+    }
+
+    .accent-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--anatomy-lit);
+      flex-shrink: 0;
+      transition: background-color 0.25s ease;
+    }
+
+    kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      font-family: var(--anatomy-mono);
+      font-size: 10px;
+      color: var(--anatomy-text);
+      background-color: var(--anatomy-pill-bg);
+      border: 1px solid var(--anatomy-border);
+      border-radius: 4px;
+      line-height: 1.3;
+    }
+
+    .engraved-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+    }
+
+    .engraved-tag {
+      position: absolute;
+      font-family: var(--anatomy-mono);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      color: var(--anatomy-muted);
+      opacity: 0.8;
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+    }
+
+    .controls-bar {
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background-color: var(--anatomy-card);
+      border: 1px solid var(--anatomy-border);
+      border-radius: 12px;
+      padding: 8px 12px;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+
+    .scheme-group,
+    .params-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .views-group {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 3px 5px;
+      border-radius: 8px;
+      border: 1px solid var(--anatomy-border);
+      background-color: color-mix(in srgb, var(--anatomy-card) 82%, transparent);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      max-width: calc(100% - 260px);
+    }
+
+    .views-group:empty,
+    .triggers-group:empty {
+      display: none;
+    }
+
+    .triggers-group {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .view-pill {
+      padding: 3px 7px;
+      border-radius: 5px;
+      border: 1px solid transparent;
+      background-color: transparent;
+      color: var(--anatomy-muted);
+      font-family: var(--anatomy-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .view-pill:hover {
+      background-color: var(--anatomy-pill-bg);
+      color: var(--anatomy-text);
+    }
+
+    .view-pill.active {
+      border-color: var(--anatomy-lit);
+      background-color: var(--anatomy-pill-bg);
+      color: var(--anatomy-lit);
+    }
+
+    .action-btn.trigger-btn {
+      border-color: color-mix(in srgb, var(--anatomy-lit) 55%, var(--anatomy-border));
+      color: var(--anatomy-text);
+      font-weight: 600;
+    }
+
+    .action-btn.trigger-btn:hover {
+      border-color: var(--anatomy-lit);
+      color: var(--anatomy-lit);
+      background-color: var(--anatomy-pill-bg);
+    }
+
+    .action-btn.trigger-btn.armed {
+      border-color: var(--anatomy-lit);
+      background-color: color-mix(in srgb, var(--anatomy-lit) 16%, transparent);
+      color: var(--anatomy-lit);
+    }
+
+    .sliders-group {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .scheme-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 9px;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      background-color: var(--anatomy-pill-bg);
+      color: var(--anatomy-text);
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .scheme-btn:hover {
+      background-color: var(--anatomy-pill-hover);
+    }
+
+    .scheme-btn.active {
+      border-color: var(--anatomy-lit);
+      background-color: var(--anatomy-card);
+    }
+
+    .swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid rgba(128, 128, 128, 0.4);
+      flex-shrink: 0;
+    }
+
+    .slider-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--anatomy-mono);
+      font-size: 11px;
+      color: var(--anatomy-muted);
+      margin-right: 2px;
+    }
+
+    input[type="range"] {
+      width: 82px;
+      accent-color: var(--anatomy-lit);
+      cursor: pointer;
+    }
+
+    .action-btn {
+      padding: 5px 9px;
+      border-radius: 7px;
+      border: 1px solid var(--anatomy-border);
+      background-color: transparent;
+      color: var(--anatomy-text);
+      font-family: var(--anatomy-mono);
+      font-size: 11px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .action-btn:hover {
+      background-color: var(--anatomy-pill-bg);
+    }
+
+    .action-btn.active {
+      border-color: var(--anatomy-lit);
+      color: var(--anatomy-lit);
+      background-color: var(--anatomy-pill-bg);
+    }
+
+    .caption-bar {
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 4px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--anatomy-muted);
+    }
+
+    .caption-bar strong {
+      color: var(--anatomy-text);
+      font-weight: 600;
+    }
+
+    .legend-strip {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--anatomy-mono);
+      font-size: 11px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-swatch {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    .desktop-hint {
+      display: inline;
+    }
+    .mobile-hint {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 6px;
+      }
+      .wrapper {
+        gap: 6px;
+      }
+      .desktop-hint {
+        display: none;
+      }
+      .mobile-hint {
+        display: inline;
+      }
+      .corner {
+        font-size: 9.5px;
+        padding: 3px 6px;
+      }
+      .corner.top-left,
+      .corner.top-right {
+        max-width: 44%;
+      }
+      .views-group {
+        top: 42px;
+        max-width: calc(100% - 24px);
+      }
+      .corner.bottom-left {
+        bottom: 36px;
+      }
+      .corner.bottom-right {
+        bottom: 8px;
+        right: 8px;
+      }
+      .controls-bar {
+        padding: 7px 8px;
+        gap: 6px;
+      }
+      .scheme-group,
+      .params-group {
+        width: 100%;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+        padding-bottom: 2px;
+      }
+      .sliders-group {
+        flex-wrap: nowrap;
+        flex-shrink: 0;
+      }
+      .scheme-group::-webkit-scrollbar,
+      .params-group::-webkit-scrollbar {
+        display: none;
+      }
+      .caption-bar {
+        display: none;
+      }
+    }
+  </style>
+<meta name="description" content="A helicopter rotor head drawn in interactive 3D: a two-part swashplate on a uniball, three CCPM servos at 120 degrees, pitch links and anti-rotation scissors driving three feathering blades over a cutaway 4:1 bevel gearbox. Grab the swashplate, cyclic stick or collective lever and watch every blade change pitch.">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/helicopter-swashplate/">
+<meta property="og:title" content="Helicopter Swashplate & Rotor Hub">
+<meta property="og:description" content="A helicopter rotor head drawn in interactive 3D: a two-part swashplate on a uniball, three CCPM servos at 120 degrees, pitch links and anti-rotation scissors driving three feathering blades over a cutaway 4:1 bevel gearbox. Grab the swashplate, cyclic stick or collective lever and watch every blade change pitch.">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/helicopter-swashplate-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "VisualArtwork", "name": "Helicopter Swashplate & Rotor Hub", "description": "A helicopter rotor head drawn in interactive 3D: a two-part swashplate on a uniball, three CCPM servos at 120 degrees, pitch links and anti-rotation scissors driving three feathering blades over a cutaway 4:1 bevel gearbox. Grab the swashplate, cyclic stick or collective lever and watch every blade change pitch.", "url": "https://theblackcat98.github.io/TheBlackCat/helicopter-swashplate/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/helicopter-swashplate-light.webp", "creator": {"@type": "Person", "name": "Nik"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="helicopter-swashplate"></script>
+</head>
+<body>
+<a class="back tk-fallback" href="../tools/">&#8592; All tools</a>
+  <div class="wrapper iso-plate">
+    <div class="figure-card" id="figure-card" tabindex="0" aria-label="Interactive helicopter swashplate and articulated rotor hub test rig">
+      <div id="canvas-host"></div>
+
+      <button type="button" class="hud-quick-btn active" id="hud-quick-btn" title="Toggle Floating Details (H)" aria-label="Toggle Floating Details">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+      </button>
+
+      <div class="engraved-layer hud-detail" id="engraved-layer">
+        <div class="engraved-tag" id="tag-plate">MRH-3 · CCPM 120° · 4:1</div>
+        <div class="engraved-tag" id="tag-pitch">BLADE 1 PITCH°</div>
+      </div>
+
+      <div class="corner top-left hud-detail">
+        <span class="accent-dot"></span>
+        <span>Fig 05 · Rotor Swashplate</span>
+      </div>
+      <div class="views-group hud-detail" id="camera-views-group" aria-label="Camera views"></div>
+      <div class="corner top-right hud-detail" id="phase-corner">FORWARD CYCLIC</div>
+
+      <div class="corner bottom-left hud-detail">
+        <span class="desktop-hint">
+          <span id="hint-interact"></span>Drag orbit · Right-drag pan · Scroll zoom · <span id="hint-crank"><kbd>Shift</kbd>+Drag crank · </span><span id="hint-explode"><kbd>E</kbd> apart · </span><kbd>H</kbd> details · <kbd>R</kbd> iso
+        </span>
+        <span class="mobile-hint">
+          <span id="hint-interact-mobile"></span>1-finger orbit · 2-finger pan &amp; pinch zoom · Tap DETAILS to hide HUD
+        </span>
+      </div>
+
+      <div class="corner bottom-right hud-detail" id="readout" data-readout aria-live="polite">
+        ψ 323° · COLL 8.5° · CYC +6.5°/-4.5° · B1 12.2° · 120 rpm
+      </div>
+    </div>
+
+    <div class="controls-bar">
+      <div class="scheme-group" id="scheme-buttons" aria-label="Anatomy color themes"></div>
+      <div class="params-group">
+        <div class="triggers-group" id="triggers-group"></div>
+        <div class="sliders-group" id="custom-sliders">
+          <label class="slider-label" id="rpm-slider-wrap" title="Shaft speed">
+            <span>RPM</span>
+            <input type="range" id="rpm-slider" min="0" max="2400" step="20" value="720" />
+          </label>
+        </div>
+        <button type="button" class="action-btn" id="crank-btn" title="1-finger drag cranks the engine shaft">CRANK</button>
+        <button type="button" class="action-btn" id="slow-btn" title="Shortcut: S">SLOW 1×</button>
+        <button type="button" class="action-btn" id="explode-btn" title="Shortcut: E">APART</button>
+        <button type="button" class="action-btn active" id="cutaway-btn" title="Shortcut: C">CUTAWAY</button>
+        <button type="button" class="action-btn active" id="shader-btn" title="Shortcut: I">SHADER</button>
+        <button type="button" class="action-btn active" id="hud-btn" title="Shortcut: H">DETAILS</button>
+        <button type="button" class="action-btn" id="reset-btn" title="Shortcut: R">RESET</button>
+      </div>
+    </div>
+
+    <div class="caption-bar hud-detail">
+      <div><strong>The object is the explanation.</strong> Drag the swashplate, cyclic stick, or collective lever directly: three 120° actuators tilt and lift the non-rotating lower swashplate while the bearing-mounted upper ring rotates with the mast so pitch links feather all three blades.</div>
+      <div class="legend-strip">
+        <span class="legend-item"><span class="legend-swatch" id="leg-lit"></span>Lit Rotor Hub &amp; Blades</span>
+        <span class="legend-item"><span class="legend-swatch" id="leg-intake"></span>Swept Rotor-Disc Blur</span>
+        <span class="legend-item"><span class="legend-swatch" id="leg-comb"></span>Pitch Links &amp; Conduits</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+/* --- kit/shaders.mjs --- */
+const THEMES = [
+  {
+    id: "light",
+    name: "Light",
+    swatch: "#e4e1d8",
+    isDark: false,
+    css: {
+      bg: "#f3f2ee",
+      card: "#faf9f5",
+      border: "#dfddd5",
+      text: "#181715",
+      muted: "#78746c",
+      strong: "#0c0b0a",
+      lit: "#d97706",
+      pillBg: "#efede7",
+      pillHover: "#e4e1d8"
+    },
+    ramps: {
+      lo:  { top: "#f5f3ed", shades: ["#ebe8df", "#dedad0", "#cfcac0", "#b8b2a6"] },
+      mid: { top: "#fcfbf8", shades: ["#efede6", "#e0ddd3", "#cbc6ba", "#b0aaa0"] },
+      hi:  { top: "#ffffff", shades: ["#f4f2ec", "#e5e2d9", "#d0cbc0", "#b4aea2"] },
+      lit: { top: "#fff7ed", shades: ["#fed7aa", "#fb923c", "#ea580c", "#9a3412"] },
+      brass: { top: "#fef9c3", shades: ["#fde68a", "#eab308", "#ca8a04", "#854d0e"] },
+      copper: { top: "#ffedd5", shades: ["#fdba74", "#ea580c", "#c2410c", "#7c2d12"] }
+    },
+    lines: {
+      hi: "#141311",
+      mid: "#3b3833",
+      lo: "#78736a",
+      faint: "#b8b3a8",
+      lit: "#7c2d12",
+      dot: "#292724"
+    },
+    halo: "#d5d1c7",
+    haloOpacity: 0.42,
+    channels: {
+      intake: "#2563eb",
+      comp: "#7c3aed",
+      comb: "#ea580c",
+      exhaust: "#dc2626",
+      cavity: "#ece9e0"
+    },
+    glass: { top: "#ffffff", rim: "#0284c7", tint: "#e0f2fe", opacity: 0.32 }
+  },
+  {
+    id: "paper",
+    name: "Paper",
+    swatch: "#e8dec9",
+    isDark: false,
+    css: {
+      bg: "#ece5d5",
+      card: "#fbf7ee",
+      border: "#dcd2be",
+      text: "#231e18",
+      muted: "#7c7161",
+      strong: "#120f0b",
+      lit: "#b45309",
+      pillBg: "#efe7d6",
+      pillHover: "#e4d9c3"
+    },
+    ramps: {
+      lo:  { top: "#f4ede0", shades: ["#e8dec9", "#d9ccb4", "#c5b69c", "#ad9d82"] },
+      mid: { top: "#fcf9f2", shades: ["#eee5d3", "#dfd3bc", "#c9baa0", "#ae9e84"] },
+      hi:  { top: "#fffdf9", shades: ["#f3ebd9", "#e4d8c1", "#cebfa4", "#b2a287"] },
+      lit: { top: "#fef3c7", shades: ["#fcd34d", "#d97706", "#b45309", "#78350f"] },
+      brass: { top: "#fef08a", shades: ["#facc15", "#ca8a04", "#a16207", "#713f12"] },
+      copper: { top: "#fed7aa", shades: ["#fb923c", "#c2410c", "#9a3412", "#6c2710"] }
+    },
+    lines: {
+      hi: "#1e1913",
+      mid: "#463d31",
+      lo: "#7d7160",
+      faint: "#bfb39f",
+      lit: "#6c2710",
+      dot: "#2e271f"
+    },
+    halo: "#d4c8b2",
+    haloOpacity: 0.46,
+    channels: {
+      intake: "#1d4ed8",
+      comp: "#6d28d9",
+      comb: "#d97706",
+      exhaust: "#b91c1c",
+      cavity: "#e9dfc9"
+    },
+    glass: { top: "#fffaf0", rim: "#b45309", tint: "#fef3c7", opacity: 0.32 }
+  },
+  {
+    id: "dark",
+    name: "Dark",
+    swatch: "#262a30",
+    isDark: true,
+    css: {
+      bg: "#0c0e10",
+      card: "#14171a",
+      border: "#262b31",
+      text: "#e6e4dd",
+      muted: "#889099",
+      strong: "#ffffff",
+      lit: "#38bdf8",
+      pillBg: "#1d2227",
+      pillHover: "#272d35"
+    },
+    ramps: {
+      lo:  { top: "#262b32", shades: ["#1f242a", "#1a1e23", "#15181c", "#101216"] },
+      mid: { top: "#383f48", shades: ["#2e343c", "#252a31", "#1d2127", "#15181d"] },
+      hi:  { top: "#4c5561", shades: ["#3f4752", "#323942", "#262c33", "#1b1f24"] },
+      lit: { top: "#e0f2fe", shades: ["#7dd3fc", "#38bdf8", "#0284c7", "#0369a1"] },
+      brass: { top: "#fef08a", shades: ["#eab308", "#ca8a04", "#854d0e", "#422006"] },
+      copper: { top: "#fdba74", shades: ["#ea580c", "#9a3412", "#7c2d12", "#431407"] }
+    },
+    lines: {
+      hi: "#f1efe9",
+      mid: "#a5acb6",
+      lo: "#5c6470",
+      faint: "#343a42",
+      lit: "#e0f2fe",
+      dot: "#d6d4ce"
+    },
+    halo: "#07080a",
+    haloOpacity: 0.78,
+    channels: {
+      intake: "#38bdf8",
+      comp: "#a855f7",
+      comb: "#fb923c",
+      exhaust: "#f87171",
+      cavity: "#0e1013"
+    },
+    glass: { top: "#e0f2fe", rim: "#38bdf8", tint: "#0c4a6e", opacity: 0.36 }
+  },
+  {
+    id: "blueprint",
+    name: "Blueprint",
+    swatch: "#1b3b66",
+    isDark: true,
+    css: {
+      bg: "#081426",
+      card: "#0d1f3a",
+      border: "#1c3c6b",
+      text: "#e0f2fe",
+      muted: "#7da5d9",
+      strong: "#ffffff",
+      lit: "#fbbf24",
+      pillBg: "#132c52",
+      pillHover: "#1b3c6e"
+    },
+    ramps: {
+      lo:  { top: "#1b3a66", shades: ["#163157", "#122847", "#0e2038", "#0a1729"] },
+      mid: { top: "#274f87", shades: ["#204373", "#19365e", "#132a4a", "#0e1f38"] },
+      hi:  { top: "#3767ab", shades: ["#2c5691", "#224575", "#19355c", "#122645"] },
+      lit: { top: "#fef9c3", shades: ["#fde047", "#fbbf24", "#d97706", "#92400e"] },
+      brass: { top: "#fef08a", shades: ["#facc15", "#ca8a04", "#854d0e", "#422006"] },
+      copper: { top: "#fed7aa", shades: ["#fb923c", "#ea580c", "#9a3412", "#431407"] }
+    },
+    lines: {
+      hi: "#eff6ff",
+      mid: "#93c5fd",
+      lo: "#3b82f6",
+      faint: "#1e40af",
+      lit: "#fef08a",
+      dot: "#dbeafe"
+    },
+    halo: "#050d1a",
+    haloOpacity: 0.75,
+    channels: {
+      intake: "#38bdf8",
+      comp: "#818cf8",
+      comb: "#facc15",
+      exhaust: "#fb7185",
+      cavity: "#09172b"
+    },
+    glass: { top: "#ffffff", rim: "#93c5fd", tint: "#1e40af", opacity: 0.34 }
+  },
+  {
+    id: "sepia",
+    name: "Sepia",
+    swatch: "#dfd3be",
+    isDark: false,
+    css: {
+      bg: "#e4dac8",
+      card: "#f4ece0",
+      border: "#d1c4ae",
+      text: "#2b2118",
+      muted: "#7a6a58",
+      strong: "#17110c",
+      lit: "#be123c",
+      pillBg: "#e8decb",
+      pillHover: "#ddd0b8"
+    },
+    ramps: {
+      lo:  { top: "#ece2d0", shades: ["#dfd2bc", "#cfc0a7", "#bca98e", "#a38f73"] },
+      mid: { top: "#f7f0e4", shades: ["#e8dcc8", "#d7c8b0", "#c2b095", "#a79478"] },
+      hi:  { top: "#fcf8f0", shades: ["#eee3d0", "#ded0b8", "#c8b69b", "#ad9a7e"] },
+      lit: { top: "#ffe4e6", shades: ["#fda4af", "#f43f5e", "#be123c", "#881337"] },
+      brass: { top: "#fef08a", shades: ["#eab308", "#ca8a04", "#a16207", "#713f12"] },
+      copper: { top: "#fed7aa", shades: ["#fb923c", "#c2410c", "#9a3412", "#7c2d12"] }
+    },
+    lines: {
+      hi: "#261c14",
+      mid: "#4f3e2e",
+      lo: "#806c58",
+      faint: "#bda992",
+      lit: "#881337",
+      dot: "#36281d"
+    },
+    halo: "#cbbba2",
+    haloOpacity: 0.48,
+    channels: {
+      intake: "#0369a1",
+      comp: "#6d28d9",
+      comb: "#e11d48",
+      exhaust: "#b91c1c",
+      cavity: "#e2d5c0"
+    },
+    glass: { top: "#fffbeb", rim: "#b45309", tint: "#fde68a", opacity: 0.34 }
+  }
+];
+
+const CHANNEL_RAMP_ALIASES = {
+  channelA: "intake",
+  channelB: "comp",
+  channelC: "comb",
+  channelD: "exhaust"
+};
+
+function deriveChannelRamp(hexColor, isDark) {
+  const base = new THREE.Color(hexColor);
+  const white = new THREE.Color(isDark ? "#e2e8f0" : "#ffffff");
+  const black = new THREE.Color("#090b0f");
+  const mixHex = (target, amt) => "#" + base.clone().lerp(target, amt).getHexString();
+  return {
+    top: mixHex(white, isDark ? 0.42 : 0.62),
+    shades: [
+      mixHex(white, isDark ? 0.18 : 0.28),
+      "#" + base.getHexString(),
+      mixHex(black, 0.25),
+      mixHex(black, 0.48)
+    ]
+  };
+}
+
+function resolveThemeRamp(theme, rampKey) {
+  const canonical = CHANNEL_RAMP_ALIASES[rampKey] || rampKey;
+  if (theme.ramps[canonical]) return theme.ramps[canonical];
+  if (theme.channels && theme.channels[canonical]) {
+    return deriveChannelRamp(theme.channels[canonical], Boolean(theme.isDark));
+  }
+  return theme.ramps.mid;
+}
+const CEL_VERTEX_SHADER = `
+  varying vec3 vWorldNormal;
+  varying vec3 vWorldPos;
+  void main() {
+    vWorldNormal = normalize(mat3(modelMatrix) * normal);
+    vec4 wp = modelMatrix * vec4(position, 1.0);
+    vWorldPos = wp.xyz;
+    gl_Position = projectionMatrix * viewMatrix * wp;
+  }
+`;
+const CEL_FRAGMENT_SHADER = `
+  uniform vec3 uLightDir;
+  uniform vec3 uTop;
+  uniform vec3 uShade0;
+  uniform vec3 uShade1;
+  uniform vec3 uShade2;
+  uniform vec3 uShade3;
+  uniform float uTopBias;
+  uniform vec4 uSectionPlane;
+  uniform float uSectionEnabled;
+  uniform float uClippedPart;
+  varying vec3 vWorldNormal;
+  varying vec3 vWorldPos;
+
+  float aaStep(float edge, float x) {
+    float w = clamp(fwidth(x) * 1.15, 0.015, 0.08);
+    return smoothstep(edge - w, edge + w, x);
+  }
+
+  void main() {
+    if (uSectionEnabled > 0.5 && uClippedPart > 0.5) {
+      float secDist = dot(vWorldPos, uSectionPlane.xyz) + uSectionPlane.w;
+      if (secDist < 0.0) discard;
+    }
+
+    if (!gl_FrontFacing) {
+      float hatch = step(0.54, fract((vWorldPos.x * 1.15 + vWorldPos.y * 1.35 + vWorldPos.z * 0.9) * 12.0));
+      vec3 cutCol = mix(uShade0 * 0.86, uShade1, hatch * 0.65);
+      gl_FragColor = vec4(cutCol, 1.0);
+      return;
+    }
+
+    vec3 N = normalize(vWorldNormal);
+    float ndotl = dot(N, normalize(uLightDir));
+
+    vec3 sideCol = uShade0;
+    sideCol = mix(sideCol, uShade1, aaStep(-0.28, ndotl));
+    sideCol = mix(sideCol, uShade2, aaStep(0.14, ndotl));
+    sideCol = mix(sideCol, uShade3, aaStep(0.56, ndotl));
+
+    float upness = N.y + 0.18 * N.z;
+    float isTop = aaStep(uTopBias, upness);
+    vec3 col = mix(sideCol, uTop, isTop);
+
+    gl_FragColor = vec4(col, 1.0);
+  }
+`;
+const GLASS_VERTEX_SHADER = `
+  varying vec3 vWorldNormal;
+  varying vec3 vWorldPos;
+  varying vec3 vViewDir;
+  void main() {
+    vWorldNormal = normalize(mat3(modelMatrix) * normal);
+    vec4 wp = modelMatrix * vec4(position, 1.0);
+    vWorldPos = wp.xyz;
+    vViewDir = normalize(cameraPosition - wp.xyz);
+    gl_Position = projectionMatrix * viewMatrix * wp;
+  }
+`;
+const GLASS_FRAGMENT_SHADER = `
+  uniform vec3 uLightDir;
+  uniform vec3 uTop;
+  uniform vec3 uRim;
+  uniform vec3 uTint;
+  uniform float uOpacity;
+  uniform vec4 uSectionPlane;
+  uniform float uSectionEnabled;
+  uniform float uClippedPart;
+  varying vec3 vWorldNormal;
+  varying vec3 vWorldPos;
+  varying vec3 vViewDir;
+
+  void main() {
+    if (uSectionEnabled > 0.5 && uClippedPart > 0.5) {
+      float secDist = dot(vWorldPos, uSectionPlane.xyz) + uSectionPlane.w;
+      if (secDist < 0.0) discard;
+    }
+
+    vec3 N = normalize(vWorldNormal);
+    if (!gl_FrontFacing) N = -N;
+    vec3 V = normalize(vViewDir);
+    vec3 L = normalize(uLightDir);
+
+    float ndotv = abs(dot(N, V));
+    float fresnel = pow(clamp(1.0 - ndotv, 0.0, 1.0), 2.0);
+    vec3 H = normalize(L + V);
+    float specBand = smoothstep(0.90, 0.96, max(dot(N, H), 0.0));
+    float topBand = smoothstep(0.68, 0.82, N.y + 0.15 * N.z) * 0.28;
+
+    vec3 col = mix(uTint, uRim, smoothstep(0.22, 0.65, fresnel));
+    col = mix(col, uTop, clamp(specBand * 0.72 + topBand, 0.0, 0.85));
+    float alpha = clamp(uOpacity + fresnel * 0.44 + specBand * 0.35, 0.06, 0.90);
+    gl_FragColor = vec4(col, alpha);
+  }
+`;
+function createShaderKit(initialTheme = THEMES[0]) {
+  let currentTheme = initialTheme;
+  const lightDir = new THREE.Vector3(0.52, 0.78, 0.48).normalize();
+  const anatomyMaterials = [];
+  const outlineMaterials = [];
+  const glassMaterials = [];
+  const haloMaterials = [];
+  const clippableLineMaterials = [];
+  const themeListeners = [];
+  const lineMaterials = {};
+  const dotMaterials = {};
+
+  let activeSectionPlane = null;
+  const sectionPlaneVec4 = new THREE.Vector4(0, 0, -1, 999);
+  let sectionEnabledVal = 0.0;
+
+  ["hi", "mid", "lo", "faint", "lit"].forEach((k) => {
+    lineMaterials[k] = new THREE.LineBasicMaterial({
+      color: new THREE.Color(currentTheme.lines[k]),
+      transparent: true,
+      opacity: k === "faint" ? 0.72 : 0.95
+    });
+  });
+
+  ["dot", "lit"].forEach((k) => {
+    dotMaterials[k] = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(currentTheme.lines[k === "dot" ? "dot" : "lit"])
+    });
+  });
+
+  function createAnatomySolidMaterial(rampKey = "mid", topBias = 0.62, clippable = false) {
+    const ramp = resolveThemeRamp(currentTheme, rampKey);
+    const mat = new THREE.ShaderMaterial({
+      uniforms: {
+        uLightDir: { value: lightDir },
+        uTop:    { value: new THREE.Color(ramp.top) },
+        uShade0: { value: new THREE.Color(ramp.shades[3]) },
+        uShade1: { value: new THREE.Color(ramp.shades[2]) },
+        uShade2: { value: new THREE.Color(ramp.shades[1]) },
+        uShade3: { value: new THREE.Color(ramp.shades[0]) },
+        uTopBias: { value: topBias },
+        uSectionPlane: { value: sectionPlaneVec4 },
+        uSectionEnabled: { value: sectionEnabledVal },
+        uClippedPart: { value: clippable ? 1.0 : 0.0 }
+      },
+      vertexShader: CEL_VERTEX_SHADER,
+      fragmentShader: CEL_FRAGMENT_SHADER,
+      side: clippable && sectionEnabledVal > 0.5 ? THREE.DoubleSide : THREE.FrontSide,
+      polygonOffset: true,
+      polygonOffsetFactor: 1.5,
+      polygonOffsetUnits: 1.5
+    });
+    mat.userData.rampKey = rampKey;
+    mat.userData.clippable = Boolean(clippable);
+    anatomyMaterials.push(mat);
+    return mat;
+  }
+
+  function createGlassMaterial(opts = {}) {
+    const gTheme = currentTheme.glass || { top: "#ffffff", rim: "#38bdf8", tint: "#bae6fd", opacity: 0.34 };
+    const clippable = Boolean(opts.clippable);
+    const customOpacity = typeof opts.opacity === "number" ? opts.opacity : null;
+    const mat = new THREE.ShaderMaterial({
+      uniforms: {
+        uLightDir: { value: lightDir },
+        uTop: { value: new THREE.Color(gTheme.top) },
+        uRim: { value: new THREE.Color(gTheme.rim) },
+        uTint: { value: new THREE.Color(gTheme.tint) },
+        uOpacity: { value: customOpacity !== null ? customOpacity : gTheme.opacity },
+        uSectionPlane: { value: sectionPlaneVec4 },
+        uSectionEnabled: { value: sectionEnabledVal },
+        uClippedPart: { value: clippable ? 1.0 : 0.0 }
+      },
+      vertexShader: GLASS_VERTEX_SHADER,
+      fragmentShader: GLASS_FRAGMENT_SHADER,
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    });
+    mat.userData.customOpacity = customOpacity;
+    mat.userData.clippable = clippable;
+    glassMaterials.push(mat);
+    return mat;
+  }
+
+  function createOutlineMaterial(lineKey = "mid", thickness = 0.018, clippable = false) {
+    const mat = new THREE.ShaderMaterial({
+      uniforms: {
+        uColor: { value: new THREE.Color(currentTheme.lines[lineKey] || currentTheme.lines.mid) },
+        uThickness: { value: thickness },
+        uSectionPlane: { value: sectionPlaneVec4 },
+        uSectionEnabled: { value: sectionEnabledVal },
+        uClippedPart: { value: clippable ? 1.0 : 0.0 }
+      },
+      vertexShader: `
+        uniform float uThickness;
+        varying vec3 vWorldPos;
+        void main() {
+          vec3 displaced = position + normalize(normal) * uThickness;
+          vec4 wp = modelMatrix * vec4(displaced, 1.0);
+          vWorldPos = wp.xyz;
+          gl_Position = projectionMatrix * viewMatrix * wp;
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 uColor;
+        uniform vec4 uSectionPlane;
+        uniform float uSectionEnabled;
+        uniform float uClippedPart;
+        varying vec3 vWorldPos;
+        void main() {
+          if (uSectionEnabled > 0.5 && uClippedPart > 0.5) {
+            float secDist = dot(vWorldPos, uSectionPlane.xyz) + uSectionPlane.w;
+            if (secDist < 0.0) discard;
+          }
+          gl_FragColor = vec4(uColor, 1.0);
+        }
+      `,
+      side: THREE.BackSide
+    });
+    mat.userData.lineKey = lineKey;
+    mat.userData.clippable = Boolean(clippable);
+    outlineMaterials.push(mat);
+    return mat;
+  }
+
+  function createHaloMaterial() {
+    const mat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(currentTheme.halo),
+      transparent: true,
+      opacity: currentTheme.haloOpacity,
+      depthWrite: false
+    });
+    haloMaterials.push(mat);
+    return mat;
+  }
+
+  function createAnatomyPart(geometry, options = {}) {
+    const isGlass = options.ramp === "glass";
+    const opts = Object.assign({
+      ramp: "mid",
+      outline: isGlass ? "lo" : "mid",
+      crease: "faint",
+      creaseAngle: 28,
+      outlineWidth: isGlass ? 0.009 : 0.017,
+      topBias: 0.62,
+      noOutline: false,
+      noCrease: false,
+      clippable: false,
+      opacity: undefined
+    }, options);
+
+    const group = new THREE.Group();
+    const solidMat = isGlass
+      ? createGlassMaterial({ opacity: opts.opacity, clippable: opts.clippable })
+      : createAnatomySolidMaterial(opts.ramp, opts.topBias, opts.clippable);
+    const mesh = new THREE.Mesh(geometry, solidMat);
+    mesh.name = "solid";
+    if (isGlass) {
+      mesh.renderOrder = 2;
+    }
+    group.add(mesh);
+
+    if (!opts.noOutline) {
+      const outMat = createOutlineMaterial(opts.outline, opts.outlineWidth, opts.clippable);
+      const outMesh = new THREE.Mesh(geometry, outMat);
+      outMesh.name = "outline";
+      group.add(outMesh);
+    }
+
+    if (!opts.noCrease) {
+      const edgesGeo = new THREE.EdgesGeometry(geometry, opts.creaseAngle);
+      let creaseMat = lineMaterials[opts.crease] || lineMaterials.faint;
+      if (opts.clippable) {
+        creaseMat = creaseMat.clone();
+        creaseMat.userData.lineKey = opts.crease in lineMaterials ? opts.crease : "faint";
+        creaseMat.clippingPlanes = activeSectionPlane ? [activeSectionPlane] : [];
+        clippableLineMaterials.push(creaseMat);
+      }
+      const edges = new THREE.LineSegments(edgesGeo, creaseMat);
+      edges.name = "crease";
+      group.add(edges);
+    }
+
+    return group;
+  }
+
+  function setSectionPlane(planeOrNull) {
+    activeSectionPlane = planeOrNull || null;
+    sectionEnabledVal = activeSectionPlane ? 1.0 : 0.0;
+    if (activeSectionPlane) {
+      sectionPlaneVec4.set(
+        activeSectionPlane.normal.x,
+        activeSectionPlane.normal.y,
+        activeSectionPlane.normal.z,
+        activeSectionPlane.constant
+      );
+    }
+    anatomyMaterials.forEach((mat) => {
+      mat.uniforms.uSectionEnabled.value = sectionEnabledVal;
+      if (mat.userData.clippable) {
+        mat.side = activeSectionPlane ? THREE.DoubleSide : THREE.FrontSide;
+      }
+    });
+    glassMaterials.forEach((mat) => {
+      mat.uniforms.uSectionEnabled.value = sectionEnabledVal;
+    });
+    outlineMaterials.forEach((mat) => {
+      mat.uniforms.uSectionEnabled.value = sectionEnabledVal;
+    });
+    clippableLineMaterials.forEach((mat) => {
+      mat.clippingPlanes = activeSectionPlane ? [activeSectionPlane] : [];
+    });
+  }
+
+  function onThemeChange(fn) {
+    themeListeners.push(fn);
+  }
+
+  function applyTheme(themeOrId) {
+    const theme = typeof themeOrId === "string"
+      ? THEMES.find((t) => t.id === themeOrId) || THEMES[0]
+      : themeOrId;
+    currentTheme = theme;
+
+    anatomyMaterials.forEach((mat) => {
+      const ramp = resolveThemeRamp(theme, mat.userData.rampKey);
+      mat.uniforms.uTop.value.set(ramp.top);
+      mat.uniforms.uShade0.value.set(ramp.shades[3]);
+      mat.uniforms.uShade1.value.set(ramp.shades[2]);
+      mat.uniforms.uShade2.value.set(ramp.shades[1]);
+      mat.uniforms.uShade3.value.set(ramp.shades[0]);
+    });
+
+    const gTheme = theme.glass || { top: "#ffffff", rim: "#38bdf8", tint: "#bae6fd", opacity: 0.34 };
+    glassMaterials.forEach((mat) => {
+      mat.uniforms.uTop.value.set(gTheme.top);
+      mat.uniforms.uRim.value.set(gTheme.rim);
+      mat.uniforms.uTint.value.set(gTheme.tint);
+      if (mat.userData.customOpacity === null) {
+        mat.uniforms.uOpacity.value = gTheme.opacity;
+      }
+    });
+
+    outlineMaterials.forEach((mat) => {
+      const col = theme.lines[mat.userData.lineKey] || theme.lines.mid;
+      mat.uniforms.uColor.value.set(col);
+    });
+
+    Object.keys(lineMaterials).forEach((k) => {
+      lineMaterials[k].color.set(theme.lines[k]);
+    });
+    clippableLineMaterials.forEach((mat) => {
+      const lk = mat.userData.lineKey || "faint";
+      mat.color.set(theme.lines[lk] || theme.lines.faint);
+    });
+    dotMaterials.dot.color.set(theme.lines.dot);
+    dotMaterials.lit.color.set(theme.lines.lit);
+
+    haloMaterials.forEach((mat) => {
+      mat.color.set(theme.halo);
+      mat.opacity = theme.haloOpacity;
+    });
+
+    themeListeners.forEach((fn) => fn(theme));
+    return theme;
+  }
+
+  return {
+    THEMES,
+    get currentTheme() { return currentTheme; },
+    lightDir,
+    lineMaterials,
+    dotMaterials,
+    createAnatomySolidMaterial,
+    createGlassMaterial,
+    createOutlineMaterial,
+    createHaloMaterial,
+    createAnatomyPart,
+    setSectionPlane,
+    onThemeChange,
+    applyTheme
+  };
+}
+
+
+/* --- kit/primitives.mjs --- */
+function makeRoundedRectShape(w, h, r) {
+  const shape = new THREE.Shape();
+  const hw = w * 0.5;
+  const hh = h * 0.5;
+  const cr = Math.min(r, hw, hh);
+  shape.moveTo(-hw + cr, -hh);
+  shape.lineTo(hw - cr, -hh);
+  shape.absarc(hw - cr, -hh + cr, cr, -Math.PI / 2, 0, false);
+  shape.lineTo(hw, hh - cr);
+  shape.absarc(hw - cr, hh - cr, cr, 0, Math.PI / 2, false);
+  shape.lineTo(-hw + cr, hh);
+  shape.absarc(-hw + cr, hh - cr, cr, Math.PI / 2, Math.PI, false);
+  shape.lineTo(-hw, -hh + cr);
+  shape.absarc(-hw + cr, -hh + cr, cr, Math.PI, Math.PI * 1.5, false);
+  return shape;
+}
+
+/**
+ * Builds a horizontal rounded-rect slab in the XZ plane.
+ * After rotateX(Math.PI / 2), extrusion extends from y = 0 down to y = -h
+ * (so placing at y = topY sets the top surface at topY and bottom at topY - h).
+ */
+function buildSlabGeometry(w, d, h, opts = {}) {
+  const {
+    radius = 0.26,
+    bevel = true,
+    bevelSize = 0.025,
+    bevelThickness = 0.025,
+    bevelSegments = 2,
+    curveSegments = 16,
+    centerY = false
+  } = opts;
+  const shape = makeRoundedRectShape(w, d, radius);
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: h,
+    bevelEnabled: bevel,
+    bevelSegments,
+    steps: 1,
+    bevelSize: bevel ? bevelSize : 0,
+    bevelThickness: bevel ? bevelThickness : 0,
+    curveSegments
+  });
+  geo.rotateX(Math.PI / 2);
+  if (centerY) {
+    geo.translate(0, h * 0.5, 0);
+  }
+  return geo;
+}
+
+/**
+ * Axis-aware cylinder helper so callers never mix up Y-up vs Z-aligned shafts.
+ */
+function buildCylinderGeometry(rTop, rBot, length, opts = {}) {
+  const { segments = 24, axis = "y" } = opts;
+  const geo = new THREE.CylinderGeometry(rTop, rBot, length, segments);
+  if (axis === "z") {
+    geo.rotateX(Math.PI / 2);
+  } else if (axis === "x") {
+    geo.rotateZ(-Math.PI / 2);
+  }
+  return geo;
+}
+function buildExternalGearGeometry(pitchR, teeth, toothDepth, width, boreFraction = 0.56) {
+  const shape = new THREE.Shape();
+  const stepsPerTooth = 4;
+  const total = teeth * stepsPerTooth;
+  for (let i = 0; i <= total; i++) {
+    const a = (i / total) * Math.PI * 2;
+    const phase = (i % stepsPerTooth) / stepsPerTooth;
+    const r = phase < 0.45 ? pitchR + toothDepth * 0.5 : pitchR - toothDepth * 0.5;
+    const x = Math.cos(a) * r;
+    const y = Math.sin(a) * r;
+    if (i === 0) shape.moveTo(x, y);
+    else shape.lineTo(x, y);
+  }
+  if (boreFraction > 0) {
+    const bore = new THREE.Path();
+    bore.absarc(0, 0, pitchR * boreFraction, 0, Math.PI * 2, false);
+    shape.holes.push(bore);
+  }
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: width,
+    bevelEnabled: false,
+    curveSegments: total
+  });
+  geo.translate(0, 0, -width * 0.5);
+  return geo;
+}
+function buildInternalGearRingGeometry(outerR, pitchR, teeth, toothDepth, width, zOffset = -width * 0.5) {
+  const stepsPerTooth = 4;
+  const total = teeth * stepsPerTooth;
+
+  const shape = new THREE.Shape();
+  shape.absarc(0, 0, outerR, 0, Math.PI * 2, false);
+
+  const gearHole = new THREE.Path();
+  for (let i = 0; i <= total; i++) {
+    const a = (i / total) * Math.PI * 2;
+    const phase = (i % stepsPerTooth) / stepsPerTooth;
+    const r = phase < 0.45 ? pitchR - toothDepth * 0.5 : pitchR + toothDepth * 0.5;
+    const x = Math.cos(a) * r;
+    const y = Math.sin(a) * r;
+    if (i === 0) gearHole.moveTo(x, y);
+    else gearHole.lineTo(x, y);
+  }
+  shape.holes.push(gearHole);
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: width,
+    bevelEnabled: false,
+    curveSegments: total
+  });
+  geo.translate(0, 0, zOffset);
+  return geo;
+}
+function makePlanOutline(w, d, r, y, kit, toneKey = "faint") {
+  const shape = makeRoundedRectShape(w, d, r);
+  const pts2d = shape.getPoints(16);
+  const pts3d = pts2d.map((p) => new THREE.Vector3(p.x, y, p.y));
+  const geo = new THREE.BufferGeometry().setFromPoints(pts3d);
+  return new THREE.LineLoop(geo, kit.lineMaterials[toneKey] || kit.lineMaterials.faint);
+}
+function makeRingLine(radius, segments, kit, toneKey = "lo") {
+  const pts = [];
+  for (let i = 0; i <= segments; i++) {
+    const a = (i / segments) * Math.PI * 2;
+    pts.push(new THREE.Vector3(Math.cos(a) * radius, Math.sin(a) * radius, 0));
+  }
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  return new THREE.Line(geo, kit.lineMaterials[toneKey] || kit.lineMaterials.lo);
+}
+function makeScrewDetail(x, y, z, radius, axis, kit) {
+  const g = new THREE.Group();
+  g.position.set(x, y, z);
+  const ring = makeRingLine(radius, 20, kit, "lo");
+  const dotGeo = new THREE.CircleGeometry(radius * 0.36, 12);
+  const dot = new THREE.Mesh(dotGeo, kit.dotMaterials.dot);
+  dot.position.z = 0.002;
+  g.add(ring, dot);
+  if (axis === "y") {
+    g.rotation.x = -Math.PI / 2;
+  } else if (axis === "x") {
+    g.rotation.y = Math.PI / 2;
+  }
+  return g;
+}
+function makeKnurlLines(radius, y0, y1, count, kit, opts = {}) {
+  const { tone = "lo", pointer = null } = opts;
+  const pts = [];
+  for (let i = 0; i < count; i++) {
+    const a = (i / count) * Math.PI * 2;
+    const kx = Math.cos(a) * (radius + 0.003);
+    const kz = Math.sin(a) * (radius + 0.003);
+    pts.push(new THREE.Vector3(kx, y0, kz), new THREE.Vector3(kx, y1, kz));
+  }
+  if (pointer) {
+    pts.push(
+      new THREE.Vector3(0, pointer.y, pointer.z0),
+      new THREE.Vector3(0, pointer.y, pointer.z1)
+    );
+  }
+  return new THREE.LineSegments(
+    new THREE.BufferGeometry().setFromPoints(pts),
+    kit.lineMaterials[tone] || kit.lineMaterials.lo
+  );
+}
+function makeRulerTicks(rulerX, rulerW, rulerZ, rulerD, y, count, majorEvery, kit) {
+  const minorPts = [];
+  const majorPts = [];
+  for (let i = 0; i <= count; i++) {
+    const tx = rulerX - rulerW * 0.46 + (i / count) * (rulerW * 0.92);
+    const zEdge = rulerZ - rulerD * 0.5;
+    const len = i % majorEvery === 0 ? 0.15 : 0.08;
+    const target = i % majorEvery === 0 ? majorPts : minorPts;
+    target.push(new THREE.Vector3(tx, y, zEdge), new THREE.Vector3(tx, y, zEdge + len));
+  }
+  const g = new THREE.Group();
+  g.add(
+    new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(minorPts), kit.lineMaterials.lo),
+    new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(majorPts), kit.lineMaterials.mid)
+  );
+  return g;
+}
+function makeHaloMesh(w, d, r, pos, kit) {
+  const haloShape = makeRoundedRectShape(w, d, r);
+  const haloGeo = new THREE.ShapeGeometry(haloShape, 24);
+  haloGeo.rotateX(Math.PI / 2);
+  const haloMat = kit.createHaloMaterial();
+  const haloMesh = new THREE.Mesh(haloGeo, haloMat);
+  haloMesh.position.set(...pos);
+  return haloMesh;
+}
+
+/**
+ * Orthographic blueprint datum grid + perimeter frame for non-bench archetypes
+ * ("free-space", "section", "diorama").
+ */
+function makeDatumGrid(width, depth, divisionsX = 8, divisionsZ = 6, y = 0, kit, toneKey = "faint") {
+  const g = new THREE.Group();
+  const hw = width * 0.5;
+  const hd = depth * 0.5;
+  const gridPts = [];
+  const tickPts = [];
+
+  for (let i = 0; i <= divisionsX; i++) {
+    const x = -hw + (i / divisionsX) * width;
+    const target = i === 0 || i === divisionsX ? tickPts : gridPts;
+    target.push(new THREE.Vector3(x, y, -hd), new THREE.Vector3(x, y, hd));
+  }
+  for (let j = 0; j <= divisionsZ; j++) {
+    const z = -hd + (j / divisionsZ) * depth;
+    const target = j === 0 || j === divisionsZ ? tickPts : gridPts;
+    target.push(new THREE.Vector3(-hw, y, z), new THREE.Vector3(hw, y, z));
+  }
+
+  const c = 0.14;
+  tickPts.push(
+    new THREE.Vector3(-c, y + 0.001, 0), new THREE.Vector3(c, y + 0.001, 0),
+    new THREE.Vector3(0, y + 0.001, -c), new THREE.Vector3(0, y + 0.001, c)
+  );
+
+  g.add(
+    new THREE.LineSegments(
+      new THREE.BufferGeometry().setFromPoints(gridPts),
+      kit.lineMaterials[toneKey] || kit.lineMaterials.faint
+    ),
+    new THREE.LineSegments(
+      new THREE.BufferGeometry().setFromPoints(tickPts),
+      kit.lineMaterials.lo
+    )
+  );
+  return g;
+}
+
+/**
+ * Graduated 3-axis / azimuthal gimbal datum ring for "free-space" or aerospace figures.
+ */
+function makeGimbalDatumRing(radius, y = 0, kit, toneKey = "lo") {
+  const g = new THREE.Group();
+  g.position.set(0, y, 0);
+
+  const eqPts = [];
+  const tickPts = [];
+  const majorPts = [];
+  const segs = 72;
+  for (let i = 0; i <= segs; i++) {
+    const a = (i / segs) * Math.PI * 2;
+    eqPts.push(new THREE.Vector3(Math.cos(a) * radius, 0, Math.sin(a) * radius));
+  }
+  for (let deg = 0; deg < 360; deg += 10) {
+    const a = (deg * Math.PI) / 180;
+    const isMajor = deg % 30 === 0;
+    const r0 = radius - (isMajor ? 0.14 : 0.07);
+    const target = isMajor ? majorPts : tickPts;
+    target.push(
+      new THREE.Vector3(Math.cos(a) * r0, 0, Math.sin(a) * r0),
+      new THREE.Vector3(Math.cos(a) * radius, 0, Math.sin(a) * radius)
+    );
+  }
+
+  const meridPts = [];
+  for (let i = 0; i <= segs; i++) {
+    const a = (i / segs) * Math.PI * 2;
+    const rM = radius * 1.03;
+    meridPts.push(new THREE.Vector3(Math.cos(a) * rM, Math.sin(a) * rM, 0));
+  }
+
+  g.add(
+    new THREE.Line(new THREE.BufferGeometry().setFromPoints(eqPts), kit.lineMaterials[toneKey] || kit.lineMaterials.lo),
+    new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(tickPts), kit.lineMaterials.faint),
+    new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(majorPts), kit.lineMaterials.mid),
+    new THREE.Line(new THREE.BufferGeometry().setFromPoints(meridPts), kit.lineMaterials.faint)
+  );
+  return g;
+}
+
+/**
+ * Builds an open-front hollow cabinet/chassis shell BufferGeometry for "cabinet" / "enclosure" archetypes.
+ * Centered on X and Z; Y runs from 0..height (or -height/2..+height/2 when centerY = true).
+ */
+function buildEnclosureBoxGeometry(width, height, depth, wallThickness = 0.12, opts = {}) {
+  const { openTop = false, centerY = true } = opts;
+  const hw = width * 0.5;
+  const hd = depth * 0.5;
+  const t = Math.min(wallThickness, hw * 0.45, height * 0.35, hd * 0.45);
+  const y0 = centerY ? -height * 0.5 : 0;
+  const y1 = centerY ? height * 0.5 : height;
+  const iy0 = y0 + t;
+  const iy1 = openTop ? y1 : y1 - t;
+  const iz0 = -hd + t;
+
+  const positions = [];
+  const pushTri = (a, b, c) => {
+    positions.push(a[0], a[1], a[2], b[0], b[1], b[2], c[0], c[1], c[2]);
+  };
+  // Quad with outward normal when vertices [p0, p1, p2, p3] are ordered CCW from outside
+  const pushQuad = (p0, p1, p2, p3) => {
+    pushTri(p0, p1, p2);
+    pushTri(p0, p2, p3);
+  };
+
+  // Outer left (-X)
+  pushQuad([-hw, y0, -hd], [-hw, y0, hd], [-hw, y1, hd], [-hw, y1, -hd]);
+  // Outer right (+X)
+  pushQuad([hw, y0, hd], [hw, y0, -hd], [hw, y1, -hd], [hw, y1, hd]);
+  // Outer back (-Z)
+  pushQuad([hw, y0, -hd], [-hw, y0, -hd], [-hw, y1, -hd], [hw, y1, -hd]);
+  // Outer bottom (-Y)
+  pushQuad([-hw, y0, -hd], [hw, y0, -hd], [hw, y0, hd], [-hw, y0, hd]);
+
+  // Inner bottom (+Y)
+  pushQuad([-hw + t, iy0, hd], [hw - t, iy0, hd], [hw - t, iy0, iz0], [-hw + t, iy0, iz0]);
+  // Inner back (+Z)
+  pushQuad([-hw + t, iy0, iz0], [hw - t, iy0, iz0], [hw - t, iy1, iz0], [-hw + t, iy1, iz0]);
+  // Inner left (+X)
+  pushQuad([-hw + t, iy0, hd], [-hw + t, iy0, iz0], [-hw + t, iy1, iz0], [-hw + t, iy1, hd]);
+  // Inner right (-X)
+  pushQuad([hw - t, iy0, iz0], [hw - t, iy0, hd], [hw - t, iy1, hd], [hw - t, iy1, iz0]);
+
+  if (!openTop) {
+    // Outer top (+Y)
+    pushQuad([-hw, y1, hd], [hw, y1, hd], [hw, y1, -hd], [-hw, y1, -hd]);
+    // Inner top (-Y)
+    pushQuad([-hw + t, iy1, iz0], [hw - t, iy1, iz0], [hw - t, iy1, hd], [-hw + t, iy1, hd]);
+    // Front rim (+Z): 4 strips around opening
+    pushQuad([-hw, y0, hd], [hw, y0, hd], [hw, iy0, hd], [-hw, iy0, hd]); // bottom rim
+    pushQuad([-hw, iy1, hd], [hw, iy1, hd], [hw, y1, hd], [-hw, y1, hd]); // top rim
+    pushQuad([-hw, iy0, hd], [-hw + t, iy0, hd], [-hw + t, iy1, hd], [-hw, iy1, hd]); // left post
+    pushQuad([hw - t, iy0, hd], [hw, iy0, hd], [hw, iy1, hd], [hw - t, iy1, hd]); // right post
+  } else {
+    // Front U-rim (+Z)
+    pushQuad([-hw, y0, hd], [hw, y0, hd], [hw, iy0, hd], [-hw, iy0, hd]); // bottom rim
+    pushQuad([-hw, iy0, hd], [-hw + t, iy0, hd], [-hw + t, y1, hd], [-hw, y1, hd]); // left post
+    pushQuad([hw - t, iy0, hd], [hw, iy0, hd], [hw, y1, hd], [hw - t, y1, hd]); // right post
+    // Open top U-rim (+Y)
+    pushQuad([-hw, y1, hd], [-hw + t, y1, hd], [-hw + t, y1, iz0], [-hw, y1, iz0]); // top left lip
+    pushQuad([hw - t, y1, hd], [hw, y1, hd], [hw, y1, iz0], [hw - t, y1, iz0]); // top right lip
+    pushQuad([-hw, y1, iz0], [hw, y1, iz0], [hw, y1, -hd], [-hw, y1, -hd]); // top back lip
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geo.computeVertexNormals();
+  return geo;
+}
+
+
+/* --- kit/registry.mjs --- */
+class Recorder3D {
+  constructor(sceneRoot, kit) {
+    this.root = sceneRoot;
+    this.kit = kit;
+    this.parts = new Map();      // id -> { id, group, geometry, opts }
+    this.tubes = [];             // { id, part, curve, radius, from, to, waypoints, opts }
+    this.joints = new Map();     // id -> THREE.Object3D (named anchor points)
+    this.groups = new Map();     // id -> { id, group, opts }
+    this.tags = new Map();       // id -> { id, text, pos }
+    this.screens = new Map();    // id -> { id, group, mesh, canvas, ctx, texture, draw }
+    this.interactables = [];     // { id, object3d, cursor, hint, onDrag }
+    this.currentStage = "base";  // 'base' | 'structure' | 'subject' | 'mechanism' | 'shader'
+  }
+
+  setStage(stageName) {
+    this.currentStage = stageName;
+  }
+
+  /**
+   * Create and register a named Three.js Group (e.g., for assemblies or kinematic sub-trees)
+   */
+  group(id, opts = {}) {
+    const {
+      parent = this.root,
+      pos = [0, 0, 0],
+      rot = [0, 0, 0],
+      explode = [0, 0, 0],
+      cutawayHide = false,
+      stage = this.currentStage
+    } = opts;
+
+    const g = new THREE.Group();
+    g.name = id;
+    g.position.set(...pos);
+    g.rotation.set(...rot);
+    g.userData = {
+      id,
+      isAssemblyGroup: true,
+      stage,
+      explode,
+      cutawayHide,
+      basePos: [...pos],
+      baseRot: [...rot]
+    };
+    parent.add(g);
+    this.groups.set(id, { id, group: g, opts: g.userData });
+    return g;
+  }
+
+  /**
+   * Register a named 3D anchor/port so other files can snap to it without guessing coordinates.
+   * Pass opts.dir ([dx, dy, dz] in parentGroup local coordinates) for port outward normals.
+   */
+  anchor(id, x, y, z, parentGroup = this.root, opts = {}) {
+    const obj = new THREE.Object3D();
+    obj.name = `anchor:${id}`;
+    obj.position.set(x, y, z);
+    obj.userData.localDir = opts.dir ? new THREE.Vector3(...opts.dir).normalize() : null;
+    parentGroup.add(obj);
+    this.joints.set(id, obj);
+    return obj;
+  }
+
+  /**
+   * Get world position of a registered anchor
+   */
+  getAnchorWorldPos(id) {
+    const obj = this.joints.get(id);
+    if (!obj) {
+      throw new Error(`Missing registered anchor "${id}"`);
+    }
+    this.root.updateMatrixWorld(true);
+    return obj.getWorldPosition(new THREE.Vector3());
+  }
+
+  /**
+   * Get world-space outward port normal of a registered anchor, or null if none was registered
+   */
+  getAnchorWorldDir(id) {
+    const obj = this.joints.get(id);
+    if (!obj) {
+      throw new Error(`Missing registered anchor "${id}"`);
+    }
+    if (!obj.userData?.localDir) return null;
+    this.root.updateMatrixWorld(true);
+    return obj.userData.localDir.clone().transformDirection(obj.matrixWorld).normalize();
+  }
+
+  /**
+   * Create an Anatomy-styled 3D solid and register it for the 3D geometry audit
+   */
+  part(id, geometry, opts = {}) {
+    if (this.parts.has(id)) {
+      throw new Error(`Duplicate part ID registered: "${id}"`);
+    }
+    const {
+      ramp = "mid",          // 'lo' | 'mid' | 'hi' | 'lit' | 'brass' | 'copper' | 'glass' | 'intake' | 'comp' | 'comb' | 'exhaust' | 'channelA..D'
+      outline = ramp === "glass" ? "lo" : "mid",
+      crease = "faint",
+      creaseAngle = 28,
+      outlineWidth = ramp === "glass" ? 0.009 : 0.017,
+      topBias = 0.62,
+      noOutline = false,
+      noCrease = false,
+      clippable = false,
+      opacity = undefined,
+      parent = this.root,
+      pos = [0, 0, 0],
+      rot = [0, 0, 0],
+      mountOn = null,        // ID of part this must touch/rest on (or 'ground' or 'coaxial')
+      allowOverlap = [],     // IDs of parts allowed to intersect (e.g. meshing gears, coaxial shafts)
+      insideBoreOf = null,   // ID of hollow housing part whose inner bore contains this part
+      boreClearanceFn = null,// Optional (x, y, z) => signed radial clearance inside bore (>0 means clear, <0 means collision)
+      explode = [0, 0, 0],   // Axial offset vector when Explode (E) = 1
+      detail = false,        // True for tiny screws/ticks/fins (skips heavy collision checks)
+      cutawayHide = false,   // True if hidden when Cutaway (C) is active at rest
+      stage = this.currentStage
+    } = opts;
+
+    const group = this.kit.createAnatomyPart(geometry, {
+      ramp,
+      outline,
+      crease,
+      creaseAngle,
+      outlineWidth,
+      topBias,
+      noOutline,
+      noCrease,
+      clippable: Boolean(clippable),
+      opacity
+    });
+    group.name = id;
+    group.position.set(...pos);
+    group.rotation.set(...rot);
+    group.userData = {
+      id,
+      ramp,
+      outline,
+      stage,
+      mountOn,
+      allowOverlap: Array.isArray(allowOverlap) ? allowOverlap.filter(Boolean) : [],
+      insideBoreOf,
+      boreClearanceFn,
+      explode,
+      basePos: [...pos],
+      baseRot: [...rot],
+      detail,
+      cutawayHide,
+      clippable: Boolean(clippable)
+    };
+
+    parent.add(group);
+    this.parts.set(id, { id, group, geometry, opts: group.userData });
+    return group;
+  }
+
+  /**
+   * Mount a live 2D CanvasTexture readout / oscilloscope / telemetry screen inside the 3D scene.
+   * Returns the bezel THREE.Group so it participates in stages, explode, and interactions.
+   */
+  screen(id, opts = {}) {
+    const {
+      width = 1.2,
+      height = 0.78,
+      depth = 0.06,
+      bezelPad = 0.06,
+      resolution = [256, 168],
+      ramp = "lo",
+      outline = "mid",
+      parent = this.root,
+      pos = [0, 0, 0],
+      rot = [0, 0, 0],
+      mountOn = "ground",
+      allowOverlap = [],
+      explode = [0, 0, 0],
+      detail = false,
+      cutawayHide = false,
+      clippable = false,
+      stage = this.currentStage,
+      draw = null
+    } = opts;
+
+    const bezelGeo = new THREE.BoxGeometry(width + bezelPad * 2, height + bezelPad * 2, depth);
+    const group = this.part(id, bezelGeo, {
+      ramp,
+      outline,
+      crease: "hi",
+      parent,
+      pos,
+      rot,
+      mountOn,
+      allowOverlap,
+      explode,
+      detail,
+      cutawayHide,
+      clippable,
+      stage
+    });
+
+    let canvas = null;
+    let ctx = null;
+    let texture = null;
+    if (typeof document !== "undefined" && typeof document.createElement === "function") {
+      canvas = document.createElement("canvas");
+      canvas.width = resolution[0] || 256;
+      canvas.height = resolution[1] || 168;
+      ctx = canvas.getContext("2d");
+      texture = new THREE.CanvasTexture(canvas);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+    }
+
+    const screenMat = new THREE.MeshBasicMaterial({
+      map: texture || undefined,
+      color: texture ? 0xffffff : 0x1e293b,
+      toneMapped: false
+    });
+    const screenGeo = new THREE.PlaneGeometry(width, height);
+    const screenMesh = new THREE.Mesh(screenGeo, screenMat);
+    screenMesh.name = "screen-face";
+    screenMesh.position.z = depth * 0.5 + 0.004;
+    group.add(screenMesh);
+
+    const entry = {
+      id,
+      group,
+      mesh: screenMesh,
+      canvas,
+      ctx,
+      texture,
+      width,
+      height,
+      resolution,
+      draw
+    };
+    this.screens.set(id, entry);
+    group.userData.screen = entry;
+    return group;
+  }
+
+  /**
+   * Add a decorative line/dot/mesh detail attached to a parent group and track its stage for isolation
+   */
+  detail(id, object3d, opts = {}) {
+    const {
+      parent = this.root,
+      cutawayHide = false,
+      stage = this.currentStage
+    } = opts;
+    object3d.name = id;
+    object3d.userData = Object.assign({}, object3d.userData, {
+      id,
+      stage,
+      cutawayHide: Boolean(cutawayHide || object3d.userData?.cutawayHide),
+      detail: true
+    });
+    parent.add(object3d);
+    return object3d;
+  }
+
+  /**
+   * Route a 3D pipe/cable between two named anchors and register it for bend/collision audits
+   */
+  tube(id, anchorFromId, waypoints, anchorToId, opts = {}) {
+    const fromObj = this.joints.get(anchorFromId);
+    const toObj = this.joints.get(anchorToId);
+    if (!fromObj || !toObj) {
+      throw new Error(`Tube "${id}" references missing anchor: ${anchorFromId} -> ${anchorToId}`);
+    }
+    this.root.updateMatrixWorld(true);
+    const pStart = fromObj.getWorldPosition(new THREE.Vector3());
+    const pEnd = toObj.getWorldPosition(new THREE.Vector3());
+    const fromDirWorld = opts.fromDir
+      ? new THREE.Vector3(...opts.fromDir).normalize()
+      : this.getAnchorWorldDir(anchorFromId);
+    const toDirWorld = opts.toDir
+      ? new THREE.Vector3(...opts.toDir).normalize()
+      : this.getAnchorWorldDir(anchorToId);
+
+    const leadOut = opts.leadOut !== undefined ? opts.leadOut : (fromDirWorld ? 0.18 : 0);
+    const leadIn = opts.leadIn !== undefined ? opts.leadIn : (toDirWorld ? 0.18 : 0);
+
+    const pts = [pStart];
+    if (fromDirWorld && leadOut > 0) {
+      pts.push(pStart.clone().addScaledVector(fromDirWorld, leadOut));
+    }
+    for (const wp of waypoints) {
+      pts.push(new THREE.Vector3(...wp));
+    }
+    if (toDirWorld && leadIn > 0) {
+      pts.push(pEnd.clone().addScaledVector(toDirWorld, leadIn));
+    }
+    pts.push(pEnd);
+
+    const curve = new THREE.CatmullRomCurve3(pts, false, opts.curveType || "centripetal");
+    const radius = opts.radius || 0.03;
+    const segments = opts.segments || 32;
+    const radialSegments = opts.radialSegments || 12;
+    const geo = new THREE.TubeGeometry(curve, segments, radius, radialSegments, false);
+
+    const allow = new Set(opts.allowOverlap || []);
+    if (opts.fromPart) allow.add(opts.fromPart);
+    if (opts.toPart) allow.add(opts.toPart);
+
+    const part = this.part(id, geo, {
+      ...opts,
+      noCrease: opts.noCrease !== undefined ? opts.noCrease : true,
+      outlineWidth: opts.outlineWidth || 0.012,
+      mountOn: opts.mountOn || opts.fromPart || "ground",
+      allowOverlap: Array.from(allow)
+    });
+
+    this.tubes.push({
+      id,
+      part,
+      curve,
+      radius,
+      from: anchorFromId,
+      to: anchorToId,
+      fromDirWorld,
+      toDirWorld,
+      fromPart: opts.fromPart || null,
+      toPart: opts.toPart || null,
+      waypoints,
+      opts
+    });
+    return part;
+  }
+
+  /**
+   * Register an engraved HUD tag anchored in 3D space
+   */
+  tag(id, text, x, y, z) {
+    this.tags.set(id, { id, text, pos: [x, y, z] });
+  }
+
+  /**
+   * Register a 3D group or part as directly draggable in the viewport via pointer raycasting.
+   * opts: { cursor = "move", hint = "", onDrag: ({ dx, dy, worldDx, worldDy, state, setParam, event }) => void }
+   */
+  interactable(targetId, opts = {}) {
+    const obj =
+      typeof targetId === "string"
+        ? this.groups.get(targetId)?.group || this.parts.get(targetId)?.group
+        : targetId;
+    if (!obj) {
+      throw new Error(`Interactable target "${targetId}" not found in registered groups or parts`);
+    }
+    const entry = {
+      id: typeof targetId === "string" ? targetId : obj.name || "interactable",
+      object3d: obj,
+      cursor: opts.cursor || "move",
+      hint: opts.hint || "",
+      onDrag: opts.onDrag || null
+    };
+    this.interactables.push(entry);
+    return entry;
+  }
+
+  /**
+   * Apply exploded axial offsets across all registered assembly groups and parts
+   */
+  applyExplode(exFactor, cutawayActive = true) {
+    for (const [, item] of this.groups) {
+      const [ex, ey, ez] = item.opts.explode;
+      if (ex || ey || ez) {
+        item.group.position.set(
+          item.opts.basePos[0] + ex * exFactor,
+          item.opts.basePos[1] + ey * exFactor,
+          item.opts.basePos[2] + ez * exFactor
+        );
+      }
+      if (item.opts.cutawayHide && !this._isolationActive) {
+        item.group.visible = !cutawayActive || exFactor > 0.08;
+      }
+    }
+    for (const [, item] of this.parts) {
+      const [ex, ey, ez] = item.opts.explode;
+      if (ex || ey || ez) {
+        item.group.position.set(
+          item.opts.basePos[0] + ex * exFactor,
+          item.opts.basePos[1] + ey * exFactor,
+          item.opts.basePos[2] + ez * exFactor
+        );
+      }
+      if (item.opts.cutawayHide && !this._isolationActive) {
+        item.group.visible = !cutawayActive || exFactor > 0.08;
+      }
+    }
+    if (!this._isolationActive) {
+      this.root.traverse((obj) => {
+        if (obj.userData && obj.userData.detail && obj.userData.cutawayHide) {
+          obj.visible = !cutawayActive || exFactor > 0.08;
+        }
+      });
+    }
+  }
+
+  /**
+   * Isolate a stage ('base', 'structure', 'subject', 'mechanism', 'shader') or list of part IDs/prefixes.
+   * Pass null or 'all' to restore visibility.
+   */
+  isolate(filter, cutawayActive = true, exFactor = 0) {
+    if (!filter || filter === "all") {
+      this._isolationActive = false;
+      this.root.traverse((obj) => {
+        if (obj === this.root) return;
+        if (obj.userData && obj.userData.cutawayHide) {
+          obj.visible = !cutawayActive || exFactor > 0.08;
+        } else if (obj.userData && (obj.userData.stage || obj.userData.id)) {
+          obj.visible = true;
+        }
+      });
+      return;
+    }
+
+    this._isolationActive = true;
+    const filters = Array.isArray(filter) ? filter : [filter];
+    const matches = (ud) => {
+      if (!ud) return false;
+      return filters.some((f) =>
+        ud.stage === f ||
+        ud.id === f ||
+        (typeof ud.id === "string" && ud.id.startsWith(f + "."))
+      );
+    };
+
+    // First set visibility on all registered parts and details
+    this.root.traverse((obj) => {
+      if (obj.userData && (obj.userData.id || obj.userData.stage) && !obj.userData.isAssemblyGroup) {
+        obj.visible = matches(obj.userData);
+      }
+    });
+  }
+}
+
+
+/* --- kit/runtime.mjs --- */
+function clamp01(x) {
+  return x <= 0 ? 0 : x >= 1 ? 1 : x;
+}
+function smooth(a, b, x) {
+  if (a === b) return x >= b ? 1 : 0;
+  const t = clamp01((x - a) / (b - a));
+  return t * t * (3 - 2 * t);
+}
+function burst(age, rise = 0.08, fall = 0.65) {
+  if (!Number.isFinite(age) || age < 0) return 0;
+  if (age <= rise) {
+    return rise <= 0 ? 1 : smooth(0, rise, age);
+  }
+  const end = rise + Math.max(0.001, fall);
+  if (age >= end) return 0;
+  return 1 - smooth(rise, end, age);
+}
+function settle(held, want, dt, seconds = 0.25, calm = 1) {
+  if (seconds <= 0 || dt <= 0) return want;
+  const alpha = 1 - Math.exp((-dt * Math.max(0.15, calm)) / Math.max(0.001, seconds));
+  if (typeof held === "object" && held !== null && "at" in held) {
+    held.at += (want - held.at) * alpha;
+    return held.at;
+  }
+  return held + (want - held) * alpha;
+}
+function mountAnatomyFigure(config) {
+  const {
+    spec,
+    buildBase,
+    buildStructure,
+    buildSubject,
+    buildMechanism,
+    buildShader,
+    updateKinematics,
+    formatReadout,
+    tourAt
+  } = config;
+
+  const simulationMode = spec.simulationMode || "continuous";
+  const isContinuous = simulationMode === "continuous";
+
+  const features = Object.assign(
+    {
+      explode: true,
+      cutaway: true,
+      shader: true,
+      crank: isContinuous,
+      slow: isContinuous,
+      rpm: isContinuous
+    },
+    spec.features || {}
+  );
+
+  const sectionSpec =
+    spec.section && typeof spec.section === "object"
+      ? spec.section
+      : features.section
+        ? { axis: "z", min: -2.0, max: 2.0, initial: 2.0, label: "SECT" }
+        : null;
+
+  const baseControls =
+    Array.isArray(spec.controls)
+      ? [...spec.controls]
+      : isContinuous || features.rpm === true
+        ? [
+            {
+              id: "rpm",
+              label: "RPM",
+              min: 0,
+              max: 2400,
+              step: 20,
+              initial: spec.initialRpm !== undefined ? spec.initialRpm : 720,
+              title: "Shaft speed"
+            }
+          ]
+        : [];
+
+  if ((simulationMode === "timeline" || features.timeline === true) && !baseControls.some((c) => c.id === "timeline")) {
+    baseControls.push({
+      id: "timeline",
+      label: "TIME",
+      min: 0,
+      max: 1,
+      step: 0.005,
+      initial: spec.initialTimeline !== undefined ? spec.initialTimeline : 0,
+      title: "Scrub simulation timeline"
+    });
+  }
+
+  const controlDefs = baseControls;
+  const triggerDefs = Array.isArray(spec.triggers) ? spec.triggers : [];
+  const stepDefs = Array.isArray(spec.steps) ? spec.steps : [];
+  const cameraViews = Array.isArray(spec.cameraViews) ? spec.cameraViews : [];
+  const tourFn = typeof tourAt === "function" ? tourAt : typeof spec.tour === "function" ? spec.tour : null;
+
+  const state = {
+    theta: spec.initialTheta !== undefined ? spec.initialTheta : 0.65,
+    rpm: spec.initialRpm !== undefined ? spec.initialRpm : (isContinuous ? 720 : 0),
+    timeline: spec.initialTimeline !== undefined ? spec.initialTimeline : 0,
+    params: {},
+    slowModes: [1, 0.2, 0.05, 0],
+    slowLabels: ["SLOW 1×", "SLOW 1/5×", "SLOW 1/20×", "PAUSED"],
+    slowIndex: 0,
+    crankMode: false,
+    exploded: false,
+    cutaway: spec.initialCutaway !== undefined ? spec.initialCutaway : features.cutaway,
+    shaderEnabled: features.shader,
+    hudVisible: true,
+    debugPaused: false,
+    stepIndex: 0,
+    section: sectionSpec ? (sectionSpec.initial !== undefined ? sectionSpec.initial : sectionSpec.max) : null
+  };
+
+  function createSpring(initial) {
+    return { at: initial, rate: 0 };
+  }
+
+  function stepSpring(held, want, dt, stiff, damping) {
+    const steps = Math.max(Math.ceil(dt * 120), 1);
+    const slice = dt / steps;
+    for (let i = 0; i < steps; i++) {
+      held.rate += ((want - held.at) * stiff - held.rate * damping) * slice;
+      held.at += held.rate * slice;
+    }
+    if (Math.abs(want - held.at) < 0.0005 && Math.abs(held.rate) < 0.0005) {
+      held.at = want;
+      held.rate = 0;
+    }
+  }
+
+  const paramSprings = {};
+  for (const c of controlDefs) {
+    state.params[c.id] = c.initial;
+    paramSprings[c.id] = createSpring(c.initial);
+  }
+  if (state.params.rpm !== undefined) {
+    state.rpm = state.params.rpm;
+  }
+
+  const explodeSpring = createSpring(0);
+  const rpmSpring = paramSprings.rpm || createSpring(state.rpm);
+  const shaderEnvSpring = createSpring(features.shader ? 1 : 0);
+  const sectionSpring = createSpring(state.section !== null ? state.section : 0);
+  let targetSection = state.section;
+  let thetaTarget = null;
+
+  let simClock = 0;
+  let tourClock = 0;
+  let hasUserInteracted = false;
+  let lastInteractionMs = performance.now();
+  const triggerTimes = {};
+  const triggerValues = {};
+  const triggerAges = {};
+  for (const t of triggerDefs) {
+    triggerTimes[t.id] = -999;
+    triggerValues[t.id] = 0;
+    triggerAges[t.id] = 999;
+  }
+
+  function markUserInteraction() {
+    hasUserInteracted = true;
+    lastInteractionMs = performance.now();
+  }
+
+  const host = document.getElementById("canvas-host");
+  const cardEl = document.getElementById("figure-card");
+  const readoutEl = document.getElementById("readout");
+  const phaseCornerEl = document.getElementById("phase-corner");
+
+  const scene = new THREE.Scene();
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  if (sectionSpec) {
+    renderer.localClippingEnabled = true;
+  }
+  host.appendChild(renderer.domElement);
+
+  const ISO_ELEV = ((spec.isoElevDeg !== undefined ? spec.isoElevDeg : 30) * Math.PI) / 180;
+  const ISO_AZIM = ((spec.isoAzimDeg !== undefined ? spec.isoAzimDeg : -36) * Math.PI) / 180;
+  let zoomFactor = spec.initialZoom || 1.08;
+  let targetZoom = zoomFactor;
+  let panX = 0;
+  let panY = spec.initialPanY !== undefined ? spec.initialPanY : -0.06;
+  let targetPanX = panX;
+  let targetPanY = panY;
+  let rotX = ISO_ELEV;
+  let rotY = ISO_AZIM;
+  let targetRotX = ISO_ELEV;
+  let targetRotY = ISO_AZIM;
+
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
+  camera.position.set(0, 0, 18);
+  camera.lookAt(0, 0, 0);
+
+  function updateCameraSize() {
+    const w = Math.max(host.clientWidth, 200);
+    const h = Math.max(host.clientHeight, 200);
+    const aspect = w / h;
+
+    const minVertSpan = spec.minVertSpan || 4.9;
+    const minHorizSpan = spec.minHorizSpan || 6.7;
+
+    let halfH = (minVertSpan * 0.5) / zoomFactor;
+    let halfW = halfH * aspect;
+
+    if (halfW < (minHorizSpan * 0.5) / zoomFactor) {
+      halfW = (minHorizSpan * 0.5) / zoomFactor;
+      halfH = halfW / aspect;
+    }
+
+    camera.left = -halfW;
+    camera.right = halfW;
+    camera.top = halfH;
+    camera.bottom = -halfH;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false);
+  }
+
+  const worldGroup = new THREE.Group();
+  scene.add(worldGroup);
+
+  const kit = createShaderKit();
+  const reg = new Recorder3D(worldGroup, kit);
+
+  // Build the 6 modular stages in order
+  reg.setStage("base");
+  if (buildBase) buildBase(reg, kit);
+  reg.setStage("structure");
+  if (buildStructure) buildStructure(reg, kit);
+  reg.setStage("subject");
+  if (buildSubject) buildSubject(reg, kit);
+  reg.setStage("mechanism");
+  if (buildMechanism) buildMechanism(reg, kit);
+  reg.setStage("shader");
+  if (buildShader) buildShader(reg, kit);
+
+  const schemeButtonsEl = document.getElementById("scheme-buttons");
+  const customSlidersEl = document.getElementById("custom-sliders");
+  const triggersGroupEl = document.getElementById("triggers-group");
+  const cameraViewsGroupEl = document.getElementById("camera-views-group");
+  const crankBtn = document.getElementById("crank-btn");
+  const slowBtn = document.getElementById("slow-btn");
+  const explodeBtn = document.getElementById("explode-btn");
+  const cutawayBtn = document.getElementById("cutaway-btn");
+  const shaderBtn = document.getElementById("shader-btn");
+  const hudBtn = document.getElementById("hud-btn");
+  const hudQuickBtn = document.getElementById("hud-quick-btn");
+  const resetBtn = document.getElementById("reset-btn");
+  const hintExplodeEl = document.getElementById("hint-explode");
+  const hintCrankEl = document.getElementById("hint-crank");
+  const hintInteractEl = document.getElementById("hint-interact");
+  const hintInteractMobileEl = document.getElementById("hint-interact-mobile");
+
+  const controlDefMap = new Map(controlDefs.map((c) => [c.id, c]));
+  const sliderInputs = new Map();
+  const triggerButtons = new Map();
+  let stepBtn = null;
+  let sectionSliderEl = null;
+  let activeCameraViewId = null;
+
+  const localSectionNormal = new THREE.Vector3(0, 0, -1);
+  const localSectionPlane = new THREE.Plane(localSectionNormal, 2.0);
+  const worldSectionPlane = new THREE.Plane(localSectionNormal, 2.0);
+
+  function setParam(id, value, immediate = false) {
+    const def = controlDefMap.get(id);
+    if (!def) return;
+    const clamped = Math.max(def.min, Math.min(def.max, value));
+    state.params[id] = clamped;
+    if (id === "rpm") state.rpm = clamped;
+    if (id === "timeline") {
+      state.timeline = clamped;
+      state.theta = clamped * Math.PI * 2;
+    }
+    const input = sliderInputs.get(id);
+    if (input) input.value = String(clamped);
+    if (immediate && paramSprings[id]) {
+      paramSprings[id].at = clamped;
+      paramSprings[id].rate = 0;
+    }
+  }
+
+  function setSection(val, immediate = false) {
+    if (!sectionSpec || !Number.isFinite(val)) return;
+    const clamped = Math.max(sectionSpec.min, Math.min(sectionSpec.max, val));
+    targetSection = clamped;
+    if (sectionSliderEl) sectionSliderEl.value = String(clamped);
+    if (immediate) {
+      state.section = sectionSpring.at = clamped;
+      sectionSpring.rate = 0;
+    }
+  }
+
+  function setCameraViewSelectionUI(viewId) {
+    activeCameraViewId = viewId || null;
+    if (!cameraViewsGroupEl) return;
+    Array.from(cameraViewsGroupEl.children).forEach((btn) => {
+      btn.classList.toggle("active", Boolean(activeCameraViewId) && btn.dataset.viewId === activeCameraViewId);
+    });
+  }
+
+  function applyCameraView(viewIdOrIndex, immediate = false) {
+    if (cameraViews.length === 0) return null;
+    const view =
+      typeof viewIdOrIndex === "number"
+        ? cameraViews[viewIdOrIndex]
+        : cameraViews.find((v) => v.id === viewIdOrIndex);
+    if (!view) return null;
+
+    const elevDeg = view.elev !== undefined ? view.elev : (spec.isoElevDeg !== undefined ? spec.isoElevDeg : 30);
+    const azimDeg = view.azim !== undefined ? view.azim : (spec.isoAzimDeg !== undefined ? spec.isoAzimDeg : -36);
+    const zoom = view.zoom !== undefined ? view.zoom : (spec.initialZoom || 1.08);
+    const pan = Array.isArray(view.pan)
+      ? view.pan
+      : [0, spec.initialPanY !== undefined ? spec.initialPanY : -0.06];
+
+    targetRotX = (elevDeg * Math.PI) / 180;
+    targetRotY = (azimDeg * Math.PI) / 180;
+    targetPanX = pan[0] !== undefined ? pan[0] : 0;
+    targetPanY = pan[1] !== undefined ? pan[1] : 0;
+    targetZoom = Math.max(0.45, Math.min(4.5, zoom));
+
+    if (immediate) {
+      rotX = targetRotX;
+      rotY = targetRotY;
+      panX = targetPanX;
+      panY = targetPanY;
+      zoomFactor = targetZoom;
+      updateCameraSize();
+    }
+    setCameraViewSelectionUI(view.id);
+    return view;
+  }
+
+  function fireTrigger(id, opts = {}) {
+    const tDef = triggerDefs.find((t) => t.id === id);
+    if (!tDef) return false;
+    if (!opts.fromTour) markUserInteraction();
+    triggerTimes[id] = simClock;
+    triggerAges[id] = 0;
+    triggerValues[id] = burst(0, tDef.rise !== undefined ? tDef.rise : 0.08, tDef.fall !== undefined ? tDef.fall : 0.75);
+    if (typeof tDef.onTrigger === "function") {
+      tDef.onTrigger({ state, setParam, fireTrigger, applyStep });
+    }
+    const btn = triggerButtons.get(id);
+    if (btn) btn.classList.add("armed");
+    return true;
+  }
+
+  function applyStep(idx) {
+    if (stepDefs.length === 0) return null;
+    state.stepIndex = ((idx % stepDefs.length) + stepDefs.length) % stepDefs.length;
+    const step = stepDefs[state.stepIndex];
+    if (step.theta !== undefined) {
+      thetaTarget = step.theta;
+    }
+    if (step.timeline !== undefined) {
+      setParam("timeline", step.timeline, false);
+    }
+    if (step.params && typeof step.params === "object") {
+      for (const [k, v] of Object.entries(step.params)) {
+        setParam(k, v, false);
+      }
+    }
+    if (stepBtn) {
+      stepBtn.textContent = step.label || `STEP ${state.stepIndex + 1}/${stepDefs.length}`;
+    }
+    return step;
+  }
+
+  if (customSlidersEl) {
+    customSlidersEl.innerHTML = "";
+    for (const c of controlDefs) {
+      const lbl = document.createElement("label");
+      lbl.className = "slider-label";
+      if (c.title) lbl.title = c.title;
+      const span = document.createElement("span");
+      span.textContent = c.label;
+      const input = document.createElement("input");
+      input.type = "range";
+      input.id = c.id === "rpm" ? "rpm-slider" : `param-slider-${c.id}`;
+      input.min = String(c.min);
+      input.max = String(c.max);
+      input.step = String(c.step);
+      input.value = String(c.initial);
+      input.addEventListener("input", (e) => {
+        markUserInteraction();
+        setParam(c.id, parseFloat(e.target.value), false);
+      });
+      lbl.appendChild(span);
+      lbl.appendChild(input);
+      customSlidersEl.appendChild(lbl);
+      sliderInputs.set(c.id, input);
+    }
+
+    if (sectionSpec) {
+      const lbl = document.createElement("label");
+      lbl.className = "slider-label";
+      lbl.title = sectionSpec.title || "Slice 3D cross-section plane";
+      const span = document.createElement("span");
+      span.textContent = sectionSpec.label || "SECT";
+      const input = document.createElement("input");
+      input.type = "range";
+      input.id = "section-slider";
+      input.min = String(sectionSpec.min);
+      input.max = String(sectionSpec.max);
+      input.step = String(sectionSpec.step || 0.02);
+      input.value = String(targetSection);
+      input.addEventListener("input", (e) => {
+        markUserInteraction();
+        setSection(parseFloat(e.target.value), false);
+      });
+      lbl.appendChild(span);
+      lbl.appendChild(input);
+      customSlidersEl.appendChild(lbl);
+      sectionSliderEl = input;
+    }
+  } else {
+    const rpmSlider = document.getElementById("rpm-slider");
+    if (rpmSlider) {
+      rpmSlider.addEventListener("input", (e) => {
+        markUserInteraction();
+        setParam("rpm", parseFloat(e.target.value), false);
+      });
+      sliderInputs.set("rpm", rpmSlider);
+    }
+  }
+
+  if (triggersGroupEl) {
+    triggersGroupEl.innerHTML = "";
+    if (stepDefs.length > 0) {
+      stepBtn = document.createElement("button");
+      stepBtn.type = "button";
+      stepBtn.className = "action-btn trigger-btn";
+      stepBtn.id = "step-btn";
+      stepBtn.title = "Advance sequence step";
+      stepBtn.textContent = stepDefs[0].label || `STEP 1/${stepDefs.length}`;
+      stepBtn.addEventListener("click", () => {
+        markUserInteraction();
+        applyStep(state.stepIndex + 1);
+      });
+      triggersGroupEl.appendChild(stepBtn);
+    }
+    for (const t of triggerDefs) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "action-btn trigger-btn";
+      btn.id = `trigger-btn-${t.id}`;
+      btn.textContent = t.label;
+      if (t.title) btn.title = t.title;
+      btn.addEventListener("click", () => fireTrigger(t.id));
+      triggersGroupEl.appendChild(btn);
+      triggerButtons.set(t.id, btn);
+    }
+  }
+
+  if (cameraViewsGroupEl) {
+    cameraViewsGroupEl.innerHTML = "";
+    cameraViews.forEach((v, idx) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "view-pill";
+      btn.dataset.viewId = v.id;
+      btn.textContent = v.label;
+      if (idx < 9) btn.title = `${v.label} (${idx + 1})`;
+      btn.addEventListener("click", () => {
+        markUserInteraction();
+        applyCameraView(v.id, false);
+      });
+      cameraViewsGroupEl.appendChild(btn);
+    });
+  }
+
+  if (!features.explode) {
+    if (explodeBtn) explodeBtn.style.display = "none";
+    if (hintExplodeEl) hintExplodeEl.style.display = "none";
+  }
+  if (!features.cutaway) {
+    if (cutawayBtn) cutawayBtn.style.display = "none";
+  } else if (cutawayBtn) {
+    cutawayBtn.classList.toggle("active", state.cutaway);
+  }
+  if (!features.shader) {
+    if (shaderBtn) shaderBtn.style.display = "none";
+  } else if (shaderBtn) {
+    shaderBtn.classList.toggle("active", state.shaderEnabled);
+  }
+  if (!features.crank) {
+    if (crankBtn) crankBtn.style.display = "none";
+    if (hintCrankEl) hintCrankEl.style.display = "none";
+  }
+  if (!features.slow && slowBtn) {
+    slowBtn.style.display = "none";
+  }
+  if (spec.interactionHint) {
+    if (hintInteractEl) hintInteractEl.textContent = `${spec.interactionHint} · `;
+    if (hintInteractMobileEl) hintInteractMobileEl.textContent = `${spec.interactionHint} · `;
+  }
+
+  function applyTheme(themeOrId) {
+    const theme = kit.applyTheme(themeOrId);
+    const root = document.documentElement.style;
+    root.setProperty("--anatomy-bg", theme.css.bg);
+    root.setProperty("--anatomy-card", theme.css.card);
+    root.setProperty("--anatomy-paper", theme.css.card);
+    root.setProperty("--anatomy-border", theme.css.border);
+    root.setProperty("--anatomy-text", theme.css.text);
+    root.setProperty("--anatomy-muted", theme.css.muted);
+    root.setProperty("--anatomy-strong", theme.css.strong);
+    root.setProperty("--anatomy-lit", theme.css.lit);
+    root.setProperty("--anatomy-pill-bg", theme.css.pillBg);
+    root.setProperty("--anatomy-pill-hover", theme.css.pillHover);
+
+    const legLit = document.getElementById("leg-lit");
+    const legIntake = document.getElementById("leg-intake");
+    const legComb = document.getElementById("leg-comb");
+    const legExh = document.getElementById("leg-exh");
+    if (legLit) legLit.style.backgroundColor = theme.css.lit;
+    if (legIntake) legIntake.style.backgroundColor = theme.channels.intake;
+    if (legComb) legComb.style.backgroundColor = theme.channels.comb;
+    if (legExh) legExh.style.backgroundColor = theme.channels.exhaust;
+
+    if (schemeButtonsEl) {
+      Array.from(schemeButtonsEl.children).forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.id === theme.id);
+      });
+    }
+  }
+
+  kit.THEMES.forEach((t) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "scheme-btn";
+    btn.dataset.id = t.id;
+    btn.innerHTML = `<span class="swatch" style="background:${t.swatch}"></span>${t.name}`;
+    btn.addEventListener("click", () => applyTheme(t));
+    schemeButtonsEl.appendChild(btn);
+  });
+
+  function toggleCrankMode() {
+    if (!features.crank) return;
+    state.crankMode = !state.crankMode;
+    crankBtn.classList.toggle("active", state.crankMode);
+  }
+
+  function toggleExplode() {
+    if (!features.explode) return;
+    state.exploded = !state.exploded;
+    explodeBtn.classList.toggle("active", state.exploded);
+  }
+
+  function cycleSlowMode() {
+    state.slowIndex = (state.slowIndex + 1) % state.slowModes.length;
+    slowBtn.textContent = state.slowLabels[state.slowIndex];
+    slowBtn.classList.toggle("active", state.slowIndex > 0);
+  }
+
+  function toggleCutaway() {
+    if (!features.cutaway) return;
+    state.cutaway = !state.cutaway;
+    cutawayBtn.classList.toggle("active", state.cutaway);
+    reg.applyExplode(explodeSpring.at, state.cutaway);
+  }
+
+  function toggleShader() {
+    if (!features.shader) return;
+    state.shaderEnabled = !state.shaderEnabled;
+    shaderBtn.classList.toggle("active", state.shaderEnabled);
+  }
+
+  function setHudVisible(vis) {
+    state.hudVisible = vis;
+    document.body.classList.toggle("hud-hidden", !state.hudVisible);
+    hudBtn.classList.toggle("active", state.hudVisible);
+    hudQuickBtn.classList.toggle("active", state.hudVisible);
+    updateCameraSize();
+  }
+
+  function toggleHud() {
+    setHudVisible(!state.hudVisible);
+  }
+
+  function resetIsoView() {
+    targetRotX = ISO_ELEV;
+    targetRotY = ISO_AZIM;
+    targetPanX = 0;
+    targetPanY = spec.initialPanY !== undefined ? spec.initialPanY : -0.06;
+    targetZoom = zoomFactor = spec.initialZoom || 1.08;
+    setCameraViewSelectionUI(null);
+    updateCameraSize();
+  }
+
+  crankBtn.addEventListener("click", () => { markUserInteraction(); toggleCrankMode(); });
+  slowBtn.addEventListener("click", () => { markUserInteraction(); cycleSlowMode(); });
+  explodeBtn.addEventListener("click", () => { markUserInteraction(); toggleExplode(); });
+  cutawayBtn.addEventListener("click", () => { markUserInteraction(); toggleCutaway(); });
+  shaderBtn.addEventListener("click", () => { markUserInteraction(); toggleShader(); });
+  hudBtn.addEventListener("click", toggleHud);
+  hudQuickBtn.addEventListener("click", toggleHud);
+  resetBtn.addEventListener("click", () => { markUserInteraction(); resetIsoView(); });
+
+  const activePointers = new Map();
+  let lastSingleX = 0;
+  let lastSingleY = 0;
+  let lastMidX = 0;
+  let lastMidY = 0;
+  let lastPinchDist = 0;
+  let isMousePan = false;
+
+  const raycaster = new THREE.Raycaster();
+  const pointerNdc = new THREE.Vector2();
+  let activeInteractable = null;
+
+  function isEffectivelyVisible(obj) {
+    let cur = obj;
+    while (cur) {
+      if (!cur.visible) return false;
+      cur = cur.parent;
+    }
+    return true;
+  }
+
+  function pickInteractable(clientX, clientY) {
+    if (!reg.interactables || reg.interactables.length === 0) return null;
+    const rect = host.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return null;
+    pointerNdc.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    pointerNdc.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointerNdc, camera);
+
+    let bestEntry = null;
+    let bestDist = Infinity;
+    for (const entry of reg.interactables) {
+      if (!entry.object3d || !isEffectivelyVisible(entry.object3d)) continue;
+      const meshes = [];
+      entry.object3d.traverse((child) => {
+        if (child.isMesh && child.name === "solid" && isEffectivelyVisible(child)) {
+          meshes.push(child);
+        }
+      });
+      if (meshes.length === 0) continue;
+      const hits = raycaster.intersectObjects(meshes, false);
+      if (hits.length > 0 && hits[0].distance < bestDist) {
+        bestDist = hits[0].distance;
+        bestEntry = entry;
+      }
+    }
+    return bestEntry;
+  }
+
+  host.addEventListener("contextmenu", (e) => e.preventDefault());
+
+  function syncTwoFingerMetrics() {
+    const pts = Array.from(activePointers.values());
+    if (pts.length >= 2) {
+      lastMidX = (pts[0].x + pts[1].x) * 0.5;
+      lastMidY = (pts[0].y + pts[1].y) * 0.5;
+      lastPinchDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+    }
+  }
+
+  host.addEventListener("pointerdown", (e) => {
+    markUserInteraction();
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    host.setPointerCapture(e.pointerId);
+    cardEl.focus();
+
+    if (activePointers.size === 1) {
+      lastSingleX = e.clientX;
+      lastSingleY = e.clientY;
+      isMousePan = e.button === 2 || e.button === 1;
+      activeInteractable =
+        !isMousePan && !e.shiftKey && !state.crankMode
+          ? pickInteractable(e.clientX, e.clientY)
+          : null;
+      host.style.cursor = "grabbing";
+    } else if (activePointers.size === 2) {
+      activeInteractable = null;
+      syncTwoFingerMetrics();
+    }
+  });
+
+  host.addEventListener("pointermove", (e) => {
+    if (!activePointers.has(e.pointerId)) {
+      if (activePointers.size === 0 && reg.interactables.length > 0) {
+        const hoverHit = pickInteractable(e.clientX, e.clientY);
+        host.style.cursor = hoverHit ? hoverHit.cursor : "grab";
+      }
+      return;
+    }
+    markUserInteraction();
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    const w = Math.max(host.clientWidth, 1);
+    const h = Math.max(host.clientHeight, 1);
+    const worldPerPixelX = (camera.right - camera.left) / w;
+    const worldPerPixelY = (camera.top - camera.bottom) / h;
+
+    if (activePointers.size === 1) {
+      const dx = e.clientX - lastSingleX;
+      const dy = e.clientY - lastSingleY;
+      lastSingleX = e.clientX;
+      lastSingleY = e.clientY;
+
+      if (isMousePan) {
+        setCameraViewSelectionUI(null);
+        targetPanX += dx * worldPerPixelX;
+        targetPanY -= dy * worldPerPixelY;
+      } else if (activeInteractable && typeof activeInteractable.onDrag === "function") {
+        activeInteractable.onDrag({
+          dx,
+          dy,
+          worldDx: dx * worldPerPixelX,
+          worldDy: -dy * worldPerPixelY,
+          state,
+          setParam,
+          fireTrigger,
+          applyStep,
+          event: e
+        });
+      } else if (e.shiftKey || state.crankMode || (features.crank && state.slowModes[state.slowIndex] === 0)) {
+        thetaTarget = null;
+        state.theta -= dx * 0.024;
+      } else {
+        setCameraViewSelectionUI(null);
+        targetRotY += dx * 0.0085;
+        targetRotX = Math.max(-Math.PI * 0.48, Math.min(Math.PI * 0.48, targetRotX + dy * 0.0085));
+      }
+    } else if (activePointers.size >= 2) {
+      setCameraViewSelectionUI(null);
+      const pts = Array.from(activePointers.values());
+      const midX = (pts[0].x + pts[1].x) * 0.5;
+      const midY = (pts[0].y + pts[1].y) * 0.5;
+      const dist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+
+      const midDx = midX - lastMidX;
+      const midDy = midY - lastMidY;
+      targetPanX += midDx * worldPerPixelX;
+      targetPanY -= midDy * worldPerPixelY;
+
+      if (lastPinchDist > 12 && dist > 12) {
+        const scale = dist / lastPinchDist;
+        targetZoom = zoomFactor = Math.max(0.45, Math.min(4.5, zoomFactor * scale));
+        updateCameraSize();
+      }
+
+      lastMidX = midX;
+      lastMidY = midY;
+      lastPinchDist = dist;
+    }
+  });
+
+  function onPointerRelease(e) {
+    activePointers.delete(e.pointerId);
+    if (host.hasPointerCapture(e.pointerId)) {
+      host.releasePointerCapture(e.pointerId);
+    }
+    if (activePointers.size === 0) {
+      activeInteractable = null;
+      host.style.cursor = "grab";
+    } else if (activePointers.size === 1) {
+      const remaining = activePointers.values().next().value;
+      lastSingleX = remaining.x;
+      lastSingleY = remaining.y;
+      isMousePan = false;
+    } else if (activePointers.size >= 2) {
+      syncTwoFingerMetrics();
+    }
+  }
+
+  host.addEventListener("pointerup", onPointerRelease);
+  host.addEventListener("pointercancel", onPointerRelease);
+
+  host.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    markUserInteraction();
+    setCameraViewSelectionUI(null);
+    targetZoom = zoomFactor = Math.max(0.45, Math.min(4.5, zoomFactor - e.deltaY * 0.0012));
+    updateCameraSize();
+  }, { passive: false });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.target.tagName === "INPUT") return;
+    if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key >= "1" && e.key <= "9") {
+      const idx = Number(e.key) - 1;
+      if (cameraViews[idx]) {
+        markUserInteraction();
+        applyCameraView(idx, false);
+        return;
+      }
+    }
+    const k = e.key.toLowerCase();
+    if (k === "e") { markUserInteraction(); toggleExplode(); }
+    else if (k === "s") {
+      markUserInteraction();
+      if (features.slow) cycleSlowMode();
+      else if (stepDefs.length > 0) applyStep(state.stepIndex + 1);
+    }
+    else if (k === "c") { markUserInteraction(); toggleCutaway(); }
+    else if (k === "i") { markUserInteraction(); toggleShader(); }
+    else if (k === "h") toggleHud();
+    else if (k === "r") { markUserInteraction(); resetIsoView(); }
+    else if (e.key === "ArrowRight") { markUserInteraction(); thetaTarget = null; state.theta -= 0.12; }
+    else if (e.key === "ArrowLeft") { markUserInteraction(); thetaTarget = null; state.theta += 0.12; }
+  });
+
+  window.addEventListener("resize", updateCameraSize);
+
+  const tempProjVec = new THREE.Vector3();
+  function projectWorldPointToScreen(worldVec) {
+    tempProjVec.copy(worldVec).project(camera);
+    const w = host.clientWidth || 760;
+    const h = host.clientHeight || 475;
+    return {
+      x: (tempProjVec.x * 0.5 + 0.5) * w,
+      y: (-tempProjVec.y * 0.5 + 0.5) * h
+    };
+  }
+
+  function updateEngravedTags() {
+    if (!state.hudVisible) return;
+    for (const [id, tagInfo] of reg.tags) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      tempProjVec.set(...tagInfo.pos).applyMatrix4(worldGroup.matrixWorld);
+      const { x, y } = projectWorldPointToScreen(tempProjVec);
+      el.style.left = `${x.toFixed(1)}px`;
+      el.style.top = `${y.toFixed(1)}px`;
+    }
+  }
+
+  function stepSceneAndRender(effectiveRpm, dt = 0) {
+    worldGroup.position.set(panX, panY, 0);
+    worldGroup.rotation.order = "XYZ";
+    worldGroup.rotation.x = rotX;
+    worldGroup.rotation.y = rotY;
+    worldGroup.updateMatrixWorld(true);
+
+    reg.applyExplode(explodeSpring.at, state.cutaway);
+
+    if (sectionSpec) {
+      const sVal = sectionSpring.at;
+      state.section = sVal;
+      const isOpen = !sectionSpec.alwaysActive && sVal >= sectionSpec.max - 0.001;
+      if (isOpen) {
+        kit.setSectionPlane(null);
+      } else {
+        const axis = sectionSpec.axis || "z";
+        const sign = sectionSpec.invert ? 1 : -1;
+        localSectionNormal.set(
+          axis === "x" ? sign : 0,
+          axis === "y" ? sign : 0,
+          axis === "z" ? sign : 0
+        );
+        localSectionPlane.set(localSectionNormal, -sign * sVal);
+        worldSectionPlane.copy(localSectionPlane).applyMatrix4(worldGroup.matrixWorld);
+        kit.setSectionPlane(worldSectionPlane);
+      }
+    }
+
+    for (const t of triggerDefs) {
+      const age = simClock - triggerTimes[t.id];
+      triggerAges[t.id] = age;
+      const val = burst(age, t.rise !== undefined ? t.rise : 0.08, t.fall !== undefined ? t.fall : 0.75);
+      triggerValues[t.id] = val;
+      const btn = triggerButtons.get(t.id);
+      if (btn) btn.classList.toggle("armed", val > 0.04);
+    }
+
+    const smoothedParams = {};
+    for (const c of controlDefs) {
+      smoothedParams[c.id] = paramSprings[c.id].at;
+    }
+    if (smoothedParams.timeline !== undefined) {
+      state.timeline = smoothedParams.timeline;
+    }
+
+    const kinematicState = {
+      theta: state.theta,
+      explode: explodeSpring.at,
+      rpm: rpmSpring.at,
+      effectiveRpm,
+      shaderEnv: shaderEnvSpring.at,
+      cutaway: state.cutaway,
+      section: sectionSpec ? sectionSpring.at : null,
+      simClock,
+      dt,
+      simulationMode,
+      timeline: state.timeline,
+      stepIndex: state.stepIndex,
+      triggers: { ...triggerValues },
+      triggerAges: { ...triggerAges },
+      params: smoothedParams,
+      rawParams: state.params,
+      ...smoothedParams
+    };
+
+    if (updateKinematics) {
+      updateKinematics(reg, kinematicState);
+    }
+
+    worldGroup.updateMatrixWorld(true);
+
+    if (reg.screens && reg.screens.size > 0) {
+      for (const [, scr] of reg.screens) {
+        if (scr.ctx && scr.canvas && typeof scr.draw === "function") {
+          scr.draw(scr.ctx, scr.canvas, kinematicState, kit.currentTheme);
+          if (scr.texture) scr.texture.needsUpdate = true;
+        }
+      }
+    }
+
+    if (state.hudVisible && formatReadout) {
+      const hudData = formatReadout(kinematicState);
+      if (hudData.readout && readoutEl) readoutEl.textContent = hudData.readout;
+      if (hudData.phase && phaseCornerEl) phaseCornerEl.textContent = hudData.phase;
+      updateEngravedTags();
+    }
+
+    renderer.render(scene, camera);
+  }
+
+  applyTheme(kit.THEMES[0]);
+  reg.applyExplode(0, state.cutaway);
+  updateCameraSize();
+
+  let lastTime = performance.now();
+
+  function animate(now) {
+    requestAnimationFrame(animate);
+    const dt = Math.min((now - lastTime) * 0.001, 0.05);
+    lastTime = now;
+
+    if (!state.debugPaused) {
+      simClock += dt;
+
+      let tourExplodeTarget = null;
+      let tourCutawayTarget = null;
+      let tourShaderTarget = null;
+      const idleThresholdMs = hasUserInteracted ? 3600 : 1600;
+      if (typeof tourFn === "function" && (now - lastInteractionMs) > idleThresholdMs && activePointers.size === 0) {
+        tourClock += dt;
+        const patch = tourFn(tourClock, {
+          theta: state.theta,
+          explode: explodeSpring.at,
+          cutaway: state.cutaway,
+          section: sectionSpec ? sectionSpring.at : null,
+          params: { ...state.params },
+          simulationMode
+        });
+        if (patch && typeof patch === "object") {
+          if (typeof patch.explode === "boolean") tourExplodeTarget = patch.explode ? 1.0 : 0.0;
+          else if (typeof patch.explode === "number") tourExplodeTarget = patch.explode;
+          if (typeof patch.cutaway === "boolean") tourCutawayTarget = patch.cutaway;
+          if (typeof patch.shader === "boolean") tourShaderTarget = patch.shader ? 1.0 : 0.0;
+          if (typeof patch.rpm === "number") setParam("rpm", patch.rpm, false);
+          if (typeof patch.theta === "number") {
+            thetaTarget = null;
+            state.theta = patch.theta;
+          }
+          if (typeof patch.section === "number" && sectionSpec) setSection(patch.section, false);
+          if (patch.params && typeof patch.params === "object") {
+            for (const [pk, pv] of Object.entries(patch.params)) {
+              setParam(pk, pv, false);
+            }
+          }
+          if (typeof patch.cameraView === "string" && patch.cameraView !== activeCameraViewId) {
+            applyCameraView(patch.cameraView, false);
+          }
+          if (typeof patch.trigger === "string") {
+            fireTrigger(patch.trigger, { fromTour: true });
+          }
+        }
+      }
+
+      if (tourCutawayTarget !== null && tourCutawayTarget !== state.cutaway) {
+        state.cutaway = tourCutawayTarget;
+        if (cutawayBtn) cutawayBtn.classList.toggle("active", state.cutaway);
+      }
+
+      rotX += (targetRotX - rotX) * 0.2;
+      rotY += (targetRotY - rotY) * 0.2;
+      panX += (targetPanX - panX) * 0.22;
+      panY += (targetPanY - panY) * 0.22;
+      if (Math.abs(targetZoom - zoomFactor) > 0.0004) {
+        zoomFactor += (targetZoom - zoomFactor) * 0.22;
+        updateCameraSize();
+      }
+
+      const wantExplode = tourExplodeTarget !== null ? tourExplodeTarget : (features.explode && state.exploded ? 1.0 : 0.0);
+      stepSpring(explodeSpring, wantExplode, dt, 150, 19);
+      if (!paramSprings.rpm) {
+        stepSpring(rpmSpring, state.rpm, dt, 110, 16);
+      }
+      for (const c of controlDefs) {
+        stepSpring(paramSprings[c.id], state.params[c.id], dt, 120, 17);
+      }
+      if (paramSprings.rpm) {
+        state.rpm = state.params.rpm;
+      }
+      if (sectionSpec) {
+        stepSpring(sectionSpring, targetSection, dt, 140, 18);
+      }
+      const wantShader = tourShaderTarget !== null ? tourShaderTarget : (features.shader && state.shaderEnabled ? 1.0 : 0.0);
+      stepSpring(shaderEnvSpring, wantShader, dt, 140, 18);
+
+      const speedMult = state.slowModes[state.slowIndex];
+      const effectiveRpm = rpmSpring.at * speedMult;
+      const isUserCranking =
+        activePointers.size === 1 &&
+        !activeInteractable &&
+        (state.crankMode || (features.crank && speedMult === 0));
+
+      if (thetaTarget !== null) {
+        state.theta += (thetaTarget - state.theta) * Math.min(1, dt * 8.5);
+        if (Math.abs(thetaTarget - state.theta) < 0.001) {
+          state.theta = thetaTarget;
+          thetaTarget = null;
+        }
+      } else if (simulationMode === "timeline" && paramSprings.timeline) {
+        state.theta = paramSprings.timeline.at * Math.PI * 2;
+      } else if (isContinuous && !isUserCranking) {
+        const omegaShaft = (effectiveRpm * Math.PI * 2) / 60;
+        state.theta -= omegaShaft * dt * 0.12;
+      } else if (!isContinuous && features.rpm && effectiveRpm > 0 && !isUserCranking) {
+        const omegaShaft = (effectiveRpm * Math.PI * 2) / 60;
+        state.theta -= omegaShaft * dt * 0.12;
+      }
+      stepSceneAndRender(effectiveRpm, dt);
+    } else {
+      stepSceneAndRender(0, 0);
+    }
+  }
+
+  requestAnimationFrame(animate);
+
+  /* ==========================================================================
+   * VISUAL HARNESS HOOK (window.__ANATOMY_DEBUG__)
+   * ========================================================================== */
+  window.__ANATOMY_DEBUG__ = {
+    setCamera(
+      elevDeg,
+      azimDeg,
+      zoom = spec.initialZoom || 1.0,
+      panXY = [0, spec.initialPanY !== undefined ? spec.initialPanY : 0.16]
+    ) {
+      state.debugPaused = true;
+      rotX = targetRotX = (elevDeg * Math.PI) / 180;
+      rotY = targetRotY = (azimDeg * Math.PI) / 180;
+      targetZoom = zoomFactor = zoom;
+      panX = targetPanX = panXY[0];
+      panY = targetPanY = panXY[1];
+      setCameraViewSelectionUI(null);
+      updateCameraSize();
+      stepSceneAndRender(0);
+      return { elevDeg, azimDeg, zoom, panXY };
+    },
+
+    setOrthoView(viewName) {
+      const defZoom = spec.initialZoom || 1.0;
+      const defPanY = spec.initialPanY !== undefined ? spec.initialPanY : 0.16;
+      const views = {
+        front: [0, 0, defZoom, [0, defPanY * 0.5]],
+        right: [0, -90, defZoom, [0, defPanY * 0.5]],
+        left:  [0, 90, defZoom, [0, defPanY * 0.5]],
+        top:   [90, 0, defZoom * 0.96, [0, 0]],
+        iso:   [
+          spec.isoElevDeg !== undefined ? spec.isoElevDeg : 30,
+          spec.isoAzimDeg !== undefined ? spec.isoAzimDeg : -36,
+          defZoom,
+          [0, defPanY]
+        ]
+      };
+      const v = views[viewName] || views.iso;
+      return this.setCamera(v[0], v[1], v[2], v[3]);
+    },
+
+    setCameraView(viewIdOrIndex) {
+      state.debugPaused = true;
+      const view = applyCameraView(viewIdOrIndex, true);
+      if (!view) {
+        throw new Error(`Unknown camera view "${viewIdOrIndex}"`);
+      }
+      stepSceneAndRender(0);
+      return view;
+    },
+
+    setSection(val) {
+      if (!sectionSpec) return null;
+      state.debugPaused = true;
+      setSection(val, true);
+      stepSceneAndRender(0);
+      return state.section;
+    },
+
+    fireTrigger(id) {
+      const ok = fireTrigger(id);
+      if (state.debugPaused) {
+        stepSceneAndRender(0);
+      }
+      return { id, ok, value: triggerValues[id] ?? 0 };
+    },
+
+    advanceStep() {
+      const step = applyStep(state.stepIndex + 1);
+      if (step && step.theta !== undefined) {
+        state.theta = step.theta;
+        thetaTarget = null;
+      }
+      if (state.debugPaused) stepSceneAndRender(0);
+      return { stepIndex: state.stepIndex, step };
+    },
+
+    isolate(filter) {
+      state.debugPaused = true;
+      reg.isolate(filter, state.cutaway, explodeSpring.at);
+      stepSceneAndRender(0);
+      return filter;
+    },
+
+    setPose(opts = {}) {
+      state.debugPaused = opts.paused !== undefined ? opts.paused : true;
+      if (opts.theta !== undefined) {
+        thetaTarget = null;
+        state.theta = opts.theta;
+      }
+      if (opts.explode !== undefined) {
+        state.exploded = features.explode && opts.explode > 0.5;
+        explodeSpring.at = features.explode ? opts.explode : 0;
+        explodeSpring.rate = 0;
+        if (explodeBtn) explodeBtn.classList.toggle("active", state.exploded);
+      }
+      if (opts.cutaway !== undefined) {
+        state.cutaway = features.cutaway ? Boolean(opts.cutaway) : Boolean(spec.initialCutaway);
+        if (cutawayBtn) cutawayBtn.classList.toggle("active", state.cutaway);
+      }
+      if (opts.shader !== undefined) {
+        state.shaderEnabled = features.shader ? Boolean(opts.shader) : false;
+        shaderEnvSpring.at = state.shaderEnabled ? 1.0 : 0.0;
+        shaderEnvSpring.rate = 0;
+        if (shaderBtn) shaderBtn.classList.toggle("active", state.shaderEnabled);
+      }
+      if (opts.rpm !== undefined) {
+        state.rpm = opts.rpm;
+        if (paramSprings.rpm) {
+          setParam("rpm", opts.rpm, true);
+        } else {
+          rpmSpring.at = opts.rpm;
+          rpmSpring.rate = 0;
+        }
+      }
+      if (opts.section !== undefined && sectionSpec) {
+        setSection(opts.section, true);
+      }
+      if (opts.cameraView !== undefined) {
+        applyCameraView(opts.cameraView, true);
+      }
+      if (opts.trigger) {
+        fireTrigger(opts.trigger);
+      }
+      if (opts.params && typeof opts.params === "object") {
+        for (const [pk, pv] of Object.entries(opts.params)) {
+          setParam(pk, pv, true);
+        }
+      }
+      for (const c of controlDefs) {
+        if (opts[c.id] !== undefined) {
+          setParam(c.id, opts[c.id], true);
+        }
+      }
+      if (opts.hud !== undefined) {
+        setHudVisible(Boolean(opts.hud));
+      }
+      if (opts.theme) {
+        applyTheme(opts.theme);
+      }
+      reg.applyExplode(explodeSpring.at, state.cutaway);
+      stepSceneAndRender(state.rpm);
+      return {
+        theta: state.theta,
+        explode: explodeSpring.at,
+        cutaway: state.cutaway,
+        shader: state.shaderEnabled,
+        section: state.section,
+        hud: state.hudVisible,
+        theme: kit.currentTheme.id,
+        params: { ...state.params }
+      };
+    },
+
+    focusJoint(anchorId, zoom = 2.8, elevDeg = 30, azimDeg = -36) {
+      const jointObj = reg.joints.get(anchorId);
+      if (!jointObj) {
+        throw new Error(`Unknown joint anchor "${anchorId}". Available: ${Array.from(reg.joints.keys()).join(", ")}`);
+      }
+      state.debugPaused = true;
+      rotX = targetRotX = (elevDeg * Math.PI) / 180;
+      rotY = targetRotY = (azimDeg * Math.PI) / 180;
+      panX = targetPanX = 0;
+      panY = targetPanY = 0;
+      targetZoom = zoomFactor = zoom;
+      updateCameraSize();
+      stepSceneAndRender(0);
+
+      const pWorld = jointObj.getWorldPosition(new THREE.Vector3());
+      panX = targetPanX = -pWorld.x;
+      panY = targetPanY = -pWorld.y;
+      stepSceneAndRender(0);
+
+      const finalWorld = jointObj.getWorldPosition(new THREE.Vector3());
+      const screen = projectWorldPointToScreen(finalWorld);
+      return { anchorId, world: [pWorld.x, pWorld.y, pWorld.z], screen };
+    },
+
+    getJoints() {
+      worldGroup.updateMatrixWorld(true);
+      const out = [];
+      for (const [id, obj] of reg.joints) {
+        const w = obj.getWorldPosition(new THREE.Vector3());
+        const s = projectWorldPointToScreen(w);
+        out.push({
+          id,
+          world: [+w.x.toFixed(3), +w.y.toFixed(3), +w.z.toFixed(3)],
+          screen: [+s.x.toFixed(1), +s.y.toFixed(1)]
+        });
+      }
+      return out;
+    },
+
+    getSummary() {
+      return {
+        archetype: spec.archetype || "bench",
+        simulationMode,
+        toneMode: spec.toneMode || "single-lit",
+        parts: reg.parts.size,
+        tubes: reg.tubes.length,
+        joints: Array.from(reg.joints.keys()),
+        screensCount: reg.screens ? reg.screens.size : 0,
+        themes: kit.THEMES.map((t) => t.id),
+        features,
+        section: sectionSpec ? { ...sectionSpec, current: state.section } : null,
+        cameraViews: cameraViews.map((v) => v.id),
+        triggers: triggerDefs.map((t) => t.id),
+        stepsCount: stepDefs.length,
+        controls: controlDefs.map((c) => c.id),
+        interactables: reg.interactables.map((i) => i.id),
+        drivePoses: spec.drivePoses || null
+      };
+    }
+  };
+}
+
+
+/* --- figure/model.mjs --- */
+const SPEC = {
+  archetype: "bench",
+  simulationMode: "continuous",
+  toneMode: "single-lit",
+  // Rotor & Swashplate dimensions (world units ~ 1m scaled bench instrument)
+  numBlades: 3,
+  rotorR: 2.45,
+  flapHingeR: 0.28,
+  featherR: 0.44,
+  pitchHornR: 0.52,
+  pitchHornZ: 0.21,          // Tangential leading offset of feathering pitch horn
+  swashServoR: 0.86,
+  swashPitchR: 0.56,         // Matches hypot(0.52, 0.21) = 0.561 for vertical pitch links
+  pitchHornPhase: Math.atan2(0.21, 0.52),
+  servoMountR: 0.92,
+  mastZ: -0.15,
+  gearboxTopY: -0.745,
+  swashY0: -0.10,
+  hubY: 0.96,
+  gearRatio: 4,              // 4:1 bevel drive reduction (motor input RPM -> rotor RPM)
+
+  // Feature flags: open articulated linkage — no exploded view
+  features: {
+    explode: false,
+    cutaway: true,
+    shader: true,
+    crank: true
+  },
+
+  interactionHint: "Drag swashplate, cyclic stick, or collective lever",
+
+  // Domain-authentic operator controls
+  controls: [
+    {
+      id: "collective",
+      label: "COLL",
+      min: 2,
+      max: 14,
+      step: 0.2,
+      initial: 8.5,
+      title: "Collective blade pitch angle (deg)"
+    },
+    {
+      id: "cyclicPitch",
+      label: "PITCH",
+      min: -10,
+      max: 10,
+      step: 0.2,
+      initial: 6.5,
+      title: "Fore/aft cyclic swashplate tilt (deg)"
+    },
+    {
+      id: "cyclicRoll",
+      label: "ROLL",
+      min: -10,
+      max: 10,
+      step: 0.2,
+      initial: -4.5,
+      title: "Left/right cyclic swashplate tilt (deg)"
+    },
+    {
+      id: "rpm",
+      label: "RPM",
+      min: 0,
+      max: 1600,
+      step: 20,
+      initial: 480,
+      title: "Drive motor speed (set 0 to pause & inspect blade pitch)"
+    }
+  ],
+
+  // Audit poses across collective & cyclic extremes (no exploded pose)
+  auditPoses: [
+    {
+      name: "rest (θ=0°)",
+      theta: 0,
+      explode: 0,
+      params: { collective: 8.5, cyclicPitch: 6.5, cyclicRoll: -4.5, rpm: 480 }
+    },
+    {
+      name: "low-coll + fwd-pitch (θ=90°)",
+      theta: Math.PI * 0.5,
+      explode: 0,
+      params: { collective: 2.0, cyclicPitch: 10.0, cyclicRoll: 0, rpm: 0 }
+    },
+    {
+      name: "high-coll + aft-pitch (θ=180°)",
+      theta: Math.PI,
+      explode: 0,
+      params: { collective: 14.0, cyclicPitch: -10.0, cyclicRoll: 0, rpm: 0 }
+    },
+    {
+      name: "roll-left (θ=270°)",
+      theta: Math.PI * 1.5,
+      explode: 0,
+      params: { collective: 8.5, cyclicPitch: 0, cyclicRoll: -10.0, rpm: 480 }
+    },
+    {
+      name: "roll-right + max-coll",
+      theta: 0.65,
+      explode: 0,
+      params: { collective: 14.0, cyclicPitch: 8.0, cyclicRoll: 10.0, rpm: 1600 }
+    }
+  ],
+
+  // 8-state interactive contact sheet poses for scripts/drive.mjs
+  drivePoses: [
+    {
+      label: "1. REST · COLLECTIVE 8.5°",
+      pose: {
+        theta: 0.65,
+        explode: 0,
+        cutaway: true,
+        shader: true,
+        hud: true,
+        theme: "light",
+        params: { collective: 8.5, cyclicPitch: 6.5, cyclicRoll: -4.5, rpm: 480 }
+      }
+    },
+    {
+      label: "2. PAUSED · LOW COLL 2°",
+      pose: {
+        theta: 0.65,
+        explode: 0,
+        cutaway: true,
+        shader: false,
+        hud: true,
+        theme: "light",
+        params: { collective: 2.0, cyclicPitch: 0, cyclicRoll: 0, rpm: 0 }
+      }
+    },
+    {
+      label: "3. PAUSED · HIGH COLL 14°",
+      pose: {
+        theta: 0.65,
+        explode: 0,
+        cutaway: true,
+        shader: false,
+        hud: true,
+        theme: "light",
+        params: { collective: 14.0, cyclicPitch: 0, cyclicRoll: 0, rpm: 0 }
+      }
+    },
+    {
+      label: "4. CYCLIC FWD (+10° PITCH)",
+      pose: {
+        theta: 0.65,
+        explode: 0,
+        cutaway: true,
+        shader: false,
+        hud: true,
+        theme: "light",
+        params: { collective: 8.5, cyclicPitch: 10.0, cyclicRoll: 0, rpm: 0 }
+      }
+    },
+    {
+      label: "5. CYCLIC ROLL (-10° LEFT)",
+      pose: {
+        theta: 0.65,
+        explode: 0,
+        cutaway: true,
+        shader: false,
+        hud: true,
+        theme: "light",
+        params: { collective: 8.5, cyclicPitch: 0, cyclicRoll: -10.0, rpm: 0 }
+      }
+    },
+    {
+      label: "6. CUTAWAY OFF (C = 0)",
+      pose: {
+        theta: 0.65,
+        explode: 0,
+        cutaway: false,
+        shader: true,
+        hud: true,
+        theme: "light",
+        params: { collective: 8.5, cyclicPitch: 6.5, cyclicRoll: -4.5, rpm: 480 }
+      }
+    },
+    {
+      label: "7. DARK THEME",
+      pose: {
+        theta: 1.9,
+        explode: 0,
+        cutaway: true,
+        shader: true,
+        hud: true,
+        theme: "dark",
+        params: { collective: 11.5, cyclicPitch: -6.0, cyclicRoll: 6.0, rpm: 960 }
+      }
+    },
+    {
+      label: "8. BLUEPRINT THEME",
+      pose: {
+        theta: 3.1,
+        explode: 0,
+        cutaway: true,
+        shader: true,
+        hud: true,
+        theme: "blueprint",
+        params: { collective: 6.0, cyclicPitch: 7.5, cyclicRoll: -6.0, rpm: 480 }
+      }
+    }
+  ],
+
+  // Kinematic defaults & camera framing
+  initialTheta: 0.65,
+  initialRpm: 480,
+  isoElevDeg: 30,
+  isoAzimDeg: -36,
+  initialZoom: 0.86,
+  initialPanY: 0.50,
+  minVertSpan: 5.6,
+  minHorizSpan: 7.2,
+  cameraViews: [
+    { id: "iso", label: "ISO", elev: 30, azim: -36, zoom: 0.86, pan: [0, 0.50] },
+    { id: "swash", label: "SWASH", elev: 18, azim: -24, zoom: 1.45, pan: [0, 0.12] },
+    { id: "hub", label: "HUB", elev: 24, azim: -32, zoom: 1.48, pan: [0, -0.58] },
+    { id: "top", label: "TOP", elev: 88, azim: 0, zoom: 0.88, pan: [0, 0] }
+  ],
+
+  // Heavy datum bedplate
+  BASE_W: 5.4,
+  BASE_D: 3.8,
+  BASE_H: 0.24,
+  BASE_Y: -2.06,
+  topSurfaceY: -2.06 + 0.24 + 0.025 // Account for 0.025 top bevel of baseplate
+};
+const SERVO_ANGLES = [
+  -Math.PI / 2,              // Servo 0: Aft cyclic pitch
+  (5 * Math.PI) / 6,         // Servo 1: Forward-left CCPM
+  Math.PI / 6                // Servo 2: Forward-right CCPM
+];
+const ANCHORS = {
+  baseTop: [0, SPEC.topSurfaceY, 0],
+  mastCenter: [0, SPEC.topSurfaceY, SPEC.mastZ],
+  servo0Mount: [
+    Math.cos(SERVO_ANGLES[0]) * SPEC.servoMountR,
+    SPEC.topSurfaceY,
+    SPEC.mastZ + Math.sin(SERVO_ANGLES[0]) * SPEC.servoMountR
+  ],
+  servo1Mount: [
+    Math.cos(SERVO_ANGLES[1]) * SPEC.servoMountR,
+    SPEC.topSurfaceY,
+    SPEC.mastZ + Math.sin(SERVO_ANGLES[1]) * SPEC.servoMountR
+  ],
+  servo2Mount: [
+    Math.cos(SERVO_ANGLES[2]) * SPEC.servoMountR,
+    SPEC.topSurfaceY,
+    SPEC.mastZ + Math.sin(SERVO_ANGLES[2]) * SPEC.servoMountR
+  ],
+  plaqueCenter: [-1.40, SPEC.topSurfaceY, SPEC.BASE_D * 0.5 - 0.44],
+  rulerCenter: [0.15, SPEC.topSurfaceY, SPEC.BASE_D * 0.5 - 0.44],
+  cyclicMount: [1.76, SPEC.topSurfaceY, 1.06],
+  collectiveMount: [-1.78, SPEC.topSurfaceY, 0.68],
+  pitchScaleMount: [1.94, SPEC.topSurfaceY, -0.88],
+  motorMount: [1.34, SPEC.topSurfaceY, SPEC.mastZ]
+};
+
+function resolveControls(paramsOrRpm) {
+  if (typeof paramsOrRpm === "number") {
+    return {
+      collective: 8.5,
+      cyclicPitch: 6.5,
+      cyclicRoll: -4.5,
+      rpm: paramsOrRpm
+    };
+  }
+  const p = paramsOrRpm || {};
+  return {
+    collective: p.collective !== undefined ? p.collective : 8.5,
+    cyclicPitch: p.cyclicPitch !== undefined ? p.cyclicPitch : 6.5,
+    cyclicRoll: p.cyclicRoll !== undefined ? p.cyclicRoll : -4.5,
+    rpm: p.rpm !== undefined ? p.rpm : SPEC.initialRpm
+  };
+}
+
+/**
+ * Computes swashplate collective lift, cyclic tilt around X and Z, blade pitch,
+ * and aerodynamic coning angle for a given shaft azimuth `theta` and control params.
+ */
+function getRotorState(theta, paramsOrRpm = SPEC.initialRpm) {
+  const { collective, cyclicPitch, cyclicRoll, rpm } = resolveControls(paramsOrRpm);
+  const rpmNorm = Math.max(0, Math.min(1, rpm / 1600));
+
+  const collNorm = Math.max(0, Math.min(1, (collective - 2.0) / 12.0));
+  const collLift = (collNorm - 0.5) * 0.24; // -0.12 .. +0.12 world units
+
+  // Positive cyclicPitch tilts +Y normal forward (+Z) -> rotation.x > 0
+  // Positive cyclicRoll tilts +Y normal right (+X) -> rotation.z < 0
+  const tiltX = (cyclicPitch * Math.PI) / 180;
+  const tiltZ = -(cyclicRoll * Math.PI) / 180;
+  const cyclicAmpRad = Math.hypot(tiltX, tiltZ);
+  const cyclicAzim = Math.atan2(tiltX, -tiltZ);
+
+  const swashCenterY = SPEC.swashY0 + collLift;
+  const collPitchDeg = collective;
+
+  // Aerodynamic coning angle increases with collective lift and centrifugal RPM
+  const coningDeg = 1.6 + 2.4 * rpmNorm + 4.4 * collNorm;
+  const coningRad = (coningDeg * Math.PI) / 180;
+
+  let phase = "LEVEL HOVER";
+  if (Math.abs(cyclicPitch) > 3.0 || Math.abs(cyclicRoll) > 3.0) {
+    if (Math.abs(cyclicPitch) >= Math.abs(cyclicRoll)) {
+      phase = cyclicPitch > 0 ? "FORWARD CYCLIC" : "AFT CYCLIC";
+    } else {
+      phase = cyclicRoll > 0 ? "RIGHT CYCLIC" : "LEFT CYCLIC";
+    }
+  } else if (collPitchDeg > 10.5) {
+    phase = "HIGH COLLECTIVE";
+  } else if (collPitchDeg < 5.0) {
+    phase = "FLAT PITCH";
+  }
+
+  const rotorRpm = rpm / SPEC.gearRatio;
+
+  return {
+    collective,
+    cyclicPitch,
+    cyclicRoll,
+    rpm,
+    rpmNorm,
+    rotorRpm,
+    collNorm,
+    collLift,
+    swashCenterY,
+    tiltX,
+    tiltZ,
+    cyclicAzim,
+    cyclicAmpRad,
+    collPitchDeg,
+    coningDeg,
+    coningRad,
+    phase
+  };
+}
+
+/**
+ * Computes individual blade k (0, 1, 2) pitch angle (rad), flapping angle (rad),
+ * and upper swashplate horn height offset matching swash.carrier rotation.
+ */
+function getBladeKinematics(theta, paramsOrRpm, bladeIndex) {
+  const st = getRotorState(theta, paramsOrRpm);
+  const ry = theta + (bladeIndex * 2 * Math.PI) / SPEC.numBlades;
+  const hornAzim = -ry + SPEC.pitchHornPhase;
+
+  const hx = Math.cos(hornAzim) * SPEC.swashPitchR;
+  const hz = Math.sin(hornAzim) * SPEC.swashPitchR;
+
+  // Under THREE.Euler(tiltX, 0, tiltZ, "XZY"): y' = -z*sin(tiltX) + x*sin(tiltZ)
+  const tiltOffsetY = -hz * Math.sin(st.tiltX) + hx * Math.sin(st.tiltZ);
+
+  // Mechanical pitch change from swashplate vertical displacement at pitch horn
+  const cyclicPitchRad = Math.atan2(tiltOffsetY, SPEC.pitchHornZ * 1.45);
+  const collPitchRad = (st.collPitchDeg * Math.PI) / 180;
+  const totalPitchRad = collPitchRad + cyclicPitchRad;
+
+  // Blade aerodynamic flap responds ~90 deg after cyclic pitch
+  const flapCyclicRad = 0.022 * Math.sin(ry - st.cyclicAzim);
+  const flapAngleRad = st.coningRad + flapCyclicRad;
+
+  return {
+    psi: ry,
+    hornAzim,
+    swashHornLocalY: tiltOffsetY,
+    totalPitchRad,
+    totalPitchDeg: (totalPitchRad * 180) / Math.PI,
+    flapAngleRad,
+    flapAngleDeg: (flapAngleRad * 180) / Math.PI
+  };
+}
+function formatReadout({ theta, effectiveRpm, params }) {
+  const displayRpm = params?.rpm !== undefined ? params.rpm : effectiveRpm;
+  const ctrl = params ? { ...params, rpm: displayRpm } : displayRpm;
+  const st = getRotorState(theta, ctrl);
+  const b0 = getBladeKinematics(theta, ctrl, 0);
+  const azimDeg = Math.round((((-theta * 180) / Math.PI) % 360 + 360) % 360);
+  const rotorRpm = Math.round(st.rotorRpm);
+  return {
+    readout: `ψ ${String(azimDeg).padStart(3, "0")}° · COLL ${st.collPitchDeg.toFixed(1)}° · CYC ${st.cyclicPitch >= 0 ? "+" : ""}${st.cyclicPitch.toFixed(1)}°/${st.cyclicRoll >= 0 ? "+" : ""}${st.cyclicRoll.toFixed(1)}° · B1 ${b0.totalPitchDeg.toFixed(1)}° · ${rotorRpm} rpm`,
+    phase: st.phase
+  };
+}
+
+
+/* --- figure/base.mjs --- */
+function buildBase(reg, kit) {
+  const baseGroup = reg.group("base.group", { stage: "base" });
+
+  const { BASE_W, BASE_D, BASE_H, BASE_Y, topSurfaceY } = SPEC;
+
+  // Soft ground shadow halo under bedplate
+  const haloMesh = makeHaloMesh(BASE_W + 0.35, BASE_D + 0.35, 0.38, [0.08, BASE_Y - 0.24, 0.08], kit);
+  reg.detail("base.halo", haloMesh, { parent: baseGroup, stage: "base" });
+
+  // Heavy datum instrument bedplate
+  const baseGeo = buildSlabGeometry(BASE_W, BASE_D, BASE_H, {
+    radius: 0.26,
+    bevel: true,
+    bevelSize: 0.025,
+    bevelThickness: 0.025,
+    bevelSegments: 2
+  });
+  reg.part("base.plate", baseGeo, {
+    parent: baseGroup,
+    pos: [0, BASE_Y + BASE_H, 0],
+    ramp: "lo",
+    outline: "lo",
+    crease: "faint",
+    outlineWidth: 0.018,
+    mountOn: "ground"
+  });
+
+  // Register mounting anchors on base.plate for downstream stages
+  reg.anchor("base.top", ...ANCHORS.baseTop, baseGroup);
+  reg.anchor("mast.center", ...ANCHORS.mastCenter, baseGroup);
+  reg.anchor("servo.0.mount", ...ANCHORS.servo0Mount, baseGroup);
+  reg.anchor("servo.1.mount", ...ANCHORS.servo1Mount, baseGroup);
+  reg.anchor("servo.2.mount", ...ANCHORS.servo2Mount, baseGroup);
+  reg.anchor("cyclic.mount", ...ANCHORS.cyclicMount, baseGroup);
+  reg.anchor("collective.mount", ...ANCHORS.collectiveMount, baseGroup);
+  reg.anchor("pitchScale.mount", ...ANCHORS.pitchScaleMount, baseGroup);
+
+  // Dual inset perimeter grooves
+  reg.detail("base.groove.outer", makePlanOutline(BASE_W - 0.32, BASE_D - 0.32, 0.16, topSurfaceY + 0.003, kit, "faint"), {
+    parent: baseGroup
+  });
+  reg.detail("base.groove.inner", makePlanOutline(BASE_W - 0.42, BASE_D - 0.42, 0.13, topSurfaceY + 0.003, kit, "faint"), {
+    parent: baseGroup
+  });
+
+  // 4 Turned corner feet with collars, pads, and top counterbored screws
+  const cornerOffsets = [
+    [-BASE_W * 0.5 + 0.38, -BASE_D * 0.5 + 0.38],
+    [ BASE_W * 0.5 - 0.38, -BASE_D * 0.5 + 0.38],
+    [-BASE_W * 0.5 + 0.38,  BASE_D * 0.5 - 0.38],
+    [ BASE_W * 0.5 - 0.38,  BASE_D * 0.5 - 0.38]
+  ];
+  cornerOffsets.forEach(([cx, cz], idx) => {
+    const colGeo = buildCylinderGeometry(0.22, 0.22, 0.12, { segments: 24, axis: "y" });
+    reg.part(`base.foot.collar.${idx}`, colGeo, {
+      parent: baseGroup,
+      pos: [cx, BASE_Y - 0.06, cz],
+      ramp: "mid",
+      outline: "lo",
+      crease: "faint",
+      mountOn: "base.plate"
+    });
+
+    const padGeo = buildCylinderGeometry(0.27, 0.25, 0.08, { segments: 24, axis: "y" });
+    reg.part(`base.foot.pad.${idx}`, padGeo, {
+      parent: baseGroup,
+      pos: [cx, BASE_Y - 0.16, cz],
+      ramp: "lo",
+      outline: "lo",
+      crease: "faint",
+      mountOn: `base.foot.collar.${idx}`
+    });
+
+    reg.detail(
+      `base.screw.${idx}`,
+      makeScrewDetail(cx, topSurfaceY + 0.005, cz, 0.095, "y", kit),
+      { parent: baseGroup }
+    );
+  });
+
+  // Graduated pitch/azimuth bench scale strip on front apron
+  const rulerW = 1.62;
+  const rulerD = 0.24;
+  const [rulerX, , rulerZ] = ANCHORS.rulerCenter;
+  const rulerGeo = new THREE.BoxGeometry(rulerW, 0.03, rulerD);
+  reg.part("base.ruler", rulerGeo, {
+    parent: baseGroup,
+    pos: [rulerX, topSurfaceY + 0.015, rulerZ],
+    ramp: "mid",
+    outline: "lo",
+    crease: "faint",
+    mountOn: "base.plate"
+  });
+
+  reg.detail(
+    "base.ruler.ticks",
+    makeRulerTicks(rulerX, rulerW, rulerZ, rulerD, topSurfaceY + 0.032, 25, 5, kit),
+    { parent: baseGroup }
+  );
+
+  // Brass specification plaque on front-left apron with rule lines and corner rivets
+  const plaqueW = 1.12;
+  const plaqueD = 0.42;
+  const [plaqueX, , plaqueZ] = ANCHORS.plaqueCenter;
+  const plaqueGeo = new THREE.BoxGeometry(plaqueW, 0.035, plaqueD);
+  reg.part("base.plaque", plaqueGeo, {
+    parent: baseGroup,
+    pos: [plaqueX, topSurfaceY + 0.018, plaqueZ],
+    ramp: "brass",
+    outline: "mid",
+    crease: "faint",
+    mountOn: "base.plate"
+  });
+
+  const rulePts = [
+    new THREE.Vector3(plaqueX - 0.40, topSurfaceY + 0.038, plaqueZ - 0.09),
+    new THREE.Vector3(plaqueX + 0.40, topSurfaceY + 0.038, plaqueZ - 0.09),
+    new THREE.Vector3(plaqueX - 0.40, topSurfaceY + 0.038, plaqueZ + 0.02),
+    new THREE.Vector3(plaqueX + 0.30, topSurfaceY + 0.038, plaqueZ + 0.02),
+    new THREE.Vector3(plaqueX - 0.40, topSurfaceY + 0.038, plaqueZ + 0.12),
+    new THREE.Vector3(plaqueX + 0.20, topSurfaceY + 0.038, plaqueZ + 0.12)
+  ];
+  reg.detail(
+    "base.plaque.rules",
+    new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(rulePts), kit.lineMaterials.lo),
+    { parent: baseGroup }
+  );
+
+  [[-0.48, -0.15], [0.48, -0.15], [-0.48, 0.15], [0.48, 0.15]].forEach(([rx, rz], idx) => {
+    const rDot = new THREE.Mesh(new THREE.CircleGeometry(0.022, 10), kit.dotMaterials.dot);
+    rDot.rotation.x = -Math.PI / 2;
+    rDot.position.set(plaqueX + rx, topSurfaceY + 0.039, plaqueZ + rz);
+    reg.detail(`base.plaque.rivet.${idx}`, rDot, { parent: baseGroup });
+  });
+
+  reg.tag("tag-plate", "MRH-3 · CCPM 120° · 4:1", plaqueX, topSurfaceY + 0.05, plaqueZ);
+}
+
+
+/* --- figure/structure.mjs --- */
+
+
+
+function buildCutawayArcGeometry(rInner, rOuter, height, aStart, aEnd, segs = 48) {
+  const shape = new THREE.Shape();
+  for (let i = 0; i <= segs; i++) {
+    const a = aStart + (i / segs) * (aEnd - aStart);
+    const x = Math.cos(a) * rOuter;
+    const y = Math.sin(a) * rOuter;
+    if (i === 0) shape.moveTo(x, y);
+    else shape.lineTo(x, y);
+  }
+  for (let i = segs; i >= 0; i--) {
+    const a = aStart + (i / segs) * (aEnd - aStart);
+    const x = Math.cos(a) * rInner;
+    const y = Math.sin(a) * rInner;
+    shape.lineTo(x, y);
+  }
+  shape.closePath();
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: height,
+    bevelEnabled: true,
+    bevelSegments: 1,
+    steps: 1,
+    bevelSize: 0.012,
+    bevelThickness: 0.012,
+    curveSegments: segs
+  });
+  // Rotate so shape XY maps to XZ with -Y_shape -> +Z_world, and extrusion depth -> +Y_world
+  geo.rotateX(-Math.PI / 2);
+  return geo;
+}
+
+function buildAnnularRingGeometry(rInner, rOuter, height, segs = 48) {
+  const shape = new THREE.Shape();
+  shape.absarc(0, 0, rOuter, 0, Math.PI * 2, false);
+  const hole = new THREE.Path();
+  hole.absarc(0, 0, rInner, 0, Math.PI * 2, true);
+  shape.holes.push(hole);
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: height,
+    bevelEnabled: true,
+    bevelSegments: 1,
+    steps: 1,
+    bevelSize: 0.012,
+    bevelThickness: 0.012,
+    curveSegments: segs
+  });
+  geo.rotateX(-Math.PI / 2);
+  return geo;
+}
+function buildStructure(reg, kit) {
+  const { topSurfaceY, mastZ, gearboxTopY } = SPEC;
+  const baseGroup = reg.groups.get("base.group")?.group || reg.root;
+
+  // 1. Central Main Rotor Gearbox Housing (Cutaway facing +Z)
+  const gearboxGroup = reg.group("gearbox.group", {
+    parent: baseGroup,
+    pos: [0, 0, mastZ],
+    stage: "structure"
+  });
+
+  const flangeH = 0.09;
+  const flangeGeo = buildAnnularRingGeometry(0.18, 0.70, flangeH, 32);
+  reg.part("gearbox.flange", flangeGeo, {
+    parent: gearboxGroup,
+    pos: [0, topSurfaceY + 0.012, 0],
+    ramp: "lo",
+    outline: "lo",
+    crease: "faint",
+    mountOn: "base.plate"
+  });
+
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2 + Math.PI / 8;
+    const bx = Math.cos(a) * 0.62;
+    const bz = Math.sin(a) * 0.62;
+    reg.detail(
+      `gearbox.flange.bolt.${i}`,
+      makeScrewDetail(bx, topSurfaceY + flangeH + 0.026, bz, 0.036, "y", kit),
+      { parent: gearboxGroup }
+    );
+  }
+
+  // Hollow C-shaped cutaway transmission housing (-0.18*pi .. +1.12*pi leaves +Z open)
+  const housingBaseY = topSurfaceY + flangeH + 0.024;
+  const housingH = 0.78;
+  const housingGeo = buildCutawayArcGeometry(0.47, 0.59, housingH, -0.18 * Math.PI, 1.12 * Math.PI, 44);
+  reg.part("gearbox.housing", housingGeo, {
+    parent: gearboxGroup,
+    pos: [0, housingBaseY, 0],
+    ramp: "mid",
+    outline: "hi",
+    crease: "lo",
+    creaseAngle: 24,
+    outlineWidth: 0.019,
+    mountOn: "gearbox.flange",
+    allowOverlap: ["gearbox.topDeck", "gearbox.inputBoss", "gearbox.frontCover"]
+  });
+
+  // Cutaway front cover arc (hidden in default cutaway mode; shown when C=0)
+  const frontCoverGeo = buildCutawayArcGeometry(0.47, 0.59, housingH, -0.88 * Math.PI, -0.18 * Math.PI, 28);
+  reg.part("gearbox.frontCover", frontCoverGeo, {
+    parent: gearboxGroup,
+    pos: [0, housingBaseY, 0],
+    ramp: "mid",
+    outline: "mid",
+    crease: "lo",
+    cutawayHide: true,
+    mountOn: "gearbox.flange",
+    allowOverlap: ["gearbox.housing", "gearbox.topDeck"]
+  });
+
+  // Cooling fin loops around the rear housing arc
+  [0.18, 0.39, 0.60].forEach((fy, idx) => {
+    const finPts = [];
+    for (let i = 0; i <= 36; i++) {
+      const a = -0.18 * Math.PI + (i / 36) * (1.30 * Math.PI);
+      finPts.push(new THREE.Vector3(Math.cos(a) * 0.605, housingBaseY + fy, -Math.sin(a) * 0.605));
+    }
+    reg.detail(
+      `gearbox.fin.${idx}`,
+      new THREE.Line(new THREE.BufferGeometry().setFromPoints(finPts), kit.lineMaterials.lo),
+      { parent: gearboxGroup }
+    );
+  });
+
+  // Upper bearing collar & top deck
+  const topDeckH = 0.12;
+  const topDeckY = housingBaseY + housingH + 0.012;
+  const topDeckGeo = buildAnnularRingGeometry(0.18, 0.63, topDeckH, 36);
+  reg.part("gearbox.topDeck", topDeckGeo, {
+    parent: gearboxGroup,
+    pos: [0, topDeckY, 0],
+    ramp: "mid",
+    outline: "hi",
+    crease: "lo",
+    mountOn: "gearbox.housing",
+    allowOverlap: ["mast.shaft", "gearbox.frontCover", "gearbox.mastBearing"]
+  });
+
+  // Top bearing race brass ring
+  const bearingGeo = buildAnnularRingGeometry(0.16, 0.27, 0.055, 28);
+  reg.part("gearbox.mastBearing", bearingGeo, {
+    parent: gearboxGroup,
+    pos: [0, topDeckY + topDeckH + 0.012, 0],
+    ramp: "brass",
+    outline: "mid",
+    crease: "faint",
+    mountOn: "gearbox.topDeck",
+    allowOverlap: ["mast.shaft"]
+  });
+
+  // Stationary anti-rotation scissors anchor bracket on rear-left of topDeck
+  const bracketGeo = new THREE.BoxGeometry(0.16, 0.12, 0.16);
+  const bracketPart = reg.part("scissor.baseBracket", bracketGeo, {
+    parent: gearboxGroup,
+    pos: [-0.36, topDeckY + topDeckH + 0.07, -0.28],
+    ramp: "lo",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "gearbox.topDeck"
+  });
+  reg.anchor("scissor.fixedPivot", 0, 0.04, 0, bracketPart);
+
+  // Input drive boss on +X side of gearbox housing
+  const inputY = housingBaseY + 0.34;
+  const inputBossGeo = buildCylinderGeometry(0.16, 0.19, 0.24, { segments: 24, axis: "x" });
+  reg.part("gearbox.inputBoss", inputBossGeo, {
+    parent: gearboxGroup,
+    pos: [0.60, inputY, 0],
+    ramp: "mid",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "gearbox.housing",
+    allowOverlap: ["gearbox.inputShaft", "gearbox.pinion"]
+  });
+
+  // 2. Electric Drive Motor Pedestal on +X side of bedplate (drives 4:1 bevel gearbox)
+  const [motorX, , motorZ] = ANCHORS.motorMount;
+  const motorGroup = reg.group("motor.group", {
+    parent: baseGroup,
+    pos: [motorX, 0, motorZ],
+    stage: "structure"
+  });
+
+  const motorFootGeo = new THREE.BoxGeometry(0.56, 0.10, 0.48);
+  reg.part("motor.foot", motorFootGeo, {
+    parent: motorGroup,
+    pos: [0, topSurfaceY + 0.05, 0],
+    ramp: "lo",
+    outline: "lo",
+    crease: "faint",
+    mountOn: "base.plate"
+  });
+
+  const motorWebGeo = new THREE.BoxGeometry(0.42, 0.30, 0.30);
+  reg.part("motor.pedestal", motorWebGeo, {
+    parent: motorGroup,
+    pos: [0, topSurfaceY + 0.24, 0],
+    ramp: "mid",
+    outline: "lo",
+    crease: "lo",
+    mountOn: "motor.foot"
+  });
+
+  const motorStatorGeo = buildCylinderGeometry(0.24, 0.24, 0.56, { segments: 28, axis: "x" });
+  reg.part("motor.housing", motorStatorGeo, {
+    parent: motorGroup,
+    pos: [0, inputY, 0],
+    ramp: "lo",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "motor.pedestal",
+    allowOverlap: ["gearbox.inputShaft"]
+  });
+
+  [-0.18, -0.06, 0.06, 0.18].forEach((mx, idx) => {
+    const finRing = makeRingLine(0.244, 28, kit, "lo");
+    finRing.rotation.y = Math.PI / 2;
+    finRing.position.set(mx, inputY, 0);
+    reg.detail(`motor.fin.${idx}`, finRing, { parent: motorGroup });
+  });
+
+  const motorCapGeo = buildCylinderGeometry(0.19, 0.24, 0.14, { segments: 24, axis: "x" });
+  reg.part("motor.endCap", motorCapGeo, {
+    parent: motorGroup,
+    pos: [0.35, inputY, 0],
+    ramp: "mid",
+    outline: "mid",
+    crease: "faint",
+    mountOn: "motor.housing"
+  });
+
+  // 3. Three 120° CCPM Servo Actuators mounted around the gearbox on base.plate
+  SERVO_ANGLES.forEach((ang, idx) => {
+    const sx = Math.cos(ang) * SPEC.servoMountR;
+    const sz = mastZ + Math.sin(ang) * SPEC.servoMountR;
+
+    const servoGroup = reg.group(`servo.${idx}`, {
+      parent: baseGroup,
+      pos: [sx, 0, sz],
+      stage: "structure"
+    });
+
+    const baseFlangeGeo = new THREE.BoxGeometry(0.28, 0.08, 0.28);
+    reg.part(`servo.base.${idx}`, baseFlangeGeo, {
+      parent: servoGroup,
+      pos: [0, topSurfaceY + 0.04, 0],
+      ramp: "lo",
+      outline: "lo",
+      crease: "faint",
+      mountOn: "base.plate"
+    });
+
+    const bodyH = 0.66;
+    const bodyGeo = buildCylinderGeometry(0.11, 0.12, bodyH, { segments: 22, axis: "y" });
+    const bodyPart = reg.part(`servo.body.${idx}`, bodyGeo, {
+      parent: servoGroup,
+      pos: [0, topSurfaceY + 0.08 + bodyH * 0.5, 0],
+      ramp: "mid",
+      outline: "mid",
+      crease: "lo",
+      mountOn: `servo.base.${idx}`,
+      allowOverlap: [`servo.rod.${idx}`]
+    });
+
+    const glandGeo = buildCylinderGeometry(0.085, 0.105, 0.08, { segments: 20, axis: "y" });
+    reg.part(`servo.gland.${idx}`, glandGeo, {
+      parent: servoGroup,
+      pos: [0, topSurfaceY + 0.08 + bodyH + 0.04, 0],
+      ramp: "brass",
+      outline: "mid",
+      crease: "faint",
+      mountOn: `servo.body.${idx}`,
+      allowOverlap: [`servo.rod.${idx}`]
+    });
+
+    // Anchor at top of servo gland for piston rod articulation
+    reg.anchor(`servo.${idx}.glandTop`, 0, topSurfaceY + 0.08 + bodyH + 0.06, 0, servoGroup);
+
+    // Mechanical Bowden control conduit fitting pointing cleanly toward pilot input
+    const portAngs = [0.0, Math.PI * 0.86, Math.PI * 0.30];
+    const tubeNames = ["tube.cyclicPitch", "tube.collective", "tube.cyclicRoll"];
+    const pAng = portAngs[idx];
+    const portPart = reg.part(
+      `servo.port.${idx}`,
+      buildCylinderGeometry(0.036, 0.036, 0.07, { segments: 12, axis: "x" }),
+      {
+        parent: bodyPart,
+        pos: [Math.cos(pAng) * 0.12, -0.18, Math.sin(pAng) * 0.12],
+        rot: [0, -pAng, 0],
+        ramp: "brass",
+        outline: "lo",
+        crease: "faint",
+        mountOn: `servo.body.${idx}`,
+        allowOverlap: [tubeNames[idx]]
+      }
+    );
+    reg.anchor(`servo.${idx}.ctrlPort`, 0.025, 0, 0, portPart, {
+      dir: [1, 0.06, 0]
+    });
+
+    const ring = makeRingLine(0.122, 24, kit, "lo");
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = topSurfaceY + 0.08 + bodyH * 0.5;
+    reg.detail(`servo.band.${idx}`, ring, { parent: servoGroup });
+  });
+
+  reg.anchor("gearbox.top", 0, gearboxTopY, 0, gearboxGroup);
+}
+
+
+/* --- figure/subject.mjs --- */
+
+
+
+function buildHubYokeGeometry() {
+  const shape = new THREE.Shape();
+  const armR = SPEC.flapHingeR + 0.04;
+  const armHalfW = 0.11;
+  const hubR = 0.21;
+  const segs = 36;
+
+  // Build 3-arm rounded star yoke in XZ (shape XY -> rotateX(-PI/2) -> XZ)
+  const pts = [];
+  for (let i = 0; i < segs; i++) {
+    const a = (i / segs) * Math.PI * 2;
+    // Smooth 3-lobed radius profile aligned with 0, 120, 240 deg
+    const lobe = Math.pow(Math.max(0, Math.cos(1.5 * a)), 4);
+    const r = hubR + (armR - hubR) * lobe + armHalfW * 0.15 * Math.cos(3 * a);
+    pts.push([Math.cos(a) * r, Math.sin(a) * r]);
+  }
+  pts.forEach(([x, y], idx) => {
+    if (idx === 0) shape.moveTo(x, y);
+    else shape.lineTo(x, y);
+  });
+  shape.closePath();
+
+  const bore = new THREE.Path();
+  bore.absarc(0, 0, 0.135, 0, Math.PI * 2, true);
+  shape.holes.push(bore);
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.14,
+    bevelEnabled: true,
+    bevelSegments: 1,
+    steps: 1,
+    bevelSize: 0.012,
+    bevelThickness: 0.012,
+    curveSegments: 24
+  });
+  geo.rotateX(-Math.PI / 2);
+  geo.translate(0, -0.07, 0);
+  return geo;
+}
+
+function buildAirfoilBladeGeometry(spanLen, chord = 0.26, thickness = 0.052) {
+  // Cambered NACA-style cross-section in XY; rotateY(+PI/2) maps -X_shape -> +Z_leading
+  const shape = new THREE.Shape();
+  const halfC = chord * 0.5;
+  const steps = 20;
+
+  // Upper surface from leading edge (-halfC -> +Z_local) to trailing edge (+halfC -> -Z_local)
+  for (let i = 0; i <= steps; i++) {
+    const u = i / steps; // 0 = LE, 1 = TE
+    const x = -halfC + u * chord;
+    const yt = 5 * thickness * (
+      0.2969 * Math.sqrt(u) - 0.126 * u - 0.3516 * u * u + 0.2843 * u * u * u - 0.1015 * u * u * u * u
+    );
+    const camber = 0.014 * Math.sin(u * Math.PI);
+    const y = camber + yt;
+    if (i === 0) shape.moveTo(x, y);
+    else shape.lineTo(x, y);
+  }
+  // Lower surface back from TE to LE
+  for (let i = steps - 1; i >= 0; i--) {
+    const u = i / steps;
+    const x = -halfC + u * chord;
+    const yt = 5 * thickness * (
+      0.2969 * Math.sqrt(u) - 0.126 * u - 0.3516 * u * u + 0.2843 * u * u * u - 0.1015 * u * u * u * u
+    );
+    const camber = 0.014 * Math.sin(u * Math.PI);
+    const y = camber - yt * 0.72;
+    shape.lineTo(x, y);
+  }
+  shape.closePath();
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: spanLen,
+    bevelEnabled: true,
+    bevelSegments: 1,
+    steps: 1,
+    bevelSize: 0.006,
+    bevelThickness: 0.008,
+    curveSegments: 16
+  });
+  // Extrude is along +Z_shape; rotateY(+PI/2) maps +Z_shape -> +X_span, -X_shape -> +Z_leading
+  geo.rotateY(Math.PI / 2);
+  return geo;
+}
+function buildSubject(reg, kit) {
+  const { numBlades, rotorR, flapHingeR, featherR, pitchHornZ, mastZ, hubY } = SPEC;
+
+  const hubAssembly = reg.group("hub.assembly", {
+    pos: [0, 0, mastZ],
+    stage: "subject"
+  });
+
+  const hubSpinGroup = reg.group("hub.spin", {
+    parent: hubAssembly,
+    stage: "subject"
+  });
+
+  // 1. Central 3-arm Articulated Rotor Hub Yoke
+  reg.part("hub.yoke", buildHubYokeGeometry(), {
+    parent: hubSpinGroup,
+    pos: [0, hubY, 0],
+    ramp: "hi",
+    outline: "hi",
+    crease: "lo",
+    outlineWidth: 0.019,
+    mountOn: "coaxial",
+    allowOverlap: [
+      "mast.shaft",
+      "hub.cap",
+      "blade.flapPin.0",
+      "blade.flapPin.1",
+      "blade.flapPin.2",
+      "blade.clevis.0",
+      "blade.clevis.1",
+      "blade.clevis.2"
+    ]
+  });
+
+  // 2. Domed Brass Rotor Mast Cap & Retention Bolts
+  const capGeo = buildCylinderGeometry(0.14, 0.20, 0.11, { segments: 24, axis: "y" });
+  reg.part("hub.cap", capGeo, {
+    parent: hubSpinGroup,
+    pos: [0, hubY + 0.13, 0],
+    ramp: "brass",
+    outline: "hi",
+    crease: "lo",
+    mountOn: "hub.yoke",
+    allowOverlap: ["mast.shaft"]
+  });
+
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2;
+    reg.detail(
+      `hub.cap.bolt.${i}`,
+      makeScrewDetail(Math.cos(a) * 0.11, hubY + 0.188, Math.sin(a) * 0.11, 0.022, "y", kit),
+      { parent: hubSpinGroup }
+    );
+  }
+
+  // 3. Three Articulated Rotor Blades (Flapping Hinge -> Feathering Cuff -> Pitch Horn -> Airfoil)
+  const airfoilSpan = rotorR - featherR - 0.34;
+  const airfoilGeo = buildAirfoilBladeGeometry(airfoilSpan, 0.26, 0.052);
+  const tipCapGeo = buildAirfoilBladeGeometry(0.14, 0.23, 0.044);
+
+  for (let k = 0; k < numBlades; k++) {
+    const azimAngle = (k * 2 * Math.PI) / numBlades;
+    const bladeAzimGroup = reg.group(`blade.azimuth.${k}`, {
+      parent: hubSpinGroup,
+      rot: [0, azimAngle, 0],
+      stage: "subject"
+    });
+
+    // Horizontal brass flapping (coning) hinge pin
+    const flapPinGeo = buildCylinderGeometry(0.032, 0.032, 0.21, { segments: 16, axis: "z" });
+    reg.part(`blade.flapPin.${k}`, flapPinGeo, {
+      parent: bladeAzimGroup,
+      pos: [flapHingeR, hubY, 0],
+      ramp: "brass",
+      outline: "mid",
+      crease: "faint",
+      mountOn: "hub.yoke",
+      allowOverlap: [`blade.clevis.${k}`, `blade.grip.${k}`]
+    });
+
+    // Flapping / Coning hinge group (rotates around local Z)
+    const flapGroup = reg.group(`blade.flap.${k}`, {
+      parent: bladeAzimGroup,
+      pos: [flapHingeR, hubY, 0],
+      stage: "subject"
+    });
+
+    // Articulated flapping yoke clevis
+    const clevisGeo = new THREE.BoxGeometry(0.17, 0.11, 0.14);
+    reg.part(`blade.clevis.${k}`, clevisGeo, {
+      parent: flapGroup,
+      pos: [0.06, 0, 0],
+      ramp: "mid",
+      outline: "mid",
+      crease: "lo",
+      mountOn: "hub.yoke",
+      allowOverlap: [`blade.flapPin.${k}`, `blade.grip.${k}`]
+    });
+
+    // Lead-lag elastomeric damper strut beside clevis
+    const damperGeo = buildCylinderGeometry(0.026, 0.026, 0.18, { segments: 12, axis: "x" });
+    reg.part(`blade.damper.${k}`, damperGeo, {
+      parent: flapGroup,
+      pos: [0.08, 0.01, -0.095],
+      ramp: "copper",
+      outline: "lo",
+      crease: "faint",
+      detail: true,
+      mountOn: `blade.clevis.${k}`
+    });
+
+    // Feathering / Pitch-change group (rotates around local X spanwise axis)
+    const pitchGroup = reg.group(`blade.pitch.${k}`, {
+      parent: flapGroup,
+      pos: [featherR - flapHingeR, 0, 0],
+      stage: "subject"
+    });
+
+    // Hero Lit Blade Retention Grip / Feathering Cuff
+    const gripGeo = buildCylinderGeometry(0.064, 0.072, 0.25, { segments: 20, axis: "x" });
+    reg.part(`blade.grip.${k}`, gripGeo, {
+      parent: pitchGroup,
+      pos: [0.10, 0, 0],
+      ramp: "lit",
+      outline: "lit",
+      crease: "lo",
+      outlineWidth: 0.018,
+      mountOn: `blade.clevis.${k}`,
+      allowOverlap: [`blade.pitchHorn.${k}`, `blade.airfoil.${k}`]
+    });
+
+    // Retention bolt details on grip top
+    reg.detail(
+      `blade.gripBolt.${k}`,
+      makeScrewDetail(0.16, 0.068, 0, 0.026, "y", kit),
+      { parent: pitchGroup }
+    );
+
+    // Brass Pitch Horn Arm projecting tangentially (+Z local) to meet Pitch Link
+    const hornGeo = new THREE.BoxGeometry(0.065, 0.055, pitchHornZ + 0.04);
+    reg.part(`blade.pitchHorn.${k}`, hornGeo, {
+      parent: pitchGroup,
+      pos: [0.08, -0.01, pitchHornZ * 0.5],
+      ramp: "brass",
+      outline: "mid",
+      crease: "lo",
+      mountOn: `blade.grip.${k}`,
+      allowOverlap: [`pitchLink.rod.${k}`, `pitchLink.topBall.${k}`]
+    });
+
+    // Anchor at exact pitch horn ball-joint center for Pitch Link kinematics & joint inspection
+    reg.anchor(`blade.${k}.hornBall`, 0.08, -0.01, pitchHornZ, pitchGroup);
+
+    // Hero Lit Swept Rotor Blade Airfoil
+    reg.part(`blade.airfoil.${k}`, airfoilGeo, {
+      parent: pitchGroup,
+      pos: [0.21, 0, 0],
+      ramp: "lit",
+      outline: "lit",
+      crease: "lo",
+      creaseAngle: 30,
+      outlineWidth: 0.020,
+      topBias: 0.24,
+      mountOn: `blade.grip.${k}`,
+      allowOverlap: [`blade.tipCap.${k}`]
+    });
+
+    // High-contrast swept blade tip weight cap
+    reg.part(`blade.tipCap.${k}`, tipCapGeo, {
+      parent: pitchGroup,
+      pos: [0.21 + airfoilSpan - 0.01, 0, 0],
+      ramp: "hi",
+      outline: "lit",
+      crease: "lo",
+      outlineWidth: 0.018,
+      mountOn: `blade.airfoil.${k}`
+    });
+
+    // Spanwise leading-edge spar seam line along blade (+Z leading side)
+    const sparPts = [
+      new THREE.Vector3(0.22, 0.028, 0.062),
+      new THREE.Vector3(0.21 + airfoilSpan + 0.12, 0.025, 0.056)
+    ];
+    reg.detail(
+      `blade.sparLine.${k}`,
+      new THREE.Line(new THREE.BufferGeometry().setFromPoints(sparPts), kit.lineMaterials.lit),
+      { parent: pitchGroup }
+    );
+  }
+}
+
+
+/* --- figure/mechanism.mjs --- */
+
+
+
+const UP_VEC = new THREE.Vector3(0, 1, 0);
+const TMP_A = new THREE.Vector3();
+const TMP_B = new THREE.Vector3();
+const TMP_DIR = new THREE.Vector3();
+const TMP_QUAT = new THREE.Quaternion();
+
+function buildAnnularGeometry(rInner, rOuter, height, segs = 40) {
+  const shape = new THREE.Shape();
+  shape.absarc(0, 0, rOuter, 0, Math.PI * 2, false);
+  const hole = new THREE.Path();
+  hole.absarc(0, 0, rInner, 0, Math.PI * 2, true);
+  shape.holes.push(hole);
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: height,
+    bevelEnabled: true,
+    bevelSegments: 1,
+    steps: 1,
+    bevelSize: 0.01,
+    bevelThickness: 0.01,
+    curveSegments: segs
+  });
+  geo.rotateX(-Math.PI / 2);
+  geo.translate(0, -height * 0.5, 0);
+  return geo;
+}
+
+function buildArcBandGeometry(rInner, rOuter, depth, aStart, aEnd, segs = 32) {
+  const shape = new THREE.Shape();
+  for (let i = 0; i <= segs; i++) {
+    const a = aStart + (i / segs) * (aEnd - aStart);
+    const x = Math.cos(a) * rOuter;
+    const y = Math.sin(a) * rOuter;
+    if (i === 0) shape.moveTo(x, y);
+    else shape.lineTo(x, y);
+  }
+  for (let i = segs; i >= 0; i--) {
+    const a = aStart + (i / segs) * (aEnd - aStart);
+    const x = Math.cos(a) * rInner;
+    const y = Math.sin(a) * rInner;
+    shape.lineTo(x, y);
+  }
+  shape.closePath();
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth,
+    bevelEnabled: true,
+    bevelSegments: 1,
+    steps: 1,
+    bevelSize: 0.008,
+    bevelThickness: 0.008,
+    curveSegments: segs
+  });
+  geo.translate(0, 0, -depth * 0.5);
+  return geo;
+}
+
+function buildProtractorBackingGeometry(radius, depth, segs = 32) {
+  const shape = new THREE.Shape();
+  shape.moveTo(-radius, 0);
+  for (let i = 0; i <= segs; i++) {
+    const a = Math.PI - (i / segs) * Math.PI;
+    shape.lineTo(Math.cos(a) * radius, Math.sin(a) * radius);
+  }
+  shape.closePath();
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth,
+    bevelEnabled: true,
+    bevelSegments: 1,
+    steps: 1,
+    bevelSize: 0.008,
+    bevelThickness: 0.008,
+    curveSegments: segs
+  });
+  geo.translate(0, 0, -depth * 0.5);
+  return geo;
+}
+function buildMechanism(reg, kit) {
+  const {
+    topSurfaceY,
+    mastZ,
+    swashY0,
+    hubY,
+    numBlades,
+    swashServoR,
+    swashPitchR,
+    pitchHornPhase
+  } = SPEC;
+
+  const baseGroup = reg.groups.get("base.group")?.group || reg.root;
+  const housingBaseY = topSurfaceY + 0.09 + 0.024;
+  const inputY = housingBaseY + 0.34;
+
+  // ---------------------------------------------------------------------------
+  // 1. Main Rotor Mast, 4:1 Bevel Drive Gears, Input Shaft & Guide Sleeve
+  // ---------------------------------------------------------------------------
+  const mastAssembly = reg.group("mast.assembly", {
+    pos: [0, 0, mastZ],
+    stage: "mechanism"
+  });
+
+  const mastSpinGroup = reg.group("mast.spin", {
+    parent: mastAssembly,
+    stage: "mechanism"
+  });
+
+  const mastBottomY = topSurfaceY + 0.14;
+  const mastTopY = hubY + 0.10;
+  const mastLen = mastTopY - mastBottomY;
+  const mastMidY = (mastBottomY + mastTopY) * 0.5;
+
+  const mastGeo = buildCylinderGeometry(0.125, 0.125, mastLen, { segments: 28, axis: "y" });
+  reg.part("mast.shaft", mastGeo, {
+    parent: mastSpinGroup,
+    pos: [0, mastMidY, 0],
+    ramp: "hi",
+    outline: "hi",
+    crease: "lo",
+    outlineWidth: 0.018,
+    mountOn: "coaxial",
+    allowOverlap: [
+      "gearbox.flange",
+      "gearbox.topDeck",
+      "gearbox.mastBearing",
+      "hub.yoke",
+      "hub.cap",
+      "swash.uniball",
+      "swash.lower",
+      "swash.upper"
+    ]
+  });
+
+  const thrustGeo = buildCylinderGeometry(0.18, 0.19, 0.08, { segments: 24, axis: "y" });
+  reg.part("mast.thrustCollar", thrustGeo, {
+    parent: mastSpinGroup,
+    pos: [0, topSurfaceY + 0.15, 0],
+    ramp: "brass",
+    outline: "mid",
+    crease: "faint",
+    mountOn: "gearbox.flange",
+    allowOverlap: ["mast.shaft"]
+  });
+
+  const crownGearGeo = buildExternalGearGeometry(0.30, 28, 0.036, 0.075, 0.42);
+  crownGearGeo.rotateX(-Math.PI / 2);
+  reg.part("mast.bevelGear", crownGearGeo, {
+    parent: mastSpinGroup,
+    pos: [0, inputY + 0.09, 0],
+    ramp: "brass",
+    outline: "mid",
+    crease: "lo",
+    creaseAngle: 35,
+    mountOn: "mast.shaft",
+    allowOverlap: ["gearbox.pinion"]
+  });
+
+  const driveCollarGeo = buildCylinderGeometry(0.18, 0.18, 0.10, { segments: 24, axis: "y" });
+  reg.part("mast.driveCollar", driveCollarGeo, {
+    parent: mastSpinGroup,
+    pos: [0, hubY - 0.28, 0],
+    ramp: "mid",
+    outline: "mid",
+    crease: "faint",
+    mountOn: "mast.shaft"
+  });
+  const mastDriveLugGeo = new THREE.BoxGeometry(0.12, 0.07, 0.09);
+  const mastDriveLug = reg.part("mast.driveLug", mastDriveLugGeo, {
+    parent: mastSpinGroup,
+    pos: [Math.cos(Math.PI / 3) * 0.20, hubY - 0.28, Math.sin(Math.PI / 3) * 0.20],
+    rot: [0, -Math.PI / 3, 0],
+    ramp: "hi",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "mast.driveCollar"
+  });
+  reg.anchor("mast.drivePin", 0.05, 0, 0, mastDriveLug);
+
+  const sleeveGeo = buildCylinderGeometry(0.165, 0.165, 0.48, { segments: 24, axis: "y" });
+  reg.part("mast.guideSleeve", sleeveGeo, {
+    parent: mastSpinGroup,
+    pos: [0, swashY0, 0],
+    ramp: "copper",
+    outline: "mid",
+    crease: "faint",
+    mountOn: "mast.shaft",
+    allowOverlap: ["swash.uniball", "swash.lower", "swash.upper"]
+  });
+
+  // Horizontal Input Shaft & Bevel Pinion connecting Motor -> Gearbox
+  const [motorX] = ANCHORS.motorMount;
+  const inputShaftLen = motorX - 0.30;
+  const inputShaftGeo = buildCylinderGeometry(0.065, 0.065, inputShaftLen, { segments: 20, axis: "x" });
+  const inputSpinGroup = reg.group("input.spin", {
+    parent: mastAssembly,
+    pos: [0, inputY, 0],
+    stage: "mechanism"
+  });
+  reg.part("gearbox.inputShaft", inputShaftGeo, {
+    parent: inputSpinGroup,
+    pos: [0.30 + inputShaftLen * 0.5, 0, 0],
+    ramp: "hi",
+    outline: "mid",
+    crease: "faint",
+    mountOn: "gearbox.inputBoss",
+    allowOverlap: ["motor.housing", "gearbox.housing", "gearbox.pinion", "mast.coupling"]
+  });
+
+  const pinionGeo = buildExternalGearGeometry(0.095, 10, 0.028, 0.070, 0.45);
+  pinionGeo.rotateY(Math.PI / 2);
+  reg.part("gearbox.pinion", pinionGeo, {
+    parent: inputSpinGroup,
+    pos: [0.30, 0, 0],
+    ramp: "brass",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "gearbox.inputShaft",
+    allowOverlap: ["mast.bevelGear", "gearbox.inputBoss"]
+  });
+
+  const couplingGeo = buildCylinderGeometry(0.105, 0.105, 0.16, { segments: 20, axis: "x" });
+  reg.part("mast.coupling", couplingGeo, {
+    parent: inputSpinGroup,
+    pos: [0.88, 0, 0],
+    ramp: "brass",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "gearbox.inputShaft"
+  });
+
+  // ---------------------------------------------------------------------------
+  // 2. Two-Part Articulated Swashplate (Uniball + Stationary Lower + Rotating Upper)
+  // ---------------------------------------------------------------------------
+  const swashAssembly = reg.group("swash.assembly", {
+    pos: [0, swashY0, mastZ],
+    stage: "mechanism"
+  });
+
+  const swashCarrier = reg.group("swash.carrier", {
+    parent: swashAssembly,
+    stage: "mechanism"
+  });
+
+  const uniballGeo = new THREE.SphereGeometry(0.185, 24, 18);
+  reg.part("swash.uniball", uniballGeo, {
+    parent: swashCarrier,
+    pos: [0, -0.04, 0],
+    ramp: "brass",
+    outline: "mid",
+    crease: "faint",
+    noCrease: true,
+    mountOn: "mast.guideSleeve",
+    allowOverlap: ["mast.shaft", "mast.guideSleeve", "swash.lower"]
+  });
+
+  const lowerSwashGeo = buildAnnularGeometry(0.185, 0.66, 0.064, 40);
+  reg.part("swash.lower", lowerSwashGeo, {
+    parent: swashCarrier,
+    pos: [0, -0.042, 0],
+    ramp: "mid",
+    outline: "hi",
+    crease: "lo",
+    outlineWidth: 0.018,
+    mountOn: "swash.uniball",
+    allowOverlap: ["mast.shaft", "mast.guideSleeve"]
+  });
+
+  SERVO_ANGLES.forEach((ang, idx) => {
+    const lugGeo = new THREE.BoxGeometry(0.26, 0.046, 0.095);
+    const lugPart = reg.part(`swash.servoLug.${idx}`, lugGeo, {
+      parent: swashCarrier,
+      pos: [Math.cos(ang) * 0.74, -0.045, Math.sin(ang) * 0.74],
+      rot: [0, -ang, 0],
+      ramp: "mid",
+      outline: "mid",
+      crease: "lo",
+      mountOn: "swash.lower",
+      allowOverlap: [`servo.rod.${idx}`, `servo.ball.${idx}`]
+    });
+    reg.anchor(`swash.servoPin.${idx}`, swashServoR - 0.74, 0, 0, lugPart);
+  });
+
+  const antiRotLugGeo = new THREE.BoxGeometry(0.18, 0.046, 0.095);
+  const antiRotLug = reg.part("swash.antiRotLug", antiRotLugGeo, {
+    parent: swashCarrier,
+    pos: [-0.48, -0.045, -0.48],
+    rot: [0, -Math.PI * 0.75, 0],
+    ramp: "lo",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "swash.lower"
+  });
+  reg.anchor("swash.antiRotPin", 0.07, 0, 0, antiRotLug);
+
+  const raceGeo = buildAnnularGeometry(0.35, 0.56, 0.036, 40);
+  reg.part("swash.bearingRace", raceGeo, {
+    parent: swashCarrier,
+    pos: [0, 0.028, 0],
+    ramp: "brass",
+    outline: "mid",
+    crease: "faint",
+    mountOn: "swash.lower"
+  });
+
+  const upperSpinGroup = reg.group("swash.upperSpin", {
+    parent: swashCarrier,
+    stage: "mechanism"
+  });
+
+  const upperSwashGeo = buildAnnularGeometry(0.265, 0.58, 0.060, 40);
+  reg.part("swash.upper", upperSwashGeo, {
+    parent: upperSpinGroup,
+    pos: [0, 0.098, 0],
+    ramp: "hi",
+    outline: "hi",
+    crease: "lo",
+    outlineWidth: 0.018,
+    mountOn: "swash.bearingRace",
+    allowOverlap: ["mast.shaft", "mast.guideSleeve", "swash.lower"]
+  });
+
+  for (let k = 0; k < numBlades; k++) {
+    const worldA = -((k * 2 * Math.PI) / numBlades) + pitchHornPhase;
+    const lugGeo = new THREE.BoxGeometry(0.15, 0.042, 0.085);
+    const pLug = reg.part(`swash.pitchLug.${k}`, lugGeo, {
+      parent: upperSpinGroup,
+      pos: [Math.cos(worldA) * 0.56, 0.106, Math.sin(worldA) * 0.56],
+      rot: [0, -worldA, 0],
+      ramp: "brass",
+      outline: "mid",
+      crease: "lo",
+      mountOn: "swash.upper",
+      allowOverlap: [`pitchLink.botBall.${k}`, `pitchLink.rod.${k}`]
+    });
+    reg.anchor(`swash.pitchPin.${k}`, swashPitchR - 0.56, 0.022, 0, pLug);
+  }
+
+  const driveLugGeo = new THREE.BoxGeometry(0.14, 0.042, 0.085);
+  const driveLug = reg.part("swash.driveLug", driveLugGeo, {
+    parent: upperSpinGroup,
+    pos: [Math.cos(Math.PI / 3) * 0.52, 0.106, Math.sin(Math.PI / 3) * 0.52],
+    rot: [0, -Math.PI / 3, 0],
+    ramp: "hi",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "swash.upper"
+  });
+  reg.anchor("swash.drivePin", 0.05, 0.02, 0, driveLug);
+
+  // ---------------------------------------------------------------------------
+  // 3. Articulated Linkages: 3 Servo Pushrods, 3 Pitch Links, & Scissors Links
+  // ---------------------------------------------------------------------------
+  const servoRodLen = 1.15;
+  SERVO_ANGLES.forEach((_, idx) => {
+    const rodGroup = reg.group(`servo.rodGroup.${idx}`, {
+      parent: baseGroup,
+      stage: "mechanism"
+    });
+    const rodGeo = buildCylinderGeometry(0.028, 0.028, servoRodLen, { segments: 14, axis: "y" });
+    rodGeo.translate(0, -servoRodLen * 0.5, 0);
+    reg.part(`servo.rod.${idx}`, rodGeo, {
+      parent: rodGroup,
+      ramp: "hi",
+      outline: "lo",
+      crease: "faint",
+      noCrease: true,
+      mountOn: `swash.servoLug.${idx}`,
+      allowOverlap: [`swash.lower`, `swash.servoLug.${idx}`, `servo.gland.${idx}`, `servo.body.${idx}`, `servo.ball.${idx}`]
+    });
+    const ballGeo = new THREE.SphereGeometry(0.044, 14, 10);
+    reg.part(`servo.ball.${idx}`, ballGeo, {
+      parent: rodGroup,
+      ramp: "brass",
+      outline: "lo",
+      crease: "faint",
+      noCrease: true,
+      detail: true,
+      mountOn: `swash.servoLug.${idx}`
+    });
+  });
+
+  const nominalPitchLen = 1.0;
+  for (let k = 0; k < numBlades; k++) {
+    const linkGroup = reg.group(`pitchLink.group.${k}`, {
+      parent: baseGroup,
+      stage: "mechanism"
+    });
+    const botBallGeo = new THREE.SphereGeometry(0.040, 14, 10);
+    reg.part(`pitchLink.botBall.${k}`, botBallGeo, {
+      parent: linkGroup,
+      ramp: "brass",
+      outline: "lo",
+      crease: "faint",
+      noCrease: true,
+      detail: true,
+      mountOn: `swash.pitchLug.${k}`
+    });
+    const rodGeo = buildCylinderGeometry(0.026, 0.026, nominalPitchLen, { segments: 14, axis: "y" });
+    rodGeo.translate(0, nominalPitchLen * 0.5, 0);
+    reg.part(`pitchLink.rod.${k}`, rodGeo, {
+      parent: linkGroup,
+      ramp: "copper",
+      outline: "lo",
+      crease: "faint",
+      noCrease: true,
+      mountOn: `swash.pitchLug.${k}`,
+      allowOverlap: [
+        `swash.pitchLug.${k}`,
+        `swash.upper`,
+        `blade.pitchHorn.${k}`,
+        `blade.grip.${k}`,
+        `pitchLink.botBall.${k}`,
+        `pitchLink.topBall.${k}`
+      ]
+    });
+    const topBallGeo = new THREE.SphereGeometry(0.040, 14, 10);
+    reg.part(`pitchLink.topBall.${k}`, topBallGeo, {
+      parent: linkGroup,
+      pos: [0, nominalPitchLen, 0],
+      ramp: "brass",
+      outline: "lo",
+      crease: "faint",
+      noCrease: true,
+      detail: true,
+      mountOn: `blade.pitchHorn.${k}`
+    });
+  }
+
+  const driveScissorGroup = reg.group("scissors.drive", {
+    parent: baseGroup,
+    stage: "mechanism"
+  });
+  const driveArmGeo = buildCylinderGeometry(0.025, 0.025, 1.0, { segments: 12, axis: "y" });
+  driveArmGeo.translate(0, 0.5, 0);
+  reg.part("scissors.driveArm", driveArmGeo, {
+    parent: driveScissorGroup,
+    ramp: "hi",
+    outline: "lo",
+    crease: "faint",
+    noCrease: true,
+    mountOn: "swash.driveLug",
+    allowOverlap: ["swash.driveLug", "swash.upper", "mast.driveLug", "mast.driveCollar"]
+  });
+
+  // 2-Bar Stationary Anti-Rotation Scissors (arm length 0.50 covers max collective + cyclic span)
+  const scissorArmLen = 0.50;
+  const fixedLowerGroup = reg.group("scissors.fixedLower", {
+    parent: baseGroup,
+    stage: "mechanism"
+  });
+  const fixedLowerGeo = new THREE.BoxGeometry(0.048, scissorArmLen, 0.048);
+  fixedLowerGeo.translate(0, scissorArmLen * 0.5, 0);
+  reg.part("scissors.fixedLowerArm", fixedLowerGeo, {
+    parent: fixedLowerGroup,
+    ramp: "lo",
+    outline: "lo",
+    crease: "lo",
+    mountOn: "scissor.baseBracket",
+    allowOverlap: ["scissor.baseBracket", "scissors.fixedUpperArm", "scissors.kneePin"]
+  });
+
+  const fixedUpperGroup = reg.group("scissors.fixedUpper", {
+    parent: baseGroup,
+    stage: "mechanism"
+  });
+  const fixedUpperGeo = new THREE.BoxGeometry(0.044, scissorArmLen, 0.044);
+  fixedUpperGeo.translate(0, scissorArmLen * 0.5, 0);
+  reg.part("scissors.fixedUpperArm", fixedUpperGeo, {
+    parent: fixedUpperGroup,
+    ramp: "mid",
+    outline: "lo",
+    crease: "lo",
+    mountOn: "swash.antiRotLug",
+    allowOverlap: ["swash.antiRotLug", "swash.lower", "scissors.fixedLowerArm", "scissors.kneePin"]
+  });
+
+  const kneePinGeo = buildCylinderGeometry(0.036, 0.036, 0.09, { segments: 14, axis: "z" });
+  reg.part("scissors.kneePin", kneePinGeo, {
+    parent: baseGroup,
+    ramp: "brass",
+    outline: "lo",
+    crease: "faint",
+    detail: true,
+    mountOn: "scissors.fixedLowerArm"
+  });
+
+  // ---------------------------------------------------------------------------
+  // 4. 2-Axis Gimbal Cyclic Control Stick (Front-Right Apron)
+  // ---------------------------------------------------------------------------
+  const [cycX, , cycZ] = ANCHORS.cyclicMount;
+  const cyclicBaseGroup = reg.group("cyclic.baseGroup", {
+    parent: baseGroup,
+    pos: [cycX, 0, cycZ],
+    stage: "mechanism"
+  });
+
+  const cycBaseGeo = buildCylinderGeometry(0.25, 0.28, 0.09, { segments: 24, axis: "y" });
+  reg.part("cyclic.mountBase", cycBaseGeo, {
+    parent: cyclicBaseGroup,
+    pos: [0, topSurfaceY + 0.045, 0],
+    ramp: "lo",
+    outline: "lo",
+    crease: "faint",
+    mountOn: "base.plate"
+  });
+
+  [
+    [-0.17, -0.17],
+    [ 0.17, -0.17],
+    [-0.17,  0.17],
+    [ 0.17,  0.17]
+  ].forEach(([bx, bz], idx) => {
+    reg.detail(
+      `cyclic.bolt.${idx}`,
+      makeScrewDetail(bx, topSurfaceY + 0.093, bz, 0.025, "y", kit),
+      { parent: cyclicBaseGroup }
+    );
+  });
+
+  const gimbalGeo = buildCylinderGeometry(0.15, 0.17, 0.08, { segments: 20, axis: "y" });
+  reg.part("cyclic.gimbalRing", gimbalGeo, {
+    parent: cyclicBaseGroup,
+    pos: [0, topSurfaceY + 0.125, 0],
+    ramp: "mid",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "cyclic.mountBase"
+  });
+
+  const bootGeo = new THREE.SphereGeometry(0.098, 18, 12);
+  reg.part("cyclic.boot", bootGeo, {
+    parent: cyclicBaseGroup,
+    pos: [0, topSurfaceY + 0.175, 0],
+    ramp: "brass",
+    outline: "mid",
+    crease: "faint",
+    noCrease: true,
+    mountOn: "cyclic.gimbalRing",
+    allowOverlap: ["cyclic.stick"]
+  });
+
+  const cyclicGroup = reg.group("cyclic.group", {
+    parent: cyclicBaseGroup,
+    pos: [0, topSurfaceY + 0.175, 0],
+    stage: "mechanism"
+  });
+
+  const stickGeo = buildCylinderGeometry(0.035, 0.042, 0.60, { segments: 16, axis: "y" });
+  reg.part("cyclic.stick", stickGeo, {
+    parent: cyclicGroup,
+    pos: [0, 0.30, 0],
+    ramp: "hi",
+    outline: "mid",
+    crease: "faint",
+    mountOn: "cyclic.boot",
+    allowOverlap: ["cyclic.gripCollar"]
+  });
+
+  const cycCollarGeo = buildCylinderGeometry(0.060, 0.044, 0.07, { segments: 18, axis: "y" });
+  reg.part("cyclic.gripCollar", cycCollarGeo, {
+    parent: cyclicGroup,
+    pos: [0, 0.62, 0],
+    ramp: "mid",
+    outline: "mid",
+    crease: "faint",
+    mountOn: "cyclic.stick"
+  });
+
+  const cycGripGeo = buildCylinderGeometry(0.066, 0.056, 0.20, { segments: 20, axis: "y" });
+  reg.part("cyclic.grip", cycGripGeo, {
+    parent: cyclicGroup,
+    pos: [0, 0.75, 0],
+    ramp: "copper",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "cyclic.gripCollar"
+  });
+
+  const hatGeo = buildCylinderGeometry(0.030, 0.034, 0.045, { segments: 14, axis: "y" });
+  reg.part("cyclic.hatSwitch", hatGeo, {
+    parent: cyclicGroup,
+    pos: [0, 0.865, 0.015],
+    ramp: "brass",
+    outline: "lo",
+    crease: "faint",
+    detail: true,
+    mountOn: "cyclic.grip"
+  });
+
+  // Two conduit ports on cyclic base (roll -> servo 2, pitch -> servo 0)
+  const portRollAng = Math.PI;
+  const cycPortRoll = reg.part(
+    "cyclic.portRoll",
+    buildCylinderGeometry(0.036, 0.036, 0.08, { segments: 12, axis: "x" }),
+    {
+      parent: cyclicBaseGroup,
+      pos: [Math.cos(portRollAng) * 0.25, topSurfaceY + 0.045, Math.sin(portRollAng) * 0.25],
+      rot: [0, -portRollAng, 0],
+      ramp: "brass",
+      outline: "lo",
+      crease: "faint",
+      mountOn: "cyclic.mountBase",
+      allowOverlap: ["tube.cyclicRoll"]
+    }
+  );
+  reg.anchor("cyclic.portRoll", 0.03, 0, 0, cycPortRoll, { dir: [1, 0.06, 0] });
+
+  const portPitchAng = -Math.PI * 0.14;
+  const cycPortPitch = reg.part(
+    "cyclic.portPitch",
+    buildCylinderGeometry(0.036, 0.036, 0.08, { segments: 12, axis: "x" }),
+    {
+      parent: cyclicBaseGroup,
+      pos: [Math.cos(portPitchAng) * 0.25, topSurfaceY + 0.045, Math.sin(portPitchAng) * 0.25],
+      rot: [0, -portPitchAng, 0],
+      ramp: "brass",
+      outline: "lo",
+      crease: "faint",
+      mountOn: "cyclic.mountBase",
+      allowOverlap: ["tube.cyclicPitch"]
+    }
+  );
+  reg.anchor("cyclic.portPitch", 0.03, 0, 0, cycPortPitch, { dir: [1, 0.06, 0] });
+
+  // ---------------------------------------------------------------------------
+  // 5. Collective Pitch Quadrant Lever (Front-Left Apron)
+  // ---------------------------------------------------------------------------
+  const [colX, , colZ] = ANCHORS.collectiveMount;
+  const collBaseGroup = reg.group("collective.baseGroup", {
+    parent: baseGroup,
+    pos: [colX, 0, colZ],
+    stage: "mechanism"
+  });
+
+  const collBaseGeo = new THREE.BoxGeometry(0.46, 0.08, 0.28);
+  reg.part("collective.base", collBaseGeo, {
+    parent: collBaseGroup,
+    pos: [0, topSurfaceY + 0.04, 0],
+    ramp: "lo",
+    outline: "lo",
+    crease: "faint",
+    mountOn: "base.plate"
+  });
+
+  const collPivotPos = [0.14, topSurfaceY + 0.15, 0];
+  const quadGeo = buildArcBandGeometry(0.35, 0.47, 0.044, 0.60 * Math.PI, 1.02 * Math.PI, 28);
+  reg.part("collective.quadrant", quadGeo, {
+    parent: collBaseGroup,
+    pos: collPivotPos,
+    ramp: "brass",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "collective.base",
+    allowOverlap: ["collective.pivot", "collective.lever"]
+  });
+
+  const quadTickPts = [];
+  for (let i = 0; i <= 12; i++) {
+    const a = 0.64 * Math.PI + (i / 12) * (0.34 * Math.PI);
+    const rOut = 0.46;
+    const rIn = i % 3 === 0 ? 0.37 : 0.405;
+    quadTickPts.push(
+      new THREE.Vector3(collPivotPos[0] + Math.cos(a) * rIn, collPivotPos[1] + Math.sin(a) * rIn, 0.032),
+      new THREE.Vector3(collPivotPos[0] + Math.cos(a) * rOut, collPivotPos[1] + Math.sin(a) * rOut, 0.032)
+    );
+  }
+  reg.detail(
+    "collective.ticks",
+    new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(quadTickPts), kit.lineMaterials.mid),
+    { parent: collBaseGroup }
+  );
+
+  const collPivotGeo = buildCylinderGeometry(0.055, 0.055, 0.14, { segments: 18, axis: "z" });
+  reg.part("collective.pivot", collPivotGeo, {
+    parent: collBaseGroup,
+    pos: collPivotPos,
+    ramp: "brass",
+    outline: "mid",
+    crease: "faint",
+    mountOn: "collective.base",
+    allowOverlap: ["collective.lever", "collective.quadrant"]
+  });
+
+  const collectiveGroup = reg.group("collective.group", {
+    parent: collBaseGroup,
+    pos: [collPivotPos[0], collPivotPos[1], 0.056],
+    stage: "mechanism"
+  });
+
+  const collLeverGeo = new THREE.BoxGeometry(0.64, 0.052, 0.042);
+  collLeverGeo.translate(-0.32, 0, 0);
+  reg.part("collective.lever", collLeverGeo, {
+    parent: collectiveGroup,
+    ramp: "hi",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "collective.pivot"
+  });
+
+  const collGripGeo = buildCylinderGeometry(0.048, 0.044, 0.22, { segments: 18, axis: "x" });
+  reg.part("collective.grip", collGripGeo, {
+    parent: collectiveGroup,
+    pos: [-0.73, 0, 0],
+    ramp: "copper",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "collective.lever"
+  });
+
+  const collPort = reg.part(
+    "collective.port",
+    buildCylinderGeometry(0.036, 0.036, 0.08, { segments: 12, axis: "x" }),
+    {
+      parent: collBaseGroup,
+      pos: [0.22, topSurfaceY + 0.045, -0.02],
+      rot: [0, -0.35, 0],
+      ramp: "brass",
+      outline: "lo",
+      crease: "faint",
+      mountOn: "collective.base",
+      allowOverlap: ["tube.collective"]
+    }
+  );
+  reg.anchor("collective.port", 0.03, 0, 0, collPort, { dir: [1, 0.06, 0] });
+
+  // ---------------------------------------------------------------------------
+  // 6. Blade Pitch Protractor Scale Stand (Right-Rear Apron, Distinct Semi-Circle)
+  // ---------------------------------------------------------------------------
+  const [pitchX, , pitchZ] = ANCHORS.pitchScaleMount;
+  const pitchBaseGroup = reg.group("pitchScale.group", {
+    parent: baseGroup,
+    pos: [pitchX, 0, pitchZ],
+    stage: "mechanism"
+  });
+
+  const pBaseGeo = new THREE.BoxGeometry(0.46, 0.09, 0.32);
+  reg.part("pitchScale.base", pBaseGeo, {
+    parent: pitchBaseGroup,
+    pos: [0, topSurfaceY + 0.045, 0],
+    ramp: "lo",
+    outline: "lo",
+    crease: "faint",
+    mountOn: "base.plate"
+  });
+
+  const pPostH = 0.72;
+  const pPostGeo = new THREE.BoxGeometry(0.11, pPostH, 0.11);
+  reg.part("pitchScale.post", pPostGeo, {
+    parent: pitchBaseGroup,
+    pos: [0, topSurfaceY + 0.09 + pPostH * 0.5, -0.04],
+    ramp: "mid",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "pitchScale.base",
+    allowOverlap: ["pitchScale.backing"]
+  });
+
+  const pitchHeadY = topSurfaceY + 0.80;
+  const pitchHeadGroup = reg.group("pitchScale.head", {
+    parent: pitchBaseGroup,
+    pos: [0, pitchHeadY, 0.02],
+    rot: [0, -0.22, 0],
+    stage: "mechanism"
+  });
+
+  const pBackingGeo = buildProtractorBackingGeometry(0.44, 0.08, 32);
+  reg.part("pitchScale.backing", pBackingGeo, {
+    parent: pitchHeadGroup,
+    ramp: "hi",
+    outline: "mid",
+    crease: "lo",
+    mountOn: "pitchScale.post",
+    allowOverlap: ["pitchScale.rim"]
+  });
+
+  const pRimGeo = buildArcBandGeometry(0.37, 0.45, 0.032, 0, Math.PI, 32);
+  reg.part("pitchScale.rim", pRimGeo, {
+    parent: pitchHeadGroup,
+    pos: [0, 0, 0.032],
+    ramp: "brass",
+    outline: "mid",
+    crease: "faint",
+    mountOn: "pitchScale.backing"
+  });
+  reg.anchor("pitchScale.pivot", 0, 0.05, 0.054, pitchHeadGroup);
+
+  const protTickPts = [];
+  for (let i = 0; i <= 16; i++) {
+    const a = Math.PI * 0.88 - (i / 16) * (Math.PI * 0.76);
+    const rOut = 0.355;
+    const rIn = i % 4 === 0 ? 0.255 : 0.295;
+    protTickPts.push(
+      new THREE.Vector3(Math.cos(a) * rIn, 0.04 + Math.sin(a) * rIn, 0.052),
+      new THREE.Vector3(Math.cos(a) * rOut, 0.04 + Math.sin(a) * rOut, 0.052)
+    );
+  }
+  reg.detail(
+    "pitchScale.ticks",
+    new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(protTickPts), kit.lineMaterials.mid),
+    { parent: pitchHeadGroup }
+  );
+
+  const pitchNeedleGroup = reg.group("pitchScale.needle", {
+    parent: pitchHeadGroup,
+    pos: [0, 0.04, 0.058],
+    stage: "mechanism"
+  });
+  const pNeedlePts = [new THREE.Vector3(0, -0.02, 0), new THREE.Vector3(0, 0.33, 0)];
+  reg.detail(
+    "pitchScale.needle.line",
+    new THREE.Line(new THREE.BufferGeometry().setFromPoints(pNeedlePts), kit.lineMaterials.lit),
+    { parent: pitchNeedleGroup }
+  );
+  const pNeedleCap = new THREE.Mesh(new THREE.CircleGeometry(0.038, 16), kit.dotMaterials.lit);
+  pNeedleCap.position.z = 0.002;
+  reg.detail("pitchScale.needle.cap", pNeedleCap, { parent: pitchNeedleGroup });
+
+  reg.tag("tag-pitch", "BLADE 1 PITCH°", pitchX + 0.10, pitchHeadY + 0.64, pitchZ);
+
+  // ---------------------------------------------------------------------------
+  // 7. Three Bowden Control Conduits (Pilot Controls -> 3 CCPM Servos)
+  // ---------------------------------------------------------------------------
+  // Conduit 1: Collective Lever -> Left CCPM Servo 1
+  reg.tube(
+    "tube.collective",
+    "collective.port",
+    [
+      [-1.32, topSurfaceY + 0.07, 0.72],
+      [-1.16, topSurfaceY + 0.14, 0.68],
+      [-1.06, topSurfaceY + 0.21, 0.50]
+    ],
+    "servo.1.ctrlPort",
+    {
+      parent: baseGroup,
+      radius: 0.024,
+      segments: 36,
+      leadOut: 0.10,
+      leadIn: 0.12,
+      ramp: "copper",
+      outline: "lo",
+      fromPart: "collective.port",
+      toPart: "servo.port.1",
+      allowOverlap: ["collective.base", "servo.body.1"]
+    }
+  );
+
+  // Conduit 2: Cyclic Roll Port -> Right CCPM Servo 2
+  reg.tube(
+    "tube.cyclicRoll",
+    "cyclic.portRoll",
+    [
+      [1.20, topSurfaceY + 0.06, 1.06],
+      [0.96, topSurfaceY + 0.13, 0.94],
+      [0.98, topSurfaceY + 0.20, 0.64]
+    ],
+    "servo.2.ctrlPort",
+    {
+      parent: baseGroup,
+      radius: 0.024,
+      segments: 36,
+      leadOut: 0.12,
+      leadIn: 0.12,
+      ramp: "copper",
+      outline: "lo",
+      fromPart: "cyclic.portRoll",
+      toPart: "servo.port.2",
+      allowOverlap: ["cyclic.mountBase", "servo.body.2"]
+    }
+  );
+
+  // Conduit 3: Cyclic Pitch Port -> Aft CCPM Servo 0 (sweeps around outer right perimeter)
+  reg.tube(
+    "tube.cyclicPitch",
+    "cyclic.portPitch",
+    [
+      [2.26, topSurfaceY + 0.07, 0.62],
+      [2.36, topSurfaceY + 0.10, -0.25],
+      [2.28, topSurfaceY + 0.13, -1.08],
+      [1.86, topSurfaceY + 0.16, -1.26],
+      [1.14, topSurfaceY + 0.21, -1.12],
+      [0.56, topSurfaceY + 0.23, -1.07]
+    ],
+    "servo.0.ctrlPort",
+    {
+      parent: baseGroup,
+      radius: 0.024,
+      segments: 60,
+      leadOut: 0.14,
+      leadIn: 0.14,
+      ramp: "copper",
+      outline: "lo",
+      fromPart: "cyclic.portPitch",
+      toPart: "servo.port.0",
+      allowOverlap: ["cyclic.mountBase", "servo.body.0"]
+    }
+  );
+
+  // ---------------------------------------------------------------------------
+  // 8. Direct 3D Viewport Manipulation (Draggable Swashplate, Cyclic & Collective)
+  // ---------------------------------------------------------------------------
+  reg.interactable("swash.assembly", {
+    cursor: "grab",
+    hint: "Drag swashplate up/down for collective or sideways to tilt cyclic",
+    onDrag: ({ dx, dy, state, setParam }) => {
+      const curColl = state.params.collective ?? 8.5;
+      const curRoll = state.params.cyclicRoll ?? -4.5;
+      setParam("collective", curColl - dy * 0.09);
+      setParam("cyclicRoll", curRoll + dx * 0.13);
+    }
+  });
+
+  reg.interactable("cyclic.group", {
+    cursor: "grab",
+    hint: "Drag cyclic stick in 2 axes to tilt the swashplate",
+    onDrag: ({ dx, dy, state, setParam }) => {
+      const curPitch = state.params.cyclicPitch ?? 6.5;
+      const curRoll = state.params.cyclicRoll ?? -4.5;
+      setParam("cyclicRoll", curRoll + dx * 0.14);
+      setParam("cyclicPitch", curPitch - dy * 0.14);
+    }
+  });
+
+  reg.interactable("collective.group", {
+    cursor: "ns-resize",
+    hint: "Drag collective lever up/down to change collective pitch",
+    onDrag: ({ dy, state, setParam }) => {
+      const curColl = state.params.collective ?? 8.5;
+      setParam("collective", curColl - dy * 0.09);
+    }
+  });
+
+  // Initial kinematic pose
+  updateKinematics(reg, {
+    theta: SPEC.initialTheta,
+    explode: 0,
+    rpm: SPEC.initialRpm,
+    effectiveRpm: SPEC.initialRpm,
+    shaderEnv: 1.0,
+    cutaway: true,
+    params: {
+      collective: 8.5,
+      cyclicPitch: 6.5,
+      cyclicRoll: -4.5,
+      rpm: SPEC.initialRpm
+    }
+  });
+}
+
+function alignSegment(group, pFrom, pTo) {
+  TMP_DIR.subVectors(pTo, pFrom);
+  const len = TMP_DIR.length();
+  group.position.copy(pFrom);
+  if (len > 1e-5) {
+    TMP_DIR.divideScalar(len);
+    TMP_QUAT.setFromUnitVectors(UP_VEC, TMP_DIR);
+    group.quaternion.copy(TMP_QUAT);
+  }
+  return len;
+}
+function updateKinematics(reg, state) {
+  const { theta, rpm, shaderEnv = 1, params } = state;
+  const ctrlParams = params ? { ...params, rpm: rpm ?? params.rpm } : rpm;
+  const st = getRotorState(theta, ctrlParams);
+
+  // 1. Spin Main Mast, 4:1 Input Shaft, Upper Swashplate & Rotor Hub
+  const mastSpin = reg.groups.get("mast.spin")?.group;
+  if (mastSpin) mastSpin.rotation.y = theta;
+
+  const inputSpin = reg.groups.get("input.spin")?.group;
+  if (inputSpin) inputSpin.rotation.x = theta * SPEC.gearRatio;
+
+  const hubSpin = reg.groups.get("hub.spin")?.group;
+  if (hubSpin) hubSpin.rotation.y = theta;
+
+  const upperSpin = reg.groups.get("swash.upperSpin")?.group;
+  if (upperSpin) upperSpin.rotation.y = theta;
+
+  // 2. Lift & Tilt Swashplate Carrier
+  const swashCarrier = reg.groups.get("swash.carrier")?.group;
+  if (swashCarrier) {
+    swashCarrier.position.y = st.collLift;
+    swashCarrier.rotation.order = "XZY";
+    swashCarrier.rotation.x = st.tiltX;
+    swashCarrier.rotation.z = st.tiltZ;
+  }
+
+  // 3. Articulate All 3 Rotor Blades (Flapping Coning + Cyclic/Collective Pitch Feathering)
+  let blade0PitchDeg = st.collPitchDeg;
+  for (let k = 0; k < SPEC.numBlades; k++) {
+    const bk = getBladeKinematics(theta, ctrlParams, k);
+    if (k === 0) blade0PitchDeg = bk.totalPitchDeg;
+    const flapGroup = reg.groups.get(`blade.flap.${k}`)?.group;
+    const pitchGroup = reg.groups.get(`blade.pitch.${k}`)?.group;
+    if (flapGroup) flapGroup.rotation.z = bk.flapAngleRad;
+    if (pitchGroup) pitchGroup.rotation.x = -bk.totalPitchRad;
+  }
+
+  // Sync world matrices of parent assemblies before querying exact pin world positions
+  const baseGroup = reg.groups.get("base.group")?.group || reg.root;
+  reg.root.updateMatrixWorld(true);
+  const invBase = baseGroup.matrixWorld.clone().invert();
+
+  const toBaseLocal = (anchorId, outVec) => {
+    const obj = reg.joints.get(anchorId);
+    if (!obj) return outVec.set(0, 0, 0);
+    return obj.getWorldPosition(outVec).applyMatrix4(invBase);
+  };
+
+  // 4. Articulate 3 Servo Pushrods
+  for (let i = 0; i < 3; i++) {
+    const rodGroup = reg.groups.get(`servo.rodGroup.${i}`)?.group;
+    if (!rodGroup) continue;
+    toBaseLocal(`swash.servoPin.${i}`, TMP_A);
+    toBaseLocal(`servo.${i}.glandTop`, TMP_B);
+    TMP_DIR.subVectors(TMP_A, TMP_B);
+    const len = TMP_DIR.length();
+    rodGroup.position.copy(TMP_A);
+    if (len > 1e-5) {
+      TMP_DIR.divideScalar(len);
+      rodGroup.quaternion.setFromUnitVectors(UP_VEC, TMP_DIR);
+    }
+  }
+
+  // 5. Articulate 3 Pitch Control Links
+  for (let k = 0; k < SPEC.numBlades; k++) {
+    const linkGroup = reg.groups.get(`pitchLink.group.${k}`)?.group;
+    if (!linkGroup) continue;
+    toBaseLocal(`swash.pitchPin.${k}`, TMP_A);
+    toBaseLocal(`blade.${k}.hornBall`, TMP_B);
+    const dist = alignSegment(linkGroup, TMP_A, TMP_B);
+    const rodPart = reg.parts.get(`pitchLink.rod.${k}`)?.group;
+    const topBall = reg.parts.get(`pitchLink.topBall.${k}`)?.group;
+    if (rodPart) rodPart.scale.y = Math.max(0.2, dist);
+    if (topBall) topBall.position.y = dist;
+  }
+
+  // 6. Articulate Rotating Drive Scissors
+  const driveScissor = reg.groups.get("scissors.drive")?.group;
+  if (driveScissor) {
+    toBaseLocal("swash.drivePin", TMP_A);
+    toBaseLocal("mast.drivePin", TMP_B);
+    const dist = alignSegment(driveScissor, TMP_A, TMP_B);
+    const armPart = reg.parts.get("scissors.driveArm")?.group;
+    if (armPart) armPart.scale.y = Math.max(0.2, dist);
+  }
+
+  // 7. Articulate 2-Bar Stationary Anti-Rotation Scissors
+  const lowerArmGroup = reg.groups.get("scissors.fixedLower")?.group;
+  const upperArmGroup = reg.groups.get("scissors.fixedUpper")?.group;
+  const kneePin = reg.parts.get("scissors.kneePin")?.group;
+  if (lowerArmGroup && upperArmGroup && kneePin) {
+    toBaseLocal("scissor.fixedPivot", TMP_A);
+    toBaseLocal("swash.antiRotPin", TMP_B);
+    const span = TMP_A.distanceTo(TMP_B);
+    const L = 0.50;
+    const halfSpan = Math.min(span * 0.5, L - 0.02);
+    const kneeOut = Math.sqrt(Math.max(0.001, L * L - halfSpan * halfSpan));
+    const mid = TMP_A.clone().add(TMP_B).multiplyScalar(0.5);
+    const outDir = new THREE.Vector3(-0.707, 0, -0.707).normalize();
+    const kneePos = mid.addScaledVector(outDir, kneeOut);
+
+    alignSegment(lowerArmGroup, TMP_A, kneePos);
+    alignSegment(upperArmGroup, TMP_B, kneePos);
+    kneePin.position.copy(kneePos);
+    kneePin.rotation.y = Math.PI * 0.25;
+  }
+
+  // 8. Drive Physical Cyclic Stick, Collective Quadrant Lever & Pitch Protractor Needle
+  const cyclicGroup = reg.groups.get("cyclic.group")?.group;
+  if (cyclicGroup) {
+    cyclicGroup.rotation.order = "XZY";
+    cyclicGroup.rotation.x = st.tiltX * 1.5;
+    cyclicGroup.rotation.z = st.tiltZ * 1.5;
+  }
+
+  const collectiveGroup = reg.groups.get("collective.group")?.group;
+  if (collectiveGroup) {
+    collectiveGroup.rotation.z = -(0.22 + st.collNorm * 0.62);
+  }
+
+  const pitchNorm = Math.max(0, Math.min(1, (blade0PitchDeg + 10) / 40));
+  const needleAngle = Math.PI * 0.38 - pitchNorm * (Math.PI * 0.76);
+  const pitchNeedle = reg.groups.get("pitchScale.needle")?.group;
+  if (pitchNeedle) {
+    pitchNeedle.rotation.z = needleAngle;
+  }
+
+  const discShader = reg.root.getObjectByName("rotor.discShader");
+  if (discShader && discShader.material && discShader.material.uniforms) {
+    discShader.material.uniforms.uTheta.value = theta;
+    discShader.material.uniforms.uRpmNorm.value = st.rpmNorm;
+    discShader.material.uniforms.uConeRad.value = st.coningRad;
+    discShader.material.uniforms.uTiltX.value = st.tiltX;
+    discShader.material.uniforms.uTiltZ.value = st.tiltZ;
+    discShader.material.uniforms.uEnvelope.value = shaderEnv;
+  }
+}
+
+
+/* --- figure/shader.mjs --- */
+function buildShader(reg, kit) {
+  const hubAssembly = reg.groups.get("hub.assembly")?.group || reg.root;
+  const theme = kit.currentTheme;
+  const initSt = getRotorState(SPEC.initialTheta, SPEC.initialRpm);
+
+  const discMat = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    uniforms: {
+      uTheta: { value: SPEC.initialTheta },
+      uRpmNorm: { value: initSt.rpmNorm },
+      uConeRad: { value: initSt.coningRad },
+      uTiltX: { value: initSt.tiltX },
+      uTiltZ: { value: initSt.tiltZ },
+      uHingeR: { value: SPEC.flapHingeR },
+      uRotorR: { value: SPEC.rotorR },
+      uEnvelope: { value: 1.0 },
+      uIsDark: { value: theme.isDark ? 1.0 : 0.0 },
+      uColWake: { value: new THREE.Color(theme.channels.intake) },
+      uColTip: { value: new THREE.Color(theme.channels.comb) }
+    },
+    vertexShader: `
+      uniform float uConeRad;
+      uniform float uTiltX;
+      uniform float uTiltZ;
+      uniform float uHingeR;
+      varying vec2 vLocalXZ;
+      varying float vRadial;
+
+      void main() {
+        // PlaneGeometry sits in XZ after rotateX(-PI/2)
+        vec3 p = position;
+        float r = length(p.xz);
+        // Track animated blade coning cone & gentle tip-path cyclic tilt
+        float coneLift = max(0.0, r - uHingeR) * tan(uConeRad);
+        float tipTilt = (p.z * uTiltX - p.x * uTiltZ) * 0.14;
+        p.y += coneLift + tipTilt;
+
+        vLocalXZ = p.xz;
+        vRadial = r;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float uTheta;
+      uniform float uRpmNorm;
+      uniform float uRotorR;
+      uniform float uEnvelope;
+      uniform float uIsDark;
+      uniform vec3 uColWake;
+      uniform vec3 uColTip;
+      varying vec2 vLocalXZ;
+      varying float vRadial;
+
+      const float PI = 3.14159265359;
+      const float TWO_PI = 6.28318530718;
+
+      void main() {
+        float r = vRadial;
+        float rInner = 0.64;
+        float rOuter = uRotorR + 0.05;
+
+        // Smooth radial bounds so alpha reaches 0 well inside the plane quad
+        float innerMask = smoothstep(rInner, rInner + 0.24, r);
+        float outerMask = 1.0 - smoothstep(uRotorR - 0.02, rOuter, r);
+        float discMask = innerMask * outerMask;
+        if (discMask < 0.002 || uEnvelope < 0.002) discard;
+
+        float rNorm = clamp((r - rInner) / (uRotorR - rInner), 0.0, 1.0);
+
+        // Angle matches Three.js +Y rotation: blade k at (cos A, -sin A) -> A = atan(-z, x)
+        float fragAng = atan(-vLocalXZ.y, vLocalXZ.x);
+
+        // Trailing motion-blur wake behind each of the 3 rotating blades
+        float trailSpan = mix(0.32, 1.48, clamp(uRpmNorm * 1.25, 0.0, 1.0));
+        float wake = 0.0;
+        for (int k = 0; k < 3; k++) {
+          float bladeAng = uTheta + float(k) * (TWO_PI / 3.0);
+          float dAng = mod(fragAng - bladeAng + 8.0 * TWO_PI, TWO_PI);
+          // Soft leading-edge feather + long trailing decay
+          float trail = exp(-dAng / max(0.18, trailSpan * 0.45)) * smoothstep(0.0, 0.06, dAng);
+          float leadGlow = exp(-pow(min(dAng, TWO_PI - dAng) / 0.075, 2.0)) * 0.45;
+          wake = max(wake, trail + leadGlow);
+        }
+
+        // Crisp translucent outer rotor-disc blur ring + subtle tip-vortex double track
+        float tipBand = exp(-pow((rNorm - 0.945) / 0.032, 2.0));
+        float subRing = exp(-pow((rNorm - 0.855) / 0.020, 2.0)) * 0.42;
+        float radialSweep = smoothstep(0.08, 0.72, rNorm);
+
+        // Concentric aerodynamic downwash ripples inside swept annulus
+        float ripple = 0.86 + 0.14 * sin(rNorm * 28.0 - uTheta * 2.0);
+
+        float baseDisc = (0.09 + 0.14 * uRpmNorm) * radialSweep;
+        float wakeTerm = wake * (0.24 + 0.34 * uRpmNorm) * radialSweep * ripple;
+        float vortexRing = (tipBand * 0.55 + subRing * 0.35) * (0.45 + 0.55 * uRpmNorm);
+
+        float rawAlpha = (baseDisc + wakeTerm + vortexRing) * discMask * uEnvelope;
+        float alpha = clamp(rawAlpha * (uIsDark > 0.5 ? 0.82 : 0.68), 0.0, 0.62);
+        if (alpha < 0.004) discard;
+
+        vec3 discCol = mix(uColWake, uColTip, clamp(tipBand * 0.75 + wake * 0.18, 0.0, 1.0));
+        if (uIsDark > 0.5) {
+          discCol = mix(discCol, vec3(0.95, 0.98, 1.0), tipBand * 0.28);
+        }
+
+        gl_FragColor = vec4(discCol, alpha);
+      }
+    `
+  });
+
+  kit.onThemeChange((nextTheme) => {
+    discMat.uniforms.uIsDark.value = nextTheme.isDark ? 1.0 : 0.0;
+    discMat.uniforms.uColWake.value.set(nextTheme.channels.intake);
+    discMat.uniforms.uColTip.value.set(nextTheme.channels.comb);
+  });
+
+  const planeSize = (SPEC.rotorR + 0.25) * 2.0;
+  const discGeo = new THREE.PlaneGeometry(planeSize, planeSize, 48, 48);
+  discGeo.rotateX(-Math.PI / 2);
+  const discMesh = new THREE.Mesh(discGeo, discMat);
+  discMesh.position.set(0, SPEC.hubY - 0.012, 0);
+  reg.detail("rotor.discShader", discMesh, { parent: hubAssembly, stage: "shader" });
+}
+
+
+
+/* --- mount --- */
+mountAnatomyFigure({
+  spec: SPEC,
+  buildBase: typeof buildBase !== "undefined" ? buildBase : null,
+  buildStructure: typeof buildStructure !== "undefined" ? buildStructure : null,
+  buildSubject: typeof buildSubject !== "undefined" ? buildSubject : null,
+  buildMechanism: typeof buildMechanism !== "undefined" ? buildMechanism : null,
+  buildShader: typeof buildShader !== "undefined" ? buildShader : null,
+  updateKinematics: typeof updateKinematics !== "undefined" ? updateKinematics : null,
+  formatReadout: typeof formatReadout !== "undefined" ? formatReadout : null,
+  tourAt: typeof tourAt !== "undefined" ? tourAt : (SPEC.tour || null)
+});
+
+    })();
+  </script>
+</body>
+</html>

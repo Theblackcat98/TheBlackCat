@@ -574,7 +574,7 @@ tools:
     related: [hermes-harness-flow, anatomy]
     added: "2026-10-31"
 
-  # ── Showcase (12) ──────────────────────────────────────────────────────────
+  # ── Showcase (15) ──────────────────────────────────────────────────────────
   - id: colosseum
     name: Colosseum
     url: colosseum/
@@ -706,3 +706,39 @@ tools:
     tags: [svg, isometric, creative-coding, architecture]
     related: [christ-the-redeemer, chichen-itza]
     added: "2026-11-12"
+
+  - id: wankel-engine
+    name: Wankel Rotary Engine
+    url: wankel-engine/
+    writeup: showcase/wankel-engine/
+    category: showcase
+    kind: exhibit
+    short: "Triangular rotor in an epitrochoid housing: 34:51 phasing gears, apex seals and a shaded four-stroke cycle."
+    desc: "A Wankel rotary engine as an interactive 3D figure: the triangular rotor sweeps three crescent chambers through intake, compression, ignition and exhaust inside a cutaway epitrochoid housing, with dual spark plugs and a chamber-pressure gauge on the bench."
+    tags: [threejs, isometric, creative-coding, simulation]
+    related: [rs25-engine, helicopter-swashplate, anatomy]
+    added: "2026-11-13"
+
+  - id: helicopter-swashplate
+    name: Helicopter Swashplate & Rotor Hub
+    url: helicopter-swashplate/
+    writeup: showcase/helicopter-swashplate/
+    category: showcase
+    kind: exhibit
+    short: "Rotor head rig: two-part swashplate, 120° CCPM servos and feathering blades over a cutaway 4:1 gearbox."
+    desc: "A helicopter rotor head as an interactive 3D figure: three CCPM servos at 120 degrees tilt and lift the swashplate so pitch links feather all three blades, driven from a cyclic stick and collective lever you can drag directly in 3D."
+    tags: [threejs, isometric, creative-coding, simulation]
+    related: [wankel-engine, rs25-engine, anatomy]
+    added: "2026-11-13"
+
+  - id: rs25-engine
+    name: Shuttle RS-25 Main Engine
+    url: rs25-engine/
+    writeup: showcase/rs25-engine/
+    category: showcase
+    kind: exhibit
+    short: "Shuttle main engine on a static-fire gantry: twin turbopumps, 77.5:1 bell and ±10.5° TVC gimbal."
+    desc: "The Shuttle RS-25 main engine as an interactive 3D figure: powerhead, twin high-pressure turbopumps and a regeneratively cooled bell on a two-axis TVC gimbal, throttled from 67% to 109% RPL with a chamber-pressure gauge tracking 20.6 MPa."
+    tags: [threejs, isometric, creative-coding, simulation]
+    related: [wankel-engine, helicopter-swashplate, anatomy]
+    added: "2026-11-13"

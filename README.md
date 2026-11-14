@@ -175,7 +175,7 @@ The repository is designed so an agent can safely perform routine maintenance su
 - moving processed items out of the inbox
 - identifying stale or broken resources
 
-The agent's rules live in [`AGENTS.md`](AGENTS.md). The formal content model is documented in [`docs/CONTENT_MODEL.md`](docs/CONTENT_MODEL.md).
+The agent's rules live in [`AGENTS.md`](AGENTS.md). The formal content model is documented in [`docs/CONTENT_MODEL.md`](docs/CONTENT_MODEL.md). How every thumbnail family is made is documented in [`docs/THUMBNAILS.md`](docs/THUMBNAILS.md).
 
 The central rule is simple:
 

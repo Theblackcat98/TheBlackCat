@@ -22,7 +22,7 @@ categories:
     blurb: Art and visual artifacts — figures built to be looked at rather than used. Listed on their own page, not in the workshop.
 
 tools:
-  # ── Color & design (8) ─────────────────────────────────────────────────────
+  # ── Color & design (7) ─────────────────────────────────────────────────────
   - id: palette-studio
     name: Palette Studio
     url: palette-studio/
@@ -195,18 +195,17 @@ tools:
 
   - id: hashes-encodings
     name: Hashes & encodings
-    url: "https://theblackcat98.github.io/Online-Tools/"
-    writeup: projects/online-tools/
+    url: hashes-encodings/
+    writeup: library/tools/hashes-encodings/
     category: text-data
     kind: utility
-    host: Online Tools
-    short: MD, SHA, Keccak and RIPEMD hashes, Base32/58/64, HTML and URL encoding.
-    desc: "The Online Tools utility belt: MD, SHA, Keccak and RIPEMD hashes and file checksums, Base32/Base58/Base64, HTML and URL encoding, and image converters (ICO, SVG, STL)."
-    tags: [hash, base64, encoding, checksum]
+    short: MD5, SHA, SHA3 and Keccak hashes, CRC checksums, and Base64/32/58, Hex, URL and HTML encodings.
+    desc: "Hash text or files with MD5, SHA-1, SHA-224/256/384/512, SHA3 and Keccak, verify CRC32 and CRC-16/MODBUS checksums, and convert between Base64, Base32, Base58, hex, URL and HTML entity encodings — all in the browser."
+    tags: [hash, md5, sha, base64, encoding, checksum]
     related: [jwt-decoder, number-base]
     added: "2026-09-15"
 
-  # ── Web & publishing (6) ───────────────────────────────────────────────────
+  # ── Web & publishing (4) ───────────────────────────────────────────────────
   - id: meta-generator
     name: Web Metadata & PWA Studio
     url: meta-generator/
@@ -255,7 +254,7 @@ tools:
     related: [data-format-workbench, meta-generator]
     added: "2026-10-30"
 
-  # ── Developer utilities (8) ────────────────────────────────────────────────
+  # ── Developer utilities (6) ────────────────────────────────────────────────
   - id: jwt-decoder
     name: JWT Decoder
     url: jwt-decoder/
@@ -268,40 +267,16 @@ tools:
     related: [time-id-toolkit, hashes-encodings]
     added: "2026-09-15"
 
-  - id: cron-tester
-    name: Cron Tester
-    url: cron-tester/
-    writeup: library/tools/cron-tester/
-    category: developer-utilities
-    kind: utility
-    short: Translate cron expressions into plain English and list upcoming run times.
-    desc: Translates cron scheduling expressions into human-readable times and shows upcoming run dates.
-    tags: [cron, scheduling, time, devops]
-    related: [time-id-toolkit]
-    added: "2026-09-15"
-
-  - id: commit-formatter
-    name: Commit Formatter
-    url: commit-formatter/
-    writeup: library/tools/commit-formatter/
-    category: developer-utilities
-    kind: utility
-    short: Compose conventional commit messages with scope, breaking changes and width checks.
-    desc: Standardizes commit messages according to conventional commit guidelines.
-    tags: [git, commits, workflow]
-    related: [gitignore-license]
-    added: "2026-09-15"
 
   - id: gitignore-license
-    name: .gitignore & License
+    name: Git & Repo Toolkit
     url: gitignore-license/
     writeup: library/tools/gitignore-license/
     category: developer-utilities
     kind: utility
-    short: Combine stack .gitignore templates and fill in open-source license files.
-    desc: Combine .gitignore templates and fill in a license, from GitHub's gitignore repo and choosealicense.com.
-    tags: [git, github, license, config]
-    related: [commit-formatter]
+    short: Combine stack .gitignore templates, fill in license files and compose conventional commit messages.
+    desc: Combine .gitignore templates and fill in a license, from GitHub's gitignore repo and choosealicense.com, and compose conventional commit messages with scope, breaking-change and width checks.
+    tags: [git, commit, conventional-commits, github, license, config]
     added: "2026-09-15"
 
   - id: keyboard-inspector
@@ -322,10 +297,10 @@ tools:
     writeup: library/tools/time-id-toolkit/
     category: developer-utilities
     kind: app
-    short: Epoch/ISO timestamp math paired with bulk UUID v4/v7 and ULID inspection.
-    desc: Timestamp Toolkit for epoch/ISO conversions and relative math, paired with a UUID/ULID Studio for bulk generation and deep inspection of modern IDs.
-    tags: [timestamps, uuid, ulid, time]
-    related: [cron-tester, jwt-decoder]
+    short: Epoch/ISO timestamp math, bulk UUID v4/v7 and ULID inspection, and cron expressions with next run times.
+    desc: Timestamp Toolkit for epoch/ISO conversions and relative math, a UUID/ULID Studio for bulk generation and deep inspection of modern IDs, and a Cron tab that translates cron expressions into plain English and lists the next five run times.
+    tags: [timestamps, uuid, ulid, time, cron, schedule]
+    related: [jwt-decoder]
     added: "2026-09-15"
 
   - id: prompt-sandbox
@@ -402,7 +377,7 @@ tools:
     related: [palette-studio, qr-code-studio]
     added: "2026-11-01"
 
-  # ── Exhibits (6) ───────────────────────────────────────────────────────────
+  # ── Exhibits (5) ───────────────────────────────────────────────────────────
   - id: aether-atelier
     name: AETHER atelier
     url: aether-atelier/

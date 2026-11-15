@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <title>Hashes &amp; Encodings</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: "Outfit", system-ui, sans-serif; font-size: 15px; line-height: 1.45; background: var(--bg); color: var(--ink); max-width: 900px; margin: 0 auto; padding: 2rem; }
+        h1 { font-size: 1.55rem; line-height: 1.2; margin: 0 0 0.5rem; }
+        h2 { font-size: 1.1rem; margin: 0 0 0.6rem; }
+        :focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+        p { color: var(--mut); }
+        p strong, label { color: var(--ink); }
+        .note { color: var(--faint); font-size: 0.85rem; margin-top: 0.4rem; }
+        textarea { width: 100%; min-height: 110px; font-family: "JetBrains Mono", monospace; font-size: 0.9rem; padding: 0.6rem; background: var(--panel2); color: var(--ink); border: 1px solid var(--line2); border-radius: 9px; word-break: break-all; resize: vertical; }
+        textarea:focus { border-color: var(--acc); outline: none; }
+        textarea[readonly] { background: var(--panel); }
+        .panel { background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 14px; padding: 1rem; margin-top: 1rem; }
+        .tabs { display: flex; gap: 0.4rem; border-bottom: 1px solid var(--line); margin-top: 1.2rem; }
+        .tab { background: none; border: none; border-bottom: 2px solid transparent; padding: 0.55rem 0.9rem; font: inherit; font-weight: 600; color: var(--mut); cursor: pointer; margin-bottom: -1px; }
+        .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--acc); }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        .btn { font: inherit; font-size: 0.88rem; background: var(--panel2); color: var(--ink); border: 1px solid var(--line2); border-radius: 9px; padding: 0.35rem 0.7rem; cursor: pointer; white-space: nowrap; }
+        .btn:hover { border-color: var(--acc); }
+        .btn.primary { background: var(--acc); color: var(--acc-ink); border-color: transparent; font-weight: 600; }
+        .pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.6rem 0; }
+        .pill { font: inherit; font-size: 0.88rem; background: var(--panel2); color: var(--ink); border: 1px solid var(--line2); border-radius: 999px; padding: 0.3rem 0.75rem; cursor: pointer; }
+        .pill[aria-pressed="true"] { background: var(--acc); color: var(--acc-ink); border-color: transparent; font-weight: 600; }
+        .seg { display: inline-flex; border: 1px solid var(--line2); border-radius: 9px; overflow: hidden; }
+        .seg button { font: inherit; font-size: 0.88rem; background: var(--panel2); color: var(--mut); border: none; padding: 0.4rem 0.85rem; cursor: pointer; }
+        .seg button[aria-pressed="true"] { background: var(--acc); color: var(--acc-ink); font-weight: 600; }
+        .hash-row { display: grid; grid-template-columns: 118px 1fr auto; gap: 0.6rem; align-items: start; padding: 0.45rem 0; border-bottom: 1px solid var(--line); }
+        .hash-row:last-child { border-bottom: none; }
+        .hash-name { font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; padding-top: 0.15rem; }
+        .hash-val { font-family: "JetBrains Mono", monospace; font-size: 0.85rem; overflow-wrap: anywhere; word-break: break-all; padding-top: 0.15rem; }
+        .file-line { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin-top: 0.8rem; }
+        .file-info { font-family: "JetBrains Mono", monospace; font-size: 0.82rem; color: var(--mut); overflow-wrap: anywhere; }
+        .source-line { font-size: 0.88rem; color: var(--mut); margin-top: 0.8rem; }
+        .source-line strong { color: var(--ink); }
+        .row-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.6rem; }
+        .error { color: var(--err-ink); background: var(--err-bg); border: 1px solid var(--err-line); border-radius: 9px; padding: 0.5rem 0.75rem; font-weight: 600; margin-top: 0.6rem; }
+        .error:empty { display: none; }
+        @media (max-width: 560px) {
+            body { padding: 1rem; }
+            .hash-row { grid-template-columns: 1fr auto; }
+            .hash-val { grid-column: 1 / -1; padding-top: 0; }
+        }
+    </style>
+
+<meta name="description" content="Hash text or files with MD5, SHA-1, SHA-224/256/384/512, SHA3 and Keccak plus CRC checksums, and convert between Base64, Base32, Base58, hex, URL and HTML entity encodings — all in the browser.">
+<link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/hashes-encodings/">
+<meta property="og:title" content="Hashes &amp; Encodings · The BlackCat">
+<meta property="og:description" content="Hash text or files with MD5, SHA-1, SHA-224/256/384/512, SHA3 and Keccak plus CRC checksums, and convert between Base64, Base32, Base58, hex, URL and HTML entity encodings — all in the browser.">
+<meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/hashes-encodings/">
+<meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/hashes-encodings-light.webp">
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Hashes & Encodings", "description": "Hash text or files with MD5, SHA-1, SHA-224/256/384/512, SHA3 and Keccak plus CRC checksums, and convert between Base64, Base32, Base58, hex, URL and HTML entity encodings — all in the browser.", "url": "https://theblackcat98.github.io/TheBlackCat/hashes-encodings/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/hashes-encodings-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
+<script src="../toolkit/toolkit.js?v=1" defer data-tool="hashes-encodings"></script>
+</head>
+<body>
+<a class="back tk-fallback" href="../tools/">&larr; All tools</a>
+    <h1>Hashes &amp; Encodings</h1>
+    <p>Hash text or a file, check CRC checksums, and convert between common encodings. <strong>Client-side only:</strong> nothing you type or drop here leaves the browser.</p>
+
+    <div class="tabs" role="tablist" aria-label="Hashes and encodings">
+        <button class="tab" role="tab" id="tab-hash" aria-selected="true" aria-controls="panel-hash">Hash</button>
+        <button class="tab" role="tab" id="tab-enc" aria-selected="false" aria-controls="panel-enc">Encodings</button>
+    </div>
+
+    <section class="tab-panel active" id="panel-hash" role="tabpanel" aria-labelledby="tab-hash">
+        <div class="panel">
+            <label for="hash-text"><strong>Text input</strong></label>
+            <textarea id="hash-text" placeholder="Type or paste text to hash it as UTF-8…"></textarea>
+            <div class="file-line">
+                <label for="hash-file" style="font-weight:600;">Or hash a file:</label>
+                <input type="file" id="hash-file">
+                <span class="file-info" id="file-info"></span>
+                <button class="btn" id="file-clear" hidden>Clear file</button>
+            </div>
+            <p class="source-line" id="source-line">Hashing: <strong>text</strong> · 0 bytes</p>
+            <p class="note">Whichever you touched last — the text box or the file picker — is what gets hashed. Files are hashed as their raw bytes.</p>
+        </div>
+        <div class="panel">
+            <h2>Digests</h2>
+            <div id="hash-results"></div>
+        </div>
+    </section>
+
+    <section class="tab-panel" id="panel-enc" role="tabpanel" aria-labelledby="tab-enc">
+        <div class="panel">
+            <div class="row-head">
+                <strong>Format</strong>
+                <div class="seg" role="group" aria-label="Direction">
+                    <button id="dir-encode" aria-pressed="true">Encode</button>
+                    <button id="dir-decode" aria-pressed="false">Decode</button>
+                </div>
+            </div>
+            <div class="pills" id="format-pills" role="group" aria-label="Encoding format"></div>
+            <p class="note" id="format-note"></p>
+            <label for="enc-input" style="display:block; margin-top:0.8rem;"><strong id="enc-input-label">Input</strong></label>
+            <textarea id="enc-input" placeholder="Type or paste here — conversion is live…"></textarea>
+            <div class="error" id="enc-error"></div>
+            <div class="row-head" style="margin-top:0.9rem;">
+                <label for="enc-output"><strong id="enc-output-label">Encoded</strong></label>
+                <button class="btn" id="enc-copy">Copy output</button>
+            </div>
+            <textarea id="enc-output" readonly placeholder="Result appears here…"></textarea>
+        </div>
+    </section>
+
+    <script>
+    'use strict';
+    const $ = (s) => document.querySelector(s);
+    const utf8 = new TextEncoder();
+
+    function toHex(bytes) {
+        let out = '';
+        for (const b of bytes) out += b.toString(16).padStart(2, '0');
+        return out;
+    }
+
+    /* ---------------- MD5 (pure JS) ---------------- */
+    function md5Bytes(bytes) {
+        const origLen = bytes.length;
+        const bitLen = origLen * 8;
+        let paddedLen = origLen + 1;
+        while (paddedLen % 64 !== 56) paddedLen++;
+        paddedLen += 8;
+        const buf = new Uint8Array(paddedLen);
+        buf.set(bytes);
+        buf[origLen] = 0x80;
+        const dv = new DataView(buf.buffer);
+        dv.setUint32(paddedLen - 8, bitLen >>> 0, true);
+        dv.setUint32(paddedLen - 4, Math.floor(bitLen / 4294967296), true);
+        const K = new Array(64);
+        for (let i = 0; i < 64; i++) K[i] = Math.floor(Math.abs(Math.sin(i + 1)) * 4294967296);
+        const S = [7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
+                   5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
+                   4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
+                   6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21];
+        let a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
+        const M = new Uint32Array(16);
+        for (let off = 0; off < paddedLen; off += 64) {
+            for (let i = 0; i < 16; i++) M[i] = dv.getUint32(off + i * 4, true);
+            let a = a0, b = b0, c = c0, d = d0;
+            for (let i = 0; i < 64; i++) {
+                let f, g;
+                if (i < 16)      { f = (b & c) | (~b & d); g = i; }
+                else if (i < 32) { f = (d & b) | (~d & c); g = (5 * i + 1) % 16; }
+                else if (i < 48) { f = b ^ c ^ d;          g = (3 * i + 5) % 16; }
+                else             { f = c ^ (b | ~d);       g = (7 * i) % 16; }
+                const sum = (a + f + K[i] + M[g]) >>> 0;
+                const rot = ((sum << S[i]) | (sum >>> (32 - S[i]))) >>> 0;
+                const tmp = d;
+                d = c; c = b;
+                b = (b + rot) >>> 0;
+                a = tmp;
+            }
+            a0 = (a0 + a) >>> 0; b0 = (b0 + b) >>> 0; c0 = (c0 + c) >>> 0; d0 = (d0 + d) >>> 0;
+        }
+        const out = new Uint8Array(16);
+        const odv = new DataView(out.buffer);
+        odv.setUint32(0, a0, true); odv.setUint32(4, b0, true);
+        odv.setUint32(8, c0, true); odv.setUint32(12, d0, true);
+        return out;
+    }
+
+    /* ---------------- SHA-256 core (SHA-224 uses its own IV + truncation) ---------------- */
+    const SHA256_K = [
+        0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+        0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+        0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+        0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+        0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+        0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+        0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+        0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+    ];
+    function sha256Core(bytes, initH, outWords) {
+        const bitLen = bytes.length * 8;
+        let paddedLen = bytes.length + 1;
+        while (paddedLen % 64 !== 56) paddedLen++;
+        paddedLen += 8;
+        const buf = new Uint8Array(paddedLen);
+        buf.set(bytes);
+        buf[bytes.length] = 0x80;
+        const dv = new DataView(buf.buffer);
+        dv.setUint32(paddedLen - 4, bitLen >>> 0, false);
+        dv.setUint32(paddedLen - 8, Math.floor(bitLen / 4294967296), false);
+        const H = initH.slice();
+        const w = new Uint32Array(64);
+        const rotr = (x, n) => ((x >>> n) | (x << (32 - n))) >>> 0;
+        for (let off = 0; off < paddedLen; off += 64) {
+            for (let i = 0; i < 16; i++) w[i] = dv.getUint32(off + i * 4, false);
+            for (let i = 16; i < 64; i++) {
+                const s0 = (rotr(w[i - 15], 7) ^ rotr(w[i - 15], 18) ^ (w[i - 15] >>> 3)) >>> 0;
+                const s1 = (rotr(w[i - 2], 17) ^ rotr(w[i - 2], 19) ^ (w[i - 2] >>> 10)) >>> 0;
+                w[i] = (w[i - 16] + s0 + w[i - 7] + s1) >>> 0;
+            }
+            let [a, b, c, d, e, f, g, h] = H;
+            for (let i = 0; i < 64; i++) {
+                const S1 = (rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)) >>> 0;
+                const ch = ((e & f) ^ (~e & g)) >>> 0;
+                const t1 = (h + S1 + ch + SHA256_K[i] + w[i]) >>> 0;
+                const S0 = (rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)) >>> 0;
+                const maj = ((a & b) ^ (a & c) ^ (b & c)) >>> 0;
+                const t2 = (S0 + maj) >>> 0;
+                h = g; g = f; f = e; e = (d + t1) >>> 0;
+                d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+            }
+            H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0; H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;
+            H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0; H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
+        }
+        const out = new Uint8Array(outWords * 4);
+        const odv = new DataView(out.buffer);
+        for (let i = 0; i < outWords; i++) odv.setUint32(i * 4, H[i], false);
+        return out;
+    }
+    function sha224Bytes(bytes) {
+        return sha256Core(bytes, [0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939,
+                                  0xffc00b31, 0x68581511, 0x64f98fa7, 0xbefa4fa4], 7);
+    }
+
+    /* ---------------- Keccak-f[1600] sponge: SHA3 (suffix 0x06) + Keccak (0x01) ---------------- */
+    const KECCAK_RC = [
+        0x0000000000000001n, 0x0000000000008082n, 0x800000000000808an, 0x8000000080008000n,
+        0x000000000000808bn, 0x0000000080000001n, 0x8000000080008081n, 0x8000000000008009n,
+        0x000000000000008an, 0x0000000000000088n, 0x0000000080008009n, 0x000000008000000an,
+        0x000000008000808bn, 0x800000000000008bn, 0x8000000000008089n, 0x8000000000008003n,
+        0x8000000000008002n, 0x8000000000000080n, 0x000000000000800an, 0x800000008000000an,
+        0x8000000080008081n, 0x8000000000008080n, 0x0000000080000001n, 0x8000000080008008n
+    ];
+    const KECCAK_ROT = [0, 1, 62, 28, 27, 36, 44, 6, 55, 20, 3, 10, 43, 25, 39, 41, 45, 15, 21, 8, 18, 2, 61, 56, 14];
+    const KECCAK_MASK = (1n << 64n) - 1n;
+    function keccakF(state) {
+        const C = new Array(5), D = new Array(5), B = new Array(25);
+        for (let round = 0; round < 24; round++) {
+            for (let x = 0; x < 5; x++) C[x] = state[x] ^ state[x + 5] ^ state[x + 10] ^ state[x + 15] ^ state[x + 20];
+            for (let x = 0; x < 5; x++) D[x] = C[(x + 4) % 5] ^ (((C[(x + 1) % 5] << 1n) | (C[(x + 1) % 5] >> 63n)) & KECCAK_MASK);
+            for (let i = 0; i < 25; i++) state[i] ^= D[i % 5];
+            for (let y = 0; y < 5; y++) {
+                for (let x = 0; x < 5; x++) {
+                    const i = x + 5 * y;
+                    const r = BigInt(KECCAK_ROT[i]);
+                    const v = r === 0n ? state[i] : (((state[i] << r) | (state[i] >> (64n - r))) & KECCAK_MASK);
+                    B[y + 5 * ((2 * x + 3 * y) % 5)] = v;
+                }
+            }
+            for (let y = 0; y < 5; y++) {
+                for (let x = 0; x < 5; x++) {
+                    const i = x + 5 * y;
+                    state[i] = B[i] ^ ((~B[(x + 1) % 5 + 5 * y] & KECCAK_MASK) & B[(x + 2) % 5 + 5 * y]);
+                }
+            }
+            state[0] ^= KECCAK_RC[round];
+        }
+    }
+    function keccak(bytes, rateBytes, suffix, outLen) {
+        const state = new Array(25).fill(0n);
+        let paddedLen = bytes.length + 1;
+        paddedLen += (rateBytes - (paddedLen % rateBytes)) % rateBytes;
+        const buf = new Uint8Array(paddedLen);
+        buf.set(bytes);
+        buf[bytes.length] = suffix;
+        buf[paddedLen - 1] |= 0x80;
+        const lanes = rateBytes / 8;
+        for (let off = 0; off < paddedLen; off += rateBytes) {
+            for (let l = 0; l < lanes; l++) {
+                let lane = 0n;
+                for (let j = 7; j >= 0; j--) lane = (lane << 8n) | BigInt(buf[off + l * 8 + j]);
+                state[l] ^= lane;
+            }
+            keccakF(state);
+        }
+        const out = new Uint8Array(outLen);
+        let produced = 0, l = 0;
+        while (produced < outLen) {
+            let lane = state[l % lanes];
+            for (let j = 0; j < 8 && produced < outLen; j++) {
+                out[produced++] = Number(lane & 0xffn);
+                lane >>= 8n;
+            }
+            l++;
+            if (l % lanes === 0 && produced < outLen) keccakF(state);
+        }
+        return out;
+    }
+
+    /* ---------------- CRC32 + CRC-16/MODBUS ---------------- */
+    const CRC32_TABLE = (() => {
+        const table = new Uint32Array(256);
+        for (let n = 0; n < 256; n++) {
+            let c = n;
+            for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+            table[n] = c >>> 0;
+        }
+        return table;
+    })();
+    function crc32(bytes) {
+        let crc = 0xFFFFFFFF;
+        for (const b of bytes) crc = CRC32_TABLE[(crc ^ b) & 0xFF] ^ (crc >>> 8);
+        return (crc ^ 0xFFFFFFFF) >>> 0;
+    }
+    function crc16Modbus(bytes) {
+        let crc = 0xFFFF;
+        for (const b of bytes) {
+            crc ^= b;
+            for (let k = 0; k < 8; k++) crc = (crc & 1) ? ((crc >>> 1) ^ 0xA001) : (crc >>> 1);
+        }
+        return crc & 0xFFFF;
+    }
+
+    /* ---------------- Hash tab ---------------- */
+    const ALGOS = ['MD5', 'SHA-1', 'SHA-224', 'SHA-256', 'SHA-384', 'SHA-512',
+                   'SHA3-256', 'SHA3-512', 'Keccak-256', 'CRC32', 'CRC-16/MODBUS'];
+    const resultsEl = $('#hash-results');
+    const rowEls = {};
+    for (const name of ALGOS) {
+        const row = document.createElement('div');
+        row.className = 'hash-row';
+        const label = document.createElement('div');
+        label.className = 'hash-name';
+        label.textContent = name;
+        const val = document.createElement('div');
+        val.className = 'hash-val';
+        val.textContent = '—';
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.textContent = 'Copy';
+        btn.addEventListener('click', async () => {
+            const text = rowEls[name].textContent;
+            if (!text || text === '—') return;
+            try { await navigator.clipboard.writeText(text); } catch (e) { /* clipboard unavailable */ }
+            btn.textContent = 'Copied';
+            setTimeout(() => { btn.textContent = 'Copy'; }, 1200);
+        });
+        row.append(label, val, btn);
+        resultsEl.appendChild(row);
+        rowEls[name] = val;
+    }
+
+    let currentBytes = new Uint8Array(0);
+    let hashRun = 0;
+    async function computeHashes() {
+        const run = ++hashRun;
+        const bytes = currentBytes;
+        rowEls['MD5'].textContent = toHex(md5Bytes(bytes));
+        rowEls['SHA-224'].textContent = toHex(sha224Bytes(bytes));
+        rowEls['SHA3-256'].textContent = toHex(keccak(bytes, 136, 0x06, 32));
+        rowEls['SHA3-512'].textContent = toHex(keccak(bytes, 72, 0x06, 64));
+        rowEls['Keccak-256'].textContent = toHex(keccak(bytes, 136, 0x01, 32));
+        rowEls['CRC32'].textContent = crc32(bytes).toString(16).padStart(8, '0');
+        rowEls['CRC-16/MODBUS'].textContent = crc16Modbus(bytes).toString(16).padStart(4, '0');
+        const web = await Promise.all([
+            crypto.subtle.digest('SHA-1', bytes),
+            crypto.subtle.digest('SHA-256', bytes),
+            crypto.subtle.digest('SHA-384', bytes),
+            crypto.subtle.digest('SHA-512', bytes)
+        ]);
+        if (run !== hashRun) return; // superseded by a newer input
+        rowEls['SHA-1'].textContent = toHex(new Uint8Array(web[0]));
+        rowEls['SHA-256'].textContent = toHex(new Uint8Array(web[1]));
+        rowEls['SHA-384'].textContent = toHex(new Uint8Array(web[2]));
+        rowEls['SHA-512'].textContent = toHex(new Uint8Array(web[3]));
+    }
+
+    const textEl = $('#hash-text');
+    const fileEl = $('#hash-file');
+    const fileInfoEl = $('#file-info');
+    const fileClearBtn = $('#file-clear');
+    const sourceLine = $('#source-line');
+    function setSource(bytes, label) {
+        currentBytes = bytes;
+        sourceLine.innerHTML = 'Hashing: <strong></strong>';
+        sourceLine.querySelector('strong').textContent = label;
+        sourceLine.append(document.createTextNode(' · ' + bytes.length + ' bytes'));
+        computeHashes();
+    }
+    textEl.addEventListener('input', () => {
+        if (fileEl.value) { fileEl.value = ''; fileInfoEl.textContent = ''; fileClearBtn.hidden = true; }
+        setSource(utf8.encode(textEl.value), 'text');
+    });
+    fileEl.addEventListener('change', async () => {
+        const file = fileEl.files && fileEl.files[0];
+        if (!file) return;
+        const buf = new Uint8Array(await file.arrayBuffer());
+        fileInfoEl.textContent = file.name + ' · ' + buf.length + ' bytes';
+        fileClearBtn.hidden = false;
+        setSource(buf, 'file');
+    });
+    fileClearBtn.addEventListener('click', () => {
+        fileEl.value = '';
+        fileInfoEl.textContent = '';
+        fileClearBtn.hidden = true;
+        setSource(utf8.encode(textEl.value), 'text');
+    });
+    setSource(new Uint8Array(0), 'text');
+
+    /* ---------------- Encodings tab ---------------- */
+    function bytesToB64(bytes) {
+        let bin = '';
+        const CHUNK = 0x8000;
+        for (let i = 0; i < bytes.length; i += CHUNK) {
+            bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+        }
+        return btoa(bin);
+    }
+    function b64ToBytes(str) {
+        const bin = atob(str.replace(/\s+/g, ''));
+        const out = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+        return out;
+    }
+    const B32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    function b32Encode(bytes) {
+        let out = '';
+        for (let i = 0; i < bytes.length; i += 5) {
+            const group = bytes.subarray(i, i + 5);
+            let buffer = 0n;
+            for (const b of group) buffer = (buffer << 8n) | BigInt(b);
+            buffer <<= BigInt((5 - group.length) * 8);
+            const chars = [];
+            for (let k = 0; k < 8; k++) chars.push(B32_ALPHABET[Number((buffer >> BigInt(35 - 5 * k)) & 31n)]);
+            const meaningful = Math.ceil(group.length * 8 / 5);
+            out += chars.slice(0, meaningful).join('') + '='.repeat(8 - meaningful);
+        }
+        return out;
+    }
+    function b32Decode(str) {
+        const clean = str.replace(/\s+/g, '').toUpperCase().replace(/=+$/, '');
+        let buffer = 0, bits = 0;
+        const out = [];
+        for (const ch of clean) {
+            const v = B32_ALPHABET.indexOf(ch);
+            if (v === -1) throw new Error('invalid Base32 character "' + ch + '"');
+            buffer = (buffer << 5) | v;
+            bits += 5;
+            if (bits >= 8) { bits -= 8; out.push((buffer >>> bits) & 0xFF); }
+        }
+        return new Uint8Array(out);
+    }
+    const B58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+    function b58Encode(bytes) {
+        let zeros = 0;
+        while (zeros < bytes.length && bytes[zeros] === 0) zeros++;
+        let n = 0n;
+        for (const b of bytes) n = n * 256n + BigInt(b);
+        let out = '';
+        while (n > 0n) { out = B58_ALPHABET[Number(n % 58n)] + out; n /= 58n; }
+        return '1'.repeat(zeros) + out;
+    }
+    function b58Decode(str) {
+        const clean = str.replace(/\s+/g, '');
+        let zeros = 0;
+        while (zeros < clean.length && clean[zeros] === '1') zeros++;
+        let n = 0n;
+        for (const ch of clean) {
+            const v = B58_ALPHABET.indexOf(ch);
+            if (v === -1) throw new Error('invalid Base58 character "' + ch + '" (the alphabet has no 0, O, I or l)');
+            n = n * 58n + BigInt(v);
+        }
+        const body = [];
+        while (n > 0n) { body.unshift(Number(n & 0xffn)); n >>= 8n; }
+        return new Uint8Array([...new Array(zeros).fill(0), ...body]);
+    }
+    function hexDecode(str) {
+        const clean = str.replace(/\s+/g, '');
+        if (clean.length % 2 !== 0) throw new Error('hex input must have an even number of characters');
+        if (/[^0-9a-fA-F]/.test(clean)) throw new Error('hex input contains non-hex characters');
+        const out = new Uint8Array(clean.length / 2);
+        for (let i = 0; i < out.length; i++) out[i] = parseInt(clean.substr(i * 2, 2), 16);
+        return out;
+    }
+    function htmlEncode(str) {
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function htmlDecode(str) {
+        const ta = document.createElement('textarea');
+        ta.innerHTML = str;
+        return ta.value;
+    }
+    function decodeUtf8Strict(bytes) {
+        return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    }
+
+    const FORMATS = {
+        'Base64': {
+            note: 'Standard Base64 (RFC 4648), Unicode-safe: text is UTF-8 encoded first.',
+            encode: (s) => bytesToB64(utf8.encode(s)),
+            decode: (s) => decodeUtf8Strict(b64ToBytes(s))
+        },
+        'Base32': {
+            note: 'RFC 4648 alphabet (A–Z, 2–7) with = padding.',
+            encode: (s) => b32Encode(utf8.encode(s)),
+            decode: (s) => decodeUtf8Strict(b32Decode(s))
+        },
+        'Base58': {
+            note: 'Bitcoin alphabet — no 0, O, I or l. Text is UTF-8 encoded first.',
+            encode: (s) => b58Encode(utf8.encode(s)),
+            decode: (s) => decodeUtf8Strict(b58Decode(s))
+        },
+        'Hex': {
+            note: 'Lowercase hexadecimal of the UTF-8 bytes.',
+            encode: (s) => toHex(utf8.encode(s)),
+            decode: (s) => decodeUtf8Strict(hexDecode(s))
+        },
+        'URL': {
+            note: 'encodeURIComponent semantics: everything except A–Z a–z 0–9 - _ . ! ~ * \' ( ) is percent-encoded.',
+            encode: (s) => encodeURIComponent(s),
+            decode: (s) => decodeURIComponent(s)
+        },
+        'HTML entities': {
+            note: 'Encodes & < > " \' as named entities; decode understands all named and numeric entities.',
+            encode: (s) => htmlEncode(s),
+            decode: (s) => htmlDecode(s)
+        }
+    };
+
+    const pillsEl = $('#format-pills');
+    const noteEl = $('#format-note');
+    const encInput = $('#enc-input');
+    const encOutput = $('#enc-output');
+    const encError = $('#enc-error');
+    const encInputLabel = $('#enc-input-label');
+    const encOutputLabel = $('#enc-output-label');
+    let format = 'Base64';
+    let direction = 'encode';
+    for (const name of Object.keys(FORMATS)) {
+        const b = document.createElement('button');
+        b.className = 'pill';
+        b.textContent = name;
+        b.setAttribute('aria-pressed', name === format ? 'true' : 'false');
+        b.addEventListener('click', () => {
+            format = name;
+            for (const p of pillsEl.children) p.setAttribute('aria-pressed', p.textContent === name ? 'true' : 'false');
+            convert();
+        });
+        pillsEl.appendChild(b);
+    }
+    function setDirection(dir) {
+        direction = dir;
+        $('#dir-encode').setAttribute('aria-pressed', dir === 'encode' ? 'true' : 'false');
+        $('#dir-decode').setAttribute('aria-pressed', dir === 'decode' ? 'true' : 'false');
+        convert();
+    }
+    $('#dir-encode').addEventListener('click', () => setDirection('encode'));
+    $('#dir-decode').addEventListener('click', () => setDirection('decode'));
+    function convert() {
+        noteEl.textContent = FORMATS[format].note;
+        encInputLabel.textContent = direction === 'encode' ? 'Plain text' : format + ' input';
+        encOutputLabel.textContent = direction === 'encode' ? format : 'Plain text';
+        const input = encInput.value;
+        encError.textContent = '';
+        if (!input) { encOutput.value = ''; return; }
+        try {
+            encOutput.value = FORMATS[format][direction](input);
+        } catch (e) {
+            encOutput.value = '';
+            encError.textContent = direction === 'decode'
+                ? 'That is not valid ' + format + ' — check for stray characters or missing padding.'
+                : 'Could not encode that input: ' + e.message;
+        }
+    }
+    encInput.addEventListener('input', convert);
+    $('#enc-copy').addEventListener('click', async (ev) => {
+        if (!encOutput.value) return;
+        try { await navigator.clipboard.writeText(encOutput.value); } catch (e) { /* clipboard unavailable */ }
+        ev.currentTarget.textContent = 'Copied';
+        setTimeout(() => { ev.currentTarget.textContent = 'Copy output'; }, 1200);
+    });
+    convert();
+
+    /* ---------------- Tabs ---------------- */
+    const tabHash = $('#tab-hash'), tabEnc = $('#tab-enc');
+    function selectTab(which) {
+        const hash = which === 'hash';
+        tabHash.setAttribute('aria-selected', hash ? 'true' : 'false');
+        tabEnc.setAttribute('aria-selected', hash ? 'false' : 'true');
+        $('#panel-hash').classList.toggle('active', hash);
+        $('#panel-enc').classList.toggle('active', !hash);
+    }
+    tabHash.addEventListener('click', () => selectTab('hash'));
+    tabEnc.addEventListener('click', () => selectTab('enc'));
+    </script>
+</body>
+</html>

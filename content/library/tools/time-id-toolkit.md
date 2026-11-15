@@ -11,8 +11,10 @@ tags:
   - html
 status: filed
 created: 2026-10-30
-updated: 2026-10-30
+updated: 2026-11-14
 tool: time-id-toolkit
+aliases:
+  - /library/tools/cron-tester/
 ---
 
 A completely client-side toolkit that helps decipher time and identity structures commonly encountered when debugging logs, databases, or API responses.
@@ -34,6 +36,11 @@ A completely client-side toolkit that helps decipher time and identity structure
 
 - **Bulk Generator**: Produce 1 to 100 identifiers at a time. Supports UUID v4 (random), UUID v7 (time-sortable), ULID, and NanoID.
 - **ID Inspector**: Paste an identifier to decode its type, version, validity, and any embedded timestamp data (useful for v7 and ULID). Flags malformed IDs with specific reasons.
+
+### Cron
+
+- **Expression Tester**: The former standalone Cron Tester, merged in as a third tab in November 2026. Translates a standard 5-field cron expression into plain English (via `cronstrue`) with a per-field breakdown.
+- **Next Runs**: Lists the next five run times in your local time, computed by a built-in cron evaluator supporting lists, ranges, steps, and month/day names — including the standard rule that when both day-of-month and day-of-week are restricted, matching either one fires.
 
 ## Notes
 

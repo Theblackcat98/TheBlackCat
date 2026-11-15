@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="Pick your stacks and a license, then copy or download a ready .gitignore and LICENSE file. Templates come from GitHub's gitignore repo and choosealicense.com, embedded so everything runs offline.">
+<meta name="description" content="Pick your stacks and a license, then copy or download a ready .gitignore and LICENSE file, and compose a Conventional Commits message. Templates come from GitHub's gitignore repo and choosealicense.com, embedded so everything runs offline.">
 <link rel="icon" href="data:,">
-<title>.gitignore & License Generator</title>
+<title>Git & Repo Toolkit</title>
 <style>
 
 
@@ -85,18 +85,18 @@ kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:
 </style>
 
 <link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/gitignore-license/">
-<meta property="og:title" content=".gitignore & License · The BlackCat">
-<meta property="og:description" content="Combine .gitignore templates and fill in a license, from GitHub's gitignore repo and choosealicense.com.">
+<meta property="og:title" content="Git & Repo Toolkit · The BlackCat">
+<meta property="og:description" content="Combine .gitignore templates, fill in a license and compose conventional commit messages, from GitHub's gitignore repo and choosealicense.com.">
 <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/gitignore-license/">
 <meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/gitignore-license-light.webp">
-<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": ".gitignore & License", "description": "Combine .gitignore templates and fill in a license, from GitHub's gitignore repo and choosealicense.com.", "url": "https://theblackcat98.github.io/TheBlackCat/gitignore-license/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/gitignore-license-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Git & Repo Toolkit", "description": "Combine .gitignore templates, fill in a license and compose conventional commit messages, from GitHub's gitignore repo and choosealicense.com.", "url": "https://theblackcat98.github.io/TheBlackCat/gitignore-license/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/gitignore-license-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
 <link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
 <script src="../toolkit/toolkit.js?v=1" defer data-tool="gitignore-license"></script>
 </head>
 <body>
 <header class="site">
-  <div class="top"><h1>.gitignore & License Generator</h1><a class="back" href="../tools/">&larr; All tools</a></div>
-  <p>Combine .gitignore templates for your languages, editors and operating systems, and fill in a license with your name and year. Templates are embedded from upstream, so nothing is fetched.</p>
+  <div class="top"><h1>Git & Repo Toolkit</h1><a class="back" href="../tools/">&larr; All tools</a></div>
+  <p>Combine .gitignore templates for your languages, editors and operating systems, fill in a license with your name and year, and build a Conventional Commits message. Templates are embedded from upstream, so nothing is fetched.</p>
 </header>
 <main class="wrap">
 
@@ -144,6 +144,38 @@ kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:
   <div class="row" style="margin-top:.8rem">
     <div class="field grow"><label class="lbl" for="l-spdx">SPDX header for source files</label><input type="text" id="l-spdx" readonly></div>
     <div class="field grow"><label class="lbl" for="l-pkg">package.json</label><input type="text" id="l-pkg" readonly></div>
+  </div>
+</section>
+<section class="card" aria-labelledby="h-commit">
+  <h2 id="h-commit">Commit message</h2>
+  <p class="note" style="margin:0 0 .7rem">Build a message that follows the <a href="https://www.conventionalcommits.org/" target="_blank" rel="noopener">Conventional Commits</a> specification.</p>
+  <div class="row">
+    <div class="field grow"><label class="lbl" for="c-type">Type (required)</label><select id="c-type">
+      <option value="feat">feat (A new feature)</option>
+      <option value="fix">fix (A bug fix)</option>
+      <option value="docs">docs (Documentation only changes)</option>
+      <option value="style">style (Changes that do not affect the meaning of the code)</option>
+      <option value="refactor">refactor (A code change that neither fixes a bug nor adds a feature)</option>
+      <option value="perf">perf (A code change that improves performance)</option>
+      <option value="test">test (Adding missing tests or correcting existing tests)</option>
+      <option value="build">build (Changes that affect the build system or external dependencies)</option>
+      <option value="ci">ci (Changes to CI configuration files and scripts)</option>
+      <option value="chore">chore (Other changes that don't modify src or test files)</option>
+    </select></div>
+    <div class="field grow"><label class="lbl" for="c-scope">Scope (optional — e.g. 'parser', 'api')</label><input type="text" id="c-scope" placeholder="component"></div>
+  </div>
+  <div class="field" style="margin-top:.6rem"><label class="lbl" for="c-desc">Description <span class="pill" id="c-count" style="float:right"></span></label>
+    <input type="text" id="c-desc" placeholder="add ability to parse arrays">
+    <p class="note">Use the imperative mood (e.g. "add" not "adds" or "added").</p></div>
+  <label class="chk" style="margin-top:.6rem"><input type="checkbox" id="c-breaking"> Breaking change (appends '!' to the type)</label>
+  <div class="field" style="margin-top:.6rem"><label class="lbl" for="c-body">Body (optional — wraps at 72 chars)</label>
+    <textarea id="c-body" rows="4" spellcheck="false" placeholder="Detailed explanation of the change..."></textarea></div>
+  <div class="field" style="margin-top:.6rem"><label class="lbl" for="c-footer">Footer / issue ref (optional)</label>
+    <input type="text" id="c-footer" placeholder="Fixes #123"></div>
+  <label class="lbl" for="c-out" style="margin-top:.8rem">Result</label>
+  <textarea id="c-out" readonly spellcheck="false" rows="7"></textarea>
+  <div class="row" style="margin-top:.6rem">
+    <button class="primary copy" data-copy-from="c-out">Copy message</button>
   </div>
 </section>
 <p class="note" id="src-note"></p>
@@ -292,6 +324,90 @@ function makeZip(files){
   });
   $('#src-note').innerHTML = 'Templates: <a href="https://github.com/github/gitignore" rel="noopener">github/gitignore</a> at ' + esc(DATA.meta.gi) + ' and <a href="https://github.com/github/choosealicense.com" rel="noopener">choosealicense.com</a> at ' + esc(DATA.meta.li) + '. This is general information, not legal advice.';
   drawPicks(); genGi(); genLi();
+})();
+
+</script>
+<script>
+/* Commit message builder, merged in from the standalone Commit Formatter.
+   The original kept no state, so nothing is persisted here either. */
+(() => {
+  const cType = $('#c-type'), cScope = $('#c-scope'), cDesc = $('#c-desc'),
+    cBreaking = $('#c-breaking'), cBody = $('#c-body'), cFooter = $('#c-footer'),
+    cCount = $('#c-count'), cOut = $('#c-out');
+
+  // Simple text wrapper to 72 columns
+  function wrapText(text, maxLineLength = 72) {
+    const words = text.split(/(\s+)/); // Preserve whitespace to avoid squishing
+    let lines = [];
+    let currentLine = '';
+
+    for (let word of words) {
+      // If it's a newline, force break
+      if (word.includes('\n')) {
+        const parts = word.split('\n');
+        currentLine += parts[0];
+        lines.push(currentLine);
+        for (let i = 1; i < parts.length - 1; i++) {
+          lines.push(parts[i]);
+        }
+        currentLine = parts[parts.length - 1];
+        continue;
+      }
+
+      if (currentLine.length + word.length > maxLineLength && currentLine.trim().length > 0) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine += word;
+      }
+    }
+    if (currentLine.trim().length > 0 || currentLine.length > 0) {
+      lines.push(currentLine);
+    }
+    return lines.join('\n');
+  }
+
+  function genCommit() {
+    const type = cType.value;
+    const scope = cScope.value.trim();
+    const desc = cDesc.value.trim();
+    const isBreaking = cBreaking.checked;
+    const body = cBody.value.trim();
+    const footer = cFooter.value.trim();
+
+    // Format subject
+    let subject = type;
+    if (scope) subject += `(${scope})`;
+    if (isBreaking) subject += '!';
+    subject += `: ${desc}`;
+
+    // Update counter (50-char soft limit, 72-char hard limit)
+    cCount.textContent = `${subject.length}/50 soft · 72 hard`;
+    cCount.className = subject.length > 72 ? 'pill bad' : 'pill';
+
+    // Build full message
+    let msg = subject;
+    if (body || footer || isBreaking) {
+      msg += '\n\n';
+    }
+
+    if (body) {
+      msg += wrapText(body) + '\n';
+    }
+
+    if (isBreaking && !footer.toUpperCase().includes('BREAKING CHANGE')) {
+      msg += '\nBREAKING CHANGE: (Describe the breaking change here)\n';
+    }
+
+    if (footer) {
+      msg += '\n' + footer;
+    }
+
+    cOut.value = msg.trim();
+  }
+
+  [cType, cScope, cDesc, cBreaking, cBody, cFooter].forEach(el => el.addEventListener('input', genCommit));
+  genCommit();
 })();
 
 </script>

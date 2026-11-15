@@ -261,8 +261,110 @@
       color: var(--danger);
       border-color: var(--danger-line);
     }
+
+    /* Cron tab (merged from the standalone Cron Tester) */
+    .cron-input {
+      font-family: var(--font-code);
+      font-size: 1.25rem;
+      text-align: center;
+    }
+
+    .cron-description {
+      font-size: 1.25rem;
+      font-weight: 600;
+      text-align: center;
+      color: var(--accent);
+      min-height: 1.8rem;
+      margin-bottom: var(--space-4);
+    }
+
+    .cron-error {
+      color: var(--danger);
+      background-color: var(--danger-bg);
+      border: 1px solid var(--danger-line);
+      border-radius: 9px;
+      padding: var(--space-2) var(--space-3);
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: var(--space-4);
+    }
+
+    .cron-error:empty {
+      display: none;
+    }
+
+    .cron-parts {
+      display: flex;
+      justify-content: space-between;
+      text-align: center;
+      gap: var(--space-2);
+      font-family: var(--font-code);
+      margin-bottom: var(--space-4);
+    }
+
+    .cron-part {
+      flex: 1;
+      padding: var(--space-3) var(--space-2);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background-color: var(--surface-2);
+      word-break: break-all;
+    }
+
+    .cron-part strong {
+      display: block;
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: var(--space-1);
+    }
+
+    .cron-next {
+      list-style: none;
+      font-family: var(--font-code);
+      font-size: 1rem;
+    }
+
+    .cron-next li {
+      padding: var(--space-2) 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .cron-next li:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .cron-next-note {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: var(--space-2);
+    }
+
+    .cron-next-note:empty {
+      display: none;
+    }
+
+    .example-btn {
+      padding: var(--space-2) var(--space-3);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 480px) {
+      .cron-parts {
+        flex-wrap: wrap;
+      }
+
+      .cron-part {
+        flex: 1 1 28%;
+      }
+    }
   </style>
 
+<script src="https://unpkg.com/cronstrue@2.47.0/dist/cronstrue.min.js"></script>
 <link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/time-id-toolkit/">
 <script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Time & ID Toolkit", "description": "Timestamp Toolkit for epoch/ISO conversions and relative math, paired with a UUID/ULID Studio for bulk generation and deep inspection of modern IDs.", "url": "https://theblackcat98.github.io/TheBlackCat/time-id-toolkit/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/time-id-toolkit-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
 <link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
@@ -278,6 +380,7 @@
   <div class="tabs" role="tablist" aria-label="Toolkit tabs">
     <button class="tab" role="tab" aria-selected="true" aria-controls="panel-time" id="tab-time">Timestamp Toolkit</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="panel-id" id="tab-id">UUID/ULID Studio</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-cron" id="tab-cron">Cron</button>
   </div>
 
   <div id="panel-time" role="tabpanel" aria-labelledby="tab-time" class="tab-panel active">
@@ -394,6 +497,38 @@
             <div class="result-value" id="inspect-notes" style="font-size: 0.9rem; font-family: var(--font-ui);">-</div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel-cron" role="tabpanel" aria-labelledby="tab-cron" class="tab-panel">
+    <div class="card">
+      <h2>Cron Expression Tester</h2>
+      <div class="form-group">
+        <label for="cron-input">Cron Expression</label>
+        <input type="text" id="cron-input" class="cron-input" value="0 12 * * 1-5" placeholder="* * * * *" aria-label="Cron expression">
+        <p style="font-size: 0.8rem; color: var(--muted); margin-top: var(--space-1);">Five fields: minute hour day-of-month month day-of-week. Supports lists, ranges, steps, and names (jan, mon, &hellip;).</p>
+      </div>
+      <div id="cron-description" class="cron-description"></div>
+      <div id="cron-error" class="cron-error" role="alert"></div>
+      <div class="cron-parts" id="cron-parts">
+        <div class="cron-part" id="cp-min">-<strong>Minute</strong></div>
+        <div class="cron-part" id="cp-hr">-<strong>Hour</strong></div>
+        <div class="cron-part" id="cp-dom">-<strong>Day of Month</strong></div>
+        <div class="cron-part" id="cp-mo">-<strong>Month</strong></div>
+        <div class="cron-part" id="cp-dow">-<strong>Day of Week</strong></div>
+      </div>
+      <div class="result-box" style="margin-bottom: var(--space-4);">
+        <h3>Next Runs (Your Local Time)</h3>
+        <ul class="cron-next" id="cron-next"></ul>
+        <p class="cron-next-note" id="cron-next-note"></p>
+      </div>
+      <div class="button-group" id="cron-examples">
+        <button type="button" class="secondary example-btn" data-cron="* * * * *">Every minute</button>
+        <button type="button" class="secondary example-btn" data-cron="0 * * * *">Hourly</button>
+        <button type="button" class="secondary example-btn" data-cron="0 0 * * *">Daily at midnight</button>
+        <button type="button" class="secondary example-btn" data-cron="0 9 * * 1-5">9 AM weekdays</button>
+        <button type="button" class="secondary example-btn" data-cron="*/15 * * * *">Every 15 mins</button>
       </div>
     </div>
   </div>
@@ -800,6 +935,187 @@
         }
       }
     });
+    // Cron Tester Logic (merged from the standalone Cron Tester)
+    // Description text comes from cronstrue (loaded in <head>); the next-run
+    // calculation below is a self-contained 5-field cron evaluator.
+    const elCronInput = document.getElementById('cron-input');
+    const elCronDesc = document.getElementById('cron-description');
+    const elCronErr = document.getElementById('cron-error');
+    const elCronNext = document.getElementById('cron-next');
+    const elCronNextNote = document.getElementById('cron-next-note');
+    const cronPartEls = ['cp-min', 'cp-hr', 'cp-dom', 'cp-mo', 'cp-dow'].map(id => document.getElementById(id));
+
+    const CRON_MONTH_NAMES = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+    const CRON_DOW_NAMES = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+
+    // Parse one cron field into a set of values. Returns { values, star },
+    // where star means the field began with '*' (used by the dom/dow rule).
+    function cronParseField(fieldStr, min, max, names, label) {
+      const star = fieldStr.startsWith('*');
+      const values = new Set();
+
+      function resolve(tok) {
+        const t = tok.toLowerCase();
+        if (names && Object.prototype.hasOwnProperty.call(names, t)) return names[t];
+        if (!/^\d+$/.test(t)) throw new Error(label + ": '" + tok + "' is not a valid value.");
+        return parseInt(t, 10);
+      }
+
+      fieldStr.split(',').forEach(part => {
+        part = part.trim();
+        if (!part) throw new Error(label + ': empty entry in the list.');
+
+        let base = part;
+        let step = 1;
+        const slash = part.indexOf('/');
+        if (slash !== -1) {
+          base = part.substring(0, slash);
+          const stepStr = part.substring(slash + 1);
+          if (!/^\d+$/.test(stepStr) || parseInt(stepStr, 10) < 1) {
+            throw new Error(label + ": invalid step '" + stepStr + "'.");
+          }
+          step = parseInt(stepStr, 10);
+          if (!base) throw new Error(label + ": missing value or range before '/'.");
+        }
+
+        let lo, hi;
+        if (base === '*') {
+          lo = min; hi = max;
+        } else if (base.indexOf('-') !== -1) {
+          const bits = base.split('-');
+          if (bits.length !== 2 || bits[0] === '' || bits[1] === '') {
+            throw new Error(label + ": invalid range '" + base + "'.");
+          }
+          lo = resolve(bits[0]); hi = resolve(bits[1]);
+          if (lo > hi) throw new Error(label + ": range '" + base + "' runs backwards.");
+        } else {
+          lo = resolve(base);
+          hi = (slash !== -1) ? max : lo; // '2/5' means 2..max step 5
+        }
+
+        if (lo < min || lo > max || hi < min || hi > max) {
+          throw new Error(label + ': value out of range (' + min + '-' + max + ').');
+        }
+        for (let v = lo; v <= hi; v += step) values.add(v);
+      });
+
+      if (!values.size) throw new Error(label + ': no values.');
+      return { values: values, star: star };
+    }
+
+    function parseCronExpression(expr) {
+      const tokens = expr.trim().split(/\s+/);
+      if (tokens.length !== 5) {
+        throw new Error('A cron expression needs exactly 5 fields (minute hour day-of-month month day-of-week); this one has ' + tokens.length + '.');
+      }
+      const minute = cronParseField(tokens[0], 0, 59, null, 'Minute');
+      const hour = cronParseField(tokens[1], 0, 23, null, 'Hour');
+      const dom = cronParseField(tokens[2], 1, 31, null, 'Day of month');
+      const month = cronParseField(tokens[3], 1, 12, CRON_MONTH_NAMES, 'Month');
+      const dowRaw = cronParseField(tokens[4], 0, 7, CRON_DOW_NAMES, 'Day of week');
+      const dow = new Set();
+      dowRaw.values.forEach(v => dow.add(v === 7 ? 0 : v)); // 0 and 7 are both Sunday
+      return {
+        minute: minute.values, hour: hour.values, dom: dom.values,
+        month: month.values, dow: dow, domStar: dom.star, dowStar: dowRaw.star
+      };
+    }
+
+    function cronDayMatches(parsed, date) {
+      if (!parsed.month.has(date.getMonth() + 1)) return false;
+      const domMatch = parsed.dom.has(date.getDate());
+      const dowMatch = parsed.dow.has(date.getDay());
+      // Vixie rule: if either day field is unrestricted ('*'), both must match;
+      // if both are restricted, matching either one is enough.
+      if (parsed.domStar || parsed.dowStar) return domMatch && dowMatch;
+      return domMatch || dowMatch;
+    }
+
+    function cronNextRuns(parsed, count, from) {
+      const runs = [];
+      const hours = Array.from(parsed.hour).sort((a, b) => a - b);
+      const minutes = Array.from(parsed.minute).sort((a, b) => a - b);
+      const day = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+      const maxDays = 366 * 6; // search up to ~6 years out (covers Feb 29 cycles)
+      for (let d = 0; d < maxDays && runs.length < count; d++) {
+        if (cronDayMatches(parsed, day)) {
+          for (let hi = 0; hi < hours.length && runs.length < count; hi++) {
+            for (let mi = 0; mi < minutes.length && runs.length < count; mi++) {
+              const t = new Date(day.getFullYear(), day.getMonth(), day.getDate(), hours[hi], minutes[mi], 0, 0);
+              if (t > from) runs.push(t);
+            }
+          }
+        }
+        day.setDate(day.getDate() + 1);
+      }
+      return runs;
+    }
+
+    const cronRunFmt = new Intl.DateTimeFormat('en-US', {
+      weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit'
+    });
+
+    function updateCron() {
+      const val = elCronInput.value.trim();
+      elCronErr.textContent = '';
+      elCronDesc.textContent = '';
+      elCronNext.innerHTML = '';
+      elCronNextNote.textContent = '';
+      cronPartEls.forEach(p => { p.childNodes[0].nodeValue = '-'; });
+
+      if (!val) return;
+
+      const tokens = val.split(/\s+/);
+      if (tokens.length >= 5) {
+        for (let i = 0; i < 5; i++) {
+          cronPartEls[i].childNodes[0].nodeValue = tokens[i];
+        }
+      }
+
+      let parsed;
+      try {
+        parsed = parseCronExpression(val);
+      } catch (e) {
+        elCronErr.textContent = e.message;
+        return;
+      }
+
+      if (window.cronstrue) {
+        try {
+          elCronDesc.textContent = cronstrue.toString(val);
+        } catch (e) {
+          // Our parser already validated the expression; if cronstrue is
+          // stricter, leave the description blank rather than erroring.
+        }
+      }
+
+      const runs = cronNextRuns(parsed, 5, new Date());
+      if (!runs.length) {
+        elCronNextNote.textContent = 'No run time in the next six years — this combination may never occur (for example, February 31).';
+        return;
+      }
+      runs.forEach(t => {
+        const li = document.createElement('li');
+        li.textContent = cronRunFmt.format(t);
+        elCronNext.appendChild(li);
+      });
+      if (runs.length < 5) {
+        elCronNextNote.textContent = 'Only ' + runs.length + ' run time(s) in the next six years.';
+      }
+    }
+
+    elCronInput.addEventListener('input', updateCron);
+    document.querySelectorAll('#cron-examples [data-cron]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        elCronInput.value = btn.getAttribute('data-cron');
+        updateCron();
+      });
+    });
+
+    // cronstrue loads synchronously in <head>, but re-run on load just in case.
+    window.addEventListener('load', updateCron);
+    updateCron();
   </script>
 </body>
 </html>

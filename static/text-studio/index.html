@@ -132,6 +132,10 @@
         <div class="metric"><span>Characters (no spaces)</span><span class="metric-val" id="m-chars-nospace">0</span></div>
         <div class="metric"><span>Words</span><span class="metric-val" id="m-words">0</span></div>
         <div class="metric"><span>Sentences</span><span class="metric-val" id="m-sentences">0</span></div>
+        <h2>Readability</h2>
+        <div class="metric"><span>Flesch Reading Ease</span><span class="metric-val" id="m-fre">—</span></div>
+        <div class="metric"><span>Flesch–Kincaid Grade</span><span class="metric-val" id="m-fk">—</span></div>
+        <div class="metric"><span>SMOG Index</span><span class="metric-val" id="m-smog">—</span></div>
       </div>
 
       <div id="cleanup" class="panel">
@@ -175,14 +179,59 @@
       } catch(e){}
     }
 
+    function countSyllables(word) {
+      const w = word.toLowerCase().replace(/[^a-z]/g, '');
+      if (!w) return 0;
+      if (w.length <= 3) return 1;
+      let count = (w.match(/[aeiouy]+/g) || []).length;
+      // Trailing silent 'e' adds no syllable, except consonant + "le" ("table").
+      if (w.endsWith('e') && !/[^aeiouy]le$/.test(w)) count -= 1;
+      return Math.max(1, count);
+    }
+
+    function fleschBand(score) {
+      if (score >= 90) return "Very easy";
+      if (score >= 80) return "Easy";
+      if (score >= 70) return "Fairly easy";
+      if (score >= 60) return "Standard";
+      if (score >= 50) return "Fairly difficult";
+      if (score >= 30) return "Difficult";
+      return "Very confusing";
+    }
+
     function updateMetrics() {
       const text = input.value;
       document.getElementById("m-chars").textContent = text.length;
       document.getElementById("m-chars-nospace").textContent = text.replace(/\s/g, '').length;
-      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const tokens = text.trim() ? text.trim().split(/\s+/) : [];
+      const words = tokens.length;
       document.getElementById("m-words").textContent = words;
       const sentences = text.trim() ? text.split(/[.!?]+/).filter(s => s.trim().length > 0).length : 0;
       document.getElementById("m-sentences").textContent = sentences;
+
+      const freEl = document.getElementById("m-fre");
+      const fkEl = document.getElementById("m-fk");
+      const smogEl = document.getElementById("m-smog");
+      let syllables = 0, polysyllables = 0;
+      tokens.forEach(tok => {
+        const s = countSyllables(tok);
+        syllables += s;
+        if (s >= 3) polysyllables++;
+      });
+      if (!words || !sentences || !syllables) {
+        freEl.textContent = "—";
+        fkEl.textContent = "—";
+        smogEl.textContent = "—";
+        return;
+      }
+      const wordsPerSentence = words / sentences;
+      const syllablesPerWord = syllables / words;
+      const fre = 206.835 - 1.015 * wordsPerSentence - 84.6 * syllablesPerWord;
+      const fk = Math.max(0, 0.39 * wordsPerSentence + 11.8 * syllablesPerWord - 15.59);
+      const smog = 1.043 * Math.sqrt(polysyllables * (30 / sentences)) + 3.1291;
+      freEl.textContent = fre.toFixed(1) + " · " + fleschBand(fre);
+      fkEl.textContent = fk.toFixed(1);
+      smogEl.textContent = smog.toFixed(1);
     }
 
     input.addEventListener("input", () => {

@@ -31,6 +31,12 @@
         th { background: var(--chip); color: var(--mut); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
         td { font-size: 0.9rem; }
         code { font-family: "JetBrains Mono", monospace; }
+        .explain-box { background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 14px; padding: 0.6rem 1rem; margin-top: 0.5rem; }
+        .explain-row { display: flex; align-items: baseline; gap: 0.6rem; padding: 0.32rem 0; border-bottom: 1px solid var(--line); }
+        .explain-row:last-child { border-bottom: none; }
+        .explain-token { font-family: "JetBrains Mono", monospace; font-size: 0.85rem; background: var(--chip); border: 1px solid var(--line); border-radius: 6px; padding: 0.05rem 0.45rem; overflow-wrap: anywhere; }
+        .explain-desc { font-size: 0.92rem; min-width: 0; }
+        .explain-note { color: var(--mut); font-size: 0.9rem; padding: 0.3rem 0; }
     </style>
 
 <meta name="description" content="A visual debugger and tester for regular expressions, explaining each part of the match.">
@@ -54,6 +60,9 @@
         <strong>/</strong>
         <input type="text" id="flags" class="flags" value="g" placeholder="Flags (g,i,m)">
     </div>
+
+    <h3>Pattern Explanation:</h3>
+    <div id="explain" class="explain-box"></div>
 
     <label for="test-text"><strong>Test String:</strong></label>
     <textarea id="test-text">Please contact support@example.com or sales@test-domain.org for help.</textarea>
@@ -85,6 +94,7 @@
         const errorEl = document.getElementById('error-msg');
         const tableEl = document.getElementById('match-table');
         const tbodyEl = document.getElementById('match-tbody');
+        const explainEl = document.getElementById('explain');
 
         function escapeHTML(str) {
             return str.replace(/[&<>'"]/g,
@@ -98,7 +108,357 @@
             );
         }
 
+        // ---------- Token-by-token pattern explanation ----------
+        // A small recursive-descent tokenizer. It never throws: an incomplete
+        // or invalid pattern yields the rows parsed so far plus a note.
+        function explainPattern(src) {
+            let i = 0;
+            let groupCount = 0;
+            let incomplete = false;
+            const n = src.length;
+
+            const CHAR_ESCAPES = {
+                d: 'a digit (0–9)',
+                D: 'any character that is not a digit',
+                w: 'a word character (a letter, digit or underscore)',
+                W: 'any character that is not a word character',
+                s: 'a whitespace character (space, tab or newline)',
+                S: 'any character that is not whitespace',
+                b: 'a word boundary — the position where a word character meets a non-word character',
+                B: 'a position that is not a word boundary',
+                n: 'a newline character (line feed)',
+                r: 'a carriage return character',
+                t: 'a tab character',
+                f: 'a form feed character',
+                v: 'a vertical tab character',
+                '0': 'a null character (U+0000)'
+            };
+            const CLASS_ESCAPES = {
+                d: 'digits', D: 'non-digits',
+                w: 'word characters', W: 'non-word characters',
+                s: 'whitespace', S: 'non-whitespace',
+                b: 'a backspace', n: 'a newline', r: 'a carriage return',
+                t: 'a tab', f: 'a form feed', v: 'a vertical tab',
+                '0': 'a null character'
+            };
+
+            function isHex(ch) { return ch !== undefined && /[0-9a-fA-F]/.test(ch); }
+            function isPrintable(ch) {
+                const code = ch.codePointAt(0);
+                return code >= 32 && code !== 127;
+            }
+            function codeDesc(ch, label) {
+                return isPrintable(ch) ? `the character '${ch}' (${label})` : `the character with code ${label}`;
+            }
+
+            // Escape starting at src[i] === '\\'. Returns {src, desc} for a
+            // standalone token, or {src, ch} when it is just a literal char.
+            function parseEscape() {
+                const start = i;
+                i++; // consume the backslash
+                if (i >= n) {
+                    incomplete = true;
+                    return { src: '\\', desc: 'a trailing backslash — the escape is incomplete' };
+                }
+                const c = src[i];
+                if (Object.prototype.hasOwnProperty.call(CHAR_ESCAPES, c)) {
+                    i++;
+                    return { src: src.slice(start, i), desc: CHAR_ESCAPES[c] };
+                }
+                if (c >= '1' && c <= '9') {
+                    i++;
+                    return { src: src.slice(start, i), desc: `a backreference — the same text matched by group ${c}` };
+                }
+                if (c === 'x' && isHex(src[i + 1]) && isHex(src[i + 2])) {
+                    const hex = src.slice(i + 1, i + 3).toUpperCase();
+                    const ch = String.fromCharCode(parseInt(hex, 16));
+                    i += 3;
+                    return { src: src.slice(start, i), desc: codeDesc(ch, 'U+00' + hex) };
+                }
+                if (c === 'u' && src[i + 1] === '{') {
+                    const close = src.indexOf('}', i + 2);
+                    if (close > 0 && /^[0-9a-fA-F]+$/.test(src.slice(i + 2, close))) {
+                        const hex = src.slice(i + 2, close).toUpperCase();
+                        const ch = String.fromCodePoint(parseInt(hex, 16));
+                        i = close + 1;
+                        return { src: src.slice(start, i), desc: codeDesc(ch, 'U+' + hex) };
+                    }
+                    i++;
+                    return { src: src.slice(start, i), ch: 'u' };
+                }
+                if (c === 'u' && isHex(src[i + 1]) && isHex(src[i + 2]) && isHex(src[i + 3]) && isHex(src[i + 4])) {
+                    const hex = src.slice(i + 1, i + 5).toUpperCase();
+                    const ch = String.fromCharCode(parseInt(hex, 16));
+                    i += 5;
+                    return { src: src.slice(start, i), desc: codeDesc(ch, 'U+' + hex) };
+                }
+                if (c === 'k' && src[i + 1] === '<') {
+                    const close = src.indexOf('>', i + 2);
+                    if (close > 0) {
+                        const name = src.slice(i + 2, close);
+                        i = close + 1;
+                        return { src: src.slice(start, i), desc: `a backreference — the same text matched by the group named '${name}'` };
+                    }
+                    i++;
+                    return { src: src.slice(start, i), ch: 'k' };
+                }
+                // Any other escaped character stands for the character itself.
+                i++;
+                return { src: src.slice(start, i), ch: c };
+            }
+
+            function classCharDisplay(ch) {
+                return /[A-Za-z0-9]/.test(ch) ? ch : `'${ch}'`;
+            }
+
+            // One item inside a character class: {part} for a set-like item,
+            // {part, ch} for a single character (a possible range endpoint).
+            function parseClassItem() {
+                if (src[i] === '\\') {
+                    i++;
+                    if (i >= n) { incomplete = true; return { part: 'an incomplete escape' }; }
+                    const c = src[i];
+                    i++;
+                    if (Object.prototype.hasOwnProperty.call(CLASS_ESCAPES, c)) return { part: CLASS_ESCAPES[c] };
+                    if (c === 'x' && isHex(src[i]) && isHex(src[i + 1])) {
+                        const ch = String.fromCharCode(parseInt(src.slice(i, i + 2), 16));
+                        i += 2;
+                        return { part: classCharDisplay(ch), ch };
+                    }
+                    return { part: classCharDisplay(c), ch: c };
+                }
+                const ch = src[i];
+                i++;
+                return { part: classCharDisplay(ch), ch };
+            }
+
+            function parseClass(depth) {
+                const start = i;
+                i++; // consume '['
+                let negated = false;
+                if (src[i] === '^') { negated = true; i++; }
+                const parts = [];
+                let first = true;
+                let closed = false;
+                while (i < n) {
+                    if (src[i] === ']' && !first) { i++; closed = true; break; }
+                    first = false;
+                    const item = parseClassItem();
+                    // A range: '-' with a real character on each side.
+                    if (item.ch !== undefined && src[i] === '-' && i + 1 < n && src[i + 1] !== ']') {
+                        i++; // consume '-'
+                        const end = parseClassItem();
+                        if (end.ch !== undefined) {
+                            parts.push(`${item.ch}–${end.ch}`);
+                        } else {
+                            parts.push(item.part, `'-'`, end.part);
+                        }
+                    } else {
+                        parts.push(item.part);
+                    }
+                }
+                if (!closed) incomplete = true;
+                let list = '';
+                if (parts.length === 1) list = parts[0];
+                else if (parts.length === 2) list = parts.join(' or ');
+                else if (parts.length > 2) list = parts.slice(0, -1).join(', ') + ' or ' + parts[parts.length - 1];
+                const desc = parts.length
+                    ? `a character class — any character ${negated ? 'NOT ' : ''}in ${list}`
+                    : 'a character class with nothing in it';
+                return { token: src.slice(start, i), desc, depth };
+            }
+
+            function parseGroup(depth, rows) {
+                let opener = '(', kind = 'capture', name = null;
+                if (src.startsWith('(?:', i)) { kind = 'noncapture'; opener = '(?:'; i += 3; }
+                else if (src.startsWith('(?=', i)) { kind = 'ahead'; opener = '(?='; i += 3; }
+                else if (src.startsWith('(?!', i)) { kind = 'negahead'; opener = '(?!'; i += 3; }
+                else if (src.startsWith('(?<=', i)) { kind = 'behind'; opener = '(?<='; i += 4; }
+                else if (src.startsWith('(?<!', i)) { kind = 'negbehind'; opener = '(?<!'; i += 4; }
+                else if (src.startsWith('(?<', i)) {
+                    const m = /^\(\?<([A-Za-z_$][A-Za-z0-9_$]*)>/.exec(src.slice(i));
+                    if (m) { kind = 'named'; name = m[1]; opener = m[0]; i += m[0].length; }
+                    else { i += 1; }
+                } else { i += 1; }
+
+                let desc;
+                if (kind === 'capture') {
+                    groupCount++;
+                    desc = `capturing group ${groupCount} — its match is saved and can be referenced as \\${groupCount}`;
+                } else if (kind === 'named') {
+                    groupCount++;
+                    desc = `capturing group ${groupCount}, named '${name}' — its match is saved under that name`;
+                } else if (kind === 'noncapture') {
+                    desc = 'a non-capturing group — groups its contents without saving a match';
+                } else if (kind === 'ahead') {
+                    desc = 'a lookahead — the text that follows must match the contents, but they are not consumed';
+                } else if (kind === 'negahead') {
+                    desc = 'a negative lookahead — the text that follows must NOT match the contents';
+                } else if (kind === 'behind') {
+                    desc = 'a lookbehind — the text just before must match the contents, but they are not consumed';
+                } else {
+                    desc = 'a negative lookbehind — the text just before must NOT match the contents';
+                }
+
+                const header = { token: opener, desc, depth, isGroup: true };
+                rows.push(header);
+                const inner = parseSequence(depth + 1, true);
+                rows.push(...inner.rows);
+                if (!inner.closed) incomplete = true;
+                return header;
+            }
+
+            function parseSequence(depth, inGroup) {
+                const rows = [];
+                let lit = [];
+                let lastRow = null;
+
+                function flushLit() {
+                    if (!lit.length) return;
+                    const token = lit.map(u => u.src).join('');
+                    const text = lit.map(u => u.ch).join('');
+                    const row = {
+                        token,
+                        desc: text.length === 1 ? `the literal character '${text}'` : `the literal text '${text}'`,
+                        depth
+                    };
+                    rows.push(row);
+                    lastRow = row;
+                    lit = [];
+                }
+
+                // The row a quantifier applies to. A quantifier after a run of
+                // literals repeats only the last character, so split the run.
+                function quantifierTarget() {
+                    if (lit.length > 1) {
+                        const last = lit.pop();
+                        flushLit();
+                        lit = [last];
+                        flushLit();
+                    } else if (lit.length === 1) {
+                        flushLit();
+                    }
+                    return lastRow;
+                }
+
+                function applyQuantifier(qSrc, phrase) {
+                    let lazy = false;
+                    if (src[i] === '?') { lazy = true; i++; }
+                    const lazyNote = lazy ? ', lazily (as few as possible)' : '';
+                    const target = quantifierTarget();
+                    if (!target) {
+                        const row = { token: qSrc + (lazy ? '?' : ''), desc: `a quantifier (${phrase}) with nothing before it to repeat`, depth };
+                        rows.push(row);
+                        lastRow = row;
+                        return;
+                    }
+                    if (target.isGroup) {
+                        target.desc += ` — the group is repeated ${phrase}${lazyNote}`;
+                    } else {
+                        target.token += qSrc + (lazy ? '?' : '');
+                        target.desc += ` — repeated ${phrase}${lazyNote}`;
+                    }
+                }
+
+                let closed = false;
+                while (i < n) {
+                    const c = src[i];
+                    if (c === ')' && inGroup) { i++; closed = true; break; }
+                    if (c === '(') {
+                        flushLit();
+                        lastRow = parseGroup(depth, rows);
+                    } else if (c === '[') {
+                        flushLit();
+                        const row = parseClass(depth);
+                        rows.push(row);
+                        lastRow = row;
+                    } else if (c === '\\') {
+                        const esc = parseEscape();
+                        if (esc.ch !== undefined) {
+                            lit.push({ src: esc.src, ch: esc.ch });
+                        } else {
+                            flushLit();
+                            const row = { token: esc.src, desc: esc.desc, depth };
+                            rows.push(row);
+                            lastRow = row;
+                        }
+                    } else if (c === '|') {
+                        flushLit();
+                        rows.push({ token: '|', desc: 'alternation — or: the pattern can match the part before or the part after this bar', depth });
+                        lastRow = null;
+                        i++;
+                    } else if (c === '^') {
+                        flushLit();
+                        const row = { token: '^', desc: 'start of string (an anchor — or the start of a line, with the m flag)', depth };
+                        rows.push(row);
+                        lastRow = row;
+                        i++;
+                    } else if (c === '$') {
+                        flushLit();
+                        const row = { token: '$', desc: 'end of string (an anchor — or the end of a line, with the m flag)', depth };
+                        rows.push(row);
+                        lastRow = row;
+                        i++;
+                    } else if (c === '.') {
+                        flushLit();
+                        const row = { token: '.', desc: 'any character except a newline', depth };
+                        rows.push(row);
+                        lastRow = row;
+                        i++;
+                    } else if (c === '*' || c === '+' || c === '?') {
+                        i++;
+                        applyQuantifier(c, c === '*' ? 'zero or more times' : c === '+' ? 'one or more times' : 'zero or one time (optional)');
+                    } else if (c === '{') {
+                        const m = /^\{(\d+)(?:,(\d*))?\}/.exec(src.slice(i));
+                        if (m) {
+                            i += m[0].length;
+                            let phrase;
+                            if (m[2] === undefined) phrase = `exactly ${m[1]} time${m[1] === '1' ? '' : 's'}`;
+                            else if (m[2] === '') phrase = `${m[1]} or more times`;
+                            else phrase = `between ${m[1]} and ${m[2]} times`;
+                            applyQuantifier(m[0], phrase);
+                        } else {
+                            lit.push({ src: '{', ch: '{' });
+                            i++;
+                        }
+                    } else if (c === ')') {
+                        flushLit();
+                        incomplete = true;
+                        const row = { token: ')', desc: 'an unmatched closing parenthesis', depth };
+                        rows.push(row);
+                        lastRow = row;
+                        i++;
+                    } else {
+                        lit.push({ src: c, ch: c });
+                        i++;
+                    }
+                }
+                flushLit();
+                return { rows, closed };
+            }
+
+            const top = parseSequence(0, false);
+            return { rows: top.rows, incomplete };
+        }
+
+        function renderExplain() {
+            const pattern = regexEl.value;
+            if (!pattern) {
+                explainEl.innerHTML = '<div class="explain-note">Type a pattern above to see a token-by-token breakdown.</div>';
+                return;
+            }
+            const result = explainPattern(pattern);
+            let html = result.rows.map(r =>
+                `<div class="explain-row" style="margin-left:${(r.depth * 1.4).toFixed(1)}rem"><code class="explain-token">${escapeHTML(r.token)}</code><span class="explain-desc">${escapeHTML(r.desc)}</span></div>`
+            ).join('');
+            if (result.incomplete) {
+                html += '<div class="explain-note">The pattern is incomplete or invalid, so this breakdown may stop early.</div>';
+            }
+            explainEl.innerHTML = html || '<div class="explain-note">Nothing to explain yet.</div>';
+        }
+
         function runRegex() {
+            renderExplain();
             const pattern = regexEl.value;
             const flags = flagsEl.value;
             const text = textEl.value;

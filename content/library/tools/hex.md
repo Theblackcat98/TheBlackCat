@@ -13,9 +13,9 @@ tags:
   - rust
   - linux
   - open-source
-status: inbox
+status: filed
 created: 2026-11-14
-updated: 2026-11-14
+updated: 2026-11-15
 ---
 
 ## Why I saved this
@@ -25,5 +25,5 @@ Local-first dictation that works on Linux (Fedora .rpm build listed) — hold-to
 ## Notes
 
 - CLI as well as app: `hex transcribe meeting.m4a` prints a transcript for WAV, AIFF, FLAC, MP3, Ogg, WebM and MP4/M4A/MOV, whether or not the app is running.
-- Installs: Homebrew cask, AUR (`hex-bin`), a Linux install script, or Nix (`nix profile add github:anomalyco/hex`); stable and dev channels.
-- Rust, MIT. ~6,750 stars. They don't take pull requests — issues only, per the README.
+- Installs: Homebrew cask, AUR (`hex-bin`), a Linux install script, or Nix (`nix profile add github:anomalyco/hex`); stable and dev channels. Direct `.deb` builds for Debian/Ubuntu (x64 and ARM64) sit next to the Fedora `.rpm` ones.
+- Rust, MIT. ~6,900 stars, actively developed. They don't take pull requests — issues only, per the README.

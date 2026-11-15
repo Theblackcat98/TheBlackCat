@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="Write Markdown with live preview, including this site's callout and anatomy shortcodes, a table of contents, and checks for the site's front matter and content rules. Runs in the browser.">
+<meta name="description" content="One studio for this site's Markdown work: live preview with the site's callout and anatomy shortcodes, a frontmatter doctor that checks and auto-fixes Hugo front matter, a JSON-to-Hugo converter, and a Markdown table builder. Runs in the browser.">
 <link rel="icon" href="data:,">
-<title>Markdown & Shortcode Previewer</title>
+<title>Markdown &amp; Hugo Studio</title>
 <style>
 
 
@@ -122,24 +122,47 @@ kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:
 .paper{min-width:0}
 @media (max-width:720px){.ed{grid-template-columns:1fr}}
 
+/* ---------- studio tabs (Preview / Frontmatter / Convert / Tables) ---------- */
+.seg.tabs{flex-wrap:wrap}
+.panel{display:grid;gap:1rem}
+.panel>*{min-width:0}
+.out.flat{padding-right:.85rem}
+#fm-input{min-height:15rem}
+#cv-input,#cv-output{min-height:17rem}
+.tb-grid{border-collapse:collapse}
+.tb-grid td{padding:.2rem}
+.tb-grid td input{min-width:6rem}
+.tb-grid tr:first-child td input{font-weight:600}
+
 </style>
 
 <link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/markdown-previewer/">
-<meta property="og:title" content="Markdown & Shortcode Previewer · The BlackCat">
-<meta property="og:description" content="Live Markdown preview that understands this site's callout and anatomy shortcodes and checks front matter against the content rules.">
+<meta property="og:title" content="Markdown & Hugo Studio · The BlackCat">
+<meta property="og:description" content="Live Markdown preview, a frontmatter doctor with auto-fix, a JSON-to-Hugo converter, and a Markdown table builder — the site's writing tools in one studio.">
 <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/markdown-previewer/">
 <meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/markdown-previewer-light.webp">
-<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Markdown & Shortcode Previewer", "description": "Live Markdown preview that understands this site's callout and anatomy shortcodes and checks front matter against the content rules.", "url": "https://theblackcat98.github.io/TheBlackCat/markdown-previewer/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/markdown-previewer-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Markdown & Hugo Studio", "description": "Live Markdown preview, a frontmatter doctor with auto-fix, a JSON-to-Hugo converter, and a Markdown table builder — the site's writing tools in one studio.", "url": "https://theblackcat98.github.io/TheBlackCat/markdown-previewer/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/markdown-previewer-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
 <link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
 <script src="../toolkit/toolkit.js?v=1" defer data-tool="markdown-previewer"></script>
 </head>
 <body>
 <header class="site">
-  <div class="top"><h1>Markdown & Shortcode Previewer</h1><a class="back" href="../tools/">&larr; All tools</a></div>
-  <p>Draft a post with a live preview that understands this site's front matter, callout and anatomy shortcodes, and flags the mistakes that break the build. Nothing is uploaded.</p>
+  <div class="top"><h1>Markdown &amp; Hugo Studio</h1><a class="back" href="../tools/">&larr; All tools</a></div>
+  <p>Four of the site's writing tools in one studio: draft a post with a live preview, run the frontmatter doctor on it, convert JSON into Hugo front matter, and build Markdown tables. Nothing is uploaded.</p>
 </header>
 <main class="wrap">
 
+<section class="card" aria-label="Studio tools">
+  <div class="seg tabs" role="tablist" aria-label="Markdown and Hugo Studio tools">
+    <button role="tab" id="tab-preview" aria-controls="panel-preview" aria-selected="true" data-tab="preview">Preview</button>
+    <button role="tab" id="tab-frontmatter" aria-controls="panel-frontmatter" aria-selected="false" data-tab="frontmatter">Frontmatter</button>
+    <button role="tab" id="tab-convert" aria-controls="panel-convert" aria-selected="false" data-tab="convert">Convert</button>
+    <button role="tab" id="tab-tables" aria-controls="panel-tables" aria-selected="false" data-tab="tables">Tables</button>
+  </div>
+  <p class="note">The Preview tab runs the same frontmatter linter as the Frontmatter tab — one set of rules, checked in both places.</p>
+</section>
+
+<div class="panel" id="panel-preview" role="tabpanel" aria-labelledby="tab-preview">
 <section class="card" aria-labelledby="h-tools">
   <h2 id="h-tools" class="sr-only">Tools</h2>
   <div class="row center">
@@ -165,7 +188,108 @@ kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:
   <ul class="checks" id="m-checks"></ul>
   <p class="note">Rules come from this site's contributor guide: <code>contenttype</code> not <code>type</code>, <code>source</code> not <code>url</code>, headings starting at <code>##</code>, a language on every code fence, and the callout and anatomy shortcodes. The preview is an approximation; the live site renders raw HTML and syntax-highlights code.</p>
 </section>
+</div>
 
+<div class="panel" id="panel-frontmatter" role="tabpanel" aria-labelledby="tab-frontmatter" hidden>
+<section class="card" aria-labelledby="h-fm">
+  <h2 id="h-fm">Frontmatter Doctor</h2>
+  <div class="field">
+    <label class="lbl" for="fm-input">Content or frontmatter</label>
+    <textarea id="fm-input" spellcheck="false" placeholder="---&#10;title: ...&#10;---&#10;Body text..."></textarea>
+  </div>
+  <div class="row" style="margin-top:.6rem">
+    <button id="fm-check" class="primary">Check rules</button>
+    <button id="fm-clear">Clear</button>
+  </div>
+  <p class="note">Paste a Markdown file or just its frontmatter to check it against the site's rules — the same linter the Preview tab runs. Errors break the build or the taxonomy; warnings are drift worth fixing.</p>
+</section>
+<section class="card" id="fm-report-card" aria-labelledby="h-fm-report" hidden>
+  <h2 id="h-fm-report">Report <span class="pill" id="fm-count" style="margin-left:.4rem"></span></h2>
+  <ul class="checks" id="fm-issues"></ul>
+</section>
+<section class="card" id="fm-fixed-card" aria-labelledby="h-fm-fixed" hidden>
+  <h2 id="h-fm-fixed">Fixed version</h2>
+  <p class="note" style="margin:0 0 .6rem">Review the suggested changes.</p>
+  <pre class="out flat" id="fm-fixed"></pre>
+  <div class="row" style="margin-top:.6rem">
+    <button data-copy-from="fm-fixed">Copy to clipboard</button>
+    <button id="fm-dl">Download .md</button>
+  </div>
+</section>
+<section class="card" aria-labelledby="h-fm-gen">
+  <h2 id="h-fm-gen">Generate starting block</h2>
+  <p class="note" style="margin:0 0 .6rem">Start a new file with valid frontmatter.</p>
+  <div class="row">
+    <div class="field">
+      <label class="lbl" for="fm-gen-type">Content type</label>
+      <select id="fm-gen-type">
+        <option value="bookmark">Bookmark</option>
+        <option value="skill">Skill</option>
+        <option value="article">Article</option>
+        <option value="note">Note</option>
+        <option value="project">Project</option>
+        <option value="collection">Collection</option>
+        <option value="reference">Reference</option>
+      </select>
+    </div>
+    <button id="fm-gen">Generate</button>
+  </div>
+</section>
+</div>
+
+<div class="panel" id="panel-convert" role="tabpanel" aria-labelledby="tab-convert" hidden>
+<section class="card" aria-labelledby="h-cv">
+  <h2 id="h-cv">JSON to Hugo frontmatter</h2>
+  <div class="cols">
+    <div class="field">
+      <label class="lbl" for="cv-input">JSON input</label>
+      <textarea id="cv-input" spellcheck="false" placeholder='{"title": "Example", "tags": ["a", "b"]}'></textarea>
+      <div class="msg bad" id="cv-error" role="alert"></div>
+    </div>
+    <div class="field">
+      <label class="lbl" for="cv-output">YAML frontmatter output</label>
+      <textarea id="cv-output" readonly></textarea>
+    </div>
+  </div>
+  <div class="row" style="margin-top:.6rem">
+    <button data-copy-from="cv-output">Copy to clipboard</button>
+  </div>
+  <p class="note">Paste JSON — a config or an API response — and get Hugo-ready YAML front matter back. Conversion runs as you type; the root value must be a JSON object.</p>
+</section>
+</div>
+
+<div class="panel" id="panel-tables" role="tabpanel" aria-labelledby="tab-tables" hidden>
+<section class="card" aria-labelledby="h-tb">
+  <h2 id="h-tb">Table grid</h2>
+  <div class="scroll"><table class="tb-grid" id="tb-grid"></table></div>
+  <div class="row" style="margin-top:.6rem">
+    <button id="tb-add-row">Add row</button>
+    <button id="tb-add-col">Add column</button>
+    <button id="tb-del-row">Remove row</button>
+    <button id="tb-del-col">Remove column</button>
+  </div>
+  <p class="note">The first row is the header. The Markdown below updates as you type, padded and aligned.</p>
+</section>
+<section class="card" aria-labelledby="h-tb-import">
+  <h2 id="h-tb-import">Import into the grid</h2>
+  <div class="field">
+    <label class="lbl" for="tb-import">CSV, TSV or Markdown table text</label>
+    <textarea id="tb-import" rows="5" spellcheck="false" placeholder="Column 1,Column 2,Column 3&#10;Value A,Value B,Value C"></textarea>
+  </div>
+  <div class="row" style="margin-top:.6rem">
+    <button id="tb-from-csv">Format from CSV</button>
+    <button id="tb-from-tsv">Format from TSV</button>
+    <button id="tb-from-md">Re-format Markdown table</button>
+  </div>
+</section>
+<section class="card" aria-labelledby="h-tb-out">
+  <h2 id="h-tb-out">Markdown output</h2>
+  <pre class="out flat" id="tb-output"></pre>
+  <div class="row" style="margin-top:.6rem">
+    <button data-copy-from="tb-output">Copy table</button>
+  </div>
+</section>
+</div>
 
 </main>
 <script>
@@ -195,6 +319,287 @@ document.addEventListener('click',e=>{const b=e.target.closest('button.copy[data
   if(b){const el=document.getElementById(b.dataset.copyFrom);if(el)copyText(el.value!==undefined&&el.tagName==='TEXTAREA'?el.value:el.textContent)}});
 
 
+</script>
+<script>
+/* =====================================================================
+   Shared frontmatter linter — ONE implementation, used by the Preview
+   tab's checks and by the Frontmatter tab (the old Frontmatter Doctor).
+   The Doctor's full check list lives in lintFrontmatter() below.
+
+   The Doctor used to load js-yaml from a CDN. This page has always been
+   self-contained, and two tabs cannot share a linter that only one of
+   them loads, so the YAML handling is a small built-in parser/emitter
+   for the subset this site's front matter actually uses: flat keys,
+   nested maps, block and flow lists, quoted scalars, block scalars.
+   ===================================================================== */
+const FM_TYPES = ['bookmark', 'skill', 'article', 'note', 'project', 'collection', 'reference'];
+const FM_KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+function fmSplitFlow(s) {
+  const out = []; let depth = 0, cur = '', q = null;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (q) { cur += ch; if (ch === q && s[i - 1] !== '\\') q = null; continue; }
+    if (ch === '"' || ch === "'") { q = ch; cur += ch; continue; }
+    if (ch === '[' || ch === '{') depth++;
+    if (ch === ']' || ch === '}') depth--;
+    if (ch === ',' && depth === 0) { out.push(cur); cur = ''; continue; }
+    cur += ch;
+  }
+  if (cur.trim() !== '') out.push(cur);
+  return out.map(x => x.trim());
+}
+
+function fmScalar(raw) {
+  let s = String(raw).trim();
+  if (s === '') return null;
+  if (s[0] === '"') { try { return JSON.parse(s); } catch (e) { return s.replace(/^"|"$/g, ''); } }
+  if (s[0] === "'") return s.slice(1, -1).replace(/''/g, "'");
+  if (s[0] === '[' && s.endsWith(']')) {
+    const inner = s.slice(1, -1).trim();
+    return inner ? fmSplitFlow(inner).map(fmScalar) : [];
+  }
+  if (s[0] === '{' && s.endsWith('}')) {
+    const inner = s.slice(1, -1).trim(); const o = {};
+    if (inner) fmSplitFlow(inner).forEach(part => {
+      const m = part.match(/^([^:]+):\s*([\s\S]*)$/);
+      if (m) o[String(fmScalar(m[1]))] = fmScalar(m[2]);
+    });
+    return o;
+  }
+  const hash = s.indexOf(' #');
+  if (hash >= 0) s = s.slice(0, hash).trimEnd();
+  if (/^(null|Null|NULL|~)$/.test(s)) return null;
+  if (/^(true|True|TRUE)$/.test(s)) return true;
+  if (/^(false|False|FALSE)$/.test(s)) return false;
+  if (/^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/.test(s)) return Number(s);
+  return s;
+}
+
+function parseYamlSubset(text) {
+  const rawLines = String(text).replace(/\r\n?/g, '\n').split('\n');
+  const lines = [];
+  for (let n = 0; n < rawLines.length; n++) {
+    const raw = rawLines[n];
+    if (!raw.trim() || /^\s*#/.test(raw)) continue;
+    if (/^\t/.test(raw)) return { error: 'line ' + (n + 1) + ': tabs are not valid indentation in YAML' };
+    lines.push({ indent: raw.match(/^ */)[0].length, text: raw.trim(), n: n + 1 });
+  }
+  if (!lines.length) return { data: null };
+  let pos = 0;
+  function parseBlock(indent) {
+    if (pos >= lines.length) return null;
+    return (lines[pos].text === '-' || lines[pos].text.startsWith('- ')) ? parseSeq(indent) : parseMap(indent);
+  }
+  function parseSeq(indent) {
+    const arr = [];
+    while (pos < lines.length) {
+      const L = lines[pos];
+      if (L.indent !== indent || !(L.text === '-' || L.text.startsWith('- '))) break;
+      const rest = L.text === '-' ? '' : L.text.slice(2).trim();
+      pos++;
+      if (rest === '') { arr.push(pos < lines.length && lines[pos].indent > indent ? parseBlock(lines[pos].indent) : null); continue; }
+      if (/^[^:\s][^:]*:(\s|$)/.test(rest) && rest[0] !== '"' && rest[0] !== "'") {
+        lines.splice(pos, 0, { indent: indent + 2, text: rest, n: L.n });
+        arr.push(parseMap(indent + 2));
+        continue;
+      }
+      arr.push(fmScalar(rest));
+    }
+    return arr;
+  }
+  function parseMap(indent) {
+    const obj = {};
+    while (pos < lines.length) {
+      const L = lines[pos];
+      if (L.indent !== indent || L.text === '-' || L.text.startsWith('- ')) break;
+      const m = L.text.match(/^("(?:[^"\\]|\\.)*"|'[^']*'|[^:\s][^:]*?):\s*(.*)$/);
+      if (!m) return { __err: 'line ' + L.n + ': could not parse "' + L.text + '"' };
+      const key = String(fmScalar(m[1]));
+      const rest = m[2].trim();
+      pos++;
+      if (/^[|>][+-]?$/.test(rest)) {
+        const buf = [];
+        while (pos < lines.length && lines[pos].indent > indent) { buf.push(lines[pos].text); pos++; }
+        obj[key] = rest[0] === '|' ? buf.join('\n') + '\n' : buf.join(' ');
+        continue;
+      }
+      if (rest !== '') { obj[key] = fmScalar(rest); continue; }
+      if (pos < lines.length && lines[pos].indent > indent) {
+        const v = parseBlock(lines[pos].indent);
+        if (v && v.__err) return v;
+        obj[key] = v; continue;
+      }
+      if (pos < lines.length && lines[pos].indent === indent && (lines[pos].text === '-' || lines[pos].text.startsWith('- '))) { obj[key] = parseSeq(indent); continue; }
+      obj[key] = null;
+    }
+    return obj;
+  }
+  const data = parseBlock(lines[0].indent);
+  if (data && data.__err) return { error: data.__err };
+  if (pos < lines.length) return { error: 'line ' + lines[pos].n + ': unexpected indentation' };
+  return { data };
+}
+
+/* The Frontmatter Doctor's check list, verbatim. */
+function lintFrontmatter(fm) {
+  const issues = [];
+  if ('url' in fm) issues.push({ type: 'error', msg: '`url` is reserved by Hugo; use `source`' });
+  if ('type' in fm) issues.push({ type: 'error', msg: '`type` is reserved by Hugo; use `contenttype`' });
+
+  if (fm.source !== undefined && fm.source !== null && fm.source !== '') {
+    if (typeof fm.source !== 'string' || (!fm.source.startsWith('http://') && !fm.source.startsWith('https://'))) {
+      issues.push({ type: 'error', msg: '`source` must be an absolute http(s) URL' });
+    }
+  }
+
+  if (fm.contenttype !== undefined) {
+    if (!FM_TYPES.includes(fm.contenttype)) {
+      issues.push({ type: 'error', msg: "Unknown contenttype '" + fm.contenttype + "'. Allowed: " + FM_TYPES.join(', ') });
+    }
+  } else {
+    issues.push({ type: 'error', msg: 'Missing `contenttype`' });
+  }
+
+  if (!fm.title) issues.push({ type: 'error', msg: 'Missing `title`' });
+
+  ['tags', 'topics', 'related'].forEach(k => {
+    if (fm[k] !== undefined && fm[k] !== null && !Array.isArray(fm[k])) {
+      issues.push({ type: 'error', msg: '`' + k + '` must be a list' });
+    }
+  });
+
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  let cDate = null, uDate = null;
+  ['created', 'updated'].forEach(k => {
+    if (fm[k] !== undefined && fm[k] !== null) {
+      let str = fm[k];
+      if (str instanceof Date) str = str.toISOString().split('T')[0];
+      else if (typeof str === 'string') { const dm = str.match(/^(\d{4}-\d{2}-\d{2})(?:[T ].*)?$/); if (dm) str = dm[1]; }
+      if (typeof str !== 'string' || !dateRegex.test(str)) {
+        issues.push({ type: 'error', msg: '`' + k + '` must be a YYYY-MM-DD date' });
+      } else {
+        if (k === 'created') cDate = str;
+        if (k === 'updated') uDate = str;
+      }
+    }
+  });
+  if (cDate && uDate && uDate < cDate) {
+    issues.push({ type: 'error', msg: '`updated` (' + uDate + ') is before `created` (' + cDate + ')' });
+  }
+
+  if (!fm.description) issues.push({ type: 'warn', msg: 'Missing `description` (used on cards, search and by agents)' });
+  if (!cDate) issues.push({ type: 'warn', msg: 'Missing `created` date' });
+  if (fm.draft === true) issues.push({ type: 'warn', msg: '`draft: true` (hidden from the site)' });
+
+  ['tags', 'topics'].forEach(k => {
+    const arr = fm[k];
+    if (Array.isArray(arr)) {
+      arr.forEach(t => {
+        if (!FM_KEBAB.test(String(t))) {
+          issues.push({ type: 'warn', msg: k.slice(0, -1) + " '" + t + "' is not lowercase-kebab-case" });
+        }
+      });
+    }
+  });
+
+  return issues;
+}
+
+function fixKebab(str) {
+  return String(str).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+function formatDate(val) {
+  if (val instanceof Date) return val.toISOString().split('T')[0];
+  if (typeof val === 'string') {
+    const m = val.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (m) return m[1];
+  }
+  return new Date().toISOString().split('T')[0];
+}
+
+function yamlScalar(v) {
+  if (v === null || v === undefined) return 'null';
+  if (typeof v === 'boolean' || typeof v === 'number') return String(v);
+  if (v instanceof Date) return v.toISOString().split('T')[0];
+  const s = String(v);
+  if (s === '') return "''";
+  if (/^(true|false|null|~)$/i.test(s) || /^[-+]?(\d+\.?\d*|\.\d+)$/.test(s) || /^\d{4}-\d{2}-\d{2}/.test(s) ||
+      /:\s|:$/.test(s) || /\s#/.test(s) || /^#/.test(s) || /[\[\]{}]/.test(s) || /^\s|\s$/.test(s) ||
+      /^[-?!&*|>%@`"',]/.test(s) || s.includes('\n')) return JSON.stringify(s);
+  return s;
+}
+
+function emitYamlLines(val, ind) {
+  const pad = ' '.repeat(ind);
+  if (Array.isArray(val)) {
+    const out = [];
+    val.forEach(item => {
+      if (item !== null && typeof item === 'object' && !(item instanceof Date)) {
+        const sub = emitYamlLines(item, ind + 2);
+        out.push(pad + '- ' + sub[0].slice(ind + 2));
+        for (let i = 1; i < sub.length; i++) out.push(sub[i]);
+      } else {
+        out.push(pad + '- ' + yamlScalar(item));
+      }
+    });
+    return out;
+  }
+  if (val !== null && typeof val === 'object' && !(val instanceof Date)) {
+    const out = [];
+    Object.keys(val).forEach(k => {
+      const v = val[k];
+      const key = /^[A-Za-z0-9_-]+$/.test(k) ? k : JSON.stringify(k);
+      if (Array.isArray(v) && v.length) { out.push(pad + key + ':'); out.push(...emitYamlLines(v, ind + 2)); }
+      else if (Array.isArray(v)) out.push(pad + key + ': []');
+      else if (v !== null && typeof v === 'object' && !(v instanceof Date) && Object.keys(v).length) { out.push(pad + key + ':'); out.push(...emitYamlLines(v, ind + 2)); }
+      else if (v !== null && typeof v === 'object' && !(v instanceof Date)) out.push(pad + key + ': {}');
+      else out.push(pad + key + ': ' + yamlScalar(v));
+    });
+    return out;
+  }
+  return [pad + yamlScalar(val)];
+}
+
+function emitYAML(obj) { return emitYamlLines(obj, 0).join('\n') + '\n'; }
+
+/* The Doctor's auto-fix, verbatim logic; emitYAML stands in for js-yaml's dump. */
+function generateFix(fm, body) {
+  const fixed = {};
+  const order = ['title', 'contenttype', 'description', 'source', 'topics', 'tags', 'status', 'created', 'updated', 'related', 'excludesearch', 'draft', 'weight', 'language', 'stars', 'github', 'pinned', 'featured', 'collect'];
+
+  if (fm.url && !fm.source) fixed.source = fm.url;
+  if (fm.type && !fm.contenttype) fixed.contenttype = fm.type;
+
+  Object.keys(fm).forEach(k => {
+    if (k === 'url' || k === 'type') return;
+    let val = fm[k];
+    if (k === 'tags' || k === 'topics') {
+      if (Array.isArray(val)) val = val.map(fixKebab);
+      else if (typeof val === 'string') val = val.split(',').map(s => fixKebab(s.trim()));
+    }
+    if (k === 'created' || k === 'updated') val = formatDate(val);
+    fixed[k] = val;
+  });
+
+  if (!fixed.title) fixed.title = 'Replace Title';
+  if (!fixed.contenttype || !FM_TYPES.includes(fixed.contenttype)) fixed.contenttype = 'bookmark';
+  if (!fixed.description) fixed.description = '';
+  if (!fixed.created) fixed.created = new Date().toISOString().split('T')[0];
+  if (!fixed.updated) fixed.updated = fixed.created;
+
+  if (fixed.tags && !Array.isArray(fixed.tags)) fixed.tags = [fixed.tags];
+  if (fixed.topics && !Array.isArray(fixed.topics)) fixed.topics = [fixed.topics];
+
+  const ordered = {};
+  order.forEach(k => { if (k in fixed) { ordered[k] = fixed[k]; delete fixed[k]; } });
+  Object.assign(ordered, fixed);
+
+  let out = '---\n' + emitYAML(ordered) + '---\n';
+  if (body) out += '\n' + body.trimStart();
+  return out;
+}
 </script>
 <script>
 
@@ -379,21 +784,16 @@ document.addEventListener('click',e=>{const b=e.target.closest('button.copy[data
     if (st.prefix) add('w', 'A link hard-codes /TheBlackCat/. Write /library/... and let the site add the prefix.');
     if (st.rawHtml) add('i', 'Raw HTML found. The live site renders it; this preview shows it as text.');
     if (fm) {
-      const keys = {}; fm.raw.split('\n').forEach(l => { const mk = l.match(/^([A-Za-z_][\w-]*):\s*(.*)$/); if (mk) keys[mk[1]] = mk[2].trim().replace(/^["']|["']$/g, ''); });
       if (fm.kind === '+++') add('i', 'TOML front matter is shown but not checked; the site’s content uses YAML.');
       else {
-        if (!keys.title) add('w', 'Front matter has no title.');
-        if (!keys.contenttype) add('w', 'Front matter has no contenttype (required for library, notes, collections and projects).');
-        else if (!TYPES.includes(keys.contenttype)) add('w', 'contenttype "' + keys.contenttype + '" is not one of: ' + TYPES.join(', ') + '.');
-        if ('url' in keys) add('e', '`url:` is a Hugo permalink override and breaks the build with an absolute URL. Use `source:`.');
-        if ('type' in keys && keys.type !== 'section') add('e', '`type:` silently breaks the contenttype taxonomy. Use `contenttype:`.');
-        if (keys.source && !/^https?:\/\//i.test(keys.source)) add('w', 'source must be an absolute http(s) URL, or omitted.');
-        ['created', 'updated'].forEach(d => { if (keys[d] && !/^\d{4}-\d{2}-\d{2}/.test(keys[d])) add('w', d + ' should be YYYY-MM-DD.'); });
-        if (keys.draft === 'true') add('i', 'draft: true means the page is not built at all.');
-        let inList = false; fm.raw.split('\n').forEach(l => {
-          if (/^(tags|topics):/.test(l)) { inList = true; return; } if (/^\S/.test(l)) { inList = false; return; }
-          const it = inList && l.match(/^\s*-\s*(.+)$/); if (it && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(it[1].trim().replace(/^["']|["']$/g, ''))) add('w', 'Tag/topic "' + it[1].trim() + '" should be lowercase kebab-case.');
-        });
+        // The shared linter (see lintFrontmatter above) — the same check
+        // list the Frontmatter tab runs. This block used to be a second,
+        // weaker copy of those rules; now there is only one.
+        const parsed = parseYamlSubset(fm.raw);
+        if (parsed.error) add('w', 'Front matter could not be parsed (' + parsed.error + '). The Frontmatter tab shows the full report.');
+        else if (parsed.data && typeof parsed.data === 'object' && !Array.isArray(parsed.data)) {
+          lintFrontmatter(parsed.data).forEach(iss => add(iss.type === 'error' ? 'e' : 'w', iss.msg));
+        } else add('w', 'Front matter is not a set of key: value pairs.');
       }
       html = '<div class="fm">' + esc(fmm[0].trim()) + '</div>\n' + html;
     } else add('i', 'No front matter found. Library items need at least title and contenttype.');
@@ -419,6 +819,261 @@ document.addEventListener('click',e=>{const b=e.target.closest('button.copy[data
   $('#m-clear').addEventListener('click', () => { src.value = ''; update(); src.focus(); });
   $('#m-dl').addEventListener('click', () => download('draft.md', src.value, 'text/markdown'));
   src.value = store.get('md', null) ?? SAMPLE; update();
+})();
+
+</script>
+<script>
+/* =====================================================================
+   Studio tabs + the three absorbed tools: Frontmatter Doctor (as the
+   Frontmatter tab), JSON-to-Hugo (Convert tab), Markdown Table
+   Generator (Tables tab). Each keeps its own behaviour; the Doctor's
+   checks come from the shared linter above.
+   ===================================================================== */
+(() => {
+  /* ---------------- tabs ---------------- */
+  const TAB_IDS = ['preview', 'frontmatter', 'convert', 'tables'];
+  const tabBtns = $$('.tabs [data-tab]');
+  function activateTab(id) {
+    if (!TAB_IDS.includes(id)) id = 'preview';
+    tabBtns.forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === id)));
+    TAB_IDS.forEach(p => { $('#panel-' + p).hidden = p !== id; });
+    store.set('tab', id);
+  }
+  tabBtns.forEach(b => b.addEventListener('click', () => activateTab(b.dataset.tab)));
+
+  /* ---------------- Frontmatter tab (Frontmatter Doctor) ---------------- */
+  const fmInput = $('#fm-input'), fmReport = $('#fm-report-card'), fmIssues = $('#fm-issues'),
+    fmCount = $('#fm-count'), fmFixedCard = $('#fm-fixed-card'), fmFixed = $('#fm-fixed');
+
+  // Legacy import: the standalone Doctor saved its draft under the raw
+  // localStorage key `doctor_input`. Adopt it on first load.
+  let fmInitial = store.get('fm', null);
+  if (fmInitial === null) {
+    let legacy = null;
+    try { legacy = localStorage.getItem('doctor_input'); } catch (e) {}
+    if (legacy !== null) { fmInitial = legacy; store.set('fm', legacy); }
+  }
+  fmInput.value = fmInitial || '';
+  fmInput.addEventListener('input', () => store.set('fm', fmInput.value));
+
+  function parseFmDocument(text) {
+    const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+    if (!match) return { rawFm: null, body: text };
+    return { rawFm: match[1], body: match[2] || '' };
+  }
+
+  function fmIssue(type, msg) {
+    const li = document.createElement('li');
+    if (type === 'error') li.className = 'e';
+    else if (type === 'warn') li.className = 'w';
+    li.innerHTML = esc(msg).replace(/`([^`]+)`/g, '<code>$1</code>');
+    fmIssues.appendChild(li);
+  }
+
+  function runFmCheck() {
+    const text = fmInput.value.trim();
+    if (!text) return;
+    let rawFm = text, body = '';
+    if (text.startsWith('---')) {
+      const parsed = parseFmDocument(text);
+      rawFm = parsed.rawFm;
+      body = parsed.body;
+    }
+    fmIssues.innerHTML = '';
+    fmReport.hidden = false;
+    fmFixedCard.hidden = true;
+
+    if (rawFm === null || rawFm === undefined) { fmIssue('error', 'No frontmatter found or empty.'); fmCount.textContent = ''; return; }
+    const parsed = parseYamlSubset(rawFm);
+    if (parsed.error) { fmIssue('error', 'Invalid YAML: ' + parsed.error); fmCount.textContent = ''; return; }
+    const fm = parsed.data;
+    if (!fm || typeof fm !== 'object' || Array.isArray(fm)) { fmIssue('error', 'No frontmatter found or empty.'); fmCount.textContent = ''; return; }
+
+    const issues = lintFrontmatter(fm);
+    if (issues.length === 0) {
+      fmIssue('ok', 'No issues found. Frontmatter is valid!');
+      fmCount.textContent = 'all clear';
+      fmCount.className = 'pill ok';
+    } else {
+      issues.forEach(iss => fmIssue(iss.type, iss.msg));
+      fmCount.textContent = issues.length + (issues.length === 1 ? ' issue' : ' issues');
+      fmCount.className = 'pill ' + (issues.some(i => i.type === 'error') ? 'bad' : '');
+    }
+    fmFixed.textContent = generateFix(fm, body);
+    fmFixedCard.hidden = false;
+  }
+
+  $('#fm-check').addEventListener('click', runFmCheck);
+  $('#fm-clear').addEventListener('click', () => {
+    fmInput.value = '';
+    store.set('fm', '');
+    try { localStorage.removeItem('doctor_input'); } catch (e) {}
+    fmReport.hidden = true;
+    fmFixedCard.hidden = true;
+    fmInput.focus();
+  });
+  $('#fm-dl').addEventListener('click', () => download('fixed.md', fmFixed.textContent, 'text/markdown'));
+  $('#fm-gen').addEventListener('click', () => {
+    const t = $('#fm-gen-type').value;
+    const todayStr = new Date().toISOString().split('T')[0];
+    const base = { title: '', contenttype: t, description: '' };
+    if (t !== 'note' && t !== 'project') base.source = '';
+    base.topics = []; base.tags = []; base.status = 'inbox'; base.created = todayStr; base.updated = todayStr;
+    let out = '---\n' + emitYAML(base) + '---\n\n';
+    if (t === 'bookmark') out += '## Why I saved this\n\n## Notes\n';
+    fmInput.value = out;
+    store.set('fm', out);
+    runFmCheck();
+  });
+
+  /* ---------------- Convert tab (JSON-to-Hugo) ---------------- */
+  const cvInput = $('#cv-input'), cvOutput = $('#cv-output'), cvError = $('#cv-error');
+
+  // JSON-to-Hugo's YAML converter, verbatim.
+  function jsonToYAML(obj, indent = 0) {
+    const spaces = ' '.repeat(indent);
+    let yaml = '';
+    for (const key in obj) {
+      if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
+      const val = obj[key];
+      const safeKey = /^[a-zA-Z0-9_-]+$/.test(key) ? key : `"${key}"`;
+      if (val === null) {
+        yaml += `${spaces}${safeKey}: null\n`;
+      } else if (typeof val === 'boolean' || typeof val === 'number') {
+        yaml += `${spaces}${safeKey}: ${val}\n`;
+      } else if (typeof val === 'string') {
+        if (val.includes('\n') || val.includes(':') || val.includes('#') || val.startsWith('{') || val.startsWith('[')) {
+          yaml += `${spaces}${safeKey}: "${val.replace(/"/g, '\\"')}"\n`;
+        } else {
+          yaml += `${spaces}${safeKey}: ${val}\n`;
+        }
+      } else if (Array.isArray(val)) {
+        if (val.length === 0) {
+          yaml += `${spaces}${safeKey}: []\n`;
+        } else {
+          yaml += `${spaces}${safeKey}:\n`;
+          for (const item of val) {
+            if (typeof item === 'object' && item !== null) {
+              const objStr = jsonToYAML(item, indent + 2).trim();
+              yaml += `${spaces}  - ${objStr}\n`;
+            } else {
+              const safeItem = typeof item === 'string' && (item.includes(':') || item.includes('#'))
+                ? `"${item.replace(/"/g, '\\"')}"`
+                : item;
+              yaml += `${spaces}  - ${safeItem}\n`;
+            }
+          }
+        }
+      } else if (typeof val === 'object') {
+        if (Object.keys(val).length === 0) {
+          yaml += `${spaces}${safeKey}: {}\n`;
+        } else {
+          yaml += `${spaces}${safeKey}:\n`;
+          yaml += jsonToYAML(val, indent + 2);
+        }
+      }
+    }
+    return yaml;
+  }
+
+  function convert() {
+    const raw = cvInput.value.trim();
+    store.set('cv', cvInput.value);
+    if (!raw) { cvOutput.value = ''; cvError.textContent = ''; return; }
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed !== 'object' || Array.isArray(parsed) || parsed === null) {
+        throw new Error('Input must be a JSON object at the root level.');
+      }
+      cvOutput.value = `---\n${jsonToYAML(parsed)}---\n`;
+      cvError.textContent = '';
+    } catch (err) {
+      cvError.textContent = `Error: ${err.message}`;
+    }
+  }
+  cvInput.addEventListener('input', convert);
+  cvInput.value = store.get('cv', '');
+  convert();
+
+  /* ---------------- Tables tab (Markdown Table Generator) ---------------- */
+  // The generator's table builder, verbatim: padded, aligned output.
+  function generateTable(rows) {
+    if (rows.length === 0) return '';
+    const colWidths = [];
+    rows.forEach(row => {
+      row.forEach((cell, i) => {
+        const len = (cell || '').trim().length;
+        colWidths[i] = Math.max(colWidths[i] || 3, len);
+      });
+    });
+    let out = '';
+    const headerRow = rows[0] || [];
+    out += '| ' + colWidths.map((w, i) => (headerRow[i] || '').trim().padEnd(w)).join(' | ') + ' |\n';
+    out += '| ' + colWidths.map(w => '-'.repeat(w)).join(' | ') + ' |\n';
+    for (let r = 1; r < rows.length; r++) {
+      const row = rows[r];
+      if (row.every(cell => cell.trim().match(/^[-:]+$/))) continue;
+      out += '| ' + colWidths.map((w, i) => (row[i] || '').trim().padEnd(w)).join(' | ') + ' |\n';
+    }
+    return out;
+  }
+
+  const tbTable = $('#tb-grid'), tbOutput = $('#tb-output'), tbImport = $('#tb-import');
+  let tbGrid = store.get('tb', null);
+  if (!Array.isArray(tbGrid) || !tbGrid.length) {
+    tbGrid = [['Column 1', 'Column 2', 'Column 3'], ['Value A', 'Value B', 'Value C'], ['Value D', 'Value E', 'Value F']];
+  }
+  function tbUpdate() {
+    tbOutput.textContent = generateTable(tbGrid);
+    store.set('tb', tbGrid);
+  }
+  function tbRender() {
+    tbTable.innerHTML = '';
+    tbGrid.forEach((row, r) => {
+      const tr = document.createElement('tr');
+      row.forEach((cell, c) => {
+        const td = document.createElement('td');
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.value = cell;
+        inp.setAttribute('aria-label', 'Row ' + (r + 1) + ', column ' + (c + 1));
+        inp.addEventListener('input', () => { tbGrid[r][c] = inp.value; tbUpdate(); });
+        td.appendChild(inp);
+        tr.appendChild(td);
+      });
+      tbTable.appendChild(tr);
+    });
+    tbUpdate();
+  }
+  $('#tb-add-row').addEventListener('click', () => { tbGrid.push(Array(tbGrid[0].length).fill('')); tbRender(); });
+  $('#tb-add-col').addEventListener('click', () => { tbGrid.forEach(row => row.push('')); tbRender(); });
+  $('#tb-del-row').addEventListener('click', () => { if (tbGrid.length > 1) { tbGrid.pop(); tbRender(); } });
+  $('#tb-del-col').addEventListener('click', () => { if (tbGrid[0].length > 1) { tbGrid.forEach(row => row.pop()); tbRender(); } });
+  function tbImportRows(rows) {
+    const cols = Math.max(...rows.map(r => r.length), 1);
+    tbGrid = rows.map(r => { const row = r.slice(); while (row.length < cols) row.push(''); return row; });
+    tbRender();
+  }
+  $('#tb-from-csv').addEventListener('click', () => {
+    const lines = tbImport.value.split('\n').filter(l => l.trim() !== '');
+    if (lines.length) tbImportRows(lines.map(l => l.split(',')));
+  });
+  $('#tb-from-tsv').addEventListener('click', () => {
+    const lines = tbImport.value.split('\n').filter(l => l.trim() !== '');
+    if (lines.length) tbImportRows(lines.map(l => l.split('\t')));
+  });
+  $('#tb-from-md').addEventListener('click', () => {
+    const lines = tbImport.value.split('\n').filter(l => l.trim() !== '');
+    if (lines.length) tbImportRows(lines.map(l => {
+      const parts = l.split('|');
+      if (parts.length > 0 && parts[0].trim() === '') parts.shift();
+      if (parts.length > 0 && parts[parts.length - 1].trim() === '') parts.pop();
+      return parts;
+    }));
+  });
+  tbRender();
+
+  activateTab(store.get('tab', 'preview'));
 })();
 
 </script>

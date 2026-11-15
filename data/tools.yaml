@@ -22,7 +22,7 @@ categories:
     blurb: Art and visual artifacts — figures built to be looked at rather than used. Listed on their own page, not in the workshop.
 
 tools:
-  # ── Color & design (9) ─────────────────────────────────────────────────────
+  # ── Color & design (8) ─────────────────────────────────────────────────────
   - id: palette-studio
     name: Palette Studio
     url: palette-studio/
@@ -32,33 +32,20 @@ tools:
     short: Pull a palette from a photo, build gradients, check color-blind views.
     desc: Extract a palette from a photo, build multi-stop gradients, and simulate color-vision deficiencies, entirely in the browser.
     tags: [color, gradients, accessibility, design]
-    related: [color-token-workshop, semantic-token-mapper]
+    related: [color-token-workshop]
     added: "2026-09-15"
     featured: true
 
   - id: color-token-workshop
     name: Color Token Workshop
-    url: "https://theblackcat98.github.io/Online-Tools/color-token-workshop.html"
-    writeup: projects/online-tools/
+    url: color-token-workshop/
+    writeup: library/tools/color-token-workshop/
     category: color-design
     kind: app
-    host: Online Tools
     short: OKLCH palette builder with WCAG 2.1 and APCA contrast checks and export.
     desc: OKLCH palette builder with WCAG 2.1 and APCA contrast checks, auto-fix suggestions, light and dark palettes, and CSS/JSON export.
     tags: [color, oklch, contrast, accessibility, design]
-    related: [palette-studio, semantic-token-mapper]
-    added: "2026-10-30"
-
-  - id: semantic-token-mapper
-    name: Semantic Token Mapper
-    url: semantic-token-mapper/
-    writeup: library/tools/semantic-token-mapper/
-    category: color-design
-    kind: utility
-    short: Map design tokens and test foreground/background pairs against WCAG rules.
-    desc: A utility for mapping and testing design system colors against WCAG contrast rules in bulk.
-    tags: [color, contrast, accessibility, design]
-    related: [palette-studio, color-token-workshop]
+    related: [palette-studio]
     added: "2026-10-30"
 
   - id: ansi-palette-lab
@@ -74,28 +61,16 @@ tools:
     added: "2026-09-15"
 
   - id: type-scale
-    name: Type Scale & Font Pairing
+    name: Typography Studio
     url: type-scale/
     writeup: library/tools/type-scale/
     category: color-design
     kind: app
-    short: Pick a modular ratio and base size, preview font pairings, and export CSS.
-    desc: "A typography studio: pick a modular scale ratio and base size, see the full scale rendered live; choose from curated font pairings and export CSS custom properties."
-    tags: [typography, css, design, fonts]
-    related: [fluid-type]
+    short: Modular type scale with font pairings, plus a fluid clamp() generator — one studio, two modes.
+    desc: "A typography studio with two modes: Scale builds a modular type scale from a ratio and base size with curated font pairings; Fluid generates clamp() font sizes that scale smoothly between two viewport widths, with its own modular-scale table and a WCAG zoom check. Both export CSS custom properties."
+    tags: [typography, css, design, fonts, accessibility]
+    related: [css-layout-generator]
     added: "2026-09-15"
-
-  - id: fluid-type
-    name: Fluid Type Calculator
-    url: fluid-type/
-    writeup: library/tools/fluid-type/
-    category: color-design
-    kind: app
-    short: Generate smooth clamp() font sizes across viewports with WCAG zoom checks.
-    desc: Generate clamp() font sizes that scale smoothly between two viewport widths, plus a modular type scale and WCAG zoom check.
-    tags: [typography, css, calculator, accessibility]
-    related: [type-scale]
-    added: "2026-10-30"
 
   - id: shadow-shape
     name: Shadow & Shape Generator
@@ -130,10 +105,10 @@ tools:
     short: Visual builder that outputs clean CSS Grid and Flexbox layout code.
     desc: A visual builder that outputs clean CSS Grid or Flexbox code for complex layouts.
     tags: [css, layout, design]
-    related: [shadow-shape, fluid-type]
+    related: [shadow-shape, type-scale]
     added: "2026-10-30"
 
-  # ── Text & data (9) ────────────────────────────────────────────────────────
+  # ── Text & data (8) ────────────────────────────────────────────────────────
   - id: text-studio
     name: Text Studio
     url: text-studio/
@@ -191,19 +166,7 @@ tools:
     short: Convert, validate and inspect JSON, YAML and TOML side by side.
     desc: JSON, YAML and TOML format converter and interactive tree viewer.
     tags: [json, yaml, toml, converter]
-    related: [json-to-hugo, markdown-table-generator]
-    added: "2026-09-15"
-
-  - id: markdown-table-generator
-    name: Markdown Table Generator
-    url: markdown-table-generator/
-    writeup: library/tools/markdown-table-generator/
-    category: text-data
-    kind: utility
-    short: Build, align and format Markdown tables or import directly from CSV.
-    desc: A utility to generate, format, and align Markdown tables, including importing from CSV.
-    tags: [markdown, tables, csv]
-    related: [markdown-previewer, data-format-workbench]
+    related: [markdown-previewer]
     added: "2026-09-15"
 
   - id: regex-visualizer
@@ -243,29 +206,17 @@ tools:
     related: [jwt-decoder, number-base]
     added: "2026-09-15"
 
-  # ── Web & publishing (8) ───────────────────────────────────────────────────
+  # ── Web & publishing (6) ───────────────────────────────────────────────────
   - id: meta-generator
-    name: Meta Tag & Manifest
+    name: Web Metadata & PWA Studio
     url: meta-generator/
     writeup: library/tools/meta-generator/
     category: web-publishing
-    kind: utility
-    short: Generate HTML meta tags and Web Manifest JSON with live previews.
-    desc: Client-side tool to generate HTML meta tags and Web Manifest JSON with live mock previews and as-you-type validation.
-    tags: [html, seo, pwa, meta]
-    related: [og-previewer, favicon-generator, robots-sitemap]
-    added: "2026-09-15"
-
-  - id: og-previewer
-    name: OpenGraph Previewer
-    url: og-previewer/
-    writeup: library/tools/og-previewer/
-    category: web-publishing
-    kind: utility
-    short: Preview how social cards render across X, LinkedIn, Discord and Slack.
-    desc: Previews how a link will look when shared on various social platforms based on its meta tags.
-    tags: [seo, opengraph, social, html]
-    related: [meta-generator, favicon-generator]
+    kind: app
+    short: Meta tags, social-card previews, favicons and a Web Manifest in one studio.
+    desc: One studio for a page's head and PWA presence — HTML meta tags with length meters and as-you-type validation, X and LinkedIn social-card previews, a full favicon and app-icon generator with ZIP download, and a unified site.webmanifest builder.
+    tags: [html, seo, pwa, meta, icons, social]
+    related: [robots-sitemap, csp-builder]
     added: "2026-09-15"
 
   - id: robots-sitemap
@@ -292,53 +243,17 @@ tools:
     related: [meta-generator, robots-sitemap]
     added: "2026-09-15"
 
-  - id: favicon-generator
-    name: Favicon & App Icon
-    url: favicon-generator/
-    writeup: library/tools/favicon-generator/
-    category: web-publishing
-    kind: app
-    short: Export every favicon and PWA icon size from an image or glyph as a ZIP.
-    desc: Make every favicon and app icon size from one image or a letter, with the web manifest, HTML tags and a zip download.
-    tags: [favicon, icons, pwa, images]
-    related: [meta-generator, image-compressor]
-    added: "2026-10-30"
-
   - id: markdown-previewer
-    name: Markdown & Shortcode Previewer
+    name: Markdown & Hugo Studio
     url: markdown-previewer/
     writeup: library/tools/markdown-previewer/
     category: web-publishing
     kind: app
-    short: Live Markdown preview supporting BlackCat callouts, anatomy and lint rules.
-    desc: Live Markdown preview that understands this site's callout and anatomy shortcodes and checks front matter against the content rules.
-    tags: [markdown, hugo, preview, writing]
-    related: [frontmatter-doctor, json-to-hugo, markdown-table-generator]
+    short: Live preview, frontmatter doctor, JSON-to-Hugo converter and table builder in one studio.
+    desc: One studio for the site's Markdown work — live preview with callout and anatomy shortcodes, a frontmatter doctor that checks and auto-fixes Hugo front matter, a JSON-to-Hugo converter, and a Markdown table builder.
+    tags: [markdown, hugo, preview, writing, frontmatter, tables]
+    related: [data-format-workbench, meta-generator]
     added: "2026-10-30"
-
-  - id: frontmatter-doctor
-    name: Hugo Frontmatter Doctor
-    url: frontmatter-doctor/
-    writeup: library/tools/frontmatter-doctor/
-    category: web-publishing
-    kind: utility
-    short: Validate and auto-fix Hugo YAML front matter against BlackCat lint rules.
-    desc: A tool to validate and auto-fix Hugo Markdown frontmatter against the specific lint rules used by The BlackCat.
-    tags: [hugo, yaml, frontmatter, linter]
-    related: [markdown-previewer, json-to-hugo]
-    added: "2026-09-15"
-
-  - id: json-to-hugo
-    name: JSON-to-Hugo
-    url: json-to-hugo/
-    writeup: library/tools/json-to-hugo/
-    category: web-publishing
-    kind: utility
-    short: Convert JSON objects or API responses into clean Hugo YAML front matter.
-    desc: Quickly convert JSON configurations or API responses into valid Hugo YAML front matter.
-    tags: [hugo, json, yaml, frontmatter]
-    related: [frontmatter-doctor, data-format-workbench]
-    added: "2026-09-15"
 
   # ── Developer utilities (8) ────────────────────────────────────────────────
   - id: jwt-decoder
@@ -427,11 +342,10 @@ tools:
 
   - id: mermaid-viewer
     name: Mermaid Viewer
-    url: "https://theblackcat98.github.io/Online-Tools/mermaid-viewer.html"
-    writeup: projects/online-tools/
+    url: mermaid-viewer/
+    writeup: library/tools/mermaid-viewer/
     category: developer-utilities
     kind: app
-    host: Online Tools
     short: Render Mermaid source with pan and zoom, then export crisp SVG or PNG.
     desc: Paste Mermaid source and render it with pan and zoom; export the result as SVG or PNG.
     tags: [mermaid, diagrams, svg]
@@ -440,29 +354,17 @@ tools:
 
   # ── Images & media (4) ─────────────────────────────────────────────────────
   - id: image-compressor
-    name: Image Compressor
+    name: Image Studio
     url: image-compressor/
     writeup: library/tools/image-compressor/
     category: images-media
     kind: app
-    short: Compress and convert images to WebP, AVIF, JPEG or PNG with EXIF stripping.
-    desc: Compress and convert images to WebP, AVIF, JPEG or PNG with a quality slider, before/after comparison and EXIF/GPS stripping, entirely in the browser.
-    tags: [images, compression, webp, avif, privacy]
-    related: [aspect-ratio-calculator, favicon-generator, svg-optimizer]
+    short: Compress, convert and crop images to WebP, AVIF, JPEG or PNG; aspect-ratio calculator built in.
+    desc: Compress and convert images to WebP, AVIF, JPEG or PNG with a quality slider, before/after comparison and EXIF/GPS stripping, crop any image to a chosen aspect ratio with an interactive crop box, and calculate ratios and megapixels — entirely in the browser.
+    tags: [images, compression, webp, avif, privacy, aspect-ratio, crop, resize, calculator]
+    related: [meta-generator, svg-optimizer]
     added: "2026-10-30"
     featured: true
-
-  - id: aspect-ratio-calculator
-    name: Aspect Ratio & Resize
-    url: aspect-ratio-calculator/
-    writeup: library/tools/aspect-ratio-calculator/
-    category: images-media
-    kind: app
-    short: Calculate aspect ratios and megapixels, and interactively crop/resize images.
-    desc: Calculate aspect ratios, megapixels, and interactively crop and resize images directly in the browser without server processing.
-    tags: [images, aspect-ratio, resize, calculator]
-    related: [image-compressor, favicon-generator]
-    added: "2026-09-15"
 
   - id: svg-optimizer
     name: SVG Optimizer
@@ -485,7 +387,7 @@ tools:
     short: Generate custom QR codes (URL, Wi-Fi, vCard) and decode QR images locally.
     desc: Generate customizable QR codes (text, URL, Wi-Fi, vCard) and decode QR codes from images entirely in the browser.
     tags: [qr-code, svg, generator, decoder]
-    related: [svg-optimizer, favicon-generator]
+    related: [svg-optimizer, meta-generator]
     added: "2026-09-15"
 
   - id: bot-avatar

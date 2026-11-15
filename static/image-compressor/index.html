@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="Compress and convert images to WebP, AVIF, JPEG or PNG in the browser. Set quality and size, compare before and after, and strip EXIF and GPS metadata. Nothing is uploaded.">
+<meta name="description" content="Compress, convert and crop images in the browser. Set quality and size, crop to any aspect ratio with the built-in ratio calculator, compare before and after, and strip EXIF and GPS metadata. Nothing is uploaded.">
 <link rel="icon" href="data:,">
-<title>Image Compressor & Converter</title>
+<title>Image Studio — Compress, Crop & Convert Images</title>
 <style>
 
 
@@ -94,22 +94,33 @@ kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:
 .item.open .meta .go{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .lock{font-size:.75rem;color:var(--muted)}
 .pill:empty{display:none}
+.rcres{display:flex;gap:2rem;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:.6rem .85rem;margin-top:.8rem}
+.rcres .v{font-family:var(--mono-font);font-size:1.15rem;font-weight:600}
+.crp{display:none;grid-column:1/-1}
+.item.cropopen .crp{display:block}
+.item.cropopen .meta .cropbtn{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.cropbox{position:relative;height:320px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:repeating-conic-gradient(var(--line) 0 25%,transparent 0 50%) 0 0/16px 16px;margin-top:.6rem}
+.cropbox canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:move}
+.crp .seg{flex-wrap:wrap}
+.crp .seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.crwrap{display:flex;gap:.4rem;align-items:center}
+.crwrap input{width:4.5rem}
 
 </style>
 
 <link rel="canonical" href="https://theblackcat98.github.io/TheBlackCat/image-compressor/">
-<meta property="og:title" content="Image Compressor · The BlackCat">
-<meta property="og:description" content="Compress and convert images to WebP, AVIF, JPEG or PNG with a quality slider, before/after comparison and EXIF/GPS stripping, entirely in the browser.">
+<meta property="og:title" content="Image Studio · The BlackCat">
+<meta property="og:description" content="Compress, convert and crop images to WebP, AVIF, JPEG or PNG with a quality slider, an aspect-ratio calculator, interactive crop, before/after comparison and EXIF/GPS stripping, entirely in the browser.">
 <meta property="og:url" content="https://theblackcat98.github.io/TheBlackCat/image-compressor/">
 <meta property="og:image" content="https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/image-compressor-light.webp">
-<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Image Compressor", "description": "Compress and convert images to WebP, AVIF, JPEG or PNG with a quality slider, before/after comparison and EXIF/GPS stripping, entirely in the browser.", "url": "https://theblackcat98.github.io/TheBlackCat/image-compressor/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/image-compressor-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<script type="application/ld+json" data-tk-ld>{"@context": "https://schema.org", "@type": "WebApplication", "name": "Image Studio", "description": "Compress, convert and crop images to WebP, AVIF, JPEG or PNG with a quality slider, an aspect-ratio calculator, interactive crop, before/after comparison and EXIF/GPS stripping, entirely in the browser.", "url": "https://theblackcat98.github.io/TheBlackCat/image-compressor/", "image": "https://theblackcat98.github.io/TheBlackCat/toolkit/thumbs/image-compressor-light.webp", "applicationCategory": "DeveloperApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
 <link rel="stylesheet" href="../toolkit/toolkit.css?v=1">
 <script src="../toolkit/toolkit.js?v=1" defer data-tool="image-compressor"></script>
 </head>
 <body>
 <header class="site">
-  <div class="top"><h1>Image Compressor & Converter</h1><a class="back" href="../tools/">&larr; All tools</a></div>
-  <p>Shrink photos and graphics, convert between WebP, AVIF, JPEG and PNG, and drop location and camera metadata. Your images are processed on this device and never uploaded.</p>
+  <div class="top"><h1>Image Studio</h1><a class="back" href="../tools/">&larr; All tools</a></div>
+  <p>Shrink photos and graphics, crop them to any aspect ratio, convert between WebP, AVIF, JPEG and PNG, and drop location and camera metadata. Your images are processed on this device and never uploaded.</p>
 </header>
 <main class="wrap">
 
@@ -133,6 +144,26 @@ kbd{font-family:var(--mono-font);font-size:.75rem;background:var(--chip);border:
     <div class="field"><label class="lbl" for="bg">JPEG background</label><input type="color" id="bg" value="#ffffff"></div>
   </div>
   <p class="note" id="fnote" style="margin:.7rem 0 0">Re-encoding always removes EXIF, GPS and other embedded metadata. Rotation from EXIF is applied first, so photos stay upright. PNG ignores the quality slider (it is lossless).</p>
+</section>
+<section class="card" aria-labelledby="h-ratio">
+  <h2 id="h-ratio">Ratio calculator</h2>
+  <div class="row center" style="margin-bottom:.7rem">
+    <button type="button" class="rcpreset" data-w="1920" data-h="1080">1920×1080 (HD)</button>
+    <button type="button" class="rcpreset" data-w="1080" data-h="1080">1080×1080 (Square)</button>
+    <button type="button" class="rcpreset" data-w="1200" data-h="630">1200×630 (OG Card)</button>
+    <button type="button" class="rcpreset" data-w="2480" data-h="3508">A4 (300dpi)</button>
+  </div>
+  <div class="row">
+    <div class="field" style="width:8rem"><label class="lbl" for="rcw">Width (px)</label><input type="number" id="rcw" min="1" step="1" value="1920"></div>
+    <div class="field" style="width:8rem"><label class="lbl" for="rch">Height (px)</label><input type="number" id="rch" min="1" step="1" value="1080"></div>
+    <div class="field"><span class="lbl">&nbsp;</span><button type="button" id="rcswap" aria-label="Swap width and height">Swap ⇄</button></div>
+    <div class="field"><span class="lbl">&nbsp;</span><label class="chk"><input type="checkbox" id="rclock"> Lock aspect ratio</label></div>
+  </div>
+  <div class="rcres">
+    <div><span class="lbl">Aspect ratio</span><span class="v" id="rcratio">16:9</span></div>
+    <div><span class="lbl">Megapixels</span><span class="v" id="rcmp">2.07 MP</span></div>
+  </div>
+  <p class="note">Works on its own, or use it to plan a size, then crop a loaded image to that ratio from its Crop panel in Results below.</p>
 </section>
 <section class="card" aria-labelledby="h-out">
   <h2 id="h-out">Results <span class="pill" id="tot" style="margin-left:.4rem"></span></h2>
@@ -233,11 +264,12 @@ function makeZip(files){
     const my = ++it.job; it.busy = true; draw(it);
     try {
       if (!it.bmp) it.bmp = await createImageBitmap(it.file, { imageOrientation: 'from-image' });
-      let w = it.bmp.width, h = it.bmp.height; const mw = +st.mw || Infinity, mh = +st.mh || Infinity;
+      const reg = it.crop || { x: 0, y: 0, w: it.bmp.width, h: it.bmp.height };
+      let w = Math.round(reg.w), h = Math.round(reg.h); const mw = +st.mw || Infinity, mh = +st.mh || Infinity;
       const s = Math.min(1, mw / w, mh / h); if (s < 1) { w = Math.max(1, Math.round(w * s)); h = Math.max(1, Math.round(h * s)); }
       const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
       if (st.f === 'image/jpeg') { x.fillStyle = st.bg; x.fillRect(0, 0, w, h); }
-      x.imageSmoothingQuality = 'high'; x.drawImage(it.bmp, 0, 0, w, h);
+      x.imageSmoothingQuality = 'high'; x.drawImage(it.bmp, reg.x, reg.y, reg.w, reg.h, 0, 0, w, h);
       const blob = await new Promise(r => c.toBlob(r, st.f, st.f === 'image/png' ? undefined : st.q / 100));
       if (my !== it.job) return;
       if (!blob || blob.type !== st.f) throw new Error('This browser cannot encode ' + st.f.replace('image/', '').toUpperCase() + '.');
@@ -247,11 +279,72 @@ function makeZip(files){
     if (my === it.job) { it.busy = false; draw(it); totals(); }
   }
 
-  const outName = it => it.file.name.replace(/\.[^.]+$/, '') + (it.w && (it.w !== it.bmp.width) ? '-' + it.w + 'w' : '') + '.' + EXT[it.fmt || st.f];
+  const outName = it => it.file.name.replace(/\.[^.]+$/, '') + (it.crop ? '-crop' : '') + (it.w && (it.w !== Math.round((it.crop || it.bmp).w)) ? '-' + it.w + 'w' : '') + '.' + EXT[it.fmt || st.f];
+
+  /* ── Ratio + crop engine (ported from the retired Aspect Ratio tool) ── */
+  const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+  function simplifyRatio(w, h) {
+    if (!w || !h) return '-';
+    if (w === h) return '1:1';
+    const d = gcd(w, h), sw = w / d, sh = h / d;
+    if (sw > 100 || sh > 100) return w > h ? (w / h).toFixed(2) + ':1' : '1:' + (h / w).toFixed(2);
+    return sw + ':' + sh;
+  }
+  const CROP_RATIOS = [['orig', 'Original'], ['16:9', '16:9'], ['4:3', '4:3'], ['3:2', '3:2'], ['1:1', '1:1'], ['4:5', '4:5'], ['9:16', '9:16'], ['custom', 'Custom']];
+  function cropRatioVal(it) {
+    if (it.cropRatio === 'orig' || !it.cropRatio) return it.bmp.width / it.bmp.height;
+    if (it.cropRatio === 'custom') { const c = it.cropCustom || { rw: 4, rh: 3 }; return (c.rw > 0 && c.rh > 0) ? c.rw / c.rh : it.bmp.width / it.bmp.height; }
+    const p = it.cropRatio.split(':'); return (+p[0]) / (+p[1]);
+  }
+  function initCropBox(it) {
+    const r = cropRatioVal(it), imgR = it.bmp.width / it.bmp.height;
+    if (imgR > r) it.cropBox = { x: (it.bmp.width - it.bmp.height * r) / 2, y: 0, w: it.bmp.height * r, h: it.bmp.height };
+    else it.cropBox = { x: 0, y: (it.bmp.height - it.bmp.width / r) / 2, w: it.bmp.width, h: it.bmp.width / r };
+  }
+  function drawCropCanvas(it, el) {
+    const cv = el.querySelector('canvas.cropcv'); if (!cv || !it.bmp || !it.cropBox) return;
+    const box = cv.parentElement, vw = box.clientWidth, vh = box.clientHeight; if (!vw || !vh) return;
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = Math.round(vw * dpr); cv.height = Math.round(vh * dpr);
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const imgW = it.bmp.width, imgH = it.bmp.height;
+    /* Fit with an 8px inset so the crop box corners never sit exactly on the
+       canvas edge, where the handles would be half-clipped and hard to grab. */
+    const scale = Math.min((vw - 16) / imgW, (vh - 16) / imgH);
+    const drawW = imgW * scale, drawH = imgH * scale, drawX = (vw - drawW) / 2, drawY = (vh - drawH) / 2;
+    it._view = { scale, drawX, drawY };
+    ctx.clearRect(0, 0, vw, vh);
+    ctx.drawImage(it.bmp, drawX, drawY, drawW, drawH);
+    const bx = drawX + it.cropBox.x * scale, by = drawY + it.cropBox.y * scale, bw = it.cropBox.w * scale, bh = it.cropBox.h * scale;
+    ctx.fillStyle = 'rgba(0,0,0,.6)';
+    ctx.beginPath(); ctx.rect(drawX, drawY, drawW, drawH); ctx.rect(bx, by, bw, bh); ctx.fill('evenodd');
+    const acc = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#2f6db3';
+    ctx.strokeStyle = acc; ctx.lineWidth = 2; ctx.strokeRect(bx, by, bw, bh);
+    ctx.fillStyle = acc;
+    [[bx, by], [bx + bw, by], [bx, by + bh], [bx + bw, by + bh]].forEach(([hx, hy]) => { ctx.fillRect(hx - 5, hy - 5, 10, 10); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.strokeRect(hx - 5, hy - 5, 10, 10); ctx.strokeStyle = acc; ctx.lineWidth = 2; });
+    updateCropInfo(it, el);
+  }
+  function updateCropInfo(it, el) {
+    const info = el.querySelector('.cropinfo'); if (!info || !it.cropBox) return;
+    const b = it.cropBox, total = it.bmp.width * it.bmp.height;
+    const lost = Math.max(0, (1 - (b.w * b.h) / total) * 100);
+    info.textContent = 'Crop window ' + Math.round(b.w) + '×' + Math.round(b.h) + ' px · ' + simplifyRatio(Math.round(b.w), Math.round(b.h)) + ' · ' + lost.toFixed(1) + '% of pixels outside the crop' +
+      (it.crop ? ' · crop applied — downloads use this region' : ' · drag to move, drag a corner to resize, then Apply crop');
+  }
+  function cropHTML(it) {
+    if (!it.bmp) return '';
+    const seg = CROP_RATIOS.map(([k, label]) => '<button type="button" data-cr="' + k + '" aria-pressed="' + String((it.cropRatio || 'orig') === k) + '">' + label + '</button>').join('');
+    const cust = (it.cropRatio === 'custom') ? '<span class="crwrap"><input type="number" class="crw" min="1" step="1" value="' + ((it.cropCustom || {}).rw || 4) + '" aria-label="Custom ratio width"><span aria-hidden="true">:</span><input type="number" class="crh" min="1" step="1" value="' + ((it.cropCustom || {}).rh || 3) + '" aria-label="Custom ratio height"></span>' : '';
+    return '<div class="row center"><div class="seg" role="group" aria-label="Crop ratio">' + seg + '</div>' + cust + '</div>' +
+      '<div class="cropbox"><canvas class="cropcv" aria-label="Crop preview — drag the highlighted region to move it, drag a corner to resize it"></canvas></div>' +
+      '<p class="note cropinfo" style="margin:.5rem 0"></p>' +
+      '<div class="row"><button type="button" class="primary" data-a="applycrop">Apply crop</button><button type="button" data-a="resetcrop"' + (it.crop ? '' : ' disabled') + '>Reset crop</button></div>';
+  }
+
   function draw(it) {
     let el = document.getElementById('it' + it.id);
     if (!el) { el = document.createElement('div'); el.id = 'it' + it.id; el.className = 'item'; $('#list').appendChild(el); }
-    const o = it.out, open = el.classList.contains('open');
+    const o = it.out, open = el.classList.contains('open'), cropopen = el.classList.contains('cropopen');
     const pct = o ? Math.round((1 - o.size / it.file.size) * 100) : 0;
     el.innerHTML = '<img class="thumb" alt="" src="' + it.url + '">' +
       '<div class="meta"><span class="nm">' + esc(it.file.name) + '</span>' +
@@ -259,10 +352,14 @@ function makeZip(files){
       (o ? ' → ' + it.w + '×' + it.h + ' · <span class="sz">' + fmtB(o.size) + '</span> <span class="save' + (pct < 0 ? ' neg' : '') + '">' + (pct >= 0 ? '−' + pct + '%' : '+' + (-pct) + '%') + '</span>' : it.busy ? ' → working…' : '') + '</span>' +
       (it.err ? '<span class="msg">' + esc(it.err) + '</span>' : '') +
       (o && pct < 0 ? '<span class="lock">Larger than the original. Keep the original, or lower the quality.</span>' : '') +
+      (it.crop ? '<span class="lock">Cropped to ' + Math.round(it.crop.w) + '×' + Math.round(it.crop.h) + ' (' + simplifyRatio(Math.round(it.crop.w), Math.round(it.crop.h)) + ').</span>' : '') +
       (it.exif ? '<span class="lock">Removed ' + fmtB(it.exif.meta) + ' of metadata' + (it.exif.gps ? ', including GPS location' : '') + '.</span>' : '') +
-      '<span class="row"><button class="go" data-a="cmp"' + (o ? '' : ' disabled') + '>Compare</button><button data-a="dl"' + (o ? '' : ' disabled') + '>Download</button><button data-a="rm">Remove</button></span></div>' +
-      '<div class="cmp">' + (o ? '<div class="stage" style="--p:50%" data-id="' + it.id + '"><img alt="Compressed" src="' + it.url2 + '"><div class="top"><img alt="Original" src="' + it.url + '"></div><span class="tag l">Original</span><span class="tag r">Compressed</span><div class="bar"></div></div><input type="range" min="0" max="100" value="50" aria-label="Before and after position" style="margin-top:.5rem">' : '') + '</div>';
+      '<span class="row"><button class="go" data-a="cmp"' + (o ? '' : ' disabled') + '>Compare</button><button class="cropbtn" data-a="crop"' + (it.bmp ? '' : ' disabled') + '>Crop</button><button data-a="dl"' + (o ? '' : ' disabled') + '>Download</button><button data-a="rm">Remove</button></span></div>' +
+      '<div class="cmp">' + (o ? '<div class="stage" style="--p:50%" data-id="' + it.id + '"><img alt="Compressed" src="' + it.url2 + '"><div class="top"><img alt="Original" src="' + it.url + '"></div><span class="tag l">Original</span><span class="tag r">Compressed</span><div class="bar"></div></div><input type="range" min="0" max="100" value="50" aria-label="Before and after position" style="margin-top:.5rem">' : '') + '</div>' +
+      '<div class="crp">' + cropHTML(it) + '</div>';
     el.classList.toggle('open', open && !!o);
+    el.classList.toggle('cropopen', cropopen && !!it.bmp);
+    if (cropopen && it.bmp) { if (!it.cropBox) initCropBox(it); drawCropCanvas(it, el); }
   }
   function totals() {
     const done = items.filter(i => i.out);
@@ -281,13 +378,79 @@ function makeZip(files){
   const redo = (() => { let t; return () => { clearTimeout(t); t = setTimeout(() => items.forEach(encode), 200); }; })();
 
   $('#list').addEventListener('click', e => {
+    const rb = e.target.closest('button[data-cr]');
+    if (rb) {
+      const el = rb.closest('.item'), it = items.find(i => 'it' + i.id === el.id);
+      it.cropRatio = rb.dataset.cr;
+      if (it.cropRatio === 'custom' && !it.cropCustom) it.cropCustom = { rw: 4, rh: 3 };
+      initCropBox(it); draw(it);
+      return;
+    }
     const b = e.target.closest('button[data-a]'); if (!b) return;
     const el = b.closest('.item'), it = items.find(i => 'it' + i.id === el.id);
     if (b.dataset.a === 'cmp') el.classList.toggle('open');
+    if (b.dataset.a === 'crop') {
+      const opening = !el.classList.contains('cropopen');
+      el.classList.toggle('cropopen', opening);
+      if (opening && it.bmp) { if (!it.cropBox) initCropBox(it); drawCropCanvas(it, el); }
+    }
+    if (b.dataset.a === 'applycrop' && it.cropBox) {
+      it.crop = it.cropRatio === 'orig' ? null : { x: Math.round(it.cropBox.x), y: Math.round(it.cropBox.y), w: Math.round(it.cropBox.w), h: Math.round(it.cropBox.h) };
+      encode(it);
+    }
+    if (b.dataset.a === 'resetcrop') { it.crop = null; initCropBox(it); encode(it); }
     if (b.dataset.a === 'dl' && it.out) download(outName(it), it.out);
     if (b.dataset.a === 'rm') { items.splice(items.indexOf(it), 1); URL.revokeObjectURL(it.url); if (it.url2) URL.revokeObjectURL(it.url2); el.remove(); totals(); }
   });
-  $('#list').addEventListener('input', e => { if (e.target.type === 'range') e.target.closest('.cmp').querySelector('.stage').style.setProperty('--p', e.target.value + '%'); });
+  $('#list').addEventListener('input', e => {
+    if (e.target.type === 'range' && e.target.closest('.cmp')) e.target.closest('.cmp').querySelector('.stage').style.setProperty('--p', e.target.value + '%');
+    if (e.target.classList.contains('crw') || e.target.classList.contains('crh')) {
+      const el = e.target.closest('.item'), it = items.find(i => 'it' + i.id === el.id);
+      it.cropCustom = { rw: +el.querySelector('.crw').value || 0, rh: +el.querySelector('.crh').value || 0 };
+      if (it.cropRatio === 'custom' && it.cropCustom.rw > 0 && it.cropCustom.rh > 0) { initCropBox(it); drawCropCanvas(it, el); }
+    }
+  });
+
+  /* Crop drag / corner-resize (pointer events; math ported from the retired tool) */
+  let drag = null;
+  $('#list').addEventListener('pointerdown', e => {
+    const cv = e.target.closest('canvas.cropcv'); if (!cv) return;
+    const el = cv.closest('.item'), it = items.find(i => 'it' + i.id === el.id);
+    if (!it || !it.cropBox || !it._view) return;
+    const rect = cv.getBoundingClientRect(), px = e.clientX - rect.left, py = e.clientY - rect.top, v = it._view;
+    const bx = v.drawX + it.cropBox.x * v.scale, by = v.drawY + it.cropBox.y * v.scale, bw = it.cropBox.w * v.scale, bh = it.cropBox.h * v.scale;
+    const corners = { nw: [bx, by], ne: [bx + bw, by], sw: [bx, by + bh], se: [bx + bw, by + bh] };
+    let corner = null;
+    for (const k in corners) { const [cx, cy] = corners[k]; if (Math.abs(px - cx) <= 16 && Math.abs(py - cy) <= 16) { corner = k; break; } }
+    const anchor = corner === 'nw' ? { x: it.cropBox.x + it.cropBox.w, y: it.cropBox.y + it.cropBox.h }
+      : corner === 'ne' ? { x: it.cropBox.x, y: it.cropBox.y + it.cropBox.h }
+      : corner === 'sw' ? { x: it.cropBox.x + it.cropBox.w, y: it.cropBox.y }
+      : corner === 'se' ? { x: it.cropBox.x, y: it.cropBox.y } : null;
+    drag = { it, el, cv, mode: corner ? 'resize' : 'move', corner, anchor, startX: e.clientX, startY: e.clientY, boxStart: { ...it.cropBox } };
+    e.preventDefault();
+  });
+  window.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const { it, el } = drag, v = it._view; if (!v) return;
+    if (drag.mode === 'move') {
+      const dx = (e.clientX - drag.startX) / v.scale, dy = (e.clientY - drag.startY) / v.scale;
+      it.cropBox.x = clamp(drag.boxStart.x + dx, 0, it.bmp.width - it.cropBox.w);
+      it.cropBox.y = clamp(drag.boxStart.y + dy, 0, it.bmp.height - it.cropBox.h);
+    } else {
+      const rect = drag.cv.getBoundingClientRect();
+      const px = (e.clientX - rect.left - v.drawX) / v.scale, py = (e.clientY - rect.top - v.drawY) / v.scale;
+      const a = drag.anchor, r = cropRatioVal(it);
+      const sx = px >= a.x ? 1 : -1, sy = py >= a.y ? 1 : -1;
+      const availW = sx > 0 ? it.bmp.width - a.x : a.x, availH = sy > 0 ? it.bmp.height - a.y : a.y;
+      let nw = Math.min(Math.abs(px - a.x), availW, availH * r);
+      nw = Math.max(16, nw); nw = Math.min(nw, availW, Math.max(availH, 16 / r) * r);
+      const nh = nw / r;
+      it.cropBox = { x: sx > 0 ? a.x : a.x - nw, y: sy > 0 ? a.y : a.y - nh, w: nw, h: nh };
+    }
+    drawCropCanvas(it, el);
+  });
+  window.addEventListener('pointerup', () => { drag = null; });
+  window.addEventListener('resize', () => { items.forEach(it => { const el = document.getElementById('it' + it.id); if (el && el.classList.contains('cropopen')) drawCropCanvas(it, el); }); });
   $('#zip').addEventListener('click', () => {
     const seen = {}, enc = [];
     return Promise.all(items.filter(i => i.out).map(async it => { let n = outName(it); if (seen[n]) { n = n.replace(/(\.\w+)$/, '-' + seen[n] + '$1'); } seen[outName(it)] = (seen[outName(it)] || 1) + 1; return { name: n, data: new Uint8Array(await it.out.arrayBuffer()) }; }))
@@ -314,6 +477,42 @@ function makeZip(files){
   [['mw'], ['mh']].forEach(([k]) => $('#' + k).addEventListener('input', e => { st[k] = e.target.value; store.set(k, st[k]); redo(); }));
   $('#bg').addEventListener('input', e => { st.bg = e.target.value; store.set('bg', st.bg); redo(); });
   syncUI(); totals();
+
+  /* ── Standalone ratio calculator (ported from the retired Aspect Ratio tool).
+        Its settings lived under the plain localStorage key "arc-state"; import
+        them once into this tool's store so returning users keep their values. */
+  let rcSaved = store.get('ratio', null);
+  if (!rcSaved) {
+    try {
+      const legacy = JSON.parse(localStorage.getItem('arc-state') || 'null');
+      if (legacy && (legacy.w || legacy.h)) { rcSaved = { w: +legacy.w || 1920, h: +legacy.h || 1080, lock: !!legacy.lock }; store.set('ratio', rcSaved); }
+    } catch (e) {}
+  }
+  const rcw = $('#rcw'), rch = $('#rch'), rclock = $('#rclock');
+  let rcRatio = 1920 / 1080;
+  if (rcSaved) { rcw.value = rcSaved.w; rch.value = rcSaved.h; rclock.checked = !!rcSaved.lock; rcRatio = (+rcw.value || 1) / (+rch.value || 1); }
+  function rcCalculate() {
+    const w = parseInt(rcw.value, 10) || 0, h = parseInt(rch.value, 10) || 0;
+    if (w <= 0 || h <= 0) { $('#rcratio').textContent = '-'; $('#rcmp').textContent = '-'; return; }
+    if (!rclock.checked) rcRatio = w / h;
+    $('#rcratio').textContent = simplifyRatio(w, h);
+    $('#rcmp').textContent = ((w * h) / 1000000).toFixed(2) + ' MP';
+    store.set('ratio', { w: rcw.value, h: rch.value, lock: rclock.checked });
+  }
+  function rcDim(changed) {
+    const w = parseInt(rcw.value, 10) || 0, h = parseInt(rch.value, 10) || 0;
+    if (w > 0 && h > 0 && rclock.checked) {
+      if (changed === 'w') rch.value = Math.round(w / rcRatio);
+      else rcw.value = Math.round(h * rcRatio);
+    }
+    rcCalculate();
+  }
+  rcw.addEventListener('input', () => rcDim('w'));
+  rch.addEventListener('input', () => rcDim('h'));
+  rclock.addEventListener('change', () => { if (rclock.checked) rcRatio = (parseInt(rcw.value, 10) || 1) / (parseInt(rch.value, 10) || 1); rcCalculate(); });
+  $('#rcswap').addEventListener('click', () => { const w = rcw.value; rcw.value = rch.value; rch.value = w; if (rclock.checked) rcRatio = 1 / rcRatio; rcCalculate(); });
+  $$('.rcpreset').forEach(b => b.addEventListener('click', () => { rcw.value = b.dataset.w; rch.value = b.dataset.h; if (rclock.checked) rcRatio = (+b.dataset.w) / (+b.dataset.h); rcCalculate(); }));
+  rcCalculate();
 })();
 
 </script>

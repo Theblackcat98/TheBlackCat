@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moved — {{ .Title }}</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="{{ .Params.target | absURL }}">
+<meta http-equiv="refresh" content="0; url={{ .Params.target }}">
+<script>location.replace({{ .Params.target | jsonify | safeJS }});</script>
+</head>
+<body>
+<p>This tool has moved into a merged studio: <a href="{{ .Params.target }}">{{ .Params.target }}</a></p>
+</body>
+</html>

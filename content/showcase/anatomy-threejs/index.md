@@ -1,6 +1,6 @@
 ---
 title: "Anatomy in Three.js"
-description: "Three machines as interactive Three.js figures: a Wankel rotary engine, a helicopter swashplate and rotor hub, and a Shuttle RS-25 main engine — cutaway solid models on test rigs, with section planes, exploded views and hand cranks."
+description: "Six machines as interactive Three.js figures: a Wankel rotary engine, a helicopter swashplate and rotor hub, a Shuttle RS-25 main engine, a twin-turbo flat-six boxer, a Porsche M64/60 twin-turbo flat-six and a sailing yacht winch and rigging — cutaway solid models on test rigs, with section planes, exploded views and hand cranks."
 contenttype: article
 tool: anatomy-threejs
 topics:
@@ -14,7 +14,7 @@ created: 2026-11-13
 updated: 2026-11-14
 ---
 
-Tools are things that run. This is the other half of the workshop: artifacts built to be looked at. The [Anatomy](/anatomy/) set draws its machines as isometric SVG, where the projection is the drawing and the camera never moves. This set asks what the same idea looks like in real 3D: three machines modelled as solid meshes in Three.js, still sitting on test rigs with the mechanism live underneath — but now you can orbit them, slide a section plane through them and pull them apart. The whole set lives at [Anatomy in Three.js](/anatomy-threejs/).
+Tools are things that run. This is the other half of the workshop: artifacts built to be looked at. The [Anatomy](/anatomy/) set draws its machines as isometric SVG, where the projection is the drawing and the camera never moves. This set asks what the same idea looks like in real 3D: six machines modelled as solid meshes in Three.js, still sitting on test rigs with the mechanism live underneath — but now you can orbit them, slide a section plane through them and pull them apart. The whole set lives at [Anatomy in Three.js](/anatomy-threejs/).
 
 ## The Wankel rotary engine
 
@@ -45,6 +45,36 @@ The powerhead carries a hot-gas manifold with twin lateral transfer ducts and fr
 Drag the nozzle, throttle quadrant or TVC stick directly in 3D, or use the sliders: THR runs the power level from 67% to 109% RPL, PITCH and YAW deflect the gimbal, PUMP sets the turbopump spin and SECT slices the section plane through powerhead, chamber and bell. Shift+drag cranks by hand.
 
 [Open the full figure](/anatomy-threejs/rs25-engine/)
+
+## The twin-turbo flat-six boxer
+
+A flat-six boxer engine on a dynamometer bench: two opposed banks of three cylinders lying flat either side of the crankshaft, so opposing pistons mirror in and out together and cancel each other's shake — the layout Porsche and Subaru built their names on, here with a turbocharger on each bank.
+
+The crankshaft carries three throw pairs at 120°, and the firing order runs 1-6-2-4-3-5, one power stroke every 120° of crank rotation. The twin turbochargers sit aft and outboard of the banks, their compressor and turbine wheels spinning up with boost, while a shader shades each cylinder's charge through its four strokes and heats the exhaust headers toward incandescence as load rises — fire the ANTILAG trigger and a spool pulse spikes the boost and lights the headers at low rpm. On the bench sit a brass specification plaque, a ruler strip, a throttle lever and a boost dial, and a diegetic dyno screen reading rpm, boost pressure, exhaust temperature and horsepower.
+
+Drag the throttle lever, boost dial or front crank pulley directly in 3D, or use the sliders: RPM runs to 7,200, THROT opens the throttles and BOOST sets the target boost from 0.4 to 2.0 bar. Shift+drag cranks by hand, E blows the engine apart and SECT slices it along the crankshaft.
+
+[Open the full figure](/anatomy-threejs/flat-six-boxer/)
+
+## The Porsche M64/60
+
+The Porsche Type M64/60 — the twin-turbo flat-six of the 993-generation 911 Turbo — on a dyno cradle: the last of Porsche's air-cooled engines, drawn with the hardware that defines it.
+
+The cranktrain is built to the engine's real dimensions: 100.0 mm bore × 76.4 mm stroke, six throws with the opposing pairs (1,4), (2,5) and (3,6) sharing TDC at 0°, 240° and 120°, firing 1-6-2-4-3-5. Air cooling means the 11-blade fan on top, belt-driven at 1.62 times crank speed, with the charge-air intercooler mounted above it. Twin KKK K16 turbochargers sit under the banks at the rear, one for each bank, with dual wastegates; the controls run a 74 mm central throttle plate and Bosch Motronic M5.2 ignition advance against a 6,800 rpm redline, and the triggers fire a 1.1 bar overboost surge or dump both wastegates. A diegetic screen on the cradle carries the telemetry. There is no exploded view — the section plane does the opening instead.
+
+Drag the crank pulley, cooling fan, pistons or boost dial directly in 3D, or use the RPM, BOOST, THROTTLE and IGN ADV sliders. SECT slices longitudinally through fan, cylinders, crankcase and intercooler, and Shift+drag cranks by hand.
+
+[Open the full figure](/anatomy-threejs/m64-twin-turbo/)
+
+## The yacht winch and rigging
+
+A sailing yacht cut through as a deck section: mast, boom and standing rigging above the deck, and on the cockpit coaming the hero of the piece — a two-speed self-tailing winch whose planetary gearbox is the whole explanation.
+
+The winch's gears are exact involute pitch math: a 12-tooth sun, 15-tooth planets and a 42-tooth ring gear, and 12 + 2 × 15 = 42, so the planets mesh. Crank the handle clockwise and a ratchet locks carrier and drum together for 1:1 direct drive; reverse to counter-clockwise and the base ratchet holds the carrier still, the planets walk inside the ring, and the drum turns at 3.5:1 for power. Around it the rig is alive: forestay and backstay, shrouds led over a spreader, a mainsail whose camber deepens as the wind rises, and a traveler car that follows the sheet trim — the readouts give apparent wind in knots and windward shroud and sheet loads in kilonewtons, and the GUST trigger adds 14 knots and spikes them all.
+
+Drag the winch handle, boom or wind vane directly in 3D, or use the CRANK, WIND and SHEET sliders. E explodes the winch's planetary stack and SECT slices through winch housing, coaming and mast partner.
+
+[Open the full figure](/anatomy-threejs/yacht-winch-rigging/)
 
 ## How they are built
 

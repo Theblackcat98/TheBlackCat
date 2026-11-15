@@ -74,7 +74,7 @@ not a screenshot of its page:
 - **Numbering:** `NN / TT` is the cover item's position within its own
   series — the Anatomy banner's quadcopter is `EXHIBIT 01 / 06`, the
   Colosseum is `EXHIBIT 01 / 11`, the Three.js collection's Wankel is
-  `EXHIBIT 01 / 03`.
+  `EXHIBIT 01 / 06`.
 - **One file, both slots:** the same banner is installed as both
   `<id>-light.webp` and `<id>-dark.webp`; the two files are byte-identical.
   This is the designed exception to the §0 verify-both-schemes rule.

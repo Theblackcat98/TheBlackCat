@@ -1,6 +1,6 @@
 ---
 title: "Anatomy in Three.js"
-description: "Six machines as interactive Three.js figures: a Wankel rotary engine, a helicopter swashplate and rotor hub, a Shuttle RS-25 main engine, a twin-turbo flat-six boxer, a Porsche M64/60 twin-turbo flat-six and a sailing yacht winch and rigging — cutaway solid models on test rigs, with section planes, exploded views and hand cranks."
+description: "Seven machines as interactive Three.js figures: a Wankel rotary engine, a helicopter swashplate and rotor hub, a Shuttle RS-25 main engine, a twin-turbo flat-six boxer, a Porsche M64/60 twin-turbo flat-six, a sailing yacht winch and rigging and a Bambu Lab P1S CoreXY 3D printer — cutaway solid models on test rigs, with section planes, exploded views and hand cranks."
 contenttype: article
 tool: anatomy-threejs
 topics:
@@ -11,10 +11,10 @@ tags:
   - creative-coding
   - simulation
 created: 2026-11-13
-updated: 2026-11-14
+updated: 2026-11-15
 ---
 
-Tools are things that run. This is the other half of the workshop: artifacts built to be looked at. The [Anatomy](/anatomy/) set draws its machines as isometric SVG, where the projection is the drawing and the camera never moves. This set asks what the same idea looks like in real 3D: six machines modelled as solid meshes in Three.js, still sitting on test rigs with the mechanism live underneath — but now you can orbit them, slide a section plane through them and pull them apart. The whole set lives at [Anatomy in Three.js](/anatomy-threejs/).
+Tools are things that run. This is the other half of the workshop: artifacts built to be looked at. The [Anatomy](/anatomy/) set draws its machines as isometric SVG, where the projection is the drawing and the camera never moves. This set asks what the same idea looks like in real 3D: seven machines modelled as solid meshes in Three.js, still sitting on test rigs with the mechanism live underneath — but now you can orbit them, slide a section plane through them and pull them apart. The whole set lives at [Anatomy in Three.js](/anatomy-threejs/).
 
 ## The Wankel rotary engine
 
@@ -75,6 +75,16 @@ The winch's gears are exact involute pitch math: a 12-tooth sun, 15-tooth planet
 Drag the winch handle, boom or wind vane directly in 3D, or use the CRANK, WIND and SHEET sliders. E explodes the winch's planetary stack and SECT slices through winch housing, coaming and mast partner.
 
 [Open the full figure](/anatomy-threejs/yacht-winch-rigging/)
+
+## The Bambu Lab P1S
+
+A Bambu Lab P1S CoreXY 3D printer — the odd one out in the set: not an engine on a bench but a self-contained enclosed cabinet, 389 × 389 × 458 mm and 12.95 kg, caught mid-print with a fourteen-band twisted vase growing layer by layer on its build plate.
+
+The speed comes from CoreXY kinematics. Two NEMA 17 steppers stay bolted to the rear of the frame, so the moving gantry never carries motor mass; two stacked GT2 belts — the upper loop in blue, the lower in red — route across eight idler pulleys to clamp onto the toolhead, and the motors drive it differentially: turn together for a pure X move, against each other for pure Y, and hold one still while the other runs for a 45-degree diagonal, where only one motor turns. The toolhead rides twin hollow carbon-fibre rods and carries a 9:53 reduction dual-gear extruder, feeding 1.75 mm filament down a PTFE tube into an all-metal hotend — ceramic heater block to 300 °C, 0.4 mm brass nozzle laying a 0.42 mm bead. Below the deck, the Z axis is three TR8×8 lead screws turned in phase by a single stepper on a closed belt loop, lowering the 256 mm textured PEI spring-steel plate one layer at a time. Four fans close the loop — part cooling, hotend, the left-wall auxiliary blower and the rear chamber exhaust — with a shader drawing the cross-flow air and the molten bead's thermal trail.
+
+Drag the toolhead, PEI bed or A/B pulleys directly in 3D, or use the sliders: SPEED runs from 40 to 500 mm/s, NOZZLE sets the hotend from 180 to 300 °C, AUX FAN drives the cooling and LAYER sets the slice thickness, while the readout computes the volumetric flow live. PURGE / PARK sends the toolhead to the rear-left chute to wipe its nozzle, RETRACT reverses the extruder to relieve pressure, and CUTAWAY hides the glass door, lid and right panel. There is no exploded view — the cabinet opens by cutaway instead.
+
+[Open the full figure](/anatomy-threejs/bambu-p1s/)
 
 ## How they are built
 

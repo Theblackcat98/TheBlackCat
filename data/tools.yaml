@@ -458,8 +458,8 @@ tools:
     writeup: showcase/anatomy-threejs/
     category: showcase
     kind: exhibit
-    short: Six cutaway machines as interactive Three.js figures on test rigs.
-    desc: "Six cutaway machines as interactive Three.js figures on test rigs: a Wankel rotary engine with its triangular rotor and 34:51 phasing gears, a helicopter swashplate and rotor hub driven from a cyclic stick and collective lever, a Shuttle RS-25 main engine throttling on a static-fire gantry, a twin-turbo flat-six boxer and a Porsche M64/60 twin-turbo flat-six on dyno benches, and a sailing yacht winch and masthead rigging on a deck section."
+    short: Seven cutaway machines as interactive Three.js figures on test rigs.
+    desc: "Seven cutaway machines as interactive Three.js figures on test rigs: a Wankel rotary engine with its triangular rotor and 34:51 phasing gears, a helicopter swashplate and rotor hub driven from a cyclic stick and collective lever, a Shuttle RS-25 main engine throttling on a static-fire gantry, a twin-turbo flat-six boxer and a Porsche M64/60 twin-turbo flat-six on dyno benches, a sailing yacht winch and masthead rigging on a deck section, and a Bambu Lab P1S CoreXY 3D printer caught mid-print inside its enclosed cabinet."
     tags: [threejs, isometric, creative-coding, simulation]
     related: [anatomy]
     added: "2026-11-13"

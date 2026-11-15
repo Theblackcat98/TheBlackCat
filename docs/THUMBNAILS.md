@@ -74,7 +74,7 @@ not a screenshot of its page:
 - **Numbering:** `NN / TT` is the cover item's position within its own
   series — the Anatomy banner's quadcopter is `EXHIBIT 01 / 06`, the
   Colosseum is `EXHIBIT 01 / 11`, the Three.js collection's Wankel is
-  `EXHIBIT 01 / 06`.
+  `EXHIBIT 01 / 07`.
 - **One file, both slots:** the same banner is installed as both
   `<id>-light.webp` and `<id>-dark.webp`; the two files are byte-identical.
   This is the designed exception to the §0 verify-both-schemes rule.
@@ -159,6 +159,17 @@ single-light-image pattern, with its own recipe:
   link) so the capture is the bare figure, like `spot.webp` above.
   Screenshot the viewport, resize to 1200 × 750, save WebP quality 82.
 - **Framing:** as above — the whole figure card, opening state.
+- **Composed mechanism title:** every thumb in this family also carries a
+  small title composed onto the capture itself (added 2026-11-15) — a short
+  mechanism label, five words or fewer, that is **different from the card
+  title** and names the mechanism or detail the figure actually shows
+  (`EPITROCHOID ROTOR · ECCENTRIC SHAFT` on the Wankel card, whose card
+  title is "Wankel Rotary Engine"). Style: mono, uppercase, letter-spaced,
+  in the site ink, on a small cream (`#faf9f5`) chip with a hairline border,
+  set at the drawing's bottom-left like a plate caption — clear of the
+  subject's focal detail, and of the figure's own hint line where the
+  framing allows. Compose at the full 1200 × 750 before the WebP save, and
+  eyeball the result at card size: legible, subtle, never a banner.
 
 ## 3. Project thumbnails
 

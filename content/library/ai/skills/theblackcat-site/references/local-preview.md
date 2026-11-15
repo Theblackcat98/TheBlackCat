@@ -81,6 +81,34 @@ python3 scripts/lint_content.py <files> # front matter rules
   `section`, `section__head`, `h-section`, `count`, `tool-grid` + `tool-card`)
   and you avoid touching `assets/css/` at all.
 
+## When the defect is in a hand-written static page
+
+Pages under `static/<slug>/index.html` never pass through Hugo, so the Hugo loop
+is irrelevant. Serve the **worktree root**, not the page directory:
+
+```bash
+git worktree add --detach ~/hermes/work/scratch/<name> origin/main
+cd ~/hermes/work/scratch/<name> && python3 -m http.server 8791 --bind 127.0.0.1   # background=true
+# then http://127.0.0.1:8791/static/<slug>/index.html
+```
+
+- Relative hrefs (`drone/`, `../toolkit/toolkit.css`) only resolve because the
+  page keeps its `/static/<slug>/` depth. Serving from inside the page folder
+  breaks every one of them.
+- `toolkit/registry.json` **404s here by design** — Hugo generates it from
+  `data/tools.yaml`. Log failed *responses* rather than counting console errors:
+  one missing generated file reads as a dozen 404s and looks like a regression.
+- `loading="lazy"` images are blank in a `fullPage` screenshot. Scroll the page,
+  await `document.images` completeness, then shoot — otherwise you report four
+  "broken" thumbnails that are fine.
+- Assert by clicking, not by reading markup: loop every anchor, click,
+  `waitForURL`, print the landing URL; then click each card's secondary links
+  (`Open`, theme toggle) to prove nothing overlays them.
+- Prove a hover/focus change with `getComputedStyle` on the **hovered** locator,
+  in both `colorScheme: 'light'` and `'dark'`. A bare `$eval('h2 a')` returns the
+  page's first match and reports a different element's colour — that has already
+  produced one false "the hover state is wrong" reading.
+
 ## After the preview
 
 Screenshot the page at 1400x900 and read it with vision before committing — the

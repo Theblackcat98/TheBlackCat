@@ -92,6 +92,13 @@ fails and a split commit ships a live page whose hub card 404s.
 - `data/tools.yaml` needs every field the check demands (`id, name, url,
   writeup, category, kind, short, desc, tags, added`), `added` from
   `date +%F`, and every `related:` id must already exist.
+- **Quote any `name:` / `short:` / `desc:` value containing `: `.** An
+  unquoted scalar with a colon-space inside it is a mapping start, so the whole
+  registry stops parsing — `mapping values are not allowed here at line N`,
+  pointing at the first offender rather than the row you just added, and
+  `check_tools.py` dies on the scanner error before any field is validated. A
+  short line like `short: Cut open: 80 bays, three arcades` is the usual
+  culprit because prose from a write-up reads naturally as a colon phrase.
 - Thumbnails: `scripts/shoot_tools.py` builds the site with Hugo first, so it
   only runs where that Hugo is installed. Fallback with the same contract —
   screenshot the page at 1280×800, DPR 1, once per scheme, resize to 640×400,
@@ -211,14 +218,50 @@ count and grid), the artifact at `static/<slug>/index.html`, and its write-up at
   bar overlays a full-bleed canvas fine — that is how the existing exhibits
   behave — and it draws its own breadcrumb and a Write-up button from the
   registry.
-- **Thumbnails**: 1280×800 shot → 640×400 WebP, light and dark, in
-  `static/toolkit/thumbs/<slug>-{light,dark}.webp`. `scripts/shoot_tools.py`
-  does this but needs the Python `playwright` package (not installed on
-  optiplex); drive the same capture through the browser harness and convert
-  with PIL (`feature.check('webp')` is true) instead of installing browsers.
-- The repeatable packager lives outside the repo at
-  `~/hermes/work/experiments/package_artifacts.py` — re-run it when Nik
-  re-uploads a refined artifact, then re-shoot its thumbnails.
+- **Thumbnails**: use the contract in § Adding a tool to the registry (1280×800,
+  DPR 1, one shot per scheme → 640×400 WebP q82,
+  `static/toolkit/thumbs/<slug>-{light,dark}.webp`). `scripts/shoot_tools.py`
+  does it in one shot but imports the Python `playwright` package; when that
+  import fails, drive the same capture through the browser harness and convert
+  with PIL rather than installing a browser — that route needs nobody's
+  permission and lands the identical files.
+- **The packager ships with this skill**: `scripts/package_artifact.py` takes
+  `--slug/--src/--name/--desc` and rewrites `static/<slug>/index.html` with the
+  chrome block and the vendored-library paths, refusing to run twice on an
+  already-packaged file. Re-run it whenever Nik sends a refined artifact, then
+  re-shoot that artifact's thumbnails.
+
+### Card images (the 640x400 thumb)
+
+The hub card shows `.tool-card__thumb { aspect-ratio: 16/10 }` with
+`.tool-card__img { object-fit: cover; object-position: top center }`, so the
+file you commit must already be 16:10. A 2:1 source (the repo's animated
+banners are 800x400) gets silently sliced by `cover` — 160 px of width at 640,
+which cuts a plate whose drawing spans 760 of its 800 px. Build at exactly
+640x400: scale the source uniformly to 640x320 and fill the two 40 px bands by
+mirroring the frame's own edge rows. Mirroring keeps the boundary row
+identical (measured seam delta < 0.1 luminance; flat fill or a stretched row
+leaves a visible line under the grain).
+
+- **Choose the frame by measurement, not by eye.** Sample ink coverage per
+  frame (`(lum < 170).mean()` across all frames). A flat curve means the loop
+  is a slow drift and frame 0 is the authored view; a curve that climbs to a
+  plateau means it is a build-up and you want the plateau. Do not hunt for a
+  frame the numbers say is equivalent.
+- **No banner yet → capture the plate, not the page.** Page screenshots carry
+  the toolkit bar into the card. Load the artifact, remove
+  `.tk-bar`, `.toolkit-bar`, `.back`, `.tk-fallback`, dispatch a `resize` so the
+  canvas reflows to the viewport, then screenshot at exactly 640x400.
+- **A capture you have not checked for a 404 is not a capture.** A preview
+  build made before a rebase 404s pages another session added, and the error
+  page screenshots as a white rectangle — two "renders" came out byte-similar
+  because both were the 404 body. Assert a canvas or selector count before
+  every shot, and treat near-identical captures as a reason to check the URL.
+- **A vision read that reports text inside the image may be describing the
+  card's own markup back at you.** It invented a baked-in "EXHIBIT 01/06"
+  caption; a per-row ink profile showed pure paper above and below the drawing
+  on every banner. Verify a claimed in-image caption with a row profile before
+  "fixing" something that is not in the file.
 
 ## Verification ladder
 

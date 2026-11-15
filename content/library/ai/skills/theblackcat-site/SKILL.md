@@ -1,7 +1,7 @@
 ---
 name: theblackcat-site
 description: "Operate Nik's TheBlackCat site: save bookmarks, write blog posts (draft-flag flow), weekly triage, and maintain the Hugo repo safely."
-version: 1.9.0
+version: 1.11.0
 author: Hermes Agent
 license: MIT
 platforms: [linux]
@@ -35,7 +35,12 @@ includes personal/private context, confirm before writing it into the repo.
   skill store AND refresh the in-repo mirror (see "Standing: repo mirror")
 - Weekly triage (cron 95f72348ff15, Sun 23:00) → triage section
 - Site bugs, rendering issues, config/menu changes → site-model reference,
-  then **propose, never push fixes without Nik's approval**
+  then **propose, never push fixes without Nik's approval**. Report in the
+  shape he expects: the cause **once**, the fix, the proof, then stop
+  restating it from other angles — repeating the same diagnosis in four
+  framings reads as padding and he will say so. Frame it as the card
+  affordance problem, not a mystery: "the title was never a link" beats three
+  paragraphs of what it is not.
 
 ## Router — load the reference before acting
 
@@ -52,6 +57,7 @@ includes personal/private context, confirm before writing it into the repo.
 | Build a static tool page — a new tool, a reimplementation of a third-party tool, or a rework (registry, thumbs, generator, local test loop) | `references/static-tool-pages.md` |
 | Past build/rendering incidents (context for debugging) | `references/theblackcat-*.md` |
 | Build/preview the site locally, or debug a template/section/CSS change before pushing | `references/local-preview.md` |
+| Fix and verify a hand-written page under `static/` (worktree, click-through, both themes) | `references/local-preview.md` § hand-written static pages |
 
 ## Hard rules (every task)
 
@@ -60,7 +66,16 @@ includes personal/private context, confirm before writing it into the repo.
    wait. Pre-authorized exceptions: bookmark saves, blog draft/publish per
    workflow, triage per its section, skill-mirror refreshes per the standing
    section below. Everything else (templates, CSS, config,
-   menu, deletions) needs an explicit OK.
+   menu, deletions) needs an explicit OK. Deliver a site fix as a **pull request
+   against `main`** (branch + PR, CI-gated), not a direct commit on `main`: that
+   is Nik's standing choice when both routes are offered. The approval gates the
+   merge, not the work — build and verify first, then ask. **`AGENTS.md` carries an additional
+   host-level approval prompt on every write**, separate from the push gate:
+   compose the whole intended edit as ONE call, because the prompt expires
+   unanswered and a second call is a second round trip. If it is refused, do
+   not route around it through terminal or execute_code — put the same note in
+   this skill's references (pre-authorized) and tell Nik the contract file is
+   waiting on an approval.
 3. **Reserved front matter**: the field is `source` NOT `url`; `contenttype`
    NOT `type`; `draft: true` silently hides a page; dates from `date +%F`,
    never invented. Full table: `references/content-model.md`.
@@ -139,6 +154,16 @@ includes personal/private context, confirm before writing it into the repo.
    deploy only proves the file was committed. Mechanism, file map and the
    token trap: `references/site-model.md` § Data-driven pages.
 
+17. **Diagnose against `origin/main`, not the local checkout.** Another session
+   can leave the clone parked on a `pr/*` branch with uncommitted edits, so the
+   working tree is not necessarily what is live. Two moves settle it: `curl` the
+   live page and diff it against `git show origin/main:<path>` (equality kills
+   the "deploy lag" theory in one call), and do the fix in a **detached worktree
+   off `origin/main`** — `git worktree add --detach ~/hermes/work/scratch/<name>
+   origin/main` — so the other session's tree is never touched. `git log` on that
+   worktree also reveals features that exist live and are missing locally (or
+   vice versa); never report a live page's behaviour from the local file alone.
+
 ## Repo facts at a glance
 
 - **Two hubs, one registry.** `/tools/` (the workshop) is for things you *use*;
@@ -147,14 +172,28 @@ includes personal/private context, confirm before writing it into the repo.
   `category: showcase`, which `layouts/partials/lists/tools.html` filters out of
   every chip, count, featured strip and grid. `scripts/check_tools.py` still
   requires the entry, its thumbnails and its `static/<slug>/` page, so never
-  "unregister" an artifact to move it. The showcase section is written as an
-  article: the prose lives in `content/showcase/_index.md`, and
-  `layouts/partials/lists/showcase.html` adds a card grid only past one item.
-  New art → showcase. Anything with a job to do → tools. Caveat: a registry
-  `writeup:` cannot point at a section `_index.md` (the checker probes only
-  `content/<w>.md` and `content/<w>/index.md`), so a section-index-as-writeup
-  needs a real page or an existing write-up path instead.
+  "unregister" an artifact to move it. **A section index is a gallery, never an
+  article** — Nik will tell you so if you get it wrong: `content/showcase/_index.md`
+  holds a short intro and nothing else, `layouts/partials/lists/showcase.html`
+  always renders the card grid, and the long-form prose lives one level down at
+  `content/showcase/<slug>/index.md` (`tool: <slug>`, `contenttype: article`).
+  The same shape applies to any section that will keep growing: cards on the
+  index, writing on the item page, so the tenth artifact adds a row instead of a
+  thousand pixels. New art → showcase. Anything with a job to do → tools.
+  Hosting one is one call: `scripts/package_artifact.py` (shipped with this
+  skill) injects the chrome block and repoints the page at the vendored
+  three.js; then shoot the thumbnails and add the registry row.
+  Caveat: a registry `writeup:` cannot point at a section `_index.md` (the
+  checker probes only `content/<w>.md` and `content/<w>/index.md`), so the item
+  page is also the only valid write-up target.
 
+- **A hand-written page under `static/` must reuse the site's card affordance,**
+  never invent one. `layouts/partials/tool-card.html` is the contract: thumbnail
+  link (`tabindex="-1" aria-hidden="true"`), the **title** as an anchor, and the
+  `Open` button, all pointing at the same target. A card whose title is plain
+  `<h2>` text looks clickable (it sits under a hover-lifting card) and is not —
+  Nik reports that as "clicking the title does nothing". Check any new gallery
+  page against `tool-card.html` before shipping it.
 - Custom layouts only (b7661b6 redesign); `hugo.yaml` has NO theme key;
   `themes/hextra` was removed 2026-09-04. Details: `references/site-model.md`.
 - Project site → every URL carries the `/TheBlackCat/` prefix (relURL trap).
@@ -165,7 +204,8 @@ includes personal/private context, confirm before writing it into the repo.
 
 This skill is mirrored **verbatim** into the repo at
 `content/library/ai/skills/theblackcat-site/` (SKILL.md + every file in
-`references/`, byte-for-byte; md5-checked at commit time), with a
+`references/`, and `scripts/` too when the skill ships runnables — byte-for-byte;
+md5-checked at commit time), with a
 human-readable `index.md` catalog page. Mirror the whole `references/`
 directory, not a remembered count — the set grows, and a stale count in a
 remembered list is how a reference silently stops shipping. The older
@@ -190,7 +230,8 @@ current, full version. So:
   ```bash
   SK=~/.hermes/skills/theblackcat-site
   REPO=~/hermes/repos/Theblackcat98/TheBlackCat/content/library/ai/skills/theblackcat-site
-  cd "$SK" && for f in SKILL.md references/*.md; do
+  cd "$SK" && for f in SKILL.md references/*.md scripts/*.py; do
+    [ -e "$f" ] || continue
     if [ -f "$REPO/$f" ]; then
       [ "$(md5sum <"$f")" = "$(md5sum <"$REPO/$f")" ] || echo "DRIFT: $f"
     else echo "MISSING: $f"; fi

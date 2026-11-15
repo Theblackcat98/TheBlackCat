@@ -71,7 +71,9 @@ body {
 body {
   margin: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  /* The toolkit bar is prepended to <body> and its footer appended, so the
+     app's three rows sit one slot lower: bar / topbar / workspace / status. */
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   gap: 8px;
   height: 100dvh;
   min-height: 520px;

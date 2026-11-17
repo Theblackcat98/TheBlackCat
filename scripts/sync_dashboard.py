@@ -79,10 +79,11 @@ def main() -> None:
         if repos is None:
             # The token cannot act as a user: the repo-scoped Actions token
             # (contents: write only) gets a 403 on /user/repos. Fall back to
-            # the public listing and drop the token — sent on the per-repo
-            # calls below, it would only hide public data behind 404s. A
-            # user-scoped DASHBOARD_TOKEN still takes the /user/repos path.
-            token = ""
+            # the public listing. The token stays attached: unauthenticated
+            # calls from shared runner IPs die on the 60/hr rate limit,
+            # while the token carries its own quota. A user-scoped
+            # DASHBOARD_TOKEN still takes the /user/repos path above.
+            pass
     if repos is None:
         repos = api(f"/users/{OWNER}/repos?per_page=100&type=owner", token) or []
     repos = [r for r in repos if r["owner"]["login"].lower() == OWNER.lower()]
@@ -146,6 +147,13 @@ def main() -> None:
     if args.dry_run:
         print("dry run: not writing", OUT)
         return
+    if len(out) > 5 and payload["summary"]["open_issues"] + payload["summary"]["open_prs"] == 0:
+        # Circuit breaker: a fleet this size always has open issues. Zero
+        # across the board means the token could not actually read the
+        # other repos (404s read as "no issues") — fail loudly instead of
+        # committing an emptied dashboard.
+        sys.exit("sanity check failed: 0 issues/PRs across "
+                 f"{len(out)} repos — refusing to write a degraded dashboard")
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, indent=1) + "\n")
     print(f"wrote {OUT}")

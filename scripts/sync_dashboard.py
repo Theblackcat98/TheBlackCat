@@ -38,8 +38,11 @@ TODAY = date.today()
 STALE_BEFORE = (TODAY - timedelta(days=90)).isoformat()
 
 
-def api(path: str, token: str):
-    """GET a GitHub API path; list endpoints are fully paginated. 404 -> None."""
+def api(path: str, token: str, soft: bool = False):
+    """GET a GitHub API path; list endpoints are fully paginated. 404 -> None.
+
+    With soft=True, any HTTP error returns None instead of aborting, so the
+    caller can fall back when a token lacks the access the endpoint needs."""
     url = f"https://api.github.com{path}"
     headers = {"Accept": "application/vnd.github+json", "User-Agent": "theblackcat-dashboard-sync"}
     if token:
@@ -52,7 +55,7 @@ def api(path: str, token: str):
                 body = json.load(resp)
                 link = resp.headers.get("Link", "")
         except urllib.error.HTTPError as exc:
-            if exc.code == 404:
+            if exc.code == 404 or soft:
                 return None
             sys.exit(f"GitHub API failed: HTTP {exc.code} on {url}")
         if isinstance(body, list):
@@ -70,10 +73,18 @@ def main() -> None:
     args = parser.parse_args()
     token = os.environ.get("DASHBOARD_TOKEN") or os.environ.get("GITHUB_TOKEN", "")
 
+    repos = None
     if token:
-        repos = api("/user/repos?affiliation=owner&per_page=100", token) or []
-    else:
-        repos = api(f"/users/{OWNER}/repos?per_page=100", token) or []
+        repos = api("/user/repos?affiliation=owner&per_page=100", token, soft=True)
+        if repos is None:
+            # The token cannot act as a user: the repo-scoped Actions token
+            # (contents: write only) gets a 403 on /user/repos. Fall back to
+            # the public listing and drop the token — sent on the per-repo
+            # calls below, it would only hide public data behind 404s. A
+            # user-scoped DASHBOARD_TOKEN still takes the /user/repos path.
+            token = ""
+    if repos is None:
+        repos = api(f"/users/{OWNER}/repos?per_page=100&type=owner", token) or []
     repos = [r for r in repos if r["owner"]["login"].lower() == OWNER.lower()]
 
     out: list[dict] = []

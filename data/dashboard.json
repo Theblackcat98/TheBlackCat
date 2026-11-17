@@ -1,17 +1,336 @@
 {
- "generated": "2026-11-09",
+ "generated": "2026-11-17",
  "scope": "public, non-fork, non-archived owner repositories; todos = open GitHub Issues",
  "private_skipped": 0,
  "summary": {
-  "repos": 27,
-  "open_issues": 84,
-  "open_prs": 49,
-  "avg_health": 84,
-  "missing_description": 1,
-  "missing_license": 19,
+  "repos": 29,
+  "open_issues": 181,
+  "open_prs": 53,
+  "avg_health": 86,
+  "missing_description": 0,
+  "missing_license": 21,
   "missing_readme": 1
  },
  "repos": [
+  {
+   "name": "liquidscribe",
+   "url": "https://github.com/Theblackcat98/liquidscribe",
+   "description": "Local-first Markdown note workspace with inline, reviewable AI suggestions. Next.js 16 + Tiptap + Postgres.",
+   "topics": [
+    "llm",
+    "local-first",
+    "markdown",
+    "nextjs",
+    "notes",
+    "writing"
+   ],
+   "language": "TypeScript",
+   "license": "MIT",
+   "stars": 0,
+   "pushed_at": "2026-11-17",
+   "health": 100,
+   "missing": [],
+   "issues": [
+    {
+     "number": 50,
+     "title": "TD-50: Workspace import/restore + empty-trash + server search: assess as product gaps (see \u00a712) rather than defects; the export-without-import gap is the actionable one",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/50",
+     "labels": []
+    },
+    {
+     "number": 49,
+     "title": "TD-49: Fix `.gitignore` env gap (`.env*` with `!.env.example` so `.env.production` cannot be committed); move the hardcoded LAN dev origin out of tracked config",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/49",
+     "labels": []
+    },
+    {
+     "number": 48,
+     "title": "TD-48: Repo process hygiene when the project grows: CONTRIBUTING/CHANGELOG/SECURITY; none urgent for a day-one personal project",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/48",
+     "labels": []
+    },
+    {
+     "number": 47,
+     "title": "TD-47: Run `npm audit` from an unrestricted network (or in CI) and record the result; until then carry CVE status as **unknown**",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/47",
+     "labels": []
+    },
+    {
+     "number": 46,
+     "title": "TD-46: Optional TS hardening (`noUncheckedIndexedAccess` first); bring `scripts/smoke.mjs` inside type checking or accept the gap explicitly",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/46",
+     "labels": []
+    },
+    {
+     "number": 45,
+     "title": "TD-45: Adopt one dependency-pinning policy (exact pins + lockfile with a deliberate update cadence) and apply it uniformly; track `tiptap-markdown@0.9.0` pre-1.0 + local type shim as a named risk; note `lucide-react@1.70.0` is verified real, not a typo",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/45",
+     "labels": []
+    },
+    {
+     "number": 44,
+     "title": "TD-44: Reference `docs/before.jpg` in the README Design section or delete it",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/44",
+     "labels": []
+    },
+    {
+     "number": 42,
+     "title": "TD-42: Key seeding on a dedicated marker (starter folder ids or a settings row) or document the \"any folder exists\" heuristic",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/42",
+     "labels": []
+    },
+    {
+     "number": 41,
+     "title": "TD-41: Vision path: check the selected model is vision-capable (Ollama `/api/show`) and validate the image payload before forwarding; fail fast with the existing friendly message",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/41",
+     "labels": []
+    },
+    {
+     "number": 40,
+     "title": "TD-40: Assistant path efficiency/correctness: cache runtime status server-side for a few seconds; set the chat fetch timeout below `maxDuration` (e.g. 75 s vs 90 s); split status codes by fault (400 client / 502\u2013503 upstream)",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/40",
+     "labels": []
+    },
+    {
+     "number": 39,
+     "title": "TD-39: Record the prompt-injection posture honestly: system-prompt sentence is a mitigation, not a defence; revisit with delimiting/output validation if the model path gains tools or autonomy",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/39",
+     "labels": []
+    },
+    {
+     "number": 38,
+     "title": "TD-38: Improve built-in heuristics: abbreviation/decimal-aware sentence tokeniser; truncate summaries on a sentence/word boundary; vary or drop Expand boilerplate for non-prose; fix Explain on empty text (\"0 words across 1 sentence\")",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/38",
+     "labels": []
+    },
+    {
+     "number": 37,
+     "title": "TD-37: Unify the workspace read path: `GET /api/notes` shares `getWorkspace()` (one ordering, one seeding site); document the full-dump-by-design contract",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/37",
+     "labels": []
+    },
+    {
+     "number": 35,
+     "title": "TD-35: Add CI (GitHub Actions: `npm ci`, typecheck, lint, build with dummy/lazy DB config, plus a Postgres service job running smoke) and a minimal deployment story",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/35",
+     "labels": []
+    },
+    {
+     "number": 34,
+     "title": "TD-34: Make smoke runnable: add `\"smoke\": \"node scripts/smoke.mjs\"`, document/install the Playwright browser, and provide a one-command harness (Postgres + schema push + server + health wait + smoke + teardown)",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/34",
+     "labels": []
+    },
+    {
+     "number": 33,
+     "title": "TD-33: Add a unit-test runner (Vitest or `node --test`) with tests for `assistant.ts` built-in tools and `workspace.ts` helpers; add a `test` script",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/33",
+     "labels": []
+    },
+    {
+     "number": 32,
+     "title": "TD-32: Fix model-selection UI consistency (Settings select value vs tools mode; dock menu check marks); make voice language a setting or document the `en-US` lock",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/32",
+     "labels": []
+    },
+    {
+     "number": 31,
+     "title": "TD-31: Add ARIA wiring to Search selection (`role=\"combobox\"`/`listbox`/`option`, `aria-activedescendant`, `aria-selected`)",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/31",
+     "labels": []
+    },
+    {
+     "number": 30,
+     "title": "TD-30: Print: switch out of Markdown source mode before `window.print()` (or add an intentional print rule for source mode); document replacement-only suggestion printing",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/30",
+     "labels": []
+    },
+    {
+     "number": 29,
+     "title": "TD-29: Gate global shortcuts when a dialog is open or the target is a form field; add Escape handling to popovers",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/29",
+     "labels": []
+    },
+    {
+     "number": 28,
+     "title": "TD-28: CapturePreview: reset `ready`/`error` on `kind` change; friendly error copy when `getDisplayMedia` is missing",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/28",
+     "labels": []
+    },
+    {
+     "number": 27,
+     "title": "TD-27: Decide and document `plainText` suggestion semantics (index original vs replacement consistently across count/search/export); note the hand-authored-markup limitation",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/27",
+     "labels": []
+    },
+    {
+     "number": 26,
+     "title": "TD-26: `exportNote`: read from `notesRef.current` after flushing (as `exportWorkspace` does); sanitise the download filename",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/26",
+     "labels": []
+    },
+    {
+     "number": 25,
+     "title": "TD-25: Wire `resolveAll` to bulk accept/reject buttons in the suggestion chip/menu, or delete it",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/25",
+     "labels": []
+    },
+    {
+     "number": 24,
+     "title": "TD-24: Hide/disable suggestion Accept/Reject when `!editor.isEditable`; add a runtime test for Reading mode and trashed notes",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/24",
+     "labels": []
+    },
+    {
+     "number": 23,
+     "title": "TD-23: Debounce localStorage cache writes (1\u20132 s + `visibilitychange`/`beforeunload`) and/or persist only dirty notes; surface quota failure",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/23",
+     "labels": []
+    },
+    {
+     "number": 22,
+     "title": "TD-22: Derive the outline from the editor document (or a real Markdown parse) and scroll by heading anchor, not positional DOM index",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/22",
+     "labels": []
+    },
+    {
+     "number": 21,
+     "title": "TD-21: Voice: treat `no-speech`/`aborted` as restartable in continuous mode (clear `keepListening` only on `not-allowed`/`audio-capture`); detach/ignore `onresult` on stop-from-submit (generation counter or `abort()`)",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/21",
+     "labels": []
+    },
+    {
+     "number": 18,
+     "title": "TD-18: Preserve formatting on suggestions: store the original as a ProseMirror JSON fragment/slice and restore it on reject; refuse or specially handle multi-block selections",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/18",
+     "labels": []
+    },
+    {
+     "number": 17,
+     "title": "TD-17: Fix the Work-workspace filter: compute descendant folder ids of the workspace root and test membership",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/17",
+     "labels": []
+    },
+    {
+     "number": 16,
+     "title": "TD-16: Make the DB pool lazy (no import-time throw), configure `max`/timeouts/`error` handler, cache the pool on `globalThis` unconditionally; let `/api/health` report `{ok:false}` instead of failing to load",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/16",
+     "labels": []
+    },
+    {
+     "number": 15,
+     "title": "TD-15: Fix `cleanText`: case-preserving a\u2192an replacement; re-collapse whitespace after the fallback pass; reconsider/document intensifier stripping as a meaning change",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/15",
+     "labels": []
+    },
+    {
+     "number": 14,
+     "title": "TD-14: Parse request bodies defensively in all mutating routes (object check \u2192 400 with existing friendly copy); stop returning raw `error.message` from the assistant route; notes POST nonexistent-folder 404 \u2192 400/422",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/14",
+     "labels": []
+    },
+    {
+     "number": 13,
+     "title": "TD-13: Decide version history's home: persist server-side (`note_versions` written by PATCH) **or** document plainly (README + Settings) that it is browser-local and excluded from exports; warn on quota failure",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/13",
+     "labels": []
+    },
+    {
+     "number": 12,
+     "title": "TD-12: Complete the folder model: `parentId` FK + existence validation; PATCH/DELETE folder endpoints; rename/delete UI (notes unfile on delete); new folders default to the current context",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/12",
+     "labels": []
+    },
+    {
+     "number": 11,
+     "title": "TD-11: Validate `folderId` in PATCH with a truthful 400; fix the misleading \"saved on device / reconnect\" 500 copy; add an exponential-backoff retry timer while saves are pending and surface the pending count",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/11",
+     "labels": []
+    },
+    {
+     "number": 10,
+     "title": "TD-10: Add request-size limits: early `Content-Length` rejection on mutating routes; cap note `content` at insert/update to a stated maximum",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/10",
+     "labels": []
+    },
+    {
+     "number": 9,
+     "title": "TD-9: Fix built-in `ask` intents: test the user's `instruction` (not the document) for word-count/title; count the correct text per context mode; derive titles from the document or drop the \"inspired by your opening\" claim",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/9",
+     "labels": []
+    },
+    {
+     "number": 8,
+     "title": "TD-8: Treat an empty Ollama response as an error for every action except `remove`",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/8",
+     "labels": []
+    },
+    {
+     "number": 7,
+     "title": "TD-7: Built-in Tighten: return the already-concise fallback with `edit: false` (chat response, not a replacement)",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/7",
+     "labels": []
+    },
+    {
+     "number": 6,
+     "title": "TD-6: Generate and commit Drizzle migrations; switch README beyond first setup to `migrate`; resolve the `drizzle/` gitignore ambiguity by tracking it",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/6",
+     "labels": []
+    },
+    {
+     "number": 5,
+     "title": "TD-5: Make `drizzle.config` env-driven (TS config reading `DATABASE_URL`); remove the committed credential URL; replace example password `scribe` with an obvious placeholder and confirm it is used nowhere real",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/5",
+     "labels": []
+    },
+    {
+     "number": 4,
+     "title": "TD-4: Split note creation/update: PATCH becomes true update (404 on missing), creation only via POST; validate `folderId` on PATCH as POST does; delete the dead 404 or make it real",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/4",
+     "labels": []
+    },
+    {
+     "number": 3,
+     "title": "TD-3: Enforce the trust boundary: loopback/`Host`/`Origin` enforcement or per-install token middleware; validate `Content-Type` + same-origin on mutations; stop disclosing Ollama endpoint/inventory unauthenticated",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/3",
+     "labels": []
+    },
+    {
+     "number": 2,
+     "title": "TD-2: Serialise saves per note (promise chain) or add revision/CAS so stale PATCHes cannot regress the DB; only the latest revision may set \"saved\"",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/2",
+     "labels": []
+    },
+    {
+     "number": 1,
+     "title": "TD-1: Reconcile boot cache with server: SSR props authoritative, merge per-note by `updatedAt`, drop cached ids absent server-side unless flagged unsynced",
+     "url": "https://github.com/Theblackcat98/liquidscribe/issues/1",
+     "labels": []
+    }
+   ],
+   "prs": [
+    {
+     "number": 59,
+     "title": "Fix global shortcuts and popover Escape behavior",
+     "url": "https://github.com/Theblackcat98/liquidscribe/pull/59"
+    },
+    {
+     "number": 58,
+     "title": "Add ARIA semantics to Search selection",
+     "url": "https://github.com/Theblackcat98/liquidscribe/pull/58"
+    },
+    {
+     "number": 57,
+     "title": "Document the current design screenshot",
+     "url": "https://github.com/Theblackcat98/liquidscribe/pull/57"
+    },
+    {
+     "number": 56,
+     "title": "Fix Markdown export freshness and filenames",
+     "url": "https://github.com/Theblackcat98/liquidscribe/pull/56"
+    }
+   ]
+  },
   {
    "name": "opencode-android",
    "url": "https://github.com/Theblackcat98/opencode-android",
@@ -369,7 +688,7 @@
    "language": "Go",
    "license": null,
    "stars": 1,
-   "pushed_at": "2026-11-09",
+   "pushed_at": "2026-11-15",
    "health": 83,
    "missing": [
     "license"
@@ -412,27 +731,9 @@
      "labels": []
     },
     {
-     "number": 23,
-     "title": "Do not let Modules Space toggle a tool in the unfocused pane",
-     "url": "https://github.com/Theblackcat98/termux-ui/issues/23",
-     "labels": []
-    },
-    {
-     "number": 22,
-     "title": "Escape should close the custom hex editor from every field",
-     "url": "https://github.com/Theblackcat98/termux-ui/issues/22",
-     "labels": []
-    },
-    {
      "number": 21,
      "title": "Complete text editing in Extra Keys cell fields",
      "url": "https://github.com/Theblackcat98/termux-ui/issues/21",
-     "labels": []
-    },
-    {
-     "number": 20,
-     "title": "Make the global help box responsive to narrow terminal widths",
-     "url": "https://github.com/Theblackcat98/termux-ui/issues/20",
      "labels": []
     },
     {
@@ -613,6 +914,376 @@
    ]
   },
   {
+   "name": "live-edit",
+   "url": "https://github.com/Theblackcat98/live-edit",
+   "description": "Live-edit multimodal note workspace \u2014 talk or show a slide, and watch a grounded, verified Markdown note update in place.",
+   "topics": [
+    "llm",
+    "local-first",
+    "markdown",
+    "typescript",
+    "voice"
+   ],
+   "language": "TypeScript",
+   "license": null,
+   "stars": 0,
+   "pushed_at": "2026-11-14",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [
+    {
+     "number": 75,
+     "title": "Remove the 'No video frame is attached' sentence from the buildD1State preamble",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/75",
+     "labels": []
+    },
+    {
+     "number": 74,
+     "title": "Reduce d1-omni context and batch size in start-models.sh (VRAM and cold-start bloat)",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/74",
+     "labels": []
+    },
+    {
+     "number": 73,
+     "title": "Run blastGate.sectionScaleCollapse before d1Decide in verifyAndExecute",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/73",
+     "labels": []
+    },
+    {
+     "number": 72,
+     "title": "Stop grading worker-d1 edits against a synthetic directive in the d1 check",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/72",
+     "labels": []
+    },
+    {
+     "number": 71,
+     "title": "Include surrounding note context in buildD1State for the d1 check",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/71",
+     "labels": []
+    },
+    {
+     "number": 70,
+     "title": "Raise the d1 noul approval threshold (0.5 is too permissive) and hold on borderline choice probabilities",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/70",
+     "labels": []
+    },
+    {
+     "number": 58,
+     "title": "Audio decision quality (3): d1 calibration \u2014 blast-radius approvals + pending cascade",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/58",
+     "labels": []
+    },
+    {
+     "number": 49,
+     "title": "P6 gate: full QA battery (incl. cases 25\u201334) green on the workstation",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/49",
+     "labels": []
+    },
+    {
+     "number": 43,
+     "title": "TD-46: Render all derived suggestion chips (or cap generation at three)",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/43",
+     "labels": []
+    },
+    {
+     "number": 42,
+     "title": "TD-45: Label the waveform's non-listening modes as activity animation (or freeze to last real levels)",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/42",
+     "labels": []
+    },
+    {
+     "number": 41,
+     "title": "TD-42: Normalize source-editor commits through the same `finalizeNote` path as engine edits",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/41",
+     "labels": []
+    },
+    {
+     "number": 40,
+     "title": "TD-41: Delete the dead, lossy engine exports or route `tools.ts` through them after bounds fixes",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/40",
+     "labels": []
+    },
+    {
+     "number": 39,
+     "title": "TD-40: Fix voice-capture edges: anti-alias the ASR downsample (or document the tradeoff); make `VoiceRecorder.start()` failure-safe and race-safe",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/39",
+     "labels": []
+    },
+    {
+     "number": 38,
+     "title": "TD-39: Validate tool enums in the executor (closed `position` / `visual_format` sets from the catalog)",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/38",
+     "labels": []
+    },
+    {
+     "number": 36,
+     "title": "TD-37: Add a timeout to the Omni TTS request",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/36",
+     "labels": []
+    },
+    {
+     "number": 35,
+     "title": "TD-36: Wire `hardware-voice-check.mjs` as an npm script with a preflight checklist instead of top-level throws, and announce sink changes before making them",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/35",
+     "labels": []
+    },
+    {
+     "number": 34,
+     "title": "TD-35: Give shared CSS primitives a single home and record the import-order contract",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/34",
+     "labels": []
+    },
+    {
+     "number": 33,
+     "title": "TD-34: Code-split the production bundle (lazy trace drawer / About dialog; gate KaTeX assets to the document view) or accept the single chunk deliberately with a raised limit + comment",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/33",
+     "labels": []
+    },
+    {
+     "number": 32,
+     "title": "TD-33: Add a LICENSE file and extend `.gitignore` (`.env*`, `*.log`, `*.wav`)",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/32",
+     "labels": []
+    },
+    {
+     "number": 31,
+     "title": "TD-32: Add a lint gate (oxlint or eslint, Vite React defaults)",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/31",
+     "labels": []
+    },
+    {
+     "number": 30,
+     "title": "TD-31: Documentation reconciliation sweep: fix plan.md \u00a77/\u00a79 stale items, README SpeechRecognition + VL-narrative items, README TTS limits",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/30",
+     "labels": []
+    },
+    {
+     "number": 29,
+     "title": "TD-30: Decide the project's canonical name/version/license once; regenerate the lockfile from current `package.json`",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/29",
+     "labels": []
+    },
+    {
+     "number": 28,
+     "title": "TD-29: Harden the model scripts: bind llama.cpp to 127.0.0.1 by default (opt-in LAN flag), verify the pidfile process identity before killing, make stop failures exit non-zero, verify the served model alias in `up()`",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/28",
+     "labels": []
+    },
+    {
+     "number": 27,
+     "title": "TD-28: Split the QA battery into `qa:fallback` (must be green with no servers) and `qa:live`; stop counting designed endpoint-probe failures as console errors",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/27",
+     "labels": []
+    },
+    {
+     "number": 26,
+     "title": "TD-27: Add a unit-test suite for the pure engine and a CI workflow running install + typecheck + build + tests",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/26",
+     "labels": []
+    },
+    {
+     "number": 25,
+     "title": "TD-26: Implement modal focus management (focus-in, Tab trap, focus restore) for TraceDrawer and AboutDialog",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/25",
+     "labels": []
+    },
+    {
+     "number": 20,
+     "title": "TD-20: Allowlist markdown link schemes (`http:`, `https:`, `mailto:`, relative/anchor); render anything else as text",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/20",
+     "labels": []
+    },
+    {
+     "number": 19,
+     "title": "TD-19: Disable (or confirm-gate) source-editor Apply while the draft is stale",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/19",
+     "labels": []
+    },
+    {
+     "number": 18,
+     "title": "TD-17: Give the worker retry feedback and a budget: per-attempt deadline, total deadline, parse-failure correction line on retry",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/18",
+     "labels": []
+    },
+    {
+     "number": 17,
+     "title": "TD-14: Implement real run cancellation (AbortSignal through `chatComplete`, run-token check before execution) and queue \u2014 don't drop \u2014 a barged-in command",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/17",
+     "labels": []
+    },
+    {
+     "number": 15,
+     "title": "TD-11: Persist `historyIndex`; cap `messages`/`rejectedTraces`/`snapshots` at the storage layer; surface quota-save failure once",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/15",
+     "labels": []
+    },
+    {
+     "number": 14,
+     "title": "TD-10: Make heading search fence-aware and remove the reverse-contains match",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/14",
+     "labels": []
+    },
+    {
+     "number": 13,
+     "title": "TD-09: Scope `remove_text`'s blank-line collapse to the removal seam",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/13",
+     "labels": []
+    },
+    {
+     "number": 12,
+     "title": "TD-08: Make the executor's anchor check byte-exact (keep normalized matching, if wanted, in grounding only); make whitespace-only edits real or explicitly rejected",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/12",
+     "labels": []
+    },
+    {
+     "number": 11,
+     "title": "TD-07: Give the XML tool-call layer a real contract: escape on serialize, decode entities on parse, reject unbalanced delimiters, strict param grammar",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/11",
+     "labels": []
+    },
+    {
+     "number": 8,
+     "title": "Verification: real-speaker pass (human ears) \u2014 confirm audible TTS, stop mid-reply, toggle off",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/8",
+     "labels": []
+    },
+    {
+     "number": 7,
+     "title": "Verification: real-mic pass (human voice) \u2014 confirm auto-stop and transcript quality",
+     "url": "https://github.com/Theblackcat98/live-edit/issues/7",
+     "labels": []
+    }
+   ],
+   "prs": [
+    {
+     "number": 77,
+     "title": "docs: sync README/TODO/design/diagrams to the 2026-11-11 d1 turn router",
+     "url": "https://github.com/Theblackcat98/live-edit/pull/77"
+    }
+   ]
+  },
+  {
+   "name": "anatomy-threejs",
+   "url": "https://github.com/Theblackcat98/anatomy-threejs",
+   "description": "Interactive 3D technical figures in Three.js with cel-shaded four-tone ramps, silhouette outlines, kinematic readouts, and the agent skill that builds them.",
+   "topics": [],
+   "language": "JavaScript",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-11-15",
+   "health": 67,
+   "missing": [
+    "topics>=3",
+    "license"
+   ],
+   "issues": [
+    {
+     "number": 18,
+     "title": "Skill: add a pre-build presentation step \u2014 recommend fixture, controls, cutaway and explode choices before building",
+     "url": "https://github.com/Theblackcat98/anatomy-threejs/issues/18",
+     "labels": []
+    },
+    {
+     "number": 17,
+     "title": "Skill: every control must drive the drawing \u2014 no dead, conflicting, or redundant controls",
+     "url": "https://github.com/Theblackcat98/anatomy-threejs/issues/17",
+     "labels": []
+    },
+    {
+     "number": 16,
+     "title": "bambu-p1s: animations and controls are wonky",
+     "url": "https://github.com/Theblackcat98/anatomy-threejs/issues/16",
+     "labels": []
+    },
+    {
+     "number": 15,
+     "title": "yacht-winch-rigging: winch control doesn't move the sail",
+     "url": "https://github.com/Theblackcat98/anatomy-threejs/issues/15",
+     "labels": []
+    },
+    {
+     "number": 14,
+     "title": "Two boxer figures: consolidate the best of flat-six-boxer and m64-twin-turbo",
+     "url": "https://github.com/Theblackcat98/anatomy-threejs/issues/14",
+     "labels": []
+    },
+    {
+     "number": 12,
+     "title": "Printable A4 / Letter technical sheets (scripts/print.mjs) & React/Next.js component wrapper",
+     "url": "https://github.com/Theblackcat98/anatomy-threejs/issues/12",
+     "labels": [
+      "enhancement"
+     ]
+    },
+    {
+     "number": 11,
+     "title": "Lifecycle, accessibility & performance polish (IntersectionObserver, prefers-reduced-motion, & aria-live phase announcements)",
+     "url": "https://github.com/Theblackcat98/anatomy-threejs/issues/11",
+     "labels": [
+      "accessibility",
+      "enhancement"
+     ]
+    },
+    {
+     "number": 9,
+     "title": "Grazing-angle detail line fading (n\u00b7V smoothstep) in kit/shaders.mjs",
+     "url": "https://github.com/Theblackcat98/anatomy-threejs/issues/9",
+     "labels": [
+      "enhancement"
+     ]
+    },
+    {
+     "number": 5,
+     "title": "Staggered multi-assembly exploded views & mid-flight collision auditing",
+     "url": "https://github.com/Theblackcat98/anatomy-threejs/issues/5",
+     "labels": [
+      "enhancement"
+     ]
+    },
+    {
+     "number": 4,
+     "title": "Interactive assembly inspection (hover/click/keyboard-to-focus & part callouts)",
+     "url": "https://github.com/Theblackcat98/anatomy-threejs/issues/4",
+     "labels": [
+      "enhancement"
+     ]
+    },
+    {
+     "number": 3,
+     "title": "Expand kit/primitives.mjs with 3D mechanical & surface craft vocabulary",
+     "url": "https://github.com/Theblackcat98/anatomy-threejs/issues/3",
+     "labels": [
+      "enhancement"
+     ]
+    },
+    {
+     "number": 2,
+     "title": "Add first-class articulated struts (reg.actuator) and dynamic deforming tubes (reg.tube dynamic: true) in kit/registry.mjs",
+     "url": "https://github.com/Theblackcat98/anatomy-threejs/issues/2",
+     "labels": [
+      "enhancement"
+     ]
+    },
+    {
+     "number": 1,
+     "title": "Generalize Stage 1 runModelAudit in kit/audit3d.mjs beyond Wankel-specific exports",
+     "url": "https://github.com/Theblackcat98/anatomy-threejs/issues/1",
+     "labels": [
+      "enhancement"
+     ]
+    }
+   ],
+   "prs": [
+    {
+     "number": 13,
+     "title": "Add interactive manual typewriter figure",
+     "url": "https://github.com/Theblackcat98/anatomy-threejs/pull/13"
+    }
+   ]
+  },
+  {
    "name": "SyncWeave",
    "url": "https://github.com/Theblackcat98/SyncWeave",
    "description": "A file transfer TUI app to learn OpenTUI and Bubbletea+ Lipgloss",
@@ -625,7 +1296,7 @@
    "language": "TypeScript",
    "license": "MIT",
    "stars": 1,
-   "pushed_at": "2026-11-09",
+   "pushed_at": "2026-11-16",
    "health": 100,
    "missing": [],
    "issues": [
@@ -638,71 +1309,54 @@
      ]
     },
     {
-     "number": 27,
-     "title": "Receive destination is hardcoded to ~/Downloads (no picker)",
-     "url": "https://github.com/Theblackcat98/SyncWeave/issues/27",
-     "labels": [
-      "enhancement"
-     ]
-    },
-    {
-     "number": 26,
-     "title": "Real-mode transfers have no retry loop (decisions.md says 3)",
-     "url": "https://github.com/Theblackcat98/SyncWeave/issues/26",
-     "labels": [
-      "enhancement"
-     ]
-    },
-    {
      "number": 25,
      "title": "Send path follows symlinks (listed as 0-byte files, sent as targets)",
      "url": "https://github.com/Theblackcat98/SyncWeave/issues/25",
      "labels": [
       "bug"
      ]
-    },
-    {
-     "number": 24,
-     "title": "Transport: O(n\u00b2) buffer growth on receive (CPU-amplification DoS)",
-     "url": "https://github.com/Theblackcat98/SyncWeave/issues/24",
-     "labels": [
-      "security"
-     ]
-    },
-    {
-     "number": 8,
-     "title": "Phase 1 \u00b7 Group 7 \u2014 Finish responsive/mobile UX, touch interaction, help, and end-to-end polish",
-     "url": "https://github.com/Theblackcat98/SyncWeave/issues/8",
-     "labels": []
-    },
-    {
-     "number": 6,
-     "title": "Phase 1 \u00b7 Group 5 \u2014 Complete the visual diff inspector and hunk staging workflow",
-     "url": "https://github.com/Theblackcat98/SyncWeave/issues/6",
-     "labels": []
-    },
-    {
-     "number": 4,
-     "title": "Phase 1 \u00b7 Group 3 \u2014 Complete the mock filesystem workspace and selection workflow",
-     "url": "https://github.com/Theblackcat98/SyncWeave/issues/4",
-     "labels": []
     }
    ],
    "prs": [
     {
-     "number": 44,
-     "title": "chore: bump @biomejs/biome from 2.5.15 to 2.6.5",
-     "url": "https://github.com/Theblackcat98/SyncWeave/pull/44"
+     "number": 52,
+     "title": "chore: bump @biomejs/biome from 2.6.6 to 2.6.7",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/52"
     },
     {
-     "number": 43,
-     "title": "chore: bump @opentui/core from 0.6.0 to 0.8.2",
-     "url": "https://github.com/Theblackcat98/SyncWeave/pull/43"
+     "number": 51,
+     "title": "chore: bump @opentui/core from 0.6.0 to 0.8.4",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/51"
     },
     {
-     "number": 40,
-     "title": "test: fix hang in floodUntil during backpressure",
-     "url": "https://github.com/Theblackcat98/SyncWeave/pull/40"
+     "number": 50,
+     "title": "C8 backlog: 14 truth-reset loose ends (P2-14, P2-4, P2-13, P2-17, P2-19, P1-16, P1-18, P1-23, P0-11, P0-12, m-P1-8, m-P1-1, P2-21, R12 deflake)",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/50"
+    },
+    {
+     "number": 49,
+     "title": "fix(app): send gathers staged files across folders (truth reset C9)",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/49"
+    },
+    {
+     "number": 48,
+     "title": "test: close four coverage gaps \u2014 staging, parallel sessions, write-error, EADDRINUSE (truth reset C5)",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/48"
+    },
+    {
+     "number": 47,
+     "title": "fix(sink): O_EXCL publish fallback + retry on EEXIST (truth reset C2)",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/47"
+    },
+    {
+     "number": 46,
+     "title": "refactor(domain): rename MockPeer/MockEntry to Peer/FileEntry (truth reset C4)",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/46"
+    },
+    {
+     "number": 45,
+     "title": "docs: truth reset \u2014 STATE_OF_TRUTH.md becomes the canonical record",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/45"
     },
     {
      "number": 39,
@@ -710,29 +1364,89 @@
      "url": "https://github.com/Theblackcat98/SyncWeave/pull/39"
     },
     {
-     "number": 37,
-     "title": "chore: bump @types/bun from 1.4.3 to 1.4.4",
-     "url": "https://github.com/Theblackcat98/SyncWeave/pull/37"
-    },
-    {
-     "number": 34,
-     "title": "Production readiness: audit fix pack (P1\u2013P7)",
-     "url": "https://github.com/Theblackcat98/SyncWeave/pull/34"
-    },
-    {
-     "number": 33,
-     "title": "chore: bump actions/upload-artifact from 4.6.2 to 7.0.2",
-     "url": "https://github.com/Theblackcat98/SyncWeave/pull/33"
-    },
-    {
-     "number": 31,
-     "title": "chore: bump actions/checkout from 4.4.0 to 7.0.1",
-     "url": "https://github.com/Theblackcat98/SyncWeave/pull/31"
-    },
-    {
      "number": 30,
      "title": "chore: bump typescript from 5.8.3 to 7.0.2",
      "url": "https://github.com/Theblackcat98/SyncWeave/pull/30"
+    }
+   ]
+  },
+  {
+   "name": "opencode-workflow",
+   "url": "https://github.com/Theblackcat98/opencode-workflow",
+   "description": "A thin engineering-operating layer on top of opencode: delegate feature-level objectives to an agent team (lead orchestrator + planner/coder/reviewer/researcher subagents) that inspects, plans, implements, tests, reviews, documents, and commits \u2014 with worktree-based parallel isolation.",
+   "topics": [
+    "agent",
+    "opencode",
+    "orchestration"
+   ],
+   "language": "TypeScript",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-11-10",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [
+    {
+     "number": 11,
+     "title": "R8: Validation hardening (regression + invariant tests)",
+     "url": "https://github.com/Theblackcat98/opencode-workflow/issues/11",
+     "labels": []
+    },
+    {
+     "number": 10,
+     "title": "R7: Reviewer independence (unbiased input + output contract)",
+     "url": "https://github.com/Theblackcat98/opencode-workflow/issues/10",
+     "labels": []
+    },
+    {
+     "number": 9,
+     "title": "R6: Parallel planning (task DAG) + worktree lifecycle invariants",
+     "url": "https://github.com/Theblackcat98/opencode-workflow/issues/9",
+     "labels": []
+    },
+    {
+     "number": 8,
+     "title": "R5: Workflow state machine with explicit states and invariants",
+     "url": "https://github.com/Theblackcat98/opencode-workflow/issues/8",
+     "labels": []
+    },
+    {
+     "number": 7,
+     "title": "R4: Permission hardening (lead, coder) + hard-vs-judgment gate taxonomy",
+     "url": "https://github.com/Theblackcat98/opencode-workflow/issues/7",
+     "labels": []
+    },
+    {
+     "number": 6,
+     "title": "R3: Phase 5: package the harness as a copyable template",
+     "url": "https://github.com/Theblackcat98/opencode-workflow/issues/6",
+     "labels": []
+    },
+    {
+     "number": 5,
+     "title": "R2: Phase 4.6 remainder: delegation-first enforcement + /plan, /review, /worktree commands + scenarios 13-16",
+     "url": "https://github.com/Theblackcat98/opencode-workflow/issues/5",
+     "labels": []
+    },
+    {
+     "number": 4,
+     "title": "R1: Scenario 12 verification after an opencode restart",
+     "url": "https://github.com/Theblackcat98/opencode-workflow/issues/4",
+     "labels": []
+    }
+   ],
+   "prs": [
+    {
+     "number": 3,
+     "title": "Specify concrete state-machine implementation for the engineering workflow",
+     "url": "https://github.com/Theblackcat98/opencode-workflow/pull/3"
+    },
+    {
+     "number": 2,
+     "title": "Formalize and more closely enforce the canonical engineering workflow",
+     "url": "https://github.com/Theblackcat98/opencode-workflow/pull/2"
     }
    ]
   },
@@ -766,12 +1480,6 @@
      "labels": []
     },
     {
-     "number": 30,
-     "title": "Add optional project-specific verification profiles for real application behavior",
-     "url": "https://github.com/Theblackcat98/PAGS/issues/30",
-     "labels": []
-    },
-    {
      "number": 24,
      "title": "Pilot PAGS on a real greenfield and a real brownfield project",
      "url": "https://github.com/Theblackcat98/PAGS/issues/24",
@@ -783,15 +1491,6 @@
      "number": 13,
      "title": "Single-file record logs conflict across parallel branches and grow without bound",
      "url": "https://github.com/Theblackcat98/PAGS/issues/13",
-     "labels": [
-      "enhancement",
-      "question"
-     ]
-    },
-    {
-     "number": 11,
-     "title": "Define who can approve: agent vs. human authority",
-     "url": "https://github.com/Theblackcat98/PAGS/issues/11",
      "labels": [
       "enhancement",
       "question"
@@ -829,11 +1528,6 @@
      "url": "https://github.com/Theblackcat98/PAGS/pull/47"
     },
     {
-     "number": 37,
-     "title": "Fix remaining tracking issue items for PAGS (#1)",
-     "url": "https://github.com/Theblackcat98/PAGS/pull/37"
-    },
-    {
      "number": 36,
      "title": "feat(installer): add merge conflict policy for brownfield adoption",
      "url": "https://github.com/Theblackcat98/PAGS/pull/36"
@@ -853,7 +1547,7 @@
    "language": "TypeScript",
    "license": "MIT",
    "stars": 1,
-   "pushed_at": "2026-11-02",
+   "pushed_at": "2026-11-14",
    "health": 100,
    "missing": [],
    "issues": [
@@ -923,25 +1617,9 @@
       "layer:ui",
       "priority:medium"
      ]
-    },
-    {
-     "number": 63,
-     "title": "[task]: reconcile spec & docs with reality (compat-matrix sign-off, D3 PTY, theme list, stale rows)",
-     "url": "https://github.com/Theblackcat98/llamacpp-runner/issues/63",
-     "labels": [
-      "ready",
-      "task",
-      "priority:medium",
-      "docs"
-     ]
     }
    ],
    "prs": [
-    {
-     "number": 78,
-     "title": "core: expose throttled partial lines for loading progress",
-     "url": "https://github.com/Theblackcat98/llamacpp-runner/pull/78"
-    },
     {
      "number": 77,
      "title": "ui: UX consistency pass (explorer preview, palette label, Esc arm, footer hints)",
@@ -960,68 +1638,86 @@
    ]
   },
   {
-   "name": "opencode-workflow",
-   "url": "https://github.com/Theblackcat98/opencode-workflow",
-   "description": "A thin engineering-operating layer on top of opencode: delegate feature-level objectives to an agent team (lead orchestrator + planner/coder/reviewer/researcher subagents) that inspects, plans, implements, tests, reviews, documents, and commits \u2014 with worktree-based parallel isolation.",
+   "name": "blackcatdesigns",
+   "url": "https://github.com/Theblackcat98/blackcatdesigns",
+   "description": "Personal portfolio and blog \u2014 Next.js 15, React, Tailwind, with Markdown-driven posts.",
    "topics": [
-    "agent",
-    "opencode",
-    "orchestration"
+    "blog",
+    "nextjs",
+    "portfolio",
+    "website"
    ],
-   "language": "TypeScript",
+   "language": "HTML",
    "license": null,
-   "stars": 1,
-   "pushed_at": "2026-10-17",
+   "stars": 0,
+   "pushed_at": "2026-11-10",
    "health": 83,
    "missing": [
     "license"
    ],
-   "issues": [],
-   "prs": [
+   "issues": [
+    {
+     "number": 4,
+     "title": "4.4 Alt Text Audit",
+     "url": "https://github.com/Theblackcat98/blackcatdesigns/issues/4",
+     "labels": []
+    },
     {
      "number": 3,
-     "title": "Specify concrete state-machine implementation for the engineering workflow",
-     "url": "https://github.com/Theblackcat98/opencode-workflow/pull/3"
+     "title": "4.3 Color Contrast Check",
+     "url": "https://github.com/Theblackcat98/blackcatdesigns/issues/3",
+     "labels": []
     },
     {
      "number": 2,
-     "title": "Formalize and more closely enforce the canonical engineering workflow",
-     "url": "https://github.com/Theblackcat98/opencode-workflow/pull/2"
-    }
-   ]
-  },
-  {
-   "name": "tui-kanban",
-   "url": "https://github.com/Theblackcat98/tui-kanban",
-   "description": "A beautiful terminal Kanban board built with Rust and Ratatui",
-   "topics": [
-    "productivity",
-    "rust",
-    "terminal",
-    "tui"
-   ],
-   "language": "Rust",
-   "license": "MIT",
-   "stars": 1,
-   "pushed_at": "2026-10-30",
-   "health": 100,
-   "missing": [],
-   "issues": [
-    {
-     "number": 31,
-     "title": "UI polish: relative times, rail counts, scroll position, overflow indicators, detail drawer",
-     "url": "https://github.com/Theblackcat98/tui-kanban/issues/31",
-     "labels": [
-      "enhancement"
-     ]
+     "title": "4.2 Heading Structure Audit",
+     "url": "https://github.com/Theblackcat98/blackcatdesigns/issues/2",
+     "labels": []
     },
     {
      "number": 1,
-     "title": "Tracking: full review findings and from-scratch redesign ideas",
-     "url": "https://github.com/Theblackcat98/tui-kanban/issues/1",
-     "labels": [
-      "enhancement"
-     ]
+     "title": "4.1 Skip-to-Content Link",
+     "url": "https://github.com/Theblackcat98/blackcatdesigns/issues/1",
+     "labels": []
+    }
+   ],
+   "prs": []
+  },
+  {
+   "name": "veritas",
+   "url": "https://github.com/Theblackcat98/veritas",
+   "description": "Terminal chat app in Rust",
+   "topics": [
+    "chat",
+    "rust",
+    "tui"
+   ],
+   "language": "Rust",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-11-10",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [
+    {
+     "number": 3,
+     "title": "Phase 6 - Local engine launcher (llama.cpp)",
+     "url": "https://github.com/Theblackcat98/veritas/issues/3",
+     "labels": []
+    },
+    {
+     "number": 2,
+     "title": "Phase 4 - Polish & release",
+     "url": "https://github.com/Theblackcat98/veritas/issues/2",
+     "labels": []
+    },
+    {
+     "number": 1,
+     "title": "Phase 3 - Reading experience",
+     "url": "https://github.com/Theblackcat98/veritas/issues/1",
+     "labels": []
     }
    ],
    "prs": []
@@ -1054,33 +1750,6 @@
    ]
   },
   {
-   "name": "CL-AI",
-   "url": "https://github.com/Theblackcat98/CL-AI",
-   "description": "Minimal CLI/TUI that turns a local LLM into bash command suggestions.",
-   "topics": [
-    "cli",
-    "llm",
-    "local-llm",
-    "tui"
-   ],
-   "language": "Python",
-   "license": null,
-   "stars": 1,
-   "pushed_at": "2026-10-10",
-   "health": 83,
-   "missing": [
-    "license"
-   ],
-   "issues": [],
-   "prs": [
-    {
-     "number": 8,
-     "title": "Refactor cl-ai into modular package",
-     "url": "https://github.com/Theblackcat98/CL-AI/pull/8"
-    }
-   ]
-  },
-  {
    "name": "skillman",
    "url": "https://github.com/Theblackcat98/skillman",
    "description": "Terminal skill manager for opencode: browse, preview, validate, edit and install skills",
@@ -1108,35 +1777,22 @@
   {
    "name": "html-tests",
    "url": "https://github.com/Theblackcat98/html-tests",
-   "description": null,
-   "topics": [],
+   "description": "Numbered HTML/CSS design experiments \u2014 posters, heroes, and visual studies in single files.",
+   "topics": [
+    "css",
+    "design",
+    "experiments",
+    "html",
+    "web-design"
+   ],
    "language": "HTML",
    "license": null,
    "stars": 0,
    "pushed_at": "2026-11-03",
-   "health": 17,
+   "health": 50,
    "missing": [
-    "description",
-    "topics>=3",
     "readme",
     "readme>500B",
-    "license"
-   ],
-   "issues": [],
-   "prs": []
-  },
-  {
-   "name": "live-edit",
-   "url": "https://github.com/Theblackcat98/live-edit",
-   "description": "Live-edit multimodal note workspace \u2014 talk or show a slide, and watch a grounded, verified Markdown note update in place.",
-   "topics": [],
-   "language": "TypeScript",
-   "license": null,
-   "stars": 0,
-   "pushed_at": "2026-11-09",
-   "health": 67,
-   "missing": [
-    "topics>=3",
     "license"
    ],
    "issues": [],
@@ -1185,19 +1841,25 @@
    "prs": []
   },
   {
-   "name": "blackcatdesigns",
-   "url": "https://github.com/Theblackcat98/blackcatdesigns",
-   "description": "Personal portfolio and blog \u2014 Next.js 15, React, Tailwind, with Markdown-driven posts.",
+   "name": "axonometric-plates",
+   "url": "https://github.com/Theblackcat98/axonometric-plates",
+   "description": "Single-file Three.js axonometric drawings of buildings and wonders \u2014 flat ink-and-wash plates on drafting paper, each one self-contained HTML \u2014 plus the agent skill that writes them.",
    "topics": [
-    "blog",
-    "nextjs",
-    "portfolio",
-    "website"
+    "agent-skills",
+    "architectural-drawing",
+    "axonometric",
+    "creative-coding",
+    "generative-art",
+    "javascript",
+    "single-file",
+    "threejs",
+    "webgl",
+    "wonders-of-the-world"
    ],
    "language": "HTML",
    "license": null,
    "stars": 0,
-   "pushed_at": "2026-09-29",
+   "pushed_at": "2026-11-14",
    "health": 83,
    "missing": [
     "license"
@@ -1219,6 +1881,27 @@
    "license": null,
    "stars": 0,
    "pushed_at": "2026-09-19",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "CL-AI",
+   "url": "https://github.com/Theblackcat98/CL-AI",
+   "description": "Minimal CLI/TUI that turns a local LLM into bash command suggestions.",
+   "topics": [
+    "cli",
+    "llm",
+    "local-llm",
+    "tui"
+   ],
+   "language": "Python",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-11-14",
    "health": 83,
    "missing": [
     "license"
@@ -1259,26 +1942,10 @@
    "language": "HTML",
    "license": null,
    "stars": 1,
-   "pushed_at": "2026-11-08",
+   "pushed_at": "2026-11-16",
    "health": 83,
    "missing": [
     "license"
-   ],
-   "issues": [],
-   "prs": []
-  },
-  {
-   "name": "liquidscribe",
-   "url": "https://github.com/Theblackcat98/liquidscribe",
-   "description": "Local-first Markdown note workspace with inline, reviewable AI suggestions. Next.js 16 + Tiptap + Postgres.",
-   "topics": [],
-   "language": "TypeScript",
-   "license": "MIT",
-   "stars": 0,
-   "pushed_at": "2026-11-09",
-   "health": 83,
-   "missing": [
-    "topics>=3"
    ],
    "issues": [],
    "prs": []
@@ -1296,7 +1963,7 @@
    "language": "HTML",
    "license": null,
    "stars": 1,
-   "pushed_at": "2026-10-31",
+   "pushed_at": "2026-11-15",
    "health": 83,
    "missing": [
     "license"
@@ -1359,7 +2026,7 @@
    "language": "HTML",
    "license": null,
    "stars": 1,
-   "pushed_at": "2026-11-09",
+   "pushed_at": "2026-11-17",
    "health": 83,
    "missing": [
     "license"
@@ -1380,26 +2047,6 @@
    "license": null,
    "stars": 1,
    "pushed_at": "2026-10-28",
-   "health": 83,
-   "missing": [
-    "license"
-   ],
-   "issues": [],
-   "prs": []
-  },
-  {
-   "name": "veritas",
-   "url": "https://github.com/Theblackcat98/veritas",
-   "description": "Terminal chat app in Rust",
-   "topics": [
-    "chat",
-    "rust",
-    "tui"
-   ],
-   "language": "Rust",
-   "license": null,
-   "stars": 1,
-   "pushed_at": "2026-09-23",
    "health": 83,
    "missing": [
     "license"
@@ -1440,6 +2087,25 @@
    "license": "NOASSERTION",
    "stars": 2,
    "pushed_at": "2026-10-17",
+   "health": 100,
+   "missing": [],
+   "issues": [],
+   "prs": []
+  },
+  {
+   "name": "tui-kanban",
+   "url": "https://github.com/Theblackcat98/tui-kanban",
+   "description": "A beautiful terminal Kanban board built with Rust and Ratatui",
+   "topics": [
+    "productivity",
+    "rust",
+    "terminal",
+    "tui"
+   ],
+   "language": "Rust",
+   "license": "MIT",
+   "stars": 1,
+   "pushed_at": "2026-10-30",
    "health": 100,
    "missing": [],
    "issues": [],

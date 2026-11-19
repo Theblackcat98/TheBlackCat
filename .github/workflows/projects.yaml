@@ -25,7 +25,11 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+      # Push via the repo deploy key, not GITHUB_TOKEN: the "Allowed Editors"
+      # ruleset on main rejects token pushes (GH013) but bypasses deploy keys.
       - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.SYNC_DEPLOY_KEY }}
 
       - name: Sync content/projects with GitHub
         env:

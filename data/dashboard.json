@@ -1,680 +1,17 @@
 {
- "generated": "2026-11-17",
+ "generated": "2026-11-19",
  "scope": "public, non-fork, non-archived owner repositories; todos = open GitHub Issues",
  "private_skipped": 0,
  "summary": {
-  "repos": 29,
-  "open_issues": 181,
-  "open_prs": 53,
+  "repos": 28,
+  "open_issues": 90,
+  "open_prs": 40,
   "avg_health": 86,
   "missing_description": 0,
   "missing_license": 21,
   "missing_readme": 1
  },
  "repos": [
-  {
-   "name": "liquidscribe",
-   "url": "https://github.com/Theblackcat98/liquidscribe",
-   "description": "Local-first Markdown note workspace with inline, reviewable AI suggestions. Next.js 16 + Tiptap + Postgres.",
-   "topics": [
-    "llm",
-    "local-first",
-    "markdown",
-    "nextjs",
-    "notes",
-    "writing"
-   ],
-   "language": "TypeScript",
-   "license": "MIT",
-   "stars": 0,
-   "pushed_at": "2026-11-17",
-   "health": 100,
-   "missing": [],
-   "issues": [
-    {
-     "number": 50,
-     "title": "TD-50: Workspace import/restore + empty-trash + server search: assess as product gaps (see \u00a712) rather than defects; the export-without-import gap is the actionable one",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/50",
-     "labels": []
-    },
-    {
-     "number": 49,
-     "title": "TD-49: Fix `.gitignore` env gap (`.env*` with `!.env.example` so `.env.production` cannot be committed); move the hardcoded LAN dev origin out of tracked config",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/49",
-     "labels": []
-    },
-    {
-     "number": 48,
-     "title": "TD-48: Repo process hygiene when the project grows: CONTRIBUTING/CHANGELOG/SECURITY; none urgent for a day-one personal project",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/48",
-     "labels": []
-    },
-    {
-     "number": 47,
-     "title": "TD-47: Run `npm audit` from an unrestricted network (or in CI) and record the result; until then carry CVE status as **unknown**",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/47",
-     "labels": []
-    },
-    {
-     "number": 46,
-     "title": "TD-46: Optional TS hardening (`noUncheckedIndexedAccess` first); bring `scripts/smoke.mjs` inside type checking or accept the gap explicitly",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/46",
-     "labels": []
-    },
-    {
-     "number": 45,
-     "title": "TD-45: Adopt one dependency-pinning policy (exact pins + lockfile with a deliberate update cadence) and apply it uniformly; track `tiptap-markdown@0.9.0` pre-1.0 + local type shim as a named risk; note `lucide-react@1.70.0` is verified real, not a typo",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/45",
-     "labels": []
-    },
-    {
-     "number": 44,
-     "title": "TD-44: Reference `docs/before.jpg` in the README Design section or delete it",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/44",
-     "labels": []
-    },
-    {
-     "number": 42,
-     "title": "TD-42: Key seeding on a dedicated marker (starter folder ids or a settings row) or document the \"any folder exists\" heuristic",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/42",
-     "labels": []
-    },
-    {
-     "number": 41,
-     "title": "TD-41: Vision path: check the selected model is vision-capable (Ollama `/api/show`) and validate the image payload before forwarding; fail fast with the existing friendly message",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/41",
-     "labels": []
-    },
-    {
-     "number": 40,
-     "title": "TD-40: Assistant path efficiency/correctness: cache runtime status server-side for a few seconds; set the chat fetch timeout below `maxDuration` (e.g. 75 s vs 90 s); split status codes by fault (400 client / 502\u2013503 upstream)",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/40",
-     "labels": []
-    },
-    {
-     "number": 39,
-     "title": "TD-39: Record the prompt-injection posture honestly: system-prompt sentence is a mitigation, not a defence; revisit with delimiting/output validation if the model path gains tools or autonomy",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/39",
-     "labels": []
-    },
-    {
-     "number": 38,
-     "title": "TD-38: Improve built-in heuristics: abbreviation/decimal-aware sentence tokeniser; truncate summaries on a sentence/word boundary; vary or drop Expand boilerplate for non-prose; fix Explain on empty text (\"0 words across 1 sentence\")",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/38",
-     "labels": []
-    },
-    {
-     "number": 37,
-     "title": "TD-37: Unify the workspace read path: `GET /api/notes` shares `getWorkspace()` (one ordering, one seeding site); document the full-dump-by-design contract",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/37",
-     "labels": []
-    },
-    {
-     "number": 35,
-     "title": "TD-35: Add CI (GitHub Actions: `npm ci`, typecheck, lint, build with dummy/lazy DB config, plus a Postgres service job running smoke) and a minimal deployment story",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/35",
-     "labels": []
-    },
-    {
-     "number": 34,
-     "title": "TD-34: Make smoke runnable: add `\"smoke\": \"node scripts/smoke.mjs\"`, document/install the Playwright browser, and provide a one-command harness (Postgres + schema push + server + health wait + smoke + teardown)",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/34",
-     "labels": []
-    },
-    {
-     "number": 33,
-     "title": "TD-33: Add a unit-test runner (Vitest or `node --test`) with tests for `assistant.ts` built-in tools and `workspace.ts` helpers; add a `test` script",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/33",
-     "labels": []
-    },
-    {
-     "number": 32,
-     "title": "TD-32: Fix model-selection UI consistency (Settings select value vs tools mode; dock menu check marks); make voice language a setting or document the `en-US` lock",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/32",
-     "labels": []
-    },
-    {
-     "number": 31,
-     "title": "TD-31: Add ARIA wiring to Search selection (`role=\"combobox\"`/`listbox`/`option`, `aria-activedescendant`, `aria-selected`)",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/31",
-     "labels": []
-    },
-    {
-     "number": 30,
-     "title": "TD-30: Print: switch out of Markdown source mode before `window.print()` (or add an intentional print rule for source mode); document replacement-only suggestion printing",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/30",
-     "labels": []
-    },
-    {
-     "number": 29,
-     "title": "TD-29: Gate global shortcuts when a dialog is open or the target is a form field; add Escape handling to popovers",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/29",
-     "labels": []
-    },
-    {
-     "number": 28,
-     "title": "TD-28: CapturePreview: reset `ready`/`error` on `kind` change; friendly error copy when `getDisplayMedia` is missing",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/28",
-     "labels": []
-    },
-    {
-     "number": 27,
-     "title": "TD-27: Decide and document `plainText` suggestion semantics (index original vs replacement consistently across count/search/export); note the hand-authored-markup limitation",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/27",
-     "labels": []
-    },
-    {
-     "number": 26,
-     "title": "TD-26: `exportNote`: read from `notesRef.current` after flushing (as `exportWorkspace` does); sanitise the download filename",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/26",
-     "labels": []
-    },
-    {
-     "number": 25,
-     "title": "TD-25: Wire `resolveAll` to bulk accept/reject buttons in the suggestion chip/menu, or delete it",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/25",
-     "labels": []
-    },
-    {
-     "number": 24,
-     "title": "TD-24: Hide/disable suggestion Accept/Reject when `!editor.isEditable`; add a runtime test for Reading mode and trashed notes",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/24",
-     "labels": []
-    },
-    {
-     "number": 23,
-     "title": "TD-23: Debounce localStorage cache writes (1\u20132 s + `visibilitychange`/`beforeunload`) and/or persist only dirty notes; surface quota failure",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/23",
-     "labels": []
-    },
-    {
-     "number": 22,
-     "title": "TD-22: Derive the outline from the editor document (or a real Markdown parse) and scroll by heading anchor, not positional DOM index",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/22",
-     "labels": []
-    },
-    {
-     "number": 21,
-     "title": "TD-21: Voice: treat `no-speech`/`aborted` as restartable in continuous mode (clear `keepListening` only on `not-allowed`/`audio-capture`); detach/ignore `onresult` on stop-from-submit (generation counter or `abort()`)",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/21",
-     "labels": []
-    },
-    {
-     "number": 18,
-     "title": "TD-18: Preserve formatting on suggestions: store the original as a ProseMirror JSON fragment/slice and restore it on reject; refuse or specially handle multi-block selections",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/18",
-     "labels": []
-    },
-    {
-     "number": 17,
-     "title": "TD-17: Fix the Work-workspace filter: compute descendant folder ids of the workspace root and test membership",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/17",
-     "labels": []
-    },
-    {
-     "number": 16,
-     "title": "TD-16: Make the DB pool lazy (no import-time throw), configure `max`/timeouts/`error` handler, cache the pool on `globalThis` unconditionally; let `/api/health` report `{ok:false}` instead of failing to load",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/16",
-     "labels": []
-    },
-    {
-     "number": 15,
-     "title": "TD-15: Fix `cleanText`: case-preserving a\u2192an replacement; re-collapse whitespace after the fallback pass; reconsider/document intensifier stripping as a meaning change",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/15",
-     "labels": []
-    },
-    {
-     "number": 14,
-     "title": "TD-14: Parse request bodies defensively in all mutating routes (object check \u2192 400 with existing friendly copy); stop returning raw `error.message` from the assistant route; notes POST nonexistent-folder 404 \u2192 400/422",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/14",
-     "labels": []
-    },
-    {
-     "number": 13,
-     "title": "TD-13: Decide version history's home: persist server-side (`note_versions` written by PATCH) **or** document plainly (README + Settings) that it is browser-local and excluded from exports; warn on quota failure",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/13",
-     "labels": []
-    },
-    {
-     "number": 12,
-     "title": "TD-12: Complete the folder model: `parentId` FK + existence validation; PATCH/DELETE folder endpoints; rename/delete UI (notes unfile on delete); new folders default to the current context",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/12",
-     "labels": []
-    },
-    {
-     "number": 11,
-     "title": "TD-11: Validate `folderId` in PATCH with a truthful 400; fix the misleading \"saved on device / reconnect\" 500 copy; add an exponential-backoff retry timer while saves are pending and surface the pending count",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/11",
-     "labels": []
-    },
-    {
-     "number": 10,
-     "title": "TD-10: Add request-size limits: early `Content-Length` rejection on mutating routes; cap note `content` at insert/update to a stated maximum",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/10",
-     "labels": []
-    },
-    {
-     "number": 9,
-     "title": "TD-9: Fix built-in `ask` intents: test the user's `instruction` (not the document) for word-count/title; count the correct text per context mode; derive titles from the document or drop the \"inspired by your opening\" claim",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/9",
-     "labels": []
-    },
-    {
-     "number": 8,
-     "title": "TD-8: Treat an empty Ollama response as an error for every action except `remove`",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/8",
-     "labels": []
-    },
-    {
-     "number": 7,
-     "title": "TD-7: Built-in Tighten: return the already-concise fallback with `edit: false` (chat response, not a replacement)",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/7",
-     "labels": []
-    },
-    {
-     "number": 6,
-     "title": "TD-6: Generate and commit Drizzle migrations; switch README beyond first setup to `migrate`; resolve the `drizzle/` gitignore ambiguity by tracking it",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/6",
-     "labels": []
-    },
-    {
-     "number": 5,
-     "title": "TD-5: Make `drizzle.config` env-driven (TS config reading `DATABASE_URL`); remove the committed credential URL; replace example password `scribe` with an obvious placeholder and confirm it is used nowhere real",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/5",
-     "labels": []
-    },
-    {
-     "number": 4,
-     "title": "TD-4: Split note creation/update: PATCH becomes true update (404 on missing), creation only via POST; validate `folderId` on PATCH as POST does; delete the dead 404 or make it real",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/4",
-     "labels": []
-    },
-    {
-     "number": 3,
-     "title": "TD-3: Enforce the trust boundary: loopback/`Host`/`Origin` enforcement or per-install token middleware; validate `Content-Type` + same-origin on mutations; stop disclosing Ollama endpoint/inventory unauthenticated",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/3",
-     "labels": []
-    },
-    {
-     "number": 2,
-     "title": "TD-2: Serialise saves per note (promise chain) or add revision/CAS so stale PATCHes cannot regress the DB; only the latest revision may set \"saved\"",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/2",
-     "labels": []
-    },
-    {
-     "number": 1,
-     "title": "TD-1: Reconcile boot cache with server: SSR props authoritative, merge per-note by `updatedAt`, drop cached ids absent server-side unless flagged unsynced",
-     "url": "https://github.com/Theblackcat98/liquidscribe/issues/1",
-     "labels": []
-    }
-   ],
-   "prs": [
-    {
-     "number": 59,
-     "title": "Fix global shortcuts and popover Escape behavior",
-     "url": "https://github.com/Theblackcat98/liquidscribe/pull/59"
-    },
-    {
-     "number": 58,
-     "title": "Add ARIA semantics to Search selection",
-     "url": "https://github.com/Theblackcat98/liquidscribe/pull/58"
-    },
-    {
-     "number": 57,
-     "title": "Document the current design screenshot",
-     "url": "https://github.com/Theblackcat98/liquidscribe/pull/57"
-    },
-    {
-     "number": 56,
-     "title": "Fix Markdown export freshness and filenames",
-     "url": "https://github.com/Theblackcat98/liquidscribe/pull/56"
-    }
-   ]
-  },
-  {
-   "name": "opencode-android",
-   "url": "https://github.com/Theblackcat98/opencode-android",
-   "description": "Unofficial android client app to drive Opencode sessions.",
-   "topics": [
-    "android",
-    "client",
-    "kotlin",
-    "opencode"
-   ],
-   "language": "Kotlin",
-   "license": null,
-   "stars": 0,
-   "pushed_at": "2026-11-02",
-   "health": 83,
-   "missing": [
-    "license"
-   ],
-   "issues": [
-    {
-     "number": 85,
-     "title": "Install scoped Android skills (second-pass review)",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/85",
-     "labels": []
-    },
-    {
-     "number": 56,
-     "title": "[P2] Bind config editor reads to the requested path and directory",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/56",
-     "labels": [
-      "no-device"
-     ]
-    },
-    {
-     "number": 54,
-     "title": "[P2] Make integrationTest fail when required live tests are unavailable",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/54",
-     "labels": [
-      "no-device"
-     ]
-    },
-    {
-     "number": 53,
-     "title": "[P2] Run the documented Spotless and Detekt quality gate in CI",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/53",
-     "labels": [
-      "no-device"
-     ]
-    },
-    {
-     "number": 52,
-     "title": "[P2] Discard review results from stale scope or session loads",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/52",
-     "labels": [
-      "no-device"
-     ]
-    },
-    {
-     "number": 45,
-     "title": "[P2] Roll back server profile changes when credential persistence fails",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/45",
-     "labels": [
-      "no-device"
-     ]
-    },
-    {
-     "number": 44,
-     "title": "[P2] Prevent request resync snapshots from restoring answered requests",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/44",
-     "labels": [
-      "no-device"
-     ]
-    },
-    {
-     "number": 42,
-     "title": "[P2] Consume incoming image share intents or remove the image share target",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/42",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 41,
-     "title": "[P1] Use a valid Android SDK platform identifier in fresh CI setup",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/41",
-     "labels": [
-      "no-device"
-     ]
-    },
-    {
-     "number": 40,
-     "title": "[P1] Cancel history timeline collectors when changing sessions",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/40",
-     "labels": [
-      "no-device"
-     ]
-    },
-    {
-     "number": 38,
-     "title": "[P1] Restore composer drafts independently for each session",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/38",
-     "labels": [
-      "no-device"
-     ]
-    },
-    {
-     "number": 35,
-     "title": "[P0] Build, sign, verify and publish Play/F-Droid release artifacts",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/35",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 34,
-     "title": "[P1] Complete live-server integrations and execute the full manual matrix",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/34",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 30,
-     "title": "[P1] Resolve security/privacy decisions and verify sensitive-data lifecycle",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/30",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 29,
-     "title": "[P1] Close accessibility release gates across screens, fonts and assistive input",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/29",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 28,
-     "title": "[P2] Measure baseline profiles and publish changelog/compatibility information",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/28",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 27,
-     "title": "[P2] Implement safe OpenCode theme import with contrast validation",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/27",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 26,
-     "title": "[P2] Implement adaptive list-detail navigation for wide Android windows",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/26",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 25,
-     "title": "[P2] Add isolated multi-session tabs with state preservation",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/25",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 24,
-     "title": "[P2] Implement home widget, Quick Settings connection tile and launcher shortcuts",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/24",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 23,
-     "title": "[P2] Add touch-accessible command palette and safe leader shortcuts",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/23",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 22,
-     "title": "[P2] Implement opt-in, bounded LAN OpenCode discovery or formally descope it",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/22",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 21,
-     "title": "[P2] Finish QR pairing for another device and gate unsupported servers",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/21",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 20,
-     "title": "[P2] Build Quick Ask and share one implementation across Android surfaces",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/20",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 19,
-     "title": "[P2] Add confirmed advanced session tools (synthetic note, wait, permission and form)",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/19",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 18,
-     "title": "[P2] Build a session log viewer with replay/live deduplication",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/18",
-     "labels": [
-      "no-device"
-     ]
-    },
-    {
-     "number": 17,
-     "title": "[P2] Add guarded RPC console and RPC event viewer",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/17",
-     "labels": [
-      "no-device"
-     ]
-    },
-    {
-     "number": 16,
-     "title": "[P2] Surface TUI control events with safe follow-desktop mode",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/16",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 15,
-     "title": "[P2] Expose the usage dashboard in Manage",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/15",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 10,
-     "title": "[P1] Clarify queue/steer/background controls and harden terminal interactions",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/10",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 9,
-     "title": "[P1] Wire staged undo/redo into the active session UI",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/9",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 8,
-     "title": "[P1] Make reconnect state converge to authoritative server state",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/8",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 7,
-     "title": "[P1] Correct worktree branch/ref semantics and surface create errors",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/7",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 6,
-     "title": "[P1] Render image attachments in the session timeline",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/6",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 5,
-     "title": "[P1] Make background permission/form requests reliable and safe",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/5",
-     "labels": [
-      "needs-device"
-     ]
-    },
-    {
-     "number": 4,
-     "title": "[P0] Reconcile Phase 11 plan PR with current manual-test evidence",
-     "url": "https://github.com/Theblackcat98/opencode-android/issues/4",
-     "labels": [
-      "no-device"
-     ]
-    }
-   ],
-   "prs": [
-    {
-     "number": 92,
-     "title": "Make integrationTest fail when required live tests are unavailable",
-     "url": "https://github.com/Theblackcat98/opencode-android/pull/92"
-    },
-    {
-     "number": 91,
-     "title": "feat: Install scoped Android skills (second-pass review)",
-     "url": "https://github.com/Theblackcat98/opencode-android/pull/91"
-    },
-    {
-     "number": 90,
-     "title": "Fix CI gate by running Detekt",
-     "url": "https://github.com/Theblackcat98/opencode-android/pull/90"
-    },
-    {
-     "number": 89,
-     "title": "Fix #45: Stage credential modifications before profile updates",
-     "url": "https://github.com/Theblackcat98/opencode-android/pull/89"
-    },
-    {
-     "number": 88,
-     "title": "Fix RequestCenter to avoid resurrecting answered requests on resync",
-     "url": "https://github.com/Theblackcat98/opencode-android/pull/88"
-    },
-    {
-     "number": 86,
-     "title": "feat: Complete remaining phase 10 todos, theme import, accessibility, and detekt quality gate",
-     "url": "https://github.com/Theblackcat98/opencode-android/pull/86"
-    },
-    {
-     "number": 83,
-     "title": "feat: add safe theme import and accessibility gates",
-     "url": "https://github.com/Theblackcat98/opencode-android/pull/83"
-    }
-   ]
-  },
   {
    "name": "termux-ui",
    "url": "https://github.com/Theblackcat98/termux-ui",
@@ -688,7 +25,7 @@
    "language": "Go",
    "license": null,
    "stars": 1,
-   "pushed_at": "2026-11-15",
+   "pushed_at": "2026-11-19",
    "health": 83,
    "missing": [
     "license"
@@ -970,12 +307,6 @@
      "labels": []
     },
     {
-     "number": 58,
-     "title": "Audio decision quality (3): d1 calibration \u2014 blast-radius approvals + pending cascade",
-     "url": "https://github.com/Theblackcat98/live-edit/issues/58",
-     "labels": []
-    },
-    {
      "number": 49,
      "title": "P6 gate: full QA battery (incl. cases 25\u201334) green on the workstation",
      "url": "https://github.com/Theblackcat98/live-edit/issues/49",
@@ -1051,12 +382,6 @@
      "number": 31,
      "title": "TD-32: Add a lint gate (oxlint or eslint, Vite React defaults)",
      "url": "https://github.com/Theblackcat98/live-edit/issues/31",
-     "labels": []
-    },
-    {
-     "number": 30,
-     "title": "TD-31: Documentation reconciliation sweep: fix plan.md \u00a77/\u00a79 stale items, README SpeechRecognition + VL-narrative items, README TTS limits",
-     "url": "https://github.com/Theblackcat98/live-edit/issues/30",
      "labels": []
     },
     {
@@ -1295,7 +620,7 @@
    ],
    "language": "TypeScript",
    "license": "MIT",
-   "stars": 1,
+   "stars": 0,
    "pushed_at": "2026-11-16",
    "health": 100,
    "missing": [],
@@ -1306,14 +631,6 @@
      "url": "https://github.com/Theblackcat98/SyncWeave/issues/28",
      "labels": [
       "testing"
-     ]
-    },
-    {
-     "number": 25,
-     "title": "Send path follows symlinks (listed as 0-byte files, sent as targets)",
-     "url": "https://github.com/Theblackcat98/SyncWeave/issues/25",
-     "labels": [
-      "bug"
      ]
     }
    ],
@@ -1488,15 +805,6 @@
      ]
     },
     {
-     "number": 13,
-     "title": "Single-file record logs conflict across parallel branches and grow without bound",
-     "url": "https://github.com/Theblackcat98/PAGS/issues/13",
-     "labels": [
-      "enhancement",
-      "question"
-     ]
-    },
-    {
      "number": 5,
      "title": "Installer: brownfield repos lose the pointer to PAGS docs when AGENTS.md or README.md already exist",
      "url": "https://github.com/Theblackcat98/PAGS/issues/5",
@@ -1531,109 +839,6 @@
      "number": 36,
      "title": "feat(installer): add merge conflict policy for brownfield adoption",
      "url": "https://github.com/Theblackcat98/PAGS/pull/36"
-    }
-   ]
-  },
-  {
-   "name": "llamacpp-runner",
-   "url": "https://github.com/Theblackcat98/llamacpp-runner",
-   "description": "llama-deck: keyboard-first TUI and CLI to discover, configure, launch, and monitor a single managed llama.cpp llama-server instance, with presets and live telemetry.",
-   "topics": [
-    "cli",
-    "llm",
-    "local-llm",
-    "tui"
-   ],
-   "language": "TypeScript",
-   "license": "MIT",
-   "stars": 1,
-   "pushed_at": "2026-11-14",
-   "health": 100,
-   "missing": [],
-   "issues": [
-    {
-     "number": 71,
-     "title": "[task]: dead-code sweep \u2014 unused exports (core branch, then ui branch)",
-     "url": "https://github.com/Theblackcat98/llamacpp-runner/issues/71",
-     "labels": [
-      "ready",
-      "layer:core",
-      "priority:low",
-      "task"
-     ]
-    },
-    {
-     "number": 70,
-     "title": "[task]: decompose SessionApp into hooks; fix telemetry service churn",
-     "url": "https://github.com/Theblackcat98/llamacpp-runner/issues/70",
-     "labels": [
-      "ready",
-      "layer:ui",
-      "task",
-      "priority:medium"
-     ]
-    },
-    {
-     "number": 69,
-     "title": "[task]: config ownership consolidation + `llama-deck config` setter + ~/.configs precedence",
-     "url": "https://github.com/Theblackcat98/llamacpp-runner/issues/69",
-     "labels": [
-      "ready",
-      "layer:core",
-      "layer:cli",
-      "task",
-      "priority:medium"
-     ]
-    },
-    {
-     "number": 68,
-     "title": "[feature]: live loading progress in the console drawer (\\r in-place updates, \u00a72.5)",
-     "url": "https://github.com/Theblackcat98/llamacpp-runner/issues/68",
-     "labels": [
-      "enhancement",
-      "ready",
-      "layer:core",
-      "priority:medium"
-     ]
-    },
-    {
-     "number": 67,
-     "title": "[task]: UX consistency pass \u2014 explorer preview, palette set-port, Esc arm, labels, modal state, port validation",
-     "url": "https://github.com/Theblackcat98/llamacpp-runner/issues/67",
-     "labels": [
-      "ready",
-      "layer:ui",
-      "task",
-      "priority:medium"
-     ]
-    },
-    {
-     "number": 66,
-     "title": "[feature]: hardware reprobe action and honest no-GPU messaging",
-     "url": "https://github.com/Theblackcat98/llamacpp-runner/issues/66",
-     "labels": [
-      "enhancement",
-      "ready",
-      "layer:ui",
-      "priority:medium"
-     ]
-    }
-   ],
-   "prs": [
-    {
-     "number": 77,
-     "title": "ui: UX consistency pass (explorer preview, palette label, Esc arm, footer hints)",
-     "url": "https://github.com/Theblackcat98/llamacpp-runner/pull/77"
-    },
-    {
-     "number": 76,
-     "title": "[feature]: hardware reprobe action and honest no-GPU messaging",
-     "url": "https://github.com/Theblackcat98/llamacpp-runner/pull/76"
-    },
-    {
-     "number": 1,
-     "title": "docs: ideas \u2014 GGUF fixture coverage & strict shell-command import",
-     "url": "https://github.com/Theblackcat98/llamacpp-runner/pull/1"
     }
    ]
   },
@@ -1746,6 +951,61 @@
      "number": 2,
      "title": "Add one-click Install button to the inspector",
      "url": "https://github.com/Theblackcat98/agentconfigs/pull/2"
+    }
+   ]
+  },
+  {
+   "name": "opencode-plugins",
+   "url": "https://github.com/Theblackcat98/opencode-plugins",
+   "description": "OpenCode V2 plugins: goal mode, session handoff, and OpenCode Go usage in the sidebar",
+   "topics": [
+    "agent",
+    "opencode",
+    "plugin",
+    "typescript"
+   ],
+   "language": "TypeScript",
+   "license": null,
+   "stars": 0,
+   "pushed_at": "2026-11-09",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [
+    {
+     "number": 1,
+     "title": "goal mode: support decision models as the completion verifier",
+     "url": "https://github.com/Theblackcat98/opencode-plugins/issues/1",
+     "labels": [
+      "suggestion"
+     ]
+    }
+   ],
+   "prs": []
+  },
+  {
+   "name": "llamacpp-runner",
+   "url": "https://github.com/Theblackcat98/llamacpp-runner",
+   "description": "llama-deck: keyboard-first TUI and CLI to discover, configure, launch, and monitor a single managed llama.cpp llama-server instance, with presets and live telemetry.",
+   "topics": [
+    "cli",
+    "llm",
+    "local-llm",
+    "tui"
+   ],
+   "language": "TypeScript",
+   "license": "MIT",
+   "stars": 0,
+   "pushed_at": "2026-11-19",
+   "health": 100,
+   "missing": [],
+   "issues": [],
+   "prs": [
+    {
+     "number": 1,
+     "title": "docs: ideas \u2014 GGUF fixture coverage & strict shell-command import",
+     "url": "https://github.com/Theblackcat98/llamacpp-runner/pull/1"
     }
    ]
   },
@@ -1942,7 +1202,7 @@
    "language": "HTML",
    "license": null,
    "stars": 1,
-   "pushed_at": "2026-11-16",
+   "pushed_at": "2026-11-19",
    "health": 83,
    "missing": [
     "license"
@@ -1972,27 +1232,6 @@
    "prs": []
   },
   {
-   "name": "opencode-plugins",
-   "url": "https://github.com/Theblackcat98/opencode-plugins",
-   "description": "OpenCode V2 plugins: goal mode, session handoff, and OpenCode Go usage in the sidebar",
-   "topics": [
-    "agent",
-    "opencode",
-    "plugin",
-    "typescript"
-   ],
-   "language": "TypeScript",
-   "license": null,
-   "stars": 0,
-   "pushed_at": "2026-11-09",
-   "health": 83,
-   "missing": [
-    "license"
-   ],
-   "issues": [],
-   "prs": []
-  },
-  {
    "name": "otg-bot",
    "url": "https://github.com/Theblackcat98/otg-bot",
    "description": "URL keeper \u2014 a Bun service that ingests links from bookmarks and RSS feeds, stores clean text plus raw snapshots in SQLite, and makes everything searchable.",
@@ -2014,6 +1253,28 @@
    "prs": []
   },
   {
+   "name": "pomodoro",
+   "url": "https://github.com/Theblackcat98/pomodoro",
+   "description": "TUI Pomodoro timer built to exercise a terminal UI toolkit's full feature set.",
+   "topics": [
+    "focus",
+    "pomodoro",
+    "productivity",
+    "timer",
+    "tui"
+   ],
+   "language": "Go",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-11-17",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [],
+   "prs": []
+  },
+  {
    "name": "TheBlackCat",
    "url": "https://github.com/Theblackcat98/TheBlackCat",
    "description": "Personal, Git-native knowledge library \u2014 a Markdown archive with a Hugo static site as the view.",
@@ -2026,7 +1287,7 @@
    "language": "HTML",
    "license": null,
    "stars": 1,
-   "pushed_at": "2026-11-17",
+   "pushed_at": "2026-11-19",
    "health": 83,
    "missing": [
     "license"

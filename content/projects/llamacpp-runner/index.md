@@ -2,7 +2,7 @@
 title: "llamacpp-runner"
 contenttype: project
 language: "TypeScript"
-stars: 1
+stars: 0
 github: "https://github.com/Theblackcat98/llamacpp-runner"
 tags:
   - cli
@@ -11,7 +11,7 @@ tags:
   - tui
 description: "llama-deck: keyboard-first TUI and CLI to discover, configure, launch, and monitor a single managed llama.cpp llama-server instance, with presets and live telemetry."
 created: 2026-08-29
-updated: 2026-10-20
+updated: 2026-11-19
 ---
 
 llama-deck: keyboard-first TUI and CLI to discover, configure, launch, and monitor a single managed llama.cpp llama-server instance, with presets and live telemetry.

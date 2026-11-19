@@ -59,4 +59,5 @@ jobs:
           git config user.email "4934499+Theblackcat98@users.noreply.github.com"
           git add content/projects
           git commit -m "projects: sync from GitHub ($(date -u +%F))"
+          git pull --rebase origin main
           git push

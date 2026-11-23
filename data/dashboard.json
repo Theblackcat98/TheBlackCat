@@ -1,11 +1,11 @@
 {
- "generated": "2026-11-22",
+ "generated": "2026-11-23",
  "scope": "public, non-fork, non-archived owner repositories; todos = open GitHub Issues",
  "private_skipped": 0,
  "summary": {
   "repos": 28,
   "open_issues": 90,
-  "open_prs": 40,
+  "open_prs": 41,
   "avg_health": 86,
   "missing_description": 0,
   "missing_license": 21,
@@ -621,7 +621,7 @@
    "language": "TypeScript",
    "license": "MIT",
    "stars": 0,
-   "pushed_at": "2026-11-16",
+   "pushed_at": "2026-11-23",
    "health": 100,
    "missing": [],
    "issues": [
@@ -636,14 +636,19 @@
    ],
    "prs": [
     {
-     "number": 52,
-     "title": "chore: bump @biomejs/biome from 2.6.6 to 2.6.7",
-     "url": "https://github.com/Theblackcat98/SyncWeave/pull/52"
+     "number": 55,
+     "title": "chore: bump @types/bun from 1.4.4 to 1.4.5",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/55"
     },
     {
-     "number": 51,
-     "title": "chore: bump @opentui/core from 0.6.0 to 0.8.4",
-     "url": "https://github.com/Theblackcat98/SyncWeave/pull/51"
+     "number": 54,
+     "title": "chore: bump @biomejs/biome from 2.6.6 to 2.6.8",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/54"
+    },
+    {
+     "number": 53,
+     "title": "chore: bump @opentui/core from 0.6.0 to 0.9.5",
+     "url": "https://github.com/Theblackcat98/SyncWeave/pull/53"
     },
     {
      "number": 50,
@@ -1202,7 +1207,7 @@
    "language": "HTML",
    "license": null,
    "stars": 1,
-   "pushed_at": "2026-11-21",
+   "pushed_at": "2026-11-22",
    "health": 83,
    "missing": [
     "license"
@@ -1287,7 +1292,7 @@
    "language": "HTML",
    "license": null,
    "stars": 1,
-   "pushed_at": "2026-11-21",
+   "pushed_at": "2026-11-22",
    "health": 83,
    "missing": [
     "license"

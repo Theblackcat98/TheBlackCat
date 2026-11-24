@@ -1,10 +1,10 @@
 {
- "generated": "2026-11-23",
+ "generated": "2026-11-24",
  "scope": "public, non-fork, non-archived owner repositories; todos = open GitHub Issues",
  "private_skipped": 0,
  "summary": {
   "repos": 28,
-  "open_issues": 90,
+  "open_issues": 91,
   "open_prs": 41,
   "avg_health": 86,
   "missing_description": 0,
@@ -990,6 +990,36 @@
    "prs": []
   },
   {
+   "name": "TheBlackCat",
+   "url": "https://github.com/Theblackcat98/TheBlackCat",
+   "description": "Personal, Git-native knowledge library \u2014 a Markdown archive with a Hugo static site as the view.",
+   "topics": [
+    "hugo",
+    "knowledge-base",
+    "personal",
+    "static-site"
+   ],
+   "language": "HTML",
+   "license": null,
+   "stars": 1,
+   "pushed_at": "2026-11-23",
+   "health": 83,
+   "missing": [
+    "license"
+   ],
+   "issues": [
+    {
+     "number": 45,
+     "title": "Link check: dead links in the library",
+     "url": "https://github.com/Theblackcat98/TheBlackCat/issues/45",
+     "labels": [
+      "maintenance"
+     ]
+    }
+   ],
+   "prs": []
+  },
+  {
    "name": "llamacpp-runner",
    "url": "https://github.com/Theblackcat98/llamacpp-runner",
    "description": "llama-deck: keyboard-first TUI and CLI to discover, configure, launch, and monitor a single managed llama.cpp llama-server instance, with presets and live telemetry.",
@@ -1207,7 +1237,7 @@
    "language": "HTML",
    "license": null,
    "stars": 1,
-   "pushed_at": "2026-11-22",
+   "pushed_at": "2026-11-24",
    "health": 83,
    "missing": [
     "license"
@@ -1272,27 +1302,6 @@
    "license": null,
    "stars": 1,
    "pushed_at": "2026-11-17",
-   "health": 83,
-   "missing": [
-    "license"
-   ],
-   "issues": [],
-   "prs": []
-  },
-  {
-   "name": "TheBlackCat",
-   "url": "https://github.com/Theblackcat98/TheBlackCat",
-   "description": "Personal, Git-native knowledge library \u2014 a Markdown archive with a Hugo static site as the view.",
-   "topics": [
-    "hugo",
-    "knowledge-base",
-    "personal",
-    "static-site"
-   ],
-   "language": "HTML",
-   "license": null,
-   "stars": 1,
-   "pushed_at": "2026-11-22",
    "health": 83,
    "missing": [
     "license"
